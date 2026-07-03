@@ -2,7 +2,7 @@
 
 This repository is the AMTECH company brain plus the build home for the AMTECH AI Employee MVP.
 
-AMTECH AI is building a pro-human, owner-operated SMB AI Employee: a textable, always-on office worker that helps a contractor get estimates, replies, deposit invoices, reminders, and other back-office work done without forcing the owner to learn a new software stack. The first beachhead is owner-operated painting and landscaping contractors.
+AMTECH AI is building a pro-human, owner-operated SMB AI Employee: a textable, always-on office worker that can receive events from the tools a business already uses, understand them against the company's own context, do the safe work, and ask the owner for judgment only when it matters. The first beachhead is owner-operated painting and landscaping contractors, but the architecture is built for vertical employees across many SMB back-office roles.
 
 The repo has two major jobs:
 
@@ -19,23 +19,37 @@ Those files define the operating identity, repo rules, canonical facts, and navi
 
 ## Product Summary
 
-The AMTECH AI Employee is a managed vertical worker for small businesses. For the contractor beachhead, the core loop is:
+The AMTECH AI Employee is a managed vertical worker for small businesses: one textable employee that receives work from the owner, connected tools, webhooks, scheduled jobs, and future systems; reasons over that work against the business brain; does the safe parts; and brings only the real decisions back to the owner.
+
+For a contractor, that can mean turning job notes, photos, email threads, past pricing, and customer replies into estimates, follow-ups, deposit invoices, reminders, and next-step recommendations. For another business, the same pattern can become a bookkeeping employee, a back-office coordinator, a customer follow-up worker, or any vertical office role where the hard part is not one isolated task but the ongoing flow of events across tools.
+
+The product is not "an estimate generator." It is an **event-driven AI office**:
 
 ```text
-signup / claim
-  -> live employee over SMS + web
-  -> walkthrough-to-estimate conversation
-  -> estimate PDF artifact
-  -> owner approval
-  -> Gmail send
-  -> real customer reply event
-  -> approved Stripe Connect test-mode deposit invoice
-  -> internal job reminder
+any source of work
+  -> normalized message to the employee
+  -> business-brain context
+  -> Hermes employee reasoning / skill / Job / tool call
+  -> typed work event or artifact
+  -> owner surface: SMS, web Work Surface, future voice
+  -> approval / edit / reply / acknowledgement
+  -> action taken
+  -> new events feed back into the same employee
 ```
 
-The owner experiences one relationship: one employee, one number, one thread. The product is intentionally pro-human. The employee drafts, prepares, organizes, and follows up, while the owner stays in control at trust, customer-facing, and money gates.
+The owner experiences one relationship: one employee, one number, one thread. The connected systems become sources that talk to the employee, not dashboards the owner has to monitor. The employee can receive an email reply, a paid invoice, a due reminder, a completed background Job, or an inbound owner message as the same primitive: a message to the agent. The employee then decides whether to notify, batch, ignore, ask, draft, prepare, or escalate.
 
-The go-to-market wedge is the Estimate skill and the contractor estimate workflow. The recurring product is the connected AI Employee that absorbs the glue work: invoking skills, pasting context, handling connectors, remembering business facts, and bringing decisions back for approval.
+The power of the product is the **tool-agnostic task flow**:
+
+- Sources are pluggable: Gmail, Stripe, Twilio, Supabase, scheduler ticks, internal Jobs, owner messages, and future connectors can all become event sources.
+- Work is type-driven: documents, outbound messages, money movement, schedule mutations, structured record writes, recommendations, job folders, and other deliverables share one preview and approval grammar.
+- The gate is structural: customer-facing and money-touching actions require owner approval; internal reversible work can be done and reported.
+- The surface follows the owner: SMS for ambient updates, web Work Surface for review and artifacts, future voice for urgent or hands-busy work.
+- The business brain compounds: pricing, customers, preferences, assumptions, and repeated workflows become durable context.
+
+The contractor Estimate workflow is the beachhead and proof object, not the ceiling. It proves the product can capture business-specific context, produce a real artifact, ask for approval, send through a real connector, receive the downstream event, and continue the job loop. The broader product is the connected employee that keeps doing this across tasks and tools.
+
+The minimum engineering acceptance path is deliberately narrower than the product promise. The team uses a contractor estimate sequence - signup/claim, live employee, estimate PDF, approved Gmail send, real Gmail reply, approved Stripe test-mode deposit invoice, internal reminder - as the basic "all rails are alive" test before putting pilots live. That sequence proves the foundation works; it should not be mistaken for the full capability model.
 
 ## How The Repo Is Organized
 
