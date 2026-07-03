@@ -1,0 +1,22 @@
+client_id: client_example
+account_id: acct_example
+employee_id: emp_example
+profile_package_key: contractor_estimator
+business_display_name: Example Painting
+business_kind: painting
+owner_name: Example Owner
+owner_phone_e164: "+15705551234"
+employee_name: Sam
+timezone: America/New_York
+workspace_dir: /home/amtech/amtech/clients/emp_example/workspace
+webhook_url: https://api.amtechai.com/webhooks/twilio/emp_example
+gateway_port: 8101
+top_workflows:
+  - estimates
+  - follow-up
+tools_mentioned:
+  - Gmail
+seed_skills:
+  - estimate
+  - invoice
+  - daily-checkin

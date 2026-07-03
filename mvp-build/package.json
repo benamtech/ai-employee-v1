@@ -1,0 +1,42 @@
+{
+  "name": "amtech-mvp",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "AMTECH AI Employee MVP — build home. Current plan: ../wiki/MVP/build-plan-current/.",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:watch": "vitest",
+    "db:migrate": "node packages/db/migrate.mjs",
+    "db:status": "node packages/db/migrate.mjs --status",
+    "manager:dev": "npm run dev --workspace @amtech/manager",
+    "web:dev": "npm run dev --workspace @amtech/web",
+    "scheduler:tick": "node infra/scripts/scheduler-tick.mjs",
+    "scheduler:hermes-jobs": "node infra/scripts/hermes-jobs-runner.mjs",
+    "smoke:hermes": "node infra/scripts/hermes-smoke.mjs",
+    "smoke:phase01": "node infra/scripts/acceptance/run2-provision.mjs",
+    "acceptance:preflight": "node infra/scripts/acceptance/preflight.mjs",
+    "acceptance:report": "node infra/scripts/acceptance/report.mjs",
+    "ops:number-pool": "node infra/scripts/number-pool.mjs",
+    "ops:healthcheck": "node infra/scripts/healthcheck.mjs",
+    "ops:repair": "node infra/scripts/repair.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "eslint": "^9.17.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

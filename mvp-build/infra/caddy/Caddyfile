@@ -1,0 +1,23 @@
+# AMTECH Caddy — VPS reverse proxy.
+# Public owner surface vs backend webhook/tool surface are split (must not change).
+# Per-client employee subdomains are added as generated snippets (see client-snippet.tpl),
+# imported from ./clients/*.caddy and reloaded without downtime.
+
+# --- Public owner web surface (Next.js on the VPS) ---------------------------
+amtechai.com, www.amtechai.com {
+	reverse_proxy localhost:3000
+}
+
+# --- Owner employee web route (Next.js handles /agent/* routing) -------------
+agent.amtechai.com {
+	reverse_proxy localhost:3000
+}
+
+# --- Backend Manager API + webhooks (the only surface Twilio/Gmail/Stripe hit)
+api.amtechai.com {
+	reverse_proxy localhost:8080
+}
+
+# --- Per-client employee gateways (Hermes), one subdomain each ---------------
+# Each provision writes ./clients/<client_id>.caddy from client-snippet.tpl.
+import ./clients/*.caddy

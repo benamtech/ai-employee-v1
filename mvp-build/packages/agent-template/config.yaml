@@ -1,0 +1,37 @@
+# Hermes profile config (template) — rendered per client by provision_employee.
+# Spec: product-ai-employee-context.md ("the architecture, as built").
+
+profile:
+  id: "client_{{CLIENT_ID}}"
+  name: "{{EMPLOYEE_NAME}}"
+
+models:
+  # Shipped default employee model; haiku for compression/background work.
+  default: "claude-opus-4-8"
+  compression: "claude-haiku-4-5"
+
+terminal:
+  # Docker is the production and production-like local/VPS default. `local` is dev/demo only.
+  backend: "{{RUNTIME_BACKEND}}"
+  home_mode: "profile"
+  cwd: "{{WORKSPACE_DIR}}"
+
+gateway:
+  sms:
+    enabled: true
+    # The exact public URL Twilio signs — the security boundary.
+    webhook_url: "{{WEBHOOK_URL}}"
+    port: {{GATEWAY_PORT}}
+  api_server:
+    # Per-profile OpenAI-compatible API server for the webchat surface (Plane 2).
+    enabled: true
+
+# tool_progress off for SMS — acknowledge, then deliver; never narrate tool steps.
+ui:
+  tool_progress: "off"
+
+cron:
+  - schedule: "0 7 * * *"
+    skill: "daily-checkin"
+  - schedule: "0 13 * * *"
+    skill: "daily-checkin"

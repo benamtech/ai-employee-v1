@@ -1,0 +1,1724 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AMTECH Workspace Explorer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f6f2eb;
+      --ink: #090909;
+      --muted: #6f6861;
+      --soft: #efe8de;
+      --panel: #fffdf9;
+      --panel-2: #f0e8dc;
+      --panel-3: #ffffff;
+      --line: #ddd1c1;
+      --line-strong: #b8aa99;
+      --accent: #cf2029;
+      --accent-2: #9f111a;
+      --inverse: #090909;
+      --inverse-ink: #ffffff;
+      --reader-bg: #fffdf9;
+      --reader-ink: #141414;
+      --code-bg: #14100f;
+      --code-ink: #fff8f0;
+      --good: #54d18a;
+      --warn: #f5b84b;
+      --bad: #ff6464;
+      --blue: #b91622;
+      --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --footer-open-h: clamp(238px, 31vh, 392px);
+      --footer-h: 0px;
+      --sidebar-w: clamp(260px, 22vw, 360px);
+    }
+
+    body[data-theme="red"] {
+      --bg: #c71f2d;
+      --ink: #ffffff;
+      --muted: #ffe0dd;
+      --soft: #a81520;
+      --panel: #ffffff;
+      --panel-2: #130b0b;
+      --panel-3: #fff7f5;
+      --line: rgba(0,0,0,.22);
+      --line-strong: #090909;
+      --accent: #090909;
+      --accent-2: #090909;
+      --inverse: #090909;
+      --inverse-ink: #ffffff;
+      --reader-bg: #fffdf9;
+      --reader-ink: #111111;
+      --code-bg: #090909;
+      --code-ink: #fff8f0;
+      --blue: #c71f2d;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--sans);
+      overflow: hidden;
+    }
+    button, input, select, textarea {
+      font: inherit;
+    }
+    button, select, input, textarea {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+    button {
+      min-height: 32px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12px;
+    }
+    button:hover { border-color: var(--line-strong); background: var(--panel-3); }
+    button.primary { background: var(--inverse); color: var(--inverse-ink); border-color: var(--inverse); }
+    button.ghost { background: transparent; }
+    input, select { height: 34px; padding: 7px 10px; }
+    textarea {
+      width: 100%;
+      min-height: 82px;
+      resize: vertical;
+      padding: 10px;
+      font-family: var(--mono);
+      line-height: 1.45;
+      font-size: 12px;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+      grid-template-rows: 54px minmax(0, 1fr) var(--footer-h);
+      height: 100vh;
+      min-width: 0;
+    }
+    .topbar {
+      grid-column: 1 / 3;
+      display: grid;
+      grid-template-columns: minmax(230px, 310px) minmax(180px, 1fr) auto auto;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--bg) 92%, white);
+      backdrop-filter: blur(12px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      letter-spacing: 0;
+    }
+    .mark {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 900;
+      font-size: 13px;
+    }
+    .brand-main {
+      font-weight: 900;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .brand-sub {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .search {
+      position: relative;
+      min-width: 0;
+    }
+    .search input {
+      width: 100%;
+      padding-left: 32px;
+      background: var(--panel);
+    }
+    .search span {
+      position: absolute;
+      left: 12px;
+      top: 8px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-weight: 700;
+    }
+    .top-actions, .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .status {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--good);
+      box-shadow: 0 0 16px rgba(84, 209, 138, .55);
+    }
+    .dot.warn { background: var(--warn); box-shadow: 0 0 16px rgba(245, 184, 75, .45); }
+    .dot.err { background: var(--bad); box-shadow: 0 0 16px rgba(255, 100, 100, .45); }
+
+    .reader-shell {
+      grid-column: 2;
+      grid-row: 2;
+      min-height: 0;
+      overflow: auto;
+      background:
+        linear-gradient(180deg, rgba(207,32,41,.08), transparent 190px),
+        var(--bg);
+    }
+    .progress {
+      height: 3px;
+      background: transparent;
+      position: sticky;
+      top: 0;
+      z-index: 4;
+    }
+    .progress div { height: 100%; width: 0; background: var(--inverse); }
+
+    .sidebar {
+      grid-column: 1;
+      grid-row: 2;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      border-right: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 88%, var(--bg));
+      overflow: hidden;
+    }
+    .sidebar-head {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+    .sidebar-tools {
+      display: grid;
+      gap: 8px;
+    }
+    .sidebar-list {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px 8px 18px;
+    }
+    .doc-wrap {
+      width: min(980px, calc(100vw - var(--sidebar-w) - 58px));
+      margin: 0 auto;
+      padding: 26px 0 70px;
+    }
+    .doc-toolbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .doc-title {
+      font-size: clamp(22px, 3vw, 40px);
+      line-height: 1.08;
+      font-weight: 900;
+      letter-spacing: 0;
+      margin: 0 0 8px;
+    }
+    .doc-meta {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+    .doc-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .reader {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--reader-bg);
+      color: var(--reader-ink);
+      padding: clamp(18px, 3vw, 36px);
+      min-height: 360px;
+      box-shadow: 0 24px 60px rgba(20, 14, 8, .08);
+    }
+    .reader h1, .reader h2, .reader h3, .reader h4 {
+      line-height: 1.14;
+      margin: 28px 0 10px;
+      letter-spacing: 0;
+    }
+    .reader h1 { font-size: clamp(28px, 4vw, 48px); margin-top: 0; font-weight: 900; }
+    .reader h2 { font-size: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .reader h3 { font-size: 18px; }
+    .reader h4 { font-size: 15px; color: var(--muted); text-transform: uppercase; }
+    .reader p, .reader li {
+      color: var(--reader-ink);
+      line-height: 1.68;
+      font-size: 16px;
+    }
+    .reader a { color: var(--blue); text-decoration: none; }
+    .reader a:hover { text-decoration: underline; }
+    .reader code {
+      font-family: var(--mono);
+      background: color-mix(in srgb, var(--accent) 10%, white);
+      border: 1px solid color-mix(in srgb, var(--accent) 20%, white);
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-size: .9em;
+    }
+    .reader pre {
+      margin: 14px 0;
+      border: 1px solid #282828;
+      border-radius: 8px;
+      background: var(--code-bg);
+      overflow: auto;
+    }
+    .reader pre code {
+      display: block;
+      min-width: max-content;
+      padding: 14px;
+      border: 0;
+      background: transparent;
+      color: var(--code-ink);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .reader table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+    .reader th, .reader td { border: 1px solid var(--line); padding: 8px 9px; vertical-align: top; }
+    .reader th { text-align: left; background: color-mix(in srgb, var(--accent) 8%, white); }
+    .reader blockquote {
+      margin: 16px 0;
+      padding: 10px 14px;
+      border-left: 3px solid var(--accent);
+      background: color-mix(in srgb, var(--accent) 7%, white);
+      color: var(--reader-ink);
+    }
+    .reader img {
+      max-width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+    .source-pill, .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #3b4d68;
+      color: var(--accent-2);
+      background: color-mix(in srgb, var(--accent) 8%, white);
+      border-radius: 999px;
+      padding: 1px 7px;
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .mark-hit { background: #fff2a8; color: #050505; border-radius: 3px; padding: 0 2px; }
+
+    .dock {
+      grid-column: 1 / 3;
+      grid-row: 3;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: 38px minmax(0, 1fr);
+      border-top: 1px solid var(--line-strong);
+      background: var(--panel);
+      overflow: hidden;
+    }
+    .dock-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 8px;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+      background: var(--panel);
+    }
+    .footer-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      padding-left: 4px;
+      white-space: nowrap;
+    }
+    .footer-select {
+      width: min(240px, 42vw);
+      height: 28px;
+      padding: 3px 8px;
+      background: var(--panel-3);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .dock-tab {
+      border: 0;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--muted);
+      min-height: 28px;
+      padding: 6px 10px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+    .dock-tab.active { background: var(--accent); color: #fff; }
+    .dock-spacer { flex: 1; }
+    .dock-body {
+      min-height: 0;
+      overflow: hidden;
+    }
+    .panel { display: none; height: 100%; min-height: 0; }
+    .panel.active { display: grid; }
+    .panel-grid {
+      grid-template-columns: minmax(310px, 34%) minmax(0, 1fr) minmax(260px, 28%);
+      gap: 0;
+    }
+    .panel-two {
+      grid-template-columns: minmax(340px, 42%) minmax(0, 1fr);
+      gap: 0;
+    }
+    .dock-pane {
+      min-height: 0;
+      overflow: auto;
+      border-right: 1px solid var(--line);
+      padding: 10px;
+      background: color-mix(in srgb, var(--panel) 92%, var(--bg));
+    }
+    .dock-pane:last-child { border-right: 0; }
+    .pane-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .row { display: flex; align-items: center; gap: 8px; }
+    .row > * { flex: 1; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .select-row { display: grid; grid-template-columns: minmax(120px, 180px) minmax(140px, 1fr); gap: 8px; margin-bottom: 8px; }
+    .list { display: grid; gap: 4px; }
+    .item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 7px 8px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .item:hover { background: color-mix(in srgb, var(--accent) 7%, white); border-color: var(--line); }
+    .item.active { background: var(--accent); color: #fff; }
+    .item.active .muted, .item.active .path { color: #444; }
+    body[data-theme="red"] .item.active .muted,
+    body[data-theme="red"] .item.active .path,
+    .item.active .path { color: rgba(255,255,255,.76); }
+    .name {
+      font-size: 12px;
+      font-weight: 800;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .path {
+      margin-top: 2px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 7px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 10px;
+      white-space: nowrap;
+    }
+    .group-title {
+      margin: 10px 0 4px;
+      color: #d0d0d0;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      letter-spacing: 0;
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; line-height: 1.45; }
+    .mono { font-family: var(--mono); }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(80px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      padding: 9px;
+    }
+    .stat strong { display: block; font-size: 18px; }
+    .stat span { color: var(--muted); font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
+    .graph-box {
+      height: 100%;
+      min-height: 170px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #050505;
+      overflow: hidden;
+    }
+    svg text { font-family: var(--mono); fill: #dfdfdf; font-size: 10px; }
+    .console-output {
+      white-space: pre-wrap;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.48;
+      color: #eeeeee;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--footer-h) + 18px);
+      transform: translateX(-50%);
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: #ffffff;
+      color: #050505;
+      padding: 10px 13px;
+      font-size: 13px;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .16s;
+      z-index: 10;
+    }
+    .toast.show { opacity: 1; }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .app { display: block; height: auto; min-height: 100vh; }
+      .topbar { position: sticky; top: 0; z-index: 5; grid-template-columns: 1fr; align-items: stretch; }
+      .top-actions, .status { justify-content: space-between; }
+      .sidebar { height: 280px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .reader-shell { overflow: visible; }
+      .doc-wrap { width: calc(100vw - 24px); padding-bottom: 24px; }
+      .doc-toolbar { display: block; }
+      .doc-actions { justify-content: flex-start; margin-top: 12px; }
+      .dock { height: 62vh; }
+      .panel-grid, .panel-two { grid-template-columns: 1fr; }
+      .dock-pane { border-right: 0; border-bottom: 1px solid var(--line); min-height: 220px; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark">A</div>
+        <div>
+          <div class="brand-main">AMTECH Workspace Explorer</div>
+          <div class="brand-sub">root-aware renderer · graph materializer · agent-readable workbench</div>
+        </div>
+      </div>
+      <div class="search"><span>/</span><input id="searchInput" autocomplete="off" placeholder="Search paths, code, source IDs, entities, or type S094"></div>
+      <div class="top-actions">
+        <button id="openFolderBtn" class="primary">Open GTM-RESEARCH folder</button>
+        <button id="themeBtn">Red Mode</button>
+        <button id="copyPathBtn">Copy Path</button>
+        <button id="copyContextBtn">Copy Context</button>
+      </div>
+      <div class="status"><span id="statusDot" class="dot warn"></span><span id="statusText">Loading corpus</span></div>
+    </header>
+
+    <aside class="sidebar" aria-label="Workspace files">
+      <div class="sidebar-head">
+        <div class="sidebar-title"><span>Wiki Rail</span><span id="fileCount" class="chip">0</span></div>
+        <div class="sidebar-tools">
+          <select id="scopeSelect">
+            <option value="all">All roots</option>
+            <option value="root">Root</option>
+            <option value="wiki">wiki/</option>
+            <option value="mvp-build">mvp-build/</option>
+          </select>
+          <select id="typeSelect"><option value="all">All filetypes</option></select>
+        </div>
+      </div>
+      <div id="fileList" class="sidebar-list list"></div>
+    </aside>
+
+    <main id="main" class="reader-shell">
+      <div class="progress"><div id="readProgress"></div></div>
+      <div class="doc-wrap">
+        <div class="doc-toolbar">
+          <div>
+            <h1 id="docTitle" class="doc-title">Loading...</h1>
+            <div id="docMeta" class="doc-meta"></div>
+          </div>
+          <div class="doc-actions">
+            <button id="rawBtn">Raw</button>
+            <button id="downloadBtn">Download</button>
+            <button id="pinBtn">Pin</button>
+            <button id="dockBtn">Open Views</button>
+          </div>
+        </div>
+        <article id="reader" class="reader"></article>
+      </div>
+    </main>
+
+    <section class="dock" id="dock">
+      <div class="dock-tabs">
+        <span class="footer-title">Workspace Views</span>
+        <select id="viewSelect" class="footer-select" aria-label="Workspace view">
+          <option value="files">Overview</option>
+          <option value="outline">Outline</option>
+          <option value="graph">Graph</option>
+          <option value="materialize">Materialize</option>
+          <option value="logs">Logs</option>
+          <option value="notes">Notes</option>
+        </select>
+        <div class="dock-spacer"></div>
+        <span id="dockSummary" class="status">0 files</span>
+      </div>
+
+      <div class="dock-body">
+        <div id="tab-files" class="panel panel-two active">
+          <div class="dock-pane">
+            <div class="pane-label"><span>Current File Intelligence</span><span id="currentKind">text</span></div>
+            <div id="fileIntel"></div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Workspace Inventory</span><span>live</span></div>
+            <div id="inventory"></div>
+          </div>
+        </div>
+
+        <div id="tab-outline" class="panel panel-grid">
+          <div class="dock-pane">
+            <div class="pane-label"><span>Headings / Symbols</span><span id="outlineCount">0</span></div>
+            <div id="outlineList" class="list"></div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Backlinks / Imports</span><span id="backlinkCount">0</span></div>
+            <div id="backlinkList" class="list"></div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Source IDs / Entities</span><span id="entityCount">0</span></div>
+            <div id="entityList" class="list"></div>
+          </div>
+        </div>
+
+        <div id="tab-graph" class="panel panel-two">
+          <div class="dock-pane">
+            <div class="pane-label"><span>Local Knowledge Graph</span><span id="graphStats">0 nodes</span></div>
+            <div class="graph-box"><svg id="graphSvg" width="100%" height="100%"></svg></div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Graph Edges</span><span>typed</span></div>
+            <div class="actions" style="margin-bottom:8px;">
+              <button id="copyGraphBtn">Copy Graph JSON</button>
+              <button id="copyGraphPromptBtn">Copy Graph Prompt</button>
+              <button id="focusCurrentBtn">Focus Current</button>
+            </div>
+            <div id="edgeList" class="list"></div>
+          </div>
+        </div>
+
+        <div id="tab-materialize" class="panel panel-grid">
+          <div class="dock-pane">
+            <div class="pane-label"><span>Materialization Lab</span><span>local</span></div>
+            <div class="card">
+              <h3>Run Strange Useful Passes</h3>
+              <div class="actions">
+                <button id="runMaterializerBtn" class="primary">Materialize Workspace</button>
+                <button id="copyMaterializerBtn">Copy Output</button>
+                <button id="copyLLMPromptBtn">Copy LLM Prompt</button>
+              </div>
+              <p class="small muted">Runs local heuristics: file centrality, entity frequency, source IDs, TODOs, phase/work-event vocabulary, imports, and doc/code links. No external model call is made here.</p>
+            </div>
+            <div class="card">
+              <h3>Conformance Lens</h3>
+              <div id="conformanceList" class="list"></div>
+            </div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Insight Pack</span><span id="insightStamp">not run</span></div>
+            <div id="materializerOutput" class="console-output"></div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Emergent Handles</span><span>entities</span></div>
+            <div id="emergentList" class="list"></div>
+          </div>
+        </div>
+
+        <div id="tab-logs" class="panel panel-two">
+          <div class="dock-pane">
+            <div class="pane-label"><span>Founder / Build Log Writer</span><span>wiki/logs</span></div>
+            <div class="select-row">
+              <select id="logType">
+                <option value="daily">Daily work log</option>
+                <option value="weekly">Weekly review</option>
+                <option value="customer">Customer conversation</option>
+                <option value="experiment">Experiment result</option>
+                <option value="implementation">Implementation record note</option>
+              </select>
+              <input id="logDate" type="date">
+            </div>
+            <div class="select-row">
+              <input id="logWeek" value="01" aria-label="Week">
+              <input id="logTitleInput" placeholder="Title">
+            </div>
+            <div class="select-row">
+              <input id="logRevenue" placeholder="Revenue $0">
+              <input id="logMrr" placeholder="MRR $0">
+            </div>
+            <textarea id="logNotes" placeholder="What happened, what changed, what proof exists, what is next..."></textarea>
+            <div class="actions" style="margin-top:8px;">
+              <button id="renderLogBtn" class="primary">Render MD</button>
+              <button id="saveLogBtn">Save</button>
+              <button id="downloadLogBtn">Download</button>
+              <button id="copyLogBtn">Copy</button>
+            </div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Markdown Output</span><span id="logFilenameLabel"></span></div>
+            <textarea id="logOutput" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+        <div id="tab-notes" class="panel panel-grid">
+          <div class="dock-pane">
+            <div class="pane-label"><span>Local Note</span><span>browser only</span></div>
+            <textarea id="localNote" placeholder="Private scratchpad. Use logs for durable, agent-readable records."></textarea>
+            <div class="actions" style="margin-top:8px;">
+              <button id="saveNoteBtn" class="primary">Save Note</button>
+              <button id="clearNoteBtn">Clear</button>
+            </div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Pinned Files</span><span id="pinCount">0</span></div>
+            <div id="pinList" class="list"></div>
+          </div>
+          <div class="dock-pane">
+            <div class="pane-label"><span>Agent Handoff</span><span>copyable</span></div>
+            <div class="card">
+              <h3>Current Work Context</h3>
+              <p class="small muted">Copies the active file, path, symbols, links, source IDs, and current graph neighborhood. Useful before handing this workspace to another agent.</p>
+              <button id="copyAgentContextBtn" class="primary">Copy Agent Context</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SEED_PATHS = `
+AMTECH-discovery-prompt.md
+identity.md
+CLAUDE.md
+CODEGRAPH.md
+wiki/README.md
+wiki/00-decision.md
+wiki/01-method.md
+wiki/founder-52-week-operating-plan.md
+wiki/product-ai-employee-context.md
+wiki/product-agent-platform-architecture.md
+wiki/ai-employee-mvp-build-plan-handoff.md
+wiki/strategy-4-year-implications.md
+wiki/warm-path.md
+wiki/entrepreneurship-playbook.md
+wiki/principle-agent-leverage.md
+wiki/principle-graph-materialization.md
+wiki/principle-deliverable-driven-surfaces.md
+wiki/segments/bookkeeping.md
+wiki/segments/marketing-agencies.md
+wiki/segments/insurance.md
+wiki/segments/property-management.md
+wiki/segments/freight-staffing.md
+wiki/segments/real-estate.md
+wiki/segments/contractors.md
+wiki/competitors/landscape.md
+wiki/evidence/scoring.md
+wiki/evidence/aulet-beachhead-scoring.md
+wiki/evidence/sources.md
+wiki/offers/pitch-scripts.md
+wiki/offers/wedge-offers.md
+wiki/offers/skill-catalog.md
+wiki/offers/estimator-whole-product.md
+wiki/gtm/consulting-sales-surface.md
+wiki/gtm/outreach-engine.md
+wiki/gtm/outbound-system.md
+wiki/gtm/channel-map.md
+wiki/logs/README.md
+wiki/MVP/old-build-plan/README.md
+wiki/MVP/old-build-plan/00-source-of-truth-and-rules.md
+wiki/MVP/old-build-plan/01-mvp-scope-and-milestones.md
+wiki/MVP/old-build-plan/02-system-architecture.md
+wiki/MVP/old-build-plan/03-data-model.md
+wiki/MVP/old-build-plan/04-manager-tools.md
+wiki/MVP/old-build-plan/05-front-door-orchestrator.md
+wiki/MVP/old-build-plan/06-interaction-wrapper.md
+wiki/MVP/old-build-plan/07-provisioning-runtime.md
+wiki/MVP/old-build-plan/08-connectors-email-v1.md
+wiki/MVP/old-build-plan/09-event-mesh-v1.md
+wiki/MVP/old-build-plan/10-security-ops-observability.md
+wiki/MVP/old-build-plan/11-agent-team-workstreams.md
+wiki/MVP/old-build-plan/12-tests-demo-acceptance.md
+wiki/MVP/old-build-plan/13-backlog-non-goals.md
+wiki/MVP/old-build-plan/14-agentic-tooling-research-notes.md
+wiki/MVP/old-build-plan/15-interaction-reimagined-the-work-surface.md
+wiki/MVP/implementation-records/README.md
+wiki/MVP/implementation-records/2026-06-29-phase-0-2-record.md
+wiki/MVP/implementation-records/2026-06-29-phase-3-partial-record.md
+wiki/MVP/implementation-records/2026-06-29-phase-5-and-work-surface-record.md
+wiki/MVP/phase-3-generative-ui-reframe.md
+wiki/MVP/event-driven-office-and-generative-ui.md
+wiki/MVP/agent-inbox-and-channel-architecture.md
+wiki/MVP/hermes-run-session-semantics-research.md
+wiki/MVP/build-plan-current/phases/phase-03a-channel-session-presence-layer.md
+wiki/MVP/prompting-guide.md
+wiki/MVP/implementation-plan-prompt-handoff.md
+wiki/MVP/phase-3-implementation-session-handoff.md
+wiki/MVP/phase-3-planning-session-handoff.md
+wiki/MVP/phase-3-finish-session-handoff.md
+wiki/MVP/phase-03a-04-live-session-event-spine-handoff.md
+wiki/MVP/phase-6-and-event-bus-session-handoff.md
+mvp-build/README.md
+mvp-build/package.json
+mvp-build/tsconfig.base.json
+mvp-build/vitest.config.ts
+mvp-build/eslint.config.mjs
+mvp-build/packages/db/migrations/0001_init.sql
+mvp-build/packages/db/migrations/0002_rls.sql
+mvp-build/packages/db/migrations/0003_phase1_profile_packages.sql
+mvp-build/packages/db/migrations/0004_phase2_artifacts.sql
+mvp-build/packages/db/migrations/0005_phase3_gmail.sql
+mvp-build/packages/shared/src/envelope.ts
+mvp-build/packages/shared/src/event-types.ts
+mvp-build/packages/shared/src/work-events.ts
+mvp-build/packages/shared/src/tool-contracts.ts
+mvp-build/packages/shared/src/profile-package.ts
+mvp-build/apps/manager/src/server.ts
+mvp-build/apps/manager/src/orchestrator.ts
+mvp-build/apps/manager/src/provisioner.ts
+mvp-build/apps/manager/src/lib/google-gmail.ts
+mvp-build/apps/manager/src/lib/employee-events.ts
+mvp-build/apps/manager/src/lib/artifacts.ts
+mvp-build/apps/manager/src/lib/stripe-signature.ts
+mvp-build/apps/manager/src/tools/registry.ts
+mvp-build/apps/manager/src/tools/events.stub.ts
+mvp-build/apps/manager/src/tools/gmail.stub.ts
+mvp-build/apps/manager/src/tools/stripe.stub.ts
+mvp-build/apps/manager/src/webhooks/gmail.ts
+mvp-build/apps/manager/src/webhooks/stripe.ts
+mvp-build/apps/web/app/page.tsx
+mvp-build/apps/web/app/create-ai-employee/page.tsx
+mvp-build/apps/web/app/agent/[employeeId]/AgentClient.tsx
+mvp-build/apps/web/app/api/employee/[employeeId]/resources/route.ts
+mvp-build/apps/web/app/api/employee/[employeeId]/approval/resolve/route.ts
+mvp-build/apps/web/app/api/front-door/message/route.ts
+mvp-build/packages/agent-template/README.md
+mvp-build/packages/agent-template/SOUL.md
+mvp-build/packages/agent-template/config.yaml
+mvp-build/packages/agent-template/workspace/brain/business-brain.md
+mvp-build/packages/agent-template/workspace/manager-tools.md
+mvp-build/packages/agent-template/skills/estimate/SKILL.md
+mvp-build/infra/hermes/RUNBOOK.md
+mvp-build/infra/scripts/profile-validate.mjs
+mvp-build/tests/README.md
+mvp-build/tests/unit/work-events.test.ts
+mvp-build/tests/unit/gmail-pubsub.test.ts
+mvp-build/tests/unit/stripe-tools.test.ts
+mvp-build/tests/golden-path/step1-create-employee.md
+mvp-build/tests/golden-path/step2-estimate-artifact.md
+`.trim().split(/\n+/).map(s => s.trim()).filter(Boolean);
+
+    const state = {
+      files: new Map(),
+      current: "wiki/README.md",
+      raw: false,
+      query: "",
+      scope: "all",
+      type: "all",
+      dirHandle: null,
+      graph: { nodes: [], edges: [] },
+      materializer: "",
+      dockCollapsed: true,
+      theme: localStorage.getItem("amtechExplorerTheme") || "light",
+      pins: JSON.parse(localStorage.getItem("amtechExplorerPins") || "[]")
+    };
+
+    const $ = id => document.getElementById(id);
+    const today = () => new Date().toISOString().slice(0, 10);
+
+    function titleFromPath(path) {
+      const name = path.split("/").pop() || path;
+      return name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+    }
+    function extOf(path) {
+      const name = path.split("/").pop() || "";
+      if (name === "Caddyfile") return "caddy";
+      if (name.startsWith(".env")) return "env";
+      const m = name.match(/\.([^.]+)$/);
+      return m ? m[1].toLowerCase() : "txt";
+    }
+    function kindOf(path) {
+      const ext = extOf(path);
+      if (ext === "md") return "markdown";
+      if (["ts", "tsx", "js", "mjs", "cjs", "json", "sql", "yaml", "yml", "toml", "env", "tpl", "html", "css", "caddy"].includes(ext)) return "code";
+      if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) return "image";
+      return "text";
+    }
+    function rootOf(path) {
+      if (path.startsWith("wiki/")) return "wiki";
+      if (path.startsWith("mvp-build/")) return "mvp-build";
+      return "root";
+    }
+    function addFile(path, text = "", source = "seed", handle = null, size = text.length) {
+      state.files.set(path, {
+        path,
+        title: titleFromPath(path),
+        ext: extOf(path),
+        kind: kindOf(path),
+        root: rootOf(path),
+        text,
+        source,
+        handle,
+        size
+      });
+    }
+    function getFile(path = state.current) {
+      return state.files.get(path);
+    }
+
+    async function boot() {
+      document.body.dataset.theme = state.theme === "red" ? "red" : "light";
+      $("themeBtn").textContent = state.theme === "red" ? "White Mode" : "Red Mode";
+      bindEvents();
+      $("logDate").value = today();
+      SEED_PATHS.forEach(path => addFile(path));
+      renderTypeOptions();
+      renderAll();
+      setStatus("warn", "Reading seed files");
+      let ok = 0;
+      await Promise.all(SEED_PATHS.map(async path => {
+        try {
+          const res = await fetch(path, { cache: "no-store" });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const text = await res.text();
+          addFile(path, text, "seed", null, text.length);
+          ok++;
+        } catch (err) {}
+      }));
+      if (ok) {
+        setStatus("ok", `${ok} seed files loaded`);
+      } else {
+        const fallback = "# AMTECH Workspace Explorer\n\nServe this repository root or click **Open GTM-RESEARCH folder**.\n\n```bash\ncd /home/georgej/AMTECH/GTM-RESEARCH\npython3 -m http.server 8765\n```\n\nThen open `http://127.0.0.1:8765/index.html`.";
+        addFile("wiki/README.md", fallback, "fallback");
+        setStatus("warn", "Open folder or serve repo root");
+      }
+      const hashPath = location.hash ? decodeURIComponent(location.hash.slice(1)) : state.current;
+      buildGraph();
+      openFile(state.files.has(hashPath) ? hashPath : state.current, false);
+      $("localNote").value = localStorage.getItem("amtechExplorerNote") || "";
+      renderLog();
+      renderMaterializer(false);
+    }
+
+    function bindEvents() {
+      $("searchInput").addEventListener("input", e => {
+        state.query = e.target.value.trim();
+        if (/^S\d{3}$/i.test(state.query)) jumpSource(state.query.toUpperCase());
+        renderLists();
+        renderReader();
+        renderContext();
+      });
+      $("scopeSelect").addEventListener("change", e => { state.scope = e.target.value; renderLists(); });
+      $("typeSelect").addEventListener("change", e => { state.type = e.target.value; renderLists(); });
+      $("openFolderBtn").addEventListener("click", openFolder);
+      $("copyPathBtn").addEventListener("click", () => copyText(state.current));
+      $("copyContextBtn").addEventListener("click", copyAgentContext);
+      $("themeBtn").addEventListener("click", toggleTheme);
+      $("rawBtn").addEventListener("click", () => { state.raw = !state.raw; renderReader(); });
+      $("downloadBtn").addEventListener("click", () => downloadFile(state.current.split("/").pop() || "download.txt", getFile()?.text || ""));
+      $("pinBtn").addEventListener("click", togglePin);
+      $("dockBtn").addEventListener("click", toggleDock);
+      $("main").addEventListener("scroll", updateProgress);
+      $("viewSelect").addEventListener("change", e => switchTab(e.target.value));
+      $("copyGraphBtn").addEventListener("click", () => copyText(JSON.stringify(state.graph, null, 2)));
+      $("copyGraphPromptBtn").addEventListener("click", copyGraphPrompt);
+      $("focusCurrentBtn").addEventListener("click", () => { drawGraph(); switchTab("graph"); });
+      $("runMaterializerBtn").addEventListener("click", () => renderMaterializer(true));
+      $("copyMaterializerBtn").addEventListener("click", () => copyText(state.materializer || renderMaterializer(true)));
+      $("copyLLMPromptBtn").addEventListener("click", copyLLMPrompt);
+      $("renderLogBtn").addEventListener("click", renderLog);
+      $("saveLogBtn").addEventListener("click", saveLog);
+      $("downloadLogBtn").addEventListener("click", () => downloadFile(logFilename(), $("logOutput").value));
+      $("copyLogBtn").addEventListener("click", () => copyText($("logOutput").value));
+      ["logType","logDate","logWeek","logTitleInput","logRevenue","logMrr","logNotes"].forEach(id => $(id).addEventListener("input", renderLog));
+      $("saveNoteBtn").addEventListener("click", () => { localStorage.setItem("amtechExplorerNote", $("localNote").value); toast("Note saved"); });
+      $("clearNoteBtn").addEventListener("click", () => { $("localNote").value = ""; localStorage.removeItem("amtechExplorerNote"); });
+      $("copyAgentContextBtn").addEventListener("click", copyAgentContext);
+      document.addEventListener("click", routeClicks);
+    }
+
+    async function openFolder() {
+      if (!window.showDirectoryPicker) {
+        toast("Folder access requires a Chromium browser");
+        return;
+      }
+      try {
+        state.dirHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+        setStatus("warn", "Scanning folder");
+        const count = await scanDirectory(state.dirHandle);
+        setStatus("ok", `${count} folder files loaded`);
+        renderTypeOptions();
+        buildGraph();
+        renderAll();
+        openFile(state.current, false);
+      } catch (err) {
+        toast("Folder not opened");
+      }
+    }
+
+    async function scanDirectory(root, prefix = "") {
+      let count = 0;
+      const skipDirs = new Set([".git", "node_modules", ".next", "dist", "coverage", ".turbo", ".vercel"]);
+      const skipFiles = new Set(["package-lock.json", "tsconfig.tsbuildinfo"]);
+      for await (const [name, handle] of root.entries()) {
+        if (name.startsWith(".") && name !== ".env.example" && name !== ".env.tpl") continue;
+        if (handle.kind === "directory" && skipDirs.has(name)) continue;
+        const path = prefix ? `${prefix}/${name}` : name;
+        if (handle.kind === "directory") {
+          count += await scanDirectory(handle, path);
+        } else if (handle.kind === "file") {
+          if (skipFiles.has(name)) continue;
+          const ext = extOf(path);
+          const allowed = ["md","txt","ts","tsx","js","mjs","cjs","json","sql","yaml","yml","toml","env","tpl","html","css","svg","caddy"].includes(ext) || name === "Caddyfile" || name === "SOUL.md";
+          if (!allowed) continue;
+          const file = await handle.getFile();
+          if (file.size > 1200000) continue;
+          const text = kindOf(path) === "image" ? "" : await file.text();
+          addFile(path, text, "folder", handle, file.size);
+          count++;
+        }
+      }
+      return count;
+    }
+
+    function renderAll() {
+      renderTypeOptions();
+      renderLists();
+      renderReader();
+      renderContext();
+      renderPins();
+      renderInventory();
+      drawGraph();
+    }
+
+    function renderTypeOptions() {
+      const exts = [...new Set([...state.files.values()].map(f => f.ext))].sort();
+      const current = $("typeSelect")?.value || "all";
+      $("typeSelect").innerHTML = `<option value="all">All filetypes</option>` + exts.map(ext => `<option value="${escapeAttr(ext)}">.${escapeHtml(ext)}</option>`).join("");
+      $("typeSelect").value = exts.includes(current) ? current : "all";
+    }
+
+    function filteredFiles() {
+      const q = state.query.toLowerCase();
+      return [...state.files.values()].filter(file => {
+        if (state.scope !== "all" && file.root !== state.scope) return false;
+        if (state.type !== "all" && file.ext !== state.type) return false;
+        if (!q) return true;
+        return file.path.toLowerCase().includes(q) || file.title.toLowerCase().includes(q) || file.text.toLowerCase().includes(q);
+      }).sort((a, b) => a.path.localeCompare(b.path));
+    }
+
+    function renderLists() {
+      const files = filteredFiles();
+      $("fileCount").textContent = `${files.length}/${state.files.size}`;
+      $("dockSummary").textContent = `${state.files.size} files · ${countWords([...state.files.values()].map(f => f.text).join(" ")).toLocaleString()} words`;
+      const groups = new Map();
+      files.forEach(file => {
+        const group = file.path.includes("/") ? file.path.split("/").slice(0, -1).join("/") : "root";
+        if (!groups.has(group)) groups.set(group, []);
+        groups.get(group).push(file);
+      });
+      let html = "";
+      for (const [group, groupFiles] of groups.entries()) {
+        html += `<div class="group-title">${escapeHtml(group)} <span class="muted">(${groupFiles.length})</span></div>`;
+        html += groupFiles.map(fileItem).join("");
+      }
+      $("fileList").innerHTML = html || `<div class="muted small">No files match this filter.</div>`;
+      $("fileList").querySelectorAll("[data-open]").forEach(el => el.addEventListener("click", () => openFile(el.dataset.open)));
+      renderInventory();
+    }
+
+    function fileItem(file) {
+      const words = file.kind === "image" ? "img" : `${countWords(file.text)}`;
+      return `<div class="item ${file.path === state.current ? "active" : ""}" data-open="${escapeAttr(file.path)}"><div><div class="name">${escapeHtml(file.title)}</div><div class="path">${escapeHtml(file.path)}</div></div><span class="chip">${escapeHtml(file.ext)} · ${words}</span></div>`;
+    }
+
+    function openFile(path, pushHash = true) {
+      if (!state.files.has(path)) path = state.files.has("wiki/README.md") ? "wiki/README.md" : [...state.files.keys()][0];
+      state.current = path;
+      state.raw = false;
+      if (pushHash) location.hash = encodeURIComponent(path);
+      renderLists();
+      renderReader();
+      renderContext();
+      drawGraph();
+      updateProgress();
+    }
+
+    function renderReader() {
+      const file = getFile();
+      if (!file) return;
+      $("docTitle").textContent = file.title;
+      $("docMeta").textContent = `${file.path} · ${file.kind}/${file.ext} · ${countWords(file.text).toLocaleString()} words · ${file.text.length.toLocaleString()} chars · ${file.source}`;
+      $("pinBtn").textContent = state.pins.includes(file.path) ? "Unpin" : "Pin";
+      $("rawBtn").textContent = state.raw ? "Rendered" : "Raw";
+      $("currentKind").textContent = `${file.kind}/${file.ext}`;
+      if (file.kind === "image") {
+        $("reader").innerHTML = `<img src="${escapeAttr(file.path)}" alt="${escapeAttr(file.title)}">`;
+      } else if (state.raw || file.kind !== "markdown") {
+        $("reader").innerHTML = renderCode(file);
+      } else {
+        $("reader").innerHTML = renderMarkdown(file.text, state.query);
+      }
+      renderFileIntel(file);
+    }
+
+    function renderCode(file) {
+      let text = file.text || "";
+      if (file.ext === "json") {
+        try { text = JSON.stringify(JSON.parse(text), null, 2); } catch (err) {}
+      }
+      const lines = text.replace(/\r\n/g, "\n").split("\n");
+      const numbered = lines.map((line, i) => `${String(i + 1).padStart(4, " ")}  ${line}`).join("\n");
+      return `<pre><code>${highlightQuery(escapeHtml(numbered), state.query)}</code></pre>`;
+    }
+
+    function renderMarkdown(md, query) {
+      const lines = md.replace(/\r\n/g, "\n").split("\n");
+      let html = "", inCode = false, code = [], list = false, table = [];
+      const flushList = () => { if (list) { html += "</ul>"; list = false; } };
+      const flushTable = () => {
+        if (!table.length) return;
+        html += "<table>";
+        table.forEach((row, idx) => {
+          if (idx === 1 && row.every(c => /^:?-{3,}:?$/.test(c.trim()))) return;
+          const tag = idx === 0 ? "th" : "td";
+          html += "<tr>" + row.map(c => `<${tag}>${inline(c, query)}</${tag}>`).join("") + "</tr>";
+        });
+        html += "</table>";
+        table = [];
+      };
+      for (const line of lines) {
+        if (line.startsWith("```")) {
+          flushList(); flushTable();
+          if (inCode) {
+            html += `<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`;
+            code = []; inCode = false;
+          } else inCode = true;
+          continue;
+        }
+        if (inCode) { code.push(line); continue; }
+        if (line.includes("|") && /^\s*\|?.+\|.+/.test(line)) {
+          flushList();
+          table.push(line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|"));
+          continue;
+        }
+        flushTable();
+        const h = line.match(/^(#{1,4})\s+(.*)$/);
+        if (h) {
+          flushList();
+          const level = Math.min(h[1].length, 4);
+          const text = h[2].trim();
+          html += `<h${level} id="${slug(text)}">${inline(text, query)}</h${level}>`;
+        } else if (/^\s*[-*]\s+/.test(line)) {
+          if (!list) { html += "<ul>"; list = true; }
+          html += `<li>${inline(line.replace(/^\s*[-*]\s+/, ""), query)}</li>`;
+        } else if (/^\s*\d+\.\s+/.test(line)) {
+          if (!list) { html += "<ul>"; list = true; }
+          html += `<li>${inline(line.replace(/^\s*\d+\.\s+/, ""), query)}</li>`;
+        } else if (/^\s*>\s?/.test(line)) {
+          flushList();
+          html += `<blockquote>${inline(line.replace(/^\s*>\s?/, ""), query)}</blockquote>`;
+        } else if (!line.trim()) {
+          flushList();
+        } else {
+          flushList();
+          html += `<p>${inline(line, query)}</p>`;
+        }
+      }
+      flushList(); flushTable();
+      return html || `<p class="muted">Empty file.</p>`;
+    }
+
+    function inline(text, query) {
+      let s = escapeHtml(text);
+      s = s.replace(/`([^`]+)`/g, "<code>$1</code>");
+      s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => `<a href="${escapeAttr(href.replace(/&amp;/g, "&"))}">${label}</a>`);
+      s = s.replace(/\[(S\d{3})\]/g, '<span class="source-pill" data-source="$1">[$1]</span>');
+      return highlightQuery(s, query);
+    }
+
+    function highlightQuery(html, query) {
+      if (!query || query.length < 3 || /^S\d{3}$/i.test(query)) return html;
+      const re = new RegExp("(" + escapeRegExp(query) + ")", "ig");
+      return html.replace(re, '<span class="mark-hit">$1</span>');
+    }
+
+    function routeClicks(e) {
+      const source = e.target.closest("[data-source]");
+      if (source) {
+        e.preventDefault();
+        jumpSource(source.dataset.source);
+        return;
+      }
+      const a = e.target.closest("a");
+      if (!a) return;
+      const href = a.getAttribute("href");
+      if (!href || /^[a-z]+:/i.test(href) || href.startsWith("#")) return;
+      const path = resolvePath(href, state.current);
+      if (state.files.has(path)) {
+        e.preventDefault();
+        openFile(path);
+      }
+    }
+
+    function resolvePath(href, fromPath) {
+      const clean = href.replace(/&amp;/g, "&").split("#")[0].split("?")[0];
+      const candidates = [];
+      candidates.push(clean.replace(/^\.\//, ""));
+      const base = fromPath.includes("/") ? fromPath.split("/").slice(0, -1) : [];
+      const parts = [...base, ...clean.split("/")];
+      const resolved = [];
+      for (const part of parts) {
+        if (!part || part === ".") continue;
+        if (part === "..") resolved.pop();
+        else resolved.push(part);
+      }
+      candidates.push(resolved.join("/"));
+      candidates.push("wiki/" + clean.replace(/^(\.\.\/)+/, "").replace(/^wiki\//, ""));
+      candidates.push(clean.replace(/^(\.\.\/)+wiki\//, "wiki/"));
+      return candidates.find(p => state.files.has(p)) || candidates[1] || candidates[0];
+    }
+
+    function jumpSource(id) {
+      const sourcePath = "wiki/evidence/sources.md";
+      if (state.files.has(sourcePath)) openFile(sourcePath);
+      $("searchInput").value = id;
+      state.query = id;
+      renderReader();
+      setTimeout(() => {
+        const hit = [...$("reader").querySelectorAll("p, li, td")].find(el => el.textContent.includes(id));
+        if (hit) hit.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 30);
+    }
+
+    function renderContext() {
+      const file = getFile();
+      if (!file) return;
+      const text = file.text || "";
+      const headings = [...text.matchAll(/^(#{1,4})\s+(.+)$/gm)].map(m => ({ level: m[1].length, text: m[2].trim(), id: slug(m[2]) }));
+      const symbols = [...text.matchAll(/\b(?:export\s+)?(?:async\s+)?(?:function|class|const|let|var|type|interface)\s+([A-Za-z_][\w]*)/g)].map(m => m[1]);
+      $("outlineCount").textContent = headings.length + symbols.length;
+      $("outlineList").innerHTML = [
+        ...headings.map(h => `<div class="item" data-jump="${escapeAttr(h.id)}"><div><div class="name">${"#".repeat(h.level)} ${escapeHtml(h.text)}</div><div class="path">heading</div></div><span class="chip">md</span></div>`),
+        ...symbols.map(s => `<div class="item"><div><div class="name">${escapeHtml(s)}</div><div class="path">symbol</div></div><span class="chip">code</span></div>`)
+      ].join("") || `<div class="muted small">No headings or symbols detected.</div>`;
+      $("outlineList").querySelectorAll("[data-jump]").forEach(el => el.addEventListener("click", () => {
+        const node = document.getElementById(el.dataset.jump);
+        if (node) node.scrollIntoView({ behavior: "smooth", block: "start" });
+      }));
+
+      const backs = backlinksFor(file.path);
+      $("backlinkCount").textContent = backs.length;
+      $("backlinkList").innerHTML = backs.map(path => fileItem(state.files.get(path))).join("") || `<div class="muted small">No backlinks or imports found.</div>`;
+      $("backlinkList").querySelectorAll("[data-open]").forEach(el => el.addEventListener("click", () => openFile(el.dataset.open)));
+
+      const ids = [...new Set((text.match(/\bS\d{3}\b/g) || []))];
+      const entities = extractEntities(text).slice(0, 20);
+      $("entityCount").textContent = ids.length + entities.length;
+      $("entityList").innerHTML = [
+        ...ids.map(id => `<div class="item" data-source="${id}"><div><div class="name">${id}</div><div class="path">source ledger citation</div></div><span class="chip">source</span></div>`),
+        ...entities.map(([name, count]) => `<div class="item"><div><div class="name">${escapeHtml(name)}</div><div class="path">local entity phrase</div></div><span class="chip">${count}</span></div>`)
+      ].join("") || `<div class="muted small">No source IDs or entities detected.</div>`;
+    }
+
+    function backlinksFor(path) {
+      const needle = path.split("/").pop();
+      const out = [];
+      for (const file of state.files.values()) {
+        if (file.path === path) continue;
+        if (file.text.includes(path) || file.text.includes(needle)) out.push(file.path);
+      }
+      return out.slice(0, 80);
+    }
+
+    function renderFileIntel(file) {
+      const ids = [...new Set((file.text.match(/\bS\d{3}\b/g) || []))];
+      const links = [...file.text.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)].map(m => m[2]).slice(0, 12);
+      const imports = [...file.text.matchAll(/\bfrom\s+["']([^"']+)["']|import\s+["']([^"']+)["']/g)].map(m => m[1] || m[2]).slice(0, 12);
+      $("fileIntel").innerHTML = `
+        <div class="stats">
+          <div class="stat"><strong>${countWords(file.text)}</strong><span>words</span></div>
+          <div class="stat"><strong>${file.text.split(/\n/).length}</strong><span>lines</span></div>
+          <div class="stat"><strong>${ids.length}</strong><span>source IDs</span></div>
+          <div class="stat"><strong>${backlinksFor(file.path).length}</strong><span>backlinks</span></div>
+        </div>
+        <div class="card"><h3>Detected Links</h3>${renderMiniList(links, "link")}</div>
+        <div class="card"><h3>Detected Imports</h3>${renderMiniList(imports, "import")}</div>
+        <div class="card"><h3>File Role</h3><p class="small muted">${escapeHtml(describeFile(file))}</p></div>
+      `;
+    }
+
+    function renderMiniList(items, label) {
+      if (!items.length) return `<div class="muted small">None detected.</div>`;
+      return `<div class="list">${items.map(item => `<div class="item"><div><div class="name">${escapeHtml(item)}</div><div class="path">${label}</div></div></div>`).join("")}</div>`;
+    }
+
+    function describeFile(file) {
+      if (file.path.includes("event-driven-office-and-generative-ui")) return "Forward design: the message-to-agent event flow (any system/webhook/cron → employee → typed work), how generative UI is implemented so far and the frontier ahead, and the build-plan re-sequencing for an entire office running through one AI employee.";
+      if (file.path.includes("agent-inbox-and-channel-architecture")) return "Load-bearing interaction architecture: universal message-to-agent inbox, live-session-first conductor, native subagents/Jobs, fallback serialized inbox, presence-aware channel/session router, and one conversation thread per employee.";
+      if (file.path.includes("hermes-run-session-semantics-research")) return "Hermes substrate research: HTTP Runs/Sessions are turn-atomic, delegate_task supports background in-session subagents, Jobs/cron run fresh isolated sessions, profiles isolate Hermes state but not OS filesystem.";
+      if (file.path.includes("phase-03a-channel-session-presence-layer")) return "Phase 3A scope: channel/session/presence router, active-session-wins delivery, cross-channel dedupe, one acceptance primitive, native subagent completions without duplicate SMS, and durable-worker routing.";
+      if (file.path.includes("phase-03a-04-live-session-event-spine-handoff")) return "Current next-session handoff: recent Hermes/subagent/channel decisions, live-session-first MVP posture, and how Phase 3 generic ingress, Phase 3A router, and Phase 4 wake path connect to the AI Employee product.";
+      if (file.path.includes("phase-5-and-work-surface-record")) return "Current implementation record: Phase 0–4 loose ends closed, Phase 5 close-the-loop + reminder firing/watch-renewal scheduler seam, the descriptor-driven Work Surface redesign, and the provider-acceptance-pending table.";
+      if (file.path.includes("phase-3-generative-ui-reframe")) return "Generative UI reframing source: typed work events, deliverable descriptors, conformance-first rendering, and one-second approval/edit loops.";
+      if (file.path.includes("work-events")) return "Work-event source/test surface. Use this when checking provider/Hermes event normalization and typed owner-facing rendering.";
+      if (file.path.includes("MVP/build-plan")) return "MVP source-of-truth planning document.";
+      if (file.path.includes("implementation-records")) return "Factual implementation ledger. Treat as current code-state memory.";
+      if (file.path.startsWith("mvp-build/")) return "MVP implementation file.";
+      if (file.path.startsWith("wiki/")) return "GTM/product/wiki knowledge file.";
+      return "Workspace control or root reference file.";
+    }
+
+    function renderInventory() {
+      const files = [...state.files.values()];
+      const roots = countBy(files, f => f.root);
+      const types = countBy(files, f => f.ext);
+      const loaded = files.filter(f => f.text).length;
+      $("inventory").innerHTML = `
+        <div class="stats">
+          <div class="stat"><strong>${files.length}</strong><span>files</span></div>
+          <div class="stat"><strong>${loaded}</strong><span>loaded</span></div>
+          <div class="stat"><strong>${Object.keys(types).length}</strong><span>types</span></div>
+          <div class="stat"><strong>${Object.keys(roots).length}</strong><span>roots</span></div>
+        </div>
+        <div class="card"><h3>Roots</h3>${objectList(roots)}</div>
+        <div class="card"><h3>Filetypes</h3>${objectList(types)}</div>
+      `;
+    }
+
+    function buildGraph() {
+      const nodes = [];
+      const edges = [];
+      const nodeSet = new Set();
+      const addNode = (id, label, type) => {
+        if (nodeSet.has(id)) return;
+        nodeSet.add(id);
+        nodes.push({ id, label, type });
+      };
+      for (const file of state.files.values()) {
+        addNode(file.path, file.title, "file");
+        const folder = file.path.includes("/") ? file.path.split("/").slice(0, -1).join("/") : "root";
+        addNode(folder, folder, "folder");
+        edges.push({ from: folder, to: file.path, type: "contains" });
+        for (const m of file.text.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)) {
+          const target = resolvePath(m[2], file.path);
+          if (state.files.has(target)) edges.push({ from: file.path, to: target, type: "markdown-link", label: m[1] });
+        }
+        for (const m of file.text.matchAll(/\bfrom\s+["']([^"']+)["']|import\s+["']([^"']+)["']/g)) {
+          const target = resolveImportPath(m[1] || m[2], file.path);
+          if (target && state.files.has(target)) edges.push({ from: file.path, to: target, type: "import" });
+        }
+        for (const id of new Set(file.text.match(/\bS\d{3}\b/g) || [])) {
+          addNode(id, id, "source");
+          edges.push({ from: file.path, to: id, type: "source-citation" });
+        }
+      }
+      state.graph = { generatedAt: new Date().toISOString(), nodes, edges };
+      $("graphStats").textContent = `${nodes.length} nodes · ${edges.length} edges`;
+    }
+
+    function resolveImportPath(importPath, fromPath) {
+      if (!importPath || !importPath.startsWith(".")) return "";
+      const base = fromPath.split("/").slice(0, -1);
+      const parts = [...base, ...importPath.split("/")];
+      const resolved = [];
+      for (const part of parts) {
+        if (!part || part === ".") continue;
+        if (part === "..") resolved.pop(); else resolved.push(part);
+      }
+      const stem = resolved.join("/");
+      return [stem, stem + ".ts", stem + ".tsx", stem + ".js", stem + ".mjs", stem + "/index.ts", stem + "/index.tsx"].find(p => state.files.has(p)) || "";
+    }
+
+    function drawGraph() {
+      buildGraph();
+      const svg = $("graphSvg");
+      const box = svg.parentElement.getBoundingClientRect();
+      const w = Math.max(320, box.width || 640);
+      const h = Math.max(170, box.height || 220);
+      svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      svg.innerHTML = "";
+      const current = state.current;
+      const adjacentIds = new Set([current]);
+      state.graph.edges.forEach(e => { if (e.from === current) adjacentIds.add(e.to); if (e.to === current) adjacentIds.add(e.from); });
+      const nodes = state.graph.nodes.filter(n => adjacentIds.has(n.id)).slice(0, 34);
+      if (!nodes.length) return;
+      const positioned = nodes.map((n, i) => {
+        if (n.id === current) return { ...n, x: w / 2, y: h / 2 };
+        const angle = ((i + 1) / Math.max(1, nodes.length - 1)) * Math.PI * 2;
+        const rx = w * .36;
+        const ry = h * .34;
+        return { ...n, x: w / 2 + Math.cos(angle) * rx, y: h / 2 + Math.sin(angle) * ry };
+      });
+      const byId = new Map(positioned.map(n => [n.id, n]));
+      state.graph.edges.filter(e => byId.has(e.from) && byId.has(e.to)).forEach(e => {
+        const a = byId.get(e.from), b = byId.get(e.to);
+        svg.insertAdjacentHTML("beforeend", `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#343434" stroke-width="1"></line>`);
+      });
+      positioned.forEach(n => {
+        const active = n.id === current;
+        const r = active ? 14 : n.type === "folder" ? 8 : n.type === "source" ? 7 : 9;
+        const fill = active ? "#ffffff" : n.type === "source" ? "#8ab4ff" : n.type === "folder" ? "#555555" : "#1f1f1f";
+        const stroke = active ? "#ffffff" : "#777777";
+        svg.insertAdjacentHTML("beforeend", `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${fill}" stroke="${stroke}" data-node="${escapeAttr(n.id)}"></circle><text x="${n.x + 12}" y="${n.y + 4}">${escapeHtml(n.label.slice(0, 30))}</text>`);
+      });
+      svg.querySelectorAll("[data-node]").forEach(el => el.addEventListener("click", () => {
+        const id = el.getAttribute("data-node");
+        if (state.files.has(id)) openFile(id);
+        else if (/^S\d{3}$/.test(id)) jumpSource(id);
+      }));
+      const related = state.graph.edges.filter(e => e.from === current || e.to === current).slice(0, 100);
+      $("edgeList").innerHTML = related.map(e => {
+        const target = e.from === current ? e.to : e.from;
+        const attr = state.files.has(target) ? ` data-open="${escapeAttr(target)}"` : /^S\d{3}$/.test(target) ? ` data-source="${target}"` : "";
+        return `<div class="item"${attr}><div><div class="name">${escapeHtml(e.type)}</div><div class="path">${escapeHtml(e.from)} -> ${escapeHtml(e.to)}</div></div><span class="chip">${state.files.has(target) ? "file" : "node"}</span></div>`;
+      }).join("") || `<div class="muted small">No graph edges for current file.</div>`;
+      $("edgeList").querySelectorAll("[data-open]").forEach(el => el.addEventListener("click", () => openFile(el.dataset.open)));
+    }
+
+    function renderMaterializer(force) {
+      const files = [...state.files.values()].filter(f => f.text);
+      const types = countBy(files, f => f.ext);
+      const roots = countBy(files, f => f.root);
+      const sourceIds = countBy(flat(files.map(f => f.text.match(/\bS\d{3}\b/g) || [])), x => x);
+      const todos = [];
+      files.forEach(f => {
+        const matches = f.text.split(/\n/).map((line, i) => ({ line, n: i + 1 })).filter(x => /\b(TODO|FIXME|pending|acceptance|proof|provider|Phase 3|Phase 4|WorkEvent|deliverable|approval)\b/i.test(x.line));
+        matches.slice(0, 8).forEach(m => todos.push(`${f.path}:${m.n} ${m.line.trim().slice(0, 160)}`));
+      });
+      const central = [...state.files.values()].map(f => ({ path: f.path, score: backlinksFor(f.path).length + state.graph.edges.filter(e => e.from === f.path || e.to === f.path).length })).sort((a, b) => b.score - a.score).slice(0, 12);
+      const entities = extractEntities(files.map(f => f.text).join("\n")).slice(0, 30);
+      const workEventFiles = files.filter(f => /WorkEvent|NormalizedEvent|deliverable|approval|proof|employee_messages|Gmail|Stripe/i.test(f.text)).map(f => f.path).slice(0, 24);
+      const out = [
+        "AMTECH WORKSPACE MATERIALIZATION",
+        `Generated: ${new Date().toISOString()}`,
+        "",
+        "1. Corpus shape",
+        `- Files loaded: ${files.length}`,
+        `- Roots: ${formatCounts(roots)}`,
+        `- Filetypes: ${formatCounts(types)}`,
+        "",
+        "2. Central files by graph/backlink pressure",
+        ...central.map(x => `- ${x.path} (${x.score})`),
+        "",
+        "3. Emerging entities",
+        ...entities.slice(0, 18).map(([name, count]) => `- ${name} (${count})`),
+        "",
+        "4. Source IDs with highest local frequency",
+        ...Object.entries(sourceIds).sort((a, b) => b[1] - a[1]).slice(0, 16).map(([id, count]) => `- ${id} (${count})`),
+        "",
+        "5. Phase 3/4 and generative-UI relevant files",
+        ...workEventFiles.map(path => `- ${path}`),
+        "",
+        "6. Proof / acceptance / provider pressure points",
+        ...todos.slice(0, 30).map(x => `- ${x}`),
+        "",
+        "7. Design inference",
+        "- Treat UI as a conformance-first materialization of typed work, not as arbitrary screens.",
+        "- Keep the owner-facing loop event/task/experience-first: provider event -> normalized fact -> typed work event -> deliverable/decision -> SMS/web rendering -> approval/edit/response -> proof.",
+        "- Favor descriptors and tests over tool-specific rendering branches."
+      ].join("\n");
+      state.materializer = out;
+      $("materializerOutput").textContent = out;
+      $("insightStamp").textContent = force ? new Date().toLocaleTimeString() : "ready";
+      $("emergentList").innerHTML = entities.slice(0, 30).map(([name, count]) => `<div class="item"><div><div class="name">${escapeHtml(name)}</div><div class="path">entity frequency</div></div><span class="chip">${count}</span></div>`).join("");
+      $("conformanceList").innerHTML = [
+        ["Provider event", hasText(/Gmail|Stripe|webhook|PubSub|provider/i)],
+        ["Normalized fact", hasText(/NormalizedEvent|normalize|normalized/i)],
+        ["Typed work event", hasText(/WorkEvent|WorkEventDescriptor|employee_messages/i)],
+        ["Deliverable/decision", hasText(/deliverable|artifact|approval|decision/i)],
+        ["SMS/web rendering", hasText(/SMS|Twilio|Work Surface|resources|render/i)],
+        ["Proof receipt", hasText(/proof|audit|receipt|idempotency|webhook/i)]
+      ].map(([label, ok]) => `<div class="item"><div><div class="name">${label}</div><div class="path">${ok ? "detected in corpus" : "not detected in loaded files"}</div></div><span class="chip">${ok ? "yes" : "gap"}</span></div>`).join("");
+      return out;
+    }
+
+    function hasText(re) {
+      for (const file of state.files.values()) if (re.test(file.text)) return true;
+      return false;
+    }
+
+    function extractEntities(text) {
+      const counts = new Map();
+      const stop = new Set(["The", "This", "That", "Status", "README", "Type", "Date", "Related", "Notes", "Agent", "Use", "AMTECH"]);
+      for (const m of text.matchAll(/\b([A-Z][A-Za-z0-9]*(?:[-\s][A-Z][A-Za-z0-9]*){0,4})\b/g)) {
+        const name = m[1].trim().replace(/\s+/g, " ");
+        if (name.length < 4 || stop.has(name) || /^\d+$/.test(name)) continue;
+        counts.set(name, (counts.get(name) || 0) + 1);
+      }
+      for (const m of text.matchAll(/\b([A-Za-z]+(?:Event|Descriptor|Surface|Manager|Hermes|Gmail|Stripe|Twilio|Supabase|MCP)[A-Za-z]*)\b/g)) {
+        counts.set(m[1], (counts.get(m[1]) || 0) + 2);
+      }
+      return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    }
+
+    function switchTab(tab) {
+      if ($("viewSelect")) $("viewSelect").value = tab;
+      document.querySelectorAll(".panel").forEach(panel => panel.classList.toggle("active", panel.id === "tab-" + tab));
+      if (tab === "graph") drawGraph();
+      if (tab === "materialize" && !state.materializer) renderMaterializer(false);
+    }
+
+    function renderLog() {
+      const type = $("logType").value;
+      const date = $("logDate").value || today();
+      const week = String($("logWeek").value || "01").padStart(2, "0");
+      const title = $("logTitleInput").value || (type === "weekly" ? `Week ${week} Review` : `${type} ${date}`);
+      const revenue = $("logRevenue").value || "$0";
+      const mrr = $("logMrr").value || "$0";
+      const notes = $("logNotes").value || "-";
+      let body = `# ${title}\n\n**Type:** ${type}\n**Date:** ${date}\n**Current file:** ${state.current}\n\n`;
+      if (type === "weekly") {
+        body += `## Metrics\n\n- Revenue collected: ${revenue}\n- MRR: ${mrr}\n- New prospects:\n- Replies:\n- Demos:\n- Paid offers:\n- Closed:\n\n## What Changed\n\n${notes}\n\n## Next Week's One Experiment\n\n-\n`;
+      } else if (type === "customer") {
+        body += `## Prospect\n\n- Company:\n- Contact:\n- Segment:\n- Source:\n\n## Operator Language\n\n${notes}\n\n## Follow-Up\n\n-\n`;
+      } else if (type === "experiment") {
+        body += `## Hypothesis\n\n-\n\n## Method\n\n-\n\n## Result\n\n${notes}\n\n## Decision\n\n- Continue / change / stop:\n`;
+      } else if (type === "implementation") {
+        body += `## Implementation Note\n\n${notes}\n\n## Proof\n\n-\n\n## Next Seam\n\n-\n`;
+      } else {
+        body += `## Work Done\n\n${notes}\n\n## Proof / Links\n\n-\n\n## Tomorrow\n\n-\n`;
+      }
+      body += `\n## Agent Notes\n\nUse this as operating evidence. Preserve source paths, proof, and next action clarity.\n`;
+      $("logOutput").value = body;
+      $("logFilenameLabel").textContent = logFilename();
+    }
+
+    function logFilename() {
+      const type = $("logType").value;
+      const date = $("logDate").value || today();
+      const week = String($("logWeek").value || "01").padStart(2, "0");
+      const title = slug($("logTitleInput").value || type);
+      if (type === "weekly") return `week-${week}.md`;
+      return `${type}-${date}-${title}.md`.replace(/--+/g, "-");
+    }
+
+    async function saveLog() {
+      renderLog();
+      const path = `wiki/logs/${logFilename()}`;
+      if (state.dirHandle) {
+        await writeFile(path, $("logOutput").value);
+        addFile(path, $("logOutput").value, "folder");
+        buildGraph();
+        openFile(path);
+        toast("Saved " + path);
+      } else {
+        downloadFile(logFilename(), $("logOutput").value);
+        toast("Downloaded log; open folder for direct save");
+      }
+    }
+
+    async function writeFile(path, text) {
+      const parts = path.split("/");
+      let handle = state.dirHandle;
+      for (let i = 0; i < parts.length - 1; i++) handle = await handle.getDirectoryHandle(parts[i], { create: true });
+      const file = await handle.getFileHandle(parts.at(-1), { create: true });
+      const writable = await file.createWritable();
+      await writable.write(text);
+      await writable.close();
+    }
+
+    function togglePin() {
+      const i = state.pins.indexOf(state.current);
+      if (i >= 0) state.pins.splice(i, 1); else state.pins.push(state.current);
+      localStorage.setItem("amtechExplorerPins", JSON.stringify(state.pins));
+      renderPins();
+      renderReader();
+    }
+    function renderPins() {
+      $("pinCount").textContent = state.pins.length;
+      $("pinList").innerHTML = state.pins.filter(p => state.files.has(p)).map(p => fileItem(state.files.get(p))).join("") || `<div class="muted small">No pinned files.</div>`;
+      $("pinList").querySelectorAll("[data-open]").forEach(el => el.addEventListener("click", () => openFile(el.dataset.open)));
+    }
+
+    function toggleDock() {
+      state.dockCollapsed = !state.dockCollapsed;
+      document.documentElement.style.setProperty("--footer-h", state.dockCollapsed ? "0px" : "var(--footer-open-h)");
+      $("dockBtn").textContent = state.dockCollapsed ? "Open Views" : "Views";
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === "red" ? "light" : "red";
+      localStorage.setItem("amtechExplorerTheme", state.theme);
+      document.body.dataset.theme = state.theme === "red" ? "red" : "light";
+      $("themeBtn").textContent = state.theme === "red" ? "White Mode" : "Red Mode";
+    }
+
+    function copyAgentContext() {
+      const file = getFile();
+      const related = state.graph.edges.filter(e => e.from === state.current || e.to === state.current).slice(0, 24);
+      const context = [
+        "# AMTECH Agent Context",
+        "",
+        `Current file: ${state.current}`,
+        `Title: ${file?.title || ""}`,
+        `Kind: ${file?.kind}/${file?.ext}`,
+        "",
+        "Graph neighborhood:",
+        ...related.map(e => `- ${e.type}: ${e.from} -> ${e.to}`),
+        "",
+        "Important frame:",
+        "Generative UI here means conformance-first typed components: provider/Hermes/tool event -> normalized fact -> typed work event -> deliverable/decision -> SMS/web rendering -> approval/edit/response -> proof."
+      ].join("\n");
+      copyText(context);
+    }
+
+    function copyGraphPrompt() {
+      copyText(`Use this AMTECH workspace graph to reason about work surfaces, provider events, typed work events, and proof loops. Stay tool-agnostic and event/task/experience-first.\n\n${JSON.stringify(state.graph, null, 2)}`);
+    }
+    function copyLLMPrompt() {
+      const out = state.materializer || renderMaterializer(true);
+      copyText(`You are analyzing the AMTECH GTM-RESEARCH workspace. Synthesize novel but implementation-testable insights about generative UI, typed work events, owner approval loops, and remote end-to-end work management. Ground every recommendation in these materialized signals:\n\n${out}`);
+    }
+
+    function updateProgress() {
+      const main = $("main");
+      const max = main.scrollHeight - main.clientHeight;
+      $("readProgress").style.width = max > 0 ? `${Math.min(100, main.scrollTop / max * 100)}%` : "0";
+    }
+    function setStatus(kind, text) {
+      $("statusDot").className = "dot" + (kind === "warn" ? " warn" : kind === "err" ? " err" : "");
+      $("statusText").textContent = text;
+    }
+    function toast(msg) {
+      $("toast").textContent = msg;
+      $("toast").classList.add("show");
+      setTimeout(() => $("toast").classList.remove("show"), 1800);
+    }
+    function countWords(s) {
+      return (String(s).trim().match(/\S+/g) || []).length;
+    }
+    function countBy(items, fn) {
+      const out = {};
+      items.forEach(item => {
+        const key = fn(item);
+        out[key] = (out[key] || 0) + 1;
+      });
+      return out;
+    }
+    function objectList(obj) {
+      const rows = Object.entries(obj).sort((a, b) => b[1] - a[1]);
+      return rows.map(([k, v]) => `<div class="item"><div><div class="name">${escapeHtml(k)}</div></div><span class="chip">${v}</span></div>`).join("") || `<div class="muted small">None.</div>`;
+    }
+    function formatCounts(obj) {
+      return Object.entries(obj).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k}:${v}`).join(", ");
+    }
+    function flat(arr) { return arr.reduce((a, b) => a.concat(b), []); }
+    function slug(s) {
+      return String(s).toLowerCase().replace(/`/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "section";
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+    }
+    function escapeAttr(s) { return escapeHtml(s).replace(/"/g, "&quot;"); }
+    function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+    function copyText(text) {
+      navigator.clipboard?.writeText(text).then(() => toast("Copied")).catch(() => {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+        toast("Copied");
+      });
+    }
+    function downloadFile(name, text) {
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    boot();
+  </script>
+</body>
+</html>

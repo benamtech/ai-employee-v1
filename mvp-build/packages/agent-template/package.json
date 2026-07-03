@@ -1,0 +1,13 @@
+{
+  "name": "@amtech/agent-template",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The AMTECH AI Employee template (agent-as-files). Data only; rendered per client by provision_employee in Phase 1.",
+  "files": [
+    "SOUL.md",
+    "config.yaml",
+    ".env.tpl",
+    "workspace",
+    "skills"
+  ]
+}

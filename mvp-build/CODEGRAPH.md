@@ -1,0 +1,447 @@
+# CODEGRAPH.md - AMTECH AI Employee MVP build map
+
+Status: active
+
+> Audience: AI agents working inside `mvp-build/`. This is the source navigation map for the flagship
+> AMTECH AI Employee product. It explains how the code, Hermes profile template, provisioning program,
+> Manager control plane, web surface, provider connectors, event mesh, tests, docs, and phase plan fit
+> together.
+
+---
+
+## 1. What this folder is
+
+`mvp-build/` is the code home for AMTECH's flagship product: a textable AI Employee for owner-operated
+SMBs, starting with painting and landscaping contractors. The root repo is the AMTECH company brain;
+this folder is the product implementation inside that brain.
+
+The employee is built on an existing open-source agent substrate: **Hermes agent from Nous Research**.
+AMTECH does not own Hermes itself. AMTECH owns the product layer around Hermes:
+
+- deterministic employee provisioning from a profile package;
+- the invisible Manager backend control plane;
+- owner-facing web/SMS surfaces;
+- account, session, approval, connector, artifact, event, scheduler, repair, admin, and metering layers;
+- the business-specific contractor estimator package and Manager tool contract.
+
+The owner only ever experiences one employee. The Manager is invisible backend infrastructure.
+
+## 2. Read order
+
+For a cold session:
+
+1. `../identity.md` - required AMTECH operating identity.
+2. `../CODEGRAPH.md` - whole workspace map and canonical facts.
+3. `CLAUDE.md` / `AGENTS.md` - build-home agent rules, local checks, Realness Rules, memory protocol.
+4. `../wiki/MVP/build-plan-current/README.md` and `../wiki/MVP/build-plan-current/phases/README.md` - current plan and phase graph.
+5. `../wiki/MVP/implementation-records/README.md` - factual code-state ledger.
+6. `memory/MEMORY.md`, then the newest dated handoff - durable development narrative.
+7. This `CODEGRAPH.md`, then the relevant authored source files below.
+
+Use `../wiki/MVP/old-build-plan/` for original whole-product mechanics only. Current sequencing lives in
+`../wiki/MVP/build-plan-current/`.
+
+## 3. Current status
+
+Status vocabulary is shared with the build plan:
+
+| Status | Meaning |
+|---|---|
+| `source-wired` | Code exists and local typecheck/unit/build/lint proof exists. |
+| `provider-accepted` | Live provider proof ids exist: Twilio, Gmail, Pub/Sub, Stripe, Supabase, etc. |
+| `runtime-accepted` | Live Hermes/runtime/job proof exists. |
+| `planned` | Designed but not implemented. |
+| `pending` | Blocked by missing env/host/credentials or not yet attempted. |
+
+Current factual state:
+
+- **Phase 0 baseline loop:** `source-wired`. Signup/claim, live employee path, estimate artifact, approved Gmail send seam, Gmail reply event seam, Stripe test-mode deposit seam, and internal reminder seams exist in code.
+- **Phase 1 live-acceptance harness:** `source-wired`; live gate `pending`. Preflight/report and 8 run-verifiers exist, but real provider/runtime proof ids are absent.
+- **New-era Phase 2 runtime/scheduler productionization:** `source-wired`; runtime gate `pending`. Docker-default backend policy, scheduler runner, `hermes_job_runs`, and `runtime_health_checks` exist.
+- **Phase 3/4/5/6/7 legacy/source seams:** Gmail, Stripe, reminders, repair tools, event triage/batching, `deliver_only`/`wake_employee`, event-source registry, and Work Surface SSE-shaped route are source-wired.
+- **Forward Phases 3-13 and Phase 3A:** planned/pending in `../wiki/MVP/build-plan-current/phases/`.
+- **Current priority:** session management around the Hermes employee: universal inbox, Channel/Session/Presence router, active-session-first routing, one employee/one number/one thread, no double delivery.
+
+Do not mark provider or runtime acceptance without real proof ids. Local tests do not prove live acceptance.
+
+## 4. End-user experience graph
+
+The user-facing whole-product path:
+
+```text
+Owner creates employee
+  -> front-door onboarding (web or SMS)
+  -> phone verification / claim token
+  -> account + owner session
+  -> provision_employee renders a Hermes profile package
+  -> employee is reachable through SMS and web
+  -> owner asks for estimate
+  -> Hermes employee uses Manager tools to create/store/link PDF artifact
+  -> owner approves customer-facing action
+  -> Gmail sends estimate
+  -> real customer reply becomes a work event
+  -> owner approves Stripe test-mode deposit invoice
+  -> payment event becomes a work event
+  -> employee sets/fires internal job reminder
+  -> Work Surface shows daily brief, job folders, cards, receipts, approvals, chat
+```
+
+The code intentionally keeps customer-facing sends and money movement behind approval gates.
+
+## 5. Runtime model and Hermes boundary
+
+Hermes is the employee substrate:
+
+- `packages/agent-template/` is the AMTECH-authored Hermes profile package.
+- `apps/manager/src/provisioner.ts` and `apps/manager/src/lib/profile-renderer.ts` render package params into a per-employee profile.
+- `apps/manager/src/lib/runtime.ts` talks to the running employee through Hermes-compatible runtime endpoints.
+- `infra/hermes/RUNBOOK.md` documents local/manual Hermes setup and smoke testing.
+- `infra/scripts/hermes-jobs-runner.mjs` is the production-oriented scheduler entrypoint for Hermes Jobs.
+
+Important architecture truth from `../wiki/MVP/agent-inbox-and-channel-architecture.md` and
+`../wiki/MVP/hermes-run-session-semantics-research.md`:
+
+- Hermes HTTP Runs/Sessions are turn-atomic.
+- Native Hermes delegation/subagents can help bounded work re-enter an active session.
+- Durable/external work should run through Jobs or worker lanes, then re-enter as a message to the agent.
+- Manager owns the fallback serialized inbox and the Channel/Session/Presence router.
+- The conversation is a brain artifact, not a channel artifact. SMS, web, and future voice attach to one thread.
+
+## 6. Authored source map
+
+Generated/local-heavy paths such as `node_modules/`, `.next/`, `dist/`, `tsconfig.tsbuildinfo`, and acceptance
+report outputs are not authoritative. Prefer authored source, migrations, docs, tests, and scripts.
+
+### Root build files
+
+| Path | Role |
+|---|---|
+| `package.json` | npm workspace root. Defines build/typecheck/test/lint, db migration, dev servers, scheduler, ops, and acceptance commands. |
+| `.env.example` | Environment inventory for Supabase, Twilio, Hermes/runtime, Gmail/PubSub, Stripe, Manager auth, and orchestrator model. |
+| `tsconfig.base.json`, `eslint.config.mjs`, `vitest*.config.ts` | Shared TypeScript, lint, unit, and integration test config. |
+| `CLAUDE.md`, `AGENTS.md` | Build-home operating guide; keep mirrored. |
+| `README.md` | Human-facing build status, stack, run commands, working/planned feature overview. |
+| `CODEGRAPH.md` | This file; keep current when source layout or phase status changes materially. |
+
+### Web app - owner surfaces and browser routes
+
+| Path | Feature connection |
+|---|---|
+| `apps/web/app/page.tsx` | Landing/root route into the product surface. |
+| `apps/web/app/create-ai-employee/page.tsx` | Web front door for creating an employee. Calls front-door API routes. |
+| `apps/web/app/claim/` | Claim flow after SMS/link verification; consumes Manager claim token and creates owner session. |
+| `apps/web/app/login/page.tsx` | Owner login surface. |
+| `apps/web/app/api/front-door/*` | Browser-facing proxies for onboarding, verification, claim-token, account creation, provisioning, and front-door messages. |
+| `apps/web/app/api/_lib/manager.ts` | Shared proxy to Manager with internal token handling. |
+| `apps/web/app/agent/[employeeId]/page.tsx` | Authenticated owner Work Surface route. |
+| `apps/web/app/agent/[employeeId]/AgentClient.tsx` | Main Work Surface client: daily brief, job folders, notify/question/review cards, approvals, chat, SSE snapshot fallback. |
+| `apps/web/app/agent/[employeeId]/components/*` | Presentation components for approval cards, work cards, receipts, daily brief, and job folders. |
+| `apps/web/app/agent/[employeeId]/components/deliverables/index.tsx` | Deliverable-type renderers used by work cards. |
+| `apps/web/app/agent/[employeeId]/lib/group-by-job.ts` | Groups artifacts/events/invoices/reminders into owner-readable job folders. |
+| `apps/web/app/agent/[employeeId]/surface-types.ts` | Resource payload shape used by the Work Surface. |
+| `apps/web/app/agent/[employeeId]/surface.tokens.ts` | Work Surface visual tokens. |
+| `apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts` | Signed artifact/owner-session resolution route for PDFs and other outputs. |
+| `apps/web/app/api/employee/[employeeId]/resources/route.ts` | Loads Work Surface snapshot through Manager. |
+| `apps/web/app/api/employee/[employeeId]/events/route.ts` | SSE-shaped snapshot route; currently sends one snapshot and closes, with polling fallback. |
+| `apps/web/app/api/employee/[employeeId]/message/route.ts` | Sends owner webchat messages to the employee runtime through Manager. |
+| `apps/web/app/api/employee/[employeeId]/approval/resolve/route.ts` | Resolves Manager approval records from web. Same acceptance primitive as SMS/future voice. |
+
+### Manager app - backend control plane
+
+| Path | Feature connection |
+|---|---|
+| `apps/manager/src/server.ts` | Hono server entrypoint. Registers health, Manager tools, scheduler, claim consume, owner message routing, artifact/resource routes, webhooks, orchestrator, and provisioner. |
+| `apps/manager/src/orchestrator.ts` | Front-door onboarding orchestrator routes. Uses model adapter and manifest contract. |
+| `apps/manager/src/lib/orchestrator-model.ts` | OpenAI-compatible Chat Completions adapter with structured output fallback. |
+| `apps/manager/src/provisioner.ts` | Production-shaped `POST /provision` and profile/package provisioning flow. |
+| `apps/manager/src/lib/profile-renderer.ts` | Renders profile package params into Hermes profile files. |
+| `apps/manager/src/lib/runtime-backend.ts` | Runtime backend policy; Docker default, `local` dev/demo only. |
+| `apps/manager/src/lib/runtime.ts` | Runtime delivery helpers: owner message delivery and `wake_employee` event calls expecting `WorkEventDescriptor`. |
+| `apps/manager/src/lib/runtime-health.ts` | Runtime health snapshots for employee runtimes. |
+| `apps/manager/src/lib/scheduler-runner.ts` | Protected scheduler boundary for reminders, watch renewal, daily briefs, and runtime health checks. |
+| `apps/manager/src/tools/registry.ts` | Tool registry; fails if any shared `TOOL_NAMES` handler is missing. |
+| `apps/manager/src/tools/identity.stub.ts` | Phone verification, account creation, owner/session identity tools. |
+| `apps/manager/src/tools/provisioning.stub.ts` | `provision_employee`, provisioning status, profile package install/start seams. |
+| `apps/manager/src/tools/estimate.stub.ts` | Business brain, estimate artifact creation, PDF registration/storage/linking, approvals. |
+| `apps/manager/src/tools/gmail.stub.ts` | Gmail OAuth, token custody, connector test, draft/send, watch/history/PubSub handling, watch renewal. |
+| `apps/manager/src/tools/stripe.stub.ts` | Stripe Connect test-mode account, onboarding, deposit invoice, invoice send, webhook handling. |
+| `apps/manager/src/tools/events.stub.ts` | `send_employee_event`, reminders, daily briefs, scheduler-facing event/reminder tools. |
+| `apps/manager/src/tools/repair.stub.ts` | Repair queue operations: replay, relink, duplicate, redeliver, suppress, regenerate onboarding link. |
+| `apps/manager/src/tools/types.ts` | Tool handler/context types. |
+| `apps/manager/src/lib/employee-events.ts` | Central event delivery primitive: dedupe, triage, optional wake, descriptor binding, inbound event/message rows, SMS delivery. This is the current seam to be replaced/absorbed by Phase 3A router work. |
+| `apps/manager/src/lib/event-triage.ts` | Suppression, repair, batch-candidate decisions. |
+| `apps/manager/src/events/registry.ts` | Generic event-source registry seam. |
+| `apps/manager/src/webhooks/twilio.ts` | Twilio inbound SMS and signature boundary. |
+| `apps/manager/src/webhooks/gmail.ts` | Gmail/PubSub push verification and event entry. |
+| `apps/manager/src/webhooks/stripe.ts` | Stripe signed webhook verification and event entry. |
+| `apps/manager/src/lib/artifacts.ts` | Private Supabase Storage artifact upload and signed URL generation. |
+| `apps/manager/src/lib/audit.ts` | Safe audit-log writes. |
+| `apps/manager/src/lib/db.ts` | DB fault helpers and duplicate-insert handling. |
+| `apps/manager/src/lib/secrets.ts` | Secret sealing/reference handling. No raw provider tokens to model/browser/logs. |
+| `apps/manager/src/lib/signed-links.ts` | Claim/artifact signed-token mint/verify/hash helpers. |
+| `apps/manager/src/lib/owner-session.ts` | Owner web-session validation. |
+| `apps/manager/src/lib/twilio.ts` | Twilio Verify/SMS helpers. |
+| `apps/manager/src/lib/google-gmail.ts`, `gmail-tokens.ts`, `mime.ts`, `pubsub.ts`, `oauth-state.ts` | Gmail connector internals. |
+| `apps/manager/src/lib/signature.ts`, `stripe-signature.ts` | Provider signature/security helpers. |
+| `apps/manager/src/lib/entitlements.ts` | Default-allow feature/usage scaffolding for later monetization/paywalls. |
+
+### Shared contracts
+
+| Path | Feature connection |
+|---|---|
+| `packages/shared/src/tool-contracts.ts` | Full Manager tool surface and typed tool inputs. This is the contract shared by front door, employee, Manager, and tests. |
+| `packages/shared/src/work-events.ts` | Typed Work Surface descriptor contract: notify/question/review, deliverable type, acceptance grammar, SMS rendering. |
+| `packages/shared/src/manifest.ts` | Seven-question onboarding manifest and validation. |
+| `packages/shared/src/profile-package.ts` | Profile package keys and render/build parameter types. |
+| `packages/shared/src/routes.ts` | Shared Manager route builders. |
+| `packages/shared/src/event-types.ts` | Event source/type definitions. |
+| `packages/shared/src/envelope.ts` | Tool envelope success/failure shape. |
+| `packages/shared/src/ids.ts` | ID prefixes and `newId` helper. |
+| `packages/shared/src/index.ts` | Public export barrel. |
+
+### Database and migrations
+
+| Path | Feature connection |
+|---|---|
+| `packages/db/src/index.ts` | Supabase client exports for Manager/service/anon use. |
+| `packages/db/migrate.mjs` | Migration runner/status command. |
+| `packages/db/migrations/0001_init.sql` | Baseline schema: accounts, employees, onboarding, tools, events, artifacts, approvals, usage/audit, provider primitives. |
+| `packages/db/migrations/0002_rls.sql` | RLS posture and grants. |
+| `packages/db/migrations/0003_phase1_profile_packages.sql` | Profile packages and provisioning records. |
+| `packages/db/migrations/0004_phase2_artifacts.sql` | Artifact/storage/approval additions. |
+| `packages/db/migrations/0005_phase3_gmail.sql` | Gmail connector/watch/history/reply state. |
+| `packages/db/migrations/0006_phase5_reminders.sql` | Job commitments and reminders. |
+| `packages/db/migrations/0007_phase6_repair_and_jobs.sql` | Repair queue, job-run proof, source suppression, triage/batching, event-bus seams. |
+| `packages/db/migrations/0008_phase2_runtime_scheduler.sql` | Runtime health checks and scheduler job-run metadata. |
+| `packages/db/migrations/0009_phase5_reminder_idempotency.sql` | Reminder idempotency backstop. |
+| `packages/db/migrations/0010_phase3_inbound_event_dedupe.sql` | Unique inbound event idempotency key backstop for at-least-once webhooks. |
+
+### Hermes profile package
+
+| Path | Feature connection |
+|---|---|
+| `packages/agent-template/README.md` | Render contract and package layout. |
+| `packages/agent-template/SOUL.md` | Constant employee persona and SMS voice. |
+| `packages/agent-template/config.yaml` | Hermes profile config; includes rendered runtime backend token. |
+| `packages/agent-template/distribution.yaml` | Package metadata/distribution shape. |
+| `packages/agent-template/.env.tpl` | Per-profile env template; secrets by reference. |
+| `packages/agent-template/profile.params.example.yaml` | Example render params. |
+| `packages/agent-template/workspace/AGENTS.md` | Runtime policy loaded into employee workspace, including confirmation gates. |
+| `packages/agent-template/workspace/manager-tools.md` | Tool-call contract the employee uses to talk to Manager. |
+| `packages/agent-template/workspace/brain/business-brain.md` | Seed business brain; starts thin and is filled over time. |
+| `packages/agent-template/workspace/brain/customers.md` | Seed customer memory. |
+| `packages/agent-template/skills/estimate/SKILL.md` | Contractor estimate wedge skill; main MVP proof path. |
+| `packages/agent-template/skills/invoice/SKILL.md` | Invoice/deposit support skill. |
+| `packages/agent-template/skills/daily-checkin/SKILL.md` | Daily brief/check-in skill. |
+
+### Infra, ops, and acceptance
+
+| Path | Feature connection |
+|---|---|
+| `infra/caddy/Caddyfile`, `infra/caddy/client-snippet.tpl` | Host routing for web, Manager, and per-employee gateways. |
+| `infra/hermes/RUNBOOK.md` | Hermes install/smoke/run guidance. |
+| `infra/scripts/README.md` | Ops script index. |
+| `infra/scripts/acceptance/preflight.mjs` | Phase 1 acceptance env/proof readiness matrix. |
+| `infra/scripts/acceptance/report.mjs` | Runs all 8 verifiers and writes gitignored reports. |
+| `infra/scripts/acceptance/run1-db-rls.mjs` | Supabase/RLS acceptance verifier. |
+| `infra/scripts/acceptance/run2-provision.mjs` | Provisioning/runtime acceptance verifier. |
+| `infra/scripts/acceptance/run3-artifact.mjs` | Artifact/storage/signed-link verifier. |
+| `infra/scripts/acceptance/run4-gmail.mjs` | Gmail/PubSub verifier. |
+| `infra/scripts/acceptance/run5-stripe.mjs` | Stripe Connect/invoice/webhook verifier. |
+| `infra/scripts/acceptance/run6-reminder.mjs` | Reminder/scheduler verifier. |
+| `infra/scripts/acceptance/run7-repair-eventbus.mjs` | Repair/event-bus verifier. |
+| `infra/scripts/acceptance/run8-security.mjs` | Forged-request/security verifier. |
+| `infra/scripts/scheduler-tick.mjs` | Dev/manual scheduler fallback through Manager. |
+| `infra/scripts/hermes-jobs-runner.mjs` | Production-oriented Hermes Jobs scheduler entrypoint. |
+| `infra/scripts/healthcheck.mjs` | Runtime health persistence and endpoint health update. |
+| `infra/scripts/number-pool.mjs` | Twilio number inventory/status. |
+| `infra/scripts/repair.mjs` | Repair ops wrapper. |
+| `infra/scripts/provisioner-health.mjs`, `profile-validate.mjs`, `hermes-smoke.mjs`, `phase01-proof.mjs` | Provisioning/profile/Hermes/proof helpers. |
+
+### Tests and proof docs
+
+| Path | Feature connection |
+|---|---|
+| `tests/unit/` | Unit coverage for contracts, security helpers, Manager tools, provider helpers, event bus, reminders, scheduler, runtime backend, Work Surface grouping. Mocks are allowed here. |
+| `tests/integration/rls-cross-account.test.ts` | Env-gated live Supabase RLS/cross-account denial. |
+| `tests/integration/security-live.test.ts` | Env-gated live security boundary checks. |
+| `tests/golden-path/step1-create-employee.md` | Manual acceptance script for create employee. |
+| `tests/golden-path/step2-estimate-artifact.md` | Manual acceptance script for estimate artifact. |
+| `tests/golden-path/step3-gmail-reply-loop.md` | Manual acceptance script for Gmail reply loop. |
+| `tests/golden-path/step4-stripe-deposit.md` | Manual acceptance script for Stripe deposit. |
+| `tests/golden-path/step5-reply-paid-to-reminder.md` | Manual acceptance script for reply/paid/reminder close loop. |
+| `tests/golden-path/step6-repair-and-event-bus.md` | Manual acceptance script for repair/event bus. |
+| `tests/golden-path/step7-security.md` | Manual acceptance script for security. |
+
+### Docs and memory
+
+| Path | Role |
+|---|---|
+| `docs/admin-system-architecture.md` | Planned admin/operator architecture. |
+| `docs/admin-system-implementation-plan.md` | Planned admin implementation sequence. |
+| `docs/metering-architecture.md` | Planned production metering architecture. |
+| `docs/metering-implementation-plan.md` | Planned metering implementation sequence. |
+| `memory/MEMORY.md` | Durable memory writing protocol and handoff index. |
+| `memory/YYYY-MM-DD-HHMM-*.md` | Dated agentic-dev handoffs and architectural decisions. |
+
+## 7. Feature graph
+
+### Front door, claim, account, provisioning
+
+```text
+apps/web/app/create-ai-employee/page.tsx
+  -> apps/web/app/api/front-door/*
+  -> apps/manager/src/orchestrator.ts
+  -> apps/manager/src/lib/orchestrator-model.ts
+  -> packages/shared/src/manifest.ts
+  -> apps/manager/src/tools/identity.stub.ts
+  -> apps/manager/src/tools/provisioning.stub.ts
+  -> apps/manager/src/provisioner.ts
+  -> apps/manager/src/lib/profile-renderer.ts
+  -> packages/agent-template/*
+  -> packages/db/migrations/0003_phase1_profile_packages.sql
+```
+
+End-user result: owner answers onboarding questions, verifies phone, creates account, and receives a live employee.
+
+### Owner webchat and SMS runtime messages
+
+```text
+apps/web/app/agent/[employeeId]/AgentClient.tsx
+  -> apps/web/app/api/employee/[employeeId]/message/route.ts
+  -> apps/manager/src/server.ts /manager/employee/:employeeId/message
+  -> apps/manager/src/lib/owner-session.ts
+  -> apps/manager/src/lib/runtime.ts deliverToRuntime()
+  -> Hermes employee runtime
+
+apps/manager/src/webhooks/twilio.ts
+  -> apps/manager/src/lib/runtime.ts deliverToRuntime()
+  -> Hermes employee runtime
+```
+
+Current gap: output routing is not yet governed by the planned Channel/Session/Presence router.
+
+### Estimate artifact and approval
+
+```text
+Hermes employee package skills/estimate/SKILL.md
+  -> workspace/manager-tools.md
+  -> apps/manager/src/tools/estimate.stub.ts
+  -> apps/manager/src/lib/artifacts.ts
+  -> packages/db/migrations/0004_phase2_artifacts.sql
+  -> apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts
+  -> apps/web/app/api/employee/[employeeId]/approval/resolve/route.ts
+```
+
+End-user result: the owner sees a PDF/link and approves customer-facing actions before anything leaves the business.
+
+### Gmail reply loop
+
+```text
+apps/manager/src/tools/gmail.stub.ts
+  -> apps/manager/src/lib/google-gmail.ts / gmail-tokens.ts / mime.ts / pubsub.ts
+  -> apps/manager/src/webhooks/gmail.ts
+  -> apps/manager/src/lib/employee-events.ts
+  -> packages/shared/src/work-events.ts
+  -> apps/web/app/agent/[employeeId]/AgentClient.tsx
+```
+
+End-user result: real customer replies become owner-readable work events, not raw webhook payloads.
+
+### Stripe deposit loop
+
+```text
+apps/manager/src/tools/stripe.stub.ts
+  -> apps/manager/src/webhooks/stripe.ts
+  -> apps/manager/src/lib/stripe-signature.ts
+  -> apps/manager/src/lib/employee-events.ts
+  -> packages/shared/src/work-events.ts
+  -> Work Surface / SMS event rendering
+```
+
+End-user result: approved test-mode deposit invoice actions and paid-invoice events enter the employee loop.
+
+### Reminders, scheduler, daily briefs
+
+```text
+apps/manager/src/tools/events.stub.ts
+  -> apps/manager/src/lib/scheduler-runner.ts
+  -> infra/scripts/scheduler-tick.mjs
+  -> infra/scripts/hermes-jobs-runner.mjs
+  -> packages/db/migrations/0006_phase5_reminders.sql
+  -> packages/db/migrations/0008_phase2_runtime_scheduler.sql
+```
+
+End-user result: the employee can set/fires internal reminders and generate daily brief records; runtime acceptance
+still needs real Hermes job proof.
+
+### Event mesh, repair, and future session routing
+
+```text
+provider/internal/source event
+  -> apps/manager/src/webhooks/* OR scheduler/tools
+  -> apps/manager/src/events/registry.ts
+  -> apps/manager/src/lib/employee-events.ts
+  -> apps/manager/src/lib/event-triage.ts
+  -> apps/manager/src/tools/repair.stub.ts
+  -> packages/shared/src/work-events.ts
+  -> apps/web/app/agent/[employeeId]/*
+```
+
+Forward work:
+
+```text
+Phase 3 generic ingress
+  -> Phase 3A Channel/Session/Presence router
+  -> Phase 4 live Hermes wake path + descriptors
+  -> Phase 5 triage/batching/live Work Surface stream
+```
+
+The planned router should own presence, standing preferences, active-session-wins routing, cross-channel dedupe,
+delivery-decision proof rows, and one acceptance primitive across SMS/web/voice.
+
+## 8. Planned phase map
+
+| Phase | Status | Code/docs to inspect first |
+|---|---|---|
+| 0 Baseline | source-wired | `README.md`, implementation records, existing apps/packages. |
+| 1 Provider/runtime acceptance | harness source-wired, live pending | `infra/scripts/acceptance/*`, `../wiki/MVP/build-plan-current/03-provider-runtime-acceptance-plan.md`. |
+| 2 Runtime/scheduler productionization | source-wired, runtime pending | `runtime-backend.ts`, `runtime-health.ts`, `scheduler-runner.ts`, `infra/scripts/hermes-jobs-runner.mjs`. |
+| 3 Generic ingress/event routing | planned | `employee-events.ts`, `events/registry.ts`, `event-triage.ts`, migration `0010`, phase doc. |
+| 3A Channel/Session/Presence | planned; current priority | `../wiki/MVP/agent-inbox-and-channel-architecture.md`, `phase-03a-channel-session-presence-layer.md`, web/SMS message routes. |
+| 4 Live wake path/descriptors | planned | `runtime.ts`, `work-events.ts`, `employee-events.ts`. |
+| 5 Triage/batching/live stream | planned | `event-triage.ts`, Work Surface SSE route, Work Surface client. |
+| 6-8 Metering | planned | `docs/metering-*.md`, `entitlements.ts`, `usage_events`, `feature_checks`, `audit_log`. |
+| 9-10 Admin | planned | `docs/admin-*.md`, provisioning/runtime health tables. |
+| 11 Billing scaffold | planned | Admin docs; keep separate from owner Stripe Connect payments. |
+| 12 LLM provider registry | planned | Orchestrator model adapter and metering/admin plans. |
+| 13 1000-user operations | planned | Admin, metering, billing, provider registry, ops scripts. |
+
+## 9. Local verification commands
+
+Baseline checks from `CLAUDE.md`:
+
+```bash
+npm run typecheck
+npm run test:unit
+npm run build
+npm run lint
+npm run test:integration
+npm run acceptance:preflight
+npm run acceptance:report
+```
+
+Expected local truth as of the current records: typecheck/build/lint pass, 25 unit files / 124 tests pass,
+integration skips cleanly without live Supabase creds, acceptance reports no fabricated proof until live env exists.
+
+## 10. Update rules
+
+Update this file when:
+
+- a new source directory, major route, tool group, migration family, script family, or test family is added;
+- phase status changes from planned/pending to source-wired/provider-accepted/runtime-accepted;
+- the Hermes/session/channel model changes;
+- `README.md`, `../CODEGRAPH.md`, or `../wiki/MVP/build-plan-current/` changes the canonical build state.
+
+For substantial implementation work, also update `memory/` per `memory/MEMORY.md` and the factual
+implementation records under `../wiki/MVP/implementation-records/` when code state changes.

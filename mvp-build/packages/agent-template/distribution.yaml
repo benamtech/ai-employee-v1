@@ -1,0 +1,25 @@
+name: contractor_estimator
+display_name: Contractor Estimator
+version: 0.1.0
+description: "AMTECH employee package optimized for painting and landscaping estimate workflows."
+hermes_requires: ">=0.12.0"
+template_source:
+  name: codegraphtheory/hermes-profile-template
+  url: https://github.com/codegraphtheory/hermes-profile-template
+  relationship: inspired-by-template-discipline
+distribution_owned:
+  - SOUL.md
+  - config.yaml
+  - workspace/AGENTS.md
+  - workspace/brain/
+  - skills/
+  - distribution.yaml
+  - profile.params.example.yaml
+env_requires:
+  - name: ANTHROPIC_API_KEY
+    description: Employee model provider key.
+    required: true
+default_skills:
+  - estimate
+  - invoice
+  - daily-checkin
