@@ -53,8 +53,23 @@ async function twilioGet(path: string, params: Record<string, string> = {}): Pro
   return json;
 }
 
+/**
+ * Dev-only phone-verify bypass (the local no-SMS analog of PROVISIONER_SKIP_SMS).
+ * The FULL onboarding flow still runs — send-code, enter-code, check-code, the
+ * verified_phones row — only the Twilio Verify API call is stubbed. Fails CLOSED
+ * in production: ignored unless NODE_ENV!=production AND TWILIO_VERIFY_DEV_BYPASS=1.
+ */
+function verifyDevCode(): string | null {
+  if (process.env.NODE_ENV === "production") return null;
+  if (process.env.TWILIO_VERIFY_DEV_BYPASS !== "1") return null;
+  return process.env.TWILIO_VERIFY_DEV_CODE ?? "000000";
+}
+
 /** Start phone verification. Proof = verification SID. */
 export async function startVerification(phoneE164: string): Promise<{ sid: string; status: string }> {
+  if (verifyDevCode() !== null) {
+    return { sid: `dev-verify-${Date.now()}`, status: "pending" };
+  }
   const service = process.env.TWILIO_VERIFY_SERVICE_SID;
   if (!service) throw new Error("TWILIO_VERIFY_SERVICE_SID missing.");
   const json = await twilioPost(
@@ -69,6 +84,11 @@ export async function checkVerification(
   phoneE164: string,
   code: string,
 ): Promise<{ status: string; valid: boolean }> {
+  const devCode = verifyDevCode();
+  if (devCode !== null) {
+    const valid = code === devCode;
+    return { status: valid ? "approved" : "denied", valid };
+  }
   const service = process.env.TWILIO_VERIFY_SERVICE_SID;
   if (!service) throw new Error("TWILIO_VERIFY_SERVICE_SID missing.");
   const json = await twilioPost(

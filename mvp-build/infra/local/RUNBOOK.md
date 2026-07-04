@@ -34,10 +34,12 @@ docker ps                       # must work without sudo
 docker build -t hermes-agent ~/.hermes/hermes-agent
 ```
 
-**Hermes model/provider** must be configured so the agent can actually reply.
-You already have OpenRouter + OpenAI keys in `~/.hermes/.env`; confirm a default
-model is set (`hermes model`). The per-employee container copies `~/.hermes/config.yaml`
-+ those provider keys, so it inherits your working setup.
+**Provider key (OpenRouter — AMTECH's master account).** Both the front-door
+onboarding orchestrator AND the employee's Hermes model call an LLM, so you need
+one working key. Create an OpenRouter account (free credits available), copy the
+`sk-or-...` key, and set `OPENROUTER_API_KEY` in `.env`. The per-employee container
+carries this key in via its home `.env`; the orchestrator falls back to it too.
+(StepFun via a Nous Portal account is an alternative provider for later.)
 
 **Supabase** — project `amtech-ai-employee-mvp` (`uxuruijrgghshfwnaagb`) is created.
 From the dashboard grab two secrets:
@@ -51,7 +53,7 @@ From the dashboard grab two secrets:
 ```
 cd mvp-build
 cp .env.local.example .env
-# edit .env: paste SUPABASE_SERVICE_ROLE_KEY and DATABASE_URL
+# edit .env: paste SUPABASE_SERVICE_ROLE_KEY, DATABASE_URL, and OPENROUTER_API_KEY
 cp apps/web/.env.local.example apps/web/.env.local   # matches MANAGER_INTERNAL_TOKEN
 ```
 
@@ -92,44 +94,52 @@ Sanity: `curl -s localhost:8080/health` → `{"status":"ok",...}`.
 
 ---
 
-## 3. Provision one employee (real tool, no SMS)
+## 3. Onboard an employee (the REAL front door, no SMS)
 
-In T4:
+This runs the actual onboarding — the conversational orchestrator builds the
+manifest, not a hardcoded script. Phone verification runs the full flow but the
+Twilio Verify call is stubbed (`TWILIO_VERIFY_DEV_BYPASS=1`); any code equal to
+`TWILIO_VERIFY_DEV_CODE` (default `000000`) passes.
+
+**Option A — the onboarding form (most production-faithful).** Open
+`http://localhost:3000/create-ai-employee`:
+1. Chat with the front door: describe the business, the repeat work, money shape,
+   what to name the assistant. Watch the manifest fill in the panel.
+2. Enter a phone (any E.164, e.g. `+15705550123`) → **Send code**.
+3. Enter `000000` → **Check code**.
+4. Enter email + password → **Create account** (sets your owner session cookie).
+5. **Provision employee** → the real tool renders the profile, writes the Caddy
+   snippet, and starts the employee's Hermes container.
+
+**Option B — headless, repeatable (same endpoints).** In T4:
 ```
-node infra/scripts/local/bootstrap.mjs
+node infra/scripts/local/onboard.mjs
 ```
-This inserts a verified phone (bypassing Twilio Verify), runs `create_account`
-and `provision_employee`, and starts the employee's Hermes container via
-`infra/scripts/hermes-runtime-docker.sh`. It prints:
-- `employee_id`
-- `owner_session_token`
-- Work Surface URL: `http://localhost:3000/agent/<employee_id>`
-- a ready-to-run terminal-chat command
+Drives a scripted owner conversation through the real front door end-to-end and
+prints the `employee_id`, `owner_session_token`, and Work Surface URL.
 
 Check the container:
 ```
 docker ps | grep hermes-        # hermes-<employee_id> should be Up
-curl -s -H "Authorization: Bearer <api_key>" http://127.0.0.1:<port>/health
+docker logs hermes-<employee_id> | tail
 ```
-(`<port>`/key are in the container's data dir `~/amtech-local/clients/<emp>/hermes-home/.env`.)
+(port + key are in `~/amtech-local/clients/<emp>/hermes-home/.env`.)
 
 ---
 
 ## 4. Use it
 
-**Terminal** (fastest first proof) — the command bootstrap printed, e.g.:
+**Terminal** (fastest proof) — the command `onboard.mjs` printed, e.g.:
 ```
 OWNER_SESSION_TOKEN='ow_...' EMPLOYEE_ID='emp_...' \
   MANAGER_INTERNAL_TOKEN='...' node infra/scripts/local/chat.mjs "hi, what can you do?"
 ```
 A real LLM reply = the whole spine works.
 
-**Browser (Work Surface):**
-1. Open `http://localhost:3000`.
-2. Set the session cookie (DevTools → Application → Cookies → `http://localhost:3000`):
-   name `amtech_owner_session`, value = the `owner_session_token` from bootstrap.
-3. Open `http://localhost:3000/agent/<employee_id>` and chat. Messages route through
-   the same Manager path; replies render on the Work Surface.
+**Browser (Work Surface):** if you onboarded via Option A in this browser, the
+session cookie is already set — just open `http://localhost:3000/agent/<employee_id>`.
+For Option B, set cookie `amtech_owner_session` = the printed `owner_session_token`
+(DevTools → Application → Cookies → `http://localhost:3000`), then open the URL and chat.
 
 ---
 
@@ -143,8 +153,10 @@ A real LLM reply = the whole spine works.
   re-provisioned, restart from a clean `~/amtech-local/clients/<emp>`.
 - **Manager 401** → `MANAGER_INTERNAL_TOKEN` in `.env` and `apps/web/.env.local` must match.
 - **DB errors** → confirm `npm run db:status` shows all 15 migrations applied.
+- **Onboarding chat errors** → the orchestrator LLM call failed. Check `OPENROUTER_API_KEY`
+  is set and the model in `ORCHESTRATOR_MODEL` is available; try `ORCHESTRATOR_MODEL=openrouter/auto`.
 - **Reset a run** → `docker rm -f hermes-<emp>` and delete `~/amtech-local/clients/<emp>`,
-  then re-run bootstrap (it makes a fresh account each time).
+  then re-onboard (each run makes a fresh account).
 
 ---
 

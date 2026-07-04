@@ -100,8 +100,10 @@ function sourcedFactSchema(): Record<string, unknown> {
 }
 
 export function orchestratorModelConfig(env: NodeJS.ProcessEnv = process.env): OrchestratorModelConfig {
-  const apiKey = env.ORCHESTRATOR_API_KEY ?? env.XAI_API_KEY ?? env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("ORCHESTRATOR_API_KEY, XAI_API_KEY, or OPENAI_API_KEY missing.");
+  // OpenRouter is AMTECH's default master provider (one account fronts many
+  // upstream models). Fall back to xAI/OpenAI keys if that's what's configured.
+  const apiKey = env.ORCHESTRATOR_API_KEY ?? env.OPENROUTER_API_KEY ?? env.XAI_API_KEY ?? env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("ORCHESTRATOR_API_KEY, OPENROUTER_API_KEY, XAI_API_KEY, or OPENAI_API_KEY missing.");
   const responseFormat =
     env.ORCHESTRATOR_RESPONSE_FORMAT === "none" || env.ORCHESTRATOR_RESPONSE_FORMAT === "json_object"
       ? env.ORCHESTRATOR_RESPONSE_FORMAT
@@ -109,8 +111,8 @@ export function orchestratorModelConfig(env: NodeJS.ProcessEnv = process.env): O
 
   return {
     apiKey,
-    baseUrl: (env.ORCHESTRATOR_API_BASE_URL ?? "https://api.openai.com/v1").replace(/\/$/, ""),
-    model: env.ORCHESTRATOR_MODEL ?? "gpt-4.1",
+    baseUrl: (env.ORCHESTRATOR_API_BASE_URL ?? "https://openrouter.ai/api/v1").replace(/\/$/, ""),
+    model: env.ORCHESTRATOR_MODEL ?? "openrouter/auto",
     maxTokens: Number(env.ORCHESTRATOR_MAX_TOKENS ?? 1200),
     temperature: Number(env.ORCHESTRATOR_TEMPERATURE ?? 0.2),
     responseFormat,

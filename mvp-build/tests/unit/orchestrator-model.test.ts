@@ -6,14 +6,23 @@ import {
 } from "../../apps/manager/src/lib/orchestrator-model";
 
 describe("orchestrator model adapter", () => {
-  it("uses OpenAI-compatible defaults with OPENAI_API_KEY fallback", () => {
+  it("defaults to OpenRouter (AMTECH master provider) with OPENAI_API_KEY fallback", () => {
     const config = orchestratorModelConfig({
       OPENAI_API_KEY: "sk-test",
     });
     expect(config.apiKey).toBe("sk-test");
-    expect(config.baseUrl).toBe("https://api.openai.com/v1");
-    expect(config.model).toBe("gpt-4.1");
+    expect(config.baseUrl).toBe("https://openrouter.ai/api/v1");
+    expect(config.model).toBe("openrouter/auto");
     expect(config.responseFormat).toBe("json_schema");
+  });
+
+  it("prefers OPENROUTER_API_KEY over legacy provider keys", () => {
+    const config = orchestratorModelConfig({
+      OPENROUTER_API_KEY: "sk-or-test",
+      OPENAI_API_KEY: "sk-openai",
+    });
+    expect(config.apiKey).toBe("sk-or-test");
+    expect(config.baseUrl).toBe("https://openrouter.ai/api/v1");
   });
 
   it("accepts XAI_API_KEY for Grok OpenAI-compatible deployments", () => {
