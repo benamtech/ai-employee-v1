@@ -3,6 +3,7 @@ import type {
   HermesCapabilities,
   HermesChatResponse,
   HermesHealth,
+  HermesSessionCreateResponse,
 } from "@amtech/shared";
 import { openSecret } from "./secrets.js";
 import { orThrow } from "./db.js";
@@ -101,11 +102,16 @@ export function supportsSessionChat(capabilities: HermesCapabilities | null): bo
 }
 
 export function supportsRuns(capabilities: HermesCapabilities | null): boolean {
-  return featureEnabled(capabilities, ["runs", "run", "/v1/runs"]);
+  return featureEnabled(capabilities, ["run_submission", "run_status", "runs", "run", "/v1/runs"]);
 }
 
 export function supportsSessionKey(capabilities: HermesCapabilities | null): boolean {
-  return featureEnabled(capabilities, ["session_key", "session_key_header", "x_hermes_session_key", "X-Hermes-Session-Key"]);
+  // Real Hermes advertises the session-key header as a string value
+  // (features.session_key_header === "X-Hermes-Session-Key"), not a boolean flag.
+  const features = capabilities?.features ?? {};
+  const header = features["session_key_header"];
+  if (typeof header === "string" && header.length > 0) return true;
+  return featureEnabled(capabilities, ["session_key", "x_hermes_session_key", "X-Hermes-Session-Key"]);
 }
 
 export async function resolveRuntimeApi(db: SupabaseClient, employeeId: string): Promise<RuntimeApi> {
@@ -203,7 +209,12 @@ export function invalidateRuntimeCapabilities(api: Pick<RuntimeApi, "runtime_end
 
 function textFromJson(json: HermesChatResponse | HermesRunCreateResponse | HermesRunStatusResponse): string | undefined {
   const nested = "result" in json ? json.result : undefined;
-  return json.output ?? json.text ?? json.message ?? json.response ??
+  // Real Hermes session-chat returns message as an object { role, content }; earlier
+  // shapes returned a plain string. Handle both.
+  const msg = json.message;
+  const msgText = typeof msg === "string" ? msg
+    : (msg && typeof msg === "object" ? (msg as { content?: string }).content : undefined);
+  return json.output ?? json.text ?? msgText ?? json.response ??
     nested?.output ?? nested?.text ?? nested?.message ?? nested?.response;
 }
 
@@ -230,9 +241,10 @@ export async function ensureCanonicalSession(api: RuntimeApi): Promise<string> {
     body: JSON.stringify({ id: api.sessionId, title: "AMTECH owner thread" }),
   });
   if (res.status === 409) return api.sessionId;
-  const json = (await res.json().catch(() => ({}))) as { id?: string; session_id?: string; error?: string };
+  const json = (await res.json().catch(() => ({}))) as HermesSessionCreateResponse;
   if (!res.ok) throw new Error(json.error ?? classifyRuntimeError(res.status));
-  return json.session_id ?? json.id ?? api.sessionId;
+  // Real Hermes nests the id under `session`; keep the flat fallbacks for other shapes.
+  return json.session?.id ?? json.session_id ?? json.id ?? api.sessionId;
 }
 
 export async function chatTurn(api: RuntimeApi, input: { input: string; system_message?: string }): Promise<{ text: string; usage?: Record<string, unknown> }> {

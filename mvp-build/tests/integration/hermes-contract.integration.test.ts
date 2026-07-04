@@ -30,6 +30,13 @@ function hasFeature(capabilities: any, names: string[]): boolean {
   return names.some((name) => features[name] === true || Boolean(endpoints[name]) || Object.values(endpoints).some((v) => typeof v === "string" && v.includes(name)));
 }
 
+// Real Hermes advertises session-key support as a string-valued header name, not a boolean flag.
+function hasSessionKey(capabilities: any): boolean {
+  const header = capabilities?.features?.session_key_header;
+  if (typeof header === "string" && header.length > 0) return true;
+  return hasFeature(capabilities, ["session_key", "X-Hermes-Session-Key"]);
+}
+
 describe.skipIf(!hasHermes)("Hermes v0.18 API Server contract", () => {
   it("proves auth, capabilities, Sessions fallback, and Runs when advertised", async () => {
     const health = await hermes("/health");
@@ -46,17 +53,27 @@ describe.skipIf(!hasHermes)("Hermes v0.18 API Server contract", () => {
         body: JSON.stringify({ id: sessionId, title: "AMTECH contract test" }),
       });
       expect([200, 201, 409]).toContain(session.status);
+      if (session.ok) {
+        // Real Hermes nests the created id under `session`.
+        const sessionJson = await session.json();
+        expect(sessionJson.session?.id ?? sessionJson.session_id ?? sessionJson.id).toBeTruthy();
+      }
       const chat = await hermes(`/api/sessions/${encodeURIComponent(sessionId)}/chat`, {
         method: "POST",
         body: JSON.stringify({ input: "Reply with only: ok" }),
       });
       expect(chat.ok).toBe(true);
+      // Real session-chat returns text at message.content (message is an object).
+      const chatJson = await chat.json();
+      const msg = chatJson.message;
+      const text = typeof msg === "string" ? msg : msg?.content;
+      expect(text ?? chatJson.output ?? chatJson.text ?? chatJson.response).toBeTruthy();
     }
 
-    if (hasFeature(caps, ["runs", "/v1/runs"])) {
+    if (hasFeature(caps, ["run_submission", "run_status", "runs", "/v1/runs"])) {
       const run = await hermes("/v1/runs", {
         method: "POST",
-        headers: hasFeature(caps, ["session_key", "session_key_header", "X-Hermes-Session-Key"]) ? { "X-Hermes-Session-Key": sessionKey } : {},
+        headers: hasSessionKey(caps) ? { "X-Hermes-Session-Key": sessionKey } : {},
         body: JSON.stringify({ input: "Reply with only: ok", session_id: sessionId }),
       });
       expect(run.ok).toBe(true);

@@ -4,6 +4,8 @@ export interface HermesSessionCreateRequest {
 }
 
 export interface HermesSessionCreateResponse {
+  // Real Hermes nests the created id under `session`.
+  session?: { id?: string };
   id?: string;
   session_id?: string;
   error?: string;
@@ -17,7 +19,8 @@ export interface HermesChatRequest {
 export interface HermesChatResponse {
   output?: string;
   text?: string;
-  message?: string;
+  // Real Hermes session-chat returns message as an object { role, content }.
+  message?: string | { role?: string; content?: string };
   response?: string;
   usage?: {
     input_tokens?: number;
@@ -57,7 +60,9 @@ export interface HermesCapabilities {
   platform?: string;
   model?: string;
   auth?: Record<string, unknown>;
-  features?: Record<string, boolean>;
+  // Real Hermes mixes boolean flags with string-valued *_header entries
+  // (e.g. session_key_header: "X-Hermes-Session-Key").
+  features?: Record<string, boolean | string>;
   endpoints?: Record<string, string>;
 }
 

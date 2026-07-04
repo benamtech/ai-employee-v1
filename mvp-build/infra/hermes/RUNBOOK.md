@@ -45,6 +45,15 @@ For judgment events, Manager talks to the per-employee Hermes API Server with be
 when Sessions chat is advertised. Manager sends `X-Hermes-Session-Key` on v1 calls when Hermes advertises
 session-key support; the key is account+employee scoped and stored on `runtime_endpoints.api_session_key`.
 
+Capability flag names (verified against `NousResearch/hermes-agent`, `gateway/platforms/api_server.py`):
+the `/v1/capabilities` `features` map exposes booleans `run_submission`, `run_status`, `run_events_sse`,
+`run_stop`, `run_approval_response`, and `session_chat`, plus **string-valued** `session_key_header`
+(`"X-Hermes-Session-Key"`) and `session_continuity_header` (`"X-Hermes-Session-Id"`) — session-key support
+is detected by the presence of the string header name, not a boolean flag. `POST /v1/runs` reads a raw
+JSON body and **ignores unknown fields** (does not reject them). `POST /api/sessions` returns the created
+id nested under `session` (`{"session":{"id":…}}`), and `POST /api/sessions/{id}/chat` returns assistant
+text at `message.content` (message is an object, not a top-level string).
+
 The profile `.env` must set `API_SERVER_ENABLED=true`, `API_SERVER_KEY`, `API_SERVER_PORT`, and
 `API_SERVER_HOST=127.0.0.1`; Manager stores only the sealed API key reference. Hermes must return JSON
 that Manager parses into a validated `WorkEventDescriptor`; invalid descriptors go to the repair queue,

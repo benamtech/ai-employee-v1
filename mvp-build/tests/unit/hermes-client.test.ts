@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { chatTurn, executeHermesTurn, getCapabilities, getHealth, invalidateRuntimeCapabilities, resolveRuntimeApi } from "../../apps/manager/src/lib/hermes-client";
+import { chatTurn, ensureCanonicalSession, executeHermesTurn, getCapabilities, getHealth, invalidateRuntimeCapabilities, resolveRuntimeApi, supportsRuns, supportsSessionKey } from "../../apps/manager/src/lib/hermes-client";
 import { sealSecret } from "../../apps/manager/src/lib/secrets";
 import { makeFakeDb } from "./_helpers/fake-supabase";
 import { routerFetch } from "./_helpers/fetch-mock";
@@ -89,6 +89,16 @@ describe("hermes-client chatTurn", () => {
     });
   }
 
+  it("extracts reply text from a real session-chat message.content object", async () => {
+    vi.stubGlobal("fetch", routerFetch([
+      { match: "/v1/capabilities", body: { features: { session_chat: true } } },
+      { match: "/chat", body: { message: { role: "assistant", content: " hello " } } },
+      { match: "/api/sessions", body: { session: { id: "sess_1" } } },
+    ]));
+    const res = await chatTurn(api(), { input: "hi" });
+    expect(res.text).toBe("hello");
+  });
+
   it("tolerates a 409 from ensureCanonicalSession", async () => {
     vi.stubGlobal("fetch", routerFetch([
       { match: "/v1/capabilities", body: { features: { session_chat: true } } },
@@ -141,7 +151,8 @@ describe("hermes-client executeHermesTurn", () => {
       calls.push({ url: String(url), headers: new Headers(init.headers) });
       const u = String(url);
       if (u.includes("/v1/capabilities")) {
-        return new Response(JSON.stringify({ features: { runs: true, session_key: true } }), { status: 200, headers: { "Content-Type": "application/json" } });
+        // Real Hermes capability shape: run_submission boolean + string-valued session_key_header.
+        return new Response(JSON.stringify({ features: { run_submission: true, run_status: true, session_key_header: "X-Hermes-Session-Key" } }), { status: 200, headers: { "Content-Type": "application/json" } });
       }
       if (u.endsWith("/v1/runs")) {
         return new Response(JSON.stringify({ run_id: "hrun_1", status: "succeeded", output: " done " }), { status: 200, headers: { "Content-Type": "application/json" } });
@@ -175,5 +186,27 @@ describe("hermes-client executeHermesTurn", () => {
     ]));
 
     await expect(executeHermesTurn(api(), { input: "hi" })).rejects.toThrow("runtime_capability_missing:session_chat");
+  });
+});
+
+describe("hermes-client capability predicates (real Hermes shape)", () => {
+  it("supportsSessionKey is true when session_key_header is the string header name", () => {
+    expect(supportsSessionKey({ features: { session_key_header: "X-Hermes-Session-Key" } })).toBe(true);
+  });
+
+  it("supportsSessionKey is false when the string header is empty and no boolean flag", () => {
+    expect(supportsSessionKey({ features: { session_key_header: "" } })).toBe(false);
+    expect(supportsSessionKey({ features: {} })).toBe(false);
+  });
+
+  it("supportsRuns is true for the real run_submission flag", () => {
+    expect(supportsRuns({ features: { run_submission: true, run_status: true } })).toBe(true);
+  });
+
+  it("ensureCanonicalSession returns the id nested under session", async () => {
+    vi.stubGlobal("fetch", routerFetch([
+      { match: "/api/sessions", body: { object: "hermes.session", session: { id: "sess_real" } } },
+    ]));
+    expect(await ensureCanonicalSession(api())).toBe("sess_real");
   });
 });
