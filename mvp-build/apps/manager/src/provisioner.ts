@@ -31,6 +31,16 @@ function employeeNumber(): string {
   return number;
 }
 
+/**
+ * Dev-only escape hatch for the VPS-faithful local loop: provision the real
+ * profile → Caddy → Docker runtime, but skip the Twilio SMS webhook + first-SMS
+ * (no 10DLC number locally). Fails CLOSED in production — the flag is ignored
+ * when NODE_ENV=production, so a real deploy always wires SMS.
+ */
+function smsProvisioningDisabled(): boolean {
+  return process.env.NODE_ENV !== "production" && process.env.PROVISIONER_SKIP_SMS === "1";
+}
+
 export function registerProvisionerRoutes(app: Hono): void {
   app.get("/provision/health", (c) => c.json({ status: "ok" }));
 
@@ -45,19 +55,31 @@ export function registerProvisionerRoutes(app: Hono): void {
       const caddy = await writeCaddySnippet(req.params);
       logs.push(`caddy:${caddy}`);
 
-      const smsNumber = employeeNumber();
-      const webhook = await setIncomingSmsWebhook(smsNumber, req.params.webhook_url);
-      logs.push(`twilio_webhook:${webhook.phone_number_sid}`);
+      const skipSms = smsProvisioningDisabled();
+      let smsNumber: string | undefined;
+      let firstSmsSid: string | undefined;
+      if (skipSms) {
+        logs.push("sms:skipped (PROVISIONER_SKIP_SMS=1, dev local loop)");
+      } else {
+        smsNumber = employeeNumber();
+        const webhook = await setIncomingSmsWebhook(smsNumber, req.params.webhook_url);
+        logs.push(`twilio_webhook:${webhook.phone_number_sid}`);
+      }
 
+      // Start the per-employee Hermes runtime (Docker container in the VPS-faithful
+      // path) BEFORE the first SMS, so "I'm live" only fires once the agent is up.
       const runtime = await runRuntimeStart(rendered.generated_path);
       logs.push(`runtime:${runtime}`);
 
-      const first = await sendSms({
-        to: req.params.owner_phone_e164,
-        from: smsNumber,
-        body: "I'm live. Text me the job you just walked, an estimate you need, or the office work you want off your plate.",
-      });
-      logs.push(`first_sms:${first.sid}`);
+      if (!skipSms && smsNumber) {
+        const first = await sendSms({
+          to: req.params.owner_phone_e164,
+          from: smsNumber,
+          body: "I'm live. Text me the job you just walked, an estimate you need, or the office work you want off your plate.",
+        });
+        firstSmsSid = first.sid;
+        logs.push(`first_sms:${first.sid}`);
+      }
 
       const result: ProvisionerResult = {
         status: "ok",
@@ -74,7 +96,7 @@ export function registerProvisionerRoutes(app: Hono): void {
         validation_status: "passed",
         validation_output: rendered.validation_output,
         smoke_output: runtime,
-        first_sms_sid: first.sid,
+        first_sms_sid: firstSmsSid,
         logs,
       };
       return c.json(result);

@@ -1,0 +1,21 @@
+# Local VPS-faithful Caddy config. Reverse-proxies each employee's agent
+# subdomain to its Hermes container port, exactly like production — but on
+# *.agents.localhost (Caddy serves these over plain HTTP on 127.0.0.1, no certs).
+#
+# Run:  caddy run --config infra/caddy/Caddyfile.local
+# The provisioner writes one snippet per employee into CADDY_CLIENTS_DIR
+# ($HOME/amtech-local/caddy/clients/<client>.caddy) via writeCaddySnippet().
+#
+# Note: the snippet template targets <slug>.agents.<PUBLIC_BASE_DOMAIN>. With
+# PUBLIC_BASE_DOMAIN=agents.localhost the vhost becomes <slug>.agents.localhost.
+# For the core chat loop Caddy is optional — the Manager reaches each container
+# directly at 127.0.0.1:<port>. Caddy makes the public agent web route faithful.
+
+{
+	admin off
+	auto_https off
+}
+
+# Import per-employee snippets written by the provisioner.
+# {$HOME} is substituted from the environment at Caddyfile parse time.
+import {$HOME}/amtech-local/caddy/clients/*.caddy
