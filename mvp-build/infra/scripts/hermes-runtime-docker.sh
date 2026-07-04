@@ -41,31 +41,41 @@ CONTAINER="hermes-${EMP}"
 log "employee=$EMP port=$PORT container=$CONTAINER data=$DATA_DIR"
 
 # --- Seed an isolated per-employee Hermes home (first run only) ---------------
-# Copy the operator's working machine config (model + provider setup) so the
-# employee's API server can actually reach an LLM, but keep sessions/state fresh
-# and isolated per employee. Provider keys come from the seed home's .env.
+# Write a minimal, isolated Hermes home config that routes the employee model
+# through OpenRouter (AMTECH's master provider). We deliberately do NOT copy the
+# operator's full ~/.hermes/config.yaml — that carries their personal provider
+# (e.g. GitHub Copilot) and a paid default model. Sessions/state stay per-employee.
 mkdir -p "$DATA_DIR"
-if [ ! -f "$DATA_DIR/config.yaml" ]; then
-  [ -f "$SEED_HOME/config.yaml" ] && cp "$SEED_HOME/config.yaml" "$DATA_DIR/config.yaml" || log "WARN: no seed config.yaml at $SEED_HOME"
-fi
+EMPLOYEE_MODEL="${HERMES_EMPLOYEE_MODEL:-openai/gpt-4o-mini}"
+cat > "$DATA_DIR/config.yaml" <<YAML
+model:
+  default: "${EMPLOYEE_MODEL}"
+  provider: "openrouter"
+  base_url: "https://openrouter.ai/api/v1"
+YAML
 
-# Per-employee .env: provider keys carried over from the seed home + the API
-# server config keyed to THIS employee's port and generated key.
+# Provider key: prefer the wrapper's own env (the Manager passes OPENROUTER_API_KEY
+# through to runRuntimeStart), else fall back to an uncommented key in the seed .env.
+OR_KEY="${OPENROUTER_API_KEY:-}"
+if [ -z "$OR_KEY" ] && [ -f "$SEED_HOME/.env" ]; then
+  OR_KEY="$(grep -E '^OPENROUTER_API_KEY=' "$SEED_HOME/.env" | head -1 | cut -d= -f2- | tr -d "\"'")"
+fi
+[ -n "$OR_KEY" ] || log "WARN: no OPENROUTER_API_KEY in env or seed home — the employee model will fail"
+
+# Per-employee .env: provider key + the API server keyed to THIS employee's port.
 {
-  if [ -f "$SEED_HOME/.env" ]; then
-    grep -E '^(OPENAI_API_KEY|OPENROUTER_API_KEY|ANTHROPIC_API_KEY|XAI_API_KEY|OPENAI_BASE_URL|OPENROUTER_BASE_URL)=' "$SEED_HOME/.env" || true
-  fi
+  [ -n "$OR_KEY" ] && echo "OPENROUTER_API_KEY=${OR_KEY}"
   echo "API_SERVER_ENABLED=true"
   echo "API_SERVER_KEY=${APIKEY}"
   echo "API_SERVER_PORT=${PORT}"
   echo "API_SERVER_HOST=127.0.0.1"
 } > "$DATA_DIR/.env"
 
-# Overlay the rendered profile (SOUL, skills, workspace, profile config) as an
-# installed Hermes profile inside the isolated home.
+# Overlay the rendered profile (SOUL, skills, workspace) as an installed Hermes
+# profile. Skip the profile's config.yaml so it can't override the model above.
 PROFILE_DIR="${DATA_DIR}/profiles/${PROFILE_ID}"
 mkdir -p "$PROFILE_DIR"
-for item in SOUL.md config.yaml skills workspace distribution.yaml; do
+for item in SOUL.md skills workspace distribution.yaml; do
   [ -e "$PWD/$item" ] && cp -r "$PWD/$item" "$PROFILE_DIR/" || true
 done
 
@@ -88,6 +98,7 @@ docker run -d \
   -e API_SERVER_KEY="${APIKEY}" \
   -e API_SERVER_PORT="${PORT}" \
   -e API_SERVER_HOST=127.0.0.1 \
+  -e OPENROUTER_API_KEY="${OR_KEY}" \
   -v "${DATA_DIR}:/opt/data" \
   "$IMAGE" gateway run >/dev/null
 
