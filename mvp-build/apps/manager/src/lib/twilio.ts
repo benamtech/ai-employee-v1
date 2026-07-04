@@ -53,6 +53,28 @@ async function twilioGet(path: string, params: Record<string, string> = {}): Pro
   return json;
 }
 
+/**
+ * Local/dev phone-verification bypass. Lets the *real* front-door verify path
+ * (`send_phone_verification` / `check_phone_code`) complete locally without live
+ * Twilio + a real SMS, so browser/API onboarding harnesses can drive the true
+ * user path (see `infra/scripts/local/onboard.mjs`). Fails closed in production
+ * exactly like `PROVISIONER_SKIP_SMS`: even if the flag is set, it is ignored
+ * when `NODE_ENV=production`, so production always uses real Twilio Verify.
+ */
+export function verifyDevBypassEnabled(): boolean {
+  if (process.env.NODE_ENV === "production") return false;
+  const flag = process.env.TWILIO_VERIFY_DEV_BYPASS;
+  return flag === "1" || flag === "true";
+}
+
+/** The fixed code accepted in dev-bypass mode (default "000000"). */
+export function verifyDevBypassCode(): string {
+  return process.env.TWILIO_VERIFY_DEV_CODE || "000000";
+}
+
+/** Marker stored as the attempt's `twilio_verify_sid` so only dev attempts bypass. */
+export const VERIFY_DEV_BYPASS_SID = "dev-bypass";
+
 /** Start phone verification. Proof = verification SID. */
 export async function startVerification(phoneE164: string): Promise<{ sid: string; status: string }> {
   const service = process.env.TWILIO_VERIFY_SERVICE_SID;

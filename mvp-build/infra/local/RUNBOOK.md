@@ -74,3 +74,40 @@ Provisioning should also start a container named `amtech-hermes-<employee_id>` a
 - `PROVISIONER_SKIP_SMS=1` skips only Twilio webhook assignment and first outbound SMS. It fails closed in production.
 - Runtime acceptance still requires captured Hermes API Server health/capabilities/run proof ids.
 - Provider acceptance still requires real Supabase/Twilio/Gmail/PubSub/Stripe proof ids.
+
+## 6. Two test paths: BYPASS vs REAL-USER
+
+Both drive the real Manager/provisioner/Hermes path; they differ only in how onboarding is entered.
+Test data is **varied per run** by `infra/scripts/local/contractor-fixtures.mjs` (painter, landscaper,
+carpenter, deck/fence, pressure-washing) so onboarding/provisioning assumptions can't hide behind one
+copy-pasted business. Pin a fixture with `ONBOARD_FIXTURE=<kind|index>`; preview one with
+`npm run local:fixture`.
+
+**BYPASS path (no model key, no SMS — runnable today).** Manifest built in-script, phone inserted via the
+service role. This is the current live-proof path (`/health` + `/v1/capabilities`).
+
+```bash
+set -a && source .env && set +a
+npm run local:bootstrap                     # varied fixture unless LOCAL_* env is set
+npm run local:acceptance:runtime            # /health + /v1/capabilities for the provisioned employee
+npm run local:acceptance:browser            # Work Surface chat via an owner-session cookie
+```
+
+**REAL-USER path (drives the true front door).** Exercises the exact endpoints the
+`/create-ai-employee` page calls: conversation → phone verify → account → provision. Phone verification
+uses the **gated dev bypass** (`TWILIO_VERIFY_DEV_BYPASS=1`, dev code `TWILIO_VERIFY_DEV_CODE`, default
+`000000`) so no real SMS is sent; it fails closed when `NODE_ENV=production`.
+
+```bash
+set -a && source .env && set +a            # needs TWILIO_VERIFY_DEV_BYPASS=1
+npm run local:onboard                        # API-level real front door (fixture-driven)
+npm run local:acceptance:browser-onboard     # Playwright drives the real /create-ai-employee form
+```
+
+Gate: the conversational first step needs a **funded orchestrator model key**
+(`ORCHESTRATOR_API_KEY` / `XAI_API_KEY` / `OPENAI_API_KEY`). Without it, `local:onboard` stops honestly at
+step 1 with the exact remediation — the same funded-key blocker as the Phase 5 runtime gate. Use the
+BYPASS path for no-model core/runtime testing.
+
+Real (non-bypass) Twilio Verify additionally needs a `TWILIO_VERIFY_SERVICE_SID` (a `VA...` Verify
+Service) and, on a trial account, the recipient number verified as a caller ID.

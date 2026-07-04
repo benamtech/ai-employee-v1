@@ -12,6 +12,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { randomBytes } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { pickFixture } from "./contractor-fixtures.mjs";
 
 const statePath = join(process.cwd(), "infra", ".local", "state.json");
 
@@ -58,12 +59,16 @@ async function main() {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  // Varied plausible contractor data by default (explicit LOCAL_* env still wins),
+  // so the bypass path doesn't hide onboarding/provisioning assumptions behind one
+  // copy-pasted business. Set ONBOARD_FIXTURE=<kind|index> to pin a specific one.
+  const fx = pickFixture();
   const phoneId = id("phone");
-  const phone = env("LOCAL_OWNER_PHONE_E164", "+15555550123");
-  const businessName = env("LOCAL_BUSINESS_DISPLAY_NAME", "Local AMTECH Painting");
-  const timezone = env("LOCAL_TIMEZONE", "America/New_York");
-  const ownerName = env("LOCAL_OWNER_NAME", "Ben");
-  const ownerEmail = env("LOCAL_OWNER_EMAIL", `local-owner+${Date.now()}@example.com`);
+  const phone = env("LOCAL_OWNER_PHONE_E164", fx.phone_e164);
+  const businessName = env("LOCAL_BUSINESS_DISPLAY_NAME", fx.business_display_name);
+  const timezone = env("LOCAL_TIMEZONE", fx.timezone);
+  const ownerName = env("LOCAL_OWNER_NAME", fx.owner_name);
+  const ownerEmail = env("LOCAL_OWNER_EMAIL", fx.owner_email);
 
   const { error: phoneError } = await supabase.from("verified_phones").insert({
     id: phoneId,
@@ -86,7 +91,7 @@ async function main() {
   const ownerSessionToken = account.proof?.owner_session_token;
   if (!accountId || !ownerSessionToken) throw new Error(`create_account returned no account/session: ${JSON.stringify(account)}`);
 
-  const kind = env("LOCAL_BUSINESS_KIND", "painting");
+  const kind = env("LOCAL_BUSINESS_KIND", fx.business_kind);
   const manifest = {
     employee_type: "contractor_estimator",
     profile_package_key: env("DEFAULT_PROFILE_PACKAGE", "contractor_estimator"),
@@ -98,7 +103,7 @@ async function main() {
     verified_phone_e164: phone,
     verification_method: "twilio_verify",
     consent_channel: "web",
-    employee_name: env("LOCAL_EMPLOYEE_NAME", "Casey"),
+    employee_name: env("LOCAL_EMPLOYEE_NAME", fx.employee_name),
     top_workflows: ["estimate walkthroughs", "follow-up", "daily office reminders"],
     tools_mentioned: ["Gmail", "Stripe", "web chat"],
     seed_skills: ["estimate", "invoice", "daily-checkin"],

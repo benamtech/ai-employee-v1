@@ -12,7 +12,13 @@ import {
 import type { ToolHandler } from "./types.js";
 import { writeAudit } from "../lib/audit.js";
 import { checkFeature } from "../lib/entitlements.js";
-import { checkVerification, startVerification } from "../lib/twilio.js";
+import {
+  checkVerification,
+  startVerification,
+  verifyDevBypassEnabled,
+  verifyDevBypassCode,
+  VERIFY_DEV_BYPASS_SID,
+} from "../lib/twilio.js";
 import { mintOwnerSession } from "../lib/owner-session.js";
 
 function slugify(input: string): string {
@@ -34,6 +40,33 @@ const sendPhoneVerification: ToolHandler = async (ctx, raw) => {
       details: { reason: "validation_failed" },
     });
     return failed("validation_failed", "phone_e164 and session_id are required.", { audit_id });
+  }
+
+  if (verifyDevBypassEnabled()) {
+    const id = newId(ID_PREFIX.phoneVerificationAttempt);
+    await ctx.db.from("phone_verification_attempts").insert({
+      id,
+      onboarding_session_id: input.session_id,
+      phone_e164: input.phone_e164,
+      twilio_verify_sid: VERIFY_DEV_BYPASS_SID,
+      status: "pending",
+      proof: { dev_bypass: true },
+      expires_at: new Date(Date.now() + 10 * 60_000).toISOString(),
+    });
+    const audit_id = await writeAudit(ctx.db, {
+      actor: ctx.actor,
+      action: "tool:send_phone_verification",
+      resource: id,
+      result: "ok",
+      details: { dev_bypass: true, session_id: input.session_id },
+    });
+    return ok({
+      changed_resources: [`phone_verification_attempt:${id}`],
+      proof: { verification_attempt_id: id, status: "pending", dev_bypass: true },
+      user_facing_summary_hint: "Verification code sent (local dev bypass; no SMS).",
+      next_suggested_action: "Enter the local dev verification code.",
+      audit_id,
+    });
   }
 
   try {
@@ -99,6 +132,45 @@ const checkPhoneCode: ToolHandler = async (ctx, raw) => {
       details: { reason: "verification_attempt_not_found" },
     });
     return failed("validation_failed", "Verification attempt not found.", { audit_id });
+  }
+
+  if (verifyDevBypassEnabled() && attempt.twilio_verify_sid === VERIFY_DEV_BYPASS_SID) {
+    if (input.code !== verifyDevBypassCode()) {
+      const audit_id = await writeAudit(ctx.db, {
+        actor: ctx.actor,
+        action: "tool:check_phone_code",
+        resource: input.verification_attempt_id,
+        result: "failed",
+        details: { dev_bypass: true, reason: "bad_dev_code" },
+      });
+      return failed("validation_failed", "Verification code was not approved.", { audit_id });
+    }
+    await ctx.db
+      .from("phone_verification_attempts")
+      .update({ status: "approved", proof: { dev_bypass: true }, updated_at: new Date().toISOString() })
+      .eq("id", input.verification_attempt_id);
+    const phoneId = newId(ID_PREFIX.phone);
+    await ctx.db.from("verified_phones").insert({
+      id: phoneId,
+      phone_e164: attempt.phone_e164,
+      verification_method: "twilio_verify",
+      consent_channel: "web",
+      twilio_proof: { verification_attempt_id: input.verification_attempt_id, dev_bypass: true },
+    });
+    const audit_id = await writeAudit(ctx.db, {
+      actor: ctx.actor,
+      action: "tool:check_phone_code",
+      resource: phoneId,
+      result: "ok",
+      details: { dev_bypass: true, verification_attempt_id: input.verification_attempt_id },
+    });
+    return ok({
+      changed_resources: [`verified_phone:${phoneId}`],
+      proof: { verified_phone_ref: phoneId, status: "approved", dev_bypass: true },
+      user_facing_summary_hint: "Phone verified (local dev bypass).",
+      next_suggested_action: "Create the AMTECH account.",
+      audit_id,
+    });
   }
 
   try {
