@@ -19,7 +19,7 @@
 import type { SupabaseClient } from "@amtech/db";
 
 type Row = Record<string, any>;
-type Filter = { kind: "eq" | "in" | "is" | "gte" | "lte"; col: string; val: any };
+type Filter = { kind: "eq" | "in" | "is" | "gte" | "lte" | "gt" | "lt"; col: string; val: any };
 
 /** Per-table unique constraints: each entry is a column set that must be unique. */
 export type UniqueSpec = Record<string, string[][]>;
@@ -35,14 +35,21 @@ class QueryBuilder {
   private orderCol: string | null = null;
   private orderAsc = true;
   private limitN: number | null = null;
+  private countMode: string | null = null;
+  private headOnly = false;
 
   constructor(private store: Row[], private uniques: string[][] = []) {}
 
   // A bare `.select()` is a read; chained AFTER insert/update/upsert it is the
   // PostgREST "returning" clause and must NOT downgrade the pending mutation to a
   // read (real Supabase returns the affected rows there). Default op is already
-  // "select", so this only needs to preserve a pending mutation op.
-  select(_cols?: string): this { return this; }
+  // "select", so this only needs to preserve a pending mutation op. The optional
+  // second arg mirrors PostgREST `{ count, head }` for exact-count queries.
+  select(_cols?: string, opts?: { count?: string; head?: boolean }): this {
+    if (opts?.count) this.countMode = opts.count;
+    if (opts?.head) this.headOnly = true;
+    return this;
+  }
   insert(rows: Row | Row[]): this { this.op = "insert"; this.payload = rows; return this; }
   update(patch: Row): this { this.op = "update"; this.payload = patch; return this; }
   delete(): this { this.op = "delete"; return this; }
@@ -56,6 +63,8 @@ class QueryBuilder {
   is(col: string, val: any): this { this.filters.push({ kind: "is", col, val }); return this; }
   gte(col: string, val: any): this { this.filters.push({ kind: "gte", col, val }); return this; }
   lte(col: string, val: any): this { this.filters.push({ kind: "lte", col, val }); return this; }
+  gt(col: string, val: any): this { this.filters.push({ kind: "gt", col, val }); return this; }
+  lt(col: string, val: any): this { this.filters.push({ kind: "lt", col, val }); return this; }
   order(col: string, opts?: { ascending?: boolean }): this { this.orderCol = col; this.orderAsc = opts?.ascending ?? true; return this; }
   limit(n: number): this { this.limitN = n; return this; }
 
@@ -75,6 +84,8 @@ class QueryBuilder {
       if (f.kind === "is") return row[f.col] === f.val || (f.val === null && (row[f.col] === null || row[f.col] === undefined));
       if (f.kind === "gte") return row[f.col] >= f.val;
       if (f.kind === "lte") return row[f.col] <= f.val;
+      if (f.kind === "gt") return row[f.col] > f.val;
+      if (f.kind === "lt") return row[f.col] < f.val;
       return true;
     });
   }
@@ -123,12 +134,14 @@ class QueryBuilder {
     }
     // select
     let rows = this.store.filter((r) => this.match(r)).map((r) => ({ ...r }));
+    const total = rows.length; // exact count reflects filters, ignores limit
     if (this.orderCol) {
       const col = this.orderCol;
       rows.sort((a, b) => (a[col] > b[col] ? 1 : a[col] < b[col] ? -1 : 0) * (this.orderAsc ? 1 : -1));
     }
     if (this.limitN != null) rows = rows.slice(0, this.limitN);
     if (this.single) return { data: rows[0] ?? null, error: null };
+    if (this.countMode) return { data: this.headOnly ? null : rows, count: total, error: null };
     return { data: rows, error: null };
   }
 }

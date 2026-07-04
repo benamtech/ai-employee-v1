@@ -5,6 +5,7 @@
  * The owner NEVER talks to this directly; the front door and live employee do.
  */
 import { Hono, type Context } from "hono";
+import { streamSSE } from "hono/streaming";
 import { serve } from "@hono/node-server";
 import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolName } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
@@ -20,6 +21,8 @@ import { requireOwnerSession } from "./lib/owner-session.js";
 import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
 import { createArtifactStorageSignedUrl } from "./lib/artifacts.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
+import { buildEmployeeSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";
+import { subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
 import { orThrow, mustWrite } from "./lib/db.js";
 import { stampChannelPresence } from "./lib/channel-router.js";
 
@@ -293,6 +296,7 @@ export function buildApp(): Hono {
     const denied = denyInternal(c);
     if (denied) return denied;
     const employeeId = c.req.param("employeeId");
+    if (!employeeId) return c.json({ error: "employee_not_found" }, 404);
     const { owner_session_token } = await c.req.json().catch(() => ({}));
     const db = serviceClient();
     const session = await requireOwnerSession(db, owner_session_token);
@@ -302,87 +306,57 @@ export function buildApp(): Hono {
       "employees.lookup",
     );
     if (!employee) return c.json({ error: "employee_not_found" }, 404);
-    const { data: artifacts } = await db
-      .from("artifacts")
-      .select("id,kind,mime_type,storage_ref,payload,created_at")
-      .eq("employee_id", employeeId)
-      .eq("account_id", session.account_id)
-      .order("created_at", { ascending: false })
-      .limit(10);
-    const { data: approvals } = await db
-      .from("approvals")
-      .select("id,action_key,summary,risk_level,refs,resolution,expires_at,created_at")
-      .eq("employee_id", employeeId)
-      .eq("account_id", session.account_id)
-      .is("resolution", null)
-      .order("created_at", { ascending: false })
-      .limit(10);
-    const { data: messages } = await db
-      .from("employee_messages")
-      .select("id,direction,source,channel,body,provider_id,status,created_at")
-      .eq("employee_id", employeeId)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    const { data: connectors } = await db
-      .from("connector_accounts")
-      .select("id,connector_key,provider,status,external_email,last_connector_test_at,last_error,created_at")
-      .eq("employee_id", employeeId)
-      .eq("account_id", session.account_id);
-    const { data: stripeConnections } = await db
-      .from("stripe_connections")
-      .select("id,connected_account_id,onboarding_status,charges_enabled,payouts_enabled,created_at")
-      .eq("employee_id", employeeId)
-      .eq("account_id", session.account_id);
-    const stripeConnectionIds = (stripeConnections ?? []).map((row: { id: string }) => row.id);
-    const { data: stripeInvoices } = stripeConnectionIds.length
-      ? await db
-        .from("stripe_invoices")
-        .select("id,stripe_connection_id,estimate_id,stripe_invoice_id,deposit_amount,hosted_invoice_url,invoice_pdf,status,created_at")
-        .in("stripe_connection_id", stripeConnectionIds)
-        .order("created_at", { ascending: false })
-        .limit(10)
-      : { data: [] };
-    const { data: reminders } = await db
-      .from("reminders")
-      .select("id,job_id,scheduled_at,channel,status,message,sent_at,provider_id,created_at")
-      .eq("employee_id", employeeId)
-      .eq("account_id", session.account_id)
-      .order("scheduled_at", { ascending: true })
-      .limit(20);
-    const { data: jobCommitments } = await db
-      .from("job_commitments")
-      .select("id,estimate_id,customer_ref,start_at,start_window,notes,source_ref,created_at")
-      .eq("employee_id", employeeId)
-      .eq("account_id", session.account_id)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    const { data: inboundEvents } = await db
-      .from("inbound_events")
-      .select("id,source,event_type,provider_id,normalized_payload,status,trace,created_at")
-      .order("created_at", { ascending: false })
-      .limit(50);
-    const workEvents = (inboundEvents ?? [])
-      .map((event: Record<string, unknown>) => ({
-        ...event,
-        work_event_descriptor: (event.normalized_payload as { work_event_descriptor?: unknown } | undefined)?.work_event_descriptor,
-      }))
-      .filter((event: { work_event_descriptor?: unknown }) =>
-        (event.work_event_descriptor as { employee_id?: string; account_id?: string } | undefined)?.employee_id === employeeId &&
-        (event.work_event_descriptor as { employee_id?: string; account_id?: string } | undefined)?.account_id === session.account_id,
-      )
-      .slice(0, 10);
-    return c.json({
-      employee_id: employeeId,
-      account_id: session.account_id,
-      artifacts: artifacts ?? [],
-      approvals: approvals ?? [],
-      messages: (messages ?? []).reverse(),
-      connectors: connectors ?? [],
-      stripe_connections: stripeConnections ?? [],
-      stripe_invoices: stripeInvoices ?? [],
-      reminders: reminders ?? [],
-      job_commitments: jobCommitments ?? [],
-      work_events: workEvents,
+    const snapshot = await buildEmployeeSnapshot(db, employeeId, session.account_id);
+    return c.json(snapshot);
+  });
+
+  // Live Work Surface stream (Phase 5). Initial snapshot, then `work_event` /
+  // `approval_update` deltas (cursor-driven, woken by the in-process change
+  // signal) and `work_progress` verbs relayed from in-flight wakes. Owner-session
+  // authorized like /resources; the browser never touches Supabase directly.
+  app.get(MANAGER_API.employeeStream(":employeeId"), async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const employeeId = c.req.param("employeeId");
+    if (!employeeId) return c.json({ error: "employee_not_found" }, 404);
+    const token = c.req.query("owner_session_token") ?? "";
+    const db = serviceClient();
+    const session = await requireOwnerSession(db, token);
+    if (!session) return c.json({ error: "owner_session_invalid" }, 401);
+    const employee = orThrow(
+      await db.from("employees").select("id").eq("id", employeeId).eq("account_id", session.account_id).maybeSingle(),
+      "employees.lookup.stream",
+    );
+    if (!employee) return c.json({ error: "employee_not_found" }, 404);
+    const accountId = session.account_id;
+    const pollMs = Number(process.env.WORK_STREAM_POLL_MS ?? 2000);
+
+    return streamSSE(c, async (stream) => {
+      let closed = false;
+      stream.onAbort(() => { closed = true; });
+      const unsub = subscribeProgress(employeeId, (p) => {
+        void stream.writeSSE({ event: "work_progress", data: JSON.stringify({ kind: "work_progress", ...p }) });
+      });
+      try {
+        const snapshot = await buildEmployeeSnapshot(db, employeeId, accountId);
+        await stream.writeSSE({ event: "snapshot", data: JSON.stringify({ kind: "snapshot", snapshot }) });
+        let cursor = new Date().toISOString();
+        while (!closed) {
+          await waitForEmployeeChange(employeeId, pollMs);
+          if (closed) break;
+          const delta = await fetchWorkEventsSince(db, employeeId, accountId, cursor);
+          for (const event of delta.workEvents) {
+            await stream.writeSSE({ event: "work_event", data: JSON.stringify({ kind: "work_event", event }) });
+          }
+          for (const approval of delta.approvals) {
+            await stream.writeSSE({ event: "approval_update", data: JSON.stringify({ kind: "approval_update", approval_id: approval.id, resolution: approval.resolution }) });
+          }
+          cursor = delta.nextCursor;
+          await stream.writeSSE({ event: "ping", data: "" }); // keepalive
+        }
+      } finally {
+        unsub();
+      }
     });
   });
 

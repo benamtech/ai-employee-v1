@@ -4,6 +4,8 @@ export * from "./manifest.js";
 export * from "./routes.js";
 export * from "./event-types.js";
 export * from "./work-events.js";
+export * from "./resource-payload.js";
+export * from "./work-stream.js";
 export * from "./hermes.js";
 export * from "./channel-routing.js";
 export * from "./tool-contracts.js";

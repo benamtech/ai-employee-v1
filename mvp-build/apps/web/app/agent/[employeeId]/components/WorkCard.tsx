@@ -10,6 +10,7 @@ import { useState } from "react";
 import type { WorkEventDescriptor } from "@amtech/shared";
 import { moveStyle, tokens } from "../surface.tokens";
 import { Deliverable } from "./deliverables";
+import { McpUiResource, type McpUiIntent } from "./McpUiResource";
 import { Receipt } from "./Receipt";
 
 export function WorkCard({
@@ -50,6 +51,17 @@ export function WorkCard({
     setDone(true);
   }
 
+  const uiResource = descriptor.deliverable?.ui_resource;
+  function onUiIntent(intent: McpUiIntent, intentApprovalId: string | undefined, payload: Record<string, unknown>) {
+    if (intent === "accept" || intent === "accept_all") { void resolve("approved"); return; }
+    if (intent === "reject") { void resolve("rejected"); return; }
+    if (intent === "respond") {
+      const fields = (payload.fields as Record<string, string> | undefined) ?? {};
+      const text = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join(", ");
+      if (text) { onRespond(text); setDone(true); }
+    }
+  }
+
   return (
     <article style={{
       display: "flex", borderRadius: tokens.radius.md, border: `1px solid ${tokens.color.border}`,
@@ -66,7 +78,11 @@ export function WorkCard({
         </div>
         <p style={{ margin: `${tokens.space.sm}px 0 0`, fontSize: tokens.font.body, color: tokens.color.text }}>{descriptor.summary}</p>
 
-        {descriptor.deliverable ? <Deliverable d={descriptor.deliverable} employeeId={employeeId} /> : null}
+        {uiResource ? (
+          <McpUiResource resource={uiResource} onIntent={onUiIntent} />
+        ) : descriptor.deliverable ? (
+          <Deliverable d={descriptor.deliverable} employeeId={employeeId} />
+        ) : null}
 
         {descriptor.suggested_next_action && !done ? (
           <p style={{ margin: `${tokens.space.sm}px 0 0`, fontSize: tokens.font.small, color: tokens.color.textMuted }}>
@@ -78,7 +94,7 @@ export function WorkCard({
 
         {done ? (
           <p style={{ margin: `${tokens.space.md}px 0 0`, fontSize: tokens.font.small, color: tokens.color.success }}>✓ Sent to your employee.</p>
-        ) : composing ? (
+        ) : uiResource ? null : composing ? (
           <div style={{ marginTop: tokens.space.md, display: "flex", gap: tokens.space.sm }}>
             <input
               autoFocus

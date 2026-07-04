@@ -5,6 +5,7 @@ import { eventTools } from "../tools/events.stub.js";
 import { gmailTools } from "../tools/gmail.stub.js";
 import { recordRuntimeHealthSnapshots } from "./runtime-health.js";
 import { drainQueuedTurns } from "./turn-drain.js";
+import { flushDueBatches } from "./event-batching.js";
 
 export const SCHEDULER_JOB_KEYS = [
   "dispatch_due_reminders",
@@ -12,6 +13,7 @@ export const SCHEDULER_JOB_KEYS = [
   "dispatch_daily_briefs",
   "runtime_health_checks",
   "drain_employee_turns",
+  "flush_event_batches",
 ] as const;
 
 export type SchedulerJobKey = (typeof SCHEDULER_JOB_KEYS)[number];
@@ -128,6 +130,9 @@ export async function runSchedulerJob(
         failed: drained.filter((r) => r.status === "failed").length,
         skipped: drained.filter((r) => r.status === "skipped").length,
       };
+    } else if (key === "flush_event_batches") {
+      const flushed = await flushDueBatches(db, { now: input.now, limit: input.limit });
+      proof = { scanned: flushed.scanned, flushed: flushed.flushed, delivered: flushed.delivered };
     } else {
       const envelope = await callEnvelopeJob(key, {
         db,

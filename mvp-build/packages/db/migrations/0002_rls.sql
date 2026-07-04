@@ -26,11 +26,17 @@ do $$
 declare
   t text;
   owner_scoped text[] := array[
-    'accounts','employees','employee_manifests','business_brain_facts',
-    'runtime_endpoints','provisioning_jobs','artifacts','approvals',
-    'connector_accounts','stripe_connections','stripe_invoices',
-    'employee_messages','job_commitments','reminders','verified_phones',
+    'accounts','employees','business_brain_facts',
+    'provisioning_jobs','artifacts','approvals',
+    'connector_accounts','stripe_connections',
+    'job_commitments','reminders','verified_phones',
     'notification_preferences'
+  ];
+  employee_scoped text[] := array[
+    'employee_manifests','runtime_endpoints','employee_messages'
+  ];
+  stripe_connection_scoped text[] := array[
+    'stripe_invoices'
   ];
 begin
   foreach t in array owner_scoped loop
@@ -47,6 +53,36 @@ begin
         using (account_id in (select amtech_account_ids()));
       $p$, t);
     end if;
+  end loop;
+
+  foreach t in array employee_scoped loop
+    execute format('alter table %I enable row level security;', t);
+    execute format($p$
+      create policy %1$s_sel on %1$I for select
+      using (
+        exists (
+          select 1
+          from employees e
+          where e.id = %1$I.employee_id
+            and e.account_id in (select amtech_account_ids())
+        )
+      );
+    $p$, t);
+  end loop;
+
+  foreach t in array stripe_connection_scoped loop
+    execute format('alter table %I enable row level security;', t);
+    execute format($p$
+      create policy %1$s_sel on %1$I for select
+      using (
+        exists (
+          select 1
+          from stripe_connections sc
+          where sc.id = %1$I.stripe_connection_id
+            and sc.account_id in (select amtech_account_ids())
+        )
+      );
+    $p$, t);
   end loop;
 end $$;
 

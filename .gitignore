@@ -12,6 +12,8 @@ hermes-data/
 # Secrets / env
 .env
 .env.*
+!mvp-build/.env.local.example
+!mvp-build/apps/web/.env.local.example
 
 # Local / OS / logs
 .DS_Store
@@ -24,3 +26,6 @@ hermes-data/
 
 # Excluded per workspace decision
 site-design/
+
+# Local MVP runtime state
+mvp-build/infra/.local/

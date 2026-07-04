@@ -1,6 +1,6 @@
 # Phase 5 — Triage, Batching & Live Work Surface Stream
 
-Status: planned
+Status: source-wired
 
 ## Goal / Module
 
@@ -39,4 +39,19 @@ the keystone the operating-layer phases (admin/metering/billing) measure and man
 
 ## Status
 
-`planned`.
+`source-wired` (2026-07-04). Real rules-first triage with priority + provider-burst detection
+(`event-triage.ts`) and account-layer batching with count/time flush → one digest
+(`event-batching.ts` + `flush_event_batches` scheduler lane; migration `0016`). The polled snapshot is
+replaced by a live Manager SSE stream (`server.ts` `employeeStream` + `employee-stream.ts`
+`buildEmployeeSnapshot`/`fetchWorkEventsSince`), woken by an in-process change signal
+(`progress-bus.ts` — the testable stand-in for the Supabase Realtime/NOTIFY decision) with cursor
+catch-up + poll fallback. The Hermes runs client gained a real streaming path (`/v1/runs/{id}/events`
+SSE → owner-safe work-verbs via `work-verbs.ts`, poll fallback) surfaced as live "doing it now"
+progress. **Generative UI = MCP-UI (MCP Apps):** the agent authors a typed `view`, Manager compiles it
+into a real `ui://` `rawHtml` `UIResource` (`ui-resources.ts`, `@mcp-ui/server`), and the Work Surface
+renders it in a sandboxed `srcdoc` iframe whose `postMessage` intents route through the existing
+approval gate (`McpUiResource.tsx`, `WorkCard.tsx`). +31 unit tests (254 total). **Supabase proven live:** migration
+`0016` applied to the live project and RLS on `event_batches` proven real (owner denied / service-role
+allowed) via `new-tables-rls.integration.test.ts` (4/4). Remaining `runtime-accepted` gate: real
+Hermes `/v1/runs/{id}/events` SSE proof (needs a running runtime). See
+`../../implementation-records/2026-07-04-phase-05-record.md`.

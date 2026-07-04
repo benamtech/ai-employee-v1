@@ -18,6 +18,8 @@ import { orThrow, mustWrite, insertDedup } from "./db.js";
 import { decideTriage, enqueueRepair, recordBatchCandidate } from "./event-triage.js";
 import { routeEmployeeIntent } from "./channel-router.js";
 import { wakeEmployeeForDescriptor } from "./wake.js";
+import { signalEmployeeChange } from "./progress-bus.js";
+import { withUiResource } from "./ui-resources.js";
 import { finishWorkRun, recordMeterEvent, startWorkRun, type WorkRunStatus, type WorkRunTrigger } from "./metering.js";
 
 export interface DeliverEmployeeEventParams {
@@ -157,7 +159,7 @@ export async function deliverEmployeeEvent(
     };
   }
 
-  const triage = await decideTriage(db, {
+  const { decision: triage, priority } = await decideTriage(db, {
     account_id: params.account_id,
     employee_id: params.employee_id,
     source,
@@ -219,7 +221,7 @@ export async function deliverEmployeeEvent(
       provider_id: params.provider_id ?? null,
       normalized_payload: params.normalized_payload ?? {},
       safe_summary: params.safe_summary,
-    })
+    }, priority)
     : null;
 
   if (routingMode === "wake_employee") {
@@ -275,6 +277,7 @@ export async function deliverEmployeeEvent(
       return { event_id: repairId, message_id: "", delivery_status: "pending", duplicate: false };
     }
     descriptor = await bindApprovalIfNeeded(db, descriptor);
+    descriptor = withUiResource(descriptor);
     const normalizedPayload = {
       ...(params.normalized_payload ?? {}),
       work_event_descriptor: descriptor,
@@ -325,9 +328,10 @@ export async function deliverEmployeeEvent(
       result: "ok",
       details: { event_type: params.event_type, channel: routed.chosen_channel, delivered: routed.delivery_status === "delivered", has_sms: Boolean(routed.sms_sid) },
     });
+    signalEmployeeChange(params.employee_id);
     return { event_id: eventId, message_id: messageId, sms_sid: routed.sms_sid, delivery_status: routed.delivery_status === "delivered" ? "delivered" : "pending", duplicate: false };
   }
-  if (descriptor) descriptor = await bindApprovalIfNeeded(db, descriptor);
+  if (descriptor) descriptor = withUiResource(await bindApprovalIfNeeded(db, descriptor));
   const normalizedPayload = {
     ...(params.normalized_payload ?? {}),
     ...(descriptor ? { work_event_descriptor: descriptor } : {}),
@@ -415,5 +419,6 @@ export async function deliverEmployeeEvent(
     details: { event_type: params.event_type, channel: routed.chosen_channel, delivered: deliveryStatus === "delivered", has_sms: Boolean(smsSid) },
   });
 
+  signalEmployeeChange(params.employee_id);
   return { event_id: eventId, message_id: messageId, sms_sid: smsSid, delivery_status: deliveryStatus, duplicate: false };
 }

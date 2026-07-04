@@ -6,6 +6,7 @@ import type {
 } from "@amtech/shared";
 import { openSecret } from "./secrets.js";
 import { orThrow } from "./db.js";
+import { workVerbForTool } from "./work-verbs.js";
 
 export interface RuntimeApi {
   runtime_endpoint_id: string;
@@ -249,7 +250,13 @@ export async function chatTurn(api: RuntimeApi, input: { input: string; system_m
   return { text: text?.trim() || "I received it.", usage: json.usage as Record<string, unknown> | undefined };
 }
 
-async function runTurn(api: RuntimeApi, input: HermesTurnInput, capabilities: HermesCapabilities | null): Promise<HermesTurnResult> {
+/** Owner-safe live progress from a streaming run. `verb` is already mapped through
+ *  the work-verb allowlist — a raw tool name never reaches this callback. */
+export type HermesProgress = (p: { verb: string; state: "started" | "step" | "completed" }) => void;
+
+/** Create the run. Returns the run id and, when the runtime answered terminally in
+ *  the create response, the finished result (so no poll/stream is needed). */
+async function createRun(api: RuntimeApi, input: HermesTurnInput, capabilities: HermesCapabilities | null): Promise<{ runId: string; terminal?: HermesTurnResult }> {
   const body = {
     input: input.input,
     session_id: api.sessionId,
@@ -274,9 +281,12 @@ async function runTurn(api: RuntimeApi, input: HermesTurnInput, capabilities: He
   if (isTerminalRunStatus(created.status ?? created.state)) {
     if (!isSuccessfulRunStatus(created.status ?? created.state)) throw new Error(created.error ?? `runtime_run_${created.status ?? created.state}`);
     const text = textFromJson(created);
-    return { text: text?.trim() || "I received it.", usage: usageFromJson(created), external_run_id: runId, mode: "runs" };
+    return { runId, terminal: { text: text?.trim() || "I received it.", usage: usageFromJson(created), external_run_id: runId, mode: "runs" } };
   }
+  return { runId };
+}
 
+async function pollRun(api: RuntimeApi, runId: string, capabilities: HermesCapabilities | null): Promise<HermesTurnResult> {
   for (let i = 0; i < RUN_MAX_POLLS; i += 1) {
     await new Promise((resolve) => setTimeout(resolve, RUN_POLL_INTERVAL_MS));
     const statusRes = await hermesFetch(api, `/v1/runs/${encodeURIComponent(runId)}`, {
@@ -294,6 +304,11 @@ async function runTurn(api: RuntimeApi, input: HermesTurnInput, capabilities: He
   throw new Error("runtime_run_timeout");
 }
 
+async function runTurn(api: RuntimeApi, input: HermesTurnInput, capabilities: HermesCapabilities | null): Promise<HermesTurnResult> {
+  const { runId, terminal } = await createRun(api, input, capabilities);
+  return terminal ?? pollRun(api, runId, capabilities);
+}
+
 export async function executeHermesTurn(api: RuntimeApi, input: HermesTurnInput): Promise<HermesTurnResult> {
   const capabilities = await getRuntimeCapabilities(api);
   if (supportsRuns(capabilities)) {
@@ -305,6 +320,136 @@ export async function executeHermesTurn(api: RuntimeApi, input: HermesTurnInput)
         !String((err as Error).message ?? err).startsWith("runtime_501")) {
         throw err;
       }
+    }
+  }
+  const session = await chatTurn(api, input);
+  return { ...session, mode: "sessions" };
+}
+
+// ---------------------------------------------------------------------------
+// Streaming runs (Phase 5): consume GET /v1/runs/{id}/events (SSE) for live
+// "doing it now" progress, falling back to polling when unsupported. The final
+// text is assembled from assistant deltas or the terminal event — same result
+// shape as the poll path, so callers are agnostic.
+// ---------------------------------------------------------------------------
+
+export interface SseFrame { event?: string; data: string; }
+
+/** Parse a fetch SSE body into {event,data} frames. Defensive: tolerates CRLF,
+ *  multi-line data, comments, and partial trailing chunks. */
+export async function* parseSseFrames(body: ReadableStream<Uint8Array>): AsyncGenerator<SseFrame> {
+  const decoder = new TextDecoder();
+  let buffer = "";
+  // Node/undici ReadableStream is async-iterable at runtime; the DOM lib type
+  // doesn't advertise it, so iterate via the cast.
+  const iterable = body as unknown as AsyncIterable<Uint8Array>;
+  for await (const chunk of iterable) {
+    buffer += decoder.decode(chunk, { stream: true });
+    buffer = buffer.replace(/\r\n/g, "\n");
+    let sep: number;
+    while ((sep = buffer.indexOf("\n\n")) >= 0) {
+      const raw = buffer.slice(0, sep);
+      buffer = buffer.slice(sep + 2);
+      let event: string | undefined;
+      const dataLines: string[] = [];
+      for (const line of raw.split("\n")) {
+        if (line.startsWith(":")) continue; // comment/keepalive
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) dataLines.push(line.slice(5).replace(/^ /, ""));
+      }
+      if (dataLines.length || event) yield { event, data: dataLines.join("\n") };
+    }
+  }
+}
+
+function eventType(frame: SseFrame, json: Record<string, unknown> | null): string {
+  return String(frame.event ?? json?.type ?? json?.event ?? "").toLowerCase();
+}
+
+function toolNameFrom(json: Record<string, unknown> | null): string | undefined {
+  if (!json) return undefined;
+  const j = json as Record<string, unknown> & { tool?: unknown; name?: unknown; tool_name?: unknown; tool_call?: { name?: unknown } };
+  return (j.tool_name ?? j.tool ?? j.name ?? j.tool_call?.name) as string | undefined;
+}
+
+function deltaTextFrom(json: Record<string, unknown> | null): string {
+  if (!json) return "";
+  const j = json as Record<string, unknown> & { delta?: unknown; text?: unknown; content?: unknown; output_text?: unknown };
+  const v = j.delta ?? j.text ?? j.content ?? j.output_text;
+  return typeof v === "string" ? v : "";
+}
+
+/** Try the SSE stream. Returns a result on terminal, or null if the stream is
+ *  unusable (unsupported / ended without terminal) so the caller can poll. */
+async function streamRun(api: RuntimeApi, runId: string, capabilities: HermesCapabilities | null, onProgress?: HermesProgress): Promise<HermesTurnResult | null> {
+  let res: Response;
+  try {
+    res = await hermesFetch(api, `/v1/runs/${encodeURIComponent(runId)}/events`, {
+      method: "GET",
+      headers: { ...sessionKeyHeaders(api, capabilities), Accept: "text/event-stream" },
+    });
+  } catch {
+    return null;
+  }
+  if (!res.ok || !res.body) {
+    if ([404, 405, 501].includes(res.status)) return null;
+    throw new Error(classifyRuntimeError(res.status));
+  }
+  let assembled = "";
+  let finalText: string | undefined;
+  let usage: Record<string, unknown> | undefined;
+  let sawTerminal = false;
+  let failed: string | undefined;
+  for await (const frame of parseSseFrames(res.body)) {
+    let json: Record<string, unknown> | null = null;
+    try { json = frame.data ? JSON.parse(frame.data) as Record<string, unknown> : null; } catch { json = null; }
+    const type = eventType(frame, json);
+    if (type.includes("tool") && (type.includes("start") || type.endsWith(".started"))) {
+      onProgress?.({ verb: workVerbForTool(toolNameFrom(json)), state: "started" });
+    } else if (type.includes("tool") && (type.includes("complete") || type.includes("end") || type.includes("result"))) {
+      onProgress?.({ verb: workVerbForTool(toolNameFrom(json)), state: "step" });
+    } else if (type.includes("delta") || type.includes("output_text")) {
+      assembled += deltaTextFrom(json);
+    } else if (type.includes("run.completed") || type.includes("completed") || type.includes("succeeded") || type.includes("done")) {
+      finalText = textFromJson(json as HermesRunStatusResponse) ?? finalText;
+      usage = usageFromJson(json as HermesRunStatusResponse) ?? usage;
+      sawTerminal = true;
+      break;
+    } else if (type.includes("failed") || type.includes("error") || type.includes("cancel")) {
+      failed = (json?.error as string) ?? `runtime_run_${type}`;
+      sawTerminal = true;
+      break;
+    }
+  }
+  if (failed) throw new Error(failed);
+  if (!sawTerminal) return null;
+  onProgress?.({ verb: "Wrapping up", state: "completed" });
+  const text = (finalText ?? assembled).trim();
+  return { text: text || "I received it.", usage, external_run_id: runId, mode: "runs" };
+}
+
+export function supportsRunEvents(capabilities: HermesCapabilities | null): boolean {
+  return featureEnabled(capabilities, ["run_events", "runs_events", "run_stream", "/v1/runs/{id}/events", "events"]);
+}
+
+/**
+ * Like executeHermesTurn, but streams live progress via SSE when the runtime
+ * supports it. Always degrades safely: create -> stream -> poll -> sessions chat.
+ */
+export async function executeHermesTurnStreaming(api: RuntimeApi, input: HermesTurnInput, onProgress?: HermesProgress): Promise<HermesTurnResult> {
+  const capabilities = await getRuntimeCapabilities(api);
+  if (supportsRuns(capabilities)) {
+    try {
+      const { runId, terminal } = await createRun(api, input, capabilities);
+      if (terminal) { onProgress?.({ verb: "Wrapping up", state: "completed" }); return terminal; }
+      if (supportsRunEvents(capabilities)) {
+        const streamed = await streamRun(api, runId, capabilities, onProgress);
+        if (streamed) return streamed;
+      }
+      return await pollRun(api, runId, capabilities);
+    } catch (err) {
+      const msg = String((err as Error).message ?? err);
+      if (!msg.startsWith("runtime_404") && !msg.startsWith("runtime_405") && !msg.startsWith("runtime_501")) throw err;
     }
   }
   const session = await chatTurn(api, input);

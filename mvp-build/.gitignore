@@ -6,6 +6,8 @@ out/
 .env
 .env.local
 .env.*.local
+!.env.local.example
+!apps/web/.env.local.example
 coverage/
 .DS_Store
 *.log
@@ -13,3 +15,4 @@ coverage/
 .vercel/
 hermes-data/
 infra/acceptance/reports/
+infra/.local/

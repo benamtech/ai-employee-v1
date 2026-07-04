@@ -14,6 +14,11 @@ Operational + acceptance scripts.
 | `repair.mjs` | done (P1) | Repair-command dispatcher → Manager tools (`/manager/tools/:name`); `list` to see commands. Money commands need `--confirm`; some are host actions. |
 | `scheduler-tick.mjs` | done (P2 fallback) | Dev/manual fallback that calls `/manager/scheduler/run` and records `hermes_job_runs` proof as `runner_type=scheduler_tick`. |
 | `hermes-jobs-runner.mjs` | done (P2) | Production-oriented Hermes Jobs entrypoint; calls `/manager/scheduler/run` with `runner_type=hermes_jobs` and optional `--external-job-id`. |
+| `local/check.mjs` | local | Host/env readiness check for Docker, buildx, Caddy, `.env`, Supabase keys, and runtime command. |
+| `local/build-hermes-image.mjs` | local | Builds the `hermes-agent` Docker image from `~/.hermes/hermes-agent` using buildx. |
+| `local/start-hermes-container.sh` | local | Runtime command invoked by the provisioner from a rendered profile; starts one Dockerized Hermes gateway/API server per employee. |
+| `local/bootstrap.mjs` | local | No-SMS local bootstrap: inserts a service-role verified phone, then calls real Manager `create_account` + `provision_employee`; requires `PROVISIONER_SKIP_SMS=1`. |
+| `local/chat.mjs` | local | Sends a web-chat owner turn to the employee created by `local/bootstrap.mjs`. |
 
 Repair commands map 1:1 to `wiki/MVP/old-build-plan/10-security-ops-observability.md` "Repair Commands".
 They are the sanctioned path for privileged ops — not ad-hoc shell/SQL.
@@ -40,6 +45,27 @@ Supabase pieces are `npm run test:integration`.
 For production-like local/tunnel use, set `PROFILE_VALIDATION_COMMAND` to
 `node infra/scripts/profile-validate.mjs .` so the provisioner validates generated profiles before
 starting a runtime.
+
+## Local no-SMS loop
+
+For the local VPS-faithful loop before Twilio is in the path:
+
+```bash
+cp .env.local.example .env
+set -a && source .env && set +a
+npm run local:check
+npm run local:build-hermes
+npm run local:browser-install
+npm run db:migrate
+npm run manager:dev
+npm run local:bootstrap
+npm run local:chat -- "Can you help price a small interior paint job?"
+```
+
+`PROVISIONER_SKIP_SMS=1` skips only Twilio webhook assignment and the first outbound SMS. The provisioner
+still renders the employee profile, writes Caddy config, starts a per-employee Dockerized Hermes runtime,
+and writes `runtime_endpoints` + sealed runtime secret. It fails closed in production and does not count as
+Twilio provider acceptance.
 
 ## Scheduler runner — Phase 2
 

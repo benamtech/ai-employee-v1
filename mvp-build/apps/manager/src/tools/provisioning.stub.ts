@@ -39,6 +39,10 @@ function firstDefined<T>(...values: Array<T | undefined | null>): T | undefined 
   return values.find((v): v is T => v !== undefined && v !== null);
 }
 
+function skipSmsProvisioning(): boolean {
+  return process.env.PROVISIONER_SKIP_SMS === "1" || process.env.PROVISIONER_SKIP_SMS === "true";
+}
+
 async function callProvisioner(req: ProvisionerRequest): Promise<ProvisionerResult> {
   const origin = requiredEnv("PROVISIONER_ORIGIN").replace(/\/$/, "");
   const token = requiredEnv("PROVISIONER_TOKEN");
@@ -201,6 +205,9 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
         api_server_key: apiServerKey,
       },
     });
+    const smsNumber = skipSmsProvisioning()
+      ? null
+      : (result.sms_number_e164 ?? process.env.TWILIO_TEST_NUMBER ?? null);
 
     await ctx.db.from("employees").update({
       status: "live",
@@ -211,7 +218,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
     await ctx.db.from("runtime_endpoints").insert({
       id: runtimeEndpointId,
       employee_id: employeeId,
-      sms_number_e164: result.sms_number_e164 ?? process.env.TWILIO_TEST_NUMBER ?? null,
+      sms_number_e164: smsNumber,
       twilio_webhook_url: result.twilio_webhook_url ?? webhookUrl,
       webchat_api_url: result.webchat_api_url ?? null,
       api_base_url: result.api_base_url ?? result.webchat_api_url ?? null,
@@ -253,7 +260,12 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
       action: "tool:provision_employee",
       resource: employeeId,
       result: "ok",
-      details: { provisioning_job_id: jobId, profile_package_key: packageKey, first_sms_sid: result.first_sms_sid },
+      details: {
+        provisioning_job_id: jobId,
+        profile_package_key: packageKey,
+        first_sms_sid: result.first_sms_sid ?? null,
+        sms_skipped: skipSmsProvisioning(),
+      },
     });
     return ok({
       account_id: input.account_id,
@@ -266,8 +278,12 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
         first_sms_sid: result.first_sms_sid ?? null,
         web_route: result.public_web_route ?? employeeWebRoute(employeeId),
       },
-      user_facing_summary_hint: "Employee provisioned and first live SMS sent.",
-      next_suggested_action: "Tell the owner to text the job they just walked.",
+      user_facing_summary_hint: skipSmsProvisioning()
+        ? "Employee provisioned for local web testing; SMS was skipped."
+        : "Employee provisioned and first live SMS sent.",
+      next_suggested_action: skipSmsProvisioning()
+        ? "Send a web chat message to the employee."
+        : "Tell the owner to text the job they just walked.",
       audit_id,
     });
   } catch (err) {

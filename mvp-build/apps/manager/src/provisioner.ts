@@ -31,6 +31,14 @@ function employeeNumber(): string {
   return number;
 }
 
+function skipSmsProvisioning(): boolean {
+  const skip = process.env.PROVISIONER_SKIP_SMS === "1" || process.env.PROVISIONER_SKIP_SMS === "true";
+  if (skip && process.env.NODE_ENV === "production") {
+    throw new Error("PROVISIONER_SKIP_SMS cannot be enabled in production.");
+  }
+  return skip;
+}
+
 export function registerProvisionerRoutes(app: Hono): void {
   app.get("/provision/health", (c) => c.json({ status: "ok" }));
 
@@ -45,27 +53,34 @@ export function registerProvisionerRoutes(app: Hono): void {
       const caddy = await writeCaddySnippet(req.params);
       logs.push(`caddy:${caddy}`);
 
-      const smsNumber = employeeNumber();
-      const webhook = await setIncomingSmsWebhook(smsNumber, req.params.webhook_url);
-      logs.push(`twilio_webhook:${webhook.phone_number_sid}`);
+      const skipSms = skipSmsProvisioning();
+      const smsNumber = skipSms ? null : employeeNumber();
+      if (smsNumber) {
+        const webhook = await setIncomingSmsWebhook(smsNumber, req.params.webhook_url);
+        logs.push(`twilio_webhook:${webhook.phone_number_sid}`);
+      } else {
+        logs.push("sms:skipped");
+      }
 
       const runtime = await runRuntimeStart(rendered.generated_path);
       logs.push(`runtime:${runtime}`);
 
-      const first = await sendSms({
-        to: req.params.owner_phone_e164,
-        from: smsNumber,
-        body: "I'm live. Text me the job you just walked, an estimate you need, or the office work you want off your plate.",
-      });
-      logs.push(`first_sms:${first.sid}`);
+      const first = smsNumber
+        ? await sendSms({
+          to: req.params.owner_phone_e164,
+          from: smsNumber,
+          body: "I'm live. Text me the job you just walked, an estimate you need, or the office work you want off your plate.",
+        })
+        : null;
+      if (first) logs.push(`first_sms:${first.sid}`);
 
       const result: ProvisionerResult = {
         status: "ok",
         profile_id: rendered.profile_id,
         generated_path: rendered.generated_path,
         workspace_dir: rendered.workspace_dir,
-        sms_number_e164: smsNumber,
-        twilio_webhook_url: req.params.webhook_url,
+        sms_number_e164: smsNumber ?? undefined,
+        twilio_webhook_url: smsNumber ? req.params.webhook_url : undefined,
         webchat_api_url: `http://localhost:${req.params.gateway_port}`,
         api_base_url: `http://localhost:${req.params.gateway_port}`,
         api_session_id: "amtech-owner-thread",
@@ -74,7 +89,7 @@ export function registerProvisionerRoutes(app: Hono): void {
         validation_status: "passed",
         validation_output: rendered.validation_output,
         smoke_output: runtime,
-        first_sms_sid: first.sid,
+        first_sms_sid: first?.sid,
         logs,
       };
       return c.json(result);

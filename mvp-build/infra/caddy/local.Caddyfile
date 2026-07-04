@@ -1,0 +1,19 @@
+# Local VPS-faithful Caddy proxy. Uses high ports so it can run without sudo:
+#   caddy run --config infra/caddy/local.Caddyfile
+
+http://amtech.localhost:2080 {
+	reverse_proxy localhost:3000
+}
+
+http://agent.amtech.localhost:2080 {
+	reverse_proxy localhost:3000
+}
+
+http://api.amtech.localhost:2080 {
+	reverse_proxy localhost:8080
+}
+
+# Generated local employee gateway snippets may be imported here if
+# CADDY_CLIENTS_DIR points at /tmp/amtech-local/caddy/clients.
+import /tmp/amtech-local/caddy/clients/*.caddy
+

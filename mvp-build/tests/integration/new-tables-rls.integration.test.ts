@@ -30,9 +30,10 @@ const toolInvocationId = `tinv_${suffix}`;
 const pricingId = `price_${suffix}`;
 const rollupId = `roll_${suffix}`;
 const budgetId = `budget_${suffix}`;
+const batchId = `batch_${suffix}`;
 
 // One seeded row per Manager-only table that owner-context columns exist on.
-const CONTROL_PLANE_TABLES = ["employee_turn_jobs", "channel_sessions", "delivery_decisions"] as const;
+const CONTROL_PLANE_TABLES = ["employee_turn_jobs", "channel_sessions", "delivery_decisions", "event_batches"] as const;
 const METERING_TABLES = [
   ["work_runs", workRunId],
   ["meter_events", meterEventId],
@@ -57,6 +58,7 @@ describe.skipIf(!hasDb)("RLS: owner cannot read Manager-only control-plane table
     await svc.from("employee_turn_jobs").insert({ id: `turn_${suffix}`, account_id: accountId, employee_id: employeeId, kind: "owner_web_chat", idempotency_key: `k_${suffix}`, status: "queued", input: {} });
     await svc.from("channel_sessions").insert({ id: `chs_${suffix}`, account_id: accountId, employee_id: employeeId, channel: "web" });
     await svc.from("delivery_decisions").insert({ id: `deld_${suffix}`, account_id: accountId, employee_id: employeeId, intent_key: `i_${suffix}`, move: "notify", chosen_channel: "none", reason: "test" });
+    await svc.from("event_batches").insert({ id: batchId, account_id: accountId, employee_id: employeeId, batch_key: `gmail:test_${suffix}`, status: "open", event_count: 1 });
     await svc.from("work_runs").insert({ id: workRunId, account_id: accountId, employee_id: employeeId, trigger_type: "system", status: "started" });
     await svc.from("meter_events").insert({ id: meterEventId, run_id: workRunId, account_id: accountId, employee_id: employeeId, category: "manager_tool", feature_key: "test", unit: "tool_call" });
     await svc.from("tool_invocations").insert({ id: toolInvocationId, run_id: workRunId, account_id: accountId, employee_id: employeeId, tool_name: "test_tool" });
@@ -77,6 +79,7 @@ describe.skipIf(!hasDb)("RLS: owner cannot read Manager-only control-plane table
     await svc.from("tool_invocations").delete().eq("id", toolInvocationId);
     await svc.from("meter_events").delete().eq("id", meterEventId);
     await svc.from("work_runs").delete().eq("id", workRunId);
+    await svc.from("event_batches").delete().eq("employee_id", employeeId);
     await svc.from("delivery_decisions").delete().eq("employee_id", employeeId);
     await svc.from("channel_sessions").delete().eq("employee_id", employeeId);
     await svc.from("employee_turn_jobs").delete().eq("employee_id", employeeId);

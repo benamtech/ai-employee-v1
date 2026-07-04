@@ -1,8 +1,9 @@
 import type { SupabaseClient } from "@amtech/db";
 import { assertWorkEventDescriptor, type WorkEventDescriptor } from "@amtech/shared";
-import { executeHermesTurn, resolveRuntimeApi } from "./hermes-client.js";
+import { executeHermesTurnStreaming, resolveRuntimeApi } from "./hermes-client.js";
 import { runEmployeeTurn } from "./turn-queue.js";
 import { recordExternalRuntimeRun, recordToolInvocation } from "./metering.js";
+import { publishProgress } from "./progress-bus.js";
 
 export interface WakeDescriptorPayload {
   account_id: string;
@@ -72,11 +73,11 @@ export async function wakeEmployeeForDescriptor(db: SupabaseClient, payload: Wak
       const api = await resolveRuntimeApi(db, payload.employee_id);
       let retryError: string | undefined;
       for (let attempt = 0; attempt < 2; attempt += 1) {
-        const res = await executeHermesTurn(api, {
+        const res = await executeHermesTurnStreaming(api, {
           input: "Produce the work-event descriptor for the internal event.",
           system_message: systemPrompt(payload, retryError),
           work_run_id: payload.run_id ?? null,
-        });
+        }, (p) => publishProgress(payload.employee_id, { run_id: payload.run_id ?? payload.source_event_id, verb: p.verb, state: p.state }));
         await recordExternalRuntimeRun(db, payload.run_id ?? null, { provider: "hermes", external_run_id: res.external_run_id ?? null });
         try {
           const descriptor = stampDescriptor(extractJson(res.text), payload);

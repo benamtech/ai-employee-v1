@@ -34,11 +34,20 @@ one employee; the Manager is the invisible backend control plane.
   and now have direct deterministic unit coverage + env-gated Postgres integration proof (turn serialization,
   new-table RLS). A `drain_employee_turns` scheduler lane handles straggler owner turns and persists routed
   replies. Live runtime/provider proof remains `pending`.
+- **Phase 5 triage/batching + live Work Surface + MCP-UI:** `source-wired` (2026-07-04). Rules-first
+  triage with priority + provider-burst batching → digest (`event-triage.ts`/`event-batching.ts`,
+  `flush_event_batches` lane, migration `0016`); live Manager SSE stream (`server.ts` `employeeStream`
+  + `employee-stream.ts`) woken by `progress-bus.ts` (the testable Realtime/NOTIFY stand-in) with cursor
+  catch-up + poll fallback; Hermes `/v1/runs/{id}/events` streaming → owner-safe work-verbs
+  (`work-verbs.ts`); **generative UI via MCP-UI** — agent `view` → Manager-compiled `ui://` `rawHtml`
+  `UIResource` (`ui-resources.ts`, `@mcp-ui/server`) rendered in a sandboxed iframe whose `postMessage`
+  intents route through the approval gate (`McpUiResource.tsx`). Live Hermes SSE + Supabase `0016` RLS
+  proof pending. See `../wiki/MVP/implementation-records/2026-07-04-phase-05-record.md`.
 - **Phase 6 metering foundation:** `source-wired`. Migration `0013` (six Manager-only ledgers +
   additive `run_id` columns), migration `0014` (turn-claim RPC `run_id` propagation), `lib/metering.ts`
   best-effort helpers, and `run_id` threaded through ingress → deliver → wake → turn-queue → router →
   owner-turn.
-- **Phases 5, 7–13:** `planned`. See `phases/README.md` for the dependency graph.
+- **Phases 7–13:** `planned`. See `phases/README.md` for the dependency graph.
 
 ## Layout
 
@@ -46,7 +55,7 @@ one employee; the Manager is the invisible backend control plane.
 apps/web/        Next.js — front door, owner Work Surface, signed artifact route
 apps/manager/    Node/TS control plane — tool registry, security libs, webhooks, server, orchestrator, provisioner
 packages/shared/ typed contracts (tool-contracts, work-events, routes, ids, profile-package, ...)
-packages/db/     migrations 0001–0008 + runner + service/anon clients
+packages/db/     migrations 0001–0016 + runner + service/anon clients
 packages/agent-template/  Hermes employee template (agent-as-files)
 infra/           caddy/, hermes/ (RUNBOOK), scripts/ (ops + acceptance/ harness)
 tests/           unit/ (mocks ok) · integration/ (real creds, env-gated) · golden-path/ (manual runbooks)
@@ -61,7 +70,7 @@ memory/          in-repo durable dev handoffs + writing protocol
 npm run typecheck && npm run test:unit && npm run build && npm run lint
 npm run test:integration   # env-gated; skips cleanly without live Supabase creds
 ```
-Current local truth: typecheck/build/lint pass; **38 unit files / 216 tests** pass; integration skips clean
+Current local truth: typecheck/build/lint pass; **44 unit files / 254 tests** pass; integration skips clean
 (9 env-gated checks without live Supabase creds).
 
 **Acceptance (Phase 1):**
@@ -100,6 +109,7 @@ code-state; `memory/` for the agentic-dev narrative + decisions + pointers.
 
 ## Git
 
-`mvp-build` is a **local-only** git repo (branch `main`, no remotes). Commit only when asked; never
-push (there is no remote). If asked to commit from the default branch for feature work, prefer a
-branch first. End commit messages with the Co-Authored-By trailer.
+`mvp-build/` is tracked inside the root **`GTM-RESEARCH`** git repo (branch `main`), which has a GitHub
+remote (`origin` → `benamtech/ai-employee-v1`). Commit only when asked; **branch off `main` first** for
+feature work and **do not push without an explicit ask**. End commit messages with the Co-Authored-By
+trailer.

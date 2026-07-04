@@ -27,6 +27,7 @@ export const MANAGER_API = {
   artifactResolve: (employeeId: string, artifactId: string) =>
     `/manager/artifacts/${employeeId}/${artifactId}/resolve`,
   employeeResources: (employeeId: string) => `/manager/employee/${employeeId}/resources`,
+  employeeStream: (employeeId: string) => `/manager/employee/${employeeId}/stream`,
   employeeHeartbeat: (employeeId: string) => `/manager/employee/${employeeId}/heartbeat`,
   webhooks: {
     twilioFrontDoor: "/webhooks/twilio/frontdoor",

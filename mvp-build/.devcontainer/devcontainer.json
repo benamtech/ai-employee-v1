@@ -1,0 +1,28 @@
+{
+  "name": "AMTECH MVP local test rig",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "workspaceFolder": "/workspace/mvp-build",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace/mvp-build,type=bind,consistency=cached",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    }
+  },
+  "mounts": [
+    "source=${localEnv:HOME}/.hermes,target=/home/node/.hermes,type=bind,consistency=cached",
+    "source=/tmp/amtech-local,target=/tmp/amtech-local,type=bind"
+  ],
+  "containerEnv": {
+    "AMTECH_MVP_ROOT": "/workspace/mvp-build",
+    "HERMES_HOME": "/home/node/.hermes"
+  },
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

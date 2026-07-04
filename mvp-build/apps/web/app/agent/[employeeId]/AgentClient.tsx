@@ -26,6 +26,14 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   const [chat, setChat] = useState<Array<{ role: "owner" | "employee"; body: string }>>([]);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
+  const [progress, setProgress] = useState<{ run_id: string; verb: string; state: string } | null>(null);
+
+  const mergeWorkEvent = useCallback((ev: ResourcePayload["work_events"][number]) => {
+    setRes((prev) => {
+      const others = prev.work_events.filter((w) => w.id !== ev.id);
+      return { ...prev, work_events: [ev, ...others] };
+    });
+  }, []);
 
   const refresh = useCallback(async () => {
     const r = await fetch(`/api/employee/${employeeId}/resources`, { method: "POST" });
@@ -46,18 +54,46 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     return () => { cancelled = true; window.clearInterval(timer); };
   }, [employeeId]);
   useEffect(() => {
-    const events = new EventSource(`/api/employee/${employeeId}/events`);
-    events.addEventListener("snapshot", (event) => {
-      try {
-        const json = JSON.parse((event as MessageEvent).data);
-        if (json?.account_id) setRes({ ...EMPTY, ...json });
-      } catch {
-        // Polling remains the fallback.
-      }
-    });
-    events.onerror = () => events.close();
-    return () => events.close();
-  }, [employeeId]);
+    let es: EventSource | null = null;
+    let closed = false;
+    let backoff = 1000;
+
+    function connect() {
+      if (closed) return;
+      es = new EventSource(`/api/employee/${employeeId}/events`);
+      es.addEventListener("snapshot", (event) => {
+        try {
+          const json = JSON.parse((event as MessageEvent).data);
+          const snap = json?.snapshot ?? json;
+          if (snap?.account_id) { setRes({ ...EMPTY, ...snap }); backoff = 1000; }
+        } catch { /* poll remains the fallback */ }
+      });
+      es.addEventListener("work_event", (event) => {
+        try {
+          const json = JSON.parse((event as MessageEvent).data);
+          if (json?.event?.id) mergeWorkEvent(json.event);
+        } catch { /* ignore */ }
+      });
+      es.addEventListener("work_progress", (event) => {
+        try {
+          const json = JSON.parse((event as MessageEvent).data);
+          if (json?.verb) setProgress({ run_id: json.run_id, verb: json.verb, state: json.state });
+          if (json?.state === "completed") window.setTimeout(() => setProgress(null), 1500);
+        } catch { /* ignore */ }
+      });
+      es.addEventListener("approval_update", () => { void refresh(); });
+      es.onerror = () => {
+        es?.close();
+        if (closed) return;
+        window.setTimeout(connect, backoff);
+        backoff = Math.min(backoff * 2, 15000);
+      };
+    }
+    connect();
+    // Poll fallback: keep state fresh even if the stream degrades.
+    const pollTimer = window.setInterval(() => { void refresh(); }, 20000);
+    return () => { closed = true; es?.close(); window.clearInterval(pollTimer); };
+  }, [employeeId, refresh, mergeWorkEvent]);
 
   const sendToEmployee = useCallback(async (text: string) => {
     setChat((c) => [...c, { role: "owner", body: text }]);
@@ -101,6 +137,11 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
         <p style={{ margin: `${tokens.space.xs}px 0 0`, color: tokens.color.textMuted, fontSize: tokens.font.small }}>
           Here to give you your evenings back — you approve, it does the work.
         </p>
+        {progress ? (
+          <p aria-live="polite" style={{ margin: `${tokens.space.sm}px 0 0`, fontSize: tokens.font.small, color: tokens.color.accent }}>
+            <span style={{ opacity: 0.7 }}>●</span> {progress.verb}…
+          </p>
+        ) : null}
       </header>
 
       <DailyBrief approvals={res.approvals} reminders={res.reminders} workEvents={res.work_events} invoices={res.stripe_invoices} />
