@@ -18,20 +18,9 @@ terminal:
 
 gateway:
   sms:
-    enabled: true
-    # The exact public URL Twilio signs — the security boundary.
-    webhook_url: "{{WEBHOOK_URL}}"
-    port: {{GATEWAY_PORT}}
-  api_server:
-    # Per-profile OpenAI-compatible API server for the webchat surface (Plane 2).
-    enabled: true
+    # Manager owns Twilio ingress, sender identity, delivery decisions, and approval gates.
+    enabled: false
 
 # tool_progress off for SMS — acknowledge, then deliver; never narrate tool steps.
 ui:
   tool_progress: "off"
-
-cron:
-  - schedule: "0 7 * * *"
-    skill: "daily-checkin"
-  - schedule: "0 13 * * *"
-    skill: "daily-checkin"

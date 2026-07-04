@@ -46,7 +46,7 @@ Therefore migration application and provider acceptance remain **PENDING**. Do n
 | Gmail OAuth/send/reply/replay | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`, `GMAIL_PUBSUB_TOPIC`, `PUBSUB_*` | sealed token ref, profile email, watch `historyId`/expiration, Gmail message/thread ids, Pub/Sub message id, replay result |
 | Twilio owner delivery | `TWILIO_*`, `EMPLOYEE_SMS_FROM` or `TWILIO_MESSAGING_SERVICE_SID` | outbound `MessageSid` |
 | Stripe Connect/invoice/webhook/replay | `STRIPE_SECRET_KEY=sk_test_...`, `STRIPE_CONNECT_CLIENT_ID`, `STRIPE_WEBHOOK_SECRET` | account id, account-link id/url, invoice id/url, signed webhook event id, replayed event id |
-| Hermes Jobs/runtime containment | `MANAGER_BASE_URL`, `MANAGER_INTERNAL_TOKEN`, `HERMES_API_TOKEN`, `HERMES_EVENT_PATH`, `HERMES_BACKEND_TYPE=docker` for pilots | job run proof, runtime health, validated descriptor from `wake_employee` |
+| Hermes Jobs/runtime containment | `MANAGER_BASE_URL`, `MANAGER_INTERNAL_TOKEN`, per-employee Hermes `API_SERVER_KEY` sealed by Manager, `HERMES_BACKEND_TYPE=docker` for pilots | job run proof, runtime health, validated descriptor from `wake_employee` |
 
 ## Next Implementation Inherits
 

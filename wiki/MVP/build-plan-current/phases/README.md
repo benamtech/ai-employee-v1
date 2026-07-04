@@ -54,11 +54,11 @@ authors structure, not progress. Do not upgrade a status without real proof ids 
 | 0 | [Baseline — current source-wired MVP](phase-00-baseline.md) | — | source-wired |
 | 1 | [Live Provider & Runtime Acceptance](phase-01-provider-runtime-acceptance.md) | 0 | pending |
 | 2 | [Runtime & Scheduler Productionization](phase-02-runtime-scheduler-productionization.md) | 1 | source-wired |
-| 3 | [Generic Ingress & Event Routing](phase-03-generic-ingress-event-routing.md) | 0 | planned |
-| 3A | [Channel, Session & Presence Layer](phase-03a-channel-session-presence-layer.md) | 0, 3 | planned |
-| 4 | [Live Employee Wake Path & Descriptors](phase-04-live-wake-path-descriptors.md) | 2, 3, 3A | planned |
+| 3 | [Generic Ingress & Event Routing](phase-03-generic-ingress-event-routing.md) | 0 | source-wired |
+| 3A | [Channel, Session & Presence Layer](phase-03a-channel-session-presence-layer.md) | 0, 3 | source-wired |
+| 4 | [Live Employee Wake Path & Descriptors](phase-04-live-wake-path-descriptors.md) | 2, 3, 3A | source-wired (TDD-hardened) / runtime pending |
 | 5 | [Triage, Batching & Live Work Surface Stream](phase-05-triage-batching-work-surface-stream.md) | 4 | planned |
-| 6 | [Metering Foundation](phase-06-metering-foundation.md) | 1 | planned |
+| 6 | [Metering Foundation](phase-06-metering-foundation.md) | 1 | source-wired |
 | 7 | [Metering Instrumentation](phase-07-metering-instrumentation.md) | 6 | planned |
 | 8 | [Metering Rollups, Budgets & Safe Summaries](phase-08-metering-rollups-budgets-summaries.md) | 7 | planned |
 | 9 | [Admin Foundations](phase-09-admin-foundations.md) | 1 | planned |

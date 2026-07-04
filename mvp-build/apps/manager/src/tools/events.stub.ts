@@ -23,6 +23,7 @@ import { stub, type ToolContext, type ToolHandler } from "./types.js";
 import { checkFeature, recordUsage } from "../lib/entitlements.js";
 import { writeAudit } from "../lib/audit.js";
 import { deliverEmployeeEvent } from "../lib/employee-events.js";
+import { ingestEvent } from "../events/ingress.js";
 import { orThrow, mustWrite } from "../lib/db.js";
 
 /** Approval action key that gates an owner-confirmed job reminder (Phase 5 loop). */
@@ -120,14 +121,16 @@ const sendEmployeeEvent: ToolHandler = async (ctx, raw) => {
   // Delivery routing resolves the owner phone from the account's verified phone
   // inside deliverEmployeeEvent — we deliberately do NOT forward a caller-supplied
   // owner_phone from normalized_payload, which would let payload content misroute.
-  const result = await deliverEmployeeEvent(ctx.db, {
+  const result = await ingestEvent(ctx.db, {
+    source: "manager",
+    payload: {
     account_id: input.account_id, employee_id: input.employee_id, event_type: input.event_type,
-    provider_id: input.provider_id ?? null, idempotency_key: input.idempotency_key ?? null,
+    provider_id: input.provider_id ?? null, idempotency_key: input.idempotency_key ?? `${input.event_type}:${input.provider_id ?? newId(ID_PREFIX.event)}`,
     normalized_payload: input.normalized_payload ?? {}, work_event_descriptor: input.work_event_descriptor,
     safe_summary: input.safe_summary,
     suggested_next_action: input.suggested_next_action, channel: input.channel,
-    actor: ctx.actor,
     routing_mode: input.routing_mode,
+    },
   });
   const audit_id = await writeAudit(ctx.db, {
     account_id: input.account_id, employee_id: input.employee_id, actor: ctx.actor,

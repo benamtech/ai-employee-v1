@@ -1,10 +1,10 @@
 # mvp-build — the AMTECH AI Employee MVP build
 
-Status: **Phase 0 baseline loop is source-wired (Gmail/Stripe test-mode/reminders + Phase 6/7 event-bus seams); the Phase 1 live-acceptance harness is built and locally verified; Phase 2 runtime/scheduler productionization is source-wired with Docker as the default runtime backend; provider/runtime acceptance is pending live creds + host proof.** This is where the AMTECH AI Employee MVP gets built.
+Status: **Phase 0 baseline loop, Phase 1 live-acceptance harness, Phase 2 runtime/scheduler productionization, and Phase 3 / 3A / 4-core live-employee source are wired locally; provider/runtime acceptance is pending live creds + host proof.** This is where the AMTECH AI Employee MVP gets built.
 
 **Agent? Start with [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the forward roadmap **[`../wiki/MVP/build-plan-current/phases/`](../wiki/MVP/build-plan-current/phases/)** (Phase 0 baseline + Phases 1–13) and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol). This repo is a local-only git repo (branch `main`, no remotes).
 
-Current reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)** (with [`../wiki/product-ai-employee-context.md`](../wiki/product-ai-employee-context.md) and [`../wiki/product-agent-platform-architecture.md`](../wiki/product-agent-platform-architecture.md)). Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**. For Phase 3/4 owner-surface work, also read **[`../wiki/MVP/phase-3-generative-ui-reframe.md`](../wiki/MVP/phase-3-generative-ui-reframe.md)** before changing web/SMS event rendering. Current implementation state: old artifact/approval Phase 2 wiring is in code; new-era Phase 2 runtime/scheduler productionization is source-wired (Docker-default backend, protected scheduler runner, job-run proof, runtime health snapshots); Phase 3 Gmail has source-level OAuth/send/watch/history/event seams, JWKS-authenticated Pub/Sub verification, typed work-event descriptors, and owner web/SMS rendering; Phase 4 Stripe has test-mode Connect/account-link/deposit-invoice/send/webhook seams; Phase 6/7 adds repair tools, source suppression, generic event-source registry seams, triage/batching tables, message-to-agent routing, and an SSE-shaped Work Surface adapter. Live provider/runtime acceptance is still pending.
+Current reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)** (with [`../wiki/product-ai-employee-context.md`](../wiki/product-ai-employee-context.md) and [`../wiki/product-agent-platform-architecture.md`](../wiki/product-agent-platform-architecture.md)). Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**. Current implementation state: old artifact/approval Phase 2 wiring is in code; new-era Phase 2 runtime/scheduler productionization is source-wired; Phase 3 generic ingress now routes Gmail/Stripe/manager events through adapters; Phase 3A has minimal presence-aware delivery decisions; Phase 4 core wakes real Hermes Sessions chat for Gmail reply descriptors. Live provider/runtime acceptance is still pending.
 
 Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). Current code has `usage_events`, `feature_checks`, and `audit_log`; production metering still needs run ids, typed meter events, wrapper instrumentation, rollups, and budget policies.
 
@@ -42,9 +42,9 @@ when no session is active, silent events record without push, and duplicate inte
 
 - Live provider/runtime acceptance is still pending real Supabase/Twilio/Hermes/Caddy/Gmail/PubSub/Stripe
   credentials, host setup, and proof ids.
-- Phase 3: generic ingress and event routing.
-- Phase 3A: Channel/Session/Presence router, currently the main session-management gap.
-- Phase 4: live employee wake path and employee-authored descriptors.
+- Phase 3: generic ingress and event routing is source-wired; live provider proof pending.
+- Phase 3A: minimal Channel/Session/Presence router is source-wired; live provider proof pending.
+- Phase 4: live employee wake path core is source-wired against Hermes Sessions; runtime proof pending.
 - Phase 5: triage, batching, and live Work Surface stream.
 - Phases 6-13: metering foundation/instrumentation/rollups, admin foundations/ops surfaces, AMTECH billing scaffold,
   LLM provider registry, and 1000-user operations.
@@ -131,7 +131,7 @@ Provider/runtime acceptance still requires real Supabase/Twilio/Hermes/Caddy/Gma
 Current local checks:
 
 - `npm run typecheck` passes.
-- `npm run test:unit` passes: **25 files / 124 tests** (includes the Phase 1 forged-request boundary test and Phase 2 runtime/scheduler tests).
+- `npm run test:unit` passes: **26 files / 128 tests** (includes forged-request, runtime/scheduler, ingress, router, and wake-path coverage).
 - `npm run test:integration` (env-gated RLS + cross-account artifact denial) skips cleanly without live Supabase creds.
 - `npm run build` passes.
 - `npm run lint` passes.

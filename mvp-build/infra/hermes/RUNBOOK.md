@@ -38,11 +38,18 @@ Each pass records `hermes_job_runs` proof; use the external Hermes job/run id wh
 `npm run scheduler:tick` remains the dev/manual fallback and calls the same Manager endpoint,
 but its rows are marked `runner_type=scheduler_tick`; those rows are not live Hermes job proof.
 
-## Message-to-agent event path (Phase 7 seam)
-For judgment events, Manager calls the per-employee Hermes API at
-`$HERMES_EVENT_PATH` (default `/events/work`) with a compact structured event payload.
-Hermes must return a validated `WorkEventDescriptor`; invalid descriptors go to the
-repair queue, not the owner.
+## Message-to-agent event path
+For judgment events, Manager talks to the per-employee Hermes API Server with bearer auth and a cached
+`GET /v1/capabilities` handshake. Runs are preferred when advertised (`POST /v1/runs`, then poll
+`GET /v1/runs/{run_id}`); `POST /api/sessions/{api_session_id}/chat` remains the synchronous fallback
+when Sessions chat is advertised. Manager sends `X-Hermes-Session-Key` on v1 calls when Hermes advertises
+session-key support; the key is account+employee scoped and stored on `runtime_endpoints.api_session_key`.
+
+The profile `.env` must set `API_SERVER_ENABLED=true`, `API_SERVER_KEY`, `API_SERVER_PORT`, and
+`API_SERVER_HOST=127.0.0.1`; Manager stores only the sealed API key reference. Hermes must return JSON
+that Manager parses into a validated `WorkEventDescriptor`; invalid descriptors go to the repair queue,
+not the owner. External Hermes run ids are proof/correlation fields on `work_runs`, not replacements for
+AMTECH's Manager-owned `work_runs.id`.
 
 ## MANUAL SMOKE TEST — gates Phase 0 "done"
 Prove the environment by hand before Phase 1 automates it:

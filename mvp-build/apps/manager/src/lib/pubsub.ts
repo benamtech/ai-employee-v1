@@ -129,6 +129,7 @@ export async function verifyPubSubJwt(authHeader: string | undefined | null): Pr
   const requireAuth = process.env.PUBSUB_REQUIRE_AUTH === "true";
 
   if (!audience) {
+    if (process.env.NODE_ENV === "production") return { ok: false, reason: "verification_required_but_unconfigured" };
     if (requireAuth) return { ok: false, reason: "verification_required_but_unconfigured" };
     return { ok: true, skipped: true };
   }

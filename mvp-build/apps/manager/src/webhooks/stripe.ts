@@ -7,10 +7,10 @@
  * Spec: 09-event-mesh-v1.md, 10-security-ops-observability.md.
  */
 import type { Hono } from "hono";
-import { EVENT_TYPES, ID_PREFIX, MANAGER_API, newId, type WorkEventDescriptor } from "@amtech/shared";
+import { EVENT_TYPES, ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
 import { serviceClient, type SupabaseClient } from "@amtech/db";
 import { verifyStripeSignature } from "../lib/stripe-signature.js";
-import { deliverEmployeeEvent } from "../lib/employee-events.js";
+import { ingestEvent } from "../events/ingress.js";
 
 export interface StripeEvent {
   id: string;
@@ -62,41 +62,21 @@ export async function recordAndProcessStripeEvent(db: SupabaseClient, event: Str
 
   const norm = normalizedStripeType(event.type);
   let delivered = false;
-  if (norm === EVENT_TYPES.stripeInvoicePaid) {
+  if (norm === EVENT_TYPES.stripeInvoicePaid || norm === EVENT_TYPES.stripeInvoiceSent) {
     const ctx = await resolveInvoiceContext(db, event);
     if (ctx) {
-      const amount = ctx.deposit_amount != null ? ` ($${(ctx.deposit_amount / 100).toFixed(2)})` : "";
-      const descriptor: WorkEventDescriptor = {
-        account_id: ctx.account_id,
-        employee_id: ctx.employee_id,
-        source_event_id: rowId,
-        move: "notify",
-        title: "Deposit paid",
-        summary: `The deposit invoice was paid${amount}.`,
-        deliverable: {
-          type: "job_folder",
-          title: "Job follow-through",
-          refs: {
-            stripe_event_id: event.id,
-            ...(ctx.estimate_id ? { estimate_artifact_id: ctx.estimate_id } : {}),
-          },
-          money: { involved: false },
-          reversible: true,
-          acceptance: ["acknowledge", "respond"],
+      const res = await ingestEvent(db, {
+        source: "stripe",
+        payload: {
+          account_id: ctx.account_id,
+          employee_id: ctx.employee_id,
+          stripe_event_id: event.id,
+          event_type: norm,
+          estimate_id: ctx.estimate_id,
+          deposit_amount: ctx.deposit_amount,
         },
-        suggested_next_action: "Confirm the job start with the customer and set a reminder.",
-        proof: { stripe_event_id: event.id },
-      };
-      const res = await deliverEmployeeEvent(db, {
-        account_id: ctx.account_id, employee_id: ctx.employee_id, event_type: norm,
-        provider_id: event.id, idempotency_key: `${norm}:${event.id}`,
-        normalized_payload: { stripe_event_id: event.id, related_estimate_id: ctx.estimate_id, deposit_amount: ctx.deposit_amount },
-        work_event_descriptor: descriptor,
-        safe_summary: `The deposit invoice was paid${amount}.`,
-        suggested_next_action: "Confirm the job start with the customer and set a reminder.",
-        channel: "sms", actor: "manager",
       });
-      delivered = !res.duplicate;
+      delivered = norm === EVENT_TYPES.stripeInvoicePaid && !res.duplicate;
     }
   }
 

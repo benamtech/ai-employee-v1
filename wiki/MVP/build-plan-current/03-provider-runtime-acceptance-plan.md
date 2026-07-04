@@ -22,8 +22,8 @@ Manager/runtime:
 - `MANAGER_BASE_URL`
 - `MANAGER_INTERNAL_TOKEN`
 - `PROVISIONER_TOKEN`
-- `HERMES_API_TOKEN`
-- `HERMES_EVENT_PATH`
+- per-employee `API_SERVER_KEY` sealed by Manager; `HERMES_API_TOKEN` only as local fallback
+- rendered Hermes profile `.env` with `API_SERVER_ENABLED=true`, `API_SERVER_PORT`, and `API_SERVER_HOST`
 - `HERMES_BACKEND_TYPE=docker` for first pilots
 
 Twilio:

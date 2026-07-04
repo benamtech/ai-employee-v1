@@ -53,6 +53,16 @@ export const ID_PREFIX = {
   repairQueue: "repair",
   eventBatch: "batch",
   jobRun: "jobrun",
+  runtimeSecret: "rtsec",
+  turnJob: "turn",
+  channelSession: "chs",
+  deliveryDecision: "deld",
+  workRun: "run",
+  meterEvent: "mev",
+  toolInvocation: "tinv",
+  meterPricing: "price",
+  usageRollup: "roll",
+  budgetPolicy: "budget",
 } as const;
 
 export type IdPrefix = (typeof ID_PREFIX)[keyof typeof ID_PREFIX];

@@ -148,12 +148,13 @@ const redeliverEmployeeEvent: ToolHandler = async (ctx, raw) => {
   } | null;
   const descriptor = event?.normalized_payload?.work_event_descriptor as WorkEventDescriptor | undefined;
   if (!event?.account_id || !event.employee_id) return failed("validation_failed", "Event does not have account/employee context.", { proof: { event_id: input.event_id } });
+  const suffix = Date.now().toString(36);
   const res = await deliverEmployeeEvent(ctx.db, {
     account_id: event.account_id,
     employee_id: event.employee_id,
     event_type: `${event.event_type}.redelivered`,
     provider_id: event.provider_id ?? event.id,
-    idempotency_key: `redeliver:${event.id}`,
+    idempotency_key: `redeliver:${event.id}#${suffix}`,
     normalized_payload: event.normalized_payload ?? {},
     work_event_descriptor: descriptor,
     safe_summary: descriptor?.summary ?? "Re-delivered employee event.",

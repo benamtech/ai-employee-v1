@@ -14,7 +14,7 @@ landscaping contractors, but provisioning must also accept other package keys.
 ```
 SOUL.md                       # employee persona + SMS voice (constant)
 config.yaml                   # Hermes profile config (terminal backend, models, ports)
-.env.tpl                      # per-profile env (secrets by reference; never raw)
+.env.tpl                      # source template; provisioner renders a real per-profile .env
 workspace/AGENTS.md           # operating policy, loaded every session (the confirmation gate)
 workspace/manager-tools.md    # AMTECH Manager tool-call contract for artifacts/approvals/connectors
 workspace/brain/business-brain.md  # pricing/rates/suppliers — starts thin, agent fills in
@@ -25,6 +25,9 @@ skills/daily-checkin/SKILL.md
 ```
 
 ## Tokens (filled from the manifest)
-`{{EMPLOYEE_NAME}}`, `{{BUSINESS_DISPLAY_NAME}}`, `{{BUSINESS_KIND}}`, `{{OWNER_NAME}}`, `{{OWNER_PHONE_E164}}`, `{{TIMEZONE}}`, `{{CLIENT_ID}}`, `{{GATEWAY_PORT}}`, `{{RUNTIME_BACKEND}}`, `{{EMPLOYEE_NUMBER_E164}}`, `{{WEBHOOK_URL}}`.
+`{{EMPLOYEE_NAME}}`, `{{BUSINESS_DISPLAY_NAME}}`, `{{BUSINESS_KIND}}`, `{{OWNER_NAME}}`, `{{OWNER_PHONE_E164}}`, `{{TIMEZONE}}`, `{{CLIENT_ID}}`, `{{GATEWAY_PORT}}`, `{{RUNTIME_BACKEND}}`, `{{EMPLOYEE_NUMBER_E164}}`, `{{WEBHOOK_URL}}`, `{{API_SERVER_KEY}}`.
+
+Manager owns SMS ingress and delivery. Hermes exposes the authenticated API server from `.env`; `config.yaml`
+does not configure the API server in current Hermes.
 
 > Runtime isolation: `terminal.backend: docker` is the default for production, VPS deployment, and production-like local testing. `local` is an explicit dev/demo fallback only; profile isolation is not process isolation.

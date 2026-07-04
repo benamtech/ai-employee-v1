@@ -1,0 +1,26 @@
+# Dependencies / build artifacts
+node_modules/
+.next/
+dist/
+out/
+*.tsbuildinfo
+coverage/
+.turbo/
+.vercel/
+hermes-data/
+
+# Secrets / env
+.env
+.env.*
+
+# Local / OS / logs
+.DS_Store
+*.log
+
+# Agent + tooling working dirs
+.claude/
+.agents/
+.codex/
+
+# Excluded per workspace decision
+site-design/

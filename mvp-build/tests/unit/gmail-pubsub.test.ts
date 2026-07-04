@@ -3,6 +3,8 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { gmailTools } from "../../apps/manager/src/tools/gmail.stub";
 import { decodePubSubPush, verifyPubSubJwt } from "../../apps/manager/src/lib/pubsub";
 import { sealTokenBundle } from "../../apps/manager/src/lib/gmail-tokens";
+import { sealSecret } from "../../apps/manager/src/lib/secrets";
+import { invalidateRuntimeCapabilities } from "../../apps/manager/src/lib/hermes-client";
 import type { ToolContext } from "../../apps/manager/src/tools/types";
 import { makeFakeDb, type FakeSupabase } from "./_helpers/fake-supabase";
 import { routerFetch } from "./_helpers/fetch-mock";
@@ -13,6 +15,7 @@ beforeAll(() => {
   process.env.GOOGLE_OAUTH_CLIENT_SECRET = "client-secret";
 });
 afterEach(() => {
+  invalidateRuntimeCapabilities({ runtime_endpoint_id: "rt_1" });
   vi.restoreAllMocks();
   delete process.env.PUBSUB_VERIFICATION_AUDIENCE;
   delete process.env.PUBSUB_REQUIRE_AUTH;
@@ -74,6 +77,8 @@ function seed(): FakeSupabase {
     connector_accounts: [{ id: "conn_1", account_id: "acct_1", employee_id: "emp_1", connector_key: "email", provider: "gmail", status: "connected", scopes: ["https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/gmail.readonly"], external_email: "shop@gmail.com", token_secret_ref: sealTokenBundle({ access_token: "at", refresh_token: "rt" }), token_expiry: FUTURE }],
     gmail_watches: [{ id: "watch_1", connector_id: "conn_1", last_history_id: "600", status: "active" }],
     email_threads: [{ id: "thr_1", connector_id: "conn_1", gmail_thread_id: "thr_known", customer_email: "jane@example.com", estimate_artifact_id: "art_1" }],
+    runtime_endpoints: [{ id: "rt_1", employee_id: "emp_1", api_base_url: "https://runtime.test", api_session_id: "amtech-owner-thread" }],
+    runtime_endpoint_secrets: [{ runtime_endpoint_id: "rt_1", api_key_ref: sealSecret("unit-hermes-key") }],
   });
 }
 
@@ -81,6 +86,9 @@ function historyRoutes() {
   return routerFetch([
     { match: "/history?", body: { historyId: "701", history: [{ messagesAdded: [{ message: { id: "m1", threadId: "thr_known" } }, { message: { id: "m2", threadId: "thr_unknown" } }] }] } },
     { match: "/messages/m1", body: { id: "m1", threadId: "thr_known", snippet: "Looks good, deposit is fine", payload: { headers: [{ name: "From", value: "jane@example.com" }] } } },
+    { match: "/v1/capabilities", body: { features: { session_chat: true } } },
+    { match: "/api/sessions/amtech-owner-thread/chat", body: { text: "```json\n{\"move\":\"question\",\"title\":\"Customer replied\",\"summary\":\"Jane said the deposit is fine.\",\"deliverable\":{\"type\":\"money_movement\",\"title\":\"Deposit invoice\",\"refs\":{\"gmail_message_id\":\"m1\"},\"leaves_business\":true,\"money\":{\"involved\":true},\"reversible\":false,\"acceptance\":[\"approve\",\"edit\",\"reject\",\"respond\"]},\"suggested_next_action\":\"Approve the deposit invoice or tell me how to reply.\"}\n```" } },
+    { match: "/api/sessions", body: { id: "amtech-owner-thread" } },
   ]);
 }
 

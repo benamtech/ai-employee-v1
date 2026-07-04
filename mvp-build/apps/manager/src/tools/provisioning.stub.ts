@@ -15,9 +15,11 @@ import {
   type ToolName,
 } from "@amtech/shared";
 import type { ToolHandler } from "./types.js";
+import { randomBytes } from "node:crypto";
 import { writeAudit } from "../lib/audit.js";
 import { checkFeature } from "../lib/entitlements.js";
 import { resolveRuntimeBackend } from "../lib/runtime-backend.js";
+import { sealSecret } from "../lib/secrets.js";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -27,6 +29,10 @@ function requiredEnv(name: string): string {
 
 function clientSlug(employeeId: string): string {
   return employeeId.replace(/^emp_/, "client-").slice(0, 40);
+}
+
+function hermesSessionKey(accountId: string, employeeId: string): string {
+  return `amtech:v1:account:${accountId}:employee:${employeeId}`;
 }
 
 function firstDefined<T>(...values: Array<T | undefined | null>): T | undefined {
@@ -105,6 +111,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
   const workspaceDir = `${requiredEnv("AMTECH_CLIENTS_DIR")}/${employeeId}/workspace`;
   const packageKey = manifest.profile_package_key ?? "contractor_estimator";
   const runtimeBackend = resolveRuntimeBackend();
+  const apiServerKey = randomBytes(32).toString("base64url");
 
   await ctx.db.from("employees").insert({
     id: employeeId,
@@ -191,6 +198,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
         seed_skills: manifest.seed_skills.length
           ? manifest.seed_skills
           : ((pkg?.default_skills as string[] | undefined) ?? []),
+        api_server_key: apiServerKey,
       },
     });
 
@@ -199,12 +207,16 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
       profile_id: result.profile_id ?? `client_${employeeId}`,
       web_route: result.public_web_route ?? employeeWebRoute(employeeId),
     }).eq("id", employeeId);
+    const runtimeEndpointId = newId(ID_PREFIX.runtime);
     await ctx.db.from("runtime_endpoints").insert({
-      id: newId(ID_PREFIX.runtime),
+      id: runtimeEndpointId,
       employee_id: employeeId,
       sms_number_e164: result.sms_number_e164 ?? process.env.TWILIO_TEST_NUMBER ?? null,
       twilio_webhook_url: result.twilio_webhook_url ?? webhookUrl,
       webchat_api_url: result.webchat_api_url ?? null,
+      api_base_url: result.api_base_url ?? result.webchat_api_url ?? null,
+      api_session_id: result.api_session_id ?? "amtech-owner-thread",
+      api_session_key: hermesSessionKey(input.account_id, employeeId),
       public_web_route: result.public_web_route ?? employeeWebRoute(employeeId),
       gateway_port: result.gateway_port ?? port,
       backend_type: runtimeBackend,
@@ -213,6 +225,12 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
         validation_status: result.validation_status,
         first_sms_sid: result.first_sms_sid,
       },
+    });
+    await ctx.db.from("runtime_endpoint_secrets").insert({
+      id: newId(ID_PREFIX.runtimeSecret),
+      runtime_endpoint_id: runtimeEndpointId,
+      employee_id: employeeId,
+      api_key_ref: sealSecret(apiServerKey),
     });
     await ctx.db.from("employee_profile_builds").update({
       generated_path: result.generated_path ?? null,

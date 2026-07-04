@@ -1,6 +1,6 @@
 # Phase 3 — Generic Ingress & Event Routing
 
-Status: planned
+Status: source-wired
 
 > **Production implementation plan:** [`phase-03-implementation-plan.md`](phase-03-implementation-plan.md)
 > (work items, target architecture, acceptance proof, forward seams).
@@ -49,4 +49,5 @@ live Hermes run. Channel choice is deliberately handed to Phase 3A, not embedded
 
 ## Status
 
-`planned`.
+`source-wired` locally in `mvp-build/`: Gmail, Stripe, and Manager events now enter through `events/ingress.ts`
+and source adapters; provider/live proof remains pending.

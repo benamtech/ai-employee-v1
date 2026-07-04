@@ -86,7 +86,8 @@ describe("recordAndProcessStripeEvent", () => {
     expect(res.normalized_type).toBe(EVENT_TYPES.stripeInvoiceSent);
     expect(res.delivered).toBe(false);
     expect(db.tables.stripe_webhook_events?.[0]?.processed).toBe(true);
-    expect(db.tables.inbound_events ?? []).toHaveLength(0);
+    expect(db.tables.inbound_events ?? []).toHaveLength(1);
+    expect(db.tables.delivery_decisions?.[0]?.chosen_channel).toBe("none");
   });
 
   it("stores an unknown event type with a null normalized type and no delivery", async () => {

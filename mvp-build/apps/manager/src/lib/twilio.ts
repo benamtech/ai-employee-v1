@@ -83,11 +83,13 @@ export async function sendSms(opts: {
   to: string;
   from?: string;
   body: string;
+  forceFrom?: boolean;
 }): Promise<{ sid: string; status: string }> {
   const c = creds();
   const form: Record<string, string> = { To: opts.to, Body: opts.body };
   const messagingService = process.env.TWILIO_MESSAGING_SERVICE_SID;
-  if (messagingService) form.MessagingServiceSid = messagingService;
+  if (opts.forceFrom && opts.from) form.From = opts.from;
+  else if (messagingService) form.MessagingServiceSid = messagingService;
   else if (opts.from) form.From = opts.from;
   else throw new Error("sendSms needs a From number or TWILIO_MESSAGING_SERVICE_SID.");
   const json = await twilioPost(

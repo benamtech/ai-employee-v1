@@ -1,14 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { deliverEmployeeEvent } from "../../apps/manager/src/lib/employee-events";
+import { invalidateRuntimeCapabilities } from "../../apps/manager/src/lib/hermes-client";
 import { listEventSources } from "../../apps/manager/src/events/registry";
-import { makeFakeDb } from "./_helpers/fake-supabase";
+import "../../apps/manager/src/events/adapters/index";
+import { sealSecret } from "../../apps/manager/src/lib/secrets";
+import { makeFakeDb, SCHEMA_UNIQUES } from "./_helpers/fake-supabase";
 import { routerFetch } from "./_helpers/fetch-mock";
 
 beforeEach(() => {
   delete process.env.TWILIO_MESSAGING_SERVICE_SID;
   delete process.env.EMPLOYEE_SMS_FROM;
+  process.env.SECRET_REF_MASTER_KEY = "unit-test-secret-ref-master-key";
 });
 afterEach(() => {
+  invalidateRuntimeCapabilities({ runtime_endpoint_id: "rt_1" });
   vi.restoreAllMocks();
 });
 
@@ -45,9 +50,15 @@ describe("event bus delivery", () => {
   });
 
   it("wakes the employee for judgment events and stores the returned descriptor", async () => {
-    const db = makeFakeDb({ runtime_endpoints: [{ employee_id: "emp_1", webchat_api_url: "https://runtime.test" }] });
+    const db = makeFakeDb({
+      employees: [{ id: "emp_1", account_id: "acct_1" }],
+      runtime_endpoints: [{ id: "rt_1", employee_id: "emp_1", api_base_url: "https://runtime.test", api_session_id: "amtech-owner-thread" }],
+      runtime_endpoint_secrets: [{ runtime_endpoint_id: "rt_1", api_key_ref: sealSecret("unit-hermes-key") }],
+    });
     vi.stubGlobal("fetch", routerFetch([
-      { match: "/events/work", body: { work_event_descriptor: { account_id: "acct_1", employee_id: "emp_1", move: "notify", title: "Paid", summary: "Deposit paid." } } },
+      { match: "/v1/capabilities", body: { features: { session_chat: true } } },
+      { match: "/api/sessions/amtech-owner-thread/chat", body: { text: "```json\n{\"move\":\"notify\",\"title\":\"Paid\",\"summary\":\"Deposit paid.\"}\n```" } },
+      { match: "/api/sessions", body: { id: "amtech-owner-thread" } },
     ]));
     const res = await deliverEmployeeEvent(db.asClient(), {
       account_id: "acct_1",
@@ -76,6 +87,78 @@ describe("event bus delivery", () => {
   });
 
   it("has concrete registered event sources", () => {
-    expect(listEventSources()).toEqual(["gmail", "manager", "stripe", "twilio"]);
+    expect(listEventSources()).toEqual(["gmail", "manager", "stripe"]);
+  });
+});
+
+describe("event bus — idempotency & internal direct delivery", () => {
+  const webActive = () => makeFakeDb({
+    channel_sessions: [{ id: "chs_1", employee_id: "emp_1", channel: "web", last_seen_at: new Date().toISOString() }],
+  }, { uniques: SCHEMA_UNIQUES });
+
+  const gatedDescriptor = {
+    account_id: "acct_1", employee_id: "emp_1", move: "question" as const, title: "Deposit",
+    summary: "Send the deposit invoice.",
+    deliverable: { type: "money_movement" as const, title: "Deposit invoice", refs: { estimate_artifact_id: "art_1" }, money: { involved: true }, leaves_business: true, reversible: false, acceptance: ["approve" as const] },
+  };
+
+  it("never double-delivers a redelivered event (one message, one approval)", async () => {
+    const db = webActive();
+    const params = { account_id: "acct_1", employee_id: "emp_1", event_type: "manager.custom", idempotency_key: "manager.custom:1", safe_summary: "x", actor: "manager" as const, work_event_descriptor: gatedDescriptor };
+    const first = await deliverEmployeeEvent(db.asClient(), params);
+    const second = await deliverEmployeeEvent(db.asClient(), params);
+    expect(first.duplicate).toBe(false);
+    expect(second.duplicate).toBe(true);
+    expect(db.tables.inbound_events).toHaveLength(1);
+    expect(db.tables.employee_messages).toHaveLength(1);
+    expect(db.tables.approvals).toHaveLength(1);
+  });
+
+  it("delivers an internal reminder descriptor to the active web surface", async () => {
+    const db = webActive();
+    const res = await deliverEmployeeEvent(db.asClient(), {
+      account_id: "acct_1", employee_id: "emp_1", event_type: "manager.reminder_due", provider_id: "rem_1",
+      idempotency_key: "reminder_due:rem_1", safe_summary: "Reminder: job tomorrow.", actor: "manager", channel: "sms",
+      work_event_descriptor: { account_id: "acct_1", employee_id: "emp_1", move: "notify", title: "Job reminder", summary: "Job is set for tomorrow.", deliverable: { type: "job_folder", title: "Job follow-through", refs: {}, money: { involved: false }, reversible: true, acceptance: ["acknowledge"] } },
+    });
+    expect(res.duplicate).toBe(false);
+    expect(res.delivery_status).toBe("delivered");
+    expect(db.tables.employee_messages?.[0]?.body).toContain("Job reminder");
+  });
+
+  it("sends a malformed employee descriptor to repair, never to the owner", async () => {
+    const db = makeFakeDb({
+      employees: [{ id: "emp_1", account_id: "acct_1" }],
+      runtime_endpoints: [{ id: "rt_1", employee_id: "emp_1", api_base_url: "https://runtime.test", api_session_id: "sess_1" }],
+      runtime_endpoint_secrets: [{ runtime_endpoint_id: "rt_1", api_key_ref: sealSecret("k") }],
+      channel_sessions: [{ id: "chs_1", employee_id: "emp_1", channel: "web", last_seen_at: new Date().toISOString() }],
+    }, { uniques: SCHEMA_UNIQUES });
+    process.env.SECRET_REF_MASTER_KEY = "unit-test-secret-ref-master-key";
+    // Both attempts return a nonconformant descriptor (empty title/summary).
+    vi.stubGlobal("fetch", routerFetch([
+      { match: "/v1/capabilities", body: { features: { session_chat: true } } },
+      { match: "/chat", body: { text: "```json\n{\"move\":\"notify\",\"title\":\"\",\"summary\":\"\"}\n```" } },
+      { match: "/api/sessions", body: { id: "sess_1" } },
+    ]));
+    const res = await deliverEmployeeEvent(db.asClient(), {
+      account_id: "acct_1", employee_id: "emp_1", event_type: "gmail.reply_received",
+      safe_summary: "Customer replied.", actor: "manager", routing_mode: "wake_employee",
+    });
+    expect(res.delivery_status).toBe("pending");
+    expect(db.tables.event_repair_queue?.[0]?.reason).toMatch(/^wake_employee_failed:/);
+    expect(db.tables.inbound_events?.[0]?.status).toBe("repair");
+    expect(db.tables.inbound_events?.[0]?.trace?.repair_id).toBeTruthy();
+    expect(db.tables.employee_messages ?? []).toHaveLength(0); // nothing surfaced to the owner
+  });
+
+  it("keeps a silent daily-brief off the interrupt channel (batched, no send)", async () => {
+    const db = webActive();
+    const res = await deliverEmployeeEvent(db.asClient(), {
+      account_id: "acct_1", employee_id: "emp_1", event_type: "manager.daily_brief", provider_id: "emp_1:2026-07-03",
+      idempotency_key: "daily_brief:emp_1:2026-07-03", safe_summary: "Daily brief.", actor: "manager", channel: "web", triage_hint: "silent",
+      work_event_descriptor: { account_id: "acct_1", employee_id: "emp_1", move: "notify", title: "Daily brief", summary: "Here is your day.", deliverable: { type: "plan", title: "Daily brief", refs: {}, money: { involved: false }, reversible: true, acceptance: ["acknowledge"] } },
+    });
+    expect(res.duplicate).toBe(false);
+    expect(db.tables.delivery_decisions?.[0]?.reason).toBe("silent");
   });
 });

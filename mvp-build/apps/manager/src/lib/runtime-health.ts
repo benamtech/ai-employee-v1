@@ -1,6 +1,7 @@
 import { ID_PREFIX, newId } from "@amtech/shared";
 import type { SupabaseClient } from "@amtech/db";
 import { isProductionRuntimeBackend, resolveRuntimeBackend, type RuntimeBackend } from "./runtime-backend.js";
+import { getHealth, getRuntimeCapabilities, resolveRuntimeApi, supportsRuns, supportsSessionChat } from "./hermes-client.js";
 
 export interface RuntimeHealthScope {
   account_id?: string;
@@ -18,14 +19,20 @@ export interface RuntimeHealthSnapshot {
   details: Record<string, unknown>;
 }
 
-async function ping(url: string | null | undefined): Promise<{ ok: boolean; status?: number; error?: string }> {
-  if (!url) return { ok: false, error: "missing_webchat_api_url" };
+async function pingHermes(db: SupabaseClient, employeeId: string): Promise<{ ok: boolean; status?: string; capabilities?: Record<string, unknown> | null; error?: string }> {
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4_000);
-    const res = await fetch(url, { method: "GET", signal: controller.signal });
-    clearTimeout(timeout);
-    return res.ok ? { ok: true, status: res.status } : { ok: false, status: res.status };
+    const api = await resolveRuntimeApi(db, employeeId);
+    const [health, capabilities] = await Promise.all([
+      getHealth(api),
+      getRuntimeCapabilities(api, { force: true }),
+    ]);
+    const capabilityOk = supportsRuns(capabilities) || supportsSessionChat(capabilities);
+    return {
+      ok: health.status === "ok" && capabilityOk,
+      status: health.status,
+      capabilities: capabilities as Record<string, unknown> | null,
+      error: capabilityOk ? undefined : "runtime_capability_missing:turn_surface",
+    };
   } catch (err) {
     return { ok: false, error: String((err as Error).message ?? err).slice(0, 120) };
   }
@@ -33,11 +40,11 @@ async function ping(url: string | null | undefined): Promise<{ ok: boolean; stat
 
 function statusFor(details: {
   backend_type: RuntimeBackend;
-  webchat_ok: boolean;
+  api_ok: boolean;
   sms_number_present: boolean;
   provisioning_state: string | null;
 }): RuntimeHealthSnapshot["status"] {
-  if (!details.webchat_ok || details.provisioning_state === "failed") return "unhealthy";
+  if (!details.api_ok || details.provisioning_state === "failed") return "unhealthy";
   if (!isProductionRuntimeBackend(details.backend_type) || !details.sms_number_present || details.provisioning_state !== "success") {
     return "degraded";
   }
@@ -68,11 +75,10 @@ export async function recordRuntimeHealthSnapshots(
       employee_id: string;
       backend_type?: string | null;
       sms_number_e164?: string | null;
-      webchat_api_url?: string | null;
       gateway_port?: number | null;
     };
     const backend = resolveRuntimeBackend(runtime.backend_type ?? undefined);
-    const webchat = await ping(runtime.webchat_api_url);
+    const hermes = await pingHermes(db, emp.id);
     const { data: jobRaw } = await db
       .from("provisioning_jobs")
       .select("state,failure_state")
@@ -85,9 +91,10 @@ export async function recordRuntimeHealthSnapshots(
       employee_status: emp.status ?? null,
       backend_type: backend,
       production_backend: isProductionRuntimeBackend(backend),
-      webchat_ok: webchat.ok,
-      webchat_status: webchat.status ?? null,
-      webchat_error: webchat.error ?? null,
+      api_ok: hermes.ok,
+      api_status: hermes.status ?? null,
+      api_error: hermes.error ?? null,
+      capabilities: hermes.capabilities ?? null,
       sms_number_present: Boolean(runtime.sms_number_e164),
       gateway_port: runtime.gateway_port ?? null,
       provisioning_state: provisioning?.state ?? null,
@@ -118,7 +125,7 @@ export async function recordRuntimeHealthSnapshots(
         checked_at: checkedAt,
         status,
         backend_type: backend,
-        webchat_ok: webchat.ok,
+        api_ok: hermes.ok,
         sms_number_present: Boolean(runtime.sms_number_e164),
       },
     }).eq("id", runtime.id);

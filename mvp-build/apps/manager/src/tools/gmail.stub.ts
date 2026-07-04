@@ -17,7 +17,6 @@ import {
   type StartEmailListenerInput,
   type SyncGmailHistoryInput,
   type ToolName,
-  type WorkEventDescriptor,
 } from "@amtech/shared";
 import { type ToolContext, type ToolHandler } from "./types.js";
 import { writeAudit } from "../lib/audit.js";
@@ -34,7 +33,7 @@ import {
 import { getFreshAccessToken, sealTokenBundle, tokenExpiryIso, type ConnectorTokenRow } from "../lib/gmail-tokens.js";
 import { base64url, buildMimeMessage } from "../lib/mime.js";
 import { downloadArtifactPdf } from "../lib/artifacts.js";
-import { deliverEmployeeEvent } from "../lib/employee-events.js";
+import { ingestEvent } from "../events/ingress.js";
 
 const DEFAULT_GMAIL_SCOPES = [
   "https://www.googleapis.com/auth/gmail.send",
@@ -623,39 +622,18 @@ async function processHistory(
 async function deliverReplies(ctx: ToolContext, connector: { account_id: string; employee_id: string }, processed: ProcessedReply[]): Promise<number> {
   let delivered = 0;
   for (const r of processed) {
-    const descriptor: WorkEventDescriptor = {
-      account_id: connector.account_id,
-      employee_id: connector.employee_id,
-      source_event_id: r.ieId,
-      move: "question",
-      title: "Customer replied",
-      summary: r.from
-        ? `${r.from} replied on the estimate thread: "${r.snippet}"`
-        : `A customer replied on the estimate thread: "${r.snippet}"`,
-      deliverable: {
-        type: "money_movement",
-        title: "Deposit invoice decision",
-        refs: {
-          gmail_message_id: r.messageId,
-          gmail_thread_id: r.threadId,
-          ...(r.thread.estimate_artifact_id ? { estimate_artifact_id: r.thread.estimate_artifact_id } : {}),
-        },
-        leaves_business: true,
-        money: { involved: true },
-        reversible: false,
-        acceptance: ["approve", "edit", "reject", "respond"],
+    const res = await ingestEvent(ctx.db, {
+      source: "gmail",
+      payload: {
+        account_id: connector.account_id,
+        employee_id: connector.employee_id,
+        inbound_email_event_id: r.ieId,
+        message_id: r.messageId,
+        thread_id: r.threadId,
+        from: r.from,
+        related_estimate_id: r.thread.estimate_artifact_id,
+        snippet: r.snippet,
       },
-      suggested_next_action: "Approve the deposit invoice, suggest a change, or tell me how to reply.",
-      proof: { gmail_message_id: r.messageId, gmail_thread_id: r.threadId },
-    };
-    const res = await deliverEmployeeEvent(ctx.db, {
-      account_id: connector.account_id, employee_id: connector.employee_id,
-      event_type: "gmail.reply_received", provider_id: r.messageId, idempotency_key: `gmail.reply_received:${r.messageId}`,
-      normalized_payload: { thread_id: r.threadId, message_id: r.messageId, from: r.from, related_estimate_id: r.thread.estimate_artifact_id, snippet: r.snippet },
-      work_event_descriptor: descriptor,
-      safe_summary: `New reply${r.from ? ` from ${r.from}` : ""} on the estimate thread: "${r.snippet}"`,
-      suggested_next_action: "Ask the owner whether to send the deposit invoice or schedule the job.",
-      channel: "sms", actor: "manager",
     });
     await ctx.db.from("inbound_email_events").update({ delivery_status: res.duplicate ? "duplicate" : "delivered" }).eq("id", r.ieId);
     if (!res.duplicate) delivered += 1;

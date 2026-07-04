@@ -58,9 +58,10 @@ Current factual state:
 - **Phase 0 baseline loop:** `source-wired`. Signup/claim, live employee path, estimate artifact, approved Gmail send seam, Gmail reply event seam, Stripe test-mode deposit seam, and internal reminder seams exist in code.
 - **Phase 1 live-acceptance harness:** `source-wired`; live gate `pending`. Preflight/report and 8 run-verifiers exist, but real provider/runtime proof ids are absent.
 - **New-era Phase 2 runtime/scheduler productionization:** `source-wired`; runtime gate `pending`. Docker-default backend policy, scheduler runner, `hermes_job_runs`, and `runtime_health_checks` exist.
-- **Phase 3/4/5/6/7 legacy/source seams:** Gmail, Stripe, reminders, repair tools, event triage/batching, `deliver_only`/`wake_employee`, event-source registry, and Work Surface SSE-shaped route are source-wired.
-- **Forward Phases 3-13 and Phase 3A:** planned/pending in `../wiki/MVP/build-plan-current/phases/`.
-- **Current priority:** session management around the Hermes employee: universal inbox, Channel/Session/Presence router, active-session-first routing, one employee/one number/one thread, no double delivery.
+- **Phase 3 / 3A / 4 live-employee source:** `source-wired`, **TDD-hardened (2026-07-03)**. Real Hermes Sessions chat client, DB-backed per-employee turn queue, generic ingress for Gmail/Stripe/manager events, Channel/Session/Presence router, and Gmail reply -> live wake -> validated descriptor path exist in code, now with direct unit coverage (fake-supabase enforces unique indexes + a faithful turn-claim rpc) and env-gated Postgres integration proof. A `drain_employee_turns` scheduler lane handles straggler owner turns and persists routed replies. **Two-door invariant:** external/untrusted sources enter via an `EventSourceAdapter` + `ingestEvent`; internal Manager-authored events call `deliverEmployeeEvent` directly.
+- **Phase 6 metering foundation:** `source-wired`. `0013` six Manager-only ledgers + additive `run_id` columns; `0014` keeps `run_id` crossing real turn-claim RPCs; `0015` adds stable Hermes session key + external runtime run correlation; `lib/metering.ts` best-effort helpers; one `run_id` threads ingress -> deliver -> wake -> turn-queue -> router -> owner-turn.
+- **Forward Phases 5-13:** planned/pending in `../wiki/MVP/build-plan-current/phases/`.
+- **Current priority:** live runtime/provider acceptance proof for the new Hermes Sessions path and provider event loop.
 
 Do not mark provider or runtime acceptance without real proof ids. Local tests do not prove live acceptance.
 
@@ -94,7 +95,7 @@ Hermes is the employee substrate:
 
 - `packages/agent-template/` is the AMTECH-authored Hermes profile package.
 - `apps/manager/src/provisioner.ts` and `apps/manager/src/lib/profile-renderer.ts` render package params into a per-employee profile.
-- `apps/manager/src/lib/runtime.ts` talks to the running employee through Hermes-compatible runtime endpoints.
+- `apps/manager/src/lib/hermes-client.ts` talks to real Hermes API Server endpoints; `runtime.ts` is now a compatibility wrapper around queued owner turns and rejects legacy invented endpoint paths.
 - `infra/hermes/RUNBOOK.md` documents local/manual Hermes setup and smoke testing.
 - `infra/scripts/hermes-jobs-runner.mjs` is the production-oriented scheduler entrypoint for Hermes Jobs.
 
@@ -156,9 +157,16 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/manager/src/provisioner.ts` | Production-shaped `POST /provision` and profile/package provisioning flow. |
 | `apps/manager/src/lib/profile-renderer.ts` | Renders profile package params into Hermes profile files. |
 | `apps/manager/src/lib/runtime-backend.ts` | Runtime backend policy; Docker default, `local` dev/demo only. |
-| `apps/manager/src/lib/runtime.ts` | Runtime delivery helpers: owner message delivery and `wake_employee` event calls expecting `WorkEventDescriptor`. |
+| `apps/manager/src/lib/runtime.ts` | Compatibility wrapper for queued owner turns; legacy invented endpoint paths fail closed. |
+| `apps/manager/src/lib/hermes-client.ts` | Authenticated Hermes API Server client for health, capabilities, canonical session creation, and Sessions chat turns. |
+| `apps/manager/src/lib/turn-queue.ts` | DB-backed per-employee turn queue/lease helpers for multi-instance-safe Hermes turn serialization. |
+| `apps/manager/src/lib/channel-router.ts` | Minimal Channel/Session/Presence router: heartbeat/SMS presence, delivery decisions, active-web-wins, silent record, SMS fallback. |
+| `apps/manager/src/lib/wake.ts` | Phase 4-core wake path: prompts Hermes for JSON descriptors, parses, stamps identity, validates, retries once, and repairs on failure. |
+| `apps/manager/src/lib/sms-sender.ts` | Dedicated employee-number sender resolution and production fail-closed sender identity. |
 | `apps/manager/src/lib/runtime-health.ts` | Runtime health snapshots for employee runtimes. |
-| `apps/manager/src/lib/scheduler-runner.ts` | Protected scheduler boundary for reminders, watch renewal, daily briefs, and runtime health checks. |
+| `apps/manager/src/lib/scheduler-runner.ts` | Protected scheduler boundary for reminders, watch renewal, daily briefs, runtime health checks, and the `drain_employee_turns` lane. |
+| `apps/manager/src/lib/turn-drain.ts` | Drains straggler owner-chat turns FIFO and delivers replies out-of-band via the channel router; event-wakes fail closed. |
+| `apps/manager/src/lib/metering.ts` | Phase 6 best-effort metering: `startWorkRun`/`finishWorkRun`/`recordMeterEvent`/`recordToolInvocation`; never aborts the owner-facing action. |
 | `apps/manager/src/tools/registry.ts` | Tool registry; fails if any shared `TOOL_NAMES` handler is missing. |
 | `apps/manager/src/tools/identity.stub.ts` | Phone verification, account creation, owner/session identity tools. |
 | `apps/manager/src/tools/provisioning.stub.ts` | `provision_employee`, provisioning status, profile package install/start seams. |
@@ -168,9 +176,10 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/manager/src/tools/events.stub.ts` | `send_employee_event`, reminders, daily briefs, scheduler-facing event/reminder tools. |
 | `apps/manager/src/tools/repair.stub.ts` | Repair queue operations: replay, relink, duplicate, redeliver, suppress, regenerate onboarding link. |
 | `apps/manager/src/tools/types.ts` | Tool handler/context types. |
-| `apps/manager/src/lib/employee-events.ts` | Central event delivery primitive: dedupe, triage, optional wake, descriptor binding, inbound event/message rows, SMS delivery. This is the current seam to be replaced/absorbed by Phase 3A router work. |
+| `apps/manager/src/lib/employee-events.ts` | Central event delivery primitive: dedupe, triage, atomic wake claim, descriptor binding, inbound event/message rows, and router-backed owner delivery. |
 | `apps/manager/src/lib/event-triage.ts` | Suppression, repair, batch-candidate decisions. |
-| `apps/manager/src/events/registry.ts` | Generic event-source registry seam. |
+| `apps/manager/src/events/registry.ts` | Generic event-source registry. |
+| `apps/manager/src/events/ingress.ts`, `apps/manager/src/events/adapters/*` | Primary generic ingress spine for Gmail, Stripe, and Manager events: structural verify, safe-fact normalize, route deliver-only vs wake. |
 | `apps/manager/src/webhooks/twilio.ts` | Twilio inbound SMS and signature boundary. |
 | `apps/manager/src/webhooks/gmail.ts` | Gmail/PubSub push verification and event entry. |
 | `apps/manager/src/webhooks/stripe.ts` | Stripe signed webhook verification and event entry. |
@@ -215,6 +224,11 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `packages/db/migrations/0008_phase2_runtime_scheduler.sql` | Runtime health checks and scheduler job-run metadata. |
 | `packages/db/migrations/0009_phase5_reminder_idempotency.sql` | Reminder idempotency backstop. |
 | `packages/db/migrations/0010_phase3_inbound_event_dedupe.sql` | Unique inbound event idempotency key backstop for at-least-once webhooks. |
+| `packages/db/migrations/0011_phase4_hermes_runtime.sql` | Runtime API fields, private `runtime_endpoint_secrets`, `employee_turn_jobs`/`employee_turn_locks` + claim/complete plpgsql. |
+| `packages/db/migrations/0012_phase3a_channel_router.sql` | `channel_sessions` + `delivery_decisions` (presence, delivery-decision proof). |
+| `packages/db/migrations/0013_phase6_metering.sql` | Six Manager-only metering ledgers (`work_runs`, `meter_events`, `tool_invocations`, `meter_pricing_versions`, `usage_rollups_daily`, `budget_policies`) + additive `run_id` columns. |
+| `packages/db/migrations/0014_phase4_turn_claim_run_id.sql` | Recreates turn-claim RPCs so `run_id` crosses the real Postgres claim boundary for the drain lane. |
+| `packages/db/migrations/0015_hermes_runs_capabilities_alignment.sql` | Adds stable Hermes session-key storage and external Hermes run id correlation on Manager-owned `work_runs`. |
 
 ### Hermes profile package
 
@@ -311,15 +325,19 @@ apps/web/app/agent/[employeeId]/AgentClient.tsx
   -> apps/web/app/api/employee/[employeeId]/message/route.ts
   -> apps/manager/src/server.ts /manager/employee/:employeeId/message
   -> apps/manager/src/lib/owner-session.ts
-  -> apps/manager/src/lib/runtime.ts deliverToRuntime()
+  -> apps/manager/src/lib/runtime.ts deliverOwnerTurnToRuntime()
+  -> apps/manager/src/lib/turn-queue.ts
+  -> apps/manager/src/lib/hermes-client.ts /api/sessions/{id}/chat
   -> Hermes employee runtime
 
 apps/manager/src/webhooks/twilio.ts
-  -> apps/manager/src/lib/runtime.ts deliverToRuntime()
+  -> apps/manager/src/lib/runtime.ts deliverOwnerTurnToRuntime()
+  -> apps/manager/src/lib/turn-queue.ts
+  -> apps/manager/src/lib/hermes-client.ts /api/sessions/{id}/chat
   -> Hermes employee runtime
 ```
 
-Current gap: output routing is not yet governed by the planned Channel/Session/Presence router.
+Router-backed employee-initiated delivery now records `delivery_decisions`; direct owner-turn replies stay on the originating channel.
 
 ### Estimate artifact and approval
 
@@ -380,9 +398,10 @@ still needs real Hermes job proof.
 ```text
 provider/internal/source event
   -> apps/manager/src/webhooks/* OR scheduler/tools
-  -> apps/manager/src/events/registry.ts
+  -> apps/manager/src/events/ingress.ts + events/adapters/*
   -> apps/manager/src/lib/employee-events.ts
   -> apps/manager/src/lib/event-triage.ts
+  -> apps/manager/src/lib/channel-router.ts
   -> apps/manager/src/tools/repair.stub.ts
   -> packages/shared/src/work-events.ts
   -> apps/web/app/agent/[employeeId]/*
@@ -407,11 +426,12 @@ delivery-decision proof rows, and one acceptance primitive across SMS/web/voice.
 | 0 Baseline | source-wired | `README.md`, implementation records, existing apps/packages. |
 | 1 Provider/runtime acceptance | harness source-wired, live pending | `infra/scripts/acceptance/*`, `../wiki/MVP/build-plan-current/03-provider-runtime-acceptance-plan.md`. |
 | 2 Runtime/scheduler productionization | source-wired, runtime pending | `runtime-backend.ts`, `runtime-health.ts`, `scheduler-runner.ts`, `infra/scripts/hermes-jobs-runner.mjs`. |
-| 3 Generic ingress/event routing | planned | `employee-events.ts`, `events/registry.ts`, `event-triage.ts`, migration `0010`, phase doc. |
-| 3A Channel/Session/Presence | planned; current priority | `../wiki/MVP/agent-inbox-and-channel-architecture.md`, `phase-03a-channel-session-presence-layer.md`, web/SMS message routes. |
-| 4 Live wake path/descriptors | planned | `runtime.ts`, `work-events.ts`, `employee-events.ts`. |
+| 3 Generic ingress/event routing | source-wired, live pending | `events/ingress.ts`, `events/adapters/*`, `employee-events.ts`, migration `0010`, phase doc. |
+| 3A Channel/Session/Presence | source-wired, live pending | `channel-router.ts`, `channel_sessions`, `delivery_decisions`, web heartbeat, SMS presence. |
+| 4 Live wake path/descriptors | source-wired (TDD-hardened), runtime pending | `hermes-client.ts`, `turn-queue.ts`, `wake.ts`, `turn-drain.ts`, `work-events.ts`, `employee-events.ts`, migrations `0011`-`0012`, `0014`-`0015`. |
 | 5 Triage/batching/live stream | planned | `event-triage.ts`, Work Surface SSE route, Work Surface client. |
-| 6-8 Metering | planned | `docs/metering-*.md`, `entitlements.ts`, `usage_events`, `feature_checks`, `audit_log`. |
+| 6 Metering foundation | source-wired | `lib/metering.ts`, migrations `0013`-`0015`, `run_id` threading; `docs/metering-*.md`. |
+| 7-8 Metering instrumentation/rollups | planned | `docs/metering-*.md`, `entitlements.ts`, `usage_events`, `feature_checks`, `audit_log`. |
 | 9-10 Admin | planned | `docs/admin-*.md`, provisioning/runtime health tables. |
 | 11 Billing scaffold | planned | Admin docs; keep separate from owner Stripe Connect payments. |
 | 12 LLM provider registry | planned | Orchestrator model adapter and metering/admin plans. |
@@ -431,8 +451,9 @@ npm run acceptance:preflight
 npm run acceptance:report
 ```
 
-Expected local truth as of the current records: typecheck/build/lint pass, 25 unit files / 124 tests pass,
-integration skips cleanly without live Supabase creds, acceptance reports no fabricated proof until live env exists.
+Expected local truth as of the current records: typecheck/build/lint pass, 38 unit files / 216 tests pass,
+integration skips cleanly without live Supabase creds (9 env-gated checks), acceptance reports no fabricated
+proof until live env exists.
 
 ## 10. Update rules
 

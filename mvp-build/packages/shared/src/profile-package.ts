@@ -40,6 +40,7 @@ export interface ProfileBuildParams {
   top_workflows: string[];
   tools_mentioned: string[];
   seed_skills: string[];
+  api_server_key?: string;
 }
 
 export interface ProvisionerRequest {
@@ -58,6 +59,9 @@ export interface ProvisionerResult {
   sms_number_e164?: string;
   twilio_webhook_url?: string;
   webchat_api_url?: string;
+  api_base_url?: string;
+  api_key_ref?: string;
+  api_session_id?: string;
   public_web_route?: string;
   gateway_port?: number;
   validation_status?: "passed" | "failed";

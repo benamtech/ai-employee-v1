@@ -26,6 +26,7 @@
     "scheduler:tick": "node infra/scripts/scheduler-tick.mjs",
     "scheduler:hermes-jobs": "node infra/scripts/hermes-jobs-runner.mjs",
     "smoke:hermes": "node infra/scripts/hermes-smoke.mjs",
+    "smoke:live-employee": "node infra/scripts/acceptance/run9-live-employee.mjs",
     "smoke:phase01": "node infra/scripts/acceptance/run2-provision.mjs",
     "acceptance:preflight": "node infra/scripts/acceptance/preflight.mjs",
     "acceptance:report": "node infra/scripts/acceptance/report.mjs",

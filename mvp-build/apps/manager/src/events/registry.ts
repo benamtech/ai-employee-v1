@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@amtech/db";
+import type { WorkEventDescriptor } from "@amtech/shared";
 
 export interface NormalizedEvent {
   account_id?: string | null;
@@ -8,6 +9,11 @@ export interface NormalizedEvent {
   idempotency_key: string;
   normalized_payload: Record<string, unknown>;
   safe_summary: string;
+  suggested_next_action?: string;
+  triage_hint?: "silent";
+  work_event_descriptor?: WorkEventDescriptor;
+  routing_mode?: "deliver_only" | "wake_employee";
+  channel?: "sms" | "web" | "voice";
 }
 
 export interface EventSourceAdapter<T = unknown> {
@@ -31,23 +37,6 @@ export function listEventSources(): string[] {
   return [...adapters.keys()].sort();
 }
 
-registerEventSource({
-  source: "manager",
-  async verify() { return { ok: true }; },
-  async normalize(_db, input) { return input as NormalizedEvent; },
-  dedupeKey(event) { return event.idempotency_key; },
-});
-
-for (const source of ["gmail", "stripe", "twilio"] as const) {
-  registerEventSource({
-    source,
-    async verify(input) {
-      const event = input as Partial<NormalizedEvent>;
-      return event.event_type && event.idempotency_key
-        ? { ok: true }
-        : { ok: false, reason: "normalized_event_required" };
-    },
-    async normalize(_db, input) { return input as NormalizedEvent; },
-    dedupeKey(event) { return event.idempotency_key; },
-  });
-}
+// The `manager` source adapter is registered once, in ./adapters/manager.ts (strict
+// field verification). It is intentionally NOT registered here — a second inline
+// registration made behavior depend on import order.

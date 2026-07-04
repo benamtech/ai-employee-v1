@@ -1,6 +1,6 @@
 # Phase 6 — Metering Foundation
 
-Status: planned
+Status: source-wired
 
 ## Goal / Module
 
@@ -44,4 +44,11 @@ The ledger + `run_id` spine that Phase 7 instruments at every chokepoint and Pha
 
 ## Status
 
-`planned`.
+`source-wired` (2026-07-03). Migration `0013` adds the six ledgers (all RLS-on/no-policy, Manager-only)
+plus additive `run_id` columns on `inbound_events`/`delivery_decisions`/`employee_turn_jobs`.
+`apps/manager/src/lib/metering.ts` provides best-effort `startWorkRun`/`finishWorkRun`/`recordMeterEvent`/
+`recordToolInvocation`. A single `run_id` threads ingress → deliver → wake → turn-queue → router →
+owner-turn, proven in `tests/unit/run-id-chain.test.ts`; migration `0014` keeps `run_id` crossing the real
+turn-claim RPC boundary for the drain lane. Env-gated RLS assertions are authored for all six ledgers and
+pending live Supabase. Phase 7 instrumentation / Phase 8 rollups remain `planned`. See
+`../../implementation-records/2026-07-03-phase-04-hardening-and-phase-06-record.md`.

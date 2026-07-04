@@ -67,6 +67,8 @@ export function registerProvisionerRoutes(app: Hono): void {
         sms_number_e164: smsNumber,
         twilio_webhook_url: req.params.webhook_url,
         webchat_api_url: `http://localhost:${req.params.gateway_port}`,
+        api_base_url: `http://localhost:${req.params.gateway_port}`,
+        api_session_id: "amtech-owner-thread",
         public_web_route: `/agent/${req.employee_id}`,
         gateway_port: req.params.gateway_port,
         validation_status: "passed",

@@ -1,6 +1,6 @@
 # Phase 3A — Channel, Session & Presence Layer
 
-Status: planned
+Status: source-wired
 
 > **Architecture context:** [`../../agent-inbox-and-channel-architecture.md`](../../agent-inbox-and-channel-architecture.md)
 > locks the model: source is orthogonal to channel, the active Hermes session is first-class, and the Manager owns the
@@ -75,4 +75,5 @@ can stream/batch over stable delivery decisions instead of ad hoc per-surface st
 
 ## Status
 
-`planned`.
+`source-wired` locally in `mvp-build/`: minimal web heartbeat/SMS presence, `delivery_decisions`, and
+active-web-wins routing are implemented; live provider proof remains pending.

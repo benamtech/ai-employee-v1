@@ -4,12 +4,14 @@ import type { ToolContext } from "../tools/types.js";
 import { eventTools } from "../tools/events.stub.js";
 import { gmailTools } from "../tools/gmail.stub.js";
 import { recordRuntimeHealthSnapshots } from "./runtime-health.js";
+import { drainQueuedTurns } from "./turn-drain.js";
 
 export const SCHEDULER_JOB_KEYS = [
   "dispatch_due_reminders",
   "renew_expiring_watches",
   "dispatch_daily_briefs",
   "runtime_health_checks",
+  "drain_employee_turns",
 ] as const;
 
 export type SchedulerJobKey = (typeof SCHEDULER_JOB_KEYS)[number];
@@ -117,6 +119,14 @@ export async function runSchedulerJob(
         healthy: health.healthy,
         degraded: health.degraded,
         unhealthy: health.unhealthy,
+      };
+    } else if (key === "drain_employee_turns") {
+      const drained = await drainQueuedTurns(db, { limit: input.limit });
+      proof = {
+        drained: drained.length,
+        delivered: drained.filter((r) => r.status === "delivered").length,
+        failed: drained.filter((r) => r.status === "failed").length,
+        skipped: drained.filter((r) => r.status === "skipped").length,
       };
     } else {
       const envelope = await callEnvelopeJob(key, {

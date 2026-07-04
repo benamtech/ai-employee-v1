@@ -32,6 +32,8 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
     WORKSPACE_DIR: params.workspace_dir,
     WEBHOOK_URL: params.webhook_url,
     GATEWAY_PORT: String(params.gateway_port),
+    EMPLOYEE_NUMBER_E164: process.env.TWILIO_EMPLOYEE_NUMBER ?? process.env.TWILIO_TEST_NUMBER ?? "",
+    API_SERVER_KEY: params.api_server_key ?? "",
     TOP_WORKFLOWS: params.top_workflows.join(", "),
     TOOLS_MENTIONED: params.tools_mentioned.join(", "),
     SEED_SKILLS: params.seed_skills.join(", "),
@@ -60,7 +62,7 @@ async function copyRendered(src: string, dst: string, params: ProfileBuildParams
     await mkdir(dst, { recursive: true });
     for (const entry of await readdir(src)) {
       if (entry === "node_modules" || entry === "dist" || entry === ".next") continue;
-      await copyRendered(join(src, entry), join(dst, entry === ".env.tpl" ? ".env.EXAMPLE" : entry), params);
+      await copyRendered(join(src, entry), join(dst, entry === ".env.tpl" ? ".env" : entry), params);
     }
     return;
   }

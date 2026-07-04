@@ -36,6 +36,16 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
 
   useEffect(() => { void refresh(); }, [refresh]);
   useEffect(() => {
+    let cancelled = false;
+    async function beat() {
+      if (cancelled) return;
+      await fetch(`/api/employee/${employeeId}/heartbeat`, { method: "POST" }).catch(() => {});
+    }
+    void beat();
+    const timer = window.setInterval(() => { void beat(); }, 30_000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [employeeId]);
+  useEffect(() => {
     const events = new EventSource(`/api/employee/${employeeId}/events`);
     events.addEventListener("snapshot", (event) => {
       try {

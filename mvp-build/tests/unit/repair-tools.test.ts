@@ -38,7 +38,8 @@ describe("Phase 6 repair tools", () => {
     const first = await repairTools.redeliver_employee_event!(ctx(db), { event_id: "evt_1" });
     const second = await repairTools.redeliver_employee_event!(ctx(db), { event_id: "evt_1" });
     expect(first.status).toBe("ok");
-    expect(second.proof.duplicate).toBe(true);
+    expect(second.proof.duplicate).toBe(false);
+    expect(db.tables.inbound_events).toHaveLength(3);
   });
 
   it("replays a Stripe event fetched by provider id", async () => {

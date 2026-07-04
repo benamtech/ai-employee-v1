@@ -29,7 +29,16 @@ one employee; the Manager is the invisible backend control plane.
 - **Phase 2 runtime/scheduler productionization:** `source-wired` (Docker-default backend policy,
   Manager scheduler runner, `hermes_job_runs` proof writes, `runtime_health_checks` snapshots);
   live `runtime-accepted` gate is still `pending` real Docker/Hermes Jobs proof.
-- **Phases 3–13:** `planned`. See `phases/README.md` for the dependency graph.
+- **Phase 3 / 3A / 4:** `source-wired` locally, **TDD-hardened (2026-07-03)**. Real Hermes Sessions
+  client, DB-backed turn queue, generic ingress, channel router, and Gmail reply wake descriptors are wired
+  and now have direct deterministic unit coverage + env-gated Postgres integration proof (turn serialization,
+  new-table RLS). A `drain_employee_turns` scheduler lane handles straggler owner turns and persists routed
+  replies. Live runtime/provider proof remains `pending`.
+- **Phase 6 metering foundation:** `source-wired`. Migration `0013` (six Manager-only ledgers +
+  additive `run_id` columns), migration `0014` (turn-claim RPC `run_id` propagation), `lib/metering.ts`
+  best-effort helpers, and `run_id` threaded through ingress → deliver → wake → turn-queue → router →
+  owner-turn.
+- **Phases 5, 7–13:** `planned`. See `phases/README.md` for the dependency graph.
 
 ## Layout
 
@@ -52,7 +61,8 @@ memory/          in-repo durable dev handoffs + writing protocol
 npm run typecheck && npm run test:unit && npm run build && npm run lint
 npm run test:integration   # env-gated; skips cleanly without live Supabase creds
 ```
-Current local truth: typecheck/build/lint pass; **25 unit files / 124 tests** pass; integration skips clean.
+Current local truth: typecheck/build/lint pass; **38 unit files / 216 tests** pass; integration skips clean
+(9 env-gated checks without live Supabase creds).
 
 **Acceptance (Phase 1):**
 ```

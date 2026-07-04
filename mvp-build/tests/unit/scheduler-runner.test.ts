@@ -6,10 +6,12 @@ import { routerFetch } from "./_helpers/fetch-mock";
 beforeEach(() => {
   delete process.env.TWILIO_MESSAGING_SERVICE_SID;
   delete process.env.EMPLOYEE_SMS_FROM;
+  delete process.env.HERMES_API_TOKEN;
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
+  delete process.env.HERMES_API_TOKEN;
 });
 
 describe("scheduler runner", () => {
@@ -71,12 +73,16 @@ describe("scheduler runner", () => {
         employee_id: "emp_1",
         backend_type: "docker",
         sms_number_e164: "+15555550199",
-        webchat_api_url: "https://runtime.test/health",
+        api_base_url: "https://runtime.test",
         gateway_port: 8101,
       }],
       provisioning_jobs: [{ id: "pjob_1", account_id: "acct_1", employee_id: "emp_1", state: "success" }],
     });
-    vi.stubGlobal("fetch", routerFetch([{ match: "/health", body: { status: "ok" } }]));
+    process.env.HERMES_API_TOKEN = "unit-hermes-key";
+    vi.stubGlobal("fetch", routerFetch([
+      { match: "/v1/capabilities", body: { features: { session_chat: true } } },
+      { match: "/health", body: { status: "ok" } },
+    ]));
 
     const result = await runSchedulerCycle(db.asClient(), { job_key: "runtime_health_checks", runner_type: "hermes_jobs" });
 
@@ -84,5 +90,31 @@ describe("scheduler runner", () => {
     expect(db.tables.runtime_health_checks).toHaveLength(1);
     expect(db.tables.runtime_health_checks?.[0]?.status).toBe("healthy");
     expect(db.tables.hermes_job_runs?.[0]?.proof.checked).toBe(1);
+  });
+
+  it("marks runtime health unhealthy when Hermes capabilities do not advertise a turn surface", async () => {
+    const db = makeFakeDb({
+      employees: [{ id: "emp_1", account_id: "acct_1", status: "live" }],
+      runtime_endpoints: [{
+        id: "rt_1",
+        employee_id: "emp_1",
+        backend_type: "docker",
+        sms_number_e164: "+15555550199",
+        api_base_url: "https://runtime.test",
+        gateway_port: 8101,
+      }],
+      provisioning_jobs: [{ id: "pjob_1", account_id: "acct_1", employee_id: "emp_1", state: "success" }],
+    });
+    process.env.HERMES_API_TOKEN = "unit-hermes-key";
+    vi.stubGlobal("fetch", routerFetch([
+      { match: "/v1/capabilities", body: { features: {} } },
+      { match: "/health", body: { status: "ok" } },
+    ]));
+
+    const result = await runSchedulerCycle(db.asClient(), { job_key: "runtime_health_checks", runner_type: "hermes_jobs" });
+
+    expect(result.results[0]?.status).toBe("ok");
+    expect(db.tables.runtime_health_checks?.[0]?.status).toBe("unhealthy");
+    expect(db.tables.runtime_health_checks?.[0]?.details.api_error).toBe("runtime_capability_missing:turn_surface");
   });
 });

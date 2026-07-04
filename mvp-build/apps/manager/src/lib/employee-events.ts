@@ -15,9 +15,10 @@ import { ID_PREFIX, assertWorkEventDescriptor, newId, renderWorkEventSms, workDe
 import type { SupabaseClient } from "@amtech/db";
 import { writeAudit } from "./audit.js";
 import { orThrow, mustWrite, insertDedup } from "./db.js";
-import { sendSms } from "./twilio.js";
 import { decideTriage, enqueueRepair, recordBatchCandidate } from "./event-triage.js";
-import { wakeEmployeeForEvent } from "./runtime.js";
+import { routeEmployeeIntent } from "./channel-router.js";
+import { wakeEmployeeForDescriptor } from "./wake.js";
+import { finishWorkRun, recordMeterEvent, startWorkRun, type WorkRunStatus, type WorkRunTrigger } from "./metering.js";
 
 export interface DeliverEmployeeEventParams {
   account_id: string;
@@ -34,6 +35,9 @@ export interface DeliverEmployeeEventParams {
   /** When set + Twilio configured, the owner is texted (proof = MessageSid). */
   owner_phone?: string | null;
   actor: "front_door" | "employee" | "manager" | "owner" | "scheduler";
+  /** Metering correlation id. When absent, deliverEmployeeEvent starts its own
+   *  work_run (Phase 6); ingress passes one down so the whole chain shares an id. */
+  run_id?: string | null;
   routing_mode?: "deliver_only" | "wake_employee";
   /** "silent" routes to the batch surface without interrupting the owner — passed
    *  through to triage instead of being smuggled into safe_summary as `[SILENT]`. */
@@ -53,22 +57,6 @@ function eventSource(eventType: string): EventSource {
   if (eventType.startsWith("stripe")) return "stripe";
   if (eventType.startsWith("twilio")) return "twilio";
   return "manager";
-}
-
-async function loadOwnerPhone(db: SupabaseClient, accountId: string): Promise<string | null> {
-  const data = orThrow(
-    await db.from("verified_phones").select("phone_e164").eq("account_id", accountId).order("verified_at", { ascending: false }).limit(1).maybeSingle(),
-    "verified_phones.lookup",
-  );
-  return (data as { phone_e164?: string } | null)?.phone_e164 ?? null;
-}
-
-async function loadRuntimeApiUrl(db: SupabaseClient, employeeId: string): Promise<string | null> {
-  const data = orThrow(
-    await db.from("runtime_endpoints").select("webchat_api_url").eq("employee_id", employeeId).maybeSingle(),
-    "runtime_endpoints.lookup",
-  );
-  return (data as { webchat_api_url?: string | null } | null)?.webchat_api_url ?? null;
 }
 
 function approvalActionKey(descriptor: WorkEventDescriptor): string {
@@ -138,12 +126,29 @@ export async function deliverEmployeeEvent(
   const source = eventSource(params.event_type);
   const routingMode = params.routing_mode ?? "deliver_only";
 
+  // Metering correlation: reuse the run ingress started, else open one here so
+  // direct callers (reminders, daily brief, send_employee_event) are still correlated.
+  const ownRun = !params.run_id;
+  const runTrigger: WorkRunTrigger = params.actor === "scheduler" ? "scheduled_job" : params.actor === "employee" ? "owner_message" : "system";
+  const runId = params.run_id ?? await startWorkRun(db, {
+    account_id: params.account_id, employee_id: params.employee_id,
+    trigger_type: runTrigger, trigger_ref: idempotencyKey, summary_safe: params.safe_summary,
+  });
+  const finishOwn = (status: WorkRunStatus) => ownRun ? finishWorkRun(db, runId, status) : Promise.resolve();
+  const meterDelivered = (deliveredEventId: string) => recordMeterEvent(db, {
+    run_id: runId, account_id: params.account_id, employee_id: params.employee_id,
+    category: "manager_tool", provider: source, feature_key: params.event_type,
+    quantity: 1, unit: "tool_call", provider_id: params.provider_id ?? null,
+    status: "ok", metadata_safe: { event_id: deliveredEventId, routing_mode: routingMode },
+  });
+
   // Dedupe — Pub/Sub and Stripe webhooks are at-least-once.
   const existing = orThrow(
     await db.from("inbound_events").select("id,trace").eq("idempotency_key", idempotencyKey).maybeSingle(),
     "inbound_events.dedupe",
   );
   if (existing) {
+    await finishOwn("succeeded");
     return {
       event_id: existing.id,
       message_id: (existing.trace as { message_id?: string })?.message_id ?? "",
@@ -177,6 +182,7 @@ export async function deliverEmployeeEvent(
       safe_summary: params.safe_summary,
       reason: "triage_repair",
     });
+    await finishOwn("failed");
     return { event_id: repairId, message_id: "", delivery_status: "pending", duplicate: false };
   }
   if (triage === "ignore") {
@@ -197,7 +203,11 @@ export async function deliverEmployeeEvent(
       }),
       "inbound_events.insert.suppressed",
     );
-    if (ins.conflict) return duplicateResult(db, idempotencyKey);
+    if (ins.conflict) {
+      await finishOwn("succeeded");
+      return duplicateResult(db, idempotencyKey);
+    }
+    await finishOwn("succeeded");
     return { event_id: eventId, message_id: "", delivery_status: "pending", duplicate: false };
   }
   const batchId = triage === "batch"
@@ -213,16 +223,40 @@ export async function deliverEmployeeEvent(
     : null;
 
   if (routingMode === "wake_employee") {
-    try {
-      const apiUrl = await loadRuntimeApiUrl(db, params.employee_id);
-      descriptor = await wakeEmployeeForEvent(apiUrl ?? "", {
+    const eventId = newId(ID_PREFIX.event);
+    const claimed = await insertDedup(
+      db.from("inbound_events").insert({
+        id: eventId,
         account_id: params.account_id,
         employee_id: params.employee_id,
+        source,
+        event_type: params.event_type,
+        provider_id: params.provider_id ?? null,
+        idempotency_key: idempotencyKey,
+        normalized_payload: params.normalized_payload ?? {},
+        status: "claimed",
+        triage_decision: triage,
+        routing_mode: routingMode,
+        batch_key: batchId,
+        run_id: runId,
+      }),
+      "inbound_events.insert.claimed",
+    );
+    if (claimed.conflict) {
+      await finishOwn("succeeded");
+      return duplicateResult(db, idempotencyKey);
+    }
+    try {
+      descriptor = await wakeEmployeeForDescriptor(db, {
+        account_id: params.account_id,
+        employee_id: params.employee_id,
+        source_event_id: eventId,
         event_type: params.event_type,
         provider_id: params.provider_id ?? null,
         safe_summary: params.safe_summary,
         normalized_payload: params.normalized_payload ?? {},
         suggested_next_action: params.suggested_next_action,
+        run_id: runId,
       });
     } catch (err) {
       const repairId = await enqueueRepair(db, {
@@ -233,10 +267,65 @@ export async function deliverEmployeeEvent(
         provider_id: params.provider_id ?? null,
         normalized_payload: params.normalized_payload ?? {},
         safe_summary: params.safe_summary,
+        inbound_event_id: eventId,
         reason: `wake_employee_failed:${String((err as Error).message ?? err)}`,
       });
-      if (!descriptor) return { event_id: repairId, message_id: "", delivery_status: "pending", duplicate: false };
+      await db.from("inbound_events").update({ status: "repair", trace: { repair_id: repairId } }).eq("id", eventId);
+      await finishOwn("failed");
+      return { event_id: repairId, message_id: "", delivery_status: "pending", duplicate: false };
     }
+    descriptor = await bindApprovalIfNeeded(db, descriptor);
+    const normalizedPayload = {
+      ...(params.normalized_payload ?? {}),
+      work_event_descriptor: descriptor,
+    };
+    const messageId = newId(ID_PREFIX.message);
+    const ownerText = renderWorkEventSms(descriptor);
+    await mustWrite(
+      db.from("employee_messages").insert({
+        id: messageId,
+        employee_id: params.employee_id,
+        direction: "to_owner",
+        source: "employee",
+        channel: "web",
+        body: ownerText,
+        status: "pending",
+      }),
+      "employee_messages.insert.wake",
+    );
+    const routed = await routeEmployeeIntent(db, {
+      account_id: params.account_id,
+      employee_id: params.employee_id,
+      intent_key: idempotencyKey,
+      move: descriptor.move,
+      text: ownerText,
+      descriptor,
+      message_id: messageId,
+      run_id: runId,
+    });
+    await mustWrite(
+      db
+        .from("inbound_events")
+        .update({
+          normalized_payload: normalizedPayload,
+          status: routed.delivery_status === "delivered" ? "delivered" : "received",
+          trace: { message_id: messageId, sms_sid: routed.sms_sid ?? null, approval_id: descriptor.deliverable?.refs.approval_id ?? null, run_id: runId },
+        })
+        .eq("id", eventId),
+      "inbound_events.trace_update.wake",
+    );
+    await meterDelivered(eventId);
+    await finishOwn("succeeded");
+    await writeAudit(db, {
+      account_id: params.account_id,
+      employee_id: params.employee_id,
+      actor: params.actor,
+      action: "event:wake_deliver",
+      resource: eventId,
+      result: "ok",
+      details: { event_type: params.event_type, channel: routed.chosen_channel, delivered: routed.delivery_status === "delivered", has_sms: Boolean(routed.sms_sid) },
+    });
+    return { event_id: eventId, message_id: messageId, sms_sid: routed.sms_sid, delivery_status: routed.delivery_status === "delivered" ? "delivered" : "pending", duplicate: false };
   }
   if (descriptor) descriptor = await bindApprovalIfNeeded(db, descriptor);
   const normalizedPayload = {
@@ -264,10 +353,14 @@ export async function deliverEmployeeEvent(
       triage_decision: triage,
       routing_mode: routingMode,
       batch_key: batchId,
+      run_id: runId,
     }),
     "inbound_events.insert",
   );
-  if (ins.conflict) return duplicateResult(db, idempotencyKey);
+  if (ins.conflict) {
+    await finishOwn("succeeded");
+    return duplicateResult(db, idempotencyKey);
+  }
 
   const messageId = newId(ID_PREFIX.message);
   const ownerText = descriptor
@@ -289,31 +382,28 @@ export async function deliverEmployeeEvent(
     "employee_messages.insert",
   );
 
-  // Env-gated SMS transport (default important-event channel). Routing is anchored
-  // to the account's verified phone — never a caller-supplied payload field — and
-  // only falls back to params.owner_phone when no verified phone exists yet.
-  let smsSid: string | undefined;
-  let deliveryStatus: "pending" | "delivered" = "pending";
-  const ownerPhone = (await loadOwnerPhone(db, params.account_id)) ?? params.owner_phone ?? null;
-  if (ownerPhone && (process.env.TWILIO_MESSAGING_SERVICE_SID || process.env.EMPLOYEE_SMS_FROM)) {
-    try {
-      const res = await sendSms({ to: ownerPhone, from: process.env.EMPLOYEE_SMS_FROM, body: ownerText });
-      smsSid = res.sid;
-      deliveryStatus = "delivered";
-      await db.from("employee_messages").update({ status: "delivered", provider_id: smsSid }).eq("id", messageId);
-    } catch {
-      // Stay pending; the owner can still see it on the web surface. Do not throw.
-      deliveryStatus = "pending";
-    }
-  }
+  const routed = await routeEmployeeIntent(db, {
+    account_id: params.account_id,
+    employee_id: params.employee_id,
+    intent_key: idempotencyKey,
+    move: triage === "batch" ? "silent" : (descriptor?.move ?? "notify"),
+    text: ownerText,
+    descriptor,
+    message_id: messageId,
+    run_id: runId,
+  });
+  const smsSid = routed.sms_sid;
+  const deliveryStatus = routed.delivery_status === "delivered" ? "delivered" : "pending";
 
   await mustWrite(
     db
       .from("inbound_events")
-      .update({ status: deliveryStatus === "delivered" ? "delivered" : "received", trace: { message_id: messageId, sms_sid: smsSid ?? null, approval_id: descriptor?.deliverable?.refs.approval_id ?? null } })
+      .update({ status: deliveryStatus === "delivered" ? "delivered" : "received", trace: { message_id: messageId, sms_sid: smsSid ?? null, approval_id: descriptor?.deliverable?.refs.approval_id ?? null, run_id: runId } })
       .eq("id", eventId),
     "inbound_events.trace_update",
   );
+  await meterDelivered(eventId);
+  await finishOwn("succeeded");
 
   await writeAudit(db, {
     account_id: params.account_id,
@@ -322,7 +412,7 @@ export async function deliverEmployeeEvent(
     action: "event:deliver",
     resource: eventId,
     result: "ok",
-    details: { event_type: params.event_type, channel, delivered: deliveryStatus === "delivered", has_sms: Boolean(smsSid) },
+    details: { event_type: params.event_type, channel: routed.chosen_channel, delivered: deliveryStatus === "delivered", has_sms: Boolean(smsSid) },
   });
 
   return { event_id: eventId, message_id: messageId, sms_sid: smsSid, delivery_status: deliveryStatus, duplicate: false };

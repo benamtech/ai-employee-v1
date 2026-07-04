@@ -17,10 +17,11 @@ import { registerProvisionerRoutes } from "./provisioner.js";
 import { registerOrchestratorRoutes } from "./orchestrator.js";
 import { tokenHash, verifySignedToken } from "./lib/signed-links.js";
 import { requireOwnerSession } from "./lib/owner-session.js";
-import { deliverToRuntime } from "./lib/runtime.js";
+import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
 import { createArtifactStorageSignedUrl } from "./lib/artifacts.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
 import { orThrow, mustWrite } from "./lib/db.js";
+import { stampChannelPresence } from "./lib/channel-router.js";
 
 /** Tools that mutate every account's queue — only the scheduler runner may invoke
  *  them, via /manager/scheduler/run, never the generic per-tool endpoint. */
@@ -167,10 +168,6 @@ export function buildApp(): Hono {
       "employees.lookup",
     );
     if (!employee) return c.json({ error: "employee_not_found" }, 404);
-    const runtime = orThrow(
-      await db.from("runtime_endpoints").select("*").eq("employee_id", employeeId).maybeSingle(),
-      "runtime_endpoints.lookup",
-    );
     await mustWrite(
       db.from("employee_messages").insert({
         id: newId(ID_PREFIX.message),
@@ -183,20 +180,47 @@ export function buildApp(): Hono {
       }),
       "employee_messages.insert.to_employee",
     );
-    const reply = await deliverToRuntime(String(runtime?.webchat_api_url ?? ""), String(message), "web");
-    await mustWrite(
-      db.from("employee_messages").insert({
-        id: newId(ID_PREFIX.message),
-        employee_id: employeeId,
-        direction: "to_owner",
-        source: "employee",
-        channel: "web",
-        body: reply,
-        status: "delivered",
-      }),
-      "employee_messages.insert.to_owner",
+    await stampChannelPresence(db, { account_id: session.account_id, employee_id: employeeId, channel: "web", session_info: { source: "web_message" } });
+    const turn = await deliverOwnerTurnToRuntime(db, {
+      account_id: session.account_id,
+      employee_id: employeeId,
+      body: String(message),
+      channel: "web",
+      idempotency_key: `web:${employeeId}:${Date.now()}:${newId(ID_PREFIX.message)}`,
+    });
+    if (turn.status === "succeeded" || turn.status === "duplicate") {
+      await mustWrite(
+        db.from("employee_messages").insert({
+          id: newId(ID_PREFIX.message),
+          employee_id: employeeId,
+          direction: "to_owner",
+          source: "employee",
+          channel: "web",
+          body: turn.reply,
+          status: "delivered",
+        }),
+        "employee_messages.insert.to_owner",
+      );
+      return c.json({ employee_id: employeeId, reply: turn.reply, turn_job_id: turn.job_id });
+    }
+    return c.json({ employee_id: employeeId, reply: "", status: turn.status, turn_job_id: turn.job_id, error: turn.error ?? null }, turn.status === "failed" ? 502 : 202);
+  });
+
+  app.post("/manager/employee/:employeeId/heartbeat", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const employeeId = c.req.param("employeeId");
+    const { owner_session_token } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    const session = await requireOwnerSession(db, owner_session_token);
+    if (!session) return c.json({ error: "owner_session_invalid" }, 401);
+    const employee = orThrow(
+      await db.from("employees").select("id,account_id").eq("id", employeeId).eq("account_id", session.account_id).maybeSingle(),
+      "employees.lookup",
     );
-    return c.json({ employee_id: employeeId, reply });
+    if (!employee) return c.json({ error: "employee_not_found" }, 404);
+    await stampChannelPresence(db, { account_id: session.account_id, employee_id: employeeId, channel: "web", session_info: { source: "heartbeat" } });
+    return c.json({ status: "ok" });
   });
 
   app.post(MANAGER_API.artifactResolve(":employeeId", ":artifactId"), async (c) => {

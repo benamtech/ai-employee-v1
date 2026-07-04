@@ -9,7 +9,9 @@ import { ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { mintSignedToken, tokenHash } from "../lib/signed-links.js";
 import { sendSms } from "../lib/twilio.js";
-import { deliverToRuntime } from "../lib/runtime.js";
+import { deliverOwnerTurnToRuntime } from "../lib/runtime.js";
+import { resolveEmployeeSmsSender } from "../lib/sms-sender.js";
+import { stampChannelPresence } from "../lib/channel-router.js";
 
 function authToken(): string {
   const t = process.env.TWILIO_AUTH_TOKEN;
@@ -34,6 +36,9 @@ async function formParams(c: any): Promise<Record<string, string>> {
 
 export function registerTwilioWebhooks(app: Hono): void {
   const insecure = process.env.SMS_INSECURE_NO_SIGNATURE === "true";
+  if (insecure && process.env.NODE_ENV === "production") {
+    throw new Error("SMS_INSECURE_NO_SIGNATURE cannot be true in production.");
+  }
 
   app.post(MANAGER_API.webhooks.twilioFrontDoor, async (c) => {
     const params = await formParams(c);
@@ -137,29 +142,48 @@ export function registerTwilioWebhooks(app: Hono): void {
       provider_id: params.MessageSid ?? null,
       status: "received",
     });
-    const { data: runtime } = await db
-      .from("runtime_endpoints")
-      .select("*")
-      .eq("employee_id", employeeId)
-      .maybeSingle();
-    const response = await deliverToRuntime(String(runtime?.webchat_api_url ?? ""), params.Body ?? "", "sms");
-    const fromNumber = runtime?.sms_number_e164 ?? process.env.TWILIO_TEST_NUMBER;
-    if (!fromNumber) return c.text("employee sender missing", 500);
-    const sent = await sendSms({
-      to: ownerFrom,
-      from: fromNumber,
-      body: response,
-    });
-    await db.from("employee_messages").insert({
-      id: newId(ID_PREFIX.message),
-      employee_id: employeeId,
-      direction: "to_owner",
-      source: "employee",
-      channel: "sms",
-      body: response,
-      provider_id: sent.sid,
-      status: sent.status,
-    });
+    await stampChannelPresence(db, { account_id: employee.account_id, employee_id: employeeId, channel: "sms", session_info: { message_sid: params.MessageSid ?? null } });
+    void (async () => {
+      try {
+        const turn = await deliverOwnerTurnToRuntime(db, {
+          account_id: employee.account_id,
+          employee_id: employeeId,
+          body: params.Body ?? "",
+          channel: "sms",
+          idempotency_key: `twilio:${params.MessageSid ?? newId(ID_PREFIX.message)}`,
+        });
+        const response = turn.reply || (turn.status === "queued" ? "I got it. I'm working on that now." : "I hit a snag. I saved your message and will pick it back up.");
+        const fromNumber = await resolveEmployeeSmsSender(db, employeeId);
+        const sent = await sendSms({ to: ownerFrom, from: fromNumber, body: response, forceFrom: true });
+        await db.from("employee_messages").insert({
+          id: newId(ID_PREFIX.message),
+          employee_id: employeeId,
+          direction: "to_owner",
+          source: "employee",
+          channel: "sms",
+          body: response,
+          provider_id: sent.sid,
+          status: sent.status,
+        });
+      } catch {
+        try {
+          const fromNumber = await resolveEmployeeSmsSender(db, employeeId);
+          const sent = await sendSms({ to: ownerFrom, from: fromNumber, body: "I hit a snag. I saved your message and will pick it back up.", forceFrom: true });
+          await db.from("employee_messages").insert({
+            id: newId(ID_PREFIX.message),
+            employee_id: employeeId,
+            direction: "to_owner",
+            source: "employee",
+            channel: "sms",
+            body: "I hit a snag. I saved your message and will pick it back up.",
+            provider_id: sent.sid,
+            status: sent.status,
+          });
+        } catch {
+          // Twilio already has the inbound 200; keep failure out of the webhook path.
+        }
+      }
+    })();
     return c.text("<Response></Response>", 200, { "Content-Type": "text/xml" });
   });
 }
