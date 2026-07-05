@@ -23,6 +23,9 @@
     "db:status": "node packages/db/migrate.mjs --status",
     "manager:dev": "npm run dev --workspace @amtech/manager",
     "web:dev": "npm run dev --workspace @amtech/web",
+    "local:onboard": "node infra/scripts/local/onboard.mjs",
+    "local:inspect": "node infra/scripts/local/inspect.mjs",
+    "test:e2e": "playwright test",
     "scheduler:tick": "node infra/scripts/scheduler-tick.mjs",
     "scheduler:hermes-jobs": "node infra/scripts/hermes-jobs-runner.mjs",
     "smoke:hermes": "node infra/scripts/hermes-smoke.mjs",
@@ -35,6 +38,7 @@
     "ops:repair": "node infra/scripts/repair.mjs"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
     "@types/node": "^22.10.0",
     "eslint": "^9.17.0",
     "typescript": "^5.7.2",

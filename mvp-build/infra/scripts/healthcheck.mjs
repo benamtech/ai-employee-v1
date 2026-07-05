@@ -11,7 +11,7 @@
  * Exit non-zero if any checked employee has a critical problem.
  */
 import { createClient } from "@supabase/supabase-js";
-import { randomBytes } from "node:crypto";
+import { randomBytes, createDecipheriv, createHash } from "node:crypto";
 
 const argv = process.argv.slice(2);
 const onlyArg = argv.find((a) => a.startsWith("--employee"));
@@ -31,10 +31,29 @@ const { data: employees, error } = await q.order("created_at", { ascending: fals
 if (error) { console.error(`healthcheck: ${error.message}`); process.exit(1); }
 if (!employees?.length) { console.log("No matching employees."); process.exit(0); }
 
-async function ping(url) {
+// Hermes API server health lives at /health with bearer auth — NOT the base URL
+// (which 404s). Resolve the sealed bearer from runtime_endpoint_secrets and hit the
+// real endpoints. Never print the token.
+function masterKey() {
+  const raw = process.env.SECRET_REF_MASTER_KEY;
+  if (!raw || raw.length < 16) return null;
+  return createHash("sha256").update(raw).digest();
+}
+function openSecret(ref) {
+  const key = masterKey();
+  if (!key || !ref) return null;
+  try {
+    const parsed = JSON.parse(Buffer.from(ref, "base64url").toString("utf8"));
+    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(parsed.iv, "base64"));
+    decipher.setAuthTag(Buffer.from(parsed.tag, "base64"));
+    return Buffer.concat([decipher.update(Buffer.from(parsed.ct, "base64")), decipher.final()]).toString("utf8");
+  } catch { return null; }
+}
+
+async function ping(url, bearer) {
   if (!url) return "no-url";
   try {
-    const res = await fetch(url, { method: "GET" });
+    const res = await fetch(url, { method: "GET", headers: bearer ? { Authorization: `Bearer ${bearer}` } : {} });
     return res.ok ? `ok (${res.status})` : `unhealthy (${res.status})`;
   } catch (e) {
     return `unreachable (${e.message.slice(0, 40)})`;
@@ -53,19 +72,23 @@ function statusFor({ backend, webchatOk, smsPresent, provisioningState }) {
 
 let problems = 0;
 for (const emp of employees) {
-  console.log(`\n■ ${emp.id} — ${emp.name ?? "(unnamed)"} [${emp.status}]`);
+  console.log(`\n== ${emp.id} - ${emp.name ?? "(unnamed)"} [${emp.status}]`);
   const issues = [];
 
   const { data: rt } = await db.from("runtime_endpoints").select("*").eq("employee_id", emp.id).maybeSingle();
   if (!rt) issues.push("no runtime endpoint");
   else {
-    console.log(`  runtime: sms=${rt.sms_number_e164 ?? "—"} backend=${rt.backend_type} webchat=${rt.webchat_api_url ?? "—"}`);
-    const webchatPing = await ping(rt.webchat_api_url);
-    const webchatOk = webchatPing.startsWith("ok");
-    console.log(`  webchat ping: ${webchatPing}`);
+    const base = (rt.api_base_url ?? rt.webchat_api_url ?? "").replace(/\/$/, "");
+    console.log(`  runtime: sms=${rt.sms_number_e164 ?? "-"} backend=${rt.backend_type} base=${base || "-"}`);
+    const { data: secretRow } = await db.from("runtime_endpoint_secrets").select("api_key_ref").eq("runtime_endpoint_id", rt.id).maybeSingle();
+    const bearer = openSecret(secretRow?.api_key_ref) ?? process.env.HERMES_API_TOKEN ?? null;
+    const healthPing = base ? await ping(`${base}/health`, bearer) : "no-url";
+    const webchatOk = healthPing.startsWith("ok");
+    console.log(`  /health: ${healthPing}${bearer ? "" : " (no bearer resolved)"}`);
+    if (base) console.log(`  /v1/capabilities: ${await ping(`${base}/v1/capabilities`, bearer)}`);
     if (!rt.sms_number_e164) issues.push("no SMS number assigned");
     if (rt.backend_type === "local") issues.push("local backend (dev/demo only)");
-    if (!webchatOk) issues.push("webchat unreachable");
+    if (!webchatOk) issues.push("runtime /health unhealthy");
 
     const { data: jobForSnapshot } = await db.from("provisioning_jobs").select("state,failure_state").eq("employee_id", emp.id).maybeSingle();
     const snapshotStatus = statusFor({
@@ -84,7 +107,7 @@ for (const emp of employees) {
       checked_at: new Date().toISOString(),
       details: {
         runner_type: "healthcheck_script",
-        webchat_ping: webchatPing,
+        health_ping: healthPing,
         sms_number_present: Boolean(rt.sms_number_e164),
         provisioning_state: jobForSnapshot?.state ?? null,
         provisioning_failure_state: jobForSnapshot?.failure_state ?? null,
@@ -122,9 +145,9 @@ for (const emp of employees) {
 
   if (issues.length) {
     problems += 1;
-    console.log(`  ⚠ issues: ${issues.join("; ")}`);
+    console.log(`  [WARN] issues: ${issues.join("; ")}`);
   } else {
-    console.log("  ✓ healthy");
+    console.log("  [ok] healthy");
   }
 }
 

@@ -146,6 +146,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/web/app/api/employee/[employeeId]/events/route.ts` | SSE-shaped snapshot route; currently sends one snapshot and closes, with polling fallback. |
 | `apps/web/app/api/employee/[employeeId]/message/route.ts` | Sends owner webchat messages to the employee runtime through Manager. |
 | `apps/web/app/api/employee/[employeeId]/approval/resolve/route.ts` | Resolves Manager approval records from web. Same acceptance primitive as SMS/future voice. |
+| `apps/web/app/api/employee/[employeeId]/connector/start/route.ts` | Owner-driven connector start: resolves account from `/resources`, calls the Manager connector tool (`connect_email`), returns the envelope (proof.consent_url). Model-independent path; same Manager tool the employee path uses. |
 
 ### Manager app - backend control plane
 
@@ -177,6 +178,8 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/manager/src/tools/repair.stub.ts` | Repair queue operations: replay, relink, duplicate, redeliver, suppress, regenerate onboarding link. |
 | `apps/manager/src/tools/types.ts` | Tool handler/context types. |
 | `apps/manager/src/lib/employee-events.ts` | Central event delivery primitive: dedupe, triage, atomic wake claim, descriptor binding, inbound event/message rows, and router-backed owner delivery. |
+| `apps/manager/src/lib/connector-events.ts` | Connector lifecycle as a typed work event: `buildConnectorDescriptor`/`emitConnectorEvent` author an `external_system_action` descriptor (refs `{connector_id,provider,status,consent_url?}`) and deliver it via the internal door, so connect/pending/connected states render on web + SMS. General across connectors; best-effort. |
+| `apps/manager/src/lib/owner-turn-prompt.ts` | `ownerTurnSystemPrompt` — injected as `system_message` into every owner turn: Manager is the product-action interface, product actions must use Manager tools (never a text promise), names `connect_email` with payload, enforces "a consent link is not a connection." |
 | `apps/manager/src/lib/event-triage.ts` | Suppression, repair, batch-candidate decisions. |
 | `apps/manager/src/events/registry.ts` | Generic event-source registry. |
 | `apps/manager/src/events/ingress.ts`, `apps/manager/src/events/adapters/*` | Primary generic ingress spine for Gmail, Stripe, and Manager events: structural verify, safe-fact normalize, route deliver-only vs wake. |
@@ -267,7 +270,10 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `infra/scripts/acceptance/run8-security.mjs` | Forged-request/security verifier. |
 | `infra/scripts/scheduler-tick.mjs` | Dev/manual scheduler fallback through Manager. |
 | `infra/scripts/hermes-jobs-runner.mjs` | Production-oriented Hermes Jobs scheduler entrypoint. |
-| `infra/scripts/healthcheck.mjs` | Runtime health persistence and endpoint health update. |
+| `infra/scripts/healthcheck.mjs` | Runtime health persistence and endpoint health update. Hits Hermes `/health` + `/v1/capabilities` with the sealed bearer (not the base URL); plain-text markers. |
+| `infra/scripts/local/onboard.mjs` | Headless real-front-door onboarding; writes `infra/.local/state.json` (gitignored) so chat/inspect stop relying on copy-paste. |
+| `infra/scripts/local/inspect.mjs` | `npm run local:inspect` — one-command local observability: reconciles state-file vs newest-DB vs running-container employee, runtime `/health`+`/v1/capabilities` via sealed bearer, recent messages/turns/runs/tools/connectors/events, and a "claimed connector work but no connect_email invocation" warning. No secrets printed. |
+| `tests/e2e/connector.spec.ts`, `playwright.config.ts` | Env-gated headed browser acceptance: drives Connect Gmail on the Work Surface and asserts UI/DB state (connector card / `pending_oauth` row), not just chat text. Needs `npm i` + a live stack. |
 | `infra/scripts/number-pool.mjs` | Twilio number inventory/status. |
 | `infra/scripts/repair.mjs` | Repair ops wrapper. |
 | `infra/scripts/provisioner-health.mjs`, `profile-validate.mjs`, `hermes-smoke.mjs`, `phase01-proof.mjs` | Provisioning/profile/Hermes/proof helpers. |
@@ -451,7 +457,7 @@ npm run acceptance:preflight
 npm run acceptance:report
 ```
 
-Expected local truth as of the current records: typecheck/build/lint pass, 38 unit files / 216 tests pass,
+Expected local truth as of the current records: typecheck/build/lint pass, 39 unit files / 233 tests pass,
 integration skips cleanly without live Supabase creds (9 env-gated checks), acceptance reports no fabricated
 proof until live env exists.
 

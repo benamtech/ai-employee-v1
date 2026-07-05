@@ -34,6 +34,7 @@ import { getFreshAccessToken, sealTokenBundle, tokenExpiryIso, type ConnectorTok
 import { base64url, buildMimeMessage } from "../lib/mime.js";
 import { downloadArtifactPdf } from "../lib/artifacts.js";
 import { ingestEvent } from "../events/ingress.js";
+import { emitConnectorEvent } from "../lib/connector-events.js";
 
 const DEFAULT_GMAIL_SCOPES = [
   "https://www.googleapis.com/auth/gmail.send",
@@ -143,6 +144,12 @@ const connectEmail: ToolHandler = async (ctx, raw) => {
       action: "tool:connect_email", resource: connectorId, result: "ok",
       details: { provider: "gmail", status: "pending_oauth", scopes },
     });
+    // Surface the connector-start as a typed work event (web card + SMS line) so the
+    // owner can see and click the consent link — not just a footer string. Best-effort.
+    await emitConnectorEvent(ctx.db, {
+      account_id: input.account_id, employee_id: input.employee_id,
+      provider: "gmail", connector_id: connectorId, status: "pending_oauth", consent_url: consentUrl,
+    });
     return ok({
       account_id: input.account_id, employee_id: input.employee_id,
       changed_resources: [`connector:${connectorId}`],
@@ -222,6 +229,11 @@ const completeGmailOAuth: ToolHandler = async (ctx, raw) => {
       account_id: connector.account_id, employee_id: connector.employee_id, actor: ctx.actor,
       action: "tool:complete_gmail_oauth", resource: connector.id, result: "ok",
       details: { status: "connected", email: profile.emailAddress, scopes, watch_status: watchStatus },
+    });
+    // The only point allowed to imply "connected": real OAuth callback completed.
+    await emitConnectorEvent(ctx.db, {
+      account_id: connector.account_id, employee_id: connector.employee_id,
+      provider: "gmail", connector_id: connector.id, status: "connected",
     });
     return ok({
       account_id: connector.account_id, employee_id: connector.employee_id,

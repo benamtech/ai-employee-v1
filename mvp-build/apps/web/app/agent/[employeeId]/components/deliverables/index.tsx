@@ -100,9 +100,39 @@ export function Deliverable({ d, employeeId }: { d: WorkDeliverableDescriptor; e
           <Line label="when" value={refs.when ?? refs.scheduled_at} />
         </Shell>
       );
+    case "external_system_action": {
+      // Connector lifecycle (Gmail, Stripe, Drive, ...). refs carry
+      // { connector_id, provider, status, consent_url? }. When a consent link is
+      // present and the connector is still pending, render an owner-clickable
+      // Connect action — this is the surface that was missing entirely. Emoji-free
+      // by the standing rule; the ICONS map's emojis are pre-existing, not extended.
+      const status = refs.status ?? "";
+      const providerName = (refs.provider ?? "").replace(/^\w/, (c) => c.toUpperCase());
+      const chip =
+        status === "connected" ? { label: "Connected", color: tokens.color.success, soft: tokens.color.successSoft }
+        : status === "pending_oauth" ? { label: "Not connected", color: tokens.color.warning, soft: tokens.color.warningSoft }
+        : status === "error" ? { label: "Needs attention", color: tokens.color.danger, soft: tokens.color.dangerSoft }
+        : { label: status || "connector", color: tokens.color.textMuted, soft: tokens.color.surfaceMuted };
+      return (
+        <Shell icon="">
+          <strong style={{ fontSize: tokens.font.small }}>{d.title}</strong>
+          <span style={{
+            fontSize: tokens.font.tiny, color: chip.color, background: chip.soft,
+            border: `1px solid ${chip.color}33`, borderRadius: tokens.radius.pill,
+            padding: `1px ${tokens.space.sm}px`,
+          }}>{chip.label}</span>
+          {refs.consent_url && status === "pending_oauth" ? (
+            <a href={refs.consent_url} target="_blank" rel="noreferrer"
+              style={{ color: tokens.color.accent, fontSize: tokens.font.small, fontWeight: 600 }}>
+              Connect {providerName || "now"}
+            </a>
+          ) : null}
+        </Shell>
+      );
+    }
     default:
       // recommendation, dataset_report, structured_record_write, media_asset,
-      // external_system_action, plan — safe generic block.
+      // plan — safe generic block.
       return (
         <Shell icon={icon}>
           <strong style={{ fontSize: tokens.font.small }}>{d.title}</strong>

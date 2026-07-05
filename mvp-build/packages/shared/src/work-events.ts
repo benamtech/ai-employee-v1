@@ -8,6 +8,15 @@
 
 export type WorkMove = "notify" | "question" | "review";
 
+/**
+ * Connector lifecycle convention (Gmail, Stripe, Drive, ...): a connector action is
+ * an `external_system_action` deliverable whose `refs` carry
+ * `{ connector_id, provider, status, consent_url? }`. It is ungated (`acknowledge`)
+ * because it neither leaves the business nor moves money. Authored by Manager via
+ * `emitConnectorEvent` (apps/manager/src/lib/connector-events.ts) through the
+ * internal event door, so it renders as a Work Surface card and an SMS line from
+ * the one descriptor. A consent_url is a start link, never proof of connection.
+ */
 export type DeliverableType =
   | "document"
   | "outbound_message"

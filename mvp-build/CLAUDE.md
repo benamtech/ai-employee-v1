@@ -39,7 +39,7 @@ one employee; the Manager is the invisible backend control plane.
   owner-turn.
 - **Phases 5, 7–13:** `planned`. See `phases/README.md` for the dependency graph.
 
-Local truth: typecheck/build/lint pass; **38 unit files / 216 tests** pass; integration skips clean
+Local truth: typecheck/build/lint pass; **39 unit files / 233 tests** pass; integration skips clean
 (9 env-gated checks without live Supabase creds).
 
 ## Layout
@@ -63,7 +63,7 @@ memory/          in-repo durable dev handoffs + writing protocol
 npm run typecheck && npm run test:unit && npm run build && npm run lint
 npm run test:integration   # env-gated; skips cleanly without live Supabase creds
 ```
-Current local truth: typecheck/build/lint pass; **38 unit files / 216 tests** pass; integration skips clean
+Current local truth: typecheck/build/lint pass; **39 unit files / 233 tests** pass; integration skips clean
 (9 env-gated checks without live Supabase creds).
 
 **Acceptance (Phase 1):**
@@ -102,6 +102,8 @@ code-state; `memory/` for the agentic-dev narrative + decisions + pointers.
 
 ## Git
 
-`mvp-build` is a **local-only** git repo (branch `main`, no remotes). Commit only when asked; never
-push (there is no remote). If asked to commit from the default branch for feature work, prefer a
-branch first. End commit messages with the Co-Authored-By trailer.
+`mvp-build/` is **not its own repo** — it is a subfolder of the all-inclusive `GTM-RESEARCH`
+repository, which has a GitHub remote at `origin` (`github.com/benamtech/ai-employee-v1`). Run git
+from the repo root (or your worktree root), not from `mvp-build/`. Commit only when asked; for feature
+work branch first and open a draft PR — **never push to `main`, force-push, or merge**. End commit
+messages with the Co-Authored-By trailer.

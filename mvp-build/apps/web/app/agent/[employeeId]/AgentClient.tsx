@@ -81,6 +81,22 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     await refresh();
   }, [employeeId, res.account_id, refresh]);
 
+  const startConnector = useCallback(async (provider: string) => {
+    setStatus(`Starting ${provider}…`);
+    const r = await fetch(`/api/employee/${employeeId}/connector/start`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ provider }),
+    });
+    const json = await r.json().catch(() => ({}));
+    const consentUrl = json?.proof?.consent_url;
+    if (r.ok && consentUrl) {
+      setStatus("Opening the secure Google consent page — authorize there, then come back.");
+      window.open(consentUrl, "_blank", "noopener,noreferrer");
+    } else {
+      setStatus(json.error ?? json.user_facing_summary_hint ?? "Could not start the connection.");
+    }
+    await refresh();
+  }, [employeeId, refresh]);
+
   function onSendInput() {
     const text = input.trim();
     if (!text) return;
@@ -150,11 +166,22 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
         </div>
       </Section>
 
-      {res.connectors.length > 0 ? (
-        <p style={{ marginTop: tokens.space.xl, fontSize: tokens.font.tiny, color: tokens.color.textFaint }}>
-          {res.connectors.map((c) => `${c.provider} ${c.status}`).join(" · ")}
-        </p>
-      ) : null}
+      <Section title="Your tools">
+        <div style={{ display: "flex", alignItems: "center", gap: tokens.space.md, flexWrap: "wrap" }}>
+          {res.connectors.some((c) => c.provider === "gmail" && c.status === "connected") ? (
+            <span style={{ fontSize: tokens.font.small, color: tokens.color.success }}>Gmail connected</span>
+          ) : (
+            <button onClick={() => void startConnector("gmail")} style={{ background: tokens.color.accent, color: "#fff", border: "none", borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.md}px`, fontSize: tokens.font.small, cursor: "pointer" }}>
+              Connect Gmail
+            </button>
+          )}
+          {res.connectors.length > 0 ? (
+            <span style={{ fontSize: tokens.font.tiny, color: tokens.color.textFaint }}>
+              {res.connectors.map((c) => `${c.provider} ${c.status}`).join(" · ")}
+            </span>
+          ) : null}
+        </div>
+      </Section>
 
       {status ? <p style={{ marginTop: tokens.space.md, fontSize: tokens.font.small, color: tokens.color.textMuted }}>{status}</p> : null}
     </main>

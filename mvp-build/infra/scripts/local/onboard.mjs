@@ -17,7 +17,12 @@
  * Usage:  node infra/scripts/local/onboard.mjs
  */
 import { randomBytes } from "node:crypto";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
 
+const HERE = dirname(fileURLToPath(import.meta.url));
+const STATE_PATH = resolve(HERE, "../../.local/state.json");
 const WEB = (process.env.WEB_ORIGIN ?? "http://localhost:3000").replace(/\/$/, "");
 const DEV_CODE = process.env.TWILIO_VERIFY_DEV_CODE ?? "000000";
 const phone = process.env.ONBOARD_PHONE ?? "+15705550123";
@@ -99,6 +104,21 @@ console.log(`   provision status: ${prov.json?.status}  employee: ${empId}`);
 if (prov.json?.status === "failed") {
   console.error("   provision failed (check docker logs hermes-<emp> if the container didn't come up):");
   console.error("   ", JSON.stringify(prov.json?.proof ?? prov.json, null, 2));
+}
+
+// Persist local state so chat.mjs / inspect.mjs stop relying on copy-paste. This is
+// a local dev convenience file (gitignored) — the owner_session_token is a local
+// session token, not a provider secret.
+try {
+  mkdirSync(dirname(STATE_PATH), { recursive: true });
+  writeFileSync(STATE_PATH, JSON.stringify({
+    employee_id: empId, account_id: accountId, owner_session_token: ownerToken,
+    owner_email: email, web_origin: WEB, work_surface_url: `${WEB}/agent/${empId}`,
+    updated_at: new Date().toISOString(),
+  }, null, 2));
+  console.log(`\n[onboard] wrote ${STATE_PATH}`);
+} catch (e) {
+  console.error(`[onboard] could not write state file: ${e.message}`);
 }
 
 console.log("\n=== ONBOARDED EMPLOYEE ===");

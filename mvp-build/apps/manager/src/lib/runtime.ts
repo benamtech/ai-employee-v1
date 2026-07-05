@@ -3,6 +3,7 @@ import { assertWorkEventDescriptor, type WorkEventDescriptor } from "@amtech/sha
 import { executeHermesTurn, resolveRuntimeApi } from "./hermes-client.js";
 import { runEmployeeTurn } from "./turn-queue.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation, startWorkRun } from "./metering.js";
+import { ownerTurnSystemPrompt } from "./owner-turn-prompt.js";
 
 export async function deliverToRuntime(apiUrl: string, body: string, channel: "sms" | "web"): Promise<string> {
   throw new Error(`legacy_runtime_path_removed:${channel}:${apiUrl ? "api_url_supplied" : "missing_api_url"}`);
@@ -35,7 +36,11 @@ export async function deliverOwnerTurnToRuntime(
     },
     async () => {
       const api = await resolveRuntimeApi(db, params.employee_id);
-      const turn = await executeHermesTurn(api, { input: params.body, work_run_id: runId });
+      const turn = await executeHermesTurn(api, {
+        input: params.body,
+        system_message: ownerTurnSystemPrompt({ account_id: params.account_id, employee_id: params.employee_id }),
+        work_run_id: runId,
+      });
       await recordExternalRuntimeRun(db, runId, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
       return { reply: turn.text, usage: turn.usage ?? {}, runtime_mode: turn.mode, external_run_id: turn.external_run_id ?? null };
     },
