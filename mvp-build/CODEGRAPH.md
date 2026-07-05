@@ -60,6 +60,16 @@ Current factual state:
 - **New-era Phase 2 runtime/scheduler productionization:** `source-wired`; runtime gate `pending`. Docker-default backend policy, scheduler runner, `hermes_job_runs`, and `runtime_health_checks` exist.
 - **Phase 3 / 3A / 4 live-employee source:** `source-wired`, **TDD-hardened (2026-07-03)**. Real Hermes Sessions chat client, DB-backed per-employee turn queue, generic ingress for Gmail/Stripe/manager events, Channel/Session/Presence router, and Gmail reply -> live wake -> validated descriptor path exist in code, now with direct unit coverage (fake-supabase enforces unique indexes + a faithful turn-claim rpc) and env-gated Postgres integration proof. A `drain_employee_turns` scheduler lane handles straggler owner turns and persists routed replies. **Two-door invariant:** external/untrusted sources enter via an `EventSourceAdapter` + `ingestEvent`; internal Manager-authored events call `deliverEmployeeEvent` directly.
 - **Phase 6 metering foundation:** `source-wired`. `0013` six Manager-only ledgers + additive `run_id` columns; `0014` keeps `run_id` crossing real turn-claim RPCs; `0015` adds stable Hermes session key + external runtime run correlation; `lib/metering.ts` best-effort helpers; one `run_id` threads ingress -> deliver -> wake -> turn-queue -> router -> owner-turn.
+- **Tool availability + materialization (2026-07-05):** `source-wired`; live employee proofs `pending`.
+  (1) Hermes toolset enablement — rendered `config.yaml` `platform_toolsets.api_server` from a safe-set
+  policy (`packages/shared/platform-toolsets.ts`) tied to backend blast radius + provider-key availability;
+  `getToolsets()` + `npm run local:inspect` prove the live surface. (2) Schema-first Manager contract —
+  `packages/shared/tool-schemas.ts` (zod source of truth) + `lib/run-tool.ts` shared dispatch (validate,
+  block scheduler-only, reuse handlers/gates). (3) **Manager-as-MCP-server** — `lib/mcp-server.ts`
+  (`@modelcontextprotocol/sdk`, web-standard streamable-http, `POST /manager/mcp`), `mcp_servers.amtech_manager`
+  in the rendered config auto-attaches to api_server; employee calls Manager tools natively. (4)
+  `ToolActivityDescriptor` + `formViewFromJsonSchema` so any tool materializes from schema with no per-tool
+  code. Live `/v1/toolsets`, MCP handshake, and the Hermes->Work native-schema pipeline are pending.
 - **Forward Phases 5-13:** planned/pending in `../wiki/MVP/build-plan-current/phases/`.
 - **Current priority:** live runtime/provider acceptance proof for the new Hermes Sessions path and provider event loop.
 
@@ -151,14 +161,16 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 
 | Path | Feature connection |
 |---|---|
-| `apps/manager/src/server.ts` | Hono server entrypoint. Registers health, Manager tools, scheduler, claim consume, owner message routing, artifact/resource routes, webhooks, orchestrator, and provisioner. |
+| `apps/manager/src/server.ts` | Hono server entrypoint. Registers health, Manager tools (via `runManagerTool`), the `/manager/mcp` MCP server endpoint, scheduler, claim consume, owner message routing, artifact/resource routes, webhooks, orchestrator, and provisioner. |
 | `apps/manager/src/orchestrator.ts` | Front-door onboarding orchestrator routes. Uses model adapter and manifest contract. |
 | `apps/manager/src/lib/orchestrator-model.ts` | OpenAI-compatible Chat Completions adapter with structured output fallback. |
 | `apps/manager/src/provisioner.ts` | Production-shaped `POST /provision` and profile/package provisioning flow. |
 | `apps/manager/src/lib/profile-renderer.ts` | Renders profile package params into Hermes profile files. |
 | `apps/manager/src/lib/runtime-backend.ts` | Runtime backend policy; Docker default, `local` dev/demo only. |
 | `apps/manager/src/lib/runtime.ts` | Compatibility wrapper for queued owner turns; legacy invented endpoint paths fail closed. |
-| `apps/manager/src/lib/hermes-client.ts` | Authenticated Hermes API Server client for health, capabilities, canonical session creation, and Sessions chat turns. |
+| `apps/manager/src/lib/hermes-client.ts` | Authenticated Hermes API Server client for health, capabilities, toolset introspection (`getToolsets` → `/v1/toolsets`), canonical session creation, and Sessions chat turns. |
+| `apps/manager/src/lib/run-tool.ts` | Single Manager-tool dispatch path shared by the HTTP route and the MCP server: validates input against the zod schema, blocks scheduler-only tools, runs the existing registry handler (gates/audit reused). |
+| `apps/manager/src/lib/mcp-server.ts` | Manager control plane exposed as a native MCP server (`@modelcontextprotocol/sdk`, web-standard streamable-http, stateless). `tools/list` = tool JSON Schemas; `tools/call` → `runManagerTool`. |
 | `apps/manager/src/lib/turn-queue.ts` | DB-backed per-employee turn queue/lease helpers for multi-instance-safe Hermes turn serialization. |
 | `apps/manager/src/lib/channel-router.ts` | Minimal Channel/Session/Presence router: heartbeat/SMS presence, delivery decisions, active-web-wins, silent record, SMS fallback. |
 | `apps/manager/src/lib/wake.ts` | Phase 4-core wake path: prompts Hermes for JSON descriptors, parses, stamps identity, validates, retries once, and repairs on failure. |
@@ -198,8 +210,10 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 
 | Path | Feature connection |
 |---|---|
-| `packages/shared/src/tool-contracts.ts` | Full Manager tool surface and typed tool inputs. This is the contract shared by front door, employee, Manager, and tests. |
-| `packages/shared/src/work-events.ts` | Typed Work Surface descriptor contract: notify/question/review, deliverable type, acceptance grammar, SMS rendering. |
+| `packages/shared/src/tool-contracts.ts` | Full Manager tool surface and typed tool inputs (compile-time interfaces). This is the contract shared by front door, employee, Manager, and tests. |
+| `packages/shared/src/tool-schemas.ts` | Runtime zod schemas keyed by `ToolName` — the JSON-Schema source of truth for HTTP dispatch validation, MCP `tools/list`, and the schema-driven renderer. Permissive passthrough fallback for the long tail. |
+| `packages/shared/src/platform-toolsets.ts` | Hermes `api_server` toolset safe-set policy (backend blast radius + provider-key availability) rendered into `config.yaml`. |
+| `packages/shared/src/work-events.ts` | Typed Work Surface descriptor contract: notify/question/review, deliverable type (incl. `tool_activity`), acceptance grammar, SMS rendering, and `formViewFromJsonSchema` (schema → form for any tool). |
 | `packages/shared/src/manifest.ts` | Seven-question onboarding manifest and validation. |
 | `packages/shared/src/profile-package.ts` | Profile package keys and render/build parameter types. |
 | `packages/shared/src/routes.ts` | Shared Manager route builders. |
@@ -236,7 +250,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 |---|---|
 | `packages/agent-template/README.md` | Render contract and package layout. |
 | `packages/agent-template/SOUL.md` | Constant employee persona and SMS voice. |
-| `packages/agent-template/config.yaml` | Hermes profile config; includes rendered runtime backend token. |
+| `packages/agent-template/config.yaml` | Hermes profile config; includes rendered runtime backend token, `platform_toolsets.api_server` (rendered safe-set), and `mcp_servers.amtech_manager` (Manager MCP server, bearer header). |
 | `packages/agent-template/distribution.yaml` | Package metadata/distribution shape. |
 | `packages/agent-template/.env.tpl` | Per-profile env template; secrets by reference. |
 | `packages/agent-template/profile.params.example.yaml` | Example render params. |

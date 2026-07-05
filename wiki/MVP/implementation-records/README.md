@@ -24,7 +24,8 @@ Use this packet when you need to answer:
 8. [`2026-06-30-phase-02-runtime-scheduler-record.md`](2026-06-30-phase-02-runtime-scheduler-record.md) - new-era **Phase 2** runtime/scheduler productionization — Docker-default backend, protected scheduler runner, `hermes_job_runs` proof writes, `runtime_health_checks`; source-wired + locally verified, live runtime gate pending.
 9. [`2026-07-03-phase-03-03a-04-core-record.md`](2026-07-03-phase-03-03a-04-core-record.md) - Phase 3 generic ingress, Phase 3A minimal router, and Phase 4-core live wake path source-wired against real Hermes Sessions API; live runtime/provider proof pending.
 10. [`2026-07-03-phase-04-hardening-and-phase-06-record.md`](2026-07-03-phase-04-hardening-and-phase-06-record.md) - **current** record: Phase 3/3A/4 TDD-hardened (fake-supabase unique indexes + rpc; every new module + adapter-contract tested; audit fixes incl. turn-queue orphan; drain lane; env-gated turn-claim + new-table RLS proofs) and Phase 6 metering foundation (0013 ledgers + metering.ts + run_id correlation, 0014 turn-claim `run_id` propagation). 38 files / 216 unit tests; provider/runtime `pending`.
-10. [`../../../mvp-build/README.md`](../../../mvp-build/README.md) - runnable build-home status and commands.
+11. [`2026-07-05-mcp-server-toolsets-tool-activity-record.md`](2026-07-05-mcp-server-toolsets-tool-activity-record.md) - Hermes toolset enablement (`platform_toolsets.api_server` safe-set + `local:inspect`), schema-first Manager tool contract (`tool-schemas.ts` zod + shared `runManagerTool`), **Manager-as-MCP-server** (`mcp-server.ts`, `/manager/mcp`, `mcp_servers.amtech_manager`), and the `ToolActivityDescriptor` + `formViewFromJsonSchema` generic-renderer spike. 50 files / 283 unit tests; live `/v1/toolsets` + MCP handshake pending.
+12. [`../../../mvp-build/README.md`](../../../mvp-build/README.md) - runnable build-home status and commands.
 
 ## Rule
 
