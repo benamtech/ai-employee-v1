@@ -10,6 +10,7 @@
 import type { SupabaseClient } from "@amtech/db";
 import { ID_PREFIX, newId } from "@amtech/shared";
 import { executeHermesTurn, resolveRuntimeApi } from "./hermes-client.js";
+import { ownerTurnSystemPrompt } from "./runtime.js";
 import { claimAnyQueuedTurn, completeEmployeeTurn } from "./turn-queue.js";
 import { routeEmployeeIntent } from "./channel-router.js";
 import { mustWrite } from "./db.js";
@@ -38,7 +39,11 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
     try {
       const api = await resolveRuntimeApi(db, job.employee_id);
       const body = String((job.input as { body?: unknown }).body ?? "");
-      const turn = await executeHermesTurn(api, { input: body, work_run_id: job.run_id ?? null });
+      const turn = await executeHermesTurn(api, {
+        input: body,
+        system_message: ownerTurnSystemPrompt(job.account_id ?? "", job.employee_id),
+        work_run_id: job.run_id ?? null,
+      });
       await recordExternalRuntimeRun(db, job.run_id ?? null, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
       const messageId = newId(ID_PREFIX.message);
       await mustWrite(

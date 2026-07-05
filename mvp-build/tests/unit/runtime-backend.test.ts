@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { resolveRuntimeBackend } from "../../apps/manager/src/lib/runtime-backend";
 import { profileTokenMap } from "../../apps/manager/src/lib/profile-renderer";
+import { ownerTurnSystemPrompt } from "../../apps/manager/src/lib/runtime";
 import type { ProfileBuildParams } from "../../packages/shared/src/profile-package";
 
 afterEach(() => {
@@ -47,5 +48,14 @@ describe("runtime backend policy", () => {
   it("passes the resolved backend into rendered profile tokens", () => {
     expect(profileTokenMap(params("docker")).RUNTIME_BACKEND).toBe("docker");
     expect(profileTokenMap(params("local")).RUNTIME_BACKEND).toBe("local");
+  });
+
+  it("injects Manager action discipline into owner turns", () => {
+    const prompt = ownerTurnSystemPrompt("acct_1", "emp_1");
+    expect(prompt).toContain("connect_email");
+    expect(prompt).toContain("provider=gmail");
+    expect(prompt).toContain("account_id=acct_1");
+    expect(prompt).toContain("employee_id=emp_1");
+    expect(prompt).toContain("Never claim");
   });
 });

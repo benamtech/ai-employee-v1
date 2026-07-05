@@ -22,6 +22,17 @@ Fill these two values in `.env` before migrations/bootstrap:
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `DATABASE_URL` — use the Supabase **shared pooler** URI, not the direct `db.<ref>.supabase.co` URI, when on an IPv4-only local network.
 
+Also choose the provisioned employee's Hermes model/provider before `local:bootstrap`:
+
+- `HERMES_MODEL_PROVIDER`
+- `HERMES_MODEL_DEFAULT`
+- `HERMES_MODEL_BASE_URL` when using `custom`
+- the matching provider key such as `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, or `ANTHROPIC_API_KEY`
+
+Provisioning renders these choices into each Hermes profile so the employee skips the normal terminal
+`hermes model` setup wizard. If no provider key is available, runtime `/health` and `/v1/capabilities`
+can still pass, but chat/run proof will fail honestly before `runtime-accepted`.
+
 The Supabase project is `amtech-ai-employee-mvp` at `https://uxuruijrgghshfwnaagb.supabase.co`.
 
 Optional: open `mvp-build/` in the devcontainer. It uses Docker-outside-of-Docker, so the development

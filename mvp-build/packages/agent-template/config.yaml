@@ -5,9 +5,17 @@ profile:
   id: "client_{{CLIENT_ID}}"
   name: "{{EMPLOYEE_NAME}}"
 
+model:
+  # Preselect the model/provider during provisioning so every employee skips the
+  # first-run Hermes setup wizard. Provider credentials are injected at container
+  # runtime by the local/VPS launcher, not written into this config file.
+  provider: "{{HERMES_MODEL_PROVIDER}}"
+  default: "{{HERMES_MODEL_DEFAULT}}"
+  base_url: "{{HERMES_MODEL_BASE_URL}}"
+
 models:
   # Shipped default employee model; haiku for compression/background work.
-  default: "claude-opus-4-8"
+  default: "{{HERMES_MODEL_DEFAULT}}"
   compression: "claude-haiku-4-5"
 
 terminal:

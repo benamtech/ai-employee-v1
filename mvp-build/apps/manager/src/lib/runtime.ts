@@ -4,6 +4,17 @@ import { executeHermesTurn, resolveRuntimeApi } from "./hermes-client.js";
 import { runEmployeeTurn } from "./turn-queue.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation, startWorkRun } from "./metering.js";
 
+export function ownerTurnSystemPrompt(accountId: string, employeeId: string): string {
+  return [
+    "You are the AMTECH AI employee. Treat owner messages as requests to do product work, not just chat.",
+    "The AMTECH Manager is the action interface for product-owned state: connector setup, artifacts, signed links, approvals, email, invoices, reminders, and provider/customer events.",
+    `When a Manager tool is needed, use account_id=${accountId} and employee_id=${employeeId}.`,
+    "If the owner asks to connect Gmail/email, call Manager tool connect_email with provider=gmail. Report Gmail as pending OAuth only if Manager returns a consent_url. Say it is connected only after Manager records connected proof.",
+    "Never claim a connector opened, email sent, invoice created, reminder scheduled, event handled, or UI surfaced unless Manager returned proof for that action.",
+    "If you cannot reach or invoke Manager tools from this runtime, say that plainly and ask the owner to use the visible Work Surface control. Do not improvise a completed action.",
+  ].join("\n");
+}
+
 export async function deliverToRuntime(apiUrl: string, body: string, channel: "sms" | "web"): Promise<string> {
   throw new Error(`legacy_runtime_path_removed:${channel}:${apiUrl ? "api_url_supplied" : "missing_api_url"}`);
 }
@@ -35,7 +46,11 @@ export async function deliverOwnerTurnToRuntime(
     },
     async () => {
       const api = await resolveRuntimeApi(db, params.employee_id);
-      const turn = await executeHermesTurn(api, { input: params.body, work_run_id: runId });
+      const turn = await executeHermesTurn(api, {
+        input: params.body,
+        system_message: ownerTurnSystemPrompt(params.account_id, params.employee_id),
+        work_run_id: runId,
+      });
       await recordExternalRuntimeRun(db, runId, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
       return { reply: turn.text, usage: turn.usage ?? {}, runtime_mode: turn.mode, external_run_id: turn.external_run_id ?? null };
     },

@@ -120,6 +120,21 @@ generic ingress; real Docker/Hermes Jobs runtime. Metering rollups (Phase 8) and
 chokepoint (Phase 7) remain planned. Use `tests/golden-path/live-employee-wake.md` +
 `npm run smoke:live-employee` as the live hook.
 
+## Live proof refresh (2026-07-04)
+
+- Phase 6 Supabase proof is now live, not merely env-gated: `set -a && source .env && set +a &&
+  npm run test:integration -- tests/integration/new-tables-rls.integration.test.ts
+  tests/integration/turn-claim.integration.test.ts` passed against the configured Supabase project
+  (2 files / 5 tests). This proves owner-denied/service-role-allowed access for the Manager-only
+  metering ledgers and real Postgres turn-claim serialization with `run_id`.
+- Hermes runtime endpoint proof advanced but is not `runtime-accepted`: the fresh local employee
+  `emp_vhz8kw3bhvh67zu292ukgl` exposed `/health` 200 (`status:"ok"`, `platform:"hermes-agent"`,
+  `version:"0.18.0"`) and `/v1/capabilities` 200 with `features.run_events_sse`,
+  `features.tool_progress_events`, `features.approval_events`, and `endpoints.run_events`.
+  The first provider-backed chat/run stopped honestly at provider auth (`HTTP 401` from the
+  OpenAI-compatible endpoint) because the local env has no funded provider key, so there is still no
+  valid `/v1/runs/{id}/events` transcript or external runtime run id.
+
 ## Carry-forward — Phase 5
 
 On the now-stable descriptor / router / `run_id` seams: real triage priority/grouping + per-account batch

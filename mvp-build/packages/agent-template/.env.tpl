@@ -14,11 +14,12 @@ SMS_ALLOWED_USERS={{OWNER_PHONE_E164}}
 SMS_WEBHOOK_URL={{WEBHOOK_URL}}
 SMS_INSECURE_NO_SIGNATURE=false
 
-# Hermes API server. Config is env-only in current Hermes; config.yaml keys are ignored.
+# Hermes loads this profile .env with precedence over Docker -e values, so the
+# API server must bind all container interfaces for the host-published port.
 API_SERVER_ENABLED=true
 API_SERVER_KEY={{API_SERVER_KEY}}
 API_SERVER_PORT={{GATEWAY_PORT}}
-API_SERVER_HOST=127.0.0.1
+API_SERVER_HOST=0.0.0.0
 
 # Model + connector provider secrets are provided as secret references by the Manager.
 # Manager tool access is an AMTECH-controlled runtime credential for this profile.

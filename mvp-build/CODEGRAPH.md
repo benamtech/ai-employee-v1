@@ -59,9 +59,15 @@ Current factual state:
 - **Phase 1 live-acceptance harness:** `source-wired`; live gate `pending`. Preflight/report and 8 run-verifiers exist, but real provider/runtime proof ids are absent.
 - **New-era Phase 2 runtime/scheduler productionization:** `source-wired`; runtime gate `pending`. Docker-default backend policy, scheduler runner, `hermes_job_runs`, and `runtime_health_checks` exist.
 - **Phase 3 / 3A / 4 live-employee source:** `source-wired`, **TDD-hardened (2026-07-03)**. Real Hermes Sessions chat client, DB-backed per-employee turn queue, generic ingress for Gmail/Stripe/manager events, Channel/Session/Presence router, and Gmail reply -> live wake -> validated descriptor path exist in code, now with direct unit coverage (fake-supabase enforces unique indexes + a faithful turn-claim rpc) and env-gated Postgres integration proof. A `drain_employee_turns` scheduler lane handles straggler owner turns and persists routed replies. **Two-door invariant:** external/untrusted sources enter via an `EventSourceAdapter` + `ingestEvent`; internal Manager-authored events call `deliverEmployeeEvent` directly.
-- **Phase 6 metering foundation:** `source-wired`. `0013` six Manager-only ledgers + additive `run_id` columns; `0014` keeps `run_id` crossing real turn-claim RPCs; `0015` adds stable Hermes session key + external runtime run correlation; `lib/metering.ts` best-effort helpers; one `run_id` threads ingress -> deliver -> wake -> turn-queue -> router -> owner-turn.
-- **Forward Phases 5-13:** planned/pending in `../wiki/MVP/build-plan-current/phases/`.
-- **Current priority:** live runtime/provider acceptance proof for the new Hermes Sessions path and provider event loop.
+- **Phase 5 triage/batching/Work Surface stream:** `source-wired`; Supabase side accepted live. `0016`
+  `event_batches` migration/RLS is live; Manager/Web SSE Work Surface, batching digest, MCP-UI iframe, and
+  Hermes run-stream client are wired. Hermes runtime endpoint proof is partial: fresh local sibling Docker
+  employees answer `/health` and `/v1/capabilities`, and provisioning now preselects Hermes model setup
+  choices so employees skip the `hermes model` wizard. `runtime-accepted` is still pending a real
+  provider-backed `/v1/runs/{id}/events` transcript/run id.
+- **Phase 6 metering foundation:** `source-wired`; Supabase accepted live. `0013` six Manager-only ledgers + additive `run_id` columns; `0014` keeps `run_id` crossing real turn-claim RPCs; `0015` adds stable Hermes session key + external runtime run correlation; `lib/metering.ts` best-effort helpers; one `run_id` threads ingress -> deliver -> wake -> turn-queue -> router -> owner-turn. Live integration proof on 2026-07-04 passed `new-tables-rls` + `turn-claim` (2 files / 5 tests).
+- **Forward Phases 7-13:** planned/pending in `../wiki/MVP/build-plan-current/phases/`.
+- **Current priority:** add a funded provider key, rerun local chat/Work Surface, and capture the real Hermes `/v1/runs/{id}/events` SSE transcript plus external runtime run id.
 
 Do not mark provider or runtime acceptance without real proof ids. Local tests do not prove live acceptance.
 
@@ -135,7 +141,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/web/app/api/front-door/*` | Browser-facing proxies for onboarding, verification, claim-token, account creation, provisioning, and front-door messages. |
 | `apps/web/app/api/_lib/manager.ts` | Shared proxy to Manager with internal token handling. |
 | `apps/web/app/agent/[employeeId]/page.tsx` | Authenticated owner Work Surface route. |
-| `apps/web/app/agent/[employeeId]/AgentClient.tsx` | Main Work Surface client: daily brief, job folders, notify/question/review cards, approvals, chat, SSE snapshot fallback. |
+| `apps/web/app/agent/[employeeId]/AgentClient.tsx` | Main Work Surface client: daily brief, job folders, notify/question/review cards, approvals, chat, live SSE stream with reconnect and fallback. |
 | `apps/web/app/agent/[employeeId]/components/*` | Presentation components for approval cards, work cards, receipts, daily brief, and job folders. |
 | `apps/web/app/agent/[employeeId]/components/deliverables/index.tsx` | Deliverable-type renderers used by work cards. |
 | `apps/web/app/agent/[employeeId]/lib/group-by-job.ts` | Groups artifacts/events/invoices/reminders into owner-readable job folders. |
@@ -143,7 +149,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/web/app/agent/[employeeId]/surface.tokens.ts` | Work Surface visual tokens. |
 | `apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts` | Signed artifact/owner-session resolution route for PDFs and other outputs. |
 | `apps/web/app/api/employee/[employeeId]/resources/route.ts` | Loads Work Surface snapshot through Manager. |
-| `apps/web/app/api/employee/[employeeId]/events/route.ts` | SSE-shaped snapshot route; currently sends one snapshot and closes, with polling fallback. |
+| `apps/web/app/api/employee/[employeeId]/events/route.ts` | Browser SSE proxy to Manager's live employee stream (`snapshot`, `work_event`, `work_progress`, `approval_update`). |
 | `apps/web/app/api/employee/[employeeId]/message/route.ts` | Sends owner webchat messages to the employee runtime through Manager. |
 | `apps/web/app/api/employee/[employeeId]/approval/resolve/route.ts` | Resolves Manager approval records from web. Same acceptance primitive as SMS/future voice. |
 
@@ -158,7 +164,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/manager/src/lib/profile-renderer.ts` | Renders profile package params into Hermes profile files. |
 | `apps/manager/src/lib/runtime-backend.ts` | Runtime backend policy; Docker default, `local` dev/demo only. |
 | `apps/manager/src/lib/runtime.ts` | Compatibility wrapper for queued owner turns; legacy invented endpoint paths fail closed. |
-| `apps/manager/src/lib/hermes-client.ts` | Authenticated Hermes API Server client for health, capabilities, canonical session creation, and Sessions chat turns. |
+| `apps/manager/src/lib/hermes-client.ts` | Authenticated Hermes API Server client for health, capabilities, canonical session creation, Runs/Sessions turns, and run-events SSE parsing. |
 | `apps/manager/src/lib/turn-queue.ts` | DB-backed per-employee turn queue/lease helpers for multi-instance-safe Hermes turn serialization. |
 | `apps/manager/src/lib/channel-router.ts` | Minimal Channel/Session/Presence router: heartbeat/SMS presence, delivery decisions, active-web-wins, silent record, SMS fallback. |
 | `apps/manager/src/lib/wake.ts` | Phase 4-core wake path: prompts Hermes for JSON descriptors, parses, stamps identity, validates, retries once, and repairs on failure. |
@@ -236,9 +242,9 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 |---|---|
 | `packages/agent-template/README.md` | Render contract and package layout. |
 | `packages/agent-template/SOUL.md` | Constant employee persona and SMS voice. |
-| `packages/agent-template/config.yaml` | Hermes profile config; includes rendered runtime backend token. |
+| `packages/agent-template/config.yaml` | Hermes profile config; includes rendered runtime backend and model provider/default/base URL choices so provisioned employees skip the first-run Hermes model wizard. |
 | `packages/agent-template/distribution.yaml` | Package metadata/distribution shape. |
-| `packages/agent-template/.env.tpl` | Per-profile env template; secrets by reference. |
+| `packages/agent-template/.env.tpl` | Per-profile env template; secrets by reference; API server binds `0.0.0.0` for sibling Docker host-port reachability. |
 | `packages/agent-template/profile.params.example.yaml` | Example render params. |
 | `packages/agent-template/workspace/AGENTS.md` | Runtime policy loaded into employee workspace, including confirmation gates. |
 | `packages/agent-template/workspace/manager-tools.md` | Tool-call contract the employee uses to talk to Manager. |

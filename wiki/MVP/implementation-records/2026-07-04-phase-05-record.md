@@ -39,9 +39,13 @@ pass-through SSE proxy; `AgentClient.tsx` consumes the full vocabulary with reco
 fallback, and a live "doing it now" line.
 
 **Hermes streaming.** `hermes-client.ts` refactors runs into `createRun`/`pollRun` and adds
-`executeHermesTurnStreaming` consuming `GET /v1/runs/{id}/events` (SSE: `tool.started`/`tool.completed`/
-`assistant.delta`/`run.completed`), degrading safely to poll → sessions chat. `work-verbs.ts` maps tool
-names to owner-safe verbs — a raw tool name can never reach the owner. `wake.ts` publishes progress.
+`executeHermesTurnStreaming` consuming `GET /v1/runs/{id}/events`, degrading safely to poll → sessions
+chat. The live Hermes API-server contract is now pinned in source: capabilities expose
+`features.run_events_sse`, `features.tool_progress_events`, `features.approval_events`, and
+`endpoints.run_events`; run event JSON uses the `event` field with `message.delta`, `tool.started`,
+`tool.completed`, `reasoning.available`, `approval.request`, `run.completed`, `run.failed`, and
+`run.cancelled`. `work-verbs.ts` maps tool names to owner-safe verbs — a raw tool name can never reach the
+owner. `wake.ts` publishes progress.
 
 **Generative UI = MCP-UI (utilitarian, real).** New shared contract: `WorkView` (`table`/`schedule`/
 `diff`/`form`) on the deliverable + `UiResourceEnvelope`; `work-stream.ts` event union; read-model types
@@ -74,5 +78,12 @@ binding). Fake Supabase gained `gt`/`lt` filters and exact-`count`/`head` suppor
   partial `uq_event_batches_open` + `idx_event_batches_flush` indexes exist. `event_batches` added to
   `new-tables-rls.integration.test.ts` and proven real (owner denied / service-role allowed), 4/4
   against live Supabase.
-- **Hermes SSE — pending.** `runtime-accepted` awaits a real `/v1/runs/{id}/events` capture from a
-  running Hermes runtime; the parser is defensive until the exact event JSON field names are pinned.
+- **Hermes runtime — partial live proof, still pending `runtime-accepted`.** Fresh local employee
+  `emp_vhz8kw3bhvh67zu292ukgl` proved the sibling Docker runtime path with `/health` 200
+  (`status:"ok"`, `platform:"hermes-agent"`, `version:"0.18.0"`) and `/v1/capabilities` 200 including
+  `run_events_sse` and `endpoints.run_events`. Provisioning now renders the normal Hermes model setup
+  choices (`model.provider`, `model.default`, `model.base_url`) into every profile so a new employee no
+  longer falls into the `hermes model` wizard. The chat probe then reached the OpenAI-compatible provider
+  and failed honestly with provider auth (`HTTP 401`) because the local env has no funded provider key.
+  Therefore there is no valid `/v1/runs/{id}/events` transcript or external runtime run id yet, and the
+  Phase 5 runtime gate remains pending.

@@ -254,6 +254,31 @@ export async function chatTurn(api: RuntimeApi, input: { input: string; system_m
  *  the work-verb allowlist — a raw tool name never reaches this callback. */
 export type HermesProgress = (p: { verb: string; state: "started" | "step" | "completed" }) => void;
 
+export const HERMES_RUN_EVENT_FIELDS = {
+  event: "event",
+  runId: "run_id",
+  timestamp: "timestamp",
+  delta: "delta",
+  output: "output",
+  usage: "usage",
+  error: "error",
+  tool: "tool",
+  preview: "preview",
+  duration: "duration",
+  choices: "choices",
+} as const;
+
+export const HERMES_RUN_EVENT_TYPES = {
+  messageDelta: "message.delta",
+  toolStarted: "tool.started",
+  toolCompleted: "tool.completed",
+  reasoningAvailable: "reasoning.available",
+  approvalRequest: "approval.request",
+  runCompleted: "run.completed",
+  runFailed: "run.failed",
+  runCancelled: "run.cancelled",
+} as const;
+
 /** Create the run. Returns the run id and, when the runtime answered terminally in
  *  the create response, the finished result (so no poll/stream is needed). */
 async function createRun(api: RuntimeApi, input: HermesTurnInput, capabilities: HermesCapabilities | null): Promise<{ runId: string; terminal?: HermesTurnResult }> {
@@ -404,18 +429,20 @@ async function streamRun(api: RuntimeApi, runId: string, capabilities: HermesCap
     let json: Record<string, unknown> | null = null;
     try { json = frame.data ? JSON.parse(frame.data) as Record<string, unknown> : null; } catch { json = null; }
     const type = eventType(frame, json);
-    if (type.includes("tool") && (type.includes("start") || type.endsWith(".started"))) {
+    if (type === HERMES_RUN_EVENT_TYPES.toolStarted || (type.includes("tool") && (type.includes("start") || type.endsWith(".started")))) {
       onProgress?.({ verb: workVerbForTool(toolNameFrom(json)), state: "started" });
-    } else if (type.includes("tool") && (type.includes("complete") || type.includes("end") || type.includes("result"))) {
+    } else if (type === HERMES_RUN_EVENT_TYPES.toolCompleted || (type.includes("tool") && (type.includes("complete") || type.includes("end") || type.includes("result")))) {
       onProgress?.({ verb: workVerbForTool(toolNameFrom(json)), state: "step" });
-    } else if (type.includes("delta") || type.includes("output_text")) {
+    } else if (type === HERMES_RUN_EVENT_TYPES.approvalRequest) {
+      onProgress?.({ verb: "Waiting for approval", state: "step" });
+    } else if (type === HERMES_RUN_EVENT_TYPES.messageDelta || type.includes("delta") || type.includes("output_text")) {
       assembled += deltaTextFrom(json);
-    } else if (type.includes("run.completed") || type.includes("completed") || type.includes("succeeded") || type.includes("done")) {
+    } else if (type === HERMES_RUN_EVENT_TYPES.runCompleted || type.includes("run.completed") || type.includes("completed") || type.includes("succeeded") || type.includes("done")) {
       finalText = textFromJson(json as HermesRunStatusResponse) ?? finalText;
       usage = usageFromJson(json as HermesRunStatusResponse) ?? usage;
       sawTerminal = true;
       break;
-    } else if (type.includes("failed") || type.includes("error") || type.includes("cancel")) {
+    } else if (type === HERMES_RUN_EVENT_TYPES.runFailed || type === HERMES_RUN_EVENT_TYPES.runCancelled || type.includes("failed") || type.includes("error") || type.includes("cancel")) {
       failed = (json?.error as string) ?? `runtime_run_${type}`;
       sawTerminal = true;
       break;
@@ -429,7 +456,15 @@ async function streamRun(api: RuntimeApi, runId: string, capabilities: HermesCap
 }
 
 export function supportsRunEvents(capabilities: HermesCapabilities | null): boolean {
-  return featureEnabled(capabilities, ["run_events", "runs_events", "run_stream", "/v1/runs/{id}/events", "events"]);
+  return featureEnabled(capabilities, [
+    "run_events_sse",
+    "run_events",
+    "runs_events",
+    "run_stream",
+    "/v1/runs/{run_id}/events",
+    "/v1/runs/{id}/events",
+    "events",
+  ]);
 }
 
 /**

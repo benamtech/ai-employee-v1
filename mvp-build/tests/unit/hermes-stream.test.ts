@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSseFrames } from "../../apps/manager/src/lib/hermes-client";
+import { HERMES_RUN_EVENT_TYPES, parseSseFrames, supportsRunEvents } from "../../apps/manager/src/lib/hermes-client";
 import { workVerbForTool, isSafeWorkVerb } from "../../apps/manager/src/lib/work-verbs";
 
 function streamOf(chunks: string[]): ReadableStream<Uint8Array> {
@@ -38,6 +38,26 @@ describe("parseSseFrames", () => {
     const frames = await collect(streamOf(["event: tool.completed\r\ndata: {}\r\n\r\n"]));
     expect(frames[0]!.event).toBe("tool.completed");
   });
+
+  it("supports Hermes run streams that carry the event name in JSON data", async () => {
+    const frames = await collect(streamOf([
+      `data: {"event":"${HERMES_RUN_EVENT_TYPES.messageDelta}","delta":"hi"}\n\n`,
+      `data: {"event":"${HERMES_RUN_EVENT_TYPES.runCompleted}","output":"done"}\n\n`,
+    ]));
+    expect(frames).toEqual([
+      { event: undefined, data: `{"event":"${HERMES_RUN_EVENT_TYPES.messageDelta}","delta":"hi"}` },
+      { event: undefined, data: `{"event":"${HERMES_RUN_EVENT_TYPES.runCompleted}","output":"done"}` },
+    ]);
+  });
+});
+
+describe("Hermes run event capabilities", () => {
+  it("recognizes the live API-server run_events_sse field", () => {
+    expect(supportsRunEvents({
+      features: { run_events_sse: true },
+      endpoints: {},
+    })).toBe(true);
+  });
 });
 
 describe("work-verbs (owner-safe progress)", () => {
@@ -48,6 +68,7 @@ describe("work-verbs (owner-safe progress)", () => {
     expect(unknown).toBe("Working on it");
     expect(unknown).not.toContain("exfiltrate");
     expect(isSafeWorkVerb(unknown)).toBe(true);
+    expect(isSafeWorkVerb("Waiting for approval")).toBe(true);
     expect(isSafeWorkVerb("exfiltrate_secrets_v2")).toBe(false);
   });
 });

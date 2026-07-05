@@ -43,8 +43,8 @@ by one operator toward ~1000 users."
 | `planned` | designed but not implemented |
 | `pending` | blocked by missing env/credential/host, or not yet attempted |
 
-Phase 0 is `source-wired`. Everything in Phases 1–13 plus Phase 3A is `planned`/`pending` today — this folder
-authors structure, not progress. Do not upgrade a status without real proof ids (see
+Phase 0 is `source-wired`. Later phase rows reflect implementation proof as it lands; do not upgrade
+a status without real proof ids (see
 [`../README.md`](../README.md) working rule).
 
 ## Phase index
@@ -57,8 +57,8 @@ authors structure, not progress. Do not upgrade a status without real proof ids 
 | 3 | [Generic Ingress & Event Routing](phase-03-generic-ingress-event-routing.md) | 0 | source-wired |
 | 3A | [Channel, Session & Presence Layer](phase-03a-channel-session-presence-layer.md) | 0, 3 | source-wired |
 | 4 | [Live Employee Wake Path & Descriptors](phase-04-live-wake-path-descriptors.md) | 2, 3, 3A | source-wired (TDD-hardened) / runtime pending |
-| 5 | [Triage, Batching & Live Work Surface Stream](phase-05-triage-batching-work-surface-stream.md) | 4 | planned |
-| 6 | [Metering Foundation](phase-06-metering-foundation.md) | 1 | source-wired |
+| 5 | [Triage, Batching & Live Work Surface Stream](phase-05-triage-batching-work-surface-stream.md) | 4 | source-wired; Supabase accepted; Hermes SSE pending |
+| 6 | [Metering Foundation](phase-06-metering-foundation.md) | 1 | source-wired; Supabase accepted |
 | 7 | [Metering Instrumentation](phase-07-metering-instrumentation.md) | 6 | planned |
 | 8 | [Metering Rollups, Budgets & Safe Summaries](phase-08-metering-rollups-budgets-summaries.md) | 7 | planned |
 | 9 | [Admin Foundations](phase-09-admin-foundations.md) | 1 | planned |

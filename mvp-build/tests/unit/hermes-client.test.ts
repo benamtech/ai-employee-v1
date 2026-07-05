@@ -137,6 +137,7 @@ describe("hermes-client health/capabilities/timeout", () => {
 describe("hermes-client executeHermesTurn", () => {
   it("uses /v1/capabilities before /v1/runs and sends the session key when advertised", async () => {
     const calls: Array<{ url: string; headers: Headers }> = [];
+    let runBody: Record<string, unknown> | null = null;
     vi.stubGlobal("fetch", vi.fn(async (url: unknown, init: RequestInit = {}) => {
       calls.push({ url: String(url), headers: new Headers(init.headers) });
       const u = String(url);
@@ -144,17 +145,24 @@ describe("hermes-client executeHermesTurn", () => {
         return new Response(JSON.stringify({ features: { runs: true, session_key: true } }), { status: 200, headers: { "Content-Type": "application/json" } });
       }
       if (u.endsWith("/v1/runs")) {
+        runBody = JSON.parse(String(init.body ?? "{}")) as Record<string, unknown>;
         return new Response(JSON.stringify({ run_id: "hrun_1", status: "succeeded", output: " done " }), { status: 200, headers: { "Content-Type": "application/json" } });
       }
       throw new Error(`no mock route for ${u}`);
     }));
 
-    const res = await executeHermesTurn(api(), { input: "hi", work_run_id: "run_1" });
+    const res = await executeHermesTurn(api(), { input: "hi", system_message: "Use Manager tools for product actions.", work_run_id: "run_1" });
 
     expect(res).toMatchObject({ text: "done", external_run_id: "hrun_1", mode: "runs" });
     expect(calls[0].url).toContain("/v1/capabilities");
     expect(calls[1].url).toContain("/v1/runs");
     expect(calls[1].headers.get("X-Hermes-Session-Key")).toBe("amtech:v1:account:acct_1:employee:emp_1");
+    expect(runBody).toMatchObject({
+      input: "hi",
+      instructions: "Use Manager tools for product actions.",
+      system_message: "Use Manager tools for product actions.",
+      metadata: { amtech_work_run_id: "run_1" },
+    });
   });
 
   it("falls back to Sessions chat when Runs are absent but session chat is advertised", async () => {
