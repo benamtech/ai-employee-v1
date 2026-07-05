@@ -25,6 +25,18 @@ terminal:
 platform_toolsets:
   api_server: {{PLATFORM_TOOLSETS}}
 
+# The AMTECH Manager control plane, exposed to this employee as a native MCP
+# server. Enabled mcp_servers auto-attach to the api_server platform's tools
+# (Hermes tools_config), so the employee calls Manager tools (estimates,
+# approvals, connectors, reminders) natively instead of parsing a prose HTTP
+# contract. Auth rides the internal bearer via headers; the streamable-http URL
+# is the Manager's /manager/mcp endpoint.
+mcp_servers:
+  amtech_manager:
+    url: "{{MANAGER_MCP_URL}}"
+    headers:
+      Authorization: "Bearer {{MANAGER_INTERNAL_TOKEN}}"
+
 gateway:
   sms:
     # Manager owns Twilio ingress, sender identity, delivery decisions, and approval gates.

@@ -11,6 +11,7 @@ import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolName } from "@amtec
 import { serviceClient } from "@amtech/db";
 import { TOOL_REGISTRY } from "./tools/registry.js";
 import { runManagerTool } from "./lib/run-tool.js";
+import { handleManagerMcpRequest } from "./lib/mcp-server.js";
 import { registerTwilioWebhooks } from "./webhooks/twilio.js";
 import { registerGmailWebhooks } from "./webhooks/gmail.js";
 import { registerStripeWebhooks } from "./webhooks/stripe.js";
@@ -87,6 +88,18 @@ export function buildApp(): Hono {
       return c.json({ error: "internal_error", tool: name }, 500);
     }
   });
+
+  // Manager control plane as a native MCP server for the employee. Same registry,
+  // schema, gates, and audit as /manager/tools — just the MCP transport. Auth
+  // rides the internal bearer (rendered into mcp_servers.amtech_manager.headers).
+  const mcp = async (c: Context) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    return handleManagerMcpRequest(c.req.raw);
+  };
+  app.post("/manager/mcp", mcp);
+  app.get("/manager/mcp", mcp);
+  app.delete("/manager/mcp", mcp);
 
   app.post("/manager/scheduler/run", async (c) => {
     const denied = denyInternal(c);
