@@ -23,11 +23,24 @@ function pendingIdsOldestFirst() {
     .map((f) => f.replace(/\.json$/, ""));
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 if (cmd === "peek") {
   const ids = pendingIdsOldestFirst();
   console.log(JSON.stringify({ pending: ids.length, ids }, null, 2));
 } else if (cmd === "next") {
-  const ids = pendingIdsOldestFirst();
+  let ids = pendingIdsOldestFirst();
+  // --wait [secs]: block (node-side, no shell sleep) until a request parks, so a
+  // model-worker subagent can sit idle waiting for the next user message.
+  if (!ids.length && rest.includes("--wait")) {
+    const wi = rest.indexOf("--wait");
+    const secs = Number(rest[wi + 1]) > 0 ? Number(rest[wi + 1]) : 55;
+    const deadline = Date.now() + secs * 1000;
+    while (Date.now() < deadline && !ids.length) {
+      await sleep(300);
+      ids = pendingIdsOldestFirst();
+    }
+  }
   if (!ids.length) { console.log("NONE"); process.exit(0); }
   const id = ids[0];
   const parked = JSON.parse(readFileSync(join(PENDING, `${id}.json`), "utf8"));
