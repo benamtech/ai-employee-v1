@@ -19,6 +19,7 @@
 import { createServer } from "node:http";
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { toMessage } from "./model-bridge-lib.mjs";
 
 const PORT = Number(process.env.MODEL_BRIDGE_PORT ?? process.env.PORT ?? 8091);
 const ROOT = join(process.cwd(), "infra", ".local", "model-bridge");
@@ -45,20 +46,6 @@ async function waitForAnswer(id) {
     await sleep(POLL_MS);
   }
   throw new Error("bridge_answer_timeout");
-}
-
-// The answer file is either plain text (-> assistant content) or a JSON OpenAI
-// message object (role/content/tool_calls). Orchestrator answers are JSON strings
-// that must stay as `content` (the caller re-parses them), so only treat parsed
-// JSON as a message object when it actually looks like one.
-function toMessage(raw) {
-  try {
-    const j = JSON.parse(raw);
-    if (j && typeof j === "object" && !Array.isArray(j) && ("content" in j || "tool_calls" in j || "role" in j)) {
-      return { role: "assistant", content: j.content ?? null, ...(j.tool_calls ? { tool_calls: j.tool_calls } : {}) };
-    }
-  } catch { /* not JSON -> plain text */ }
-  return { role: "assistant", content: raw };
 }
 
 function chatCompletion(id, model, message) {

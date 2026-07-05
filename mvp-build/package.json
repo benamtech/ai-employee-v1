@@ -33,6 +33,7 @@
     "local:onboard": "node infra/scripts/local/onboard.mjs",
     "local:fixture": "node infra/scripts/local/contractor-fixtures.mjs",
     "local:model-bridge": "node infra/scripts/local/model-bridge.mjs",
+    "local:model-bridge-worker": "node infra/scripts/local/model-bridge-worker.mjs",
     "local:chat": "node infra/scripts/local/chat.mjs",
     "local:acceptance:env": "node infra/scripts/local/acceptance/01-env.mjs",
     "local:acceptance:services": "node infra/scripts/local/acceptance/02-services.mjs",

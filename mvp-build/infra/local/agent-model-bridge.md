@@ -22,10 +22,21 @@ Hermes employee ──────┼─→ POST /v1/chat/…  →  bridge  ├�
 
 ## Non-negotiable: the model is always a **Haiku 4.5** subagent
 
-The worker that answers parked requests **must** be a Claude Code subagent on the **latest Haiku**
-(`claude-haiku-4-5`, spawned via the Agent tool with `model: "haiku"`). Not Opus, not answered by hand.
-Haiku is fast and cheap, the completions here are simple (structured onboarding JSON; Hermes setup turns),
-and fixing the tier keeps runs comparable and inexpensive. Do not substitute a heavier model.
+The worker that answers parked requests **must** run on the **latest Haiku** (`claude-haiku-4-5`). Not
+Opus, not Sonnet, not answered by hand. Haiku is fast and cheap, the completions here are simple
+(structured onboarding JSON; Hermes setup turns), and fixing the tier keeps runs comparable and
+inexpensive.
+
+This is now **enforced in code**, not just by convention: `infra/scripts/local/model-bridge-worker.mjs`
+spawns headless Claude Code with the model **hard-pinned** to `claude-haiku-4-5`
+(`BRIDGE_WORKER_MODEL` in `model-bridge-lib.mjs`) — there is no env/flag override. Run it with:
+
+```bash
+npm run local:model-bridge-worker         # loop: spawn a Haiku instance per parked request
+MODEL_BRIDGE_WORKER_ONCE=1 npm run local:model-bridge-worker   # answer one and exit
+```
+
+If you instead answer by hand (or via an Agent-tool subagent), it still **must** be `model: "haiku"`.
 
 ## Run it
 
