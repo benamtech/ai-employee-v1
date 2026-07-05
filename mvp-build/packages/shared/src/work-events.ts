@@ -19,7 +19,10 @@ export type DeliverableType =
   | "media_asset"
   | "job_folder"
   | "external_system_action"
-  | "plan";
+  | "plan"
+  // Generic materialization of ANY tool invocation/result (native, Manager, or
+  // MCP) from its JSON Schema — the long tail with no bespoke per-tool renderer.
+  | "tool_activity";
 
 export type AcceptanceAction = "approve" | "edit" | "reject" | "respond" | "acknowledge";
 
@@ -70,6 +73,49 @@ export interface UiResourceEnvelope {
   resource: { uri: string; mimeType: string; text?: string; blob?: string };
 }
 
+/** Owner-facing shape of a tool's result, drives the generic result preview. */
+export type ToolResultKind =
+  | "text"
+  | "table"
+  | "artifact"
+  | "media"
+  | "external_action"
+  | "structured"
+  | "error";
+
+/** Minimal JSON-Schema subset the generic renderer reads to draw an input form.
+ *  Any tool (native Hermes, Manager, or MCP connector) exposes this shape. */
+export interface JsonSchemaProperty {
+  type?: string | string[];
+  description?: string;
+  title?: string;
+  enum?: unknown[];
+  format?: string;
+}
+export interface JsonSchemaObject {
+  type?: string;
+  properties?: Record<string, JsonSchemaProperty>;
+  required?: string[];
+  additionalProperties?: boolean;
+}
+
+/**
+ * A tool invocation/result carried on a deliverable so ANY tool materializes
+ * from its schema with no bespoke per-tool code. `input_schema` is the tool's
+ * JSON Schema (Manager tools via zod; native tools via introspection; MCP
+ * connectors via the server), `input` the bound values, `result_kind` selects
+ * the generic preview. The gate stays structural — see workDeliverableNeedsGate.
+ */
+export interface ToolActivityDescriptor {
+  name: string;
+  toolset?: string;
+  input_schema?: JsonSchemaObject;
+  input?: Record<string, unknown>;
+  result_kind?: ToolResultKind;
+  /** Owner-safe one-line result summary (never raw provider payloads). */
+  result_summary?: string;
+}
+
 export interface WorkDeliverableDescriptor {
   type: DeliverableType;
   title: string;
@@ -82,6 +128,43 @@ export interface WorkDeliverableDescriptor {
   view?: WorkView;
   /** Manager-compiled MCP-UI resource; attached at delivery, not by the agent. */
   ui_resource?: UiResourceEnvelope;
+  /** Generic tool carrier for `tool_activity` — the schema-driven long tail. */
+  tool?: ToolActivityDescriptor;
+}
+
+/**
+ * Compile a tool's JSON Schema into a WorkFormView — the load-bearing "any tool,
+ * no per-tool code" step. The existing form renderer draws the result; native
+ * cards and MCP-UI remain the higher-precedence tiers for money/trust and rich
+ * widgets respectively.
+ */
+export function formViewFromJsonSchema(
+  schema: JsonSchemaObject | undefined,
+  input?: Record<string, unknown>,
+): WorkFormView | undefined {
+  const props = schema?.properties;
+  if (!props || typeof props !== "object") return undefined;
+  const required = new Set(schema?.required ?? []);
+  const fields: WorkFormField[] = Object.entries(props).map(([name, p]) => {
+    const t = Array.isArray(p.type) ? p.type[0] : p.type;
+    const type: WorkFormField["type"] = p.enum
+      ? "select"
+      : t === "number" || t === "integer"
+        ? "number"
+        : p.format === "date" || p.format === "date-time"
+          ? "date"
+          : "text";
+    const raw = input?.[name];
+    return {
+      name,
+      label: p.title || p.description || name,
+      type,
+      value: raw == null ? undefined : String(raw),
+      options: p.enum ? p.enum.map((v) => String(v)) : undefined,
+      required: required.has(name),
+    };
+  });
+  return fields.length ? { kind: "form", fields } : undefined;
 }
 
 export interface WorkEventDescriptor {
@@ -142,6 +225,9 @@ export function validateWorkEventDescriptor(descriptor: WorkEventDescriptor): Wo
   const needsGate = workDeliverableNeedsGate(d);
   if (needsGate && !d.acceptance.some((a) => a === "approve" || a === "respond")) {
     return { ok: false, reason: "gated_deliverable_without_gate" };
+  }
+  if (d.type === "tool_activity" && !d.tool?.name?.trim()) {
+    return { ok: false, reason: "tool_activity_missing_tool_name" };
   }
   const viewCheck = validateWorkView(d.view);
   if (!viewCheck.ok) return viewCheck;

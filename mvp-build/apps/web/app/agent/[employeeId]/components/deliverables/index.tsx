@@ -5,7 +5,8 @@
  * every time and the model can never surprise them with a new UI for money/customer
  * actions. Unknown types fall back to a safe generic block — never a raw payload.
  */
-import type { DeliverableType, WorkDeliverableDescriptor } from "@amtech/shared";
+import type { DeliverableType, WorkDeliverableDescriptor, WorkView } from "@amtech/shared";
+import { formViewFromJsonSchema } from "@amtech/shared";
 import { tokens } from "../../surface.tokens";
 
 function money(cents?: number, currency = "usd"): string {
@@ -49,7 +50,36 @@ const ICONS: Record<DeliverableType, string> = {
   job_folder: "📁",
   external_system_action: "🔗",
   plan: "🧭",
+  tool_activity: "🛠️",
 };
+
+/**
+ * Renders any WorkView (form/table) generically — the schema-driven path that
+ * lets ANY tool materialize with no per-tool component. Presentation only; a
+ * view never relaxes a gate (validateWorkEventDescriptor enforces that).
+ */
+function ViewBlock({ view }: { view: WorkView }) {
+  if (view.kind === "form") {
+    return (
+      <div style={{ display: "grid", gap: 2 }}>
+        {view.fields.map((f) => (
+          <Line key={f.name} label={`${f.label}:`} value={f.value ?? (f.required ? "(required)" : "—")} />
+        ))}
+      </div>
+    );
+  }
+  if (view.kind === "table") {
+    return (
+      <div style={{ display: "grid", gap: 2 }}>
+        <Line label="" value={view.columns.join(" · ")} />
+        {view.rows.slice(0, 5).map((row, i) => (
+          <Line key={i} label="" value={row.join(" · ")} />
+        ))}
+      </div>
+    );
+  }
+  return null;
+}
 
 export function Deliverable({ d, employeeId }: { d: WorkDeliverableDescriptor; employeeId: string }) {
   const icon = ICONS[d.type] ?? "•";
@@ -100,6 +130,22 @@ export function Deliverable({ d, employeeId }: { d: WorkDeliverableDescriptor; e
           <Line label="when" value={refs.when ?? refs.scheduled_at} />
         </Shell>
       );
+    case "tool_activity": {
+      // Generic, schema-driven: form from the tool's own JSON Schema (or an
+      // agent-authored view) with ZERO per-tool code. Rich widgets (ui_resource)
+      // and native money/trust cards take precedence upstream in WorkCard.
+      const tool = d.tool;
+      const view = d.view ?? formViewFromJsonSchema(tool?.input_schema, tool?.input);
+      return (
+        <Shell icon={icon}>
+          <strong style={{ fontSize: tokens.font.small }}>{d.title || tool?.name}</strong>
+          {tool?.toolset ? <Line label="via" value={tool.toolset} /> : null}
+          {view ? <ViewBlock view={view} /> : null}
+          {tool?.result_summary ? <Line label="result" value={tool.result_summary} /> : null}
+          {gated ? <Line label="" value="your approval gates it" /> : null}
+        </Shell>
+      );
+    }
     default:
       // recommendation, dataset_report, structured_record_write, media_asset,
       // external_system_action, plan — safe generic block.

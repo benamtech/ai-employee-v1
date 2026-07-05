@@ -3,9 +3,14 @@
  * (acct_, emp_, aud_, …) as their primary keys; the app supplies them so ids are
  * meaningful in logs, envelopes, and audit. Uses crypto for collision resistance.
  */
-import { randomBytes } from "node:crypto";
-
 const ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+// Web Crypto — globally available in Node 20+ and every target browser. Using it
+// (instead of a static `node:crypto` import) keeps @amtech/shared isomorphic, so
+// the barrel is safe to value-import from Next.js client bundles.
+function randomBytes(len: number): Uint8Array {
+  return globalThis.crypto.getRandomValues(new Uint8Array(len));
+}
 
 function token(len = 22): string {
   const bytes = randomBytes(len);
