@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 // Dev-only local tooling (ESM .mjs). Imported for its pure helpers; the worker's
 // hard-pinned model tier is the load-bearing invariant under test.
 // @ts-expect-error — untyped local .mjs helper module
-import { toMessage, buildWorkerPrompt, stripCodeFences, BRIDGE_WORKER_MODEL } from "../../infra/scripts/local/model-bridge-lib.mjs";
+import { toMessage, buildWorkerPrompt, stripCodeFences, BRIDGE_WORKER_MODEL, toStreamJsonInput, resultTextFromEvent } from "../../infra/scripts/local/model-bridge-lib.mjs";
 
 describe("model-bridge lib", () => {
   it("hard-pins the worker to the latest Haiku (always-Haiku invariant)", () => {
@@ -48,5 +48,24 @@ describe("model-bridge lib", () => {
   it("strips accidental markdown code fences around JSON", () => {
     expect(stripCodeFences("```json\n{\"a\":1}\n```")).toBe('{"a":1}');
     expect(stripCodeFences('{"a":1}')).toBe('{"a":1}');
+  });
+
+  it("frames a parked prompt as a single stream-json user message (warm-instance input)", () => {
+    const line = toStreamJsonInput("hello there");
+    const parsed = JSON.parse(line);
+    expect(parsed).toEqual({ type: "user", message: { role: "user", content: "hello there" } });
+    expect(line).not.toContain("\n"); // caller adds the newline frame
+  });
+
+  it("extracts a turn completion only from a result event, flagging errors", () => {
+    expect(resultTextFromEvent({ type: "assistant", message: {} })).toBeNull();
+    expect(resultTextFromEvent({ type: "system", subtype: "init" })).toBeNull();
+    expect(resultTextFromEvent(null)).toBeNull();
+    expect(resultTextFromEvent({ type: "result", subtype: "success", is_error: false, result: "ALPHA" }))
+      .toEqual({ text: "ALPHA", isError: false });
+    expect(resultTextFromEvent({ type: "result", subtype: "error_during_execution", is_error: true, result: "boom" }))
+      .toEqual({ text: "boom", isError: true });
+    expect(resultTextFromEvent({ type: "result", subtype: "success", is_error: false }))
+      .toEqual({ text: "", isError: false });
   });
 });

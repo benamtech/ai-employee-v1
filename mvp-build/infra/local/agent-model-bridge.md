@@ -28,15 +28,26 @@ Opus, not Sonnet, not answered by hand. Haiku is fast and cheap, the completions
 inexpensive.
 
 This is now **enforced in code**, not just by convention: `infra/scripts/local/model-bridge-worker.mjs`
-spawns headless Claude Code with the model **hard-pinned** to `claude-haiku-4-5`
-(`BRIDGE_WORKER_MODEL` in `model-bridge-lib.mjs`) — there is no env/flag override. Run it with:
+holds **one persistent, warm** headless Claude Code instance with the model **hard-pinned** to
+`claude-haiku-4-5` (`BRIDGE_WORKER_MODEL` in `model-bridge-lib.mjs`) — there is no env/flag override.
+It is a single long-lived stream-json session, **not** a fresh `claude -p` process per request:
 
 ```bash
-npm run local:model-bridge-worker         # loop: spawn a Haiku instance per parked request
+claude --print --verbose --input-format stream-json --output-format stream-json --model claude-haiku-4-5
+```
+
+Each parked request is fed as a new user message on stdin; the worker reads stdout events until that
+turn's `result` event, extracts the completion, writes the answer, and loops — **the same instance
+answers every parked input**. Requests are handled sequentially (one prompt out, wait for its `result`,
+then the next), so request/response matching is trivial. The child self-restarts if it dies. Run it with:
+
+```bash
+npm run local:model-bridge-worker         # one warm Haiku instance; loops answering all parked inputs
 MODEL_BRIDGE_WORKER_ONCE=1 npm run local:model-bridge-worker   # answer one and exit
 ```
 
-If you instead answer by hand (or via an Agent-tool subagent), it still **must** be `model: "haiku"`.
+If you instead answer by hand (or via an Agent-tool subagent), it still **must** be `model: "haiku"`,
+and it is likewise **one instance** looping over inputs — never a new instance per request.
 
 ## Run it
 

@@ -58,6 +58,28 @@ export function buildWorkerPrompt(parkedBody) {
 }
 
 /**
+ * Serialize one parked prompt into a stream-json input line for the persistent
+ * worker process. The worker holds ONE warm `claude ... --input-format stream-json`
+ * instance and feeds each parked request as a fresh user message on stdin; this is
+ * that message. (Newline framing is added by the caller.)
+ */
+export function toStreamJsonInput(prompt) {
+  return JSON.stringify({ type: "user", message: { role: "user", content: String(prompt) } });
+}
+
+/**
+ * Given a parsed stream-json event from the worker process, return the terminal
+ * completion for the current turn, or null if this event is not a turn result.
+ * Claude Code emits one `result` event per user turn: `{type:"result",
+ * subtype:"success"|..., is_error, result:"<text>"}`. We key on that to know a
+ * turn finished and reuse the same warm process for the next parked request.
+ */
+export function resultTextFromEvent(evt) {
+  if (!evt || evt.type !== "result") return null;
+  return { text: typeof evt.result === "string" ? evt.result : "", isError: Boolean(evt.is_error) };
+}
+
+/**
  * Strip accidental markdown fences a chat model sometimes wraps JSON in, so the
  * answer the bridge stores is the raw completion the caller expects.
  */
