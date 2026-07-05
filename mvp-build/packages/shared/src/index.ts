@@ -7,6 +7,8 @@ export * from "./work-events.js";
 export * from "./resource-payload.js";
 export * from "./work-stream.js";
 export * from "./hermes.js";
+export * from "./platform-toolsets.js";
 export * from "./channel-routing.js";
 export * from "./tool-contracts.js";
+export * from "./tool-schemas.js";
 export * from "./profile-package.js";

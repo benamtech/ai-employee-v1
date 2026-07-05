@@ -2,6 +2,7 @@ import { mkdir, readFile, readdir, stat, writeFile, copyFile } from "node:fs/pro
 import { join, relative } from "node:path";
 import { spawn } from "node:child_process";
 import type { ProfileBuildParams, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
+import { computeApiServerToolsets, toYamlFlowList } from "@amtech/shared";
 
 const TEXT_EXTENSIONS = new Set([".md", ".yaml", ".yml", ".json", ".tpl", ".txt", ".example"]);
 
@@ -41,6 +42,23 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
     BRANDING_NOTES: "_(learned as we go)_",
     MANAGER_API_ORIGIN: process.env.MANAGER_API_ORIGIN ?? "http://localhost:8080",
     MANAGER_INTERNAL_TOKEN: process.env.MANAGER_INTERNAL_TOKEN ?? "",
+    // Hermes reads api_server tools from config.yaml platform_toolsets.api_server.
+    // With no block it falls back to terminal/file/web only — so we render the
+    // safe set, tied to backend blast radius + provider-key availability.
+    PLATFORM_TOOLSETS: toYamlFlowList(
+      computeApiServerToolsets({
+        runtimeBackend: params.runtime_backend ?? "docker",
+        hasBrowserbaseKey: Boolean(process.env.BROWSERBASE_API_KEY),
+        hasVisionKey: Boolean(process.env.OPENROUTER_API_KEY),
+        hasImageGenKey: Boolean(process.env.FAL_KEY),
+        hasTtsKey: Boolean(process.env.ELEVENLABS_API_KEY),
+      }),
+    ),
+    // Employee reaches the Manager control plane natively as an MCP server
+    // (mcp_servers.amtech_manager in the rendered config.yaml).
+    MANAGER_MCP_URL:
+      process.env.MANAGER_MCP_URL ??
+      `${process.env.MANAGER_API_ORIGIN ?? "http://localhost:8080"}/manager/mcp`,
   };
 }
 

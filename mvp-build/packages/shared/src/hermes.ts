@@ -65,3 +65,21 @@ export interface HermesHealth {
   status?: string;
   [key: string]: unknown;
 }
+
+export interface HermesToolsetInfo {
+  name?: string;
+  enabled?: boolean;
+  configured?: boolean;
+  tools?: string[];
+}
+
+/** Shape of `GET /v1/toolsets` — the ground-truth "what can this employee do".
+ *  Note: the api_server introspection route resolves base toolsets only
+ *  (`include_default_mcp_servers=False`), so Manager MCP tools do NOT appear
+ *  here even though the employee can call them. */
+export interface HermesToolsets {
+  object?: string;
+  platform?: string;
+  toolsets?: HermesToolsetInfo[] | Record<string, HermesToolsetInfo>;
+  [key: string]: unknown;
+}

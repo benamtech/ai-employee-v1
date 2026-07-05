@@ -16,6 +16,15 @@ terminal:
   home_mode: "profile"
   cwd: "{{WORKSPACE_DIR}}"
 
+# Toolsets Hermes exposes to this employee on the api_server platform. Without
+# this block Hermes falls back to terminal/file/web only (a nearly tool-less
+# frontier agent). Rendered per employee from the safe-set policy in
+# packages/shared/src/platform-toolsets.ts — tied to runtime-backend blast
+# radius + provider-key availability. Money/customer-facing safety stays
+# enforced by the Manager approval gate, never by omitting a tool here.
+platform_toolsets:
+  api_server: {{PLATFORM_TOOLSETS}}
+
 gateway:
   sms:
     # Manager owns Twilio ingress, sender identity, delivery decisions, and approval gates.

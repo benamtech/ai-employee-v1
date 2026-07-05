@@ -26,6 +26,7 @@
     "scheduler:tick": "node infra/scripts/scheduler-tick.mjs",
     "scheduler:hermes-jobs": "node infra/scripts/hermes-jobs-runner.mjs",
     "local:check": "node infra/scripts/local/check.mjs",
+    "local:inspect": "node infra/scripts/local/inspect.mjs",
     "local:build-hermes": "node infra/scripts/local/build-hermes-image.mjs",
     "local:db-setup": "bash infra/scripts/local/db-setup.sh",
     "local:bootstrap": "node infra/scripts/local/bootstrap.mjs",

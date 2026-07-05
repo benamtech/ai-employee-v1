@@ -3,6 +3,7 @@ import type {
   HermesCapabilities,
   HermesChatResponse,
   HermesHealth,
+  HermesToolsets,
 } from "@amtech/shared";
 import { openSecret } from "./secrets.js";
 import { orThrow } from "./db.js";
@@ -188,6 +189,16 @@ export async function getCapabilities(api: RuntimeApi): Promise<HermesCapabiliti
   const res = await hermesFetch(api, "/v1/capabilities", { method: "GET" });
   if (!res.ok) return null;
   return (await res.json().catch(() => null)) as HermesCapabilities | null;
+}
+
+/** Ground-truth "what can this employee actually do": the resolved api_server
+ *  toolsets and their tools. Never mark a tool available without this (Realness
+ *  Rule). Note: the api_server route lists base toolsets only, so Manager MCP
+ *  tools won't appear here even though the employee can call them. */
+export async function getToolsets(api: RuntimeApi): Promise<HermesToolsets | null> {
+  const res = await hermesFetch(api, "/v1/toolsets", { method: "GET" });
+  if (!res.ok) return null;
+  return (await res.json().catch(() => null)) as HermesToolsets | null;
 }
 
 export async function getRuntimeCapabilities(api: RuntimeApi, opts: { force?: boolean } = {}): Promise<HermesCapabilities | null> {

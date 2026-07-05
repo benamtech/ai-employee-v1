@@ -14,7 +14,9 @@ SMS_ALLOWED_USERS={{OWNER_PHONE_E164}}
 SMS_WEBHOOK_URL={{WEBHOOK_URL}}
 SMS_INSECURE_NO_SIGNATURE=false
 
-# Hermes API server. Config is env-only in current Hermes; config.yaml keys are ignored.
+# Hermes API server. The api_server platform reads config.yaml (e.g.
+# platform_toolsets.api_server, mcp_servers) — these keys are NOT ignored; env
+# and config.yaml both apply. Secrets stay in env; capability wiring is in config.
 API_SERVER_ENABLED=true
 API_SERVER_KEY={{API_SERVER_KEY}}
 API_SERVER_PORT={{GATEWAY_PORT}}

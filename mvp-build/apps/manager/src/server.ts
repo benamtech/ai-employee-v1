@@ -10,7 +10,7 @@ import { serve } from "@hono/node-server";
 import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolName } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { TOOL_REGISTRY } from "./tools/registry.js";
-import type { ToolContext } from "./tools/types.js";
+import { runManagerTool } from "./lib/run-tool.js";
 import { registerTwilioWebhooks } from "./webhooks/twilio.js";
 import { registerGmailWebhooks } from "./webhooks/gmail.js";
 import { registerStripeWebhooks } from "./webhooks/stripe.js";
@@ -25,14 +25,6 @@ import { buildEmployeeSnapshot, fetchWorkEventsSince } from "./lib/employee-stre
 import { subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
 import { orThrow, mustWrite } from "./lib/db.js";
 import { stampChannelPresence } from "./lib/channel-router.js";
-
-/** Tools that mutate every account's queue — only the scheduler runner may invoke
- *  them, via /manager/scheduler/run, never the generic per-tool endpoint. */
-const SCHEDULER_ONLY_TOOLS = new Set<ToolName>([
-  "dispatch_due_reminders",
-  "dispatch_daily_briefs",
-  "renew_expiring_watches",
-]);
 
 let warnedMissingInternalToken = false;
 
@@ -82,21 +74,13 @@ export function buildApp(): Hono {
     const denied = denyInternal(c);
     if (denied) return denied;
     const name = c.req.param("name") as ToolName;
-    if (SCHEDULER_ONLY_TOOLS.has(name)) {
-      return c.json({ error: "scheduler_only_tool" }, 403);
-    }
-    const handler = TOOL_REGISTRY.get(name);
-    if (!handler) return c.json({ error: "unknown_tool" }, 404);
     const input = await c.req.json().catch(() => ({}));
-    const ctx: ToolContext = {
-      db: serviceClient(),
-      account_id: (input?.account_id as string) ?? null,
-      employee_id: (input?.employee_id as string) ?? null,
-      actor: "manager",
-    };
     try {
-      const envelope = await handler(ctx, input);
-      return c.json(envelope);
+      const outcome = await runManagerTool(name, input, { actor: "manager" });
+      if (outcome.kind === "scheduler_only") return c.json({ error: "scheduler_only_tool" }, 403);
+      if (outcome.kind === "unknown_tool") return c.json({ error: "unknown_tool" }, 404);
+      if (outcome.kind === "invalid_input") return c.json(outcome.envelope, 400);
+      return c.json(outcome.envelope);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(`[manager] tool ${name} threw:`, err instanceof Error ? err.message : String(err));
