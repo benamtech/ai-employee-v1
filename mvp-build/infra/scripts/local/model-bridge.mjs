@@ -47,15 +47,42 @@ async function waitForAnswer(id) {
   throw new Error("bridge_answer_timeout");
 }
 
-function chatCompletion(id, model, content) {
+// The answer file is either plain text (-> assistant content) or a JSON OpenAI
+// message object (role/content/tool_calls). Orchestrator answers are JSON strings
+// that must stay as `content` (the caller re-parses them), so only treat parsed
+// JSON as a message object when it actually looks like one.
+function toMessage(raw) {
+  try {
+    const j = JSON.parse(raw);
+    if (j && typeof j === "object" && !Array.isArray(j) && ("content" in j || "tool_calls" in j || "role" in j)) {
+      return { role: "assistant", content: j.content ?? null, ...(j.tool_calls ? { tool_calls: j.tool_calls } : {}) };
+    }
+  } catch { /* not JSON -> plain text */ }
+  return { role: "assistant", content: raw };
+}
+
+function chatCompletion(id, model, message) {
   return {
     id: `chatcmpl-bridge-${id}`,
     object: "chat.completion",
     created: Math.floor(Date.now() / 1000),
     model: model ?? "bridge-agent",
-    choices: [{ index: 0, message: { role: "assistant", content }, finish_reason: "stop" }],
+    choices: [{ index: 0, message, finish_reason: message.tool_calls ? "tool_calls" : "stop" }],
     usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0, note: "bridge:agent-in-the-loop" },
   };
+}
+
+// OpenAI-style SSE stream for clients that sent stream:true (Hermes does).
+function streamCompletion(res, id, model, message) {
+  res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" });
+  const base = { id: `chatcmpl-bridge-${id}`, object: "chat.completion.chunk", created: Math.floor(Date.now() / 1000), model: model ?? "bridge-agent" };
+  const chunk = (delta, finish_reason = null) => res.write(`data: ${JSON.stringify({ ...base, choices: [{ index: 0, delta, finish_reason }] })}\n\n`);
+  chunk({ role: "assistant" });
+  if (message.content) chunk({ content: message.content });
+  if (message.tool_calls) chunk({ tool_calls: message.tool_calls });
+  chunk({}, message.tool_calls ? "tool_calls" : "stop");
+  res.write("data: [DONE]\n\n");
+  res.end();
 }
 
 const server = createServer(async (req, res) => {
@@ -77,8 +104,10 @@ const server = createServer(async (req, res) => {
       log(`PARKED ${id}  ${preview}`);
       try {
         const content = await waitForAnswer(id);
-        log(`ANSWERED ${id}  ${content.slice(0, 80)}`);
-        send(200, chatCompletion(id, body.model, content));
+        log(`ANSWERED ${id}  ${body.stream ? "[stream] " : ""}${content.slice(0, 80)}`);
+        const message = toMessage(content);
+        if (body.stream) streamCompletion(res, id, body.model, message);
+        else send(200, chatCompletion(id, body.model, message));
       } catch (e) {
         log(`TIMEOUT ${id}`);
         send(504, { error: { message: String(e.message ?? e) } });
