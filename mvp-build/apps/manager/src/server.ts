@@ -18,7 +18,7 @@ import { registerStripeWebhooks } from "./webhooks/stripe.js";
 import { registerProvisionerRoutes } from "./provisioner.js";
 import { registerOrchestratorRoutes } from "./orchestrator.js";
 import { tokenHash, verifySignedToken } from "./lib/signed-links.js";
-import { requireOwnerSession } from "./lib/owner-session.js";
+import { requireOwnerSession, mintOwnerSession } from "./lib/owner-session.js";
 import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
 import { createArtifactStorageSignedUrl } from "./lib/artifacts.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
@@ -354,6 +354,42 @@ export function buildApp(): Hono {
       } finally {
         unsub();
       }
+    });
+  });
+
+  // Dev-only owner "login": mint an owner web session for an existing employee so
+  // local testing can authenticate the Work Surface without the (Phase 1 stub)
+  // Supabase Auth login. Double-gated — requires DEV_OWNER_LOGIN=1 AND fails closed
+  // when NODE_ENV=production. Web calls this from /api/dev/login and sets the cookie.
+  app.post("/manager/dev/mint-owner-session", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    if (process.env.NODE_ENV === "production" || process.env.DEV_OWNER_LOGIN !== "1") {
+      return c.json({ error: "dev_login_disabled" }, 403);
+    }
+    const { employee_id, account_id } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    let accountId = account_id as string | undefined;
+    if (!accountId && employee_id) {
+      const emp = orThrow(
+        await db.from("employees").select("account_id").eq("id", employee_id).maybeSingle(),
+        "dev_login.employees.lookup",
+      );
+      if (!emp) return c.json({ error: "employee_not_found" }, 404);
+      accountId = String(emp.account_id);
+    }
+    if (!accountId) return c.json({ error: "account_or_employee_required" }, 400);
+    const membership = orThrow(
+      await db.from("account_memberships").select("user_id").eq("account_id", accountId).eq("role", "owner").maybeSingle(),
+      "dev_login.membership.lookup",
+    );
+    if (!membership?.user_id) return c.json({ error: "owner_user_not_found" }, 404);
+    const { token, expires_at } = await mintOwnerSession(db, accountId, String(membership.user_id));
+    return c.json({
+      owner_session_token: token,
+      owner_session_expires_at: expires_at,
+      account_id: accountId,
+      employee_id: employee_id ?? null,
     });
   });
 

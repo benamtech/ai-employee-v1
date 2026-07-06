@@ -50,7 +50,14 @@
     "acceptance:report": "node infra/scripts/acceptance/report.mjs",
     "ops:number-pool": "node infra/scripts/number-pool.mjs",
     "ops:healthcheck": "node infra/scripts/healthcheck.mjs",
-    "ops:repair": "node infra/scripts/repair.mjs"
+    "ops:repair": "node infra/scripts/repair.mjs",
+    "live:up": "bash infra/scripts/local/test/stack-up.sh",
+    "live:down": "bash infra/scripts/local/test/stack-down.sh",
+    "live:status": "bash infra/scripts/local/test/status.sh",
+    "live:list": "node infra/scripts/local/test/reprovision.mjs list",
+    "live:reprovision": "node infra/scripts/local/test/reprovision.mjs from",
+    "live:recover": "bash infra/scripts/local/test/employee-recover.sh",
+    "live:login": "bash infra/scripts/local/test/devlogin.sh"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",

@@ -10,6 +10,32 @@ function workspaceRoot(): string {
   return process.env.AMTECH_MVP_ROOT ?? process.cwd();
 }
 
+/**
+ * The rendered config.yaml model block. Production ships `claude-opus-4-8`. When
+ * HERMES_MODEL_PROVIDER is set (local no-key testing), the employee's model is
+ * pointed at the agent-in-the-loop bridge instead — the "you-are-the-LLM" design
+ * where the persistent Haiku worker answers every model call (see
+ * infra/local/agent-model-bridge.md). The paired OPENAI_API_KEY/OPENAI_BASE_URL
+ * env come from the .env.tpl MODEL_BRIDGE_* tokens below.
+ */
+function modelConfigBlock(): string {
+  const provider = process.env.HERMES_MODEL_PROVIDER;
+  if (provider) {
+    const def = process.env.HERMES_MODEL_DEFAULT ?? "bridge-agent";
+    const baseUrl = process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1";
+    return [
+      "model:",
+      `  provider: ${provider}`,
+      `  default: ${def}`,
+      `  base_url: ${baseUrl}`,
+      "models:",
+      `  default: ${def}`,
+      "  compression: claude-haiku-4-5",
+    ].join("\n");
+  }
+  return ["models:", "  default: claude-opus-4-8", "  compression: claude-haiku-4-5"].join("\n");
+}
+
 function packageRoot(packageKey: string): string {
   const configured = process.env.PROFILE_PACKAGES_DIR;
   if (configured) return join(configured, packageKey);
@@ -42,6 +68,12 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
     BRANDING_NOTES: "_(learned as we go)_",
     MANAGER_API_ORIGIN: process.env.MANAGER_API_ORIGIN ?? "http://localhost:8080",
     MANAGER_INTERNAL_TOKEN: process.env.MANAGER_INTERNAL_TOKEN ?? "",
+    // Model wiring. Local no-key testing (HERMES_MODEL_PROVIDER set) points the
+    // employee at the bridge + a dummy OpenAI-compatible key; production leaves
+    // these empty (real provider key is a Manager-injected secret ref).
+    MODEL_CONFIG: modelConfigBlock(),
+    MODEL_BRIDGE_BASE_URL: process.env.HERMES_MODEL_PROVIDER ? (process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1") : "",
+    MODEL_BRIDGE_API_KEY: process.env.HERMES_MODEL_PROVIDER ? (process.env.HERMES_MODEL_API_KEY ?? "bridge-local-dummy") : "",
     // Hermes reads api_server tools from config.yaml platform_toolsets.api_server.
     // With no block it falls back to terminal/file/web only — so we render the
     // safe set, tied to backend blast radius + provider-key availability.

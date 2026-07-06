@@ -5,10 +5,11 @@ profile:
   id: "client_{{CLIENT_ID}}"
   name: "{{EMPLOYEE_NAME}}"
 
-models:
-  # Shipped default employee model; haiku for compression/background work.
-  default: "claude-opus-4-8"
-  compression: "claude-haiku-4-5"
+# Model — rendered per employee by profile-renderer. Production ships
+# claude-opus-4-8; local no-key testing (HERMES_MODEL_PROVIDER=custom) points this
+# at the agent-in-the-loop bridge so the warm Haiku worker is the LLM. See
+# infra/local/agent-model-bridge.md.
+{{MODEL_CONFIG}}
 
 terminal:
   # Docker is the production and production-like local/VPS default. `local` is dev/demo only.

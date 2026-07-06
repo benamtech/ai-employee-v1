@@ -17,12 +17,24 @@ SMS_INSECURE_NO_SIGNATURE=false
 # Hermes API server. The api_server platform reads config.yaml (e.g.
 # platform_toolsets.api_server, mcp_servers) — these keys are NOT ignored; env
 # and config.yaml both apply. Secrets stay in env; capability wiring is in config.
+# Bind 0.0.0.0 (all container interfaces) so the Manager can reach the runtime
+# through Docker's port publish, which forwards to the container's eth0 — a
+# 127.0.0.1 bind is only reachable from the container's own loopback and yields
+# runtime_unreachable. Host exposure is already limited: the port is published on
+# 127.0.0.1 only and every request requires the API_SERVER_KEY bearer.
 API_SERVER_ENABLED=true
 API_SERVER_KEY={{API_SERVER_KEY}}
 API_SERVER_PORT={{GATEWAY_PORT}}
-API_SERVER_HOST=127.0.0.1
+API_SERVER_HOST=0.0.0.0
 
 # Model + connector provider secrets are provided as secret references by the Manager.
 # Manager tool access is an AMTECH-controlled runtime credential for this profile.
+#
+# Local no-key model bridge (you-are-the-LLM): when HERMES_MODEL_PROVIDER is set the
+# renderer fills these with a dummy key + the bridge base_url so the custom provider
+# reaches the parked-request bridge; both are empty in production (real key is a
+# Manager-injected secret ref, and the shipped model is claude-opus-4-8 on Anthropic).
+OPENAI_API_KEY={{MODEL_BRIDGE_API_KEY}}
+OPENAI_BASE_URL={{MODEL_BRIDGE_BASE_URL}}
 MANAGER_API_ORIGIN={{MANAGER_API_ORIGIN}}
 MANAGER_INTERNAL_TOKEN={{MANAGER_INTERNAL_TOKEN}}
