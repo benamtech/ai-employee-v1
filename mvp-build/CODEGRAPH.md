@@ -165,6 +165,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/web/app/agent/[employeeId]/components/deliverables/index.tsx` | Deliverable-type renderers used by work cards. |
 | `apps/web/app/agent/[employeeId]/lib/group-by-job.ts` | Groups artifacts/events/invoices/reminders into owner-readable job folders. |
 | `apps/web/app/agent/[employeeId]/lib/surface-model.ts` | Client-side view model helpers for nav counts, default preview selection, owner-facing connector labels, and status tone mapping. |
+| `apps/web/app/agent/[employeeId]/fixtures.ts` | Representative local `ResourcePayload` fixture for UI-only development/testing when `NEXT_PUBLIC_AMTECH_UI_FIXTURES=1`; avoids Manager/Supabase/Docker/Hermes/provider/model dependencies. |
 | `apps/web/app/agent/[employeeId]/surface-types.ts` | Resource payload shape used by the Work Surface. |
 | `apps/web/app/agent/[employeeId]/surface.tokens.ts` | Work Surface visual tokens. |
 | `apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts` | Signed artifact/owner-session resolution route for PDFs and other outputs; redirects stored files and renders Manager-provided safe HTML fallbacks for payload-only artifacts. |
@@ -299,6 +300,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `infra/scripts/acceptance/run8-security.mjs` | Forged-request/security verifier. |
 | `infra/scripts/scheduler-tick.mjs` | Dev/manual scheduler fallback through Manager. |
 | `infra/scripts/hermes-jobs-runner.mjs` | Production-oriented Hermes Jobs scheduler entrypoint. |
+| `infra/scripts/ui/fixture-browser.mjs` | UI-only Playwright fixture runner. Starts fixture-backed Next dev server on loopback, warms the Work Surface fixture route, opens headed browser or runs smoke checks, and writes screenshots under `infra/.local/ui-fixtures/`. |
 | `infra/scripts/healthcheck.mjs` | Runtime health persistence and endpoint health update. |
 | `infra/scripts/number-pool.mjs` | Twilio number inventory/status. |
 | `infra/scripts/repair.mjs` | Repair ops wrapper. |

@@ -67,6 +67,18 @@ For UI contributors, start at `mvp-build/ui-handoff/`. That packet explains:
 
 The immediate UI priority is the web Work Surface. SMS, signed preview links, media/video previews, admin, and future desktop clients should be designed as renderers of the same underlying work/resources/actions, but the web client is the richest and most urgent place to make the product understandable.
 
+UI contributors can work without full infrastructure:
+
+```bash
+cd mvp-build
+npm run ui:dev          # fixture-backed web client
+npm run ui:browser      # headed browser for visual work
+npm run ui:test         # UI-only Playwright smoke
+```
+
+These commands use representative local fixture data and do not require Manager, Supabase, Docker, Hermes containers, provider credentials, or model calls. They are for UI development, not provider/runtime acceptance.
+The browser smoke warms the fixture Work Surface route and writes desktop/mobile screenshots to `mvp-build/infra/.local/ui-fixtures/`.
+
 ## How The Repo Is Organized
 
 ```text

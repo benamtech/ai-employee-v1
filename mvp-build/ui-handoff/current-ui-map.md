@@ -21,6 +21,7 @@ Work Surface files:
 - `apps/web/app/agent/[employeeId]/AgentClient.tsx` — current shell, navigation, views, composer, preview pane, inline CSS.
 - `apps/web/app/agent/[employeeId]/surface-types.ts` — web-facing exports for the shared resource payload.
 - `apps/web/app/agent/[employeeId]/surface.tokens.ts` — small current token object used by older Work Surface components.
+- `apps/web/app/agent/[employeeId]/fixtures.ts` — representative local `ResourcePayload` for UI-only fixture mode.
 - `apps/web/app/agent/[employeeId]/lib/surface-model.ts` — nav counts, default preview selection, connector labels, status tones.
 - `apps/web/app/agent/[employeeId]/lib/group-by-job.ts` — groups artifacts/events/invoices/reminders into job folders.
 - `apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts` — output route for stored files and safe HTML artifact fallback.
@@ -112,6 +113,29 @@ Current derived fields:
 
 These derived fields are Phase 2 groundwork. Phase 4 should replace the temporary ability derivation with a real capability registry/cache.
 
+## UI-Only Fixture Flow
+
+For UI-only work, set `NEXT_PUBLIC_AMTECH_UI_FIXTURES=1` or use the `ui:*` scripts from `mvp-build/package.json`.
+
+```text
+browser Work Surface
+  -> apps/web/app/agent/[employeeId]/fixtures.ts
+  -> AgentClient views + preview pane
+```
+
+In fixture mode:
+
+- `AgentClient` does not call `/api/employee/*`;
+- heartbeat and EventSource are skipped;
+- chat sends are simulated in local React state;
+- approval resolve buttons update local state;
+- artifact/output links return a fixture HTML preview from the output route;
+- Playwright can inspect the real browser UI without Manager, Supabase, Docker, Hermes, Twilio, Gmail, Stripe, or model credentials.
+
+`npm run ui:test` warms `/agent/emp_ui_fixture` before Playwright assertions and saves screenshots at `infra/.local/ui-fixtures/work-surface-desktop.png` and `infra/.local/ui-fixtures/work-surface-mobile.png`.
+
+Fixture mode is representative of the product surface contract, but it is not acceptance proof for runtime/provider/backend behavior.
+
 ## What Is Implemented But Still Thin
 
 - Chat history now persists through `employee_messages`, but streaming reply state is still simple.
@@ -145,6 +169,10 @@ Use care:
 From `mvp-build/`:
 
 ```bash
+npm run ui:dev
+npm run ui:browser
+npm run ui:test
+npm run ui:test:headed
 npm run web:dev
 npm run typecheck
 npm run test:unit

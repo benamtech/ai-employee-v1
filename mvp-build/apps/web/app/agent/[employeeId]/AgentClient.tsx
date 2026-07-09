@@ -18,6 +18,7 @@ import { DailyBrief } from "./components/DailyBrief";
 import { ApprovalCard } from "./components/ApprovalCard";
 import { WorkCard } from "./components/WorkCard";
 import { JobFolder } from "./components/JobFolder";
+import { fixtureResourcePayload } from "./fixtures";
 
 const EMPTY: ResourcePayload = {
   account_id: "",
@@ -49,18 +50,30 @@ const NAV: Array<{ id: SurfaceView; label: string }> = [
 
 type PendingMessage = { id: string; role: "owner" | "employee"; body: string; status: "sending" | "failed" };
 
+const UI_FIXTURE_MODE = process.env.NEXT_PUBLIC_AMTECH_UI_FIXTURES === "1";
+
 export function AgentClient({ employeeId }: { employeeId: string }) {
-  const [res, setRes] = useState<ResourcePayload>(EMPTY);
+  const [res, setRes] = useState<ResourcePayload>(() => (UI_FIXTURE_MODE ? fixtureResourcePayload(employeeId) : EMPTY));
   const [active, setActive] = useState<SurfaceView>("today");
   const [selected, setSelected] = useState<PreviewSelection | null>(null);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [streamState, setStreamState] = useState<"connecting" | "live" | "reconnecting" | "offline">("connecting");
+  const [loading, setLoading] = useState(!UI_FIXTURE_MODE);
+  const [streamState, setStreamState] = useState<"connecting" | "live" | "reconnecting" | "offline">(UI_FIXTURE_MODE ? "live" : "connecting");
   const [progress, setProgress] = useState<{ run_id: string; verb: string; state: string } | null>(null);
   const [pending, setPending] = useState<PendingMessage[]>([]);
 
   const refresh = useCallback(async () => {
+    if (UI_FIXTURE_MODE) {
+      setRes((current) => {
+        const next = current.account_id ? current : fixtureResourcePayload(employeeId);
+        setSelected((selection) => selection ?? defaultSelection(next));
+        return next;
+      });
+      setStreamState("live");
+      setLoading(false);
+      return;
+    }
     const r = await fetch(`/api/employee/${employeeId}/resources`, { method: "POST" });
     const json = await r.json().catch(() => ({}));
     if (!r.ok) {
@@ -85,6 +98,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   useEffect(() => { void refresh(); }, [refresh]);
 
   useEffect(() => {
+    if (UI_FIXTURE_MODE) return;
     let cancelled = false;
     async function beat() {
       if (cancelled) return;
@@ -96,6 +110,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   }, [employeeId]);
 
   useEffect(() => {
+    if (UI_FIXTURE_MODE) return;
     let es: EventSource | null = null;
     let closed = false;
     let backoff = 1000;
@@ -151,6 +166,29 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   const sendToEmployee = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
+    if (UI_FIXTURE_MODE) {
+      const created = new Date().toISOString();
+      setRes((prev) => ({
+        ...prev,
+        messages: [
+          ...prev.messages,
+          { id: `fixture_owner_${Date.now()}`, direction: "from_owner", source: "web", channel: "web", body: trimmed, status: "delivered", created_at: created },
+          {
+            id: `fixture_employee_${Date.now()}`,
+            direction: "to_owner",
+            source: "employee",
+            channel: "web",
+            body: "UI fixture reply: I added that note to the work queue. In the real app this would go through Manager and the employee runtime.",
+            status: "delivered",
+            provider_id: "fixture",
+            created_at: created,
+          },
+        ],
+      }));
+      setStatus("UI fixture mode: message simulated locally.");
+      setActive("chat");
+      return;
+    }
     const pendingId = `pending:${Date.now()}`;
     setPending((p) => [...p, { id: pendingId, role: "owner", body: trimmed, status: "sending" }]);
     const r = await fetch(`/api/employee/${employeeId}/message`, {
@@ -173,6 +211,33 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   }, [employeeId, refresh, res.messages]);
 
   const resolveApproval = useCallback(async (approvalId: string, response: "approved" | "rejected") => {
+    if (UI_FIXTURE_MODE) {
+      setRes((prev) => ({
+        ...prev,
+        approvals: prev.approvals.filter((a) => a.id !== approvalId),
+        tasks: (prev.tasks ?? []).map((task) => task.target_id === approvalId ? { ...task, status: response === "approved" ? "done" : "blocked", summary: `${response === "approved" ? "Approved" : "Rejected"} in UI fixture mode.` } : task),
+        work_events: [
+          {
+            id: `fixture_resolution_${Date.now()}`,
+            event_type: "ui_fixture.approval_resolved",
+            status: response,
+            created_at: new Date().toISOString(),
+            work_event_descriptor: {
+              account_id: prev.account_id,
+              employee_id: prev.employee_id ?? employeeId,
+              move: "notify",
+              title: response === "approved" ? "Approval simulated" : "Change request simulated",
+              summary: response === "approved" ? "The fixture approval was marked approved locally." : "The fixture approval was marked not yet locally.",
+              deliverable: { type: "recommendation", title: "Fixture approval result", refs: { approval_id: approvalId }, acceptance: ["acknowledge"] },
+              proof: { fixture: "ui_only" },
+            },
+          },
+          ...prev.work_events,
+        ],
+      }));
+      setStatus(response === "approved" ? "UI fixture mode: approved locally." : "UI fixture mode: rejected locally.");
+      return;
+    }
     if (!res.account_id) { setStatus("Account context is missing."); return; }
     const r = await fetch(`/api/employee/${employeeId}/approval/resolve`, {
       method: "POST",
@@ -230,6 +295,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
             <h1>{titleForView(active)}</h1>
           </div>
           <div className="ws-status-row">
+            {UI_FIXTURE_MODE ? <Pill tone="quiet" label="fixture data" /> : null}
             {progress ? <Pill tone="warn" label={`${progress.verb}...`} /> : null}
             <Pill tone={streamState === "live" ? "good" : streamState === "offline" ? "bad" : "warn"} label={streamLabel(streamState)} />
           </div>

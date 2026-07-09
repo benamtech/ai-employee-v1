@@ -8,6 +8,17 @@ Current second-half plan: **[`second-half-plan/`](second-half-plan/)**. Current 
 
 For UI contributors, start with **[`ui-handoff/`](ui-handoff/)** after the core orientation docs. It explains the product grounding, current UI source map, research/principles, future surface experiments, and parallel working protocol.
 
+UI contributors can work without full infrastructure:
+
+```bash
+npm run ui:dev          # fixture-backed web client on :3000
+npm run ui:browser      # headed browser against fixture data on :3200
+npm run ui:test         # headless UI-only Playwright smoke
+npm run ui:test:headed  # headed UI-only smoke
+```
+
+These commands use representative local Work Surface fixtures and do not require Manager, Supabase, Docker, Hermes containers, provider credentials, or model calls. They are for UI development, not provider/runtime acceptance.
+
 Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). Current code has `usage_events`, `feature_checks`, and `audit_log`; production metering still needs run ids, typed meter events, wrapper instrumentation, rollups, and budget policies.
 
 ## Hermes boundary
@@ -172,10 +183,16 @@ npm run test:integration    # real RLS cross-account test (skips without Supabas
 npm run smoke:hermes        # env check + manual smoke-test steps
 npm run manager:dev         # Manager API on :8080
 npm run web:dev             # Next.js on :3000
+npm run ui:dev              # UI-only fixture web client on :3000 (no Manager/Docker/env)
+npm run ui:browser          # UI-only fixture headed browser on :3200
+npm run ui:test             # UI-only Playwright smoke against fixture data
+npm run ui:test:headed      # UI-only headed Playwright smoke
 npm run scheduler:tick      # fire reminders + renew watches + emit daily briefs (cron/dev fallback)
 npm run scheduler:hermes-jobs # Hermes Jobs / production scheduler entrypoint
 npm run acceptance:preflight # Phase 1: which acceptance runs are runnable with current env
 npm run acceptance:report    # Phase 1: run the 8 verifiers, write infra/acceptance/reports/
 ```
+
+The `ui:*` commands use fixture data and avoid Manager, Supabase, Docker, Hermes, provider credentials, and model calls. `ui:test` warms the fixture Work Surface route and writes desktop/mobile screenshots under `infra/.local/ui-fixtures/`.
 
 > Before building, read [`../identity.md`](../identity.md) and [`../CODEGRAPH.md`](../CODEGRAPH.md), then `wiki/MVP/`.

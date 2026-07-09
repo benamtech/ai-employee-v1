@@ -89,12 +89,27 @@ UI work should explicitly say which phase it supports. A visual cleanup to `Agen
 From `mvp-build/`:
 
 ```bash
+npm run ui:dev
+npm run ui:browser
+npm run ui:test
+npm run ui:test:headed
 npm run web:dev
 npm run typecheck
 npm run test:unit
 npm run lint
 npm run build
 ```
+
+Use `ui:*` for UI-only work:
+
+- `npm run ui:dev` starts the web app with fixture data on port 3000.
+- `npm run ui:browser` starts a fixture server on port 3200 and opens a headed browser.
+- `npm run ui:test` runs a headless Playwright smoke with representative fixture data.
+- `npm run ui:test:headed` runs the same smoke visibly.
+
+The fixture browser runner binds to loopback, warms the Work Surface route, and writes desktop/mobile screenshots under `infra/.local/ui-fixtures/`. A cold Next dev server may take a minute or more before the first assertions run.
+
+These commands intentionally avoid Manager, Supabase, Docker, Hermes containers, provider credentials, and model calls. They are for UI development and screenshots, not live acceptance.
 
 Use targeted tests during iteration:
 

@@ -45,6 +45,25 @@ For UI work, this means:
 - SMS/mobile preview work should use the same resource/action thinking as the web desk.
 - Do not claim live acceptance unless real runtime/provider proof exists.
 
+## UI-Only Fixture Mode
+
+UI contributors do not need to run Docker, Supabase, Manager, Hermes, or model/provider credentials just to work on the web client.
+
+From `mvp-build/`:
+
+```bash
+npm run ui:dev          # fixture-backed Next dev server on :3000
+npm run ui:browser      # starts fixture server on :3200 and opens a headed browser
+npm run ui:test         # headless Playwright smoke against fixture data
+npm run ui:test:headed  # same smoke in a headed browser
+```
+
+Fixture mode sets `NEXT_PUBLIC_AMTECH_UI_FIXTURES=1`. It uses the real `AgentClient` and real Work Surface components with representative local `ResourcePayload` data: approvals, messages, jobs, outputs, media/report artifacts, connector states, abilities, task progress, and activity. It also simulates chat replies and approval resolution locally.
+
+The browser smoke warms the fixture Work Surface route before assertions, because a cold Next dev server can take time to compile. It writes desktop and mobile screenshots to `infra/.local/ui-fixtures/`.
+
+This is for UI development and UI-only smoke tests. It is not provider/runtime acceptance and does not prove Manager, Hermes, Docker, Supabase, Gmail, Stripe, Twilio, or the model path.
+
 ## What UI Work Can Safely Focus On
 
 Good areas for an independent UI contributor:
@@ -56,6 +75,7 @@ Good areas for an independent UI contributor:
 - Component extraction from the large `AgentClient.tsx` file if it reduces complexity.
 - Reusable styling/tokens if they make the UI easier to evolve.
 - Playwright/browser checks and screenshots once the local surface can run.
+- UI-only fixture checks through `npm run ui:test` / `npm run ui:test:headed`.
 - Phase 3 mobile signed-preview designs that consume existing resource/action concepts.
 - Experimental preview patterns for images, video, reports, task progress, and other artifacts, as long as the web client remains the first implementation target.
 
