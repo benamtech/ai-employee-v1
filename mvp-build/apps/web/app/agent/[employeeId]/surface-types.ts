@@ -16,6 +16,11 @@ export type {
   ReminderRow,
   JobCommitmentRow,
   WorkEventRow,
+  EmployeeSummary,
+  RuntimeHealthSummary,
+  AbilitySummary,
+  WorkOutput,
+  WorkTask,
   ResourcePayload,
 } from "@amtech/shared";
 import type { ArtifactRow, StripeInvoiceRow, ReminderRow, JobCommitmentRow, WorkEventRow } from "@amtech/shared";

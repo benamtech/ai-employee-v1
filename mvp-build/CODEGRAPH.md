@@ -73,7 +73,9 @@ Current factual state:
   `ToolActivityDescriptor` + `formViewFromJsonSchema` so any tool materializes from schema with no per-tool
   code. Live `/v1/toolsets`, MCP handshake, and the Hermes->Work native-schema pipeline are pending.
 - **Second-half plan (2026-07-09):** active in `second-half-plan/`. The backend is ahead of the owner product; the next seven phases are: Phase 0 handoff, Phase 1 preserve/close live gate, Phase 2 web employee desk, Phase 3 SMS ambient inbox/signed previews, Phase 4 tool-agnostic capability/rendering/materialization, Phase 5 trial ops/admin/billing, Phase 6 free-trial/paid-pilot readiness.
-- **Current priority:** complete Phase 1 using `second-half-plan/phase-01-handoff-prompt.md`: preserve interrupted Manager-as-MCP/tool-enabled employee fixes, run static gates, then capture or honestly block a local live proof that a provisioned employee registers Manager tools, calls a Manager tool, creates an artifact, and loads in the Work Surface.
+- **Second-half Phase 1 preserve/close live gate:** `source-wired/static-green`; live gate `blocked` pending a usable model/provider path. Manager MCP identity injection, Docker Manager-origin rendering, in-container terminal backend, broad persona, local bridge tool compatibility, and structured artifact fallback are preserved and tested.
+- **Second-half Phase 2 owner Work Surface redesign:** `source-wired`. The owner web surface is now a multi-region employee desk backed by a stronger Manager read model: persisted conversation, Today/Chat/Jobs/Tasks/Outputs/Connected/Abilities/Activity/Settings views, selected preview pane, derived outputs/tasks/abilities/runtime health, SSE/poll fallback, approval/work-card reuse, and generic artifact HTML fallback. Browser/live acceptance remains pending local runtime/model availability.
+- **Current priority:** prove the Phase 1/2 live browser/runtime path when a funded model/provider route is available, then continue into Phase 3 SMS signed previews and Phase 4 materialization contracts.
 
 Do not mark provider or runtime acceptance without real proof ids. Local tests do not prove live acceptance.
 
@@ -157,10 +159,11 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/web/app/api/front-door/*` | Browser-facing proxies for onboarding, verification, claim-token, account creation, provisioning, and front-door messages. |
 | `apps/web/app/api/_lib/manager.ts` | Shared proxy to Manager with internal token handling. |
 | `apps/web/app/agent/[employeeId]/page.tsx` | Authenticated owner Work Surface route. |
-| `apps/web/app/agent/[employeeId]/AgentClient.tsx` | Main Work Surface client: daily brief, job folders, notify/question/review cards, approvals, chat, SSE snapshot fallback. |
+| `apps/web/app/agent/[employeeId]/AgentClient.tsx` | Main Work Surface client: multi-region employee desk with left navigation, center work views, right preview pane, persisted conversation, tasks/outputs/connectors/abilities/activity views, SSE/poll fallback, and approval/work-card actions. |
 | `apps/web/app/agent/[employeeId]/components/*` | Presentation components for approval cards, work cards, receipts, daily brief, and job folders. |
 | `apps/web/app/agent/[employeeId]/components/deliverables/index.tsx` | Deliverable-type renderers used by work cards. |
 | `apps/web/app/agent/[employeeId]/lib/group-by-job.ts` | Groups artifacts/events/invoices/reminders into owner-readable job folders. |
+| `apps/web/app/agent/[employeeId]/lib/surface-model.ts` | Client-side view model helpers for nav counts, default preview selection, owner-facing connector labels, and status tone mapping. |
 | `apps/web/app/agent/[employeeId]/surface-types.ts` | Resource payload shape used by the Work Surface. |
 | `apps/web/app/agent/[employeeId]/surface.tokens.ts` | Work Surface visual tokens. |
 | `apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts` | Signed artifact/owner-session resolution route for PDFs and other outputs; redirects stored files and renders Manager-provided safe HTML fallbacks for payload-only artifacts. |
@@ -227,6 +230,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `packages/shared/src/tool-schemas.ts` | Runtime zod schemas keyed by `ToolName` — the JSON-Schema source of truth for HTTP dispatch validation, MCP `tools/list`, and the schema-driven renderer. Permissive passthrough fallback for the long tail. |
 | `packages/shared/src/platform-toolsets.ts` | Hermes `api_server` toolset safe-set policy (backend blast radius + provider-key availability) rendered into `config.yaml`. |
 | `packages/shared/src/work-events.ts` | Typed Work Surface descriptor contract: notify/question/review, deliverable type (incl. `tool_activity`), acceptance grammar, SMS rendering, and `formViewFromJsonSchema` (schema → form for any tool). |
+| `packages/shared/src/resource-payload.ts` | Shared Work Surface read-model contract: Manager snapshot rows plus Phase 2 derived employee/runtime health, abilities, outputs, and tasks consumed by the web desk. |
 | `packages/shared/src/manifest.ts` | Seven-question onboarding manifest and validation. |
 | `packages/shared/src/profile-package.ts` | Profile package keys and render/build parameter types. |
 | `packages/shared/src/routes.ts` | Shared Manager route builders. |

@@ -2,6 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { MANAGER_API } from "@amtech/shared";
 import { makeFakeDb, type FakeSupabase } from "./_helpers/fake-supabase";
 import { mintOwnerSession } from "../../apps/manager/src/lib/owner-session";
+import { mintSignedToken, tokenHash } from "../../apps/manager/src/lib/signed-links";
 
 const state = vi.hoisted(() => ({ db: null as FakeSupabase | null }));
 
@@ -41,14 +42,14 @@ describe("artifact resolve route", () => {
     return session.token;
   }
 
-  async function resolveArtifact(employeeId: string, artifactId: string, token?: string) {
+  async function resolveArtifact(employeeId: string, artifactId: string, token?: string, signedToken?: string) {
     return buildApp().request(MANAGER_API.artifactResolve(employeeId, artifactId), {
       method: "POST",
       headers: {
         Authorization: "Bearer test-internal-token",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(token ? { owner_session_token: token } : {}),
+      body: JSON.stringify({ ...(token ? { owner_session_token: token } : {}), ...(signedToken ? { signed_token: signedToken } : {}) }),
     });
   }
 
@@ -107,6 +108,32 @@ describe("artifact resolve route", () => {
 
     const res = await resolveArtifact("emp_1", "art_3", await ownerToken("acct_other"));
     expect(res.status).toBe(403);
+    expect(state.db!.tables.audit_log).toHaveLength(0);
+  });
+
+  it("does not increment signed-link access count when a payload-only artifact cannot render", async () => {
+    const signed = mintSignedToken("artifact_link", "art_4", 300, { account_id: "acct_1", employee_id: "emp_1" });
+    state.db!.tables.artifacts!.push({
+      id: "art_4",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: null,
+      payload: {},
+    });
+    state.db!.tables.artifact_links!.push({
+      id: "alink_1",
+      artifact_id: "art_4",
+      token_hash: tokenHash(signed),
+      access_count: 4,
+      revoked_at: null,
+      expires_at: new Date(Date.now() + 60_000).toISOString(),
+    });
+
+    const res = await resolveArtifact("emp_1", "art_4", undefined, signed);
+
+    expect(res.status).toBe(404);
+    expect(state.db!.tables.artifact_links![0]!.access_count).toBe(4);
     expect(state.db!.tables.audit_log).toHaveLength(0);
   });
 });

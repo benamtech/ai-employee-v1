@@ -246,6 +246,8 @@ export function buildApp(): Hono {
 
     let authorized = false;
     let linkId: string | null = null;
+    let linkToIncrement: string | null = null;
+    let linkAccessCount = 0;
     if (signed_token) {
       const payload = verifySignedToken(String(signed_token), "artifact_link");
       if (payload &&
@@ -264,10 +266,8 @@ export function buildApp(): Hono {
         ) {
           authorized = true;
           linkId = link.id;
-          await mustWrite(
-            db.from("artifact_links").update({ access_count: Number(link.access_count ?? 0) + 1 }).eq("id", link.id),
-            "artifact_links.access_count",
-          );
+          linkToIncrement = link.id;
+          linkAccessCount = Number(link.access_count ?? 0);
         }
       }
     }
@@ -280,6 +280,13 @@ export function buildApp(): Hono {
     if (!authorized) return c.json({ error: "artifact_access_denied" }, 403);
     const fallbackHtml = artifact.storage_ref ? null : renderArtifactHtml(artifact);
     if (!artifact.storage_ref && !fallbackHtml) return c.json({ error: "artifact_not_found" }, 404);
+    const signedUrl = artifact.storage_ref ? await createArtifactStorageSignedUrl(db, String(artifact.storage_ref)) : null;
+    if (linkToIncrement) {
+      await mustWrite(
+        db.from("artifact_links").update({ access_count: linkAccessCount + 1 }).eq("id", linkToIncrement),
+        "artifact_links.access_count",
+      );
+    }
     await db.from("audit_log").insert({
       id: newId(ID_PREFIX.audit),
       account_id: artifact.account_id,
@@ -298,7 +305,6 @@ export function buildApp(): Hono {
         mime_type: "text/html",
       });
     }
-    const signedUrl = await createArtifactStorageSignedUrl(db, String(artifact.storage_ref));
     return c.json({
       artifact_id: artifactId,
       employee_id: employeeId,

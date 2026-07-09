@@ -19,6 +19,8 @@ export async function GET(
     return new Response(json.html, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'",
+        "Referrer-Policy": "no-referrer",
         "X-Content-Type-Options": "nosniff",
       },
     });

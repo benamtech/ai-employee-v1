@@ -1,6 +1,6 @@
 # Phase 2 - Owner Work Surface Redesign
 
-Status: planned
+Status: source-wired
 
 Goal: replace the skeletal owner web UI with a powerful small-business employee desk that renders Hermes capability as usable work, not as a developer dashboard.
 

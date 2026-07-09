@@ -1,48 +1,89 @@
 "use client";
 
-/**
- * The Work Surface (wiki/MVP/old-build-plan/15-interaction-reimagined-the-work-surface.md):
- * Hermes's developer event stream rendered as a coworker a non-technical owner trusts
- * and enjoys — never a dashboard. One relationship, two surfaces (this + SMS), three
- * moves (notify/question/review). Everything renders from WorkEventDescriptor and
- * Manager records; no raw provider payloads, no tool names, no JSON.
- */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { tokens } from "./surface.tokens";
-import type { ResourcePayload } from "./surface-types";
+import type React from "react";
+import type { ResourcePayload, WorkEventRow } from "./surface-types";
 import { groupByJob } from "./lib/group-by-job";
+import {
+  defaultSelection,
+  labelConnector,
+  navCounts,
+  previewItem,
+  statusTone,
+  type PreviewSelection,
+  type SurfaceView,
+} from "./lib/surface-model";
+import { tokens } from "./surface.tokens";
 import { DailyBrief } from "./components/DailyBrief";
 import { ApprovalCard } from "./components/ApprovalCard";
 import { WorkCard } from "./components/WorkCard";
 import { JobFolder } from "./components/JobFolder";
 
 const EMPTY: ResourcePayload = {
-  account_id: "", artifacts: [], approvals: [], messages: [], connectors: [],
-  stripe_invoices: [], reminders: [], job_commitments: [], work_events: [],
+  account_id: "",
+  employee_id: "",
+  artifacts: [],
+  approvals: [],
+  messages: [],
+  connectors: [],
+  stripe_invoices: [],
+  reminders: [],
+  job_commitments: [],
+  work_events: [],
+  abilities: [],
+  outputs: [],
+  tasks: [],
 };
+
+const NAV: Array<{ id: SurfaceView; label: string }> = [
+  { id: "today", label: "Today" },
+  { id: "chat", label: "Chat" },
+  { id: "jobs", label: "Jobs" },
+  { id: "tasks", label: "Tasks" },
+  { id: "outputs", label: "Outputs" },
+  { id: "connected", label: "Connected" },
+  { id: "abilities", label: "Abilities" },
+  { id: "activity", label: "Activity" },
+  { id: "settings", label: "Settings" },
+];
+
+type PendingMessage = { id: string; role: "owner" | "employee"; body: string; status: "sending" | "failed" };
 
 export function AgentClient({ employeeId }: { employeeId: string }) {
   const [res, setRes] = useState<ResourcePayload>(EMPTY);
-  const [chat, setChat] = useState<Array<{ role: "owner" | "employee"; body: string }>>([]);
+  const [active, setActive] = useState<SurfaceView>("today");
+  const [selected, setSelected] = useState<PreviewSelection | null>(null);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [streamState, setStreamState] = useState<"connecting" | "live" | "reconnecting" | "offline">("connecting");
   const [progress, setProgress] = useState<{ run_id: string; verb: string; state: string } | null>(null);
+  const [pending, setPending] = useState<PendingMessage[]>([]);
 
-  const mergeWorkEvent = useCallback((ev: ResourcePayload["work_events"][number]) => {
+  const refresh = useCallback(async () => {
+    const r = await fetch(`/api/employee/${employeeId}/resources`, { method: "POST" });
+    const json = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      setStatus(ownerError(json.error ?? "Could not load your work."));
+      setStreamState("offline");
+      setLoading(false);
+      return;
+    }
+    const next = { ...EMPTY, ...json };
+    setRes(next);
+    setSelected((current) => current ?? defaultSelection(next));
+    setLoading(false);
+  }, [employeeId]);
+
+  const mergeWorkEvent = useCallback((ev: WorkEventRow) => {
     setRes((prev) => {
       const others = prev.work_events.filter((w) => w.id !== ev.id);
       return { ...prev, work_events: [ev, ...others] };
     });
   }, []);
 
-  const refresh = useCallback(async () => {
-    const r = await fetch(`/api/employee/${employeeId}/resources`, { method: "POST" });
-    const json = await r.json().catch(() => ({}));
-    if (!r.ok) { setStatus(json.error ?? "Could not load your work."); return; }
-    setRes({ ...EMPTY, ...json });
-  }, [employeeId]);
-
   useEffect(() => { void refresh(); }, [refresh]);
+
   useEffect(() => {
     let cancelled = false;
     async function beat() {
@@ -53,6 +94,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     const timer = window.setInterval(() => { void beat(); }, 30_000);
     return () => { cancelled = true; window.clearInterval(timer); };
   }, [employeeId]);
+
   useEffect(() => {
     let es: EventSource | null = null;
     let closed = false;
@@ -60,60 +102,85 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
 
     function connect() {
       if (closed) return;
+      setStreamState((s) => (s === "offline" ? "reconnecting" : "connecting"));
       es = new EventSource(`/api/employee/${employeeId}/events`);
+      es.addEventListener("open", () => {
+        setStreamState("live");
+        backoff = 1000;
+      });
       es.addEventListener("snapshot", (event) => {
         try {
           const json = JSON.parse((event as MessageEvent).data);
           const snap = json?.snapshot ?? json;
-          if (snap?.account_id) { setRes({ ...EMPTY, ...snap }); backoff = 1000; }
+          if (snap?.account_id) {
+            const next = { ...EMPTY, ...snap };
+            setRes(next);
+            setSelected((current) => current ?? defaultSelection(next));
+            setStreamState("live");
+            backoff = 1000;
+          }
         } catch { /* poll remains the fallback */ }
       });
       es.addEventListener("work_event", (event) => {
         try {
           const json = JSON.parse((event as MessageEvent).data);
           if (json?.event?.id) mergeWorkEvent(json.event);
-        } catch { /* ignore */ }
+        } catch { /* ignore malformed stream chunks */ }
       });
       es.addEventListener("work_progress", (event) => {
         try {
           const json = JSON.parse((event as MessageEvent).data);
           if (json?.verb) setProgress({ run_id: json.run_id, verb: json.verb, state: json.state });
           if (json?.state === "completed") window.setTimeout(() => setProgress(null), 1500);
-        } catch { /* ignore */ }
+        } catch { /* ignore malformed stream chunks */ }
       });
       es.addEventListener("approval_update", () => { void refresh(); });
       es.onerror = () => {
         es?.close();
         if (closed) return;
+        setStreamState("reconnecting");
         window.setTimeout(connect, backoff);
         backoff = Math.min(backoff * 2, 15000);
       };
     }
     connect();
-    // Poll fallback: keep state fresh even if the stream degrades.
     const pollTimer = window.setInterval(() => { void refresh(); }, 20000);
     return () => { closed = true; es?.close(); window.clearInterval(pollTimer); };
   }, [employeeId, refresh, mergeWorkEvent]);
 
   const sendToEmployee = useCallback(async (text: string) => {
-    setChat((c) => [...c, { role: "owner", body: text }]);
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    const pendingId = `pending:${Date.now()}`;
+    setPending((p) => [...p, { id: pendingId, role: "owner", body: trimmed, status: "sending" }]);
     const r = await fetch(`/api/employee/${employeeId}/message`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: trimmed }),
     });
     const json = await r.json().catch(() => ({}));
-    if (!r.ok) { setStatus(json.error ?? "Message failed."); return; }
-    setChat((c) => [...c, { role: "employee", body: json.reply }]);
+    if (!r.ok) {
+      setPending((p) => p.map((m) => (m.id === pendingId ? { ...m, status: "failed" } : m)));
+      setStatus(ownerError(json.error ?? "Message failed."));
+      return;
+    }
+    setPending((p) => p.filter((m) => m.id !== pendingId));
+    if (json.reply && !res.messages.some((m) => m.body === json.reply)) {
+      setPending((p) => [...p, { id: `reply:${Date.now()}`, role: "employee", body: json.reply, status: "sending" }]);
+      window.setTimeout(() => setPending((p) => p.filter((m) => !m.id.startsWith("reply:"))), 2500);
+    }
     await refresh();
-  }, [employeeId, refresh]);
+  }, [employeeId, refresh, res.messages]);
 
   const resolveApproval = useCallback(async (approvalId: string, response: "approved" | "rejected") => {
     if (!res.account_id) { setStatus("Account context is missing."); return; }
     const r = await fetch(`/api/employee/${employeeId}/approval/resolve`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ account_id: res.account_id, approval_id: approvalId, owner_response: response }),
     });
     const json = await r.json().catch(() => ({}));
-    setStatus(json.user_facing_summary_hint ?? json.error ?? "Updated.");
+    setStatus(json.user_facing_summary_hint ?? ownerError(json.error ?? "Updated."));
     await refresh();
   }, [employeeId, res.account_id, refresh]);
 
@@ -124,89 +191,567 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     void sendToEmployee(text);
   }
 
-  const { folders, looseWorkEvents } = useMemo(() => groupByJob(res), [res]);
-  const needsYou = looseWorkEvents.filter((e) => e.work_event_descriptor?.move !== "notify");
-  const fyi = looseWorkEvents.filter((e) => e.work_event_descriptor?.move === "notify");
-  const workApprovalIds = new Set(looseWorkEvents.map((e) => e.work_event_descriptor?.deliverable?.refs.approval_id).filter(Boolean));
-  const standaloneApprovals = res.approvals.filter((a) => !workApprovalIds.has(a.id));
+  const grouped = useMemo(() => groupByJob(res), [res]);
+  const counts = useMemo(() => navCounts(res), [res]);
+  const preview = useMemo(() => previewItem(res, selected), [res, selected]);
+  const urgentTasks = (res.tasks ?? []).filter((t) => t.status === "needs_you" || t.status === "blocked" || t.status === "failed");
+  const recentEvents = res.work_events.slice(0, 8);
+  const displayMessages = [
+    ...res.messages.map((m) => ({ id: m.id, role: m.direction === "to_owner" ? "employee" as const : "owner" as const, body: m.body, status: m.status })),
+    ...pending,
+  ];
 
   return (
-    <main style={{ maxWidth: 760, margin: "5vh auto", padding: tokens.space.xl, fontFamily: tokens.font.family, color: tokens.color.text, background: tokens.color.bg }}>
-      <header style={{ marginBottom: tokens.space.lg }}>
-        <h1 style={{ margin: 0, fontSize: tokens.font.h1 }}>Your employee</h1>
-        <p style={{ margin: `${tokens.space.xs}px 0 0`, color: tokens.color.textMuted, fontSize: tokens.font.small }}>
-          Here to give you your evenings back — you approve, it does the work.
-        </p>
-        {progress ? (
-          <p aria-live="polite" style={{ margin: `${tokens.space.sm}px 0 0`, fontSize: tokens.font.small, color: tokens.color.accent }}>
-            <span style={{ opacity: 0.7 }}>●</span> {progress.verb}…
-          </p>
-        ) : null}
-      </header>
-
-      <DailyBrief approvals={res.approvals} reminders={res.reminders} workEvents={res.work_events} invoices={res.stripe_invoices} />
-
-      {(standaloneApprovals.length > 0 || needsYou.length > 0) ? (
-        <Section title="Needs you">
-          {standaloneApprovals.map((a) => <ApprovalCard key={a.id} approval={a} onResolve={resolveApproval} />)}
-          {needsYou.map((e) => e.work_event_descriptor ? (
-            <WorkCard key={e.id} descriptor={e.work_event_descriptor} employeeId={employeeId} onRespond={sendToEmployee} onResolve={resolveApproval} />
-          ) : null)}
-        </Section>
-      ) : null}
-
-      {folders.length > 0 ? (
-        <Section title="Your jobs">
-          {folders.map((f) => <JobFolder key={f.key} folder={f} employeeId={employeeId} />)}
-        </Section>
-      ) : null}
-
-      {fyi.length > 0 ? (
-        <Section title="Handled — just so you know">
-          {fyi.map((e) => e.work_event_descriptor ? (
-            <WorkCard key={e.id} descriptor={e.work_event_descriptor} employeeId={employeeId} onRespond={sendToEmployee} onResolve={resolveApproval} />
-          ) : null)}
-        </Section>
-      ) : null}
-
-      <Section title="Talk to your employee">
-        <div style={{ borderRadius: tokens.radius.md, border: `1px solid ${tokens.color.border}`, background: tokens.color.surface, padding: tokens.space.lg }}>
-          {chat.length === 0 ? (
-            <p style={{ margin: 0, color: tokens.color.textMuted, fontSize: tokens.font.small }}>Ask for an estimate, a follow-up, or anything else — like texting a great office manager.</p>
-          ) : chat.map((m, i) => (
-            <p key={i} style={{ margin: `${tokens.space.xs}px 0`, fontSize: tokens.font.body }}>
-              <strong style={{ color: m.role === "owner" ? tokens.color.text : tokens.color.accent }}>{m.role === "owner" ? "You" : "Employee"}:</strong> {m.body}
-            </p>
-          ))}
-          <div style={{ display: "flex", gap: tokens.space.sm, marginTop: tokens.space.md }}>
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") onSendInput(); }}
-              placeholder="Text your employee…"
-              style={{ flex: 1, padding: `${tokens.space.sm}px ${tokens.space.md}px`, border: `1px solid ${tokens.color.borderStrong}`, borderRadius: tokens.radius.sm, fontSize: tokens.font.body }}
-            />
-            <button onClick={onSendInput} style={{ background: tokens.color.accent, color: "#fff", border: "none", borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.lg}px`, fontSize: tokens.font.body, cursor: "pointer" }}>Send</button>
+    <main className="ws-root">
+      <style>{WORK_SURFACE_CSS}</style>
+      <aside className="ws-rail" aria-label="Employee sections">
+        <div className="ws-brand">
+          <span className="ws-mark">A</span>
+          <div>
+            <strong>{res.employee?.name ?? "Employee"}</strong>
+            <span>{res.employee?.status ?? "loading"}</span>
           </div>
         </div>
-      </Section>
+        <nav className="ws-nav">
+          {NAV.map((item) => (
+            <button key={item.id} className={active === item.id ? "active" : ""} onClick={() => setActive(item.id)}>
+              <span>{item.label}</span>
+              {counts[item.id] ? <b>{counts[item.id]}</b> : null}
+            </button>
+          ))}
+        </nav>
+        <HealthBlock health={res.runtime_health ?? null} streamState={streamState} />
+      </aside>
 
-      {res.connectors.length > 0 ? (
-        <p style={{ marginTop: tokens.space.xl, fontSize: tokens.font.tiny, color: tokens.color.textFaint }}>
-          {res.connectors.map((c) => `${c.provider} ${c.status}`).join(" · ")}
-        </p>
-      ) : null}
+      <section className="ws-main" aria-busy={loading}>
+        <header className="ws-topbar">
+          <div>
+            <p className="ws-kicker">Work Surface</p>
+            <h1>{titleForView(active)}</h1>
+          </div>
+          <div className="ws-status-row">
+            {progress ? <Pill tone="warn" label={`${progress.verb}...`} /> : null}
+            <Pill tone={streamState === "live" ? "good" : streamState === "offline" ? "bad" : "warn"} label={streamLabel(streamState)} />
+          </div>
+        </header>
 
-      {status ? <p style={{ marginTop: tokens.space.md, fontSize: tokens.font.small, color: tokens.color.textMuted }}>{status}</p> : null}
+        {status ? <div className="ws-banner">{status}</div> : null}
+
+        <div className="ws-view">
+          {loading ? <EmptyState title="Loading your employee" body="Getting the latest work, outputs, and decisions." /> : null}
+          {!loading && active === "today" ? (
+            <TodayView
+              res={res}
+              urgentTasks={urgentTasks}
+              recentEvents={recentEvents}
+              onSelect={setSelected}
+              onRespond={sendToEmployee}
+              onResolve={resolveApproval}
+              employeeId={employeeId}
+            />
+          ) : null}
+          {!loading && active === "chat" ? (
+            <ChatView messages={displayMessages} input={input} setInput={setInput} onSend={onSendInput} onSelect={setSelected} />
+          ) : null}
+          {!loading && active === "jobs" ? (
+            <ListShell emptyTitle="No jobs yet" emptyBody="Jobs will collect estimates, replies, invoices, reminders, and proof in one place.">
+              {grouped.folders.map((f) => (
+                <div key={f.key} className="ws-card-wrap">
+                  <button className="ws-preview-action" onClick={() => setSelected({ kind: "job", id: f.key })}>Open in preview</button>
+                  <JobFolder folder={f} employeeId={employeeId} />
+                </div>
+              ))}
+            </ListShell>
+          ) : null}
+          {!loading && active === "tasks" ? <TaskList res={res} onSelect={setSelected} /> : null}
+          {!loading && active === "outputs" ? <OutputList res={res} onSelect={setSelected} /> : null}
+          {!loading && active === "connected" ? <ConnectorList res={res} onSelect={setSelected} /> : null}
+          {!loading && active === "abilities" ? <AbilityList res={res} onSelect={setSelected} /> : null}
+          {!loading && active === "activity" ? (
+            <ActivityList res={res} employeeId={employeeId} onSelect={setSelected} onRespond={sendToEmployee} onResolve={resolveApproval} />
+          ) : null}
+          {!loading && active === "settings" ? <SettingsLite res={res} /> : null}
+        </div>
+      </section>
+
+      <aside className="ws-preview" aria-label="Selected work preview">
+        <PreviewPane
+          employeeId={employeeId}
+          res={res}
+          preview={preview}
+          selection={selected}
+          onSelect={setSelected}
+          onRespond={sendToEmployee}
+          onResolve={resolveApproval}
+        />
+      </aside>
     </main>
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function TodayView({
+  res,
+  urgentTasks,
+  recentEvents,
+  onSelect,
+  onRespond,
+  onResolve,
+  employeeId,
+}: {
+  res: ResourcePayload;
+  urgentTasks: NonNullable<ResourcePayload["tasks"]>;
+  recentEvents: WorkEventRow[];
+  onSelect: (selection: PreviewSelection) => void;
+  onRespond: (text: string) => void;
+  onResolve: (approvalId: string, response: "approved" | "rejected") => Promise<void> | void;
+  employeeId: string;
+}) {
+  const standaloneApprovals = res.approvals.slice(0, 3);
   return (
-    <section style={{ marginTop: tokens.space.xxl }}>
-      <h2 style={{ margin: `0 0 ${tokens.space.md}px`, fontSize: tokens.font.h2 }}>{title}</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: tokens.space.md }}>{children}</div>
+    <>
+      <DailyBrief approvals={res.approvals} reminders={res.reminders} workEvents={res.work_events} invoices={res.stripe_invoices} />
+      <div className="ws-grid two">
+        <Panel title="Needs attention" empty={!urgentTasks.length && !standaloneApprovals.length} emptyText="Nothing needs a decision right now.">
+          {standaloneApprovals.map((a) => (
+            <button key={a.id} className="ws-row" onClick={() => onSelect({ kind: "approval", id: a.id })}>
+              <span>Decision needed</span>
+              <strong>{a.summary}</strong>
+              <Pill tone="warn" label={a.risk_level || "review"} />
+            </button>
+          ))}
+          {urgentTasks.slice(0, 5).map((t) => <TaskRow key={t.id} task={t} onSelect={onSelect} />)}
+        </Panel>
+        <Panel title="Recent work" empty={!recentEvents.length} emptyText="Employee activity will appear here as work happens.">
+          {recentEvents.map((e) => e.work_event_descriptor ? (
+            <WorkCard key={e.id} descriptor={e.work_event_descriptor} employeeId={employeeId} onRespond={onRespond} onResolve={onResolve} />
+          ) : null)}
+        </Panel>
+      </div>
+    </>
+  );
+}
+
+function ChatView({
+  messages,
+  input,
+  setInput,
+  onSend,
+  onSelect,
+}: {
+  messages: Array<{ id: string; role: "owner" | "employee"; body: string; status: string }>;
+  input: string;
+  setInput: (value: string) => void;
+  onSend: () => void;
+  onSelect: (selection: PreviewSelection) => void;
+}) {
+  return (
+    <section className="ws-chat">
+      <div className="ws-thread">
+        {!messages.length ? (
+          <EmptyState title="Start with the work" body="Ask for an estimate, a follow-up, a draft, a reminder, or the next best step." />
+        ) : messages.map((m) => (
+          <button key={m.id} className={`ws-message ${m.role}`} onClick={() => onSelect({ kind: "message", id: m.id })}>
+            <span>{m.role === "owner" ? "You" : "Employee"}</span>
+            <p>{m.body}</p>
+            {m.status !== "sent" && m.status !== "delivered" ? <small>{m.status}</small> : null}
+          </button>
+        ))}
+      </div>
+      <Composer input={input} setInput={setInput} onSend={onSend} />
     </section>
   );
 }
+
+function TaskList({ res, onSelect }: { res: ResourcePayload; onSelect: (selection: PreviewSelection) => void }) {
+  return (
+    <ListShell emptyTitle="No open tasks" emptyBody="Approvals, questions, reminders, and blocked work will appear here.">
+      {(res.tasks ?? []).map((task) => <TaskRow key={task.id} task={task} onSelect={onSelect} />)}
+    </ListShell>
+  );
+}
+
+function OutputList({ res, onSelect }: { res: ResourcePayload; onSelect: (selection: PreviewSelection) => void }) {
+  return (
+    <ListShell emptyTitle="No outputs yet" emptyBody="Artifacts, invoices, message receipts, and generic resources will collect here.">
+      {(res.outputs ?? []).map((output) => (
+        <button key={output.id} className="ws-row" onClick={() => onSelect({ kind: "output", id: output.id })}>
+          <span>{output.type}</span>
+          <strong>{output.title}</strong>
+          {output.summary ? <p>{output.summary}</p> : null}
+          <Pill tone={statusTone(output.status)} label={output.status} />
+        </button>
+      ))}
+    </ListShell>
+  );
+}
+
+function ConnectorList({ res, onSelect }: { res: ResourcePayload; onSelect: (selection: PreviewSelection) => void }) {
+  return (
+    <ListShell emptyTitle="No connected systems yet" emptyBody="Email, payments, files, and calendar status will appear here as they are connected.">
+      {res.connectors.map((c) => (
+        <button key={c.id} className="ws-row" onClick={() => onSelect({ kind: "connector", id: c.id })}>
+          <span>Connection</span>
+          <strong>{labelConnector(c.provider)}</strong>
+          <p>{c.external_email ?? c.last_error ?? "Ready to connect when needed."}</p>
+          <Pill tone={statusTone(c.status)} label={c.status} />
+        </button>
+      ))}
+    </ListShell>
+  );
+}
+
+function AbilityList({ res, onSelect }: { res: ResourcePayload; onSelect: (selection: PreviewSelection) => void }) {
+  return (
+    <ListShell emptyTitle="Abilities are still loading" emptyBody="The employee's abilities will be summarized from Manager, connectors, policy, and runtime health.">
+      {(res.abilities ?? []).map((ability) => (
+        <button key={ability.id} className="ws-row" onClick={() => onSelect({ kind: "ability", id: ability.id })}>
+          <span>{ability.category}</span>
+          <strong>{ability.label}</strong>
+          <p>{ability.summary}</p>
+          <Pill tone={statusTone(ability.status)} label={ability.status.replace(/_/g, " ")} />
+        </button>
+      ))}
+    </ListShell>
+  );
+}
+
+function ActivityList({
+  res,
+  employeeId,
+  onSelect,
+  onRespond,
+  onResolve,
+}: {
+  res: ResourcePayload;
+  employeeId: string;
+  onSelect: (selection: PreviewSelection) => void;
+  onRespond: (text: string) => void;
+  onResolve: (approvalId: string, response: "approved" | "rejected") => Promise<void> | void;
+}) {
+  return (
+    <ListShell emptyTitle="No activity yet" emptyBody="Provider events, work progress, receipts, and employee notices will appear here.">
+      {res.work_events.map((e) => (
+        <div key={e.id} className="ws-card-wrap">
+          <button className="ws-preview-action" onClick={() => onSelect({ kind: "work_event", id: e.id })}>Open in preview</button>
+          {e.work_event_descriptor ? (
+            <WorkCard descriptor={e.work_event_descriptor} employeeId={employeeId} onRespond={onRespond} onResolve={onResolve} />
+          ) : (
+            <button className="ws-row" onClick={() => onSelect({ kind: "work_event", id: e.id })}>
+              <strong>{e.event_type}</strong>
+              <Pill tone={statusTone(e.status)} label={e.status} />
+            </button>
+          )}
+        </div>
+      ))}
+    </ListShell>
+  );
+}
+
+function SettingsLite({ res }: { res: ResourcePayload }) {
+  return (
+    <div className="ws-grid two">
+      <Panel title="Employee" empty={!res.employee} emptyText="Employee profile is not loaded yet.">
+        <KeyValue label="Name" value={res.employee?.name} />
+        <KeyValue label="Status" value={res.employee?.status} />
+        <KeyValue label="Profile" value={res.employee?.profile_id ?? undefined} />
+      </Panel>
+      <Panel title="Runtime" empty={!res.runtime_health} emptyText="Runtime health has not been checked yet.">
+        <KeyValue label="Health" value={res.runtime_health?.status} />
+        <KeyValue label="Backend" value={res.runtime_health?.backend_type ?? undefined} />
+        <KeyValue label="Checked" value={res.runtime_health?.checked_at ?? undefined} />
+        <p className="ws-muted">{res.runtime_health?.message}</p>
+      </Panel>
+    </div>
+  );
+}
+
+function PreviewPane({
+  employeeId,
+  res,
+  preview,
+  selection,
+  onSelect,
+  onRespond,
+  onResolve,
+}: {
+  employeeId: string;
+  res: ResourcePayload;
+  preview: ReturnType<typeof previewItem>;
+  selection: PreviewSelection | null;
+  onSelect: (selection: PreviewSelection) => void;
+  onRespond: (text: string) => void;
+  onResolve: (approvalId: string, response: "approved" | "rejected") => Promise<void> | void;
+}) {
+  if (!preview || !selection) {
+    return <EmptyState title="Select work" body="Open an approval, output, task, connection, or activity item to inspect it here." />;
+  }
+  const approval = selection.kind === "approval" ? res.approvals.find((a) => a.id === selection.id) : null;
+  const event = selection.kind === "work_event" ? res.work_events.find((e) => e.id === selection.id) : null;
+  const output = selection.kind === "output" ? (res.outputs ?? []).find((o) => o.id === selection.id) : null;
+  const task = selection.kind === "task" ? (res.tasks ?? []).find((t) => t.id === selection.id) : null;
+  const connector = selection.kind === "connector" ? res.connectors.find((c) => c.id === selection.id) : null;
+  const ability = selection.kind === "ability" ? (res.abilities ?? []).find((a) => a.id === selection.id) : null;
+  const message = selection.kind === "message" ? res.messages.find((m) => m.id === selection.id) : null;
+  const job = selection.kind === "job" ? groupByJob(res).folders.find((f) => f.key === selection.id) : null;
+
+  return (
+    <div className="ws-preview-inner">
+      <p className="ws-kicker">{preview.eyebrow}</p>
+      <h2>{preview.title}</h2>
+      {preview.summary ? <p className="ws-muted">{preview.summary}</p> : null}
+      {preview.status ? <Pill tone={statusTone(preview.status)} label={preview.status.replace(/_/g, " ")} /> : null}
+
+      <div className="ws-preview-body">
+        {approval ? <ApprovalCard approval={approval} onResolve={onResolve} /> : null}
+        {event?.work_event_descriptor ? <WorkCard descriptor={event.work_event_descriptor} employeeId={employeeId} onRespond={onRespond} onResolve={onResolve} /> : null}
+        {output ? <OutputPreview output={output} /> : null}
+        {task ? <TaskDetails task={task} onSelect={onSelect} /> : null}
+        {connector ? <ConnectorDetails connector={connector} /> : null}
+        {ability ? <AbilityDetails ability={ability} /> : null}
+        {message ? <MessageDetails message={message} /> : null}
+        {job ? <JobFolder folder={job} employeeId={employeeId} /> : null}
+      </div>
+    </div>
+  );
+}
+
+function OutputPreview({ output }: { output: NonNullable<ResourcePayload["outputs"]>[number] }) {
+  return (
+    <div className="ws-detail">
+      <KeyValue label="Type" value={output.type} />
+      <KeyValue label="Status" value={output.status} />
+      {output.summary ? <p>{output.summary}</p> : null}
+      {output.href ? <a className="ws-link" href={output.href} target="_blank" rel="noreferrer">Open output</a> : null}
+    </div>
+  );
+}
+
+function TaskDetails({ task, onSelect }: { task: NonNullable<ResourcePayload["tasks"]>[number]; onSelect: (selection: PreviewSelection) => void }) {
+  return (
+    <div className="ws-detail">
+      <KeyValue label="Status" value={task.status.replace(/_/g, " ")} />
+      {task.summary ? <p>{task.summary}</p> : null}
+      {task.type === "approval" && task.target_id ? <button className="ws-primary" onClick={() => onSelect({ kind: "approval", id: task.target_id! })}>Review approval</button> : null}
+    </div>
+  );
+}
+
+function ConnectorDetails({ connector }: { connector: ResourcePayload["connectors"][number] }) {
+  return (
+    <div className="ws-detail">
+      <KeyValue label="Connection" value={labelConnector(connector.provider)} />
+      <KeyValue label="Status" value={connector.status.replace(/_/g, " ")} />
+      <KeyValue label="Account" value={connector.external_email ?? undefined} />
+      {connector.last_error ? <p>{connector.last_error}</p> : <p className="ws-muted">No repair action is needed from this surface right now.</p>}
+    </div>
+  );
+}
+
+function AbilityDetails({ ability }: { ability: NonNullable<ResourcePayload["abilities"]>[number] }) {
+  return (
+    <div className="ws-detail">
+      <KeyValue label="Category" value={ability.category} />
+      <KeyValue label="Status" value={ability.status.replace(/_/g, " ")} />
+      <p>{ability.summary}</p>
+    </div>
+  );
+}
+
+function MessageDetails({ message }: { message: ResourcePayload["messages"][number] }) {
+  return (
+    <div className="ws-detail">
+      <KeyValue label="Direction" value={message.direction === "to_owner" ? "Employee to owner" : "Owner to employee"} />
+      <KeyValue label="Status" value={message.status} />
+      <p>{message.body}</p>
+    </div>
+  );
+}
+
+function TaskRow({ task, onSelect }: { task: NonNullable<ResourcePayload["tasks"]>[number]; onSelect: (selection: PreviewSelection) => void }) {
+  return (
+    <button className="ws-row" onClick={() => onSelect({ kind: "task", id: task.id })}>
+      <span>{task.type}</span>
+      <strong>{task.title}</strong>
+      {task.summary ? <p>{task.summary}</p> : null}
+      <Pill tone={statusTone(task.status)} label={task.status.replace(/_/g, " ")} />
+    </button>
+  );
+}
+
+function Composer({ input, setInput, onSend }: { input: string; setInput: (value: string) => void; onSend: () => void }) {
+  return (
+    <div className="ws-composer">
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") onSend(); }}
+        placeholder="Text your employee..."
+      />
+      <button onClick={onSend}>Send</button>
+    </div>
+  );
+}
+
+function HealthBlock({ health, streamState }: { health: ResourcePayload["runtime_health"] | null; streamState: string }) {
+  return (
+    <div className="ws-health">
+      <span>Employee status</span>
+      <Pill tone={statusTone(health?.status ?? streamState)} label={health?.status ?? streamState} />
+      <p>{health?.message ?? "Waiting for the first runtime health check."}</p>
+    </div>
+  );
+}
+
+function Panel({ title, empty, emptyText, children }: { title: string; empty?: boolean; emptyText?: string; children: React.ReactNode }) {
+  return (
+    <section className="ws-panel">
+      <h2>{title}</h2>
+      {empty ? <p className="ws-muted">{emptyText}</p> : children}
+    </section>
+  );
+}
+
+function ListShell({ emptyTitle, emptyBody, children }: { emptyTitle: string; emptyBody: string; children: React.ReactNode }) {
+  const list = Array.isArray(children) ? children.filter(Boolean) : children;
+  const empty = Array.isArray(list) ? list.length === 0 : !list;
+  return empty ? <EmptyState title={emptyTitle} body={emptyBody} /> : <div className="ws-list">{children}</div>;
+}
+
+function EmptyState({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="ws-empty">
+      <strong>{title}</strong>
+      <p>{body}</p>
+    </div>
+  );
+}
+
+function KeyValue({ label, value }: { label: string; value?: string | null }) {
+  if (!value) return null;
+  return (
+    <div className="ws-kv">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function Pill({ tone, label }: { tone: "good" | "warn" | "bad" | "quiet"; label: string }) {
+  return <span className={`ws-pill ${tone}`}>{label}</span>;
+}
+
+function titleForView(view: SurfaceView): string {
+  if (view === "today") return "Today";
+  if (view === "chat") return "Conversation";
+  if (view === "connected") return "Connected systems";
+  if (view === "settings") return "Employee settings";
+  return view.charAt(0).toUpperCase() + view.slice(1);
+}
+
+function streamLabel(state: "connecting" | "live" | "reconnecting" | "offline"): string {
+  if (state === "live") return "live";
+  if (state === "reconnecting") return "reconnecting";
+  if (state === "offline") return "offline";
+  return "connecting";
+}
+
+function ownerError(code: string): string {
+  if (code === "owner_session_invalid") return "Your session expired. Log in again to keep working.";
+  if (code === "runtime_unreachable") return "Your employee is not reachable right now. Work is saved; retry after runtime health recovers.";
+  return code.replace(/[_-]+/g, " ");
+}
+
+const WORK_SURFACE_CSS = `
+  :root {
+    --ws-bg: #f3f1ec;
+    --ws-panel: #fffefa;
+    --ws-panel-2: #f8f6ef;
+    --ws-border: #ded8cb;
+    --ws-border-strong: #c7bfaf;
+    --ws-text: #242018;
+    --ws-muted: #716b60;
+    --ws-faint: #969086;
+    --ws-blue: #1769aa;
+    --ws-blue-soft: #e8f1f8;
+    --ws-green: #1a7f4b;
+    --ws-green-soft: #e7f4ec;
+    --ws-amber: #8a6d1f;
+    --ws-amber-soft: #fbf3df;
+    --ws-red: #b42318;
+    --ws-red-soft: #fbeae8;
+  }
+  .ws-root { min-height: 100vh; display: grid; grid-template-columns: 236px minmax(0, 1fr) 360px; background: radial-gradient(circle at 20% -10%, #fff8df 0, transparent 38%), linear-gradient(135deg, #f5f2ea 0%, #edf3f2 100%); color: var(--ws-text); font-family: ui-sans-serif, system-ui, sans-serif; }
+  .ws-rail { border-right: 1px solid var(--ws-border); padding: 18px; display: flex; flex-direction: column; gap: 18px; min-height: 100vh; background: rgba(255,255,255,.55); backdrop-filter: blur(10px); }
+  .ws-brand { display: flex; gap: 10px; align-items: center; }
+  .ws-brand strong, .ws-brand span { display: block; }
+  .ws-brand span { color: var(--ws-muted); font-size: 12px; }
+  .ws-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--ws-text); color: white; display: grid; place-items: center; font-weight: 800; }
+  .ws-nav { display: grid; gap: 4px; }
+  .ws-nav button { border: 0; background: transparent; color: var(--ws-muted); text-align: left; border-radius: 7px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 14px; }
+  .ws-nav button.active, .ws-nav button:hover { background: var(--ws-panel); color: var(--ws-text); box-shadow: inset 0 0 0 1px var(--ws-border); }
+  .ws-nav b { font-size: 11px; color: var(--ws-blue); background: var(--ws-blue-soft); border-radius: 999px; padding: 1px 7px; }
+  .ws-health { margin-top: auto; border: 1px solid var(--ws-border); border-radius: 8px; padding: 12px; background: var(--ws-panel); }
+  .ws-health > span, .ws-kicker { display: block; color: var(--ws-faint); font-size: 11px; text-transform: uppercase; letter-spacing: 0; font-weight: 700; }
+  .ws-health p, .ws-muted { color: var(--ws-muted); font-size: 13px; line-height: 1.45; }
+  .ws-main { min-width: 0; padding: 22px; overflow: auto; max-height: 100vh; }
+  .ws-topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
+  .ws-topbar h1 { margin: 2px 0 0; font-size: 28px; line-height: 1.1; }
+  .ws-status-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .ws-banner { border: 1px solid var(--ws-amber); background: var(--ws-amber-soft); color: var(--ws-text); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 14px; }
+  .ws-view { display: grid; gap: 16px; }
+  .ws-grid.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .ws-panel, .ws-empty, .ws-chat, .ws-preview-inner { border: 1px solid var(--ws-border); border-radius: 8px; background: var(--ws-panel); box-shadow: 0 1px 2px rgba(36,32,24,.05); padding: 16px; }
+  .ws-panel h2 { margin: 0 0 12px; font-size: 16px; }
+  .ws-list { display: grid; gap: 10px; }
+  .ws-row { width: 100%; border: 1px solid var(--ws-border); background: var(--ws-panel); border-radius: 8px; padding: 12px; text-align: left; display: grid; gap: 5px; cursor: pointer; color: var(--ws-text); }
+  .ws-row:hover { border-color: var(--ws-border-strong); }
+  .ws-row span { color: var(--ws-faint); font-size: 11px; text-transform: uppercase; letter-spacing: 0; font-weight: 700; }
+  .ws-row strong { font-size: 15px; }
+  .ws-row p { margin: 0; color: var(--ws-muted); font-size: 13px; line-height: 1.45; }
+  .ws-card-wrap { display: grid; gap: 6px; }
+  .ws-preview-action { justify-self: start; border: 1px solid var(--ws-border); border-radius: 999px; background: var(--ws-panel); color: var(--ws-muted); padding: 4px 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
+  .ws-preview-action:hover { border-color: var(--ws-border-strong); color: var(--ws-text); }
+  .ws-chat { min-height: calc(100vh - 120px); display: grid; grid-template-rows: 1fr auto; gap: 14px; }
+  .ws-thread { overflow: auto; display: flex; flex-direction: column; gap: 10px; min-height: 320px; }
+  .ws-message { max-width: 76%; border: 1px solid var(--ws-border); border-radius: 10px; padding: 10px 12px; text-align: left; background: var(--ws-panel-2); color: var(--ws-text); cursor: pointer; }
+  .ws-message.owner { align-self: flex-end; background: var(--ws-blue-soft); }
+  .ws-message span { color: var(--ws-faint); font-size: 11px; font-weight: 700; }
+  .ws-message p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; }
+  .ws-message small { color: var(--ws-muted); }
+  .ws-composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; border: 1px solid var(--ws-border); border-radius: 8px; padding: 8px; background: var(--ws-panel-2); }
+  .ws-composer input { border: 0; background: transparent; min-width: 0; padding: 8px; font-size: 15px; outline: none; color: var(--ws-text); }
+  .ws-composer button, .ws-primary { border: 0; border-radius: 7px; background: var(--ws-blue); color: white; padding: 9px 14px; cursor: pointer; font-weight: 700; }
+  .ws-preview { border-left: 1px solid var(--ws-border); padding: 22px 18px; background: rgba(255,255,255,.45); max-height: 100vh; overflow: auto; }
+  .ws-preview-inner h2 { margin: 2px 0 8px; font-size: 22px; }
+  .ws-preview-body { display: grid; gap: 12px; margin-top: 14px; }
+  .ws-detail { display: grid; gap: 10px; border-top: 1px solid var(--ws-border); padding-top: 12px; }
+  .ws-detail p { margin: 0; color: var(--ws-muted); font-size: 14px; line-height: 1.45; }
+  .ws-kv { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; border-bottom: 1px solid var(--ws-border); padding-bottom: 7px; }
+  .ws-kv span { color: var(--ws-faint); }
+  .ws-kv strong { text-align: right; }
+  .ws-link { color: var(--ws-blue); font-weight: 700; text-decoration: none; }
+  .ws-pill { width: max-content; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0; }
+  .ws-pill.good { color: var(--ws-green); background: var(--ws-green-soft); }
+  .ws-pill.warn { color: var(--ws-amber); background: var(--ws-amber-soft); }
+  .ws-pill.bad { color: var(--ws-red); background: var(--ws-red-soft); }
+  .ws-pill.quiet { color: var(--ws-muted); background: var(--ws-panel-2); }
+  .ws-empty strong { display: block; font-size: 15px; }
+  .ws-empty p { margin: 6px 0 0; color: var(--ws-muted); font-size: 13px; line-height: 1.45; }
+  @media (max-width: 1100px) {
+    .ws-root { grid-template-columns: 190px minmax(0, 1fr); }
+    .ws-preview { grid-column: 2; border-left: 0; border-top: 1px solid var(--ws-border); max-height: none; }
+  }
+  @media (max-width: 760px) {
+    .ws-root { display: block; }
+    .ws-rail { position: sticky; top: 0; z-index: 2; min-height: 0; border-right: 0; border-bottom: 1px solid var(--ws-border); padding: 12px; }
+    .ws-nav { display: flex; overflow-x: auto; padding-bottom: 4px; }
+    .ws-nav button { white-space: nowrap; }
+    .ws-health { display: none; }
+    .ws-main, .ws-preview { padding: 14px; max-height: none; }
+    .ws-grid.two { grid-template-columns: 1fr; }
+    .ws-topbar { display: block; }
+    .ws-status-row { justify-content: flex-start; margin-top: 10px; }
+    .ws-chat { min-height: 70vh; }
+    .ws-message { max-width: 92%; }
+  }
+`;

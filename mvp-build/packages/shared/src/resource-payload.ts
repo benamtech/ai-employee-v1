@@ -10,6 +10,7 @@ import type { WorkEventDescriptor } from "./work-events.js";
 export interface ArtifactRow {
   id: string;
   kind: string;
+  mime_type?: string | null;
   storage_ref?: string | null;
   payload?: { customer_name?: string; job_description?: string; recommended_total?: number };
   created_at: string;
@@ -82,8 +83,59 @@ export interface WorkEventRow {
   created_at: string;
 }
 
+export interface EmployeeSummary {
+  id: string;
+  name: string;
+  status: string;
+  profile_id?: string | null;
+  web_route?: string | null;
+  created_at?: string | null;
+}
+
+export interface RuntimeHealthSummary {
+  status: "healthy" | "degraded" | "unhealthy" | "unknown";
+  checked_at?: string | null;
+  backend_type?: string | null;
+  api_ok?: boolean | null;
+  sms_number_present?: boolean | null;
+  message: string;
+}
+
+export interface AbilitySummary {
+  id: string;
+  label: string;
+  category: "communication" | "money" | "office" | "documents" | "automation" | "research" | "system";
+  status: "ready" | "needs_connection" | "degraded" | "policy_gated" | "unavailable";
+  summary: string;
+  source: "manager" | "connector" | "runtime" | "profile" | "policy";
+}
+
+export interface WorkOutput {
+  id: string;
+  type: "artifact" | "invoice" | "message" | "generic";
+  title: string;
+  status: string;
+  created_at?: string | null;
+  href?: string;
+  artifact_id?: string;
+  summary?: string;
+}
+
+export interface WorkTask {
+  id: string;
+  type: "approval" | "question" | "reminder" | "job" | "connector" | "runtime" | "work";
+  title: string;
+  status: "needs_you" | "in_progress" | "blocked" | "done" | "failed" | "scheduled";
+  summary?: string;
+  created_at?: string | null;
+  target_id?: string;
+}
+
 export interface ResourcePayload {
   account_id: string;
+  employee_id?: string;
+  employee?: EmployeeSummary;
+  runtime_health?: RuntimeHealthSummary | null;
   artifacts: ArtifactRow[];
   approvals: ApprovalRow[];
   messages: MessageRow[];
@@ -92,4 +144,7 @@ export interface ResourcePayload {
   reminders: ReminderRow[];
   job_commitments: JobCommitmentRow[];
   work_events: WorkEventRow[];
+  abilities?: AbilitySummary[];
+  outputs?: WorkOutput[];
+  tasks?: WorkTask[];
 }
