@@ -147,6 +147,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `CLAUDE.md`, `AGENTS.md` | Build-home operating guide; keep mirrored. |
 | `README.md` | Human-facing build status, stack, run commands, working/planned feature overview. |
 | `CODEGRAPH.md` | This file; keep current when source layout or phase status changes materially. |
+| `ui-handoff/` | UI contributor packet for working on owner surfaces while MVP functionality continues: orientation, current UI map, research/principles, experimental future surfaces, and handoff protocol. |
 
 ### Web app - owner surfaces and browser routes
 
@@ -336,6 +337,12 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `second-half-plan/phase-05-trial-operations-admin-billing.md` | Planned factory/admin/billing/operations layer for trials and paid pilots. |
 | `second-half-plan/phase-06-free-trial-and-paid-pilot-readiness.md` | Planned launch gate across proof, UX, SMS, admin, billing, and support. |
 | `second-half-plan/surface-research-hermes-gui-and-materialization.md` | Deep Hermes Workspace/WebUI/Desktop research translated into AMTECH surfaces and materialization strategy. |
+| `ui-handoff/README.md` | Entry point for a UI-focused partner: read order, current phase position, safe work areas, and product mental model. |
+| `ui-handoff/product-grounding.md` | Product grounding for UI agents: AMTECH product power, owner mental model, wiki-vs-`mvp-build` distinction, current source reality, and UI north star. |
+| `ui-handoff/current-ui-map.md` | Source map for the current web UI, Work Surface data flow, styling state, and refactor boundaries. |
+| `ui-handoff/research-and-principles.md` | Index of UI research, Hermes GUI discoveries, generative UI principles, and owner-facing vocabulary. |
+| `ui-handoff/experiments-and-future-surfaces.md` | Design backlog for signed SMS previews, preview images/media/video, task progress, artifact representations, and cross-surface data renderings; web remains first priority. |
+| `ui-handoff/working-protocol.md` | Parallel UI contributor workflow: checks, memory/handoff rules, contract boundaries, and coordination guidance. |
 | `memory/MEMORY.md` | Durable memory writing protocol and handoff index. |
 | `memory/YYYY-MM-DD-HHMM-*.md` | Dated agentic-dev handoffs and architectural decisions. |
 

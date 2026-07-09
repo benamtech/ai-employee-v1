@@ -51,6 +51,22 @@ The contractor Estimate workflow is the beachhead and proof object, not the ceil
 
 The minimum engineering acceptance path is deliberately narrower than the product promise. The team uses a contractor estimate sequence - signup/claim, live employee, estimate PDF, approved Gmail send, real Gmail reply, approved Stripe test-mode deposit invoice, internal reminder - as the basic "all rails are alive" test before putting pilots live. That sequence proves the foundation works; it should not be mistaken for the full capability model.
 
+## UI And Surface Work
+
+The current product frontier is the owner surface: making the power of the Hermes-backed employee legible to a nontechnical business owner. The backend now has meaningful Manager, MCP, artifact, approval, event, runtime, scheduler, and metering seams. UI work turns that raw power into an employee desk the owner can understand and trust.
+
+For UI contributors, start at `mvp-build/ui-handoff/`. That packet explains:
+
+- what AMTECH is and why this product is powerful;
+- how to distinguish `wiki/` product truth from `mvp-build/` implementation truth;
+- the current Work Surface source map;
+- current styling and component scaffolding;
+- Hermes GUI and generative-UI research;
+- experimental future surface ideas: SMS signed previews, preview thumbnails, image/video/media artifacts, task progress, reports, and cross-surface representations;
+- how to write memories and handoffs while UI work happens in parallel with MVP functionality.
+
+The immediate UI priority is the web Work Surface. SMS, signed preview links, media/video previews, admin, and future desktop clients should be designed as renderers of the same underlying work/resources/actions, but the web client is the richest and most urgent place to make the product understandable.
+
 ## How The Repo Is Organized
 
 ```text
@@ -86,6 +102,8 @@ High-value starting points:
 
 Treat the wiki as current truth, not an archive. If a product or strategy fact changes, update every affected page rather than leaving stale history in place.
 
+Use the wiki to understand **why** the product exists, what it should become, what the owner should feel, and what strategic constraints matter. The wiki contains product vision and planning; it does not prove a feature is already implemented.
+
 ### `mvp-build/`
 
 `mvp-build/` is the TypeScript/Node monorepo for the AI Employee MVP. It is the software product inside the company brain.
@@ -101,8 +119,11 @@ It contains:
 - `tests/` - unit, integration, and golden-path acceptance docs.
 - `docs/` - planned admin and metering architecture.
 - `memory/` - durable agent handoffs and implementation decisions.
+- `ui-handoff/` - UI contributor orientation, source map, product grounding, research index, experimental surface backlog, and parallel-work protocol.
 
-Current state: Phase 0 baseline, the Phase 1 live-acceptance harness, and new-era Phase 2 runtime/scheduler productionization are source-wired. Live provider/runtime acceptance is still pending real Supabase, Twilio, Hermes, Gmail/PubSub, Stripe, host, and proof IDs.
+Use `mvp-build/` to understand **what is actually wired**, what commands to run, what source files to edit, and what proof exists. If the wiki vision and source reality differ, check `mvp-build/CODEGRAPH.md`, `mvp-build/memory/MEMORY.md`, newest memory notes, tests, and source before claiming status.
+
+Current state: the second-half plan is active in `mvp-build/second-half-plan/`. Phase 1 preservation is source/static-green with the live gate blocked by model/provider availability. Phase 2 web Work Surface is source-wired. Phase 3 SMS signed previews, Phase 4 generic materialization contracts, and Phase 5/6 trial operations and readiness remain planned/pending. Live provider/runtime acceptance is still pending real proof IDs where required.
 
 ## Hermes Agent Boundary
 

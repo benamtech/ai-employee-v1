@@ -1,10 +1,12 @@
 # mvp-build — the AMTECH AI Employee MVP build
 
-Status: **Phase 0 baseline loop, Phase 1 live-acceptance harness, Phase 2 runtime/scheduler productionization, and Phase 3 / 3A / 4-core live-employee source are wired locally; provider/runtime acceptance is pending live creds + host proof.** This is where the AMTECH AI Employee MVP gets built.
+Status: **Second-half Phase 1 is source/static-green with live gate blocked by model/provider availability; second-half Phase 2 web Work Surface is source-wired; Phase 3 SMS signed previews, Phase 4 materialization contracts, and trial/admin/billing readiness remain planned/pending.** This is where the AMTECH AI Employee MVP gets built.
 
-**Agent? Start with [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the forward roadmap **[`../wiki/MVP/build-plan-current/phases/`](../wiki/MVP/build-plan-current/phases/)** (Phase 0 baseline + Phases 1–13) and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol). This repo is a local-only git repo (branch `main`, no remotes).
+**Agent? Start with [`../identity.md`](../identity.md), [`../CODEGRAPH.md`](../CODEGRAPH.md), [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the current second-half plan **[`second-half-plan/`](second-half-plan/)**, and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol).
 
-Current reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)** (with [`../wiki/product-ai-employee-context.md`](../wiki/product-ai-employee-context.md) and [`../wiki/product-agent-platform-architecture.md`](../wiki/product-agent-platform-architecture.md)). Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**. Current implementation state: old artifact/approval Phase 2 wiring is in code; new-era Phase 2 runtime/scheduler productionization is source-wired; Phase 3 generic ingress now routes Gmail/Stripe/manager events through adapters; Phase 3A has minimal presence-aware delivery decisions; Phase 4 core wakes real Hermes Sessions chat for Gmail reply descriptors. Live provider/runtime acceptance is still pending.
+Current second-half plan: **[`second-half-plan/`](second-half-plan/)**. Current wiki companion: **[`../wiki/MVP/second-half-current-and-future-state.md`](../wiki/MVP/second-half-current-and-future-state.md)**. Older reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)**. Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**.
+
+For UI contributors, start with **[`ui-handoff/`](ui-handoff/)** after the core orientation docs. It explains the product grounding, current UI source map, research/principles, future surface experiments, and parallel working protocol.
 
 Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). Current code has `usage_events`, `feature_checks`, and `audit_log`; production metering still needs run ids, typed meter events, wrapper instrumentation, rollups, and budget policies.
 
@@ -20,6 +22,20 @@ is one employee, one number, one continuous thread across SMS/web/future voice. 
 turn-atomic; durable work should use Jobs/worker lanes and re-enter the Manager's universal inbox. The planned
 Channel/Session/Presence router decides where employee output lands: active session wins, ambient preferences apply
 when no session is active, silent events record without push, and duplicate intents never double-deliver.
+
+## Product and UI grounding
+
+AMTECH is not selling a model, an estimate generator, or a developer dashboard. AMTECH packages Hermes into a trusted small-business employee. Estimates are the first proof object, but the broader product is an employee that can help with customer intake, estimates, follow-ups, invoices, reminders, connector repair, web/media/document outputs, and future office workflows while asking before customer-facing, money, destructive, credential, or broad external actions.
+
+The UI job is to make that power visible and safe:
+
+- Web is the primary high-fidelity employee desk.
+- SMS is the ambient inbox and approval path.
+- Signed links are scoped mobile previews/actions.
+- Admin is the operator proof/repair surface.
+- Future desktop/customer/email surfaces should render the same underlying work/resources/actions.
+
+Use `../wiki/` for product vision, strategy, research, and rationale. Use this `mvp-build/` folder for actual implementation state, source, tests, scripts, memory, and proof. If the wiki vision and source differ, do not assume the vision is built; check `CODEGRAPH.md`, `memory/MEMORY.md`, newest memory notes, and source.
 
 ## What works now
 
@@ -81,6 +97,7 @@ infra/
   hermes/      # RUNBOOK.md (install + manual smoke test) — gates Phase 0 infra acceptance
   scripts/     # hermes-smoke + number-pool/healthcheck/repair seams
 docs/          # production architecture notes, including metering
+ui-handoff/    # UI contributor packet: product grounding, current UI map, research, future surfaces
 tests/
   unit/        # security boundary, envelope, contracts, signed links, secrets, manifest
   integration/ # RLS cross-account denial (real Supabase) — skeleton
