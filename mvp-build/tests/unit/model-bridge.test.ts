@@ -45,6 +45,48 @@ describe("model-bridge lib", () => {
     expect(prompt).toMatch(/Output ONLY the assistant's reply text/);
   });
 
+  it("teaches the worker the tool-call protocol and lists offered tools", () => {
+    const prompt = buildWorkerPrompt({
+      messages: [{ role: "user", content: "make me an estimate" }],
+      tools: [
+        { type: "function", function: { name: "create_estimate_artifact", description: "Create an estimate", parameters: { type: "object" } } },
+      ],
+    });
+    expect(prompt).toMatch(/"tool_calls"/);
+    expect(prompt).toContain("create_estimate_artifact");
+    expect(prompt).toContain("Create an estimate");
+    expect(prompt).toMatch(/parameters \(JSON Schema\)/);
+  });
+
+  it("honors tool_choice: forced function and 'none'", () => {
+    const forced = buildWorkerPrompt({
+      messages: [{ role: "user", content: "x" }],
+      tools: [{ type: "function", function: { name: "set_internal_reminder" } }],
+      tool_choice: { type: "function", function: { name: "set_internal_reminder" } },
+    });
+    expect(forced).toMatch(/MUST call the tool "set_internal_reminder"/);
+
+    const none = buildWorkerPrompt({
+      messages: [{ role: "user", content: "x" }],
+      tools: [{ type: "function", function: { name: "set_internal_reminder" } }],
+      tool_choice: "none",
+    });
+    expect(none).toMatch(/Output ONLY the assistant's reply text/);
+    expect(none).not.toContain("----- TOOLS -----");
+  });
+
+  it("surfaces prior assistant tool_calls in the serialized conversation so the worker can chain", () => {
+    const prompt = buildWorkerPrompt({
+      messages: [
+        { role: "assistant", content: null, tool_calls: [{ id: "c1", type: "function", function: { name: "create_estimate_artifact", arguments: "{}" } }] },
+        { role: "tool", name: "create_estimate_artifact", content: "{\"artifact_id\":\"art_1\"}" },
+      ],
+      tools: [{ type: "function", function: { name: "render_estimate_pdf" } }],
+    });
+    expect(prompt).toContain("(tool_calls)");
+    expect(prompt).toContain("art_1");
+  });
+
   it("strips accidental markdown code fences around JSON", () => {
     expect(stripCodeFences("```json\n{\"a\":1}\n```")).toBe('{"a":1}');
     expect(stripCodeFences('{"a":1}')).toBe('{"a":1}');

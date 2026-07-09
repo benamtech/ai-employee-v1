@@ -21,6 +21,7 @@ import { tokenHash, verifySignedToken } from "./lib/signed-links.js";
 import { requireOwnerSession, mintOwnerSession } from "./lib/owner-session.js";
 import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
 import { createArtifactStorageSignedUrl } from "./lib/artifacts.js";
+import { renderArtifactHtml } from "./lib/artifact-view.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
 import { buildEmployeeSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";
 import { subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
@@ -95,7 +96,14 @@ export function buildApp(): Hono {
   const mcp = async (c: Context) => {
     const denied = denyInternal(c);
     if (denied) return denied;
-    return handleManagerMcpRequest(c.req.raw);
+    // Employee identity is bound to the employee's baked MCP config headers
+    // (rendered per employee), not supplied by the model. Inject it into every
+    // tool call so ownerCtx is authoritative and un-spoofable.
+    const identity = {
+      account_id: c.req.header("X-AMTECH-Account-Id") || undefined,
+      employee_id: c.req.header("X-AMTECH-Employee-Id") || undefined,
+    };
+    return handleManagerMcpRequest(c.req.raw, identity);
   };
   app.post("/manager/mcp", mcp);
   app.get("/manager/mcp", mcp);
@@ -234,7 +242,7 @@ export function buildApp(): Hono {
       await db.from("artifacts").select("*").eq("id", artifactId).eq("employee_id", employeeId).maybeSingle(),
       "artifacts.lookup",
     );
-    if (!artifact?.storage_ref) return c.json({ error: "artifact_not_found" }, 404);
+    if (!artifact) return c.json({ error: "artifact_not_found" }, 404);
 
     let authorized = false;
     let linkId: string | null = null;
@@ -270,7 +278,8 @@ export function buildApp(): Hono {
     }
 
     if (!authorized) return c.json({ error: "artifact_access_denied" }, 403);
-    const signedUrl = await createArtifactStorageSignedUrl(db, String(artifact.storage_ref));
+    const fallbackHtml = artifact.storage_ref ? null : renderArtifactHtml(artifact);
+    if (!artifact.storage_ref && !fallbackHtml) return c.json({ error: "artifact_not_found" }, 404);
     await db.from("audit_log").insert({
       id: newId(ID_PREFIX.audit),
       account_id: artifact.account_id,
@@ -281,6 +290,15 @@ export function buildApp(): Hono {
       result: "ok",
       details: { artifact_link_id: linkId, via_signed_token: Boolean(signed_token) },
     });
+    if (!artifact.storage_ref) {
+      return c.json({
+        artifact_id: artifactId,
+        employee_id: employeeId,
+        html: fallbackHtml,
+        mime_type: "text/html",
+      });
+    }
+    const signedUrl = await createArtifactStorageSignedUrl(db, String(artifact.storage_ref));
     return c.json({
       artifact_id: artifactId,
       employee_id: employeeId,

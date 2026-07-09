@@ -36,6 +36,26 @@ function modelConfigBlock(): string {
   return ["models:", "  default: claude-opus-4-8", "  compression: claude-haiku-4-5"].join("\n");
 }
 
+/**
+ * Resolve the Manager control-plane origin a *provisioned employee* must use to
+ * call back on. For a Dockerized employee, host loopback URLs (localhost /
+ * 127.0.0.1) point at the container's own loopback, not the host — so anything
+ * baked into config.yaml / .env at render time (the Manager MCP server URL, the
+ * MANAGER_API_ORIGIN callback base) is unreachable and the employee comes up
+ * tool-less. Rewrite loopback to `host.docker.internal` for docker backends,
+ * mirroring the model base_url which already uses it. `local` backends run on
+ * the host directly, so their loopback origin is correct and left untouched.
+ * An explicit DOCKER_MANAGER_API_ORIGIN override wins (matches
+ * infra/scripts/local/start-hermes-container.sh).
+ */
+function employeeManagerOrigin(runtimeBackend: string): string {
+  const hostOrigin = process.env.MANAGER_API_ORIGIN ?? "http://localhost:8080";
+  if (runtimeBackend !== "docker") return hostOrigin;
+  const override = process.env.DOCKER_MANAGER_API_ORIGIN;
+  if (override) return override;
+  return hostOrigin.replace(/\/\/(localhost|127\.0\.0\.1)(?=[:/]|$)/, "//host.docker.internal");
+}
+
 function packageRoot(packageKey: string): string {
   const configured = process.env.PROFILE_PACKAGES_DIR;
   if (configured) return join(configured, packageKey);
@@ -44,12 +64,29 @@ function packageRoot(packageKey: string): string {
 }
 
 export function profileTokenMap(params: ProfileBuildParams): Record<string, string> {
+  const runtimeBackend = params.runtime_backend ?? "docker";
+  // Container-facing Manager origin: the URL an employee actually reaches the
+  // control plane on. Baked at render time, so it must already be correct for
+  // the runtime backend (see employeeManagerOrigin) — the container-start `-e`
+  // override is too late for values compiled into config.yaml.
+  const managerOrigin = employeeManagerOrigin(runtimeBackend);
   return {
     CLIENT_ID: params.client_id,
     ACCOUNT_ID: params.account_id,
     EMPLOYEE_ID: params.employee_id,
     PROFILE_PACKAGE_KEY: params.profile_package_key,
-    RUNTIME_BACKEND: params.runtime_backend ?? "docker",
+    RUNTIME_BACKEND: runtimeBackend,
+    // Hermes' OWN terminal/file execution backend (config.yaml terminal.backend).
+    // A Manager-provisioned employee already runs INSIDE its isolation runtime
+    // (the Docker container for the docker backend), so Hermes must execute
+    // terminal/file tools in-process ("local") — the container IS the sandbox.
+    // Rendering "docker" here makes Hermes attempt docker-in-docker against a
+    // socket that isn't mounted; check_terminal_requirements then fails and
+    // silently gates terminal/file tools off. The Manager's runtime_backend stays
+    // the real blast-radius tier and still drives the toolset policy that ENABLES
+    // `terminal` only when isolated. Mounting the host docker socket instead would
+    // hand the employee host-root — a deliberate non-goal.
+    TERMINAL_BACKEND: process.env.HERMES_TERMINAL_BACKEND ?? "local",
     BUSINESS_DISPLAY_NAME: params.business_display_name,
     BUSINESS_KIND: params.business_kind,
     OWNER_NAME: params.owner_name,
@@ -66,7 +103,7 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
     SEED_SKILLS: params.seed_skills.join(", "),
     PRICING_NOTES: "_(learned as we go)_",
     BRANDING_NOTES: "_(learned as we go)_",
-    MANAGER_API_ORIGIN: process.env.MANAGER_API_ORIGIN ?? "http://localhost:8080",
+    MANAGER_API_ORIGIN: managerOrigin,
     MANAGER_INTERNAL_TOKEN: process.env.MANAGER_INTERNAL_TOKEN ?? "",
     // Model wiring. Local no-key testing (HERMES_MODEL_PROVIDER set) points the
     // employee at the bridge + a dummy OpenAI-compatible key; production leaves
@@ -88,9 +125,7 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
     ),
     // Employee reaches the Manager control plane natively as an MCP server
     // (mcp_servers.amtech_manager in the rendered config.yaml).
-    MANAGER_MCP_URL:
-      process.env.MANAGER_MCP_URL ??
-      `${process.env.MANAGER_API_ORIGIN ?? "http://localhost:8080"}/manager/mcp`,
+    MANAGER_MCP_URL: process.env.MANAGER_MCP_URL ?? `${managerOrigin}/manager/mcp`,
   };
 }
 

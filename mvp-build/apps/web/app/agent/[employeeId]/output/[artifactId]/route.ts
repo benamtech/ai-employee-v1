@@ -15,6 +15,14 @@ export async function GET(
     signed_token: token,
   });
   const json = await res.json().catch(() => ({}));
+  if (res.ok && typeof json.html === "string") {
+    return new Response(json.html, {
+      headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
+  }
   if (!res.ok || !json.signed_url) {
     return NextResponse.json(json, { status: res.status });
   }

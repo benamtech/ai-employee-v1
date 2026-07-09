@@ -15,6 +15,8 @@ and principle §11: we shipped the rendered Work-Surface components ahead of the
 arc re-sequences (§7). The big idea the user is driving toward — **an entire office running through one AI employee** —
 is an event-management problem first and a UI problem second; this doc works out both.
 
+**Second-half update, 2026-07-09:** the new forward packet is [`../../mvp-build/second-half-plan/`](../../mvp-build/second-half-plan/) and the wiki companion is [`second-half-current-and-future-state.md`](second-half-current-and-future-state.md). The current code has enough backend/event/runtime seams that the next risk is the surface layer: web and SMS are not yet powerful enough for real owners. The new plan keeps this event-driven spine but promotes the surface contract from `WorkEventDescriptor` alone toward `SurfaceEnvelope`, `WorkResource`, `WorkAction`, and `EmployeeEventStream`, so the same work can render in web, SMS, signed previews, admin, email/customer links, and optional desktop/Deno clients.
+
 ---
 
 ## 1. The thesis — the office is an event bus with one employee on it

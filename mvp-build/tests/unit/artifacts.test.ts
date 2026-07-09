@@ -5,6 +5,7 @@ import {
   decodePdfBase64,
   sanitizeFilename,
 } from "../../apps/manager/src/lib/artifacts";
+import { renderArtifactHtml } from "../../apps/manager/src/lib/artifact-view";
 
 describe("artifact helpers", () => {
   it("builds account-scoped storage paths", () => {
@@ -31,5 +32,29 @@ describe("artifact helpers", () => {
     expect(artifactLinkTtlSeconds(1)).toBe(60);
     expect(artifactLinkTtlSeconds(90)).toBe(90);
     expect(artifactLinkTtlSeconds(60 * 60 * 24 * 60)).toBe(60 * 60 * 24 * 30);
+  });
+
+  it("renders structured artifact payloads as escaped owner-safe HTML", () => {
+    const html = renderArtifactHtml({
+      id: "art_1",
+      kind: "estimate",
+      payload: {
+        customer_name: "<script>alert(1)</script>",
+        total_amount: 1200,
+        line_items: [
+          { description: "Walls <prep>", amount: 900 },
+          { description: "Trim", amount: 300 },
+        ],
+      },
+    });
+    expect(html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;");
+    expect(html).toContain("<table>");
+    expect(html).toContain("$1,200.00");
+    expect(html).not.toContain("<script>alert(1)</script>");
+  });
+
+  it("does not render empty or non-object artifact payloads", () => {
+    expect(renderArtifactHtml({ payload: {} })).toBeNull();
+    expect(renderArtifactHtml({ payload: "plain text" })).toBeNull();
   });
 });

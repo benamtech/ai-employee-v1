@@ -6,6 +6,8 @@
 
 Hermes (and the frontier models under it) is the **engine** — profile-scoped state, runtime, memory, gateways, API server, webhooks, cron, MCP, and skill loading [S081, S085–S088]. It improves on its own. **AMTECH owns the layer that makes an agent useful *inside a business*** — getting it in (onboarding), making it work across the surfaces an owner actually uses, and managing its connectors, skills, lifecycle, and fleet over time. That layer is the durable moat, and it is built so that **a Hermes advance makes AMTECH stronger, not obsolete**: new engine capability is absorbed behind AMTECH's tools and shipped to the whole fleet.
 
+**Second-half update, 2026-07-09:** the current source has made the backend/control-plane thesis real enough that the next risk is not "can Hermes work?" but "can a non-technical owner operate it?" The fresh forward plan lives in [`../mvp-build/second-half-plan/`](../mvp-build/second-half-plan/) and the wiki companion is [`MVP/second-half-current-and-future-state.md`](MVP/second-half-current-and-future-state.md). The future interface layer is a materialization system: `SurfaceEnvelope`, `WorkResource`, `WorkAction`, and `EmployeeEventStream` feed web, SMS, signed previews, admin, and optional desktop/Deno clients from the same employee state. Hermes Workspace/WebUI/Desktop are inspiration for interaction patterns, not owner-facing vocabulary.
+
 Four design rules govern everything below (see [[amtech-technical-architecture-principles]]):
 
 1. **Agent-native.** Prefer agent **tool calls / MCP and agent-to-agent messages** over bespoke REST APIs wherever it makes sense — the forward bet is that agents coordinate by *messaging each other*, not by calling each other's APIs (this extends all the way to events and notifications; see "The event mesh"). Reuse Hermes primitives (skills, cron, profiles) instead of rebuilding them. The platform is a thin set of **tools the agents call** + **a message rail they talk over**, not a parallel API stack.
@@ -107,6 +109,8 @@ Making `provision_employee` an MCP tool is useful precisely because it can be na
 ## Plane 2 — The interaction wrapper (how the owner works with the live employee)
 
 The live employee is a Hermes profile with gateway processes and, when enabled, an API server [S085, S087]. Today the checked-in template declares **SMS only**; current Hermes also supports a per-profile OpenAI-compatible API server with Responses/Runs/Sessions/Jobs endpoints and SSE progress [S087]. Plane 2 adds **webchat now, voice later**, and defines the four interaction primitives the owner feels. The rule stays agent-native: most of this is the **agent's own behavior** (the `SOUL`/`AGENTS` conventions [S084]) plus **thin per-surface adapters** — not heavy middleware.
+
+The second-half plan sharpens Plane 2: the owner surface is not a chat box. It is an employee desk and ambient inbox. Web becomes the high-fidelity renderer (navigation, timeline, preview rail, outputs, connected accounts, capabilities, approvals); SMS becomes the compact renderer (notify/question/review/failure/receipt + signed links); admin becomes the operator renderer (raw provenance, health, repair, cost). All render the same work resources and actions.
 
 **The surfaces:**
 

@@ -1,0 +1,112 @@
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { MANAGER_API } from "@amtech/shared";
+import { makeFakeDb, type FakeSupabase } from "./_helpers/fake-supabase";
+import { mintOwnerSession } from "../../apps/manager/src/lib/owner-session";
+
+const state = vi.hoisted(() => ({ db: null as FakeSupabase | null }));
+
+vi.mock("@amtech/db", () => ({
+  serviceClient: () => {
+    if (!state.db) throw new Error("fake db not initialized");
+    return state.db.asClient();
+  },
+}));
+
+describe("artifact resolve route", () => {
+  let buildApp: typeof import("../../apps/manager/src/server").buildApp;
+
+  beforeAll(async () => {
+    ({ buildApp } = await import("../../apps/manager/src/server"));
+  });
+
+  beforeEach(() => {
+    process.env.MANAGER_INTERNAL_TOKEN = "test-internal-token";
+    process.env.SIGNING_SECRET = "unit-test-signing-secret-123";
+    state.db = makeFakeDb({
+      artifacts: [],
+      artifact_links: [],
+      audit_log: [],
+      owner_web_sessions: [],
+    });
+  });
+
+  afterEach(() => {
+    delete process.env.MANAGER_INTERNAL_TOKEN;
+    delete process.env.SIGNING_SECRET;
+    state.db = null;
+  });
+
+  async function ownerToken(accountId = "acct_1"): Promise<string> {
+    const session = await mintOwnerSession(state.db!.asClient(), accountId, "user_1");
+    return session.token;
+  }
+
+  async function resolveArtifact(employeeId: string, artifactId: string, token?: string) {
+    return buildApp().request(MANAGER_API.artifactResolve(employeeId, artifactId), {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer test-internal-token",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(token ? { owner_session_token: token } : {}),
+    });
+  }
+
+  it("returns safe HTML for authorized payload-only artifacts", async () => {
+    state.db!.tables.artifacts!.push({
+      id: "art_1",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: null,
+      payload: {
+        customer_name: "<b>Jane</b>",
+        line_items: [{ description: "Prep <walls>", amount: 250 }],
+      },
+    });
+
+    const res = await resolveArtifact("emp_1", "art_1", await ownerToken());
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.mime_type).toBe("text/html");
+    expect(body.html).toContain("&lt;b&gt;Jane&lt;/b&gt;");
+    expect(body.html).toContain("<table>");
+    expect(state.db!.tables.audit_log).toHaveLength(1);
+  });
+
+  it("keeps stored artifacts on the signed storage URL path", async () => {
+    state.db!.tables.artifacts!.push({
+      id: "art_2",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: "accounts/acct_1/employees/emp_1/artifacts/art_2/estimate.pdf",
+      mime_type: "application/pdf",
+      payload: { customer_name: "Jane" },
+    });
+
+    const res = await resolveArtifact("emp_1", "art_2", await ownerToken());
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.signed_url).toContain("/accounts/acct_1/employees/emp_1/artifacts/art_2/estimate.pdf");
+    expect(body.html).toBeUndefined();
+    expect(body.mime_type).toBe("application/pdf");
+  });
+
+  it("denies payload-only artifacts without an authorized owner session", async () => {
+    state.db!.tables.artifacts!.push({
+      id: "art_3",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: null,
+      payload: { customer_name: "Jane" },
+    });
+
+    const res = await resolveArtifact("emp_1", "art_3", await ownerToken("acct_other"));
+    expect(res.status).toBe(403);
+    expect(state.db!.tables.audit_log).toHaveLength(0);
+  });
+});

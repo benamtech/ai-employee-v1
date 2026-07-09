@@ -192,6 +192,8 @@ _Current sequencing lives in [`MVP/event-driven-office-and-generative-ui.md`](MV
 
 Each step adds **types** (and the *agent's* ability to author them), not screens — and every existing surface picks the new type up for free.
 
+**Second-half plan update, 2026-07-09:** the new implementation packet in [`../mvp-build/second-half-plan/`](../mvp-build/second-half-plan/) makes this phasing concrete. Phase 2 rebuilds the web Work Surface as the rich renderer; Phase 3 makes SMS a complete renderer; Phase 4 introduces `SurfaceEnvelope`, `WorkResource`, `WorkAction`, and `EmployeeEventStream`; Phase 5 adds the operator/admin renderer; Phase 6 requires proof that generic non-estimate resources render across web, SMS, and admin before trials. This is the operational route from "typed work cards" to a surface-agnostic small-business AI employee.
+
 ---
 
 ## 12. How it shows up across the brain

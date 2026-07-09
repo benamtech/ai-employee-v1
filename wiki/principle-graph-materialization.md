@@ -81,6 +81,17 @@ This frame explains *why installing early wins* and ties straight to the intelli
 
 > **Build the graph once; materialize the view the moment needs.** Every skill is a traversal, every surface is a view, every new "feature" is a projection — so spend the scarce human judgment on *which* views earn the owner more jobs, more evenings, and better decisions, and let the agent render the rest.
 
+## 2026-07-09 Product Update — Hermes Employee Materialization
+
+The second-half plan turns this principle into the explicit AMTECH application contract. The current code already has a Hermes-backed employee, Manager tools, artifacts, approvals, events, and metering seams, but the owner web/SMS surfaces are not yet good enough. The future application state is:
+
+- `WorkResource` = a typed graph node/output the employee produced;
+- `SurfaceEnvelope` = the surface-specific projection of an event/resource/action;
+- `WorkAction` = the declarative decision or command the owner/admin/customer can take;
+- `EmployeeEventStream` = the projection that merges Hermes, Manager, connector, scheduler, provider, and approval events into owner-safe state.
+
+This is the same graph-materialization idea at product-runtime level. Web, SMS, signed links, admin, customer portals, email, and future desktop/Deno clients should be renderers of the same employee state, not separate products.
+
 ## How it shows up across the brain
 
 - [`principle-deliverable-driven-surfaces.md`](principle-deliverable-driven-surfaces.md) — the operational layer beneath this one: the deliverable's **type** is the selector that picks *which* view to materialize, how to preview it, and how to gate its acceptance — the type system that lets one interaction grammar serve hundreds of skills.

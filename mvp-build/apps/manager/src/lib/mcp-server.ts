@@ -52,15 +52,34 @@ function employeeCallableTools(): ToolName[] {
   return TOOL_NAMES.filter((name) => !SCHEDULER_ONLY_TOOLS.has(name));
 }
 
+/** Owner-context fields bound to the employee's runtime, injected server-side from
+ *  the MCP request identity — the model neither sees nor supplies them. */
+const INJECTED_OWNER_FIELDS = ["account_id", "employee_id"] as const;
+
 function inputSchemaFor(name: ToolName): Record<string, unknown> {
   const json = zodToJsonSchema(getToolSchema(name), { $refStrategy: "none" }) as Record<string, unknown>;
   delete json.$schema;
   // MCP inputSchema must be a JSON-Schema object; our tools all take an object.
   if (json.type !== "object") return { type: "object", additionalProperties: true };
+  // Don't advertise the injected identity fields — otherwise the model sees them
+  // as required inputs and asks the owner for an account_id / employee_id it should
+  // never handle. They are injected from the request identity in the call handler.
+  const props = json.properties as Record<string, unknown> | undefined;
+  if (props) for (const f of INJECTED_OWNER_FIELDS) delete props[f];
+  if (Array.isArray(json.required)) {
+    json.required = (json.required as string[]).filter((r) => !INJECTED_OWNER_FIELDS.includes(r as never));
+  }
   return json;
 }
 
-export function buildManagerMcpServer(): Server {
+/** Identity bound to the employee's baked MCP config (rendered request headers),
+ *  NOT anything the model provides. Injected into every tool call. */
+export interface McpIdentity {
+  account_id?: string;
+  employee_id?: string;
+}
+
+export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
   const server = new Server(SERVER_INFO, { capabilities: { tools: {} } });
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
@@ -73,7 +92,11 @@ export function buildManagerMcpServer(): Server {
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     const name = req.params.name as ToolName;
-    const args = (req.params.arguments ?? {}) as Record<string, unknown>;
+    // Inject/override the owner context from the bound identity so the model can
+    // neither spoof another account nor omit ids it should never have to know.
+    const args = { ...((req.params.arguments ?? {}) as Record<string, unknown>) };
+    if (identity.account_id) args.account_id = identity.account_id;
+    if (identity.employee_id) args.employee_id = identity.employee_id;
     const outcome = await runManagerTool(name, args, { actor: "employee" });
 
     if (outcome.kind === "unknown_tool") {
@@ -97,8 +120,8 @@ export function buildManagerMcpServer(): Server {
 
 /** Handle one MCP HTTP request (stateless). Auth is enforced by the caller
  *  (denyInternal) before this runs. */
-export async function handleManagerMcpRequest(request: Request): Promise<Response> {
-  const server = buildManagerMcpServer();
+export async function handleManagerMcpRequest(request: Request, identity: McpIdentity = {}): Promise<Response> {
+  const server = buildManagerMcpServer(identity);
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,

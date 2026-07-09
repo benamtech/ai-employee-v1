@@ -37,23 +37,67 @@ export function buildWorkerPrompt(parkedBody) {
   const wantsJson =
     parkedBody?.response_format?.type === "json_schema" ||
     parkedBody?.response_format?.type === "json_object";
+  // The OpenAI `tools` the caller (Hermes) offers this turn. Dropping these makes
+  // the worker structurally unable to call a tool — every turn degrades to a text
+  // reply (tool_turns=0) and no real work / MCP-UI view ever fires. `tool_choice:
+  // "none"` means the caller does not want a tool call this turn.
+  const rawTools = Array.isArray(parkedBody?.tools) ? parkedBody.tools : [];
+  const toolChoice = parkedBody?.tool_choice;
+  const toolsOffered = toolChoice === "none" ? [] : rawTools;
+  const hasTools = toolsOffered.length > 0;
+
   const lines = [
     "You are the model behind a local OpenAI-compatible chat/completions endpoint.",
     "Read the conversation below (a system prompt followed by messages) and produce",
     "EXACTLY the assistant completion the system prompt requires — nothing else.",
-    wantsJson
-      ? "The caller requires a JSON response. Output ONLY valid JSON: no markdown code fences, no prose, no leading/trailing text."
-      : "Output ONLY the assistant's reply text: no markdown fences, no meta-commentary.",
   ];
+  if (wantsJson) {
+    lines.push(
+      "The caller requires a JSON response. Output ONLY valid JSON: no markdown code fences, no prose, no leading/trailing text.",
+    );
+  } else if (hasTools) {
+    lines.push(
+      "You have TOOLS (listed below). When the conversation asks you to DO something a tool can accomplish (create an estimate, set a reminder, request approval, save a business fact, draft an email, etc.), CALL the tool rather than describing it — calling tools is how work actually happens here.",
+      "To call tools, output ONLY a JSON object of EXACTLY this shape (no prose, no markdown fences):",
+      '{"tool_calls":[{"id":"call_1","type":"function","function":{"name":"<tool name>","arguments":"<arguments as a JSON-ENCODED STRING>"}}]}',
+      "`arguments` MUST be a string containing JSON, not a nested object. You may emit multiple tool_calls. After a tool runs you are called again with its result, so you can chain calls across turns (e.g. create the estimate, then render the PDF, then create the signed link).",
+      "Only when NO tool is needed (a plain question, a confirmation, small talk) output the assistant's reply text instead — no fences, no meta-commentary.",
+    );
+  } else {
+    lines.push("Output ONLY the assistant's reply text: no markdown fences, no meta-commentary.");
+  }
   if (parkedBody?.response_format) {
     lines.push(`response_format: ${JSON.stringify(parkedBody.response_format)}`);
   }
+  if (hasTools) {
+    if (toolChoice && typeof toolChoice === "object" && toolChoice.function?.name) {
+      lines.push(`You MUST call the tool "${toolChoice.function.name}" this turn.`);
+    } else if (toolChoice === "required") {
+      lines.push("You MUST call at least one tool this turn.");
+    }
+    lines.push("----- TOOLS -----");
+    for (const t of toolsOffered) {
+      const fn = t?.function ?? t;
+      if (!fn?.name) continue;
+      lines.push(`- ${fn.name}: ${fn.description ?? ""}`.trimEnd());
+      lines.push(`  parameters (JSON Schema): ${fn.parameters ? JSON.stringify(fn.parameters) : "{}"}`);
+    }
+    lines.push("----- END TOOLS -----");
+  }
   lines.push("----- CONVERSATION -----");
   for (const m of messages) {
-    const content = typeof m.content === "string" ? m.content : JSON.stringify(m.content);
-    lines.push(`[${m.role}]`, content, "");
+    if (m.tool_calls) {
+      // A prior assistant tool call — surface it so the worker can chain coherently.
+      lines.push(`[${m.role}]`, `(tool_calls) ${JSON.stringify(m.tool_calls)}`, "");
+    } else {
+      const content = typeof m.content === "string" ? m.content : JSON.stringify(m.content);
+      lines.push(`[${m.role}${m.name ? " " + m.name : ""}]`, content, "");
+    }
   }
-  lines.push("----- END CONVERSATION -----", "Now output the completion:");
+  lines.push(
+    "----- END CONVERSATION -----",
+    hasTools ? "Now output the completion (a tool_calls JSON object, or reply text):" : "Now output the completion:",
+  );
   return lines.join("\n");
 }
 

@@ -5,6 +5,10 @@ import type { ProfileBuildParams } from "../../packages/shared/src/profile-packa
 
 afterEach(() => {
   delete process.env.HERMES_BACKEND_TYPE;
+  delete process.env.MANAGER_API_ORIGIN;
+  delete process.env.DOCKER_MANAGER_API_ORIGIN;
+  delete process.env.MANAGER_MCP_URL;
+  delete process.env.HERMES_TERMINAL_BACKEND;
 });
 
 function params(runtime_backend?: ProfileBuildParams["runtime_backend"]): ProfileBuildParams {
@@ -47,5 +51,55 @@ describe("runtime backend policy", () => {
   it("passes the resolved backend into rendered profile tokens", () => {
     expect(profileTokenMap(params("docker")).RUNTIME_BACKEND).toBe("docker");
     expect(profileTokenMap(params("local")).RUNTIME_BACKEND).toBe("local");
+  });
+
+  it("renders Hermes terminal backend as in-process 'local' even under docker isolation", () => {
+    // The employee already runs inside the Manager's container; Hermes must not
+    // attempt docker-in-docker (no socket) or it silently gates terminal/file tools.
+    expect(profileTokenMap(params("docker")).TERMINAL_BACKEND).toBe("local");
+    expect(profileTokenMap(params("local")).TERMINAL_BACKEND).toBe("local");
+  });
+
+  it("allows an explicit HERMES_TERMINAL_BACKEND override", () => {
+    process.env.HERMES_TERMINAL_BACKEND = "docker";
+    expect(profileTokenMap(params("docker")).TERMINAL_BACKEND).toBe("docker");
+  });
+});
+
+describe("container-facing Manager origin", () => {
+  it("rewrites host loopback to host.docker.internal for docker employees", () => {
+    process.env.MANAGER_API_ORIGIN = "http://localhost:8080";
+    const tokens = profileTokenMap(params("docker"));
+    expect(tokens.MANAGER_API_ORIGIN).toBe("http://host.docker.internal:8080");
+    expect(tokens.MANAGER_MCP_URL).toBe("http://host.docker.internal:8080/manager/mcp");
+  });
+
+  it("also rewrites the 127.0.0.1 loopback form", () => {
+    process.env.MANAGER_API_ORIGIN = "http://127.0.0.1:8080";
+    expect(profileTokenMap(params("docker")).MANAGER_MCP_URL).toBe(
+      "http://host.docker.internal:8080/manager/mcp",
+    );
+  });
+
+  it("leaves the host loopback intact for local employees (run on the host directly)", () => {
+    process.env.MANAGER_API_ORIGIN = "http://localhost:8080";
+    const tokens = profileTokenMap(params("local"));
+    expect(tokens.MANAGER_API_ORIGIN).toBe("http://localhost:8080");
+    expect(tokens.MANAGER_MCP_URL).toBe("http://localhost:8080/manager/mcp");
+  });
+
+  it("leaves a non-loopback (production) origin untouched under docker", () => {
+    process.env.MANAGER_API_ORIGIN = "https://api.amtechai.com";
+    expect(profileTokenMap(params("docker")).MANAGER_MCP_URL).toBe(
+      "https://api.amtechai.com/manager/mcp",
+    );
+  });
+
+  it("honors an explicit DOCKER_MANAGER_API_ORIGIN override for docker employees", () => {
+    process.env.MANAGER_API_ORIGIN = "http://localhost:8080";
+    process.env.DOCKER_MANAGER_API_ORIGIN = "http://host.docker.internal:9090";
+    expect(profileTokenMap(params("docker")).MANAGER_MCP_URL).toBe(
+      "http://host.docker.internal:9090/manager/mcp",
+    );
   });
 });

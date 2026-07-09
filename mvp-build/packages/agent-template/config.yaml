@@ -12,8 +12,12 @@ profile:
 {{MODEL_CONFIG}}
 
 terminal:
-  # Docker is the production and production-like local/VPS default. `local` is dev/demo only.
-  backend: "{{RUNTIME_BACKEND}}"
+  # Hermes' own terminal/file execution backend. The employee already runs inside
+  # its Manager-provided isolation runtime (a Docker container), so Hermes executes
+  # in-process ("local") — the container IS the sandbox. Nesting Docker here would
+  # need a socket that isn't mounted and silently gates terminal/file tools off.
+  # The Manager's runtime_backend (docker) remains the real blast-radius tier.
+  backend: "{{TERMINAL_BACKEND}}"
   home_mode: "profile"
   cwd: "{{WORKSPACE_DIR}}"
 
@@ -36,7 +40,13 @@ mcp_servers:
   amtech_manager:
     url: "{{MANAGER_MCP_URL}}"
     headers:
+      # Auth bearer + the employee's bound identity. The Manager injects
+      # account_id/employee_id into every tool call from these headers, so the
+      # model never sees or supplies them (they are stripped from the advertised
+      # tool schemas). Rendered per employee; not model-controlled.
       Authorization: "Bearer {{MANAGER_INTERNAL_TOKEN}}"
+      X-AMTECH-Account-Id: "{{ACCOUNT_ID}}"
+      X-AMTECH-Employee-Id: "{{EMPLOYEE_ID}}"
 
 gateway:
   sms:

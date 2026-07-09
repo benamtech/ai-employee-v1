@@ -33,13 +33,15 @@ For a cold session:
 1. `../identity.md` - required AMTECH operating identity.
 2. `../CODEGRAPH.md` - whole workspace map and canonical facts.
 3. `CLAUDE.md` / `AGENTS.md` - build-home agent rules, local checks, Realness Rules, memory protocol.
-4. `../wiki/MVP/build-plan-current/README.md` and `../wiki/MVP/build-plan-current/phases/README.md` - current plan and phase graph.
-5. `../wiki/MVP/implementation-records/README.md` - factual code-state ledger.
-6. `memory/MEMORY.md`, then the newest dated handoff - durable development narrative.
-7. This `CODEGRAPH.md`, then the relevant authored source files below.
+4. `second-half-plan/README.md`, `second-half-plan/phase-00-current-state-handoff.md`, and `second-half-plan/phase-01-preserve-and-close-live-gate.md` - current second-half forward plan.
+5. `../wiki/MVP/second-half-current-and-future-state.md` - wiki companion for current/future app state.
+6. `../wiki/MVP/build-plan-current/README.md` and `../wiki/MVP/build-plan-current/phases/README.md` - older reconciled phase graph and factual context.
+7. `../wiki/MVP/implementation-records/README.md` - factual code-state ledger.
+8. `memory/MEMORY.md`, then the newest dated handoff - durable development narrative.
+9. This `CODEGRAPH.md`, then the relevant authored source files below.
 
-Use `../wiki/MVP/old-build-plan/` for original whole-product mechanics only. Current sequencing lives in
-`../wiki/MVP/build-plan-current/`.
+Use `../wiki/MVP/old-build-plan/` for original whole-product mechanics only. The immediate forward sequencing now lives in
+`second-half-plan/`; the older reconciled modular phase graph remains in `../wiki/MVP/build-plan-current/`.
 
 ## 3. Current status
 
@@ -70,8 +72,8 @@ Current factual state:
   in the rendered config auto-attaches to api_server; employee calls Manager tools natively. (4)
   `ToolActivityDescriptor` + `formViewFromJsonSchema` so any tool materializes from schema with no per-tool
   code. Live `/v1/toolsets`, MCP handshake, and the Hermes->Work native-schema pipeline are pending.
-- **Forward Phases 5-13:** planned/pending in `../wiki/MVP/build-plan-current/phases/`.
-- **Current priority:** live runtime/provider acceptance proof for the new Hermes Sessions path and provider event loop.
+- **Second-half plan (2026-07-09):** active in `second-half-plan/`. The backend is ahead of the owner product; the next seven phases are: Phase 0 handoff, Phase 1 preserve/close live gate, Phase 2 web employee desk, Phase 3 SMS ambient inbox/signed previews, Phase 4 tool-agnostic capability/rendering/materialization, Phase 5 trial ops/admin/billing, Phase 6 free-trial/paid-pilot readiness.
+- **Current priority:** complete Phase 1 using `second-half-plan/phase-01-handoff-prompt.md`: preserve interrupted Manager-as-MCP/tool-enabled employee fixes, run static gates, then capture or honestly block a local live proof that a provisioned employee registers Manager tools, calls a Manager tool, creates an artifact, and loads in the Work Surface.
 
 Do not mark provider or runtime acceptance without real proof ids. Local tests do not prove live acceptance.
 
@@ -95,9 +97,19 @@ Owner creates employee
   -> payment event becomes a work event
   -> employee sets/fires internal job reminder
   -> Work Surface shows daily brief, job folders, cards, receipts, approvals, chat
+  -> second-half product layer materializes the same work as web previews, SMS signed links, admin proof, and future desktop/email/customer-link renderings
 ```
 
 The code intentionally keeps customer-facing sends and money movement behind approval gates.
+
+Second-half surface target:
+
+```text
+Hermes/Manager/provider events
+  -> EmployeeEventStream
+  -> SurfaceEnvelope + WorkResource + WorkAction
+  -> web employee desk / SMS ambient inbox / signed preview / admin inspector / optional desktop
+```
 
 ## 5. Runtime model and Hermes boundary
 
@@ -151,7 +163,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/web/app/agent/[employeeId]/lib/group-by-job.ts` | Groups artifacts/events/invoices/reminders into owner-readable job folders. |
 | `apps/web/app/agent/[employeeId]/surface-types.ts` | Resource payload shape used by the Work Surface. |
 | `apps/web/app/agent/[employeeId]/surface.tokens.ts` | Work Surface visual tokens. |
-| `apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts` | Signed artifact/owner-session resolution route for PDFs and other outputs. |
+| `apps/web/app/agent/[employeeId]/output/[artifactId]/route.ts` | Signed artifact/owner-session resolution route for PDFs and other outputs; redirects stored files and renders Manager-provided safe HTML fallbacks for payload-only artifacts. |
 | `apps/web/app/api/employee/[employeeId]/resources/route.ts` | Loads Work Surface snapshot through Manager. |
 | `apps/web/app/api/employee/[employeeId]/events/route.ts` | SSE-shaped snapshot route; currently sends one snapshot and closes, with polling fallback. |
 | `apps/web/app/api/employee/[employeeId]/message/route.ts` | Sends owner webchat messages to the employee runtime through Manager. |
@@ -196,6 +208,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `apps/manager/src/webhooks/gmail.ts` | Gmail/PubSub push verification and event entry. |
 | `apps/manager/src/webhooks/stripe.ts` | Stripe signed webhook verification and event entry. |
 | `apps/manager/src/lib/artifacts.ts` | Private Supabase Storage artifact upload and signed URL generation. |
+| `apps/manager/src/lib/artifact-view.ts` | Deterministic escaped HTML fallback renderer for structured artifact payloads that do not yet have a stored file/PDF. |
 | `apps/manager/src/lib/audit.ts` | Safe audit-log writes. |
 | `apps/manager/src/lib/db.ts` | DB fault helpers and duplicate-insert handling. |
 | `apps/manager/src/lib/secrets.ts` | Secret sealing/reference handling. No raw provider tokens to model/browser/logs. |
@@ -309,6 +322,16 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `docs/admin-system-implementation-plan.md` | Planned admin implementation sequence. |
 | `docs/metering-architecture.md` | Planned production metering architecture. |
 | `docs/metering-implementation-plan.md` | Planned metering implementation sequence. |
+| `second-half-plan/README.md` | Active second-half forward plan for moving from source-wired prototype to free trials and paid pilots. |
+| `second-half-plan/phase-00-current-state-handoff.md` | Large current-state handoff: code, dirty tree, architecture, UI/SMS gaps, deployment/factory state, and readiness. |
+| `second-half-plan/phase-01-preserve-and-close-live-gate.md` | Immediate next phase: preserve interrupted tool-enabled employee work and close local live gate. |
+| `second-half-plan/phase-01-handoff-prompt.md` | Copy-ready implementation prompt for a fresh agent to complete Phase 1. |
+| `second-half-plan/phase-02-owner-work-surface-redesign.md` | Planned web employee desk redesign inspired by Hermes Desktop/WebUI/Workspace. |
+| `second-half-plan/phase-03-sms-ambient-inbox-and-link-previews.md` | Planned SMS ambient inbox and signed-preview/action surface. |
+| `second-half-plan/phase-04-tool-agnostic-capability-and-renderer-layer.md` | Planned capability/rendering/materialization layer: `SurfaceEnvelope`, `WorkResource`, `WorkAction`, `EmployeeEventStream`, generic renderers. |
+| `second-half-plan/phase-05-trial-operations-admin-billing.md` | Planned factory/admin/billing/operations layer for trials and paid pilots. |
+| `second-half-plan/phase-06-free-trial-and-paid-pilot-readiness.md` | Planned launch gate across proof, UX, SMS, admin, billing, and support. |
+| `second-half-plan/surface-research-hermes-gui-and-materialization.md` | Deep Hermes Workspace/WebUI/Desktop research translated into AMTECH surfaces and materialization strategy. |
 | `memory/MEMORY.md` | Durable memory writing protocol and handoff index. |
 | `memory/YYYY-MM-DD-HHMM-*.md` | Dated agentic-dev handoffs and architectural decisions. |
 
