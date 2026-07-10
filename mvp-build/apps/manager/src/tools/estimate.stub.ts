@@ -7,6 +7,7 @@ import {
   needsConfirmation,
   newId,
   ok,
+  requiresOwnerAuthenticatedResolution,
   type CreateEstimateArtifactInput,
   type CreateSignedArtifactLinkInput,
   type GetApprovalStatusInput,
@@ -25,21 +26,6 @@ import {
   uploadArtifactPdf,
 } from "../lib/artifacts.js";
 import { mintSignedToken, tokenHash } from "../lib/signed-links.js";
-
-const OWNER_AUTH_REQUIRED_APPROVAL_ACTIONS = new Set([
-  "send_estimate_email",
-  "send_email",
-  "send_deposit_invoice",
-  "send_invoice",
-  "connect_email",
-  "connect_stripe",
-  "bulk_external_send",
-  "delete_customer_data",
-]);
-
-function requiresOwnerAuthenticatedResolution(approval: { action_key: string; risk_level?: string | null }): boolean {
-  return approval.risk_level === "high" || OWNER_AUTH_REQUIRED_APPROVAL_ACTIONS.has(approval.action_key);
-}
 
 async function employeeBelongsToAccount(ctx: Parameters<ToolHandler>[0], account_id: string, employee_id: string): Promise<boolean> {
   const { data } = await ctx.db

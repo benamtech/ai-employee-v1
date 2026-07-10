@@ -11,7 +11,7 @@
  * channel. The runtime hop (employee phrasing) and SMS transport are env-gated so
  * the primitive is deterministic and testable; both leave provider proof when live.
  */
-import { ID_PREFIX, actionScopeFor, assertWorkEventDescriptor, newId, renderWorkEventSms, workDeliverableNeedsGate, type EventSource, type PreviewActionType, type PreviewResourceType, type WorkEventDescriptor } from "@amtech/shared";
+import { DEFAULT_EXTERNAL_ACTION_KEY, EMAIL_SEND_ACTION_KEY, ID_PREFIX, INVOICE_SEND_ACTION_KEY, REMINDER_ACTION_KEY, actionScopeFor, assertWorkEventDescriptor, newId, renderWorkEventSms, workDeliverableNeedsGate, type EventSource, type PreviewActionType, type PreviewResourceType, type WorkEventDescriptor } from "@amtech/shared";
 import type { SupabaseClient } from "@amtech/db";
 import { writeAudit } from "./audit.js";
 import { orThrow, mustWrite, insertDedup } from "./db.js";
@@ -65,10 +65,10 @@ function eventSource(eventType: string): EventSource {
 function approvalActionKey(descriptor: WorkEventDescriptor): string {
   const refs = descriptor.deliverable?.refs ?? {};
   if (refs.action_key) return refs.action_key;
-  if (descriptor.deliverable?.type === "outbound_message") return "send_email";
-  if (descriptor.deliverable?.type === "money_movement") return "send_deposit_invoice";
-  if (descriptor.deliverable?.type === "schedule_mutation" || descriptor.deliverable?.type === "job_folder") return "set_job_reminder";
-  return "external_system_action";
+  if (descriptor.deliverable?.type === "outbound_message") return EMAIL_SEND_ACTION_KEY;
+  if (descriptor.deliverable?.type === "money_movement") return INVOICE_SEND_ACTION_KEY;
+  if (descriptor.deliverable?.type === "schedule_mutation" || descriptor.deliverable?.type === "job_folder") return REMINDER_ACTION_KEY;
+  return DEFAULT_EXTERNAL_ACTION_KEY;
 }
 
 async function bindApprovalIfNeeded(db: SupabaseClient, descriptor: WorkEventDescriptor): Promise<WorkEventDescriptor> {

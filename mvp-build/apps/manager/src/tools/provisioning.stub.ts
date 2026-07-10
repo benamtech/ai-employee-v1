@@ -18,7 +18,7 @@ import type { ToolHandler } from "./types.js";
 import { randomBytes } from "node:crypto";
 import { writeAudit } from "../lib/audit.js";
 import { checkFeature } from "../lib/entitlements.js";
-import { resolveRuntimeBackend } from "../lib/runtime-backend.js";
+import { isLocalRuntimeBackendAllowed, resolveRuntimeBackend } from "../lib/runtime-backend.js";
 import { sealSecret } from "../lib/secrets.js";
 import { mintEmployeeMcpCredential, revokeEmployeeMcpCredential } from "../lib/mcp-auth.js";
 
@@ -116,6 +116,16 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
   const workspaceDir = `${requiredEnv("AMTECH_CLIENTS_DIR")}/${employeeId}/workspace`;
   const packageKey = manifest.profile_package_key ?? "contractor_estimator";
   const runtimeBackend = resolveRuntimeBackend();
+  if (runtimeBackend === "local" && !isLocalRuntimeBackendAllowed()) {
+    const audit_id = await writeAudit(ctx.db, {
+      account_id: input.account_id,
+      actor: ctx.actor,
+      action: "tool:provision_employee",
+      result: "denied",
+      details: { reason: "runtime_backend_not_allowed", runtime_backend: runtimeBackend },
+    });
+    return failed("unauthorized", "This deployment is not configured to provision employees on the local runtime backend.", { account_id: input.account_id, audit_id });
+  }
   const apiServerKey = randomBytes(32).toString("base64url");
   let mcpCredentialId: string | null = null;
 

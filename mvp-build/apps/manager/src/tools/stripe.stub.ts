@@ -4,6 +4,7 @@
  */
 import {
   ID_PREFIX,
+  INVOICE_SEND_ACTION_KEYS,
   failed,
   newId,
   ok,
@@ -19,7 +20,7 @@ import {
 import { writeAudit } from "../lib/audit.js";
 import { type ToolContext, type ToolHandler } from "./types.js";
 
-const SEND_INVOICE_ACTION_KEYS = new Set(["send_deposit_invoice", "send_invoice"]);
+const SEND_INVOICE_ACTION_KEYS = new Set<string>(INVOICE_SEND_ACTION_KEYS);
 
 function stripeKey(): string {
   const key = process.env.STRIPE_SECRET_KEY;

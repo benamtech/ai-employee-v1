@@ -156,4 +156,39 @@ describe("reapStuckTurns", () => {
     expect(res).toEqual({ requeued: 0, failed: 0 });
     expect(db.tables.employee_turn_jobs.find((j) => j.id === "turn_r")?.status).toBe("running");
   });
+
+  it("does not clobber a turn that legitimately completed between the reaper's read and its write", async () => {
+    const db = reapDb([runningTurn({ attempts: 1, lease_expires_at: past })]);
+    const client = db.asClient() as any;
+    const originalFrom = client.from.bind(client);
+    let injected = false;
+    // The reaper's stale-lock delete (employee_turn_locks) runs between its
+    // initial SELECT and its guarded UPDATE. Hook that call to simulate a
+    // different worker's complete_employee_turn_job landing in that exact
+    // window — the reaper's guarded UPDATE (lease_token + status='running')
+    // must then match zero rows instead of clobbering the completed turn.
+    vi.spyOn(client, "from").mockImplementation((table: string) => {
+      const builder = originalFrom(table);
+      if (table === "employee_turn_locks" && !injected) {
+        injected = true;
+        const originalDelete = builder.delete.bind(builder);
+        builder.delete = (...args: unknown[]) => {
+          const job = db.tables.employee_turn_jobs.find((j) => j.id === "turn_r");
+          if (job) {
+            job.status = "succeeded";
+            job.lease_token = "worker:new";
+            job.output = { reply: "raced" };
+          }
+          return originalDelete(...args);
+        };
+      }
+      return builder;
+    });
+
+    const res = await reapStuckTurns(client);
+    expect(res).toEqual({ requeued: 0, failed: 0 });
+    const job = db.tables.employee_turn_jobs.find((j) => j.id === "turn_r");
+    expect(job?.status).toBe("succeeded"); // NOT clobbered back to queued/failed
+    expect(job?.output).toEqual({ reply: "raced" });
+  });
 });

@@ -4,6 +4,7 @@ import { invalidateRuntimeCapabilities } from "../../apps/manager/src/lib/hermes
 import { listEventSources } from "../../apps/manager/src/events/registry";
 import "../../apps/manager/src/events/adapters/index";
 import { sealSecret } from "../../apps/manager/src/lib/secrets";
+import { EMAIL_SEND_ACTION_KEY, INVOICE_SEND_ACTION_KEY, REMINDER_ACTION_KEY } from "../../packages/shared/src/approval-policy";
 import { makeFakeDb, SCHEMA_UNIQUES } from "./_helpers/fake-supabase";
 import { routerFetch } from "./_helpers/fetch-mock";
 
@@ -45,8 +46,65 @@ describe("event bus delivery", () => {
     });
     expect(res.duplicate).toBe(false);
     expect(db.tables.approvals).toHaveLength(1);
+    expect(db.tables.approvals?.[0]?.action_key).toBe(INVOICE_SEND_ACTION_KEY);
     const descriptor = db.tables.inbound_events?.[0]?.normalized_payload.work_event_descriptor;
     expect(descriptor.deliverable.refs.approval_id).toBe(db.tables.approvals?.[0]?.id);
+  });
+
+  it("binds the shared email send-gate action_key for an outbound_message descriptor", async () => {
+    const db = makeFakeDb();
+    await deliverEmployeeEvent(db.asClient(), {
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      event_type: "manager.custom",
+      safe_summary: "Reply draft ready.",
+      actor: "manager",
+      work_event_descriptor: {
+        account_id: "acct_1",
+        employee_id: "emp_1",
+        move: "review",
+        title: "Reply draft",
+        summary: "Reply draft ready to send.",
+        deliverable: {
+          type: "outbound_message",
+          title: "Reply draft",
+          refs: {},
+          money: { involved: false },
+          leaves_business: true,
+          reversible: false,
+          acceptance: ["approve"],
+        },
+      },
+    });
+    expect(db.tables.approvals?.[0]?.action_key).toBe(EMAIL_SEND_ACTION_KEY);
+  });
+
+  it("binds the shared reminder action_key for a gated schedule_mutation descriptor", async () => {
+    const db = makeFakeDb();
+    await deliverEmployeeEvent(db.asClient(), {
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      event_type: "manager.custom",
+      safe_summary: "Reschedule the visit.",
+      actor: "manager",
+      work_event_descriptor: {
+        account_id: "acct_1",
+        employee_id: "emp_1",
+        move: "review",
+        title: "Reschedule visit",
+        summary: "Move tomorrow's visit to Friday.",
+        deliverable: {
+          type: "schedule_mutation",
+          title: "Reschedule visit",
+          refs: {},
+          money: { involved: false },
+          leaves_business: true,
+          reversible: true,
+          acceptance: ["approve"],
+        },
+      },
+    });
+    expect(db.tables.approvals?.[0]?.action_key).toBe(REMINDER_ACTION_KEY);
   });
 
   it("persists the money amount (as a string) on the approval so the mobile preview can show it", async () => {

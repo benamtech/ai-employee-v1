@@ -56,19 +56,46 @@ export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number 
     if (job.lease_token) {
       await db.from("employee_turn_locks").delete().eq("employee_id", job.employee_id).eq("lease_token", job.lease_token);
     }
+    // job.lease_token is guaranteed set here (this row was read with
+    // status='running', which only the claim RPC sets, always together with a
+    // lease_token). Guarding both writes below on it (like
+    // complete_employee_turn_job's WHERE clause does) closes a lost-update
+    // race: a worker that's genuinely still finishing right as its lease
+    // crosses the reap threshold must not have its legitimate completion
+    // clobbered back to queued/failed by this scan.
     const isOwnerTurn = job.kind === "owner_web_chat" || job.kind === "owner_sms_chat";
     if (isOwnerTurn && Number(job.attempts ?? 0) < MAX_TURN_ATTEMPTS) {
-      await mustWrite(
-        db.from("employee_turn_jobs").update({ status: "queued", lease_token: null, lease_expires_at: null, available_at: nowIso }).eq("id", job.id),
+      const requeuedRows = await mustWrite(
+        db.from("employee_turn_jobs")
+          .update({ status: "queued", lease_token: null, lease_expires_at: null, available_at: nowIso })
+          .eq("id", job.id)
+          .eq("lease_token", job.lease_token)
+          .eq("status", "running")
+          .select("id"),
         "employee_turn_jobs.reap_requeue",
       );
+      if (!requeuedRows || (requeuedRows as unknown[]).length === 0) {
+        // Lost the race: the job legitimately completed (or was reclaimed)
+        // between our stale-turn scan and this write. Not a real reap.
+        continue;
+      }
       requeued += 1;
       continue;
     }
-    await mustWrite(
-      db.from("employee_turn_jobs").update({ status: "failed", lease_token: null, lease_expires_at: null, error: "reaped_max_attempts" }).eq("id", job.id),
+    const failedRows = await mustWrite(
+      db.from("employee_turn_jobs")
+        .update({ status: "failed", lease_token: null, lease_expires_at: null, error: "reaped_max_attempts" })
+        .eq("id", job.id)
+        .eq("lease_token", job.lease_token)
+        .eq("status", "running")
+        .select("id"),
       "employee_turn_jobs.reap_fail",
     );
+    if (!failedRows || (failedRows as unknown[]).length === 0) {
+      // Same lost-race case on the fail path: don't finish/notify a run that
+      // isn't the reaper's to close.
+      continue;
+    }
     await finishWorkRun(db, job.run_id ?? null, "failed");
     if (isOwnerTurn && job.account_id) {
       await routeEmployeeIntent(db, {

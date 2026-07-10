@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { resolveRuntimeBackend } from "../../apps/manager/src/lib/runtime-backend";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { isLocalRuntimeBackendAllowed, resolveRuntimeBackend } from "../../apps/manager/src/lib/runtime-backend";
 import { profileTokenMap } from "../../apps/manager/src/lib/profile-renderer";
 import type { ProfileBuildParams } from "../../packages/shared/src/profile-package";
 
@@ -69,6 +69,44 @@ describe("runtime backend policy", () => {
   it("allows an explicit HERMES_TERMINAL_BACKEND override", () => {
     process.env.HERMES_TERMINAL_BACKEND = "docker";
     expect(profileTokenMap(params("docker")).TERMINAL_BACKEND).toBe("docker");
+  });
+});
+
+describe("local runtime backend admission (production provisioning)", () => {
+  const GUARD_ENV_KEYS = ["NODE_ENV", "ALLOW_LOCAL_RUNTIME_BACKEND"];
+  let saved: Record<string, string | undefined>;
+  beforeEach(() => {
+    saved = Object.fromEntries(GUARD_ENV_KEYS.map((k) => [k, process.env[k]]));
+    for (const k of GUARD_ENV_KEYS) delete process.env[k];
+  });
+  afterEach(() => {
+    for (const k of GUARD_ENV_KEYS) {
+      if (saved[k] === undefined) delete process.env[k];
+      else process.env[k] = saved[k];
+    }
+  });
+
+  it("denies local by default even outside production (no opt-in flag)", () => {
+    process.env.NODE_ENV = "test";
+    expect(isLocalRuntimeBackendAllowed()).toBe(false);
+  });
+
+  it("allows local when explicitly opted in outside production", () => {
+    process.env.NODE_ENV = "test";
+    process.env.ALLOW_LOCAL_RUNTIME_BACKEND = "1";
+    expect(isLocalRuntimeBackendAllowed()).toBe(true);
+  });
+
+  it("accepts the 'true' string form of the opt-in flag", () => {
+    process.env.NODE_ENV = "test";
+    process.env.ALLOW_LOCAL_RUNTIME_BACKEND = "true";
+    expect(isLocalRuntimeBackendAllowed()).toBe(true);
+  });
+
+  it("vetoes local in production even when explicitly opted in", () => {
+    process.env.NODE_ENV = "production";
+    process.env.ALLOW_LOCAL_RUNTIME_BACKEND = "1";
+    expect(isLocalRuntimeBackendAllowed()).toBe(false);
   });
 });
 

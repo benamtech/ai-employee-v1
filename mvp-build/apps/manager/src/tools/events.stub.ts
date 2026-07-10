@@ -8,6 +8,7 @@
  *  Spec: 04-manager-tools.md, 09-event-mesh-v1.md. */
 import {
   ID_PREFIX,
+  REMINDER_ACTION_KEY,
   failed,
   newId,
   ok,
@@ -25,9 +26,6 @@ import { writeAudit } from "../lib/audit.js";
 import { deliverEmployeeEvent } from "../lib/employee-events.js";
 import { ingestEvent } from "../events/ingress.js";
 import { orThrow, mustWrite } from "../lib/db.js";
-
-/** Approval action key that gates an owner-confirmed job reminder (Phase 5 loop). */
-const SET_REMINDER_ACTION_KEY = "set_job_reminder";
 
 /** Input-validation bounds (tools take trusted internal input, but loose values
  *  still flow into delivery routing / persisted columns, so we pin the enums). */
@@ -191,7 +189,7 @@ const setInternalReminder: ToolHandler = async (ctx, raw) => {
       "approvals.gate",
     );
     const approval = approvalRaw as { resolution: string | null; action_key: string } | null;
-    if (!approval || approval.resolution !== "approved" || approval.action_key !== SET_REMINDER_ACTION_KEY) {
+    if (!approval || approval.resolution !== "approved" || approval.action_key !== REMINDER_ACTION_KEY) {
       const audit_id = await writeAudit(ctx.db, {
         account_id: input.account_id, employee_id: input.employee_id, actor: ctx.actor,
         action: "tool:set_internal_reminder", result: "denied",

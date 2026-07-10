@@ -14,3 +14,4 @@ export * from "./channel-routing.js";
 export * from "./tool-contracts.js";
 export * from "./tool-schemas.js";
 export * from "./profile-package.js";
+export * from "./approval-policy.js";

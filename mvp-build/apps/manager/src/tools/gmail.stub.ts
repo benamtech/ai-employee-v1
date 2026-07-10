@@ -3,6 +3,7 @@
  *  verify/test step; every external send requires a resolved owner approval; tokens
  *  are stored by secret reference; raw tokens/bodies are never logged. */
 import {
+  EMAIL_SEND_ACTION_KEYS,
   ID_PREFIX,
   failed,
   newId,
@@ -41,7 +42,7 @@ const DEFAULT_GMAIL_SCOPES = [
   "https://www.googleapis.com/auth/userinfo.email",
 ];
 
-const SEND_ACTION_KEYS = new Set(["send_estimate_email", "send_email"]);
+const SEND_ACTION_KEYS = new Set<string>(EMAIL_SEND_ACTION_KEYS);
 
 function gmailRedirectUri(): string {
   return process.env.GOOGLE_OAUTH_REDIRECT_URI ??

@@ -60,6 +60,42 @@ describe("Phase 2 estimate/artifact/approval state machine", () => {
     expect(ownerResolved.status).toBe("ok");
   });
 
+  it("requires owner-authenticated resolution for send_email approvals", async () => {
+    const db = seed();
+    const ctx = ctxFor(db, "acct_1", "emp_1");
+    const appr = await estimateTools.request_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", action_key: "send_email", summary: "send", risk_level: "medium" });
+    const approvalId = appr.proof.approval_id as string;
+    const employeeResolved = await estimateTools.resolve_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(employeeResolved.status).toBe("failed");
+    expect(employeeResolved.proof.failure_code).toBe("unauthorized");
+    const ownerResolved = await estimateTools.resolve_approval!(ctxFor(db, "acct_1", "emp_1", "owner"), { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(ownerResolved.status).toBe("ok");
+  });
+
+  it("requires owner-authenticated resolution for send_deposit_invoice approvals", async () => {
+    const db = seed();
+    const ctx = ctxFor(db, "acct_1", "emp_1");
+    const appr = await estimateTools.request_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", action_key: "send_deposit_invoice", summary: "send invoice", risk_level: "medium" });
+    const approvalId = appr.proof.approval_id as string;
+    const employeeResolved = await estimateTools.resolve_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(employeeResolved.status).toBe("failed");
+    expect(employeeResolved.proof.failure_code).toBe("unauthorized");
+    const ownerResolved = await estimateTools.resolve_approval!(ctxFor(db, "acct_1", "emp_1", "owner"), { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(ownerResolved.status).toBe("ok");
+  });
+
+  it("requires owner-authenticated resolution for send_invoice approvals", async () => {
+    const db = seed();
+    const ctx = ctxFor(db, "acct_1", "emp_1");
+    const appr = await estimateTools.request_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", action_key: "send_invoice", summary: "send invoice", risk_level: "medium" });
+    const approvalId = appr.proof.approval_id as string;
+    const employeeResolved = await estimateTools.resolve_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(employeeResolved.status).toBe("failed");
+    expect(employeeResolved.proof.failure_code).toBe("unauthorized");
+    const ownerResolved = await estimateTools.resolve_approval!(ctxFor(db, "acct_1", "emp_1", "owner"), { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(ownerResolved.status).toBe("ok");
+  });
+
   it("cannot sign a link before the PDF is stored", async () => {
     const db = seed();
     const ctx = ctxFor(db, "acct_1", "emp_1");
