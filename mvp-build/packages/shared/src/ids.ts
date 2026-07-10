@@ -75,6 +75,10 @@ export const ID_PREFIX = {
   workAction: "wact",
   capabilityNode: "cap",
   surfaceReceipt: "srcpt",
+  platformUser: "puser",
+  platformRole: "prole",
+  supportAccess: "supp",
+  adminAction: "adact",
 } as const;
 
 export type IdPrefix = (typeof ID_PREFIX)[keyof typeof ID_PREFIX];

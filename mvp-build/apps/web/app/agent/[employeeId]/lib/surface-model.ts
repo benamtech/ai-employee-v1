@@ -101,3 +101,37 @@ export function statusTone(status?: string): "good" | "warn" | "bad" | "quiet" {
   if (["failed", "unhealthy", "error", "rejected", "unavailable"].includes(s)) return "bad";
   return "quiet";
 }
+
+export function labelStatus(status?: string): string {
+  const s = String(status ?? "").toLowerCase();
+  const labels: Record<string, string> = {
+    ready: "Ready",
+    healthy: "Reachable",
+    connected: "Connected",
+    active: "Active",
+    sent: "Sent",
+    delivered: "Delivered",
+    done: "Done",
+    completed: "Completed",
+    approved: "Approved",
+    success: "Ready",
+    needs_connection: "Needs connection",
+    needs_you: "Needs you",
+    blocked: "Needs help",
+    degraded: "Degraded",
+    scheduled: "Scheduled",
+    pending: "Waiting",
+    draft: "Draft",
+    policy_gated: "Asks first",
+    failed: "Failed",
+    unhealthy: "Unreachable",
+    error: "Failed",
+    rejected: "Rejected",
+    unavailable: "Unavailable",
+    provisioning: "Setting up",
+    live: "Live",
+    retired: "Disabled",
+    suspended: "Paused",
+  };
+  return labels[s] ?? String(status ?? "Unknown").replace(/[_-]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}

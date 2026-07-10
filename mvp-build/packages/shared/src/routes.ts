@@ -36,6 +36,14 @@ export const MANAGER_API = {
   employeeResources: (employeeId: string) => `/manager/employee/${employeeId}/resources`,
   employeeStream: (employeeId: string) => `/manager/employee/${employeeId}/stream`,
   employeeHeartbeat: (employeeId: string) => `/manager/employee/${employeeId}/heartbeat`,
+  admin: {
+    dashboard: "/manager/admin/dashboard",
+    accounts: "/manager/admin/accounts",
+    account: (accountId: string) => `/manager/admin/accounts/${accountId}`,
+    employee: (employeeId: string) => `/manager/admin/employees/${employeeId}`,
+    readiness: (employeeId: string) => `/manager/admin/employees/${employeeId}/readiness`,
+    supportAction: "/manager/admin/support-action",
+  },
   webhooks: {
     twilioFrontDoor: "/webhooks/twilio/frontdoor",
     twilioEmployee: (employeeId: string) => `/webhooks/twilio/${employeeId}`,

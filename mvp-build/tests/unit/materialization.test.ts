@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { TOOL_NAMES } from "@amtech/shared";
 import type { EmployeeSnapshot } from "../../apps/manager/src/lib/employee-stream";
 import { materializeEmployeeSnapshot } from "../../apps/manager/src/lib/materialization";
 
@@ -55,5 +56,13 @@ describe("Phase 4 materialization", () => {
     expect(out.capabilities.find((c) => c.key === "manager_tool:send_email_draft")?.status).toBe("ready");
     expect(out.capabilities.find((c) => c.key === "manager_tool:send_deposit_invoice")?.status).toBe("needs_connection");
     expect(out.abilities.find((a) => a.id === "ability:payments")?.status).toBe("needs_connection");
+  });
+
+  it("does not expose raw Manager tool names as owner ability labels", () => {
+    const out = materializeEmployeeSnapshot(snapshot());
+    const toolNodes = out.capabilities.filter((c) => c.key.startsWith("manager_tool:"));
+    expect(toolNodes).toHaveLength(TOOL_NAMES.length);
+    expect(toolNodes.every((c) => !c.label.includes("_"))).toBe(true);
+    expect(toolNodes.every((c) => c.label !== c.key.replace("manager_tool:", ""))).toBe(true);
   });
 });

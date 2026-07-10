@@ -6,6 +6,7 @@ import type { ResourcePayload, WorkEventRow } from "./surface-types";
 import { groupByJob } from "./lib/group-by-job";
 import {
   defaultSelection,
+  labelStatus,
   labelConnector,
   navCounts,
   previewItem,
@@ -382,7 +383,7 @@ function TodayView({
             <button key={a.id} className="ws-row" onClick={() => onSelect({ kind: "approval", id: a.id })}>
               <span>Decision needed</span>
               <strong>{a.summary}</strong>
-              <Pill tone="warn" label={a.risk_level || "review"} />
+              <Pill tone="warn" label={labelStatus(a.risk_level || "review")} />
             </button>
           ))}
           {urgentTasks.slice(0, 5).map((t) => <TaskRow key={t.id} task={t} onSelect={onSelect} />)}
@@ -444,7 +445,7 @@ function OutputList({ res, onSelect }: { res: ResourcePayload; onSelect: (select
           <span>{output.type}</span>
           <strong>{output.title}</strong>
           {output.summary ? <p>{output.summary}</p> : null}
-          <Pill tone={statusTone(output.status)} label={output.status} />
+          <Pill tone={statusTone(output.status)} label={labelStatus(output.status)} />
         </button>
       ))}
     </ListShell>
@@ -459,7 +460,7 @@ function ConnectorList({ res, onSelect }: { res: ResourcePayload; onSelect: (sel
           <span>Connection</span>
           <strong>{labelConnector(c.provider)}</strong>
           <p>{c.external_email ?? c.last_error ?? "Ready to connect when needed."}</p>
-          <Pill tone={statusTone(c.status)} label={c.status} />
+          <Pill tone={statusTone(c.status)} label={labelStatus(c.status)} />
         </button>
       ))}
     </ListShell>
@@ -474,7 +475,7 @@ function AbilityList({ res, onSelect }: { res: ResourcePayload; onSelect: (selec
           <span>{ability.category}</span>
           <strong>{ability.label}</strong>
           <p>{ability.summary}</p>
-          <Pill tone={statusTone(ability.status)} label={ability.status.replace(/_/g, " ")} />
+          <Pill tone={statusTone(ability.status)} label={labelStatus(ability.status)} />
         </button>
       ))}
     </ListShell>
@@ -504,7 +505,7 @@ function ActivityList({
           ) : (
             <button className="ws-row" onClick={() => onSelect({ kind: "work_event", id: e.id })}>
               <strong>{e.event_type}</strong>
-              <Pill tone={statusTone(e.status)} label={e.status} />
+              <Pill tone={statusTone(e.status)} label={labelStatus(e.status)} />
             </button>
           )}
         </div>
@@ -518,12 +519,11 @@ function SettingsLite({ res }: { res: ResourcePayload }) {
     <div className="ws-grid two">
       <Panel title="Employee" empty={!res.employee} emptyText="Employee profile is not loaded yet.">
         <KeyValue label="Name" value={res.employee?.name} />
-        <KeyValue label="Status" value={res.employee?.status} />
-        <KeyValue label="Profile" value={res.employee?.profile_id ?? undefined} />
+        <KeyValue label="Status" value={labelStatus(res.employee?.status)} />
+        <KeyValue label="Setup" value={res.employee?.profile_id ? "Profile is installed" : undefined} />
       </Panel>
       <Panel title="Runtime" empty={!res.runtime_health} emptyText="Runtime health has not been checked yet.">
-        <KeyValue label="Health" value={res.runtime_health?.status} />
-        <KeyValue label="Backend" value={res.runtime_health?.backend_type ?? undefined} />
+        <KeyValue label="Health" value={labelStatus(res.runtime_health?.status)} />
         <KeyValue label="Checked" value={res.runtime_health?.checked_at ?? undefined} />
         <p className="ws-muted">{res.runtime_health?.message}</p>
       </Panel>
@@ -565,7 +565,7 @@ function PreviewPane({
       <p className="ws-kicker">{preview.eyebrow}</p>
       <h2>{preview.title}</h2>
       {preview.summary ? <p className="ws-muted">{preview.summary}</p> : null}
-      {preview.status ? <Pill tone={statusTone(preview.status)} label={preview.status.replace(/_/g, " ")} /> : null}
+      {preview.status ? <Pill tone={statusTone(preview.status)} label={labelStatus(preview.status)} /> : null}
 
       <div className="ws-preview-body">
         {approval ? <ApprovalCard approval={approval} onResolve={onResolve} /> : null}
@@ -585,7 +585,7 @@ function OutputPreview({ output }: { output: NonNullable<ResourcePayload["output
   return (
     <div className="ws-detail">
       <KeyValue label="Type" value={output.type} />
-      <KeyValue label="Status" value={output.status} />
+      <KeyValue label="Status" value={labelStatus(output.status)} />
       {output.summary ? <p>{output.summary}</p> : null}
       {output.href ? <a className="ws-link" href={output.href} target="_blank" rel="noreferrer">Open output</a> : null}
     </div>
@@ -595,7 +595,7 @@ function OutputPreview({ output }: { output: NonNullable<ResourcePayload["output
 function TaskDetails({ task, onSelect }: { task: NonNullable<ResourcePayload["tasks"]>[number]; onSelect: (selection: PreviewSelection) => void }) {
   return (
     <div className="ws-detail">
-      <KeyValue label="Status" value={task.status.replace(/_/g, " ")} />
+      <KeyValue label="Status" value={labelStatus(task.status)} />
       {task.summary ? <p>{task.summary}</p> : null}
       {task.type === "approval" && task.target_id ? <button className="ws-primary" onClick={() => onSelect({ kind: "approval", id: task.target_id! })}>Review approval</button> : null}
     </div>
@@ -606,7 +606,7 @@ function ConnectorDetails({ connector }: { connector: ResourcePayload["connector
   return (
     <div className="ws-detail">
       <KeyValue label="Connection" value={labelConnector(connector.provider)} />
-      <KeyValue label="Status" value={connector.status.replace(/_/g, " ")} />
+      <KeyValue label="Status" value={labelStatus(connector.status)} />
       <KeyValue label="Account" value={connector.external_email ?? undefined} />
       {connector.last_error ? <p>{connector.last_error}</p> : <p className="ws-muted">No repair action is needed from this surface right now.</p>}
     </div>
@@ -617,7 +617,7 @@ function AbilityDetails({ ability }: { ability: NonNullable<ResourcePayload["abi
   return (
     <div className="ws-detail">
       <KeyValue label="Category" value={ability.category} />
-      <KeyValue label="Status" value={ability.status.replace(/_/g, " ")} />
+      <KeyValue label="Status" value={labelStatus(ability.status)} />
       <p>{ability.summary}</p>
     </div>
   );
@@ -627,7 +627,7 @@ function MessageDetails({ message }: { message: ResourcePayload["messages"][numb
   return (
     <div className="ws-detail">
       <KeyValue label="Direction" value={message.direction === "to_owner" ? "Employee to owner" : "Owner to employee"} />
-      <KeyValue label="Status" value={message.status} />
+      <KeyValue label="Status" value={labelStatus(message.status)} />
       <p>{message.body}</p>
     </div>
   );
@@ -639,7 +639,7 @@ function TaskRow({ task, onSelect }: { task: NonNullable<ResourcePayload["tasks"
       <span>{task.type}</span>
       <strong>{task.title}</strong>
       {task.summary ? <p>{task.summary}</p> : null}
-      <Pill tone={statusTone(task.status)} label={task.status.replace(/_/g, " ")} />
+      <Pill tone={statusTone(task.status)} label={labelStatus(task.status)} />
     </button>
   );
 }
@@ -662,7 +662,7 @@ function HealthBlock({ health, streamState }: { health: ResourcePayload["runtime
   return (
     <div className="ws-health">
       <span>Employee status</span>
-      <Pill tone={statusTone(health?.status ?? streamState)} label={health?.status ?? streamState} />
+      <Pill tone={statusTone(health?.status ?? streamState)} label={labelStatus(health?.status ?? streamState)} />
       <p>{health?.message ?? "Waiting for the first runtime health check."}</p>
     </div>
   );

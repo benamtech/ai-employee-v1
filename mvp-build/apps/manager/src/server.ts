@@ -30,6 +30,15 @@ import { subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js"
 import { orThrow, mustWrite } from "./lib/db.js";
 import { stampChannelPresence } from "./lib/channel-router.js";
 import { bearerToken, verifyEmployeeMcpCredential } from "./lib/mcp-auth.js";
+import {
+  buildAdminAccountDetail,
+  buildAdminDashboard,
+  buildAdminEmployeeDetail,
+  buildReadinessReport,
+  recordSupportAccess,
+  requirePlatformRole,
+  runAdminSupportAction,
+} from "./lib/admin.js";
 
 let warnedMissingInternalToken = false;
 
@@ -156,6 +165,86 @@ export function buildApp(): Hono {
         .filter((e) => e.status === "failed" || e.safety.requires_approval)
         .map((e) => ({ source_envelope_id: e.id, hint: e.status === "failed" ? "Check source proof and repair queue." : "Await or resolve owner approval gate." })),
     });
+  });
+
+  async function adminActor(c: Context, minimum: "support_readonly" | "platform_operator" = "support_readonly") {
+    const denied = denyInternal(c);
+    if (denied) return { denied };
+    const auth = await requirePlatformRole(serviceClient(), {
+      platform_user_id: c.req.header("X-AMTECH-Platform-User-Id"),
+      minimum,
+    });
+    if (!auth.ok) return { denied: c.json({ error: auth.error }, auth.status as 401 | 403) };
+    return { actor: auth.actor };
+  }
+
+  app.get(MANAGER_API.admin.dashboard, async (c) => {
+    const auth = await adminActor(c);
+    if ("denied" in auth) return auth.denied;
+    return c.json(await buildAdminDashboard(serviceClient()));
+  });
+
+  app.get(MANAGER_API.admin.accounts, async (c) => {
+    const auth = await adminActor(c);
+    if ("denied" in auth) return auth.denied;
+    return c.json({ accounts: (await buildAdminDashboard(serviceClient())).accounts });
+  });
+
+  app.get("/manager/admin/accounts/:accountId", async (c) => {
+    const auth = await adminActor(c);
+    if ("denied" in auth) return auth.denied;
+    const accountId = c.req.param("accountId");
+    const access = await recordSupportAccess(serviceClient(), auth.actor, {
+      account_id: accountId,
+      reason: c.req.header("X-AMTECH-Support-Reason"),
+      action: "account_detail",
+    });
+    if (!access.ok) return c.json({ error: access.error }, access.status as 400);
+    const detail = await buildAdminAccountDetail(serviceClient(), accountId);
+    if (!detail) return c.json({ error: "account_not_found" }, 404);
+    return c.json(detail);
+  });
+
+  app.get("/manager/admin/employees/:employeeId", async (c) => {
+    const auth = await adminActor(c);
+    if ("denied" in auth) return auth.denied;
+    const employeeId = c.req.param("employeeId");
+    const db = serviceClient();
+    const detail = await buildAdminEmployeeDetail(db, employeeId) as { employee?: { account_id?: string } } | null;
+    if (!detail?.employee?.account_id) return c.json({ error: "employee_not_found" }, 404);
+    const access = await recordSupportAccess(db, auth.actor, {
+      account_id: detail.employee.account_id,
+      employee_id: employeeId,
+      reason: c.req.header("X-AMTECH-Support-Reason"),
+      action: "employee_detail",
+    });
+    if (!access.ok) return c.json({ error: access.error }, access.status as 400);
+    return c.json(detail);
+  });
+
+  app.get("/manager/admin/employees/:employeeId/readiness", async (c) => {
+    const auth = await adminActor(c);
+    if ("denied" in auth) return auth.denied;
+    const employeeId = c.req.param("employeeId");
+    const report = await buildReadinessReport(serviceClient(), employeeId);
+    if (!report) return c.json({ error: "employee_not_found" }, 404);
+    const access = await recordSupportAccess(serviceClient(), auth.actor, {
+      account_id: report.account_id,
+      employee_id: employeeId,
+      reason: c.req.header("X-AMTECH-Support-Reason"),
+      action: "readiness_report",
+    });
+    if (!access.ok) return c.json({ error: access.error }, access.status as 400);
+    return c.json(report);
+  });
+
+  app.post(MANAGER_API.admin.supportAction, async (c) => {
+    const auth = await adminActor(c, "platform_operator");
+    if ("denied" in auth) return auth.denied;
+    const input = await c.req.json().catch(() => ({}));
+    const result = await runAdminSupportAction(serviceClient(), auth.actor, input);
+    const status = result.status === "ok" ? 200 : result.status === "denied" ? 403 : 400;
+    return c.json(result, status);
   });
 
   app.post("/manager/claim/consume", async (c) => {
