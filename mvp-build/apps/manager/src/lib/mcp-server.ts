@@ -16,11 +16,15 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import {
   CallToolRequestSchema,
+  ListResourcesRequestSchema,
   ListToolsRequestSchema,
+  ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { TOOL_NAMES, getToolSchema, type ToolName } from "@amtech/shared";
+import { serviceClient } from "@amtech/db";
 import { runManagerTool, SCHEDULER_ONLY_TOOLS } from "./run-tool.js";
+import { buildEmployeeSnapshot } from "./employee-stream.js";
 
 const SERVER_INFO = { name: "amtech-manager", version: "0.1.0" } as const;
 
@@ -79,8 +83,63 @@ export interface McpIdentity {
   employee_id?: string;
 }
 
+const RESOURCE_DEFS = [
+  { uri: "amtech://manager/business-brain", name: "Business brain summary", mimeType: "application/json" },
+  { uri: "amtech://manager/connector-status", name: "Connector status", mimeType: "application/json" },
+  { uri: "amtech://manager/artifacts", name: "Artifacts", mimeType: "application/json" },
+  { uri: "amtech://manager/approvals", name: "Approvals", mimeType: "application/json" },
+  { uri: "amtech://manager/work-queue", name: "Work queue", mimeType: "application/json" },
+  { uri: "amtech://manager/runtime-health", name: "Runtime health", mimeType: "application/json" },
+  { uri: "amtech://manager/capability-registry", name: "Capability registry", mimeType: "application/json" },
+] as const;
+
+function jsonResource(uri: string, payload: unknown) {
+  return { contents: [{ uri, mimeType: "application/json", text: JSON.stringify(payload, null, 2) }] };
+}
+
+async function readManagerResource(uri: string, identity: McpIdentity) {
+  if (!identity.account_id || !identity.employee_id) {
+    return jsonResource(uri, { error: "identity_required" });
+  }
+  const db = serviceClient();
+  const snapshot = await buildEmployeeSnapshot(db, identity.employee_id, identity.account_id);
+  if (uri === "amtech://manager/connector-status") return jsonResource(uri, {
+    connectors: snapshot.connectors.map((c) => ({
+      id: c.id,
+      connector_key: c.connector_key,
+      provider: c.provider,
+      status: c.status,
+      external_email: c.external_email ?? null,
+      last_error: c.last_error ?? null,
+    })),
+  });
+  if (uri === "amtech://manager/artifacts") return jsonResource(uri, { artifacts: snapshot.artifacts, outputs: snapshot.outputs ?? [] });
+  if (uri === "amtech://manager/approvals") return jsonResource(uri, { approvals: snapshot.approvals });
+  if (uri === "amtech://manager/work-queue") return jsonResource(uri, { tasks: snapshot.tasks ?? [], surface_envelopes: snapshot.surface_envelopes ?? [] });
+  if (uri === "amtech://manager/runtime-health") return jsonResource(uri, { runtime_health: snapshot.runtime_health });
+  if (uri === "amtech://manager/capability-registry") return jsonResource(uri, { capabilities: snapshot.capabilities ?? [], abilities: snapshot.abilities ?? [] });
+  if (uri === "amtech://manager/business-brain") {
+    const { data } = await db
+      .from("business_brain_facts")
+      .select("id,fact_key,fact_value,category,source,confidence,updated_at")
+      .eq("account_id", identity.account_id)
+      .eq("employee_id", identity.employee_id)
+      .order("updated_at", { ascending: false })
+      .limit(50);
+    return jsonResource(uri, { facts: data ?? [] });
+  }
+  return jsonResource(uri, { error: "resource_not_found" });
+}
+
+export function isRealMcpToolExecutionResult(value: unknown): boolean {
+  const v = value as { structuredContent?: { proof?: unknown; status?: unknown }; content?: Array<{ text?: string }> } | undefined;
+  if (!v?.structuredContent || typeof v.structuredContent !== "object") return false;
+  if (!("status" in v.structuredContent)) return false;
+  return Boolean(v.structuredContent.proof && typeof v.structuredContent.proof === "object");
+}
+
 export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
-  const server = new Server(SERVER_INFO, { capabilities: { tools: {} } });
+  const server = new Server(SERVER_INFO, { capabilities: { tools: {}, resources: {} } });
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: employeeCallableTools().map((name) => ({
@@ -89,6 +148,21 @@ export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
       inputSchema: inputSchemaFor(name),
     })),
   }));
+
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+    resources: RESOURCE_DEFS.map((r) => ({
+      uri: r.uri,
+      name: r.name,
+      mimeType: r.mimeType,
+      description: `${r.name} for the bound AMTECH employee context.`,
+    })),
+  }));
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
+    const uri = String(req.params.uri ?? "");
+    if (!RESOURCE_DEFS.some((r) => r.uri === uri)) return jsonResource(uri, { error: "resource_not_found" });
+    return readManagerResource(uri, identity);
+  });
 
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     const name = req.params.name as ToolName;

@@ -63,7 +63,7 @@ function packageRoot(packageKey: string): string {
   return join(workspaceRoot(), "packages", "profile-packages", packageKey);
 }
 
-export function profileTokenMap(params: ProfileBuildParams): Record<string, string> {
+export function profileTokenMap(params: ProfileBuildParams, renderSecrets: ProvisionerRequest["render_secrets"] = {}): Record<string, string> {
   const runtimeBackend = params.runtime_backend ?? "docker";
   // Container-facing Manager origin: the URL an employee actually reaches the
   // control plane on. Baked at render time, so it must already be correct for
@@ -104,7 +104,7 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
     PRICING_NOTES: "_(learned as we go)_",
     BRANDING_NOTES: "_(learned as we go)_",
     MANAGER_API_ORIGIN: managerOrigin,
-    MANAGER_INTERNAL_TOKEN: process.env.MANAGER_INTERNAL_TOKEN ?? "",
+    MANAGER_MCP_TOKEN: renderSecrets.manager_mcp_token ?? "",
     // Model wiring. Local no-key testing (HERMES_MODEL_PROVIDER set) points the
     // employee at the bridge + a dummy OpenAI-compatible key; production leaves
     // these empty (real provider key is a Manager-injected secret ref).
@@ -129,9 +129,9 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
   };
 }
 
-function render(content: string, params: ProfileBuildParams): string {
+function render(content: string, params: ProfileBuildParams, renderSecrets?: ProvisionerRequest["render_secrets"]): string {
   let out = content;
-  for (const [key, value] of Object.entries(profileTokenMap(params))) {
+  for (const [key, value] of Object.entries(profileTokenMap(params, renderSecrets))) {
     out = out.replaceAll(`{{${key}}}`, value);
   }
   return out;
@@ -141,19 +141,19 @@ function isText(path: string): boolean {
   return [...TEXT_EXTENSIONS].some((ext) => path.toLowerCase().endsWith(ext));
 }
 
-async function copyRendered(src: string, dst: string, params: ProfileBuildParams): Promise<void> {
+async function copyRendered(src: string, dst: string, params: ProfileBuildParams, renderSecrets?: ProvisionerRequest["render_secrets"]): Promise<void> {
   const s = await stat(src);
   if (s.isDirectory()) {
     await mkdir(dst, { recursive: true });
     for (const entry of await readdir(src)) {
       if (entry === "node_modules" || entry === "dist" || entry === ".next") continue;
-      await copyRendered(join(src, entry), join(dst, entry === ".env.tpl" ? ".env" : entry), params);
+      await copyRendered(join(src, entry), join(dst, entry === ".env.tpl" ? ".env" : entry), params, renderSecrets);
     }
     return;
   }
   await mkdir(join(dst, ".."), { recursive: true });
   if (isText(src)) {
-    await writeFile(dst, render(await readFile(src, "utf8"), params), "utf8");
+    await writeFile(dst, render(await readFile(src, "utf8"), params, renderSecrets), "utf8");
   } else {
     await copyFile(src, dst);
   }
@@ -190,8 +190,9 @@ export async function renderProfilePackage(req: ProvisionerRequest): Promise<{
   const profile_id = `client_${params.employee_id}`;
   const hermesHome = process.env.HERMES_HOME;
   if (!hermesHome) throw new Error("HERMES_HOME missing.");
+  if (!req.render_secrets?.manager_mcp_token) throw new Error("manager_mcp_token missing.");
   const generated_path = join(hermesHome, "profiles", profile_id);
-  await copyRendered(packageRoot(req.profile_package_key), generated_path, params);
+  await copyRendered(packageRoot(req.profile_package_key), generated_path, params, req.render_secrets);
   await mkdir(params.workspace_dir, { recursive: true });
   await mkdir(join(params.workspace_dir, "output"), { recursive: true });
   await writeFile(

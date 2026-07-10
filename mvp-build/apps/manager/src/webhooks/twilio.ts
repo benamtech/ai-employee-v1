@@ -12,6 +12,7 @@ import { sendSms } from "../lib/twilio.js";
 import { deliverOwnerTurnToRuntime } from "../lib/runtime.js";
 import { resolveEmployeeSmsSender } from "../lib/sms-sender.js";
 import { stampChannelPresence } from "../lib/channel-router.js";
+import { mustWrite } from "../lib/db.js";
 
 function authToken(): string {
   const t = process.env.TWILIO_AUTH_TOKEN;
@@ -62,19 +63,22 @@ export function registerTwilioWebhooks(app: Hono): void {
       .maybeSingle();
     const sessionId = existing?.id ?? newId(ID_PREFIX.onboardingSession);
     if (!existing) {
-      await db.from("onboarding_sessions").insert({
-        id: sessionId,
-        phone_e164: from,
-        surface: "sms",
-        state: "anonymous_chat",
-        transcript: [],
-        manifest_draft: {
-          employee_type: "contractor_estimator",
-          profile_package_key: "contractor_estimator",
-          timezone: "America/New_York",
-          seed_skills: ["estimate", "invoice", "daily-checkin"],
-        },
-      });
+      await mustWrite(
+        db.from("onboarding_sessions").insert({
+          id: sessionId,
+          phone_e164: from,
+          surface: "sms",
+          state: "anonymous_chat",
+          transcript: [],
+          manifest_draft: {
+            employee_type: "contractor_estimator",
+            profile_package_key: "contractor_estimator",
+            timezone: "America/New_York",
+            seed_skills: ["estimate", "invoice", "daily-checkin"],
+          },
+        }),
+        "onboarding_sessions.insert",
+      );
     }
     const origin = process.env.MANAGER_API_ORIGIN ?? `http://localhost:${process.env.MANAGER_PORT ?? 8080}`;
     const res = await fetch(`${origin}/manager/orchestrator/web`, {
@@ -89,19 +93,42 @@ export function registerTwilioWebhooks(app: Hono): void {
     let reply = out.assistant_message ?? "I can help set up your AI employee. Tell me what kind of business you run.";
     if (out.ready_for_phone_verification) {
       const token = mintSignedToken("claim_link", from, 30 * 60, { session_id: sessionId });
-      await db.from("claim_tokens").insert({
-        id: newId(ID_PREFIX.claimToken),
-        token_hash: tokenHash(token),
-        phone_e164: from,
-        onboarding_session_id: sessionId,
-        twilio_proof: { message_sid: params.MessageSid },
-        expires_at: new Date(Date.now() + 30 * 60_000).toISOString(),
-      });
+      // mustWrite: only surface the /claim link after the token row is durably stored —
+      // a swallowed insert would text the owner a link that /claim/consume can never honor.
+      await mustWrite(
+        db.from("claim_tokens").insert({
+          id: newId(ID_PREFIX.claimToken),
+          token_hash: tokenHash(token),
+          phone_e164: from,
+          onboarding_session_id: sessionId,
+          twilio_proof: { message_sid: params.MessageSid },
+          expires_at: new Date(Date.now() + 30 * 60_000).toISOString(),
+        }),
+        "claim_tokens.insert",
+      );
       reply += `\n\nFinish account setup here: ${(process.env.PUBLIC_WEB_ORIGIN ?? "https://amtechai.com")}/claim?t=${encodeURIComponent(token)}`;
     }
     return c.text(`<Response><Message>${escapeXml(reply)}</Message></Response>`, 200, {
       "Content-Type": "text/xml",
     });
+  });
+
+  // Twilio delivery-status callback. Static "status" segment beats the
+  // `:employeeId` param route below, so it never collides. Reflects real delivery
+  // state (queued/sent/delivered/undelivered/failed) onto the message row for
+  // receipt/repair visibility. Signature is mandatory like every Twilio route.
+  app.post("/webhooks/twilio/status", async (c) => {
+    const params = await formParams(c);
+    const sig = c.req.header("X-Twilio-Signature");
+    const ok = validateTwilioSignature(authToken(), signedUrl("/status"), params, sig, { insecureNoSignature: insecure });
+    if (!ok) return c.text("invalid signature", 403);
+    const sid = params.MessageSid || params.SmsSid;
+    const status = params.MessageStatus || params.SmsStatus;
+    if (sid && status) {
+      const db = serviceClient();
+      await db.from("employee_messages").update({ status }).eq("provider_id", sid);
+    }
+    return c.text("<Response></Response>", 200, { "Content-Type": "text/xml" });
   });
 
   app.post("/webhooks/twilio/:employeeId", async (c) => {

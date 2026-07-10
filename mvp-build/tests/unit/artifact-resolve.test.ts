@@ -96,6 +96,31 @@ describe("artifact resolve route", () => {
     expect(body.mime_type).toBe("application/pdf");
   });
 
+  it("increments signed artifact link access through the atomic RPC", async () => {
+    const signed = mintSignedToken("artifact_link", "art_signed", 300, { account_id: "acct_1", employee_id: "emp_1" });
+    state.db!.tables.artifacts!.push({
+      id: "art_signed",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: null,
+      payload: { customer_name: "Jane", line_items: [{ description: "Prep", amount: 250 }] },
+    });
+    state.db!.tables.artifact_links!.push({
+      id: "alink_signed",
+      artifact_id: "art_signed",
+      token_hash: tokenHash(signed),
+      access_count: 7,
+      revoked_at: null,
+      expires_at: new Date(Date.now() + 60_000).toISOString(),
+    });
+
+    const res = await resolveArtifact("emp_1", "art_signed", undefined, signed);
+
+    expect(res.status).toBe(200);
+    expect(state.db!.tables.artifact_links![0]!.access_count).toBe(8);
+  });
+
   it("denies payload-only artifacts without an authorized owner session", async () => {
     state.db!.tables.artifacts!.push({
       id: "art_3",
@@ -108,6 +133,81 @@ describe("artifact resolve route", () => {
 
     const res = await resolveArtifact("emp_1", "art_3", await ownerToken("acct_other"));
     expect(res.status).toBe(403);
+    expect(state.db!.tables.audit_log).toHaveLength(0);
+  });
+
+  it("returns 410 for an expired signed artifact link", async () => {
+    const signed = mintSignedToken("artifact_link", "art_expired", -1, { account_id: "acct_1", employee_id: "emp_1" });
+    state.db!.tables.artifacts!.push({
+      id: "art_expired",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: null,
+      payload: { customer_name: "Jane" },
+    });
+    state.db!.tables.artifact_links!.push({
+      id: "alink_expired",
+      artifact_id: "art_expired",
+      token_hash: tokenHash(signed),
+      access_count: 0,
+      revoked_at: null,
+      expires_at: new Date(Date.now() + 60_000).toISOString(),
+    });
+
+    const res = await resolveArtifact("emp_1", "art_expired", undefined, signed);
+    const body = await res.json();
+
+    expect(res.status).toBe(410);
+    expect(body).toMatchObject({ error: "artifact_link_expired", expired: true });
+    expect(state.db!.tables.artifact_links![0]!.access_count).toBe(0);
+    expect(state.db!.tables.audit_log).toHaveLength(0);
+  });
+
+  it("returns 410 for a revoked signed artifact link", async () => {
+    const signed = mintSignedToken("artifact_link", "art_revoked", 300, { account_id: "acct_1", employee_id: "emp_1" });
+    state.db!.tables.artifacts!.push({
+      id: "art_revoked",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: null,
+      payload: { customer_name: "Jane" },
+    });
+    state.db!.tables.artifact_links!.push({
+      id: "alink_revoked",
+      artifact_id: "art_revoked",
+      token_hash: tokenHash(signed),
+      access_count: 0,
+      revoked_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 60_000).toISOString(),
+    });
+
+    const res = await resolveArtifact("emp_1", "art_revoked", undefined, signed);
+    const body = await res.json();
+
+    expect(res.status).toBe(410);
+    expect(body).toMatchObject({ error: "artifact_link_expired", expired: true });
+    expect(state.db!.tables.artifact_links![0]!.access_count).toBe(0);
+    expect(state.db!.tables.audit_log).toHaveLength(0);
+  });
+
+  it("returns 403 for a forged or wrong-scope signed artifact link", async () => {
+    const wrongScope = mintSignedToken("artifact_link", "art_scope", 300, { account_id: "acct_other", employee_id: "emp_1" });
+    state.db!.tables.artifacts!.push({
+      id: "art_scope",
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      kind: "estimate",
+      storage_ref: null,
+      payload: { customer_name: "Jane" },
+    });
+
+    const res = await resolveArtifact("emp_1", "art_scope", undefined, wrongScope);
+    const forged = await resolveArtifact("emp_1", "art_scope", undefined, `${wrongScope}x`);
+
+    expect(res.status).toBe(403);
+    expect(forged.status).toBe(403);
     expect(state.db!.tables.audit_log).toHaveLength(0);
   });
 

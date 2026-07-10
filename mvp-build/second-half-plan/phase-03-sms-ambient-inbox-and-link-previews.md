@@ -1,8 +1,38 @@
 # Phase 3 - SMS Ambient Inbox And Link Previews
 
-Status: planned
+Status: source-wired (live SMS/tool-loop proof pending)
 
 Goal: make SMS a complete owner surface, not a notification afterthought.
+
+## Implementation (2026-07-09)
+
+Source-wired and static/fixture-green. Signed, scoped, expiring preview/action links now back
+every owner-inspectable resource (approval, artifact, work_event, task, connector, job):
+
+- Signing: `signed-links.ts` `preview_link` purpose + `mint/verifyPreviewToken`; `lib/preview-links.ts`
+  `createPreviewLink`/`resolvePreviewLink`; migration `0017_preview_links` (Manager-only RLS, single-use
+  `consumed_at`, `access_count`).
+- Rendering from the same web-desk state: `lib/preview-render.ts` `buildWorkResource` over
+  `buildEmployeeSnapshot` + `renderArtifactHtml`. Artifacts are kind-agnostic (stored file / payload HTML /
+  media), closing the PDF-only signed-link gap.
+- Manager routes: token-only `POST /manager/preview/resolve`; owner-authenticated `POST /manager/preview/action`
+  (approve/reject reuse the idempotent `resolve_approval`; respond routes into the owner-turn pipeline).
+- SMS: `renderWorkEventSms` is grammar-aware and appends `descriptor.preview_url`, minted in `employee-events.ts`
+  (both wake + deliver paths). **No inbound keyword parser** — the employee LLM resolves approvals via its MCP
+  `resolve_approval` tool. Signed Twilio `/webhooks/twilio/status` delivery-status callback added.
+- Web: token-auth mobile-first `agent/[employeeId]/review` page + sticky action bar + fixture mode.
+- Contracts: `WorkResource`/`WorkAction` shared types (first slice of Phase 4; `SurfaceEnvelope`/
+  `EmployeeEventStream`/capability registry deferred).
+
+Proof: typecheck, 58 files / 346 unit tests, lint, build, `ui:test` all green. Live tool execution remains
+blocked by the temporary model bridge (see `memory/2026-07-09-1815-*`). No provider/runtime acceptance claimed.
+
+Hardening pass (2026-07-09, see `memory/2026-07-09-2210-*`): fixed 5 code-review findings — dead
+"Open document" action (`WorkResource.open_url`), expired-vs-invalid token (`decodeSignedToken` → 410
+reissue), approval-preview amount persisted on the approval refs, `createPreviewLink` false-success →
+`mustWrite`, and the deliver-path pre-dedupe orphan (binds moved after the `inbound_events` claim) — plus
+a codebase straggler sweep (RLS closure `0018`-`0021`, stuck-turn reaper, Stripe atomic dedupe, GC lane,
+`mustWrite`/auth hardening). 59 files / 356 unit tests green.
 
 ## Summary
 

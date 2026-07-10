@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { handleManagerMcpRequest } from "../../apps/manager/src/lib/mcp-server";
+import { handleManagerMcpRequest, isRealMcpToolExecutionResult } from "../../apps/manager/src/lib/mcp-server";
 
 function rpc(method: string, params: unknown, id = 1): Request {
   return new Request("http://manager.local/manager/mcp", {
@@ -83,5 +83,15 @@ describe("Manager MCP server (transport over the tool registry)", () => {
     // account_id/employee_id — proving identity was injected before validation.
     expect(body.result.isError).toBe(true);
     expect(body.result.structuredContent.status).toBe("failed");
+  });
+
+  it("distinguishes real MCP tool execution from tool-call JSON emitted as text", () => {
+    expect(isRealMcpToolExecutionResult({
+      content: [{ type: "text", text: "{\"tool\":\"send_email_draft\",\"arguments\":{}}" }],
+    })).toBe(false);
+    expect(isRealMcpToolExecutionResult({
+      content: [{ type: "text", text: "send_email_draft: ok" }],
+      structuredContent: { status: "ok", proof: { audit_id: "aud_1" } },
+    })).toBe(true);
   });
 });

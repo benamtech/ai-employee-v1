@@ -27,8 +27,21 @@ if [[ -n "$workspace" ]]; then
   mount_args+=(-v "$workspace:$workspace")
 fi
 
+security_args=(
+  --cap-drop=ALL
+  --security-opt=no-new-privileges
+  --pids-limit="${HERMES_CONTAINER_PIDS_LIMIT:-256}"
+)
+if [[ -n "${HERMES_CONTAINER_MEMORY:-1g}" ]]; then
+  security_args+=(--memory="${HERMES_CONTAINER_MEMORY:-1g}")
+fi
+if [[ -n "${HERMES_CONTAINER_CPUS:-1}" ]]; then
+  security_args+=(--cpus="${HERMES_CONTAINER_CPUS:-1}")
+fi
+
 docker run -d \
   --name "$container" \
+  "${security_args[@]}" \
   --add-host=host.docker.internal:host-gateway \
   --env-file "$profile_dir/.env" \
   -e "HERMES_UID=$(id -u)" \

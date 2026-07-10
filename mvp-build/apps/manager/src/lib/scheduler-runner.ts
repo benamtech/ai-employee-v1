@@ -4,8 +4,9 @@ import type { ToolContext } from "../tools/types.js";
 import { eventTools } from "../tools/events.stub.js";
 import { gmailTools } from "../tools/gmail.stub.js";
 import { recordRuntimeHealthSnapshots } from "./runtime-health.js";
-import { drainQueuedTurns } from "./turn-drain.js";
+import { drainQueuedTurns, reapStuckTurns } from "./turn-drain.js";
 import { flushDueBatches } from "./event-batching.js";
+import { cleanupExpiredRows } from "./cleanup.js";
 
 export const SCHEDULER_JOB_KEYS = [
   "dispatch_due_reminders",
@@ -14,6 +15,8 @@ export const SCHEDULER_JOB_KEYS = [
   "runtime_health_checks",
   "drain_employee_turns",
   "flush_event_batches",
+  "reap_stuck_turns",
+  "cleanup_expired",
 ] as const;
 
 export type SchedulerJobKey = (typeof SCHEDULER_JOB_KEYS)[number];
@@ -133,6 +136,12 @@ export async function runSchedulerJob(
     } else if (key === "flush_event_batches") {
       const flushed = await flushDueBatches(db, { now: input.now, limit: input.limit });
       proof = { scanned: flushed.scanned, flushed: flushed.flushed, delivered: flushed.delivered };
+    } else if (key === "reap_stuck_turns") {
+      const reaped = await reapStuckTurns(db, { limit: input.limit });
+      proof = { requeued: reaped.requeued, failed: reaped.failed };
+    } else if (key === "cleanup_expired") {
+      const cleaned = await cleanupExpiredRows(db, { now: input.now });
+      proof = cleaned as unknown as Record<string, unknown>;
     } else {
       const envelope = await callEnvelopeJob(key, {
         db,

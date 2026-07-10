@@ -114,6 +114,13 @@ export async function sendSms(opts: {
   else if (messagingService) form.MessagingServiceSid = messagingService;
   else if (opts.from) form.From = opts.from;
   else throw new Error("sendSms needs a From number or TWILIO_MESSAGING_SERVICE_SID.");
+  // Subscribe to delivery-status callbacks so /webhooks/twilio/status can reflect
+  // real delivery state onto the message row. Signature is validated there over the
+  // (evolving) Twilio param set. No-op locally when neither env is set.
+  const statusCallback =
+    process.env.SMS_STATUS_CALLBACK_URL ||
+    (process.env.SMS_WEBHOOK_BASE_URL ? `${process.env.SMS_WEBHOOK_BASE_URL.replace(/\/$/, "")}/status` : "");
+  if (statusCallback) form.StatusCallback = statusCallback;
   const json = await twilioPost(
     `api.twilio.com/2010-04-01/Accounts/${c.accountSid}/Messages.json`,
     form,

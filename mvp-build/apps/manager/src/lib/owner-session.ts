@@ -1,6 +1,7 @@
 import { createHmac, randomBytes } from "node:crypto";
 import { ID_PREFIX, newId } from "@amtech/shared";
 import type { SupabaseClient } from "@amtech/db";
+import { mustWrite } from "./db.js";
 
 function signingSecret(): string {
   const secret = process.env.SIGNING_SECRET;
@@ -20,13 +21,19 @@ export async function mintOwnerSession(
 ): Promise<{ token: string; expires_at: string }> {
   const token = `ow_${randomBytes(32).toString("base64url")}`;
   const expires_at = new Date(Date.now() + ttlMs).toISOString();
-  await db.from("owner_web_sessions").insert({
-    id: newId(ID_PREFIX.ownerWebSession),
-    account_id: accountId,
-    user_id: userId,
-    token_hash: ownerSessionHash(token),
-    expires_at,
-  });
+  // mustWrite: a swallowed insert would hand back a session cookie whose token_hash
+  // was never stored, so requireOwnerSession always 401s — a login that silently
+  // never works.
+  await mustWrite(
+    db.from("owner_web_sessions").insert({
+      id: newId(ID_PREFIX.ownerWebSession),
+      account_id: accountId,
+      user_id: userId,
+      token_hash: ownerSessionHash(token),
+      expires_at,
+    }),
+    "owner_web_sessions.insert",
+  );
   return { token, expires_at };
 }
 

@@ -10,13 +10,13 @@
  */
 import type { SupabaseClient } from "@amtech/db";
 import type {
-  AbilitySummary,
   ResourcePayload,
   RuntimeHealthSummary,
   WorkEventRow,
   WorkOutput,
   WorkTask,
 } from "@amtech/shared";
+import { materializeEmployeeSnapshot } from "./materialization.js";
 
 export type EmployeeSnapshot = ResourcePayload & {
   employee_id: string;
@@ -26,6 +26,10 @@ export type EmployeeSnapshot = ResourcePayload & {
 type EmployeeRow = { id: string; name?: string | null; status?: string | null; profile_id?: string | null; web_route?: string | null; created_at?: string | null };
 type RuntimeEndpointRow = { id: string; backend_type?: string | null; health?: Record<string, unknown> | null; sms_number_e164?: string | null };
 type RuntimeHealthRow = { status?: string | null; checked_at?: string | null; backend_type?: string | null; details?: Record<string, unknown> | null };
+export interface TupleCursor {
+  created_at: string;
+  id: string;
+}
 
 function toWorkEvents(inboundEvents: Array<Record<string, unknown>>, employeeId: string, accountId: string): WorkEventRow[] {
   return inboundEvents
@@ -167,57 +171,6 @@ function buildTasks(input: {
   return [...approvalTasks, ...eventTasks, ...runtimeTask, ...connectorTasks, ...reminderTasks, ...jobTasks];
 }
 
-function buildAbilities(input: {
-  runtimeHealth: RuntimeHealthSummary;
-  connectors: EmployeeSnapshot["connectors"];
-  stripeConnections: Array<Record<string, unknown>>;
-}): AbilitySummary[] {
-  const email = input.connectors.find((c) => c.connector_key === "gmail" || c.provider === "gmail");
-  const stripe = input.stripeConnections[0] as { charges_enabled?: boolean; onboarding_status?: string } | undefined;
-  return [
-    {
-      id: "ability:estimate",
-      label: "Create estimates and documents",
-      category: "documents",
-      status: input.runtimeHealth.status === "unhealthy" ? "degraded" : "ready",
-      summary: "Draft structured estimates, save artifacts, and prepare owner-safe previews.",
-      source: "manager",
-    },
-    {
-      id: "ability:email",
-      label: "Draft and send email",
-      category: "communication",
-      status: email?.status === "connected" ? "ready" : "needs_connection",
-      summary: email?.status === "connected" ? "Email is connected and customer-facing sends stay approval-gated." : "Connect email before sending customer messages.",
-      source: "connector",
-    },
-    {
-      id: "ability:payments",
-      label: "Collect deposits",
-      category: "money",
-      status: stripe?.charges_enabled ? "ready" : "needs_connection",
-      summary: stripe?.charges_enabled ? "Stripe deposits can be drafted and sent after approval." : "Connect payments before sending deposit invoices.",
-      source: "connector",
-    },
-    {
-      id: "ability:reminders",
-      label: "Track follow-ups and reminders",
-      category: "automation",
-      status: "ready",
-      summary: "Schedule internal reminders and surface them in the job timeline.",
-      source: "manager",
-    },
-    {
-      id: "ability:broad-work",
-      label: "Help with broad business work",
-      category: "office",
-      status: "policy_gated",
-      summary: "The employee should take a real swing at owner work while asking before sending, spending, or changing external systems.",
-      source: "policy",
-    },
-  ];
-}
-
 export async function buildEmployeeSnapshot(db: SupabaseClient, employeeId: string, accountId: string): Promise<EmployeeSnapshot> {
   const { data: employeeRaw } = await db
     .from("employees")
@@ -309,7 +262,7 @@ export async function buildEmployeeSnapshot(db: SupabaseClient, employeeId: stri
   };
   const runtime_health = runtimeHealthSummary(runtime, latestHealth);
 
-  return {
+  const snapshot: EmployeeSnapshot = {
     ...snapshotBase,
     runtime_health,
     outputs: buildOutputs({ employeeId, artifacts: snapshotBase.artifacts, stripeInvoices: snapshotBase.stripe_invoices, messages: snapshotBase.messages }),
@@ -321,37 +274,72 @@ export async function buildEmployeeSnapshot(db: SupabaseClient, employeeId: stri
       connectors: snapshotBase.connectors,
       runtimeHealth: runtime_health,
     }),
-    abilities: buildAbilities({ runtimeHealth: runtime_health, connectors: snapshotBase.connectors, stripeConnections: snapshotBase.stripe_connections }),
+  };
+  const materialized = materializeEmployeeSnapshot(snapshot);
+  return {
+    ...snapshot,
+    abilities: materialized.abilities,
+    capabilities: materialized.capabilities,
+    surface_envelopes: materialized.surface_envelopes,
   };
 }
 
 export interface WorkEventDelta {
   workEvents: WorkEventRow[];
   approvals: Array<{ id: string; resolution: string | null }>;
-  nextCursor: string;
+  nextCursor: TupleCursor;
 }
 
-/** New work events + approvals created strictly after `cursor` (ISO). Used by the
- *  stream loop to push deltas. */
-export async function fetchWorkEventsSince(db: SupabaseClient, employeeId: string, accountId: string, cursor: string): Promise<WorkEventDelta> {
+function normalizeCursor(cursor: TupleCursor | string): TupleCursor {
+  return typeof cursor === "string" ? { created_at: cursor, id: "" } : cursor;
+}
+
+function afterCursor(row: { created_at?: string | null; id?: string | null }, cursor: TupleCursor): boolean {
+  const created = row.created_at ?? "";
+  if (created > cursor.created_at) return true;
+  return created === cursor.created_at && String(row.id ?? "") > cursor.id;
+}
+
+function maxCursor(cursor: TupleCursor, rows: Array<{ created_at?: string | null; id?: string | null }>): TupleCursor {
+  return rows.reduce<TupleCursor>((max, row) => {
+    const created = row.created_at;
+    if (created && afterCursor(row, max)) return { created_at: created, id: String(row.id ?? "") };
+    return max;
+  }, cursor);
+}
+
+export function cursorFromSnapshot(snapshot: EmployeeSnapshot): TupleCursor {
+  const approvalRows = (snapshot.approvals ?? []) as Array<{ id?: string; created_at?: string | null }>;
+  return maxCursor({ created_at: "1970-01-01T00:00:00.000Z", id: "" }, [
+    ...(snapshot.work_events ?? []),
+    ...approvalRows,
+  ]);
+}
+
+/** New work events + approvals created after the stable `(created_at,id)` cursor.
+ *  Rows at the exact cursor timestamp are over-fetched and filtered here so a
+ *  reconnect cannot miss same-millisecond rows or duplicate the last delivered id. */
+export async function fetchWorkEventsSince(db: SupabaseClient, employeeId: string, accountId: string, cursor: TupleCursor | string): Promise<WorkEventDelta> {
+  const c = normalizeCursor(cursor);
   const { data: inboundEvents } = await db
     .from("inbound_events")
     .select("id,source,event_type,provider_id,normalized_payload,status,trace,created_at")
-    .gt("created_at", cursor)
+    .gte("created_at", c.created_at)
     .order("created_at", { ascending: true }).limit(50);
-  const rows = (inboundEvents ?? []) as Array<Record<string, unknown> & { created_at?: string }>;
+  const rows = ((inboundEvents ?? []) as Array<Record<string, unknown> & { id?: string; created_at?: string }>)
+    .filter((row) => afterCursor(row, c));
   const workEvents = toWorkEvents(rows, employeeId, accountId);
 
   const { data: newApprovals } = await db
     .from("approvals")
     .select("id,resolution,created_at")
     .eq("employee_id", employeeId).eq("account_id", accountId)
-    .gt("created_at", cursor)
+    .gte("created_at", c.created_at)
     .order("created_at", { ascending: true }).limit(20);
-  const approvals = ((newApprovals ?? []) as Array<{ id: string; resolution: string | null }>)
+  const approvalRows = ((newApprovals ?? []) as Array<{ id: string; resolution: string | null; created_at?: string }>)
+    .filter((row) => afterCursor(row, c));
+  const approvals = approvalRows
     .map((a) => ({ id: a.id, resolution: a.resolution ?? null }));
 
-  const approvalRows = (newApprovals ?? []) as Array<{ created_at?: string }>;
-  const maxCreated = [...rows, ...approvalRows].reduce((max, r) => (r.created_at && r.created_at > max ? r.created_at : max), cursor);
-  return { workEvents, approvals, nextCursor: maxCreated };
+  return { workEvents, approvals, nextCursor: maxCursor(c, [...rows, ...approvalRows]) };
 }

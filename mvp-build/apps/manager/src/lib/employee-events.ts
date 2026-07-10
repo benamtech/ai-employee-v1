@@ -11,12 +11,13 @@
  * channel. The runtime hop (employee phrasing) and SMS transport are env-gated so
  * the primitive is deterministic and testable; both leave provider proof when live.
  */
-import { ID_PREFIX, assertWorkEventDescriptor, newId, renderWorkEventSms, workDeliverableNeedsGate, type EventSource, type WorkEventDescriptor } from "@amtech/shared";
+import { ID_PREFIX, actionScopeFor, assertWorkEventDescriptor, newId, renderWorkEventSms, workDeliverableNeedsGate, type EventSource, type PreviewActionType, type PreviewResourceType, type WorkEventDescriptor } from "@amtech/shared";
 import type { SupabaseClient } from "@amtech/db";
 import { writeAudit } from "./audit.js";
 import { orThrow, mustWrite, insertDedup } from "./db.js";
 import { decideTriage, enqueueRepair, recordBatchCandidate } from "./event-triage.js";
 import { routeEmployeeIntent } from "./channel-router.js";
+import { createPreviewLink } from "./preview-links.js";
 import { wakeEmployeeForDescriptor } from "./wake.js";
 import { signalEmployeeChange } from "./progress-bus.js";
 import { withUiResource } from "./ui-resources.js";
@@ -77,6 +78,13 @@ async function bindApprovalIfNeeded(db: SupabaseClient, descriptor: WorkEventDes
   if (d.refs.approval_id) return descriptor;
 
   const approvalId = newId(ID_PREFIX.approval);
+  // Persist the money amount onto the approval so the mobile preview can show the
+  // dollar figure (the descriptor's deliverable.money isn't stored on the row; refs
+  // is a string map, so amount_cents is stringified).
+  const moneyRefs: Record<string, string> =
+    d.money?.involved && d.money.amount_cents != null
+      ? { amount_cents: String(d.money.amount_cents), ...(d.money.currency ? { currency: d.money.currency } : {}) }
+      : {};
   await mustWrite(
     db.from("approvals").insert({
       id: approvalId,
@@ -85,7 +93,7 @@ async function bindApprovalIfNeeded(db: SupabaseClient, descriptor: WorkEventDes
       action_key: approvalActionKey(descriptor),
       summary: descriptor.suggested_next_action ? `${descriptor.summary} ${descriptor.suggested_next_action}` : descriptor.summary,
       risk_level: d.money?.involved || d.leaves_business ? "high" : "medium",
-      refs: { ...d.refs, source_event_id: descriptor.source_event_id ?? "" },
+      refs: { ...d.refs, ...moneyRefs, source_event_id: descriptor.source_event_id ?? "" },
       channel: "web",
       expires_at: new Date(Date.now() + 24 * 60 * 60_000).toISOString(),
     }),
@@ -99,6 +107,51 @@ async function bindApprovalIfNeeded(db: SupabaseClient, descriptor: WorkEventDes
       refs: { ...d.refs, approval_id: approvalId, action_key: approvalActionKey(descriptor) },
     },
   };
+}
+
+/** The signed-preview target a descriptor points at: an approval (gated action) or
+ *  an artifact (a produced output). Notify-only events with neither get no link. */
+function previewTargetForDescriptor(
+  descriptor: WorkEventDescriptor,
+): { resource_type: PreviewResourceType; resource_id: string; actions: PreviewActionType[] } | null {
+  const d = descriptor.deliverable;
+  if (!d) return null;
+  if (d.refs.approval_id) {
+    return { resource_type: "approval", resource_id: d.refs.approval_id, actions: actionScopeFor("approval", d) };
+  }
+  if (d.refs.artifact_id) {
+    return { resource_type: "artifact", resource_id: d.refs.artifact_id, actions: actionScopeFor("artifact", d) };
+  }
+  return null;
+}
+
+/**
+ * Mint a signed preview/action link for a descriptor and attach it as
+ * `preview_url` so the persisted owner message AND the outbound SMS carry the same
+ * link (the channel router re-renders from this descriptor). Failure to mint (e.g.
+ * missing signing secret) must never block the owner notification — fall back to a
+ * linkless message.
+ */
+async function attachPreviewLink(
+  db: SupabaseClient,
+  descriptor: WorkEventDescriptor,
+  runId: string | null,
+): Promise<WorkEventDescriptor> {
+  const target = previewTargetForDescriptor(descriptor);
+  if (!target) return descriptor;
+  try {
+    const { url } = await createPreviewLink(db, {
+      account_id: descriptor.account_id,
+      employee_id: descriptor.employee_id,
+      resource_type: target.resource_type,
+      resource_id: target.resource_id,
+      actions: target.actions,
+      run_id: runId,
+    });
+    return { ...descriptor, preview_url: url };
+  } catch {
+    return descriptor;
+  }
 }
 
 /** Build the duplicate result for an idempotency key whose row already exists —
@@ -278,6 +331,7 @@ export async function deliverEmployeeEvent(
     }
     descriptor = await bindApprovalIfNeeded(db, descriptor);
     descriptor = withUiResource(descriptor);
+    descriptor = await attachPreviewLink(db, descriptor, runId);
     const normalizedPayload = {
       ...(params.normalized_payload ?? {}),
       work_event_descriptor: descriptor,
@@ -331,7 +385,6 @@ export async function deliverEmployeeEvent(
     signalEmployeeChange(params.employee_id);
     return { event_id: eventId, message_id: messageId, sms_sid: routed.sms_sid, delivery_status: routed.delivery_status === "delivered" ? "delivered" : "pending", duplicate: false };
   }
-  if (descriptor) descriptor = withUiResource(await bindApprovalIfNeeded(db, descriptor));
   const normalizedPayload = {
     ...(params.normalized_payload ?? {}),
     ...(descriptor ? { work_event_descriptor: descriptor } : {}),
@@ -364,6 +417,14 @@ export async function deliverEmployeeEvent(
   if (ins.conflict) {
     await finishOwn("succeeded");
     return duplicateResult(db, idempotencyKey);
+  }
+
+  // Side-effecting binds run ONLY after the dedupe row is claimed, so a lost
+  // at-least-once race never orphans an approval / preview_link row. The enriched
+  // descriptor is folded back into normalized_payload by the trace update below.
+  if (descriptor) {
+    descriptor = withUiResource(await bindApprovalIfNeeded(db, descriptor));
+    descriptor = await attachPreviewLink(db, descriptor, runId);
   }
 
   const messageId = newId(ID_PREFIX.message);
@@ -402,7 +463,11 @@ export async function deliverEmployeeEvent(
   await mustWrite(
     db
       .from("inbound_events")
-      .update({ status: deliveryStatus === "delivered" ? "delivered" : "received", trace: { message_id: messageId, sms_sid: smsSid ?? null, approval_id: descriptor?.deliverable?.refs.approval_id ?? null, run_id: runId } })
+      .update({
+        status: deliveryStatus === "delivered" ? "delivered" : "received",
+        normalized_payload: descriptor ? { ...normalizedPayload, work_event_descriptor: descriptor } : normalizedPayload,
+        trace: { message_id: messageId, sms_sid: smsSid ?? null, approval_id: descriptor?.deliverable?.refs.approval_id ?? null, run_id: runId },
+      })
       .eq("id", eventId),
     "inbound_events.trace_update",
   );

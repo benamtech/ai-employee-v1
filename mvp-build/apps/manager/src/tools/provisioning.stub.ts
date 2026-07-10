@@ -20,6 +20,7 @@ import { writeAudit } from "../lib/audit.js";
 import { checkFeature } from "../lib/entitlements.js";
 import { resolveRuntimeBackend } from "../lib/runtime-backend.js";
 import { sealSecret } from "../lib/secrets.js";
+import { mintEmployeeMcpCredential, revokeEmployeeMcpCredential } from "../lib/mcp-auth.js";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -116,6 +117,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
   const packageKey = manifest.profile_package_key ?? "contractor_estimator";
   const runtimeBackend = resolveRuntimeBackend();
   const apiServerKey = randomBytes(32).toString("base64url");
+  let mcpCredentialId: string | null = null;
 
   await ctx.db.from("employees").insert({
     id: employeeId,
@@ -177,11 +179,19 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
   });
 
   try {
+    const mcpCredential = await mintEmployeeMcpCredential(ctx.db, {
+      account_id: input.account_id,
+      employee_id: employeeId,
+    });
+    mcpCredentialId = mcpCredential.credential_id;
     const result = await callProvisioner({
       account_id: input.account_id,
       employee_id: employeeId,
       manifest_id: manifestId,
       profile_package_key: packageKey,
+      render_secrets: {
+        manager_mcp_token: mcpCredential.token,
+      },
       params: {
         client_id: slug,
         account_id: input.account_id,
@@ -265,6 +275,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
         profile_package_key: packageKey,
         first_sms_sid: result.first_sms_sid ?? null,
         sms_skipped: skipSmsProvisioning(),
+        mcp_credential_prefix: mcpCredential.token_prefix,
       },
     });
     return ok({
@@ -287,6 +298,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
       audit_id,
     });
   } catch (err) {
+    if (mcpCredentialId) await revokeEmployeeMcpCredential(ctx.db, mcpCredentialId).catch(() => {});
     await ctx.db.from("employees").update({ status: "failed" }).eq("id", employeeId);
     await ctx.db.from("employee_profile_builds").update({
       validation_status: "failed",

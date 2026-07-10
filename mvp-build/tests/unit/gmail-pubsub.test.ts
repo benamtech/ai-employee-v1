@@ -1,5 +1,6 @@
 import { createSign, generateKeyPairSync } from "node:crypto";
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { MANAGER_API } from "@amtech/shared";
 import { gmailTools } from "../../apps/manager/src/tools/gmail.stub";
 import { decodePubSubPush, verifyPubSubJwt } from "../../apps/manager/src/lib/pubsub";
 import { sealTokenBundle } from "../../apps/manager/src/lib/gmail-tokens";
@@ -8,6 +9,15 @@ import { invalidateRuntimeCapabilities } from "../../apps/manager/src/lib/hermes
 import type { ToolContext } from "../../apps/manager/src/tools/types";
 import { makeFakeDb, type FakeSupabase } from "./_helpers/fake-supabase";
 import { routerFetch } from "./_helpers/fetch-mock";
+
+const state = vi.hoisted(() => ({ db: null as FakeSupabase | null }));
+
+vi.mock("@amtech/db", () => ({
+  serviceClient: () => {
+    if (!state.db) throw new Error("fake db not initialized");
+    return state.db.asClient();
+  },
+}));
 
 beforeAll(() => {
   process.env.SECRET_REF_MASTER_KEY = "unit-test-master-key-0123456789ab";
@@ -21,6 +31,7 @@ afterEach(() => {
   delete process.env.PUBSUB_REQUIRE_AUTH;
   delete process.env.PUBSUB_SERVICE_ACCOUNT_EMAIL;
   delete process.env.PUBSUB_JWKS_URL;
+  state.db = null;
 });
 
 describe("Pub/Sub decode + verify", () => {
@@ -124,5 +135,44 @@ describe("handle_gmail_pubsub reply pipeline", () => {
     vi.stubGlobal("fetch", vi.fn());
     const res = await gmailTools.handle_gmail_pubsub!({ db: db.asClient(), actor: "manager", account_id: null, employee_id: null }, { email_address: "nobody@gmail.com", history_id: "701" });
     expect(res.status).toBe("failed");
+  });
+});
+
+describe("Gmail Pub/Sub webhook route", () => {
+  it("acks handler failures with 204 and records an audit failure", async () => {
+    state.db = makeFakeDb({ audit_log: [] });
+    const { buildApp } = await import("../../apps/manager/src/server");
+    const { TOOL_REGISTRY } = await import("../../apps/manager/src/tools/registry");
+    const originalGet = TOOL_REGISTRY.get.bind(TOOL_REGISTRY);
+    const throwingHandler = vi.fn(async () => {
+      throw new Error("history pipeline failed");
+    });
+    const getSpy = vi.spyOn(TOOL_REGISTRY, "get").mockImplementation((name) =>
+      name === "handle_gmail_pubsub" ? throwingHandler as never : originalGet(name),
+    );
+    const data = Buffer.from(JSON.stringify({ emailAddress: "shop@gmail.com", historyId: 701 })).toString("base64");
+
+    try {
+      const res = await buildApp().request(MANAGER_API.webhooks.gmail, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: { data, messageId: "pm_fail" } }),
+      });
+
+      expect(res.status).toBe(204);
+      expect(throwingHandler).toHaveBeenCalledWith(expect.any(Object), {
+        email_address: "shop@gmail.com",
+        history_id: "701",
+        pubsub_message_id: "pm_fail",
+      });
+      expect(state.db.tables.audit_log).toHaveLength(1);
+      expect(state.db.tables.audit_log?.[0]).toMatchObject({
+        action: "gmail_pubsub:handler_failed",
+        resource: "shop@gmail.com",
+        result: "failed",
+      });
+    } finally {
+      getSpy.mockRestore();
+    }
   });
 });

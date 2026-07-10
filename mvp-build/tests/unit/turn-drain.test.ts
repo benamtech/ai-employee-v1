@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { drainQueuedTurns } from "../../apps/manager/src/lib/turn-drain";
+import { drainQueuedTurns, reapStuckTurns } from "../../apps/manager/src/lib/turn-drain";
 import { invalidateRuntimeCapabilities } from "../../apps/manager/src/lib/hermes-client";
 import { sealSecret } from "../../apps/manager/src/lib/secrets";
 import { makeFakeDb, SCHEMA_UNIQUES } from "./_helpers/fake-supabase";
@@ -93,5 +93,67 @@ describe("turn-drain drainQueuedTurns", () => {
     const results = await drainQueuedTurns(db.asClient(), { limit: 1 });
     expect(results).toHaveLength(1);
     expect(db.tables.employee_turn_jobs.find((j) => j.status === "queued")).toBeTruthy();
+  });
+
+  it("fails and notifies over-budget queued owner turns instead of looping", async () => {
+    const db = drainDb([queuedTurn({ attempts: 5 })]);
+    const results = await drainQueuedTurns(db.asClient());
+    expect(results).toEqual([{ job_id: "turn_q", employee_id: "emp_1", status: "failed", error: "max_turn_attempts_exhausted" }]);
+    expect(db.tables.employee_turn_jobs[0].status).toBe("failed");
+    expect(db.tables.employee_turn_jobs[0].error).toBe("max_turn_attempts_exhausted");
+    expect(db.tables.work_runs[0].status).toBe("failed");
+    expect(db.tables.delivery_decisions).toHaveLength(1);
+    expect(smsBodies[0]).toContain("queued message");
+  });
+});
+
+const runningTurn = (over: Record<string, any> = {}) => ({
+  id: "turn_r", account_id: "acct_1", employee_id: "emp_1", kind: "owner_sms_chat",
+  idempotency_key: "twilio:SMr", status: "running", input: { body: "hi", channel: "sms" },
+  output: {}, attempts: 1, lease_token: "worker:dead", run_id: "run_queued",
+  created_at: "2026-07-03T00:00:00.000Z", ...over,
+});
+
+const reapDb = (jobs: Record<string, any>[]) => makeFakeDb({
+  employees: [{ id: "emp_1", account_id: "acct_1" }],
+  work_runs: [{ id: "run_queued", account_id: "acct_1", employee_id: "emp_1", trigger_type: "owner_message", status: "started" }],
+  employee_turn_jobs: jobs,
+  employee_turn_locks: [{ employee_id: "emp_1", job_id: "turn_r", lease_token: "worker:dead", lease_expires_at: "2026-07-03T00:01:00.000Z" }],
+  verified_phones: [{ account_id: "acct_1", phone_e164: "+15550001111", verified_at: "2026-07-03T00:00:00.000Z" }],
+  runtime_endpoints: [{ id: "rt_1", employee_id: "emp_1", sms_number_e164: "+15559990000" }],
+}, { uniques: SCHEMA_UNIQUES });
+
+describe("reapStuckTurns", () => {
+  const past = "2026-07-03T00:01:00.000Z"; // lease long expired vs Date.now()
+
+  it("requeues an owner-chat turn stuck in running with an expired lease (so the drain lane re-runs it)", async () => {
+    const db = reapDb([runningTurn({ attempts: 1, lease_expires_at: past })]);
+    const res = await reapStuckTurns(db.asClient());
+    expect(res.requeued).toBe(1);
+    expect(res.failed).toBe(0);
+    const job = db.tables.employee_turn_jobs.find((j) => j.id === "turn_r");
+    expect(job?.status).toBe("queued");
+    expect(job?.lease_token).toBeNull();
+    // stale lock dropped
+    expect(db.tables.employee_turn_locks).toHaveLength(0);
+  });
+
+  it("fails and notifies the owner once the attempt budget is exhausted", async () => {
+    const db = reapDb([runningTurn({ attempts: 5, lease_expires_at: past })]);
+    const res = await reapStuckTurns(db.asClient());
+    expect(res.failed).toBe(1);
+    expect(db.tables.employee_turn_jobs.find((j) => j.id === "turn_r")?.status).toBe("failed");
+    // The owner was told through the router (a delivery decision was recorded).
+    expect((db.tables.delivery_decisions ?? []).length).toBe(1);
+    // The work run was closed out as failed.
+    expect(db.tables.work_runs.find((r) => r.id === "run_queued")?.status).toBe("failed");
+  });
+
+  it("leaves a running turn with a still-valid lease untouched", async () => {
+    const future = "2999-01-01T00:00:00.000Z";
+    const db = reapDb([runningTurn({ attempts: 1, lease_expires_at: future })]);
+    const res = await reapStuckTurns(db.asClient());
+    expect(res).toEqual({ requeued: 0, failed: 0 });
+    expect(db.tables.employee_turn_jobs.find((j) => j.id === "turn_r")?.status).toBe("running");
   });
 });

@@ -25,9 +25,10 @@ skills/daily-checkin/SKILL.md
 ```
 
 ## Tokens (filled from the manifest)
-`{{EMPLOYEE_NAME}}`, `{{BUSINESS_DISPLAY_NAME}}`, `{{BUSINESS_KIND}}`, `{{OWNER_NAME}}`, `{{OWNER_PHONE_E164}}`, `{{TIMEZONE}}`, `{{CLIENT_ID}}`, `{{GATEWAY_PORT}}`, `{{RUNTIME_BACKEND}}` (Manager isolation tier), `{{TERMINAL_BACKEND}}` (Hermes in-container execution backend), `{{MANAGER_MCP_URL}}` (container-facing), `{{EMPLOYEE_NUMBER_E164}}`, `{{WEBHOOK_URL}}`, `{{API_SERVER_KEY}}`.
+`{{EMPLOYEE_NAME}}`, `{{BUSINESS_DISPLAY_NAME}}`, `{{BUSINESS_KIND}}`, `{{OWNER_NAME}}`, `{{OWNER_PHONE_E164}}`, `{{TIMEZONE}}`, `{{CLIENT_ID}}`, `{{GATEWAY_PORT}}`, `{{RUNTIME_BACKEND}}` (Manager isolation tier), `{{TERMINAL_BACKEND}}` (Hermes in-container execution backend), `{{MANAGER_MCP_URL}}` (container-facing), `{{MANAGER_MCP_TOKEN}}` (render-only scoped employee credential), `{{EMPLOYEE_NUMBER_E164}}`, `{{WEBHOOK_URL}}`, `{{API_SERVER_KEY}}`.
 
 Manager owns SMS ingress and delivery. Hermes exposes the authenticated API server from `.env`; `config.yaml`
 does not configure the API server in current Hermes.
 
-> Runtime isolation: `terminal.backend: docker` is the default for production, VPS deployment, and production-like local testing. `local` is an explicit dev/demo fallback only; profile isolation is not process isolation.
+> Runtime isolation: the Manager runtime backend is the isolation tier. For Docker employees, Hermes' own
+> terminal backend runs `local` inside the already-isolated container; do not mount the host Docker socket.

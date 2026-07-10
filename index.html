@@ -921,6 +921,45 @@ mvp-build/tests/unit/gmail-pubsub.test.ts
 mvp-build/tests/unit/stripe-tools.test.ts
 mvp-build/tests/golden-path/step1-create-employee.md
 mvp-build/tests/golden-path/step2-estimate-artifact.md
+wiki/MVP/codebase-reading-guide-3-hour.md
+mvp-build/architecture-and-security-review-2026-07.md
+mvp-build/memory/2026-07-09-1815-phase-03-sms-signed-previews-and-live-gate.md
+mvp-build/memory/2026-07-09-2210-mvp-hardening-review-fixes-and-rls-closure.md
+mvp-build/memory/2026-07-10-0012-phase-4-hardening-closure-and-next-session.md
+mvp-build/memory/2026-07-10-0045-phase-4-source-wired-materialization.md
+mvp-build/memory/2026-07-10-0110-next-session-architecture-and-review-prompt.md
+mvp-build/memory/2026-07-10-0116-agent-trust-boundary-hardening.md
+mvp-build/memory/2026-07-10-1022-next-session-ui-phase5-phase6-planning-prompt.md
+mvp-build/packages/db/migrations/0017_phase3_preview_links.sql
+mvp-build/packages/db/migrations/0018_manager_only_rls.sql
+mvp-build/packages/db/migrations/0019_migrations_table_rls.sql
+mvp-build/packages/db/migrations/0020_revoke_turn_rpc_from_anon.sql
+mvp-build/packages/db/migrations/0021_turn_rpc_grants_fix.sql
+mvp-build/packages/db/migrations/0022_phase4_materialization.sql
+mvp-build/packages/db/migrations/0023_agent_boundary_hardening.sql
+mvp-build/packages/shared/src/materialization.ts
+mvp-build/packages/shared/src/preview-links.ts
+mvp-build/apps/manager/src/lib/capability-registry.ts
+mvp-build/apps/manager/src/lib/cleanup.ts
+mvp-build/apps/manager/src/lib/materialization.ts
+mvp-build/apps/manager/src/lib/mcp-auth.ts
+mvp-build/apps/manager/src/lib/preview-links.ts
+mvp-build/apps/manager/src/lib/preview-render.ts
+mvp-build/apps/web/app/agent/[employeeId]/review/page.tsx
+mvp-build/apps/web/app/agent/[employeeId]/review/ReviewClient.tsx
+mvp-build/apps/web/app/api/employee/[employeeId]/preview/action/route.ts
+mvp-build/tests/unit/cleanup.test.ts
+mvp-build/tests/unit/hermes-container-script.test.ts
+mvp-build/tests/unit/materialization.test.ts
+mvp-build/tests/unit/mcp-auth.test.ts
+mvp-build/tests/unit/mcp-resources.test.ts
+mvp-build/tests/unit/mcp-route-auth.test.ts
+mvp-build/tests/unit/preview-action.test.ts
+mvp-build/tests/unit/preview-links.test.ts
+mvp-build/tests/unit/preview-resolve.test.ts
+mvp-build/tests/unit/profile-renderer-security.test.ts
+mvp-build/tests/unit/sms-preview.test.ts
+mvp-build/tests/unit/twilio-status.test.ts
 `.trim().split(/\n+/).map(s => s.trim()).filter(Boolean);
 
     const state = {

@@ -11,6 +11,7 @@ import { EVENT_TYPES, ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
 import { serviceClient, type SupabaseClient } from "@amtech/db";
 import { verifyStripeSignature } from "../lib/stripe-signature.js";
 import { ingestEvent } from "../events/ingress.js";
+import { insertDedup } from "../lib/db.js";
 
 export interface StripeEvent {
   id: string;
@@ -44,6 +45,8 @@ export interface StripeProcessResult {
   duplicate: boolean;
   normalized_type: string | null;
   delivered: boolean;
+  /** False when an invoice event could not be mapped to an account yet (replayable). */
+  processed?: boolean;
 }
 
 /**
@@ -51,18 +54,24 @@ export interface StripeProcessResult {
  * injected db so it is unit-testable; the route handles transport + signature.
  */
 export async function recordAndProcessStripeEvent(db: SupabaseClient, event: StripeEvent): Promise<StripeProcessResult> {
-  const { data: existing } = await db.from("stripe_webhook_events").select("id").eq("stripe_event_id", event.id).maybeSingle();
-  if (existing) return { duplicate: true, normalized_type: normalizedStripeType(event.type), delivered: false };
-
+  // Atomic dedupe: two concurrent deliveries of the same Stripe event.id both used to
+  // pass a check-then-insert and both call ingestEvent. `stripe_event_id` is UNIQUE
+  // (0001), so insertDedup lets exactly one winner proceed; the loser is a clean duplicate.
   const rowId = newId(ID_PREFIX.stripeWebhookEvent);
-  await db.from("stripe_webhook_events").insert({
-    id: rowId, stripe_event_id: event.id, type: event.type, livemode: Boolean(event.livemode),
-    signature_verified: true, processed: false, trace: { object_type: (event.data?.object as { object?: string })?.object ?? null },
-  });
+  const ins = await insertDedup(
+    db.from("stripe_webhook_events").insert({
+      id: rowId, stripe_event_id: event.id, type: event.type, livemode: Boolean(event.livemode),
+      signature_verified: true, processed: false, trace: { object_type: (event.data?.object as { object?: string })?.object ?? null },
+    }),
+    "stripe_webhook_events.insert",
+  );
+  if (ins.conflict) return { duplicate: true, normalized_type: normalizedStripeType(event.type), delivered: false };
 
   const norm = normalizedStripeType(event.type);
   let delivered = false;
-  if (norm === EVENT_TYPES.stripeInvoicePaid || norm === EVENT_TYPES.stripeInvoiceSent) {
+  const isInvoiceEvent = norm === EVENT_TYPES.stripeInvoicePaid || norm === EVENT_TYPES.stripeInvoiceSent;
+  let contextResolved = true;
+  if (isInvoiceEvent) {
     const ctx = await resolveInvoiceContext(db, event);
     if (ctx) {
       const res = await ingestEvent(db, {
@@ -77,11 +86,16 @@ export async function recordAndProcessStripeEvent(db: SupabaseClient, event: Str
         },
       });
       delivered = norm === EVENT_TYPES.stripeInvoicePaid && !res.duplicate;
+    } else {
+      // The invoice couldn't be mapped to an account yet (e.g. the connection row
+      // arrives later). Leave processed=false so a replay can pick it up once
+      // context exists, instead of foreclosing it as a benign duplicate.
+      contextResolved = false;
     }
   }
 
-  await db.from("stripe_webhook_events").update({ processed: true }).eq("id", rowId);
-  return { stored_id: rowId, duplicate: false, normalized_type: norm, delivered };
+  await db.from("stripe_webhook_events").update({ processed: contextResolved }).eq("id", rowId);
+  return { stored_id: rowId, duplicate: false, normalized_type: norm, delivered, processed: contextResolved };
 }
 
 export function registerStripeWebhooks(app: Hono): void {

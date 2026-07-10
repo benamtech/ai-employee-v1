@@ -6,6 +6,7 @@
  * snapshot builder and the browser agree on one shape.
  */
 import type { WorkEventDescriptor } from "./work-events.js";
+import type { CapabilityGraphNode, SurfaceEnvelope } from "./materialization.js";
 
 export interface ArtifactRow {
   id: string;
@@ -23,6 +24,7 @@ export interface ApprovalRow {
   risk_level: string;
   refs?: Record<string, string>;
   expires_at?: string | null;
+  created_at?: string | null;
 }
 
 export interface MessageRow {
@@ -145,6 +147,8 @@ export interface ResourcePayload {
   job_commitments: JobCommitmentRow[];
   work_events: WorkEventRow[];
   abilities?: AbilitySummary[];
+  capabilities?: CapabilityGraphNode[];
+  surface_envelopes?: SurfaceEnvelope[];
   outputs?: WorkOutput[];
   tasks?: WorkTask[];
 }

@@ -49,6 +49,9 @@ export interface ProvisionerRequest {
   manifest_id: string;
   profile_package_key: string;
   params: ProfileBuildParams;
+  render_secrets?: {
+    manager_mcp_token?: string;
+  };
 }
 
 export interface ProvisionerResult {

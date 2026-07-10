@@ -9,8 +9,8 @@ beforeAll(() => {
 
 const PDF_B64 = Buffer.from("%PDF-1.4\n1 0 obj\n%%EOF").toString("base64");
 
-function ctxFor(db: FakeSupabase, account_id: string, employee_id: string): ToolContext {
-  return { db: db.asClient(), account_id, employee_id, actor: "employee" };
+function ctxFor(db: FakeSupabase, account_id: string, employee_id: string, actor: ToolContext["actor"] = "employee"): ToolContext {
+  return { db: db.asClient(), account_id, employee_id, actor };
 }
 
 function seed(): FakeSupabase {
@@ -40,12 +40,24 @@ describe("Phase 2 estimate/artifact/approval state machine", () => {
     expect(appr.status).toBe("needs_confirmation");
     const approvalId = appr.proof.approval_id as string;
 
-    const resolved = await estimateTools.resolve_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    const resolved = await estimateTools.resolve_approval!(ctxFor(db, "acct_1", "emp_1", "owner"), { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
     expect(resolved.status).toBe("ok");
     expect(resolved.proof.resolution).toBe("approved");
 
     const status = await estimateTools.get_approval_status!(ctx, { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId });
     expect(status.proof.resolution).toBe("approved");
+  });
+
+  it("requires owner-authenticated resolution for customer-facing send approvals", async () => {
+    const db = seed();
+    const ctx = ctxFor(db, "acct_1", "emp_1");
+    const appr = await estimateTools.request_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", action_key: "send_estimate_email", summary: "send", risk_level: "medium" });
+    const approvalId = appr.proof.approval_id as string;
+    const employeeResolved = await estimateTools.resolve_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(employeeResolved.status).toBe("failed");
+    expect(employeeResolved.proof.failure_code).toBe("unauthorized");
+    const ownerResolved = await estimateTools.resolve_approval!(ctxFor(db, "acct_1", "emp_1", "owner"), { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "approved" });
+    expect(ownerResolved.status).toBe("ok");
   });
 
   it("cannot sign a link before the PDF is stored", async () => {
@@ -59,7 +71,7 @@ describe("Phase 2 estimate/artifact/approval state machine", () => {
   it("rejects double resolution and the reject path", async () => {
     const db = seed();
     const ctx = ctxFor(db, "acct_1", "emp_1");
-    const appr = await estimateTools.request_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", action_key: "send_estimate_email", summary: "send", risk_level: "high" });
+    const appr = await estimateTools.request_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", action_key: "set_job_reminder", summary: "set reminder", risk_level: "medium" });
     const approvalId = appr.proof.approval_id as string;
     const first = await estimateTools.resolve_approval!(ctx, { account_id: "acct_1", employee_id: "emp_1", approval_id: approvalId, owner_response: "rejected" });
     expect(first.proof.resolution).toBe("rejected");

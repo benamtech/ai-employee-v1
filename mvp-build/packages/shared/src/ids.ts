@@ -39,6 +39,7 @@ export const ID_PREFIX = {
   ownerWebSession: "sess",
   artifact: "art",
   artifactLink: "lnk",
+  previewLink: "prev",
   approval: "appr",
   connector: "conn",
   outboundEmail: "email",
@@ -59,6 +60,7 @@ export const ID_PREFIX = {
   eventBatch: "batch",
   jobRun: "jobrun",
   runtimeSecret: "rtsec",
+  mcpCredential: "mcpc",
   turnJob: "turn",
   channelSession: "chs",
   deliveryDecision: "deld",
@@ -68,6 +70,11 @@ export const ID_PREFIX = {
   meterPricing: "price",
   usageRollup: "roll",
   budgetPolicy: "budget",
+  surfaceEnvelope: "senv",
+  workResource: "wres",
+  workAction: "wact",
+  capabilityNode: "cap",
+  surfaceReceipt: "srcpt",
 } as const;
 
 export type IdPrefix = (typeof ID_PREFIX)[keyof typeof ID_PREFIX];

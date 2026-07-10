@@ -7,6 +7,7 @@
 import type { SupabaseClient } from "@amtech/db";
 import { sealSecret, openSecret } from "./secrets.js";
 import { refreshAccessToken } from "./google-gmail.js";
+import { mustWrite } from "./db.js";
 
 export interface GmailTokenBundle {
   access_token: string;
@@ -51,9 +52,15 @@ export async function getFreshAccessToken(db: SupabaseClient, connector: Connect
     refresh_token: refreshed.refresh_token ?? bundle.refresh_token,
     scope: refreshed.scope ?? bundle.scope,
   };
-  await db
-    .from("connector_accounts")
-    .update({ token_secret_ref: sealTokenBundle(next), token_expiry: tokenExpiryIso(refreshed.expires_in) })
-    .eq("id", connector.id);
+  // mustWrite: Google rotates refresh tokens, so a swallowed persist error would
+  // drop the new refresh_token and silently disconnect Gmail on the next refresh.
+  // Throwing surfaces the failure at rotation time instead.
+  await mustWrite(
+    db
+      .from("connector_accounts")
+      .update({ token_secret_ref: sealTokenBundle(next), token_expiry: tokenExpiryIso(refreshed.expires_in) })
+      .eq("id", connector.id),
+    "connector_accounts.token_refresh",
+  );
   return next.access_token;
 }

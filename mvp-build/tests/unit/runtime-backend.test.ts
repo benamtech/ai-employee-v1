@@ -53,6 +53,12 @@ describe("runtime backend policy", () => {
     expect(profileTokenMap(params("local")).RUNTIME_BACKEND).toBe("local");
   });
 
+  it("uses a scoped MCP token slot instead of the global Manager internal token", () => {
+    const tokens = profileTokenMap(params("docker"), { manager_mcp_token: "mcp_scoped" });
+    expect(tokens.MANAGER_MCP_TOKEN).toBe("mcp_scoped");
+    expect(tokens).not.toHaveProperty("MANAGER_INTERNAL_TOKEN");
+  });
+
   it("renders Hermes terminal backend as in-process 'local' even under docker isolation", () => {
     // The employee already runs inside the Manager's container; Hermes must not
     // attempt docker-in-docker (no socket) or it silently gates terminal/file tools.

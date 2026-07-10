@@ -49,6 +49,41 @@ describe("event bus delivery", () => {
     expect(descriptor.deliverable.refs.approval_id).toBe(db.tables.approvals?.[0]?.id);
   });
 
+  it("persists the money amount (as a string) on the approval so the mobile preview can show it", async () => {
+    const db = makeFakeDb();
+    await deliverEmployeeEvent(db.asClient(), {
+      account_id: "acct_1", employee_id: "emp_1", event_type: "manager.custom", safe_summary: "Send the deposit invoice.", actor: "manager",
+      work_event_descriptor: {
+        account_id: "acct_1", employee_id: "emp_1", move: "review", title: "Deposit invoice", summary: "Collect a $1,250 deposit.",
+        deliverable: { type: "money_movement", title: "Deposit invoice", refs: { estimate_artifact_id: "art_1" }, money: { involved: true, amount_cents: 125000, currency: "usd" }, leaves_business: true, reversible: false, acceptance: ["approve"] },
+      },
+    });
+    expect(db.tables.approvals?.[0]?.refs.amount_cents).toBe("125000");
+    expect(db.tables.approvals?.[0]?.refs.currency).toBe("usd");
+  });
+
+  it("does not orphan an approval or preview_link row when a duplicate delivery is caught", async () => {
+    process.env.SIGNING_SECRET = "unit-test-signing-secret-0123456789";
+    const db = makeFakeDb({
+      channel_sessions: [{ id: "chs_1", employee_id: "emp_1", channel: "web", last_seen_at: new Date().toISOString() }],
+    }, { uniques: SCHEMA_UNIQUES });
+    const params = {
+      account_id: "acct_1", employee_id: "emp_1", event_type: "manager.custom", idempotency_key: "dup:1", safe_summary: "x", actor: "manager" as const,
+      work_event_descriptor: {
+        account_id: "acct_1", employee_id: "emp_1", move: "review" as const, title: "Deposit", summary: "Send the deposit invoice.",
+        deliverable: { type: "money_movement" as const, title: "Deposit invoice", refs: { estimate_artifact_id: "art_1" }, money: { involved: true, amount_cents: 125000 }, leaves_business: true, reversible: false, acceptance: ["approve" as const] },
+      },
+    };
+    const first = await deliverEmployeeEvent(db.asClient(), params);
+    const second = await deliverEmployeeEvent(db.asClient(), params);
+    expect(first.duplicate).toBe(false);
+    expect(second.duplicate).toBe(true);
+    // Binds now run only after the dedupe row is claimed, so the duplicate adds nothing.
+    expect(db.tables.approvals).toHaveLength(1);
+    expect(db.tables.preview_links).toHaveLength(1);
+    delete process.env.SIGNING_SECRET;
+  });
+
   it("wakes the employee for judgment events and stores the returned descriptor", async () => {
     const db = makeFakeDb({
       employees: [{ id: "emp_1", account_id: "acct_1" }],

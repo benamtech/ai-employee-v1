@@ -28,7 +28,8 @@ API_SERVER_PORT={{GATEWAY_PORT}}
 API_SERVER_HOST=0.0.0.0
 
 # Model + connector provider secrets are provided as secret references by the Manager.
-# Manager tool access is an AMTECH-controlled runtime credential for this profile.
+# Manager tool access is rendered into config.yaml as a scoped per-employee MCP
+# credential, never the global Manager internal bearer.
 #
 # Local no-key model bridge (you-are-the-LLM): when HERMES_MODEL_PROVIDER is set the
 # renderer fills these with a dummy key + the bridge base_url so the custom provider
@@ -37,4 +38,3 @@ API_SERVER_HOST=0.0.0.0
 OPENAI_API_KEY={{MODEL_BRIDGE_API_KEY}}
 OPENAI_BASE_URL={{MODEL_BRIDGE_BASE_URL}}
 MANAGER_API_ORIGIN={{MANAGER_API_ORIGIN}}
-MANAGER_INTERNAL_TOKEN={{MANAGER_INTERNAL_TOKEN}}

@@ -34,19 +34,13 @@ platform_toolsets:
 # server. Enabled mcp_servers auto-attach to the api_server platform's tools
 # (Hermes tools_config), so the employee calls Manager tools (estimates,
 # approvals, connectors, reminders) natively instead of parsing a prose HTTP
-# contract. Auth rides the internal bearer via headers; the streamable-http URL
-# is the Manager's /manager/mcp endpoint.
+# contract. Auth rides a scoped per-employee MCP bearer; Manager derives
+# account_id/employee_id from that credential, not from caller-supplied headers.
 mcp_servers:
   amtech_manager:
     url: "{{MANAGER_MCP_URL}}"
     headers:
-      # Auth bearer + the employee's bound identity. The Manager injects
-      # account_id/employee_id into every tool call from these headers, so the
-      # model never sees or supplies them (they are stripped from the advertised
-      # tool schemas). Rendered per employee; not model-controlled.
-      Authorization: "Bearer {{MANAGER_INTERNAL_TOKEN}}"
-      X-AMTECH-Account-Id: "{{ACCOUNT_ID}}"
-      X-AMTECH-Employee-Id: "{{EMPLOYEE_ID}}"
+      Authorization: "Bearer {{MANAGER_MCP_TOKEN}}"
 
 gateway:
   sms:

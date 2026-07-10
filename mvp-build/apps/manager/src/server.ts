@@ -7,7 +7,7 @@
 import { Hono, type Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serve } from "@hono/node-server";
-import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolName } from "@amtech/shared";
+import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolName, type PreviewActionType } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { TOOL_REGISTRY } from "./tools/registry.js";
 import { runManagerTool } from "./lib/run-tool.js";
@@ -17,16 +17,19 @@ import { registerGmailWebhooks } from "./webhooks/gmail.js";
 import { registerStripeWebhooks } from "./webhooks/stripe.js";
 import { registerProvisionerRoutes } from "./provisioner.js";
 import { registerOrchestratorRoutes } from "./orchestrator.js";
-import { tokenHash, verifySignedToken } from "./lib/signed-links.js";
+import { decodeSignedToken, tokenHash, verifySignedToken } from "./lib/signed-links.js";
 import { requireOwnerSession, mintOwnerSession } from "./lib/owner-session.js";
 import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
 import { createArtifactStorageSignedUrl } from "./lib/artifacts.js";
 import { renderArtifactHtml } from "./lib/artifact-view.js";
+import { resolvePreviewLink } from "./lib/preview-links.js";
+import { buildWorkResource } from "./lib/preview-render.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
-import { buildEmployeeSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";
+import { buildEmployeeSnapshot, cursorFromSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";
 import { subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
 import { orThrow, mustWrite } from "./lib/db.js";
 import { stampChannelPresence } from "./lib/channel-router.js";
+import { bearerToken, verifyEmployeeMcpCredential } from "./lib/mcp-auth.js";
 
 let warnedMissingInternalToken = false;
 
@@ -40,13 +43,17 @@ let warnedMissingInternalToken = false;
 function denyInternal(c: Context): Response | null {
   const internalToken = process.env.MANAGER_INTERNAL_TOKEN;
   if (!internalToken) {
-    if (process.env.NODE_ENV === "production") {
+    // Fail CLOSED unless dev has EXPLICITLY opted into unauthenticated mode. The old
+    // guard keyed only on NODE_ENV, so a deploy with NODE_ENV unset/misspelled (a bad
+    // container env, a staging box) left the entire control plane open. Now the open
+    // path requires ALLOW_UNAUTH_DEV=1 AND non-production.
+    if (process.env.NODE_ENV === "production" || process.env.ALLOW_UNAUTH_DEV !== "1") {
       return c.json({ error: "manager_auth_misconfigured" }, 503);
     }
     if (!warnedMissingInternalToken) {
       warnedMissingInternalToken = true;
       // eslint-disable-next-line no-console
-      console.warn("[manager] MANAGER_INTERNAL_TOKEN unset — endpoints are UNAUTHENTICATED (dev only).");
+      console.warn("[manager] MANAGER_INTERNAL_TOKEN unset + ALLOW_UNAUTH_DEV=1 — endpoints are UNAUTHENTICATED (dev only).");
     }
     return null;
   }
@@ -91,18 +98,13 @@ export function buildApp(): Hono {
   });
 
   // Manager control plane as a native MCP server for the employee. Same registry,
-  // schema, gates, and audit as /manager/tools — just the MCP transport. Auth
-  // rides the internal bearer (rendered into mcp_servers.amtech_manager.headers).
+  // schema, gates, and audit as /manager/tools — just the MCP transport. Auth is
+  // a scoped per-employee credential, not the global Manager internal bearer.
   const mcp = async (c: Context) => {
-    const denied = denyInternal(c);
-    if (denied) return denied;
-    // Employee identity is bound to the employee's baked MCP config headers
-    // (rendered per employee), not supplied by the model. Inject it into every
-    // tool call so ownerCtx is authoritative and un-spoofable.
-    const identity = {
-      account_id: c.req.header("X-AMTECH-Account-Id") || undefined,
-      employee_id: c.req.header("X-AMTECH-Employee-Id") || undefined,
-    };
+    const token = bearerToken(c.req.header("Authorization"));
+    if (!token?.startsWith("mcp_")) return c.json({ error: "unauthorized" }, 401);
+    const identity = await verifyEmployeeMcpCredential(serviceClient(), c.req.header("Authorization"));
+    if (!identity) return c.json({ error: "unauthorized" }, 401);
     return handleManagerMcpRequest(c.req.raw, identity);
   };
   app.post("/manager/mcp", mcp);
@@ -119,6 +121,41 @@ export function buildApp(): Hono {
       status: failedRuns.length ? "failed" : "ok",
       results: result.results,
     }, failedRuns.length ? 500 : 200);
+  });
+
+  app.post("/manager/materialization/diagnostics", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const { account_id, employee_id, limit } = await c.req.json().catch(() => ({}));
+    if (!account_id || !employee_id) return c.json({ error: "account_and_employee_required" }, 400);
+    const db = serviceClient();
+    const employee = orThrow(
+      await db.from("employees").select("id,account_id").eq("id", String(employee_id)).eq("account_id", String(account_id)).maybeSingle(),
+      "materialization.diagnostics.employee",
+    );
+    if (!employee) return c.json({ error: "employee_not_found" }, 404);
+    const snapshot = await buildEmployeeSnapshot(db, String(employee_id), String(account_id));
+    const max = Math.max(1, Math.min(Number(limit ?? 25), 100));
+    const envelopes = (snapshot.surface_envelopes ?? []).slice(0, max);
+    return c.json({
+      account_id,
+      employee_id,
+      latest_envelopes: envelopes.map((e) => ({
+        id: e.id,
+        kind: e.kind,
+        status: e.status ?? null,
+        proof: e.proof,
+        safety: e.safety,
+        render_hints: e.render_hints,
+      })),
+      latest_resources: envelopes.flatMap((e) => e.resource ? [{ resource_type: e.resource.resource_type, resource_id: e.resource.resource_id, title: e.resource.title, body_kind: e.resource.body_kind ?? null }] : []),
+      latest_actions: envelopes.flatMap((e) => (e.actions ?? []).map((a) => ({ action: a.action, label: a.label, gated: Boolean(a.gated) }))),
+      render_errors: [],
+      delivery_receipts: envelopes.flatMap((e) => e.proof.delivery_decision_id ? [{ source_envelope_id: e.id, delivery_decision_id: e.proof.delivery_decision_id }] : []),
+      repair_hints: envelopes
+        .filter((e) => e.status === "failed" || e.safety.requires_approval)
+        .map((e) => ({ source_envelope_id: e.id, hint: e.status === "failed" ? "Check source proof and repair queue." : "Await or resolve owner approval gate." })),
+    });
   });
 
   app.post("/manager/claim/consume", async (c) => {
@@ -245,29 +282,32 @@ export function buildApp(): Hono {
     if (!artifact) return c.json({ error: "artifact_not_found" }, 404);
 
     let authorized = false;
+    let expiredLink = false;
     let linkId: string | null = null;
     let linkToIncrement: string | null = null;
-    let linkAccessCount = 0;
     if (signed_token) {
-      const payload = verifySignedToken(String(signed_token), "artifact_link");
+      // decode (not verify) so an aged-out token is distinguishable from a forged one.
+      const decoded = decodeSignedToken(String(signed_token), "artifact_link");
+      const payload = decoded?.payload;
       if (payload &&
-        payload?.subject === artifactId &&
+        payload.subject === artifactId &&
         payload.extra?.employee_id === employeeId &&
         payload.extra?.account_id === artifact.account_id
       ) {
-        const link = orThrow(
-          await db.from("artifact_links").select("*").eq("artifact_id", artifactId).eq("token_hash", tokenHash(String(signed_token))).maybeSingle(),
-          "artifact_links.lookup",
-        );
-        if (
-          link &&
-          !link.revoked_at &&
-          (!link.expires_at || new Date(link.expires_at).getTime() >= Date.now())
-        ) {
-          authorized = true;
-          linkId = link.id;
-          linkToIncrement = link.id;
-          linkAccessCount = Number(link.access_count ?? 0);
+        if (decoded!.expired) {
+          expiredLink = true;
+        } else {
+          const link = orThrow(
+            await db.from("artifact_links").select("*").eq("artifact_id", artifactId).eq("token_hash", tokenHash(String(signed_token))).maybeSingle(),
+            "artifact_links.lookup",
+          );
+          if (link && (link.revoked_at || (link.expires_at && new Date(link.expires_at).getTime() < Date.now()))) {
+            expiredLink = true;
+          } else if (link) {
+            authorized = true;
+            linkId = link.id;
+            linkToIncrement = link.id;
+          }
         }
       }
     }
@@ -277,15 +317,23 @@ export function buildApp(): Hono {
       authorized = Boolean(session && session.account_id === artifact.account_id);
     }
 
-    if (!authorized) return c.json({ error: "artifact_access_denied" }, 403);
+    if (!authorized) {
+      // An expired/revoked (but validly-signed and correctly-scoped) link gets the
+      // owner-friendly reissue path, consistent with the preview route.
+      if (expiredLink) return c.json({ error: "artifact_link_expired", expired: true }, 410);
+      return c.json({ error: "artifact_access_denied" }, 403);
+    }
     const fallbackHtml = artifact.storage_ref ? null : renderArtifactHtml(artifact);
     if (!artifact.storage_ref && !fallbackHtml) return c.json({ error: "artifact_not_found" }, 404);
     const signedUrl = artifact.storage_ref ? await createArtifactStorageSignedUrl(db, String(artifact.storage_ref)) : null;
     if (linkToIncrement) {
-      await mustWrite(
-        db.from("artifact_links").update({ access_count: linkAccessCount + 1 }).eq("id", linkToIncrement),
-        "artifact_links.access_count",
-      );
+      // Best-effort analytics counter — never fail the owner's read on it (access
+      // is authorized by the signed token/expiry, not by this count).
+      try {
+        await db.rpc("increment_artifact_link_access_count", { p_link_id: linkToIncrement });
+      } catch {
+        // best effort
+      }
     }
     await db.from("audit_log").insert({
       id: newId(ID_PREFIX.audit),
@@ -311,6 +359,144 @@ export function buildApp(): Hono {
       signed_url: signedUrl,
       mime_type: artifact.mime_type ?? "application/pdf",
     });
+  });
+
+  // Signed mobile preview (Phase 3). The signed token IS the credential and encodes
+  // the scoped resource; Manager decodes it, renders a WorkResource from the same
+  // read model the web desk uses, and scopes the offered actions to the token.
+  app.post(MANAGER_API.previewResolve, async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const { signed_token } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    const resolution = await resolvePreviewLink(db, String(signed_token ?? ""));
+    if (!resolution.ok) {
+      if (resolution.reason === "expired" || resolution.reason === "revoked") {
+        return c.json({ error: "preview_link_expired", expired: true }, 410);
+      }
+      return c.json({ error: "preview_access_denied" }, 403);
+    }
+    const link = resolution.link;
+    const resource = await buildWorkResource(db, {
+      employee_id: link.employee_id,
+      account_id: link.account_id,
+      resource_type: link.resource_type,
+      resource_id: link.resource_id,
+    });
+    if (!resource) return c.json({ error: "preview_not_found" }, 404);
+
+    // Scope offered actions to what the signed link allows (view is always safe).
+    const allow = new Set<string>([...resolution.claims.actions, "view"]);
+    resource.actions = resource.actions.filter((a) => allow.has(a.action));
+
+    // Best-effort analytics counter — access is authorized by the signed token, not
+    // by this count, so a counter write must never fail the owner's read.
+    try {
+      await db.rpc("increment_preview_link_access_count", { p_link_id: link.id });
+    } catch {
+      // best effort
+    }
+    await db.from("audit_log").insert({
+      id: newId(ID_PREFIX.audit),
+      account_id: link.account_id,
+      employee_id: link.employee_id,
+      actor: "owner",
+      action: "preview:access",
+      resource: `${link.resource_type}:${link.resource_id}`,
+      result: "ok",
+      details: { via_signed_token: true },
+    });
+    return c.json({ resource, employee_id: link.employee_id });
+  });
+
+  // Owner-authenticated signed action (Phase 3). The token is the credential; the
+  // action must be in the token's scope. approve/reject reuse the idempotent
+  // resolve_approval state machine; respond/edit route the note into the same
+  // owner-turn pipeline as web/SMS so the employee LLM handles it.
+  app.post(MANAGER_API.previewAction, async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const { signed_token, action, note } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    const resolution = await resolvePreviewLink(db, String(signed_token ?? ""));
+    if (!resolution.ok) {
+      if (resolution.reason === "expired" || resolution.reason === "revoked") {
+        return c.json({ error: "preview_link_expired", expired: true }, 410);
+      }
+      return c.json({ error: "preview_access_denied" }, 403);
+    }
+    const link = resolution.link;
+    const act = String(action ?? "") as PreviewActionType;
+    if (!resolution.claims.actions.includes(act)) {
+      return c.json({ error: "action_not_permitted" }, 403);
+    }
+    const terminal = act === "approve" || act === "reject" || act === "acknowledge";
+    if (terminal && link.consumed_at) {
+      return c.json({ error: "already_actioned", consumed: true }, 409);
+    }
+
+    let resultBody: Record<string, unknown> = { ok: true };
+
+    if (act === "approve" || act === "reject") {
+      if (link.resource_type !== "approval") return c.json({ error: "action_not_permitted" }, 403);
+      const outcome = await runManagerTool("resolve_approval", {
+        account_id: link.account_id,
+        employee_id: link.employee_id,
+        approval_id: link.resource_id,
+        owner_response: act === "approve" ? "approved" : "rejected",
+        channel: "sms",
+      }, { actor: "owner" });
+      if (outcome.kind !== "ok" || outcome.envelope.status !== "ok") {
+        return c.json({ error: "resolve_failed", detail: outcome.kind === "ok" ? outcome.envelope : outcome.kind }, 400);
+      }
+      resultBody = { ok: true, resolution: act === "approve" ? "approved" : "rejected" };
+    } else if (act === "respond" || act === "edit") {
+      const body = String(note ?? "").trim();
+      if (!body) return c.json({ error: "note_required" }, 400);
+      const messageId = newId(ID_PREFIX.message);
+      await mustWrite(
+        db.from("employee_messages").insert({
+          id: messageId,
+          employee_id: link.employee_id,
+          direction: "to_employee",
+          source: "web",
+          channel: "web",
+          body,
+          status: "received",
+        }),
+        "employee_messages.insert.preview_respond",
+      );
+      const turn = await deliverOwnerTurnToRuntime(db, {
+        account_id: link.account_id,
+        employee_id: link.employee_id,
+        body,
+        channel: "web",
+        idempotency_key: `preview:${link.id}:${messageId}`,
+      });
+      resultBody = { ok: true, turn_status: turn.status };
+    } else if (act === "acknowledge") {
+      resultBody = { ok: true, acknowledged: true };
+    } else {
+      return c.json({ error: "action_not_permitted" }, 403);
+    }
+
+    if (terminal) {
+      await mustWrite(
+        db.from("preview_links").update({ consumed_at: new Date().toISOString() }).eq("id", link.id),
+        "preview_links.consume",
+      );
+    }
+    await db.from("audit_log").insert({
+      id: newId(ID_PREFIX.audit),
+      account_id: link.account_id,
+      employee_id: link.employee_id,
+      actor: "owner",
+      action: "preview:action",
+      resource: `${link.resource_type}:${link.resource_id}`,
+      result: "ok",
+      details: { action: act },
+    });
+    return c.json(resultBody);
   });
 
   app.post(MANAGER_API.employeeResources(":employeeId"), async (c) => {
@@ -354,28 +540,40 @@ export function buildApp(): Hono {
 
     return streamSSE(c, async (stream) => {
       let closed = false;
+      let writeChain = Promise.resolve();
       stream.onAbort(() => { closed = true; });
+      const writeSse = (frame: { event: string; data: string }) => {
+        writeChain = writeChain
+          .then(() => closed ? undefined : stream.writeSSE(frame))
+          .catch((err) => {
+            closed = true;
+            // eslint-disable-next-line no-console
+            console.warn("[manager] SSE write failed:", err instanceof Error ? err.message : String(err));
+          });
+        return writeChain;
+      };
       const unsub = subscribeProgress(employeeId, (p) => {
-        void stream.writeSSE({ event: "work_progress", data: JSON.stringify({ kind: "work_progress", ...p }) });
+        void writeSse({ event: "work_progress", data: JSON.stringify({ kind: "work_progress", ...p }) });
       });
       try {
         const snapshot = await buildEmployeeSnapshot(db, employeeId, accountId);
-        await stream.writeSSE({ event: "snapshot", data: JSON.stringify({ kind: "snapshot", snapshot }) });
-        let cursor = new Date().toISOString();
+        await writeSse({ event: "snapshot", data: JSON.stringify({ kind: "snapshot", snapshot }) });
+        let cursor = cursorFromSnapshot(snapshot);
         while (!closed) {
           await waitForEmployeeChange(employeeId, pollMs);
           if (closed) break;
           const delta = await fetchWorkEventsSince(db, employeeId, accountId, cursor);
           for (const event of delta.workEvents) {
-            await stream.writeSSE({ event: "work_event", data: JSON.stringify({ kind: "work_event", event }) });
+            await writeSse({ event: "work_event", data: JSON.stringify({ kind: "work_event", event }) });
           }
           for (const approval of delta.approvals) {
-            await stream.writeSSE({ event: "approval_update", data: JSON.stringify({ kind: "approval_update", approval_id: approval.id, resolution: approval.resolution }) });
+            await writeSse({ event: "approval_update", data: JSON.stringify({ kind: "approval_update", approval_id: approval.id, resolution: approval.resolution }) });
           }
           cursor = delta.nextCursor;
-          await stream.writeSSE({ event: "ping", data: "" }); // keepalive
+          await writeSse({ event: "ping", data: "" }); // keepalive
         }
       } finally {
+        await writeChain;
         unsub();
       }
     });

@@ -79,6 +79,16 @@ try {
   await mobile.screenshot({ path: join(screenshotDir, "work-surface-mobile.png"), fullPage: true });
   await mobile.close();
 
+  // Signed mobile review surface (Phase 3), fixture mode — no Manager/creds.
+  const reviewUrl = `${baseUrl}/agent/${employeeId}/review?t=fixture-approval`;
+  const review = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
+  await waitForAppRoute(reviewUrl);
+  await review.goto(reviewUrl, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  await review.getByText("Needs your decision").waitFor({ timeout: 20_000 });
+  await review.getByRole("button", { name: "Approve" }).waitFor({ timeout: 10_000 });
+  await review.screenshot({ path: join(screenshotDir, "review-mobile.png"), fullPage: true });
+  await review.close();
+
   console.log(`UI fixture smoke passed: ${url}`);
   console.log(`Screenshots: ${screenshotDir}`);
 

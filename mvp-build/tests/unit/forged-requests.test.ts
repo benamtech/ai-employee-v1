@@ -78,6 +78,22 @@ describe("forged provider requests are denied at the HTTP boundary", () => {
     });
     expect(res.status).not.toBe(200);
   });
+
+  it("rejects the global internal bearer on the employee MCP route", async () => {
+    process.env.MANAGER_INTERNAL_TOKEN = "global-manager-token";
+    const app = buildApp();
+    const res = await app.request("/manager/mcp", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer global-manager-token",
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+        "MCP-Protocol-Version": "2025-06-18",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+    });
+    expect(res.status).toBe(401);
+  });
 });
 
 describe("signature verifiers discriminate valid vs tampered (positive controls)", () => {

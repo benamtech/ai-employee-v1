@@ -15,6 +15,8 @@
  *    `complete_employee_turn_job` over the in-memory tables, faithful to the SQL
  *    contract in migration 0011, so turn-queue's RPC branch runs under unit tests.
  *    (The plpgsql itself is proven by the env-gated integration test.)
+ *  - `increment_*_access_count`: atomic signed-link counter RPCs used by Manager
+ *    routes; the fake mutates a single row exactly once per call.
  */
 import type { SupabaseClient } from "@amtech/db";
 
@@ -176,7 +178,20 @@ export class FakeSupabase {
     if (name === "complete_employee_turn_job") {
       return { data: this.completeTurn(params.p_job_id, params.p_lease_token, params.p_status, params.p_output ?? {}, params.p_error ?? null), error: null };
     }
+    if (name === "increment_artifact_link_access_count") {
+      return { data: this.incrementAccessCount("artifact_links", params.p_link_id), error: null };
+    }
+    if (name === "increment_preview_link_access_count") {
+      return { data: this.incrementAccessCount("preview_links", params.p_link_id), error: null };
+    }
     throw new Error(`fake rpc: unknown function ${name}`);
+  }
+
+  private incrementAccessCount(table: string, id: string): number | null {
+    const row = this.table(table).find((r) => r.id === id);
+    if (!row) return null;
+    row.access_count = Number(row.access_count ?? 0) + 1;
+    return row.access_count;
   }
 
   private nowMs(): number { return Date.now(); }
@@ -261,4 +276,7 @@ export const SCHEMA_UNIQUES: UniqueSpec = {
   delivery_decisions: [["employee_id", "intent_key"]],
   channel_sessions: [["employee_id", "channel"]],
   runtime_endpoint_secrets: [["runtime_endpoint_id"]],
+  employee_mcp_credentials: [["token_hash"]],
+  stripe_webhook_events: [["stripe_event_id"]],
+  preview_links: [["token_hash"]],
 };

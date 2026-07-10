@@ -9,7 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { EVENT_TYPES } from "@amtech/shared";
 import { recordAndProcessStripeEvent, type StripeEvent } from "../../apps/manager/src/webhooks/stripe";
-import { makeFakeDb, type FakeSupabase } from "./_helpers/fake-supabase";
+import { makeFakeDb, SCHEMA_UNIQUES, type FakeSupabase } from "./_helpers/fake-supabase";
 
 // Guard: ensure no ambient Twilio creds make deliverEmployeeEvent attempt a real send.
 beforeEach(() => {
@@ -30,7 +30,7 @@ function seedWithInvoice(): FakeSupabase {
     stripe_connections: [
       { id: "stcon_1", account_id: "acct_1", employee_id: "emp_1" },
     ],
-  });
+  }, { uniques: SCHEMA_UNIQUES });
 }
 
 function paidEvent(id: string): StripeEvent {
@@ -39,7 +39,7 @@ function paidEvent(id: string): StripeEvent {
 
 describe("recordAndProcessStripeEvent", () => {
   it("dedupes a Stripe event already recorded (idempotent webhook)", async () => {
-    const db = makeFakeDb({ stripe_webhook_events: [{ id: "swe_existing", stripe_event_id: "evt_dup" }] });
+    const db = makeFakeDb({ stripe_webhook_events: [{ id: "swe_existing", stripe_event_id: "evt_dup" }] }, { uniques: SCHEMA_UNIQUES });
     const res = await recordAndProcessStripeEvent(db.asClient(), paidEvent("evt_dup"));
     expect(res.duplicate).toBe(true);
     expect(res.delivered).toBe(false);
@@ -76,6 +76,19 @@ describe("recordAndProcessStripeEvent", () => {
     expect(second.duplicate).toBe(true);
     expect(second.delivered).toBe(false);
     expect(db.tables.inbound_events).toHaveLength(1);
+  });
+
+  it("leaves unresolved invoice events unprocessed so repair/replay can pick them up", async () => {
+    const db = makeFakeDb({ stripe_invoices: [], stripe_connections: [] }, { uniques: SCHEMA_UNIQUES });
+    const res = await recordAndProcessStripeEvent(db.asClient(), paidEvent("evt_unresolved"));
+
+    expect(res.duplicate).toBe(false);
+    expect(res.normalized_type).toBe(EVENT_TYPES.stripeInvoicePaid);
+    expect(res.delivered).toBe(false);
+    expect(res.processed).toBe(false);
+    expect(db.tables.stripe_webhook_events).toHaveLength(1);
+    expect(db.tables.stripe_webhook_events?.[0]?.processed).toBe(false);
+    expect(db.tables.inbound_events ?? []).toHaveLength(0);
   });
 
   it("stores invoice.sent but does not deliver (only paid notifies the owner)", async () => {

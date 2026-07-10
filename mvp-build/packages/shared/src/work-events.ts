@@ -177,6 +177,12 @@ export interface WorkEventDescriptor {
   deliverable?: WorkDeliverableDescriptor;
   suggested_next_action?: string;
   proof?: Record<string, string>;
+  /**
+   * Signed mobile preview/action link (Phase 3). Minted by Manager
+   * (lib/preview-links.ts) and attached before rendering, so the persisted owner
+   * message and the outbound SMS carry the identical link. Presentation only.
+   */
+  preview_url?: string;
 }
 
 export interface WorkEventConformance {
@@ -240,8 +246,35 @@ export function assertWorkEventDescriptor(descriptor: WorkEventDescriptor): Work
   return descriptor;
 }
 
+/**
+ * Grammar-aware SMS trailer for a link. `review` prompts approval, `question`
+ * prompts an answer, `notify`/receipt links are quiet context. Kept here (not in
+ * preview-links) to avoid a value import cycle with this module.
+ */
+export function smsGrammarSuffix(move: WorkMove, hasLink: boolean): string {
+  if (!hasLink) return "";
+  switch (move) {
+    case "review":
+      return "Review and approve here:";
+    case "question":
+      return "Open to answer:";
+    case "notify":
+    default:
+      return "Details:";
+  }
+}
+
+/**
+ * Owner-safe SMS body for a work event. Grammar-aware; when a signed
+ * `preview_url` is attached it appends the move-appropriate trailer + link so the
+ * owner can inspect/act from their phone. Pure — the URL is minted upstream.
+ */
 export function renderWorkEventSms(descriptor: WorkEventDescriptor): string {
   const action = descriptor.suggested_next_action?.trim();
   const base = `${descriptor.title}: ${descriptor.summary}`.trim();
-  return action ? `${base} ${action}` : base;
+  const head = action ? `${base} ${action}` : base;
+  const link = descriptor.preview_url?.trim();
+  if (!link) return head;
+  const suffix = smsGrammarSuffix(descriptor.move, true);
+  return `${head} ${suffix} ${link}`.trim();
 }

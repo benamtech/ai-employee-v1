@@ -22,6 +22,69 @@ export interface DrainResult {
   error?: string;
 }
 
+/** Owner-chat turns are safe to retry; a straggler is re-run by the drain lane. */
+const MAX_TURN_ATTEMPTS = 5;
+
+export interface ReapResult {
+  requeued: number;
+  failed: number;
+}
+
+/**
+ * Recover turns stuck in `running` because their worker died mid-execution (crash,
+ * OOM, redeploy). The claim lease has expired but the job row is still `running`, so
+ * the drain lane (which only claims `queued`) never re-picks it and the owner's
+ * message is silently lost with no reply and no error. This scheduled reaper requeues
+ * owner-chat turns under the attempt budget (the drain lane then re-runs them); past
+ * the budget it fails the turn and tells the owner to resend. Event-wake turns carry
+ * lost event context and aren't drainable, so they are failed directly.
+ */
+export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number } = {}): Promise<ReapResult> {
+  const limit = opts.limit ?? 50;
+  const nowIso = new Date().toISOString();
+  const { data } = await db
+    .from("employee_turn_jobs")
+    .select("id,account_id,employee_id,kind,attempts,run_id,lease_token")
+    .eq("status", "running")
+    .lt("lease_expires_at", nowIso)
+    .limit(limit);
+  const stuck = (data ?? []) as Array<{ id: string; account_id?: string | null; employee_id: string; kind: string; attempts?: number; run_id?: string | null; lease_token?: string | null }>;
+  let requeued = 0;
+  let failed = 0;
+  for (const job of stuck) {
+    // Drop the dead worker's stale lock so the employee is unblocked either way.
+    if (job.lease_token) {
+      await db.from("employee_turn_locks").delete().eq("employee_id", job.employee_id).eq("lease_token", job.lease_token);
+    }
+    const isOwnerTurn = job.kind === "owner_web_chat" || job.kind === "owner_sms_chat";
+    if (isOwnerTurn && Number(job.attempts ?? 0) < MAX_TURN_ATTEMPTS) {
+      await mustWrite(
+        db.from("employee_turn_jobs").update({ status: "queued", lease_token: null, lease_expires_at: null, available_at: nowIso }).eq("id", job.id),
+        "employee_turn_jobs.reap_requeue",
+      );
+      requeued += 1;
+      continue;
+    }
+    await mustWrite(
+      db.from("employee_turn_jobs").update({ status: "failed", lease_token: null, lease_expires_at: null, error: "reaped_max_attempts" }).eq("id", job.id),
+      "employee_turn_jobs.reap_fail",
+    );
+    await finishWorkRun(db, job.run_id ?? null, "failed");
+    if (isOwnerTurn && job.account_id) {
+      await routeEmployeeIntent(db, {
+        account_id: job.account_id,
+        employee_id: job.employee_id,
+        intent_key: `reap:${job.id}`,
+        move: "notify",
+        text: "I hit a snag finishing your last message and couldn't complete it. Please send it again and I'll pick it right back up.",
+        run_id: job.run_id ?? null,
+      });
+    }
+    failed += 1;
+  }
+  return { requeued, failed };
+}
+
 export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: number } = {}): Promise<DrainResult[]> {
   const limit = opts.limit ?? 10;
   const results: DrainResult[] = [];
@@ -32,6 +95,22 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
       await completeEmployeeTurn(db, job, "failed", {}, "event_wake_not_drainable");
       await finishWorkRun(db, job.run_id ?? null, "failed");
       results.push({ job_id: job.id, employee_id: job.employee_id, status: "skipped" });
+      continue;
+    }
+    if (Number(job.attempts ?? 0) > MAX_TURN_ATTEMPTS) {
+      await completeEmployeeTurn(db, job, "failed", {}, "max_turn_attempts_exhausted");
+      await finishWorkRun(db, job.run_id ?? null, "failed");
+      if (job.account_id) {
+        await routeEmployeeIntent(db, {
+          account_id: job.account_id,
+          employee_id: job.employee_id,
+          intent_key: `drain-failed:${job.id}`,
+          move: "notify",
+          text: "I hit a snag finishing your queued message and couldn't complete it. Please send it again and I'll pick it right back up.",
+          run_id: job.run_id ?? null,
+        });
+      }
+      results.push({ job_id: job.id, employee_id: job.employee_id, status: "failed", error: "max_turn_attempts_exhausted" });
       continue;
     }
     const startedAt = Date.now();

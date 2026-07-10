@@ -1,8 +1,10 @@
 # Phase 4 - Tool-Agnostic Capability And Renderer Layer
 
-Status: planned
+Status: source-wired
 
 Goal: make every Hermes skill/tool, Manager tool, MCP server tool, artifact, and deliverable materialize without writing a bespoke connector UI.
+
+Source-wired note (2026-07-10): the production-shaped contract/source layer is implemented locally, but no live Hermes/provider acceptance is claimed. Current proof is static/local only: typecheck, unit, lint, build, UI fixture smoke, and env-gated integration skips.
 
 ## Summary
 
@@ -79,6 +81,16 @@ No renderer tier may relax approval requirements.
 - A generic structured artifact with no PDF renders safely as HTML.
 - A failed tool result appears as a repairable coworker message, not a raw exception.
 - The same `WorkResource` can render as a web preview, SMS preview link, and admin/debug view.
+
+## Source State (2026-07-10)
+
+- Shared contracts: `SurfaceEnvelope`, `RenderHints`, `SafetyEnvelope`, `ProofEnvelope`, `CapabilityGraphNode`, `EmployeeEventStreamEvent`, new ID prefixes, and `ResourcePayload.capabilities/surface_envelopes`.
+- Manager registry/materialization: capability graph from Manager tool schemas/MCP, connector status, runtime health, and policy; generic surface envelope projection from messages, artifacts, approvals, work events, connectors, reminders, invoices, runtime health, and tool activity descriptors.
+- MCP resources: read-only `resources/list` and `resources/read` for business brain, connector status, artifacts, approvals, work queue, runtime health, and capability registry.
+- Hardening closed in the same pass: tuple `(created_at,id)` SSE cursor, serialized SSE progress writes, over-budget turn drain fail/notify path, atomic signed-link counter RPCs, and secret-ref direct-read policy tightening.
+- Phase 5 groundwork: internal `/manager/materialization/diagnostics` endpoint with redacted envelopes/resources/actions/proof ids/repair hints.
+
+Remaining live gaps: live Hermes tool execution, live Hermes/provider capability discovery, live DB migration/advisor proof for `0022`, and provider-event proof that the materialized envelopes match real Gmail/Stripe/Twilio flows.
 
 ## Tests
 

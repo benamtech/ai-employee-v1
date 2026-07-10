@@ -20,12 +20,19 @@ export function artifactRoute(employeeId: string, artifactId: string): string {
   return `/agent/${employeeId}/output/${artifactId}`;
 }
 
+/** Signed mobile review route (Phase 3): the token is the auth, no owner session. */
+export function reviewRoute(employeeId: string, token: string): string {
+  return `/agent/${employeeId}/review?t=${encodeURIComponent(token)}`;
+}
+
 /** Backend Manager API + webhook surface (api.amtechai.com). */
 export const MANAGER_API = {
   toolBase: "/manager",
   orchestratorWeb: "/manager/orchestrator/web",
   artifactResolve: (employeeId: string, artifactId: string) =>
     `/manager/artifacts/${employeeId}/${artifactId}/resolve`,
+  previewResolve: "/manager/preview/resolve",
+  previewAction: "/manager/preview/action",
   employeeResources: (employeeId: string) => `/manager/employee/${employeeId}/resources`,
   employeeStream: (employeeId: string) => `/manager/employee/${employeeId}/stream`,
   employeeHeartbeat: (employeeId: string) => `/manager/employee/${employeeId}/heartbeat`,

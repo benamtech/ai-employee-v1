@@ -26,6 +26,21 @@ import {
 } from "../lib/artifacts.js";
 import { mintSignedToken, tokenHash } from "../lib/signed-links.js";
 
+const OWNER_AUTH_REQUIRED_APPROVAL_ACTIONS = new Set([
+  "send_estimate_email",
+  "send_email",
+  "send_deposit_invoice",
+  "send_invoice",
+  "connect_email",
+  "connect_stripe",
+  "bulk_external_send",
+  "delete_customer_data",
+]);
+
+function requiresOwnerAuthenticatedResolution(approval: { action_key: string; risk_level?: string | null }): boolean {
+  return approval.risk_level === "high" || OWNER_AUTH_REQUIRED_APPROVAL_ACTIONS.has(approval.action_key);
+}
+
 async function employeeBelongsToAccount(ctx: Parameters<ToolHandler>[0], account_id: string, employee_id: string): Promise<boolean> {
   const { data } = await ctx.db
     .from("employees")
@@ -462,6 +477,18 @@ const resolveApproval: ToolHandler = async (ctx, raw) => {
       details: { reason: "approval_expired" },
     });
     return failed("validation_failed", "Approval expired.", { account_id: input.account_id, employee_id: input.employee_id, audit_id });
+  }
+  if (ctx.actor === "employee" && requiresOwnerAuthenticatedResolution(approval)) {
+    const audit_id = await writeAudit(ctx.db, {
+      account_id: input.account_id,
+      employee_id: input.employee_id,
+      actor: ctx.actor,
+      action: "tool:resolve_approval",
+      resource: input.approval_id,
+      result: "denied",
+      details: { reason: "owner_authenticated_resolution_required", action_key: approval.action_key, risk_level: approval.risk_level ?? null },
+    });
+    return failed("unauthorized", "This approval requires an owner-authenticated web or signed-link action.", { account_id: input.account_id, employee_id: input.employee_id, audit_id });
   }
   await ctx.db.from("approvals").update({
     resolution,

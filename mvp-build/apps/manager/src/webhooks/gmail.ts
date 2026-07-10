@@ -5,7 +5,7 @@
  * thin transport adapters — all logic lives in the tools (08/09-*.md).
  */
 import type { Hono } from "hono";
-import { MANAGER_API } from "@amtech/shared";
+import { ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { verifyOAuthState } from "../lib/oauth-state.js";
 import { decodePubSubPush, verifyPubSubJwt } from "../lib/pubsub.js";
@@ -65,7 +65,23 @@ export function registerGmailWebhooks(app: Hono): void {
       try {
         await handler(ctx, { email_address: push.email_address, history_id: push.history_id, pubsub_message_id: push.pubsub_message_id });
       } catch {
-        // Swallow — ack regardless; the next push or sync_gmail_history recovers.
+        // Ack regardless (Pub/Sub would otherwise retry-storm), but leave a failure
+        // record so a persistently-failing reply pipeline isn't invisible — inbound
+        // customer replies could be silently lost with no dead-letter otherwise.
+        try {
+          await ctx.db.from("audit_log").insert({
+            id: newId(ID_PREFIX.audit),
+            account_id: null,
+            employee_id: null,
+            actor: "manager",
+            action: "gmail_pubsub:handler_failed",
+            resource: push.email_address,
+            result: "failed",
+            details: { history_id: push.history_id, pubsub_message_id: push.pubsub_message_id },
+          });
+        } catch {
+          // best-effort observability only.
+        }
       }
     }
     return c.newResponse(null, 204);
