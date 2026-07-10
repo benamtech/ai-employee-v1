@@ -24,15 +24,21 @@ Before changing UI, read:
 3. `mvp-build/CODEGRAPH.md`.
 4. `mvp-build/memory/MEMORY.md` and newest relevant handoff.
 5. `mvp-build/second-half-plan/README.md`.
-6. `mvp-build/second-half-plan/phase-02-owner-work-surface-redesign.md`.
+6. Whichever phase doc matches the surface you're touching: `phase-02-owner-work-surface-redesign.md` (web desk), `phase-03-sms-ambient-inbox-and-link-previews.md` (Review/SMS), `phase-04-tool-agnostic-capability-and-renderer-layer.md` (materialization/capabilities), `phase-05-trial-operations-admin-billing.md` (Admin console).
 7. `mvp-build/ui-handoff/product-grounding.md`.
-8. This folder.
+8. `mvp-build/ui-handoff/data-catalog.md` — the data/surface/route inventory; read before assuming a field or surface doesn't exist.
+9. This folder.
 
 Before changing any backend-facing contract, also read:
 
 - `packages/shared/src/resource-payload.ts`;
 - `packages/shared/src/work-events.ts`;
+- `packages/shared/src/preview-links.ts` (the `WorkResource`/`WorkAction` contract; Review/SMS-preview surfaces);
+- `packages/shared/src/materialization.ts` (`SurfaceEnvelope`/`CapabilityGraphNode`; Phase 4 contract);
+- `packages/shared/src/admin.ts` (Admin console contracts);
 - `apps/manager/src/lib/employee-stream.ts`;
+- `apps/manager/src/lib/preview-render.ts` (if touching Review/SMS preview data);
+- `apps/manager/src/lib/admin.ts` (if touching the Admin console);
 - `apps/manager/src/server.ts`;
 - relevant unit tests.
 
@@ -73,16 +79,16 @@ Current forward plan:
 
 - `mvp-build/second-half-plan/`.
 
-Current UI-related phase status:
+Current UI-related phase status (see `mvp-build/CODEGRAPH.md` §3 for the authoritative version):
 
 - Phase 1: source/static gates complete; live gate blocked by model/provider availability.
-- Phase 2: web Work Surface source-wired; browser/live acceptance pending.
-- Phase 3: planned SMS ambient inbox and signed previews.
-- Phase 4: planned generic materialization/capability/renderer contracts.
-- Phase 5: planned trial ops/admin/billing surfaces.
+- Phase 2: web Work Surface `source-wired`; browser/live acceptance pending.
+- Phase 3: `source-wired`. SMS ambient inbox + signed mobile preview/action surface (`/agent/[employeeId]/review`) exist and render a real `WorkResource`; live SMS/tool-loop proof pending.
+- Phase 4: `source-wired`. `SurfaceEnvelope`/`CapabilityGraphNode`/materialization/capability registry exist; the web Work Surface doesn't fully render from them yet; live provider/runtime proof pending.
+- Phase 5: `source-wired`. An internal `/admin` console (dashboard/accounts/provisioning/repairs/providers/billing-scaffold/support actions/readiness) exists; live operator proof pending.
 - Phase 6: planned free trial and paid pilot readiness gate.
 
-UI work should explicitly say which phase it supports. A visual cleanup to `AgentClient.tsx` likely supports Phase 2. A signed mobile approval preview likely supports Phase 3. Generic schema/table/action components likely support Phase 4.
+UI work should explicitly say which phase it supports. A visual cleanup to `AgentClient.tsx` supports Phase 2. Polish on `ReviewClient.tsx`/the signed preview page supports Phase 3. Wiring more Work Surface views through `SurfaceEnvelope`/`CapabilityGraphNode` instead of the older derived `ResourcePayload` fields supports Phase 4. Polish or new views on the `/admin` console support Phase 5. None of these are "future" surfaces to design from a blank page — see `data-catalog.md` for what already exists in each.
 
 ## Safe Development Workflow
 
@@ -147,10 +153,12 @@ Coordinate before changing:
 
 - `packages/shared/src/resource-payload.ts`;
 - `packages/shared/src/work-events.ts`;
+- `packages/shared/src/preview-links.ts` / `packages/shared/src/materialization.ts` (`WorkResource`/`WorkAction`/`SurfaceEnvelope`/`CapabilityGraphNode`);
+- `packages/shared/src/admin.ts` and Admin console platform-role/redaction behavior;
 - Manager API route shapes;
 - database migrations;
 - approval resolution behavior;
-- signed-link scope;
+- signed-link scope (both artifact links and preview/review links);
 - artifact security;
 - employee runtime/message delivery;
 - provider webhook semantics.

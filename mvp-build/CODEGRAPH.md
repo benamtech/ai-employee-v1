@@ -370,6 +370,7 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `second-half-plan/phase-06-free-trial-and-paid-pilot-readiness.md` | Planned launch gate across proof, UX, SMS, admin, billing, and support. |
 | `second-half-plan/surface-research-hermes-gui-and-materialization.md` | Deep Hermes Workspace/WebUI/Desktop research translated into AMTECH surfaces and materialization strategy. |
 | `ui-handoff/README.md` | Entry point for a UI-focused partner: read order, current phase position, safe work areas, and product mental model. |
+| `ui-handoff/data-catalog.md` | Full inventory of every data shape/route available to the UI (`ResourcePayload`, `WorkResource`/`WorkAction`, `SurfaceEnvelope`/`CapabilityGraphNode`, admin contracts), across every surface (web desk, signed mobile review, admin console, MCP-UI generative cards), plus the concrete artifact-link/preview-image rendering plumbing. |
 | `ui-handoff/product-grounding.md` | Product grounding for UI agents: AMTECH product power, owner mental model, wiki-vs-`mvp-build` distinction, current source reality, and UI north star. |
 | `ui-handoff/current-ui-map.md` | Source map for the current web UI, Work Surface data flow, styling state, and refactor boundaries. |
 | `ui-handoff/research-and-principles.md` | Index of UI research, Hermes GUI discoveries, generative UI principles, and owner-facing vocabulary. |

@@ -4,15 +4,21 @@ Status: active design backlog
 
 Purpose: capture the more experimental UI ideas so they are not lost while the immediate priority remains the web client.
 
+**Status note:** the signed mobile Review page, SMS grammar-aware links, and the internal Admin console
+described below as priorities 2/3/5 are now source-wired (see `data-catalog.md` and
+`current-ui-map.md`) — they exist and can be polished today, not designed from scratch. What remains
+mostly aspirational here is the *media/preview-generation pipeline* (thumbnails, posters, OG images —
+priority 4) and richer per-surface polish. Read each section below for what's built vs. still backlog.
+
 The most important surface right now is the web Work Surface. It is where the product can show the richest state, prove the employee desk model, and give UI contributors a fast feedback loop. SMS, preview media, signed links, video/image artifacts, and future desktop/admin/customer views should be designed as renderers of the same underlying work, not as separate apps.
 
 ## Priority Order
 
 1. **Web client first.** Make the employee desk understandable, polished, responsive, and useful with the data we already have.
-2. **Mobile web preview second.** The signed-link preview path should feel native on a phone because SMS will send owners there.
-3. **SMS copy/action grammar third.** SMS should summarize and route to preview/actions, not try to cram the whole app into text.
-4. **Generic resource/media preview system fourth.** Images, video, PDFs, web pages, reports, order carts, and task progress should share a resource contract.
-5. **Admin/operator and optional desktop later.** These consume the same resources/actions with more provenance and control.
+2. **Mobile web preview second.** The signed-link preview path (`/agent/[employeeId]/review`, `ReviewClient.tsx`) exists and renders a real `WorkResource` with sticky actions, inline media/document preview, and receipts — it should feel more native on a phone and needs visual polish, not to be built from zero.
+3. **SMS copy/action grammar third.** SMS carries a grammar-aware summary plus the signed preview link (`work-events.ts`); it should summarize and route to preview/actions, not try to cram the whole app into text.
+4. **Generic resource/media preview system fourth.** `WorkResource`'s `media`/`body_html`/`open_url` fields already unify document/media rendering across Review and (partially) web; images, video, PDFs, web pages, reports, order carts, and task progress should keep sharing this one contract. What's missing is the thumbnail/poster/OG-image *generation* pipeline itself.
+5. **Admin/operator and optional desktop later.** The Admin console (`/admin`, `AdminClient.tsx`) exists and consumes account/employee/readiness/support-action contracts with more provenance and control than the owner surface — it needs visual/UX polish and an inline `WorkResource` preview, not a first build.
 
 ## Web Client Experiments To Explore Now
 
@@ -49,7 +55,7 @@ These are reasonable near-term UI explorations:
 
 ## Signed SMS Preview Ideas
 
-SMS should send short messages and links into scoped mobile previews. The link should open a resource/action page, not just a static artifact.
+SMS should send short messages and links into scoped mobile previews. The link should open a resource/action page, not just a static artifact. **The mobile preview page and its signed-link backend are built** (`/agent/[employeeId]/review`, `ReviewClient.tsx`, `preview-links.ts`/`preview-render.ts`); it currently renders one generic `WorkResource` layout for every `resource_type` rather than a bespoke layout per type below. Whether these preview types below need their own visual treatment within that one page, versus staying one generic layout, is open design work — not a decision to relitigate the underlying contract.
 
 Preview types to design:
 
@@ -76,7 +82,13 @@ Important: SMS is a compact renderer for the same work state. It should not beco
 
 ## Media And Artifact Preview Ideas
 
-Current artifacts are estimate-heavy and structured HTML/PDF oriented. Future work should support broad media/resource previews:
+Current artifacts are estimate-heavy and structured HTML/PDF oriented. The rendering primitives already
+exist and are generic — `renderArtifactHtml()` (`artifact-view.ts`) turns any structured artifact
+payload into owner-safe HTML with zero per-kind code, and `WorkResource.media`/`body_html` (rendered
+today by `ReviewClient.tsx`) already carry image/video/document bodies. What's missing is broad
+*content* diversity (most real artifacts today are estimates) and any *generation* pipeline for
+thumbnails/posters/comparisons below — see `data-catalog.md` §5 for exactly what's real vs. planned.
+Future work should support broad media/resource previews:
 
 - **Images**
   - before/after galleries;

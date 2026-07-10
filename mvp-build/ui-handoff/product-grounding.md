@@ -122,9 +122,12 @@ Current source reality:
 - Backend seams are meaningful: Manager control plane, Manager-as-MCP, schema-first tools, artifacts, approvals, events, runtime health, scheduler lanes, metering, local live-test tooling.
 - Phase 1 preservation is source/static-green; live proof is blocked by model/provider availability.
 - Phase 2 web Work Surface is source-wired.
-- The web UI is not final visually.
-- SMS is not yet a complete surface.
-- Generic materialization contracts are planned for Phase 4, with some early groundwork in current resource payloads, work descriptors, artifact fallback, and Work Surface views.
+- Phase 3 SMS ambient inbox + signed mobile preview/action surface (`/agent/[employeeId]/review`) is source-wired; live SMS/tool-loop proof is pending.
+- Phase 4 generic materialization contracts (`SurfaceEnvelope`, `CapabilityGraphNode`, capability registry) are source-wired; the web Work Surface doesn't fully render from them yet.
+- Phase 5 internal Admin console (`/admin`) is source-wired; live operator proof is pending.
+- The web UI, signed Review page, and Admin console are none of them final visually.
+- SMS carries a grammar-aware summary plus a signed preview link, but is still a compact renderer, not a full second surface.
+- See `mvp-build/ui-handoff/data-catalog.md` for the concrete data/route inventory across all of these.
 
 For UI work, this means the job is not to invent a different product. The job is to make the existing product power visible, comprehensible, and trustworthy.
 

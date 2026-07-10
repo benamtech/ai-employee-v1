@@ -22,6 +22,7 @@ Read these first, in order:
 Then read whichever UI area you are touching:
 
 - [Product Grounding](product-grounding.md) for what AMTECH is, why the product is powerful, and how to distinguish the wiki from `mvp-build/`.
+- [Data Catalog](data-catalog.md) — **read this before designing anything.** Full inventory of every data shape available to the UI (`ResourcePayload`, `WorkResource`/`WorkAction`, `SurfaceEnvelope`/`CapabilityGraphNode`, admin contracts), every surface that consumes it (web desk, signed mobile review, admin console, MCP-UI generative cards), and the concrete artifact-link/preview-image plumbing.
 - [Current UI Map](current-ui-map.md) for source files, data flow, and existing implementation notes.
 - [Research And Principles](research-and-principles.md) for the Hermes GUI discoveries, generative UI direction, and product vocabulary.
 - [Experiments And Future Surfaces](experiments-and-future-surfaces.md) for preview media, SMS links, task progress, images/video/artifacts, and cross-surface data representations.
@@ -29,21 +30,26 @@ Then read whichever UI area you are touching:
 
 ## Current Build Position
 
-The current forward plan is `mvp-build/second-half-plan/`.
+The current forward plan is `mvp-build/second-half-plan/`. All of Phases 1-5 below are already
+`source-wired` in code — this packet used to describe Phase 3-5 as future work; they are not. Live
+provider/runtime/operator proof is still `pending` for all of them (no fabricated acceptance claims),
+but the surfaces, contracts, and routes exist today and are designable/buildable against.
 
-Relevant current status:
+Relevant current status (see `mvp-build/CODEGRAPH.md` §3 for the authoritative version):
 
-- Second-half Phase 1 is `source-wired/static-green`; live browser/runtime proof is blocked until a usable model/provider path exists.
-- Second-half Phase 2 is `source-wired`: the web Work Surface has been rebuilt into a multi-region employee desk with Today, Chat, Jobs, Tasks, Outputs, Connected, Abilities, Activity, Settings-lite, and a preview pane.
-- Phase 3 is planned: SMS ambient inbox and signed mobile previews.
-- Phase 4 is planned: `SurfaceEnvelope`, `WorkResource`, `WorkAction`, `EmployeeEventStream`, capability registry, and generic renderers.
+- **Phase 1** (preserve/close live gate): `source-wired/static-green`; live browser/runtime proof is blocked until a usable model/provider path exists.
+- **Phase 2** (owner Work Surface redesign): `source-wired`. The web Work Surface is a multi-region employee desk with Today, Chat, Jobs, Tasks, Outputs, Connected, Abilities, Activity, Settings-lite, and a preview pane.
+- **Phase 3** (SMS ambient inbox + signed mobile previews): `source-wired`. A real signed, scoped, expiring preview/action link mints a `WorkResource` and renders it at `/agent/[employeeId]/review` — a mobile-first page with sticky approve/reject/reply, inline media/document preview, and quiet receipt links. SMS carries the link, not a rich payload.
+- **Phase 4** (tool-agnostic capability/materialization layer): `source-wired`. `SurfaceEnvelope`, `CapabilityGraphNode`, `WorkResource`/`WorkAction`, and a Manager capability registry exist and are exposed via Manager MCP `resources/list`/`resources/read`. The web Work Surface's Outputs/Tasks/Abilities views mostly still consume the older `ResourcePayload` derived fields directly — wiring more of the UI through the generic materialization contract is open work.
+- **Phase 5** (trial ops/admin/billing): `source-wired`. An internal `/admin` console exists (dashboard, accounts, provisioning, repairs, providers, billing scaffold, employee support actions, readiness). It is operator-facing, not owner-facing, and is a separate audience/vocabulary from the Work Surface.
+- Also source-wired: MCP-UI generative cards — the agent can emit a typed `table`/`schedule`/`diff`/`form` view that Manager compiles into a real `ui://` resource, rendered in a sandboxed iframe on the web Work Surface with actions routed through the same approval gate.
 
 For UI work, this means:
 
-- The backend shape is good enough to design against.
-- The current web UI is not final and can be improved aggressively.
-- SMS/mobile preview work should use the same resource/action thinking as the web desk.
-- Do not claim live acceptance unless real runtime/provider proof exists.
+- The backend shape is good enough to design against, and it already covers more surfaces than "just the web desk" — read `data-catalog.md` before assuming a surface or data field doesn't exist yet.
+- None of the current visual/component work in any of these surfaces is final; all can be improved aggressively, including the signed Review page and the Admin console.
+- New work should reuse the `WorkResource`/`WorkAction` contract (see `data-catalog.md` §3) rather than re-deriving resource/action shapes per surface.
+- Do not claim live acceptance unless real runtime/provider/operator proof exists.
 
 ## UI-Only Fixture Mode
 
@@ -73,10 +79,13 @@ Good areas for an independent UI contributor:
 - Better empty, loading, degraded, and error states.
 - Clearer owner language for tasks, abilities, connectors, outputs, and activity.
 - Component extraction from the large `AgentClient.tsx` file if it reduces complexity.
-- Reusable styling/tokens if they make the UI easier to evolve.
+- Reusable styling/tokens if they make the UI easier to evolve — including a real design system that
+  spans the Work Surface, the signed Review page, and (separately styled, operator-audience) Admin.
 - Playwright/browser checks and screenshots once the local surface can run.
 - UI-only fixture checks through `npm run ui:test` / `npm run ui:test:headed`.
-- Phase 3 mobile signed-preview designs that consume existing resource/action concepts.
+- Visual/UX polish of the already-built signed mobile Review page (`apps/web/app/agent/[employeeId]/review/`) — it renders a real `WorkResource` today; see `data-catalog.md` §3.
+- Visual/UX polish of the already-built Admin console (`apps/web/app/admin/`) — a distinct operator audience/vocabulary; see `data-catalog.md` §7.
+- Improving the MCP-UI generative card compiler/renderer (`ui-resources.ts` + `McpUiResource.tsx`) — currently very plain inline HTML/CSS; see `data-catalog.md` §6.
 - Experimental preview patterns for images, video, reports, task progress, and other artifacts, as long as the web client remains the first implementation target.
 
 Coordinate before changing:
@@ -108,7 +117,8 @@ If a wiki vision and the source differ, do not assume the vision is already buil
 
 - `README.md` — this overview.
 - `product-grounding.md` — product power, owner mental model, and wiki versus `mvp-build/`.
-- `current-ui-map.md` — concrete source map and current implementation notes.
+- `data-catalog.md` — full inventory of data shapes, surfaces, routes, and artifact/preview plumbing available to the UI today. Read this before designing.
+- `current-ui-map.md` — concrete source map and current implementation notes, across all surfaces (Work Surface, Review, Admin, MCP-UI cards).
 - `research-and-principles.md` — research index and design/product principles.
-- `experiments-and-future-surfaces.md` — forward UI backlog for SMS/media previews and surface representations.
+- `experiments-and-future-surfaces.md` — forward UI backlog for SMS/media previews and surface representations, marked against what is already source-wired.
 - `working-protocol.md` — checks, handoff rules, memory protocol, and coordination guidance.

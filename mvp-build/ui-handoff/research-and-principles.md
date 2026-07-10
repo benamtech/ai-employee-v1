@@ -25,11 +25,13 @@ AMTECH supplies the product layer:
 
 Newest and most directly relevant:
 
+- `mvp-build/ui-handoff/data-catalog.md` — the concrete data/surface/route inventory this research informed; read it alongside this file.
 - `mvp-build/second-half-plan/surface-research-hermes-gui-and-materialization.md` — newest Hermes GUI/runtime research and AMTECH materialization strategy.
 - `mvp-build/second-half-plan/README.md` — current seven-phase second-half plan.
-- `mvp-build/second-half-plan/phase-02-owner-work-surface-redesign.md` — current web desk target; now `source-wired`, but browser polish/proof remains.
-- `mvp-build/second-half-plan/phase-03-sms-ambient-inbox-and-link-previews.md` — next UI surface: SMS and signed mobile previews.
-- `mvp-build/second-half-plan/phase-04-tool-agnostic-capability-and-renderer-layer.md` — surface contracts and generic rendering future.
+- `mvp-build/second-half-plan/phase-02-owner-work-surface-redesign.md` — web desk target; `source-wired`, browser polish/proof remains.
+- `mvp-build/second-half-plan/phase-03-sms-ambient-inbox-and-link-previews.md` — SMS and signed mobile previews; `source-wired` (the `/review` page and `preview-links`/`preview-render` backend exist).
+- `mvp-build/second-half-plan/phase-04-tool-agnostic-capability-and-renderer-layer.md` — surface contracts and generic rendering; `source-wired` (`SurfaceEnvelope`/`CapabilityGraphNode`/capability registry exist; wiring more of the web UI through them is open work).
+- `mvp-build/second-half-plan/phase-05-trial-operations-admin-billing.md` — admin/ops/trial-readiness layer; `source-wired` (the `/admin` console exists).
 - `wiki/MVP/second-half-current-and-future-state.md` — wiki companion for current/future state.
 
 Foundational UI/product docs:
@@ -41,12 +43,15 @@ Foundational UI/product docs:
 - `wiki/MVP/old-build-plan/15-interaction-reimagined-the-work-surface.md` — original Work Surface thesis.
 - `wiki/MVP/agent-inbox-and-channel-architecture.md` — conversation as brain artifact; SMS/web/voice as channels into one employee.
 
-Recent implementation notes:
+Recent implementation notes (newest first):
 
-- `mvp-build/memory/2026-07-09-1050-phase-2-work-surface-source-wired.md` — latest web Work Surface source-wired implementation.
+- `mvp-build/memory/2026-07-10-1153-phase-5-admin-ops-source-wired.md` — the Admin console + owner-vocabulary hardening.
+- `mvp-build/memory/2026-07-10-0045-phase-4-source-wired-materialization.md` — `SurfaceEnvelope`/capability registry/materialization implementation.
+- `mvp-build/memory/2026-07-09-1815-phase-03-sms-signed-previews-and-live-gate.md` — the signed Review surface and preview-link backend.
+- `mvp-build/memory/2026-07-09-1050-phase-2-work-surface-source-wired.md` — web Work Surface source-wired implementation.
 - `mvp-build/memory/2026-07-09-0215-phase-1-static-gates-artifact-fallback-live-blocked.md` — Phase 1 preservation and artifact fallback.
 - `mvp-build/memory/2026-07-09-0115-hermes-gui-surface-research.md` — research session summary.
-- `mvp-build/ui-handoff/experiments-and-future-surfaces.md` — practical backlog of preview media, signed SMS preview, artifact/media, task progress, and cross-surface representation experiments.
+- `mvp-build/ui-handoff/experiments-and-future-surfaces.md` — practical backlog of preview media, signed SMS preview, artifact/media, task progress, and cross-surface representation experiments, marked against what's already built.
 
 ## Recent Hermes GUI Discoveries
 
@@ -97,20 +102,35 @@ AMTECH translation:
 
 ## Generative UI Direction
 
-Current code is in the safe typed/static stage:
+Current code has moved past the safe typed/static stage into real generative rendering:
 
 - `WorkEventDescriptor` describes the move: notify, question, review.
 - Deliverable type selects the renderer.
 - Acceptance grammar is approve, edit, reject, respond, acknowledge.
 - Approval gates are structural for money/customer-facing/risky work.
 - Manager currently authors most descriptors; later the employee should emit descriptors through the message-to-agent path.
+- **Now real:** a deliverable can carry a typed `WorkView` (`table`/`schedule`/`diff`/`form`); Manager
+  compiles it into an AMTECH-templated MCP-UI `ui://` resource (`ui-resources.ts`), rendered in a
+  sandboxed iframe (`McpUiResource.tsx`) whose actions route through the same approval gate as any
+  other action. The model never emits raw HTML — see `data-catalog.md` §6.
+- **Now real:** the same owner-safe resource/action state renders in a signed mobile preview
+  (`WorkResource`/`WorkAction`, `preview-links.ts`, `/agent/[employeeId]/review`) — see `data-catalog.md` §3.
+- **Now real:** `SurfaceEnvelope`/`CapabilityGraphNode` (Phase 4, `materialization.ts`) exist as the
+  generic surface-agnostic contract, exposed read-only via Manager MCP `resources/list`/`resources/read`.
+  The web Work Surface doesn't fully render from this contract yet — most Outputs/Tasks/Abilities
+  views still read `ResourcePayload`'s derived fields directly. Wiring more of the UI through the
+  generic contract, rather than adding new per-kind branches, is open forward work.
 
-Future direction:
+Still forward work, not yet built:
 
-- Phase 3: render the same resource/action state in SMS and signed mobile previews.
-- Phase 4: introduce `SurfaceEnvelope`, `WorkResource`, `WorkAction`, and `EmployeeEventStream`.
-- Later: richer MCP-UI/schema-derived renderers for tables, diffs, schedules, forms, connector repair, and generic structured artifacts.
-- Experimental but important: preview images, video posters/transcripts, PDF thumbnails, report summary cards, website screenshots, generated media galleries, order-cart previews, and task-progress timelines should all become representations of `WorkResource`/`WorkAction`, not separate one-off products.
+- Richer MCP-UI/schema-derived renderers beyond table/schedule/diff/form (e.g. connector repair
+  forms, generic structured artifacts with nested media).
+- Preview images, video posters/transcripts, PDF thumbnails, report summary cards, website
+  screenshots, generated media galleries, order-cart previews, and task-progress timelines — these
+  should all become representations of `WorkResource`/`WorkAction` (populate `media`/`open_url`), not
+  separate one-off products. See `data-catalog.md` §5.3 and `experiments-and-future-surfaces.md`.
+- A shared `WorkResource` renderer used identically by the Review page, the web preview pane, and
+  admin inline preview, instead of three separate implementations.
 
 Core principle: do not design a bespoke screen for every skill. Type the work/output, then let the surface render that type.
 
@@ -135,16 +155,20 @@ The UI contributor should feel free to propose and implement a stronger visual d
 
 ## Future UI Surface Inventory
 
-Current or near-term:
+Already built (source-wired, live proof still pending in most cases — see `data-catalog.md`):
 
 - web Work Surface;
 - create/claim/login front door;
 - artifact/output route;
-- SMS replies and notifications;
-- signed mobile preview links;
-- admin/operator screens;
-- connector consent/repair screens.
-- preview-media generation for signed links: thumbnails, posters, summary cards, and mobile-first artifact pages.
+- SMS replies and notifications (grammar-aware text + signed preview link, no rich payload in the text itself);
+- signed mobile preview links (`/agent/[employeeId]/review`);
+- admin/operator console (`/admin`);
+- MCP-UI generative cards (table/schedule/diff/form).
+
+Near-term / still to build:
+
+- connector consent/repair screens (connector state exists in the data; a dedicated repair UI does not);
+- preview-media generation for signed links: thumbnails, posters, summary cards — `WorkResource.media`/`open_url` exist as the target fields, but there's no thumbnail/poster generation pipeline yet.
 
 Future possible:
 
