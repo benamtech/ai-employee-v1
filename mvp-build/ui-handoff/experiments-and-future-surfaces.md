@@ -2,23 +2,39 @@
 
 Status: active design backlog
 
-Purpose: capture the more experimental UI ideas so they are not lost while the immediate priority remains the web client.
+Purpose: separate what needs real design work **now, for the first paying trial**, from ideas that
+are genuinely speculative and should not be prioritized yet. Despite this file's name, most of what's
+in it is not "future" — read the note below before assuming anything here can wait.
 
-**Status note:** the signed mobile Review page, SMS grammar-aware links, and the internal Admin console
-described below as priorities 2/3/5 are now source-wired (see `data-catalog.md` and
-`current-ui-map.md`) — they exist and can be polished today, not designed from scratch. What remains
-mostly aspirational here is the *media/preview-generation pipeline* (thumbnails, posters, OG images —
-priority 4) and richer per-surface polish. Read each section below for what's built vs. still backlog.
+**Important framing note:** artifact/document preview quality, photo/media previews, and the signed
+mobile Review page are **not future work** — a real paying customer's first estimate/report/photo will
+render through exactly these surfaces. If your job is UI/design, this is core, near-term scope, not a
+backlog to defer. The genuinely-later/speculative material in this file is narrower: order-cart
+actions, generated video, voice-call summaries, desktop clients, and similar not-yet-real product
+lines. Each section below says explicitly which bucket it's in.
 
-The most important surface right now is the web Work Surface. It is where the product can show the richest state, prove the employee desk model, and give UI contributors a fast feedback loop. SMS, preview media, signed links, video/image artifacts, and future desktop/admin/customer views should be designed as renderers of the same underlying work, not as separate apps.
+The most important surface right now is the web Work Surface, closely followed by the artifact/
+document preview rendering and the signed mobile Review page — both of those are what a real customer
+actually looks at during a trial. SMS, signed links, and future desktop/admin/customer views should be
+designed as renderers of the same underlying work, not as separate apps.
 
 ## Priority Order
 
-1. **Web client first.** Make the employee desk understandable, polished, responsive, and useful with the data we already have.
-2. **Mobile web preview second.** The signed-link preview path (`/agent/[employeeId]/review`, `ReviewClient.tsx`) exists and renders a real `WorkResource` with sticky actions, inline media/document preview, and receipts — it should feel more native on a phone and needs visual polish, not to be built from zero.
-3. **SMS copy/action grammar third.** SMS carries a grammar-aware summary plus the signed preview link (`work-events.ts`); it should summarize and route to preview/actions, not try to cram the whole app into text.
-4. **Generic resource/media preview system fourth.** `WorkResource`'s `media`/`body_html`/`open_url` fields already unify document/media rendering across Review and (partially) web; images, video, PDFs, web pages, reports, order carts, and task progress should keep sharing this one contract. What's missing is the thumbnail/poster/OG-image *generation* pipeline itself.
-5. **Admin/operator and optional desktop later.** The Admin console (`/admin`, `AdminClient.tsx`) exists and consumes account/employee/readiness/support-action contracts with more provenance and control than the owner surface — it needs visual/UX polish and an inline `WorkResource` preview, not a first build.
+**Needed now, for the first paying trial:**
+
+1. **Web client.** Make the employee desk understandable, polished, responsive, and useful with the data we already have.
+2. **Artifact/document preview quality.** The estimate/report a customer sees renders through `renderArtifactHtml()`/`WorkResource.body_html` today as a clean but generic auto-formatted table — this is the actual deliverable being sold and deserves real design attention, not deferral. See "Media And Artifact Preview Ideas" below.
+3. **Mobile Review page polish.** The signed-link path (`/agent/[employeeId]/review`, `ReviewClient.tsx`) exists and renders a real `WorkResource` with sticky actions, inline media/document preview, and receipts — this is what an owner opens straight from a text, so it needs to feel native and trustworthy on a phone now, not "eventually."
+4. **SMS copy/action grammar.** SMS carries a grammar-aware summary plus the signed preview link (`work-events.ts`); it should summarize and route to preview/actions, not try to cram the whole app into text.
+
+**Reasonable near-term, once the above is solid:**
+
+5. **Admin console polish.** The Admin console (`/admin`, `AdminClient.tsx`) exists and consumes account/employee/readiness/support-action contracts — it needs visual/UX polish and an inline `WorkResource` preview, but it's operator-facing, not something a trial customer sees.
+
+**Genuinely later — do not prioritize:**
+
+6. **Thumbnail/poster/OG-image generation pipeline.** `WorkResource`'s `media`/`body_html`/`open_url` fields already unify document/media rendering; what's missing is auto-generating thumbnails/posters/screenshots for SMS link previews. Design for it (don't block on it), but it's not required for a trial customer to use the product.
+7. **Order carts, generated video, voice-call summaries, desktop clients** — genuinely speculative product surfaces; see "Experimental Resource Types To Keep In Mind" below.
 
 ## Web Client Experiments To Explore Now
 
@@ -85,52 +101,25 @@ Important: SMS is a compact renderer for the same work state. It should not beco
 Current artifacts are estimate-heavy and structured HTML/PDF oriented. The rendering primitives already
 exist and are generic — `renderArtifactHtml()` (`artifact-view.ts`) turns any structured artifact
 payload into owner-safe HTML with zero per-kind code, and `WorkResource.media`/`body_html` (rendered
-today by `ReviewClient.tsx`) already carry image/video/document bodies. What's missing is broad
-*content* diversity (most real artifacts today are estimates) and any *generation* pipeline for
-thumbnails/posters/comparisons below — see `data-catalog.md` §5 for exactly what's real vs. planned.
-Future work should support broad media/resource previews:
+today by `ReviewClient.tsx`) already carry image/video/document bodies. What's missing is not the
+plumbing — it's real design applied to that plumbing, and it's needed now, not later.
 
-- **Images**
-  - before/after galleries;
-  - generated marketing image previews;
-  - annotated job photos;
-  - image comparison slider;
-  - downloadable originals plus compressed SMS thumbnails.
-- **Video**
-  - short generated promo clips;
-  - job walkthrough videos;
-  - customer-uploaded videos;
-  - poster frame thumbnail in SMS/web;
-  - transcript/summary fallback;
-  - review/publish approval if customer-facing.
-- **Documents**
-  - estimate/proposal PDFs;
-  - crew packets;
-  - invoice PDFs;
-  - contracts/SOWs;
-  - bookkeeper handoff packets.
-- **Web previews**
-  - website draft preview;
-  - landing page preview;
-  - supplier/cart page preview;
-  - customer-facing portal preview.
-- **Datasets/reports**
-  - lead lists;
-  - AR aging;
-  - cashflow brief;
-  - pricing drift report;
-  - sortable/filterable table on web, summary + link on SMS.
-- **Order carts / external-system actions**
-  - target vendor/system;
-  - item list;
-  - total cost;
-  - delivery/pickup;
-  - approve before purchase.
-- **Forms / questions**
-  - missing info forms;
-  - connector repair forms;
-  - scope clarification;
-  - owner policy setting.
+**Build now — a first trial customer will actually see these:**
+
+- **Documents.** The estimate/proposal itself is the single most important thing to make look good — it's
+  the sold deliverable. Also: invoice PDFs, and eventually crew packets/contracts if those become real artifacts.
+- **Images.** Contractors work with before/after job photos constantly — a clean before/after layout,
+  a simple image comparison view, and a sane thumbnail/full-size pattern are near-term, real design work,
+  not speculative.
+- **Forms / questions.** Missing-info forms, connector repair forms, and scope-clarification prompts —
+  these already happen via MCP-UI cards (`ui-resources.ts`) and need real visual treatment now.
+
+**Later / speculative — do not prioritize:**
+
+- Generated marketing image previews, short generated promo/walkthrough video, video transcripts.
+- Website/landing-page/supplier-cart previews.
+- Order carts and other external-system purchase actions.
+- Datasets/reports (lead lists, AR aging, cashflow/pricing-drift reports) — plausible eventually, not asked for yet.
 
 Fallback rule: if a special renderer does not exist, show a safe structured summary, sections/table/list where possible, proof refs, and a signed open/download link.
 
@@ -153,6 +142,10 @@ Every work object should eventually be representable in multiple ways:
 This table is more important than any one visual design. It keeps web, SMS, preview links, admin, and future clients from drifting into separate products.
 
 ## Preview Media Over SMS
+
+This is the "later/speculative" thumbnail/poster/OG-image *generation* pipeline (priority item 6 above)
+— design for it, but it is not required for a trial customer to use the product today; the signed
+Review page already renders real documents/images/video without it.
 
 Potential approaches:
 
@@ -237,4 +230,9 @@ Most of these should fit into a small set of render types: document, outbound me
 
 ## Immediate UI Contributor Takeaway
 
-Make the web desk excellent first, but design it as if every selected preview could also open from SMS tomorrow. The preview pane, output library, task progress model, status chips, and action controls are the patterns that will later become signed mobile previews, media previews, admin inspection, and optional desktop right rails.
+Design the web desk, the artifact/document preview, and the mobile Review page as one job, not three
+— a trial customer's first real interaction is likely "get a text, tap the link, look at the estimate."
+Make that whole path excellent now. The preview pane, output library, task progress model, status
+chips, and action controls are the same patterns that will later extend to richer media previews,
+admin inspection, and optional desktop right rails — but that extension is later work, not a reason to
+under-invest in what's already built.
