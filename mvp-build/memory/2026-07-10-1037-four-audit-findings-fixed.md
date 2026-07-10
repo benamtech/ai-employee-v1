@@ -25,6 +25,7 @@ The user asked for a rigorous "did we actually do a good job or are we kidding o
 
 - New: `packages/shared/src/approval-policy.ts`, `packages/db/migrations/0024_turn_claim_lock_race_fix.sql`, `tests/unit/approval-policy.test.ts`, `tests/integration/turn-claim-race.integration.test.ts`, `tests/unit/provisioning-runtime-backend.test.ts`.
 - Modified: `packages/shared/src/index.ts`, `apps/manager/src/tools/{estimate,gmail,stripe,events,provisioning}.stub.ts`, `apps/manager/src/lib/{employee-events,turn-drain,runtime-backend}.ts`, `tests/unit/{estimate-tools,event-bus,turn-drain,runtime-backend}.test.ts`.
+- Docs: `mvp-build/CODEGRAPH.md` (new "Audit-fix pass" status bullet; migration `0023`/`0024` rows added to the migrations table — `0023` was previously undocumented as a table row; `approval-policy.ts` added to the shared contracts table; `runtime-backend.ts`/`turn-drain.ts` one-liners updated; stale "38 files / 216 tests" local-truth line corrected to current counts) and root `CODEGRAPH.md` (the `mvp-build/` node's summary paragraph now mentions the scoped-MCP-credential hardening and this audit-fix pass).
 
 ## Carry-forward / next
 
