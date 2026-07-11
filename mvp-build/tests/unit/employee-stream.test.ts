@@ -13,8 +13,8 @@ const seed = () => ({
   connector_accounts: [{ id: "conn_1", employee_id: "emp_1", account_id: "acct_1", connector_key: "gmail", provider: "gmail", status: "needs_reauth", last_error: "expired" }],
   employee_messages: [{ id: "m_1", employee_id: "emp_1", direction: "to_owner", body: "hi", status: "sent", created_at: "2026-07-04T00:00:00Z" }],
   inbound_events: [
-    { id: "e_1", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
-    { id: "e_other", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:02Z", normalized_payload: descriptorPayload("acct_2", "emp_2") },
+    { id: "e_1", account_id: "acct_1", employee_id: "emp_1", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
+    { id: "e_other", account_id: "acct_2", employee_id: "emp_2", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:02Z", normalized_payload: descriptorPayload("acct_2", "emp_2") },
   ],
 });
 
@@ -34,6 +34,59 @@ describe("buildEmployeeSnapshot", () => {
     expect(snap.abilities?.some((a) => a.id === "ability:email" && a.status === "needs_connection")).toBe(true);
     expect(snap.capabilities?.some((c) => c.key === "manager_tool:create_estimate_artifact")).toBe(true);
     expect(snap.surface_envelopes?.some((e) => e.kind === "approval" && e.safety.requires_approval)).toBe(true);
+    expect(snap.connection_surfaces?.map((c) => c.label)).toEqual(expect.arrayContaining(["Email", "Payments", "Accounting", "Files", "Calendar", "Store"]));
+    expect(snap.connection_surfaces?.find((c) => c.label === "Email")?.state).toBe("needs_you");
+    expect(snap.connection_surfaces?.find((c) => c.label === "Payments")?.capability_keys).toContain("manager_tool:send_deposit_invoice");
+    expect(snap.resurface_items?.some((item) => item.kind === "connector" && item.target?.kind === "task")).toBe(true);
+    expect(snap.resurface_items?.some((item) => item.kind === "review" && item.target?.kind === "approval")).toBe(true);
+  });
+
+  it("derives generic connection surfaces from connector rows and capability categories", async () => {
+    const db = makeFakeDb({
+      ...seed(),
+      connector_accounts: [
+        { id: "conn_email", employee_id: "emp_1", account_id: "acct_1", connector_key: "gmail", provider: "gmail", status: "connected", external_email: "owner@example.com", last_connector_test_at: "2026-07-04T00:00:04Z" },
+        { id: "conn_custom", employee_id: "emp_1", account_id: "acct_1", connector_key: "field_app", provider: "field_ops", status: "connected", external_label: "Field Ops" },
+      ],
+    });
+    const snap = await buildEmployeeSnapshot(db.asClient(), "emp_1", "acct_1");
+    expect(snap.connection_surfaces?.find((c) => c.id === "connection:email")).toMatchObject({
+      label: "Email",
+      state: "working",
+      account_label: "owner@example.com",
+      connector_id: "conn_email",
+    });
+    expect(snap.connection_surfaces?.find((c) => c.id === "connection:payments")).toMatchObject({
+      label: "Payments",
+      state: "not_connected",
+    });
+    expect(snap.connection_surfaces?.find((c) => c.id === "connection:custom:conn_custom")).toMatchObject({
+      label: "Field Ops",
+      category: "custom",
+      state: "connected",
+    });
+  });
+
+  it("queries scoped inbound events before applying the recent-event limit", async () => {
+    const unrelated = Array.from({ length: 60 }, (_, i) => ({
+      id: `e_other_${i}`,
+      account_id: "acct_2",
+      employee_id: "emp_2",
+      source: "gmail",
+      event_type: "gmail.reply_received",
+      status: "delivered",
+      created_at: `2026-07-04T00:01:${String(i).padStart(2, "0")}Z`,
+      normalized_payload: descriptorPayload("acct_2", "emp_2"),
+    }));
+    const db = makeFakeDb({
+      ...seed(),
+      inbound_events: [
+        ...unrelated,
+        { id: "e_relevant", account_id: "acct_1", employee_id: "emp_1", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
+      ],
+    });
+    const snap = await buildEmployeeSnapshot(db.asClient(), "emp_1", "acct_1");
+    expect(snap.work_events.map((w) => w.id)).toEqual(["e_relevant"]);
   });
 });
 
@@ -42,10 +95,34 @@ describe("fetchWorkEventsSince", () => {
     const db = makeFakeDb(seed());
     const before = await fetchWorkEventsSince(db.asClient(), "emp_1", "acct_1", "2026-07-04T00:00:00Z");
     expect(before.workEvents.map((w) => w.id)).toEqual(["e_1"]);
-    expect(before.nextCursor).toEqual({ created_at: "2026-07-04T00:00:02Z", id: "e_other" });
+    expect(before.nextCursor).toEqual({ created_at: "2026-07-04T00:00:01Z", id: "e_1" });
 
     const after = await fetchWorkEventsSince(db.asClient(), "emp_1", "acct_1", { created_at: "2026-07-04T00:00:01Z", id: "e_1" });
     expect(after.workEvents).toHaveLength(0);
+  });
+
+  it("does not let unrelated tenant events consume the since-cursor window", async () => {
+    const unrelated = Array.from({ length: 60 }, (_, i) => ({
+      id: `e_other_${i}`,
+      account_id: "acct_2",
+      employee_id: "emp_2",
+      source: "gmail",
+      event_type: "gmail.reply_received",
+      status: "delivered",
+      created_at: `2026-07-04T00:01:${String(i).padStart(2, "0")}Z`,
+      normalized_payload: descriptorPayload("acct_2", "emp_2"),
+    }));
+    const db = makeFakeDb({
+      ...seed(),
+      approvals: [],
+      inbound_events: [
+        ...unrelated,
+        { id: "e_relevant", account_id: "acct_1", employee_id: "emp_1", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
+      ],
+    });
+    const delta = await fetchWorkEventsSince(db.asClient(), "emp_1", "acct_1", "2026-07-04T00:00:00Z");
+    expect(delta.workEvents.map((w) => w.id)).toEqual(["e_relevant"]);
+    expect(delta.nextCursor).toEqual({ created_at: "2026-07-04T00:00:01Z", id: "e_relevant" });
   });
 
   it("surfaces newly created approvals as deltas", async () => {
@@ -69,9 +146,9 @@ describe("fetchWorkEventsSince", () => {
     const db = makeFakeDb({
       ...seed(),
       inbound_events: [
-        { id: "evt_a", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01.000Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
-        { id: "evt_b", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01.000Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
-        { id: "evt_c", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:02.000Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
+        { id: "evt_a", account_id: "acct_1", employee_id: "emp_1", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01.000Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
+        { id: "evt_b", account_id: "acct_1", employee_id: "emp_1", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:01.000Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
+        { id: "evt_c", account_id: "acct_1", employee_id: "emp_1", source: "gmail", event_type: "gmail.reply_received", status: "delivered", created_at: "2026-07-04T00:00:02.000Z", normalized_payload: descriptorPayload("acct_1", "emp_1") },
       ],
       approvals: [],
     });

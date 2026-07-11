@@ -7,7 +7,7 @@
 import { Hono, type Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serve } from "@hono/node-server";
-import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolName, type PreviewActionType } from "@amtech/shared";
+import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolEnvelope, type ToolName, type PreviewActionType } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { TOOL_REGISTRY } from "./tools/registry.js";
 import { runManagerTool } from "./lib/run-tool.js";
@@ -27,7 +27,7 @@ import { resolvePreviewLink } from "./lib/preview-links.js";
 import { buildWorkResource } from "./lib/preview-render.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
 import { buildEmployeeSnapshot, cursorFromSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";
-import { subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
+import { signalEmployeeChange, subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
 import { orThrow, mustWrite } from "./lib/db.js";
 import { stampChannelPresence } from "./lib/channel-router.js";
 import { bearerToken, verifyEmployeeMcpCredential } from "./lib/mcp-auth.js";
@@ -73,6 +73,79 @@ function denyInternal(c: Context): Response | null {
   return null;
 }
 
+type ApprovalResolution = "approved" | "rejected";
+
+interface ApprovalFollowupTurn {
+  status: "succeeded" | "queued" | "duplicate" | "failed";
+  job_id?: string;
+  run_id?: string;
+  error?: string;
+}
+
+function approvalResolutionWakeBody(params: {
+  approval_id: string;
+  resolution: ApprovalResolution;
+}): string {
+  if (params.resolution === "approved") {
+    return [
+      `Owner approved approval ${params.approval_id}.`,
+      "Resume the workflow that was waiting on this approval and perform only the gated action covered by that approval.",
+      "Use get_approval_status if you need to confirm the gate before sending or committing.",
+    ].join(" ");
+  }
+  return [
+    `Owner rejected approval ${params.approval_id}.`,
+    "Do not perform the gated action covered by that approval.",
+    "Continue by acknowledging the decision and asking only for the next safe alternative if needed.",
+  ].join(" ");
+}
+
+async function deliverApprovalResolutionFollowup(
+  db: ReturnType<typeof serviceClient>,
+  params: {
+    account_id: string;
+    employee_id: string;
+    approval_id: string;
+    resolution: ApprovalResolution;
+    channel?: "sms" | "web";
+  },
+): Promise<ApprovalFollowupTurn> {
+  try {
+    const turn = await deliverOwnerTurnToRuntime(db, {
+      account_id: params.account_id,
+      employee_id: params.employee_id,
+      body: approvalResolutionWakeBody(params),
+      channel: params.channel ?? "web",
+      idempotency_key: `approval-resolution:${params.approval_id}:${params.resolution}`,
+    });
+    return {
+      status: turn.status,
+      job_id: turn.job_id,
+      run_id: turn.run_id,
+      error: turn.error,
+    };
+  } catch (err) {
+    const message = String((err as Error).message ?? err);
+    // eslint-disable-next-line no-console
+    console.warn("[manager] approval follow-up wake failed:", message);
+    return { status: "failed", error: message };
+  } finally {
+    signalEmployeeChange(params.employee_id);
+  }
+}
+
+function withApprovalFollowupProof(envelope: ToolEnvelope, followup: ApprovalFollowupTurn): ToolEnvelope {
+  return {
+    ...envelope,
+    proof: {
+      ...envelope.proof,
+      approval_followup_turn_status: followup.status,
+      approval_followup_turn_job_id: followup.job_id ?? null,
+      approval_followup_run_id: followup.run_id ?? null,
+    },
+  };
+}
+
 export function buildApp(): Hono {
   const app = new Hono();
 
@@ -95,10 +168,22 @@ export function buildApp(): Hono {
     const name = c.req.param("name") as ToolName;
     const input = await c.req.json().catch(() => ({}));
     try {
-      const outcome = await runManagerTool(name, input, { actor: "manager" });
+      const outcome = await runManagerTool(name, input, { actor: name === "resolve_approval" ? "owner" : "manager" });
       if (outcome.kind === "scheduler_only") return c.json({ error: "scheduler_only_tool" }, 403);
       if (outcome.kind === "unknown_tool") return c.json({ error: "unknown_tool" }, 404);
       if (outcome.kind === "invalid_input") return c.json(outcome.envelope, 400);
+      if (name === "resolve_approval" && outcome.envelope.status === "ok") {
+        const approvalInput = input as { account_id?: string; employee_id?: string; approval_id?: string; owner_response?: string; channel?: "sms" | "web" };
+        const resolution = approvalInput.owner_response === "approved" || approvalInput.owner_response === "yes" ? "approved" : "rejected";
+        const followup = await deliverApprovalResolutionFollowup(serviceClient(), {
+          account_id: String(approvalInput.account_id),
+          employee_id: String(approvalInput.employee_id),
+          approval_id: String(approvalInput.approval_id),
+          resolution,
+          channel: approvalInput.channel,
+        });
+        return c.json(withApprovalFollowupProof(outcome.envelope, followup));
+      }
       return c.json(outcome.envelope);
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -539,7 +624,21 @@ export function buildApp(): Hono {
       if (outcome.kind !== "ok" || outcome.envelope.status !== "ok") {
         return c.json({ error: "resolve_failed", detail: outcome.kind === "ok" ? outcome.envelope : outcome.kind }, 400);
       }
-      resultBody = { ok: true, resolution: act === "approve" ? "approved" : "rejected" };
+      const resolution = act === "approve" ? "approved" : "rejected";
+      const followup = await deliverApprovalResolutionFollowup(db, {
+        account_id: link.account_id,
+        employee_id: link.employee_id,
+        approval_id: link.resource_id,
+        resolution,
+        channel: "sms",
+      });
+      resultBody = {
+        ok: true,
+        resolution,
+        turn_status: followup.status,
+        turn_job_id: followup.job_id ?? null,
+        run_id: followup.run_id ?? null,
+      };
     } else if (act === "respond" || act === "edit") {
       const body = String(note ?? "").trim();
       if (!body) return c.json({ error: "note_required" }, 400);

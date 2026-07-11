@@ -16,6 +16,10 @@ function page(entities: { Id: string; DisplayName?: string; Name?: string }[]) {
   return { entities, count: entities.length };
 }
 
+function truncatedPage(entities: { Id: string; DisplayName?: string; Name?: string }[], count: number) {
+  return { entities, count };
+}
+
 beforeEach(() => {
   clearQboLookupCacheForTests();
   queryEntity.mockReset();
@@ -72,5 +76,44 @@ describe("resolveQboEntity", () => {
     await resolveQboEntity(config, "conn_1", "Vendor", "Home Depot");
     await resolveQboEntity(config, "conn_2", "Vendor", "Home Depot");
     expect(queryEntity).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not return a false not_found when QBO silently truncates the lookup page", async () => {
+    queryEntity.mockResolvedValue(truncatedPage(
+      Array.from({ length: 1000 }, (_, i) => ({ Id: String(i), DisplayName: `Vendor ${i}` })),
+      1250,
+    ));
+    const res = await resolveQboEntity(config, "conn_1", "Vendor", "Missing Vendor");
+    expect(res).toEqual({ status: "lookup_truncated", returned_count: 1000, total_count: 1250 });
+  });
+
+  it("treats a full maxresults page as possibly truncated when total count is unavailable", async () => {
+    queryEntity.mockResolvedValue(page(
+      Array.from({ length: 1000 }, (_, i) => ({ Id: String(i), DisplayName: `Vendor ${i}` })),
+    ));
+    const res = await resolveQboEntity(config, "conn_1", "Vendor", "Missing Vendor");
+    expect(res).toEqual({ status: "lookup_truncated", returned_count: 1000, total_count: 1000 });
+  });
+
+  it("does not resolve a single exact match when the QBO lookup page is truncated", async () => {
+    queryEntity.mockResolvedValue(truncatedPage([{ Id: "70", DisplayName: "Sherwin-Williams" }], 1001));
+    const res = await resolveQboEntity(config, "conn_1", "Vendor", "Sherwin-Williams");
+    expect(res.status).toBe("needs_disambiguation");
+    if (res.status === "needs_disambiguation") {
+      expect(res.truncated).toBe(true);
+      expect(res.candidates).toEqual([{ id: "70", name: "Sherwin-Williams" }]);
+    }
+  });
+
+  it("bounds the module-level lookup cache", async () => {
+    queryEntity.mockImplementation(async (_config, _entity, statement: string) => {
+      const match = statement.match(/from (\w+)/);
+      return page([{ Id: statement, DisplayName: match?.[1] ?? "Vendor", Name: match?.[1] ?? "Name" }]);
+    });
+    for (let i = 0; i < 125; i += 1) {
+      await resolveQboEntity(config, `conn_${i}`, "Vendor", "Vendor");
+    }
+    await resolveQboEntity(config, "conn_0", "Vendor", "Vendor");
+    expect(queryEntity).toHaveBeenCalledTimes(126);
   });
 });

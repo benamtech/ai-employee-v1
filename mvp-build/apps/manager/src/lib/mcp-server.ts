@@ -116,6 +116,7 @@ async function readManagerResource(uri: string, identity: McpIdentity) {
   const db = serviceClient();
   const snapshot = await buildEmployeeSnapshot(db, identity.employee_id, identity.account_id);
   if (uri === "amtech://manager/connector-status") return jsonResource(uri, {
+    connection_surfaces: snapshot.connection_surfaces ?? [],
     connectors: snapshot.connectors.map((c) => ({
       id: c.id,
       connector_key: c.connector_key,
@@ -127,7 +128,7 @@ async function readManagerResource(uri: string, identity: McpIdentity) {
   });
   if (uri === "amtech://manager/artifacts") return jsonResource(uri, { artifacts: snapshot.artifacts, outputs: snapshot.outputs ?? [] });
   if (uri === "amtech://manager/approvals") return jsonResource(uri, { approvals: snapshot.approvals });
-  if (uri === "amtech://manager/work-queue") return jsonResource(uri, { tasks: snapshot.tasks ?? [], surface_envelopes: snapshot.surface_envelopes ?? [] });
+  if (uri === "amtech://manager/work-queue") return jsonResource(uri, { tasks: snapshot.tasks ?? [], resurface_items: snapshot.resurface_items ?? [], surface_envelopes: snapshot.surface_envelopes ?? [] });
   if (uri === "amtech://manager/runtime-health") return jsonResource(uri, { runtime_health: snapshot.runtime_health });
   if (uri === "amtech://manager/capability-registry") return jsonResource(uri, { capabilities: snapshot.capabilities ?? [], abilities: snapshot.abilities ?? [] });
   if (uri === "amtech://manager/business-brain") {

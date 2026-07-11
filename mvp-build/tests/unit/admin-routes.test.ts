@@ -79,6 +79,29 @@ describe("admin Manager routes", () => {
     expect(state.db!.tables.admin_action_events?.some((r) => r.action === "support_access:account_detail")).toBe(true);
   });
 
+  it("scopes account runtime endpoints before applying the support-detail limit", async () => {
+    state.db = makeFakeDb({
+      ...seed(),
+      runtime_endpoints: [
+        ...Array.from({ length: 120 }, (_, i) => ({
+          id: `rt_other_${i}`,
+          employee_id: `emp_other_${i}`,
+          backend_type: "docker",
+          sms_number_e164: null,
+          gateway_port: 9000 + i,
+          health: { status: "healthy" },
+        })),
+        { id: "rt_target", employee_id: "emp_1", backend_type: "docker", sms_number_e164: "+15555550100", gateway_port: 8123, health: { status: "healthy" } },
+      ],
+    }, { uniques: SCHEMA_UNIQUES });
+    const res = await buildApp().request("/manager/admin/accounts/acct_1", {
+      headers: headers({ "X-AMTECH-Support-Reason": "Investigating account runtime visibility" }),
+    });
+    const json = await res.json();
+    expect(res.status).toBe(200);
+    expect(json.runtime_endpoints.map((r: { id: string }) => r.id)).toEqual(["rt_target"]);
+  });
+
   it("rotates scoped MCP credentials without returning the raw token", async () => {
     const res = await buildApp().request("/manager/admin/support-action", {
       method: "POST",

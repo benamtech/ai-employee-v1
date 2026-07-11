@@ -18,7 +18,8 @@ export interface QboEntityCandidate {
 
 export type QboLookupResult =
   | { status: "resolved"; id: string; name: string }
-  | { status: "needs_disambiguation"; candidates: QboEntityCandidate[] }
+  | { status: "needs_disambiguation"; candidates: QboEntityCandidate[]; truncated?: boolean; returned_count?: number; total_count?: number }
+  | { status: "lookup_truncated"; returned_count: number; total_count: number }
   | { status: "not_found" };
 
 const NAME_FIELD: Record<QboLookupEntityType, string> = {
@@ -32,10 +33,15 @@ const NAME_FIELD: Record<QboLookupEntityType, string> = {
 
 const TTL_MS = 5 * 60 * 1000;
 const MAX_CANDIDATES = 10;
+const MAX_CACHE_ENTRIES = 120;
+const QBO_LOOKUP_PAGE_SIZE = 1000;
 
 interface CacheEntry {
   fetchedAt: number;
   entities: QboEntityCandidate[];
+  returnedCount: number;
+  totalCount: number;
+  truncated: boolean;
 }
 
 const cache = new Map<string, CacheEntry>();
@@ -48,18 +54,30 @@ async function loadEntities(
   config: QboClientConfig,
   connectorId: string,
   entityType: QboLookupEntityType,
-): Promise<QboEntityCandidate[]> {
+): Promise<CacheEntry> {
   const key = cacheKey(connectorId, entityType);
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.fetchedAt < TTL_MS) return cached.entities;
+  if (cached && Date.now() - cached.fetchedAt < TTL_MS) return cached;
 
   const nameField = NAME_FIELD[entityType];
   const page = await queryEntity(config, entityType, `select * from ${entityType} maxresults 1000`);
   const entities: QboEntityCandidate[] = page.entities
     .map((row) => ({ id: String((row as Record<string, unknown>).Id ?? ""), name: String((row as Record<string, unknown>)[nameField] ?? "") }))
     .filter((e) => e.id && e.name);
-  cache.set(key, { fetchedAt: Date.now(), entities });
-  return entities;
+  const entry: CacheEntry = {
+    fetchedAt: Date.now(),
+    entities,
+    returnedCount: page.entities.length,
+    totalCount: page.count,
+    truncated: page.count > page.entities.length || page.entities.length >= QBO_LOOKUP_PAGE_SIZE,
+  };
+  cache.set(key, entry);
+  while (cache.size > MAX_CACHE_ENTRIES) {
+    const oldest = cache.keys().next().value as string | undefined;
+    if (!oldest) break;
+    cache.delete(oldest);
+  }
+  return entry;
 }
 
 /**
@@ -74,16 +92,36 @@ export async function resolveQboEntity(
   entityType: QboLookupEntityType,
   name: string,
 ): Promise<QboLookupResult> {
-  const entities = await loadEntities(config, connectorId, entityType);
+  const entry = await loadEntities(config, connectorId, entityType);
+  const entities = entry.entities;
   const query = name.trim().toLowerCase();
   if (!query) return { status: "not_found" };
 
   const exact = entities.filter((e) => e.name.trim().toLowerCase() === query);
+  if (entry.truncated && exact.length > 0) {
+    return {
+      status: "needs_disambiguation",
+      candidates: exact.slice(0, MAX_CANDIDATES),
+      truncated: true,
+      returned_count: entry.returnedCount,
+      total_count: entry.totalCount,
+    };
+  }
   if (exact.length === 1) return { status: "resolved", id: exact[0]!.id, name: exact[0]!.name };
   if (exact.length > 1) return { status: "needs_disambiguation", candidates: exact.slice(0, MAX_CANDIDATES) };
 
   const partial = entities.filter((e) => e.name.toLowerCase().includes(query));
-  if (partial.length > 0) return { status: "needs_disambiguation", candidates: partial.slice(0, MAX_CANDIDATES) };
+  if (partial.length > 0) {
+    return {
+      status: "needs_disambiguation",
+      candidates: partial.slice(0, MAX_CANDIDATES),
+      ...(entry.truncated ? { truncated: true, returned_count: entry.returnedCount, total_count: entry.totalCount } : {}),
+    };
+  }
+
+  if (entry.truncated) {
+    return { status: "lookup_truncated", returned_count: entry.returnedCount, total_count: entry.totalCount };
+  }
 
   return { status: "not_found" };
 }

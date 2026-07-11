@@ -6,7 +6,7 @@
  * snapshot builder and the browser agree on one shape.
  */
 import type { WorkEventDescriptor } from "./work-events.js";
-import type { CapabilityGraphNode, SurfaceEnvelope } from "./materialization.js";
+import type { CapabilityCategory, CapabilityGraphNode, ProofEnvelope, SurfaceEnvelope } from "./materialization.js";
 
 export interface ArtifactRow {
   id: string;
@@ -42,7 +42,10 @@ export interface ConnectorRow {
   provider: string;
   status: string;
   external_email?: string | null;
+  external_label?: string | null;
+  last_connector_test_at?: string | null;
   last_error?: string | null;
+  created_at?: string | null;
 }
 
 export interface StripeInvoiceRow {
@@ -133,6 +136,37 @@ export interface WorkTask {
   target_id?: string;
 }
 
+export type ConnectionSurfaceState = "not_connected" | "needs_you" | "connected" | "working";
+
+export interface ConnectionSurface {
+  id: string;
+  label: string;
+  category: CapabilityCategory | "calendar" | "store" | "custom";
+  state: ConnectionSurfaceState;
+  account_label?: string | null;
+  health?: string | null;
+  last_event?: string | null;
+  last_action?: string | null;
+  what_employee_can_do: string;
+  setup_requirement?: string | null;
+  connector_id?: string | null;
+  capability_keys: string[];
+  proof: ProofEnvelope;
+}
+
+export interface ResurfaceItem {
+  id: string;
+  kind: "approval" | "question" | "review" | "failure" | "reminder" | "connector" | "runtime" | "work";
+  title: string;
+  why: string;
+  status: "needs_you" | "blocked" | "failed" | "scheduled" | "waiting";
+  resurface_at?: string | null;
+  channel: "web" | "sms" | "both" | "admin";
+  source_envelope_id?: string | null;
+  target?: { kind: "approval" | "work_event" | "task" | "connection" | "connector" | "ability" | "message" | "job" | "output"; id: string } | null;
+  proof: ProofEnvelope;
+}
+
 export interface ResourcePayload {
   account_id: string;
   employee_id?: string;
@@ -149,6 +183,8 @@ export interface ResourcePayload {
   abilities?: AbilitySummary[];
   capabilities?: CapabilityGraphNode[];
   surface_envelopes?: SurfaceEnvelope[];
+  connection_surfaces?: ConnectionSurface[];
+  resurface_items?: ResurfaceItem[];
   outputs?: WorkOutput[];
   tasks?: WorkTask[];
 }

@@ -222,7 +222,6 @@ export async function buildAdminAccountDetail(db: SupabaseClient, accountId: str
     { data: users },
     { data: employeesRaw },
     { data: provisioning },
-    { data: runtimes },
     { data: connectors },
     { data: repairsRaw },
     { data: approvals },
@@ -235,7 +234,6 @@ export async function buildAdminAccountDetail(db: SupabaseClient, accountId: str
     db.from("account_memberships").select("*").eq("account_id", accountId).limit(50),
     db.from("employees").select("*").eq("account_id", accountId).limit(50),
     db.from("provisioning_jobs").select("id,account_id,employee_id,state,failure_state,repair_state,created_at,updated_at").eq("account_id", accountId).limit(50),
-    db.from("runtime_endpoints").select("*").limit(100),
     db.from("connector_accounts").select("id,account_id,employee_id,connector_key,provider,status,external_email,last_error,updated_at").eq("account_id", accountId).limit(100),
     db.from("event_repair_queue").select("id,account_id,employee_id,status,severity,source,event_type,reason,created_at").eq("account_id", accountId).limit(100),
     db.from("approvals").select("id,account_id,employee_id,action_key,summary,risk_level,resolution,created_at,expires_at").eq("account_id", accountId).limit(100),
@@ -246,7 +244,11 @@ export async function buildAdminAccountDetail(db: SupabaseClient, accountId: str
   ]);
   if (!account) return null;
   const employees = asRows<Record<string, unknown>>(employeesRaw);
-  const runtimeRows = asRows<Record<string, unknown>>(runtimes).filter((r) => employees.some((e) => e.id === r.employee_id));
+  const employeeIds = employees.map((e) => String(e.id)).filter(Boolean);
+  const { data: runtimes } = employeeIds.length
+    ? await db.from("runtime_endpoints").select("*").in("employee_id", employeeIds).limit(100)
+    : { data: [] };
+  const runtimeRows = asRows<Record<string, unknown>>(runtimes);
   const approvalRows = asRows<Record<string, unknown>>(approvals);
   const repairRows = asRows<Record<string, unknown>>(repairsRaw);
   const employee_summaries: AdminEmployeeSummary[] = employees.map((e) => {
@@ -301,6 +303,8 @@ export async function buildAdminEmployeeDetail(db: SupabaseClient, employeeId: s
     snapshot,
     mcp_credentials: credentials ?? [],
     materialization: {
+      connection_surfaces: snapshot.connection_surfaces ?? [],
+      resurface_items: snapshot.resurface_items ?? [],
       latest_envelopes: (snapshot.surface_envelopes ?? []).slice(0, 50).map((e) => ({
         id: e.id,
         kind: e.kind,
@@ -330,7 +334,8 @@ export async function buildReadinessReport(db: SupabaseClient, employeeId: strin
     { key: "tool_loop", label: "Hermes tool execution", status: "unknown", detail: "Requires real model/provider path that executes MCP tool calls, not JSON emitted as text." },
     { key: "egress_control", label: "Agent egress control", status: "fail", detail: "Deny-by-default egress or allowlisted proxy remains required before real tenant use." },
     { key: "pending_approvals", label: "Owner approval gates", status: snapshot?.approvals?.length ? "warn" : "pass", detail: `${snapshot?.approvals?.length ?? 0} pending approval(s).` },
-    { key: "connector_health", label: "Connector health", status: snapshot?.connectors?.some((c: { status?: string }) => !["connected", "active", "ok"].includes(String(c.status).toLowerCase())) ? "warn" : "pass", detail: `${snapshot?.connectors?.length ?? 0} connector row(s) summarized.` },
+    { key: "connector_health", label: "Connector health", status: snapshot?.connection_surfaces?.some((c: { state?: string }) => c.state === "needs_you") ? "warn" : "pass", detail: `${snapshot?.connection_surfaces?.length ?? snapshot?.connectors?.length ?? 0} connection surface(s) summarized.` },
+    { key: "resurface_queue", label: "Resurface queue", status: snapshot?.resurface_items?.some((item: { status?: string }) => item.status === "failed" || item.status === "blocked") ? "warn" : "pass", detail: `${snapshot?.resurface_items?.length ?? 0} resurfacing item(s) derived from current work.` },
   ];
   const failed = checks.some((c) => c.status === "fail");
   return {

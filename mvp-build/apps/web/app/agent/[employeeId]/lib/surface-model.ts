@@ -1,4 +1,4 @@
-import type { AbilitySummary, ResourcePayload, WorkOutput, WorkTask } from "../surface-types";
+import type { AbilitySummary, ConnectionSurface, ResourcePayload, ResurfaceItem, WorkOutput, WorkTask } from "../surface-types";
 import { groupByJob } from "./group-by-job";
 
 export type SurfaceView = "today" | "chat" | "jobs" | "tasks" | "outputs" | "connected" | "abilities" | "activity" | "settings";
@@ -9,6 +9,7 @@ export type PreviewSelection =
   | { kind: "job"; id: string }
   | { kind: "output"; id: string }
   | { kind: "task"; id: string }
+  | { kind: "connection"; id: string }
   | { kind: "connector"; id: string }
   | { kind: "ability"; id: string }
   | { kind: "message"; id: string };
@@ -29,7 +30,7 @@ export function navCounts(res: ResourcePayload): Record<SurfaceView, number> {
     jobs: grouped.folders.length,
     tasks: res.tasks?.length ?? 0,
     outputs: res.outputs?.length ?? res.artifacts.length,
-    connected: res.connectors.length,
+    connected: res.connection_surfaces?.length ?? res.connectors.length,
     abilities: res.abilities?.length ?? 0,
     activity: res.work_events.length,
     settings: res.employee ? 1 : 0,
@@ -37,6 +38,8 @@ export function navCounts(res: ResourcePayload): Record<SurfaceView, number> {
 }
 
 export function defaultSelection(res: ResourcePayload): PreviewSelection | null {
+  const resurfaced = res.resurface_items?.find((item) => item.status === "needs_you" || item.status === "blocked" || item.status === "failed");
+  if (resurfaced) return selectionForResurface(resurfaced);
   const urgentTask = res.tasks?.find((t) => t.status === "needs_you" || t.status === "blocked" || t.status === "failed");
   if (urgentTask) return { kind: "task", id: urgentTask.id };
   const approval = res.approvals[0];
@@ -71,6 +74,10 @@ export function previewItem(res: ResourcePayload, selection: PreviewSelection | 
     const row = res.connectors.find((c) => c.id === selection.id);
     return row ? { selection, eyebrow: "Connected", title: labelConnector(row.provider), summary: row.last_error ?? row.external_email ?? undefined, status: row.status } : null;
   }
+  if (selection.kind === "connection") {
+    const row = (res.connection_surfaces ?? []).find((c: ConnectionSurface) => c.id === selection.id);
+    return row ? { selection, eyebrow: "Connected", title: row.label, summary: row.health ?? row.account_label ?? row.what_employee_can_do, status: row.state } : null;
+  }
   if (selection.kind === "ability") {
     const row = (res.abilities ?? []).find((a: AbilitySummary) => a.id === selection.id);
     return row ? { selection, eyebrow: "Ability", title: row.label, summary: row.summary, status: row.status } : null;
@@ -86,6 +93,11 @@ export function previewItem(res: ResourcePayload, selection: PreviewSelection | 
   return null;
 }
 
+export function selectionForResurface(item: ResurfaceItem): PreviewSelection {
+  if (item.target) return item.target;
+  return { kind: "task", id: item.id };
+}
+
 export function labelConnector(value: string): string {
   const v = value.toLowerCase();
   if (v.includes("gmail") || v.includes("email")) return "Email";
@@ -96,8 +108,8 @@ export function labelConnector(value: string): string {
 
 export function statusTone(status?: string): "good" | "warn" | "bad" | "quiet" {
   const s = String(status ?? "").toLowerCase();
-  if (["ready", "healthy", "connected", "active", "sent", "delivered", "done", "completed", "approved", "success"].includes(s)) return "good";
-  if (["needs_connection", "needs_you", "blocked", "degraded", "scheduled", "pending", "draft", "policy_gated"].includes(s)) return "warn";
+  if (["ready", "healthy", "connected", "working", "active", "sent", "delivered", "done", "completed", "approved", "success"].includes(s)) return "good";
+  if (["not_connected", "needs_connection", "needs_you", "blocked", "degraded", "scheduled", "pending", "draft", "policy_gated"].includes(s)) return "warn";
   if (["failed", "unhealthy", "error", "rejected", "unavailable"].includes(s)) return "bad";
   return "quiet";
 }
@@ -128,6 +140,8 @@ export function labelStatus(status?: string): string {
     error: "Failed",
     rejected: "Rejected",
     unavailable: "Unavailable",
+    not_connected: "Not connected",
+    working: "Working",
     provisioning: "Setting up",
     live: "Live",
     retired: "Disabled",

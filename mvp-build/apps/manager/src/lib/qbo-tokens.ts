@@ -74,7 +74,7 @@ export interface FreshQboAccess {
 const EXPIRY_SKEW_MS = 5 * 60 * 1000;
 const REFRESH_LEASE_SECONDS = 30;
 const CONTENDED_POLL_MS = 200;
-const CONTENDED_POLL_ATTEMPTS = 5;
+const CONTENDED_POLL_ATTEMPTS = Math.ceil((REFRESH_LEASE_SECONDS * 1000) / CONTENDED_POLL_MS);
 
 function envOf(row: QboConnectorTokenRow): QboEnvironment {
   return row.environment === "production" ? "production" : "sandbox";

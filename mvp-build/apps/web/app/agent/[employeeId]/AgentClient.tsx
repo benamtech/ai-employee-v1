@@ -10,6 +10,7 @@ import {
   labelConnector,
   navCounts,
   previewItem,
+  selectionForResurface,
   statusTone,
   type PreviewSelection,
   type SurfaceView,
@@ -35,6 +36,8 @@ const EMPTY: ResourcePayload = {
   abilities: [],
   outputs: [],
   tasks: [],
+  connection_surfaces: [],
+  resurface_items: [],
 };
 
 const NAV: Array<{ id: SurfaceView; label: string }> = [
@@ -261,6 +264,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   const counts = useMemo(() => navCounts(res), [res]);
   const preview = useMemo(() => previewItem(res, selected), [res, selected]);
   const urgentTasks = (res.tasks ?? []).filter((t) => t.status === "needs_you" || t.status === "blocked" || t.status === "failed");
+  const resurfaceItems = (res.resurface_items ?? []).filter((item) => item.status === "needs_you" || item.status === "blocked" || item.status === "failed");
   const recentEvents = res.work_events.slice(0, 8);
   const displayMessages = [
     ...res.messages.map((m) => ({ id: m.id, role: m.direction === "to_owner" ? "employee" as const : "owner" as const, body: m.body, status: m.status })),
@@ -309,6 +313,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
           {!loading && active === "today" ? (
             <TodayView
               res={res}
+              resurfaceItems={resurfaceItems}
               urgentTasks={urgentTasks}
               recentEvents={recentEvents}
               onSelect={setSelected}
@@ -358,6 +363,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
 
 function TodayView({
   res,
+  resurfaceItems,
   urgentTasks,
   recentEvents,
   onSelect,
@@ -366,6 +372,7 @@ function TodayView({
   employeeId,
 }: {
   res: ResourcePayload;
+  resurfaceItems: NonNullable<ResourcePayload["resurface_items"]>;
   urgentTasks: NonNullable<ResourcePayload["tasks"]>;
   recentEvents: WorkEventRow[];
   onSelect: (selection: PreviewSelection) => void;
@@ -373,12 +380,14 @@ function TodayView({
   onResolve: (approvalId: string, response: "approved" | "rejected") => Promise<void> | void;
   employeeId: string;
 }) {
-  const standaloneApprovals = res.approvals.slice(0, 3);
+  const resurfacedApprovalIds = new Set(resurfaceItems.flatMap((item) => item.target?.kind === "approval" ? [item.target.id] : []));
+  const standaloneApprovals = res.approvals.filter((approval) => !resurfacedApprovalIds.has(approval.id)).slice(0, 3);
   return (
     <>
-      <DailyBrief approvals={res.approvals} reminders={res.reminders} workEvents={res.work_events} invoices={res.stripe_invoices} />
+      <DailyBrief approvals={res.approvals} reminders={res.reminders} workEvents={res.work_events} invoices={res.stripe_invoices} resurfaceItems={res.resurface_items ?? []} />
       <div className="ws-grid two">
-        <Panel title="Needs attention" empty={!urgentTasks.length && !standaloneApprovals.length} emptyText="Nothing needs a decision right now.">
+        <Panel title="Needs attention" empty={!resurfaceItems.length && !urgentTasks.length && !standaloneApprovals.length} emptyText="Nothing needs a decision right now.">
+          {resurfaceItems.slice(0, 5).map((item) => <ResurfaceRow key={item.id} item={item} onSelect={onSelect} />)}
           {standaloneApprovals.map((a) => (
             <button key={a.id} className="ws-row" onClick={() => onSelect({ kind: "approval", id: a.id })}>
               <span>Decision needed</span>
@@ -453,16 +462,25 @@ function OutputList({ res, onSelect }: { res: ResourcePayload; onSelect: (select
 }
 
 function ConnectorList({ res, onSelect }: { res: ResourcePayload; onSelect: (selection: PreviewSelection) => void }) {
+  const connections = res.connection_surfaces ?? [];
   return (
-    <ListShell emptyTitle="No connected systems yet" emptyBody="Email, payments, files, and calendar status will appear here as they are connected.">
-      {res.connectors.map((c) => (
+    <ListShell emptyTitle="No connected systems yet" emptyBody="Email, payments, files, calendar, store, and other connected work will appear here.">
+      {connections.map((c) => (
+        <button key={c.id} className="ws-row" onClick={() => onSelect({ kind: "connection", id: c.id })}>
+          <span>{c.category}</span>
+          <strong>{c.label}</strong>
+          <p>{c.account_label ?? c.health ?? c.what_employee_can_do}</p>
+          <Pill tone={statusTone(c.state)} label={labelStatus(c.state)} />
+        </button>
+      ))}
+      {!connections.length ? res.connectors.map((c) => (
         <button key={c.id} className="ws-row" onClick={() => onSelect({ kind: "connector", id: c.id })}>
           <span>Connection</span>
           <strong>{labelConnector(c.provider)}</strong>
           <p>{c.external_email ?? c.last_error ?? "Ready to connect when needed."}</p>
           <Pill tone={statusTone(c.status)} label={labelStatus(c.status)} />
         </button>
-      ))}
+      )) : null}
     </ListShell>
   );
 }
@@ -555,6 +573,7 @@ function PreviewPane({
   const event = selection.kind === "work_event" ? res.work_events.find((e) => e.id === selection.id) : null;
   const output = selection.kind === "output" ? (res.outputs ?? []).find((o) => o.id === selection.id) : null;
   const task = selection.kind === "task" ? (res.tasks ?? []).find((t) => t.id === selection.id) : null;
+  const connection = selection.kind === "connection" ? (res.connection_surfaces ?? []).find((c) => c.id === selection.id) : null;
   const connector = selection.kind === "connector" ? res.connectors.find((c) => c.id === selection.id) : null;
   const ability = selection.kind === "ability" ? (res.abilities ?? []).find((a) => a.id === selection.id) : null;
   const message = selection.kind === "message" ? res.messages.find((m) => m.id === selection.id) : null;
@@ -572,11 +591,26 @@ function PreviewPane({
         {event?.work_event_descriptor ? <WorkCard descriptor={event.work_event_descriptor} employeeId={employeeId} onRespond={onRespond} onResolve={onResolve} /> : null}
         {output ? <OutputPreview output={output} /> : null}
         {task ? <TaskDetails task={task} onSelect={onSelect} /> : null}
+        {connection ? <ConnectionDetails connection={connection} /> : null}
         {connector ? <ConnectorDetails connector={connector} /> : null}
         {ability ? <AbilityDetails ability={ability} /> : null}
         {message ? <MessageDetails message={message} /> : null}
         {job ? <JobFolder folder={job} employeeId={employeeId} /> : null}
       </div>
+    </div>
+  );
+}
+
+function ConnectionDetails({ connection }: { connection: NonNullable<ResourcePayload["connection_surfaces"]>[number] }) {
+  return (
+    <div className="ws-detail">
+      <KeyValue label="Connection" value={connection.label} />
+      <KeyValue label="Status" value={labelStatus(connection.state)} />
+      <KeyValue label="Account" value={connection.account_label ?? undefined} />
+      <KeyValue label="Last event" value={connection.last_event ?? undefined} />
+      <KeyValue label="Last action" value={connection.last_action ?? undefined} />
+      <p>{connection.what_employee_can_do}</p>
+      {connection.setup_requirement ? <p className="ws-muted">{connection.setup_requirement}</p> : null}
     </div>
   );
 }
@@ -640,6 +674,17 @@ function TaskRow({ task, onSelect }: { task: NonNullable<ResourcePayload["tasks"
       <strong>{task.title}</strong>
       {task.summary ? <p>{task.summary}</p> : null}
       <Pill tone={statusTone(task.status)} label={labelStatus(task.status)} />
+    </button>
+  );
+}
+
+function ResurfaceRow({ item, onSelect }: { item: NonNullable<ResourcePayload["resurface_items"]>[number]; onSelect: (selection: PreviewSelection) => void }) {
+  return (
+    <button className="ws-row" onClick={() => onSelect(selectionForResurface(item))}>
+      <span>{item.kind}</span>
+      <strong>{item.title}</strong>
+      <p>{item.why}</p>
+      <Pill tone={statusTone(item.status)} label={labelStatus(item.status)} />
     </button>
   );
 }

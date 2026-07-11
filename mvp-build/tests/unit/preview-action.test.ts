@@ -2,6 +2,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { MANAGER_API } from "@amtech/shared";
 import { makeFakeDb, type FakeSupabase } from "./_helpers/fake-supabase";
 import { createPreviewLink } from "../../apps/manager/src/lib/preview-links";
+import { deliverOwnerTurnToRuntime } from "../../apps/manager/src/lib/runtime";
 
 const state = vi.hoisted(() => ({ db: null as FakeSupabase | null }));
 
@@ -26,6 +27,7 @@ describe("preview action route", () => {
   });
 
   beforeEach(() => {
+    vi.mocked(deliverOwnerTurnToRuntime).mockClear();
     process.env.MANAGER_INTERNAL_TOKEN = "test-internal-token";
     process.env.SIGNING_SECRET = "unit-test-signing-secret-123456789";
     state.db = makeFakeDb({
@@ -68,6 +70,13 @@ describe("preview action route", () => {
     expect(json.resolution).toBe("approved");
     expect(state.db!.tables.approvals!.find((a) => a.id === "appr_1")!.resolution).toBe("approved");
     expect(state.db!.tables.preview_links![0].consumed_at).toBeTruthy();
+    expect(deliverOwnerTurnToRuntime).toHaveBeenCalledWith(state.db!.asClient(), expect.objectContaining({
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      channel: "sms",
+      idempotency_key: "approval-resolution:appr_1:approved",
+    }));
+    expect(json.turn_status).toBe("queued");
     const audit = state.db!.tables.audit_log!.filter((r) => r.action === "preview:action");
     expect(audit).toHaveLength(1);
     expect(audit[0].actor).toBe("owner");
@@ -86,6 +95,12 @@ describe("preview action route", () => {
     const res = await action(link.token, "reject");
     expect(res.status).toBe(200);
     expect(state.db!.tables.approvals!.find((a) => a.id === "appr_2")!.resolution).toBe("rejected");
+    expect(deliverOwnerTurnToRuntime).toHaveBeenCalledWith(state.db!.asClient(), expect.objectContaining({
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      channel: "sms",
+      idempotency_key: "approval-resolution:appr_2:rejected",
+    }));
   });
 
   it("routes a respond note into the owner-turn pipeline", async () => {

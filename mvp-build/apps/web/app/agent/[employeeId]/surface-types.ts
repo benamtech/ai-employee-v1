@@ -21,6 +21,8 @@ export type {
   AbilitySummary,
   WorkOutput,
   WorkTask,
+  ConnectionSurface,
+  ResurfaceItem,
   ResourcePayload,
 } from "@amtech/shared";
 import type { ArtifactRow, StripeInvoiceRow, ReminderRow, JobCommitmentRow, WorkEventRow } from "@amtech/shared";

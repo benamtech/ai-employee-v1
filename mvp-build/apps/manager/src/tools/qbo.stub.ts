@@ -294,6 +294,15 @@ async function resolveOrHalt(
   if (res.status === "needs_disambiguation") {
     return { ok: false, result: { kind: "disambiguation", field: entityType, candidates: res.candidates } };
   }
+  if (res.status === "lookup_truncated") {
+    return {
+      ok: false,
+      result: {
+        kind: "rejected",
+        reason: `QuickBooks returned ${res.returned_count} of ${res.total_count} ${entityType} records; ask for a more specific ${entityType} name before writing.`,
+      },
+    };
+  }
   return { ok: false, result: { kind: "rejected", reason: `No ${entityType} named "${name}" found in QuickBooks.` } };
 }
 
