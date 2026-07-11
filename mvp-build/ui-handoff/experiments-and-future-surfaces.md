@@ -63,6 +63,10 @@ These are reasonable near-term UI explorations:
   - ability cards grouped by work type: communicate, estimate, collect money, schedule, research, create media, manage files;
   - each state says ready, needs connection, needs info, degraded, or policy-gated;
   - setup/repair buttons where routes exist.
+  - **Connected now renders generic `ConnectionSurface` cards** (Email/Payments/Accounting/Files/Calendar/Store/custom) before raw connector rows — design the connected-business card, not a per-provider (Gmail/Stripe/QBO) layout. A new connector should light up a generic card, not a bespoke branch. See `data-catalog.md` §4.5.
+- Resurfacing ("come back to this"):
+  - `Today`/`Daily Brief` attention now comes from `ResurfaceItem`s (approvals, questions, failures, due reminders, connector/runtime attention, high-priority envelopes), not provider-specific counts.
+  - **Concrete near-term step:** give `resurface_items` a signed preview/action link so SMS can carry the same "come back to this" item as the web `Today` — the resurfacing analog of the existing signed Review path. This is the most likely next slice; design the SMS "later" nudge + its mobile landing against the `WorkResource` contract (§3), reusing the Review layout.
 - Mobile web:
   - top/bottom segmented nav;
   - preview as full-screen drawer/page;

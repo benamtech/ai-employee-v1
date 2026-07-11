@@ -4,11 +4,19 @@ Status: active
 
 Date: 2026-06-30
 
-This folder is **the phased build plan for the next era of development**. Earlier docs in
+This folder is the **module map and dependency graph** for the productionize-and-operate era. Earlier docs in
 [`../`](../) referenced "phases" loosely (Phase 0–6, "Phase 6/7 seams") but never authored the
 forward work as real, ordered, shippable units — it lived as parallel "Workstreams A–H" in the
 now-retired [`../05-implementation-workstreams.md`](../05-implementation-workstreams.md). This folder
 replaces that with **genuine modular phases**.
+
+> **Not the active sequence (updated 2026-07-11).** The immediate development order is the **second-half plan**
+> ([`../../../../mvp-build/second-half-plan/`](../../../../mvp-build/second-half-plan/)), **re-sequenced** by
+> [`../../../../mvp-build/second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md`](../../../../mvp-build/second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md):
+> **deployability + core tool-loop first** (no creds needed), then durability/observability/egress; **admin ops (9-10),
+> billing (11), and further metering (7-8, 12) here are explicitly parked** until the box runs. Read the phases below as
+> the module/dependency reference and the 1000-user horizon — not as the next thing to build. Note the numbering here
+> (1-13) is a **different track** from the second-half plan's own Phases 0-6; they are not one sequence.
 
 ## Era boundary
 
@@ -43,9 +51,10 @@ by one operator toward ~1000 users."
 | `planned` | designed but not implemented |
 | `pending` | blocked by missing env/credential/host, or not yet attempted |
 
-Phase 0 is `source-wired`. Everything in Phases 1–13 plus Phase 3A is `planned`/`pending` today — this folder
-authors structure, not progress. Do not upgrade a status without real proof ids (see
-[`../README.md`](../README.md) working rule).
+This folder authors structure, not progress; the status column below is a point-in-time snapshot. Since it was
+written, Phases **2, 3, 3A, 4, 5, and 6** have reached `source-wired` (see `mvp-build/CODEGRAPH.md` §3 for the
+authoritative per-phase status), while the live-acceptance Phase 1 and the parked Phases 7-13 remain
+`planned`/`pending`. Do not upgrade a status without real proof ids (see [`../README.md`](../README.md) working rule).
 
 ## Phase index
 
@@ -57,7 +66,7 @@ authors structure, not progress. Do not upgrade a status without real proof ids 
 | 3 | [Generic Ingress & Event Routing](phase-03-generic-ingress-event-routing.md) | 0 | source-wired |
 | 3A | [Channel, Session & Presence Layer](phase-03a-channel-session-presence-layer.md) | 0, 3 | source-wired |
 | 4 | [Live Employee Wake Path & Descriptors](phase-04-live-wake-path-descriptors.md) | 2, 3, 3A | source-wired (TDD-hardened) / runtime pending |
-| 5 | [Triage, Batching & Live Work Surface Stream](phase-05-triage-batching-work-surface-stream.md) | 4 | planned |
+| 5 | [Triage, Batching & Live Work Surface Stream](phase-05-triage-batching-work-surface-stream.md) | 4 | source-wired |
 | 6 | [Metering Foundation](phase-06-metering-foundation.md) | 1 | source-wired |
 | 7 | [Metering Instrumentation](phase-07-metering-instrumentation.md) | 6 | planned |
 | 8 | [Metering Rollups, Budgets & Safe Summaries](phase-08-metering-rollups-budgets-summaries.md) | 7 | planned |

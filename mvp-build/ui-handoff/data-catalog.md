@@ -60,6 +60,8 @@ Source: `packages/shared/src/resource-payload.ts`. Built by
 | `abilities` | `AbilitySummary[]` (optional) | legacy owner-language ability list: `category`, `status`, `summary`, `source` | Abilities (being superseded by `capabilities`) |
 | `capabilities` | `CapabilityGraphNode[]` (optional, Phase 4) | the real capability graph — see §4 | Abilities (target shape) |
 | `surface_envelopes` | `SurfaceEnvelope[]` (optional, Phase 4) | generic materialized work items — see §4 | future generic Activity/Outputs rendering |
+| `connection_surfaces` | `ConnectionSurface[]` (optional) | owner-safe generic connected-business cards (Email/Payments/Accounting/Files/Calendar/Store/custom) derived from connectors + capabilities + proof — see §4.5 | **Connected** (rendered first, before raw connector rows) |
+| `resurface_items` | `ResurfaceItem[]` (optional) | owner-safe "come back to this" attention queue derived from tasks + surface envelopes — see §4.5 | **Today** / **Daily Brief** attention counts; a future SMS "later" link |
 | `outputs` | `WorkOutput[]` (optional) | derived, UI-shaped list: `type` (artifact/invoice/message/generic), `title`, `status`, `href`, `artifact_id`, `summary` | Outputs list/library |
 | `tasks` | `WorkTask[]` (optional) | derived, UI-shaped list: `type` (approval/question/reminder/job/connector/runtime/work), `status` (`needs_you`/`in_progress`/`blocked`/`done`/`failed`/`scheduled`), `target_id` | Today, Tasks, Jobs |
 
@@ -172,6 +174,57 @@ component when `render_hints` already tells you which renderer family to use.
 `capability-registry.ts` maps raw Manager tool names to owner-safe `label`/`summary` — never surface a
 raw snake_case tool name in owner UI; if you add a new capability source, add its label mapping there,
 not inline in a component.
+
+## 4.5. `ConnectionSurface` / `ResurfaceItem` — The Connector Center And "Come Back To This"
+
+Source: `packages/shared/src/resource-payload.ts`. Derived by `apps/manager/src/lib/employee-stream.ts`
+(`deriveConnectionSurfaces()` / `deriveResurfaceItems()`) and folded into `ResourcePayload` by
+`buildEmployeeSnapshot()`. These are the **product use of the Phase 4 materialization layer** (§4): they
+turn capabilities + connectors + surface envelopes into two owner-language projections the UI renders
+directly, instead of the older provider-specific rows.
+
+```ts
+interface ConnectionSurface {
+  id: string; label: string;                       // "Email", "Payments", "Accounting", "Files", ...
+  category: CapabilityCategory | "calendar" | "store" | "custom";
+  state: "not_connected" | "needs_you" | "connected" | "working";
+  account_label?: string | null;                   // e.g. the connected email address
+  health?: string | null; last_event?: string | null; last_action?: string | null;
+  what_employee_can_do: string;                    // owner-language capability sentence
+  setup_requirement?: string | null;               // present when state needs action
+  connector_id?: string | null;                    // links back to a raw ConnectorRow when one exists
+  capability_keys: string[]; proof: ProofEnvelope;
+}
+
+interface ResurfaceItem {
+  id: string;
+  kind: "approval" | "question" | "review" | "failure" | "reminder" | "connector" | "runtime" | "work";
+  title: string; why: string;                      // why it's back in front of the owner
+  status: "needs_you" | "blocked" | "failed" | "scheduled" | "waiting";
+  resurface_at?: string | null; channel: "web" | "sms" | "both" | "admin";
+  source_envelope_id?: string | null;
+  target?: { kind: "approval" | "work_event" | "task" | "connection" | "connector" | "ability"
+           | "message" | "job" | "output"; id: string } | null;
+  proof: ProofEnvelope;
+}
+```
+
+How the web surface consumes them today (`AgentClient.tsx`, `lib/surface-model.ts`, `DailyBrief.tsx`):
+
+- **Connected** renders `connection_surfaces` as generic connected-business cards **first**, and only
+  falls back to raw `connectors` rows for compatibility. Selecting a card opens a `ConnectionDetails`
+  preview. The nav count is `connection_surfaces?.length ?? connectors.length`.
+- **Today** and the **Daily Brief** compute "needs attention" from `resurface_items` filtered to
+  `needs_you | blocked | failed` (via a `ResurfaceRow`), instead of the old provider-specific
+  approval/reminder counts. `selectionForResurface()` maps an item to a preview selection.
+- Both are also exposed read-only over Manager MCP (`connector-status` / `work-queue` resources) and in
+  admin employee-detail/materialization diagnostics, so operator triage sees the same projections with
+  proof ids.
+
+Design rule: reach for `ConnectionSurface`/`ResurfaceItem` before raw `connectors`/`approvals`/
+`reminders` when building a "what's connected" or "what needs me" view — they are already owner-language,
+proof-carrying, and provider-agnostic. Adding a new connector should light up a generic card here, not a
+new bespoke React branch (see `experiments-and-future-surfaces.md`).
 
 ## 5. Artifact Links And Preview Images — The Concrete Plumbing
 

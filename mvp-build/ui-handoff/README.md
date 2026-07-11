@@ -43,6 +43,7 @@ Relevant current status (see `mvp-build/CODEGRAPH.md` §3 for the authoritative 
 - **Phase 4** (tool-agnostic capability/materialization layer): `source-wired`. `SurfaceEnvelope`, `CapabilityGraphNode`, `WorkResource`/`WorkAction`, and a Manager capability registry exist and are exposed via Manager MCP `resources/list`/`resources/read`. The web Work Surface's Outputs/Tasks/Abilities views mostly still consume the older `ResourcePayload` derived fields directly — wiring more of the UI through the generic materialization contract is open work.
 - **Phase 5** (trial ops/admin/billing): `source-wired`. An internal `/admin` console exists (dashboard, accounts, provisioning, repairs, providers, billing scaffold, employee support actions, readiness). It is operator-facing, not owner-facing, and is a separate audience/vocabulary from the Work Surface.
 - Also source-wired: MCP-UI generative cards — the agent can emit a typed `table`/`schedule`/`diff`/`form` view that Manager compiles into a real `ui://` resource, rendered in a sandboxed iframe on the web Work Surface with actions routed through the same approval gate.
+- Also source-wired (2026-07-11): a **tool-agnostic Connector Center** (`ConnectionSurface`) and a **resurfacing projection** (`ResurfaceItem`) — `Connected` renders generic connected-business cards before raw connector rows, and `Today`/`Daily Brief` compute attention from resurfacing items. These are the product use of the Phase 4 materialization layer; see `data-catalog.md` §4.5.
 
 For UI work, this means:
 

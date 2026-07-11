@@ -1,99 +1,66 @@
 # AI Employee Second-Half Current And Future State
 
-**Status: active** · _Created 2026-07-09. This is the wiki companion to [`../../mvp-build/second-half-plan/`](../../mvp-build/second-half-plan/): it summarizes the current application state and the forward state after the new seven-phase second-half plan. It does not replace implementation records; it points agents to the plan and explains the product architecture shift._
+**Status: active** · _Created 2026-07-09; brought current 2026-07-11. This is the wiki companion to [`../../mvp-build/second-half-plan/`](../../mvp-build/second-half-plan/): it summarizes what is actually built in `mvp-build/` today and what remains before free trials and paid pilots. It does not replace implementation records; it points agents to the plan and explains the product architecture. The authoritative per-phase status is `mvp-build/CODEGRAPH.md` §3._
 
 ## Why This Exists
 
-The current `mvp-build/` backend is ahead of the product surface. AMTECH has meaningful Hermes/Manager/runtime/event seams, but the owner-facing web and SMS experiences are not ready for free trials or paid pilots. The second-half plan changes the next development era from "finish the estimate app" to "ship the small-business interface layer over Hermes."
+The `mvp-build/` backend and the owner surfaces are now much further along than "finish the estimate app." The seven-phase second-half plan reframed the product as **the business-native materialization layer over Hermes Agent**, and Phases 2–5 of that plan are now **`source-wired`** — the surfaces, contracts, and routes exist in code with local typecheck/unit/build/lint proof. What is **not** yet done is (a) **live provider/runtime proof** (blocked on credentials, ~days out) and (b) the **production deploy/runtime-operations layer** that actually keeps the box running — see the readiness review linked below.
 
-The core conclusion from the Hermes Workspace/WebUI/Desktop research is:
+The core conclusion from the Hermes Workspace/WebUI/Desktop research still holds:
 
 > AMTECH should not be a chat wrapper or a bespoke estimate app. It should be the business-native materialization layer over Hermes Agent.
 
-That means the AI Employee must be usable through web, SMS, signed preview links, email, customer portals, admin, and optional desktop/Deno clients while all of those surfaces render the same underlying employee state.
+The AI Employee is usable through web, SMS, signed preview links, and (as contracts) admin and future desktop/Deno clients, with all of those surfaces rendering the same underlying employee state.
 
-## Current Application State
+## Current Application State (2026-07-11)
 
-Current backend state in `mvp-build/`:
+Backend / control plane — `source-wired`:
 
-- **Manager control plane exists**: provisioning, tools, claims, owner messaging, artifacts, approvals, webhooks, scheduler, repair, metering, and resource routes are present in source.
-- **Hermes profile package exists**: `packages/agent-template/` renders `SOUL.md`, `config.yaml`, workspace policy, Manager tool docs, brain files, skills, model config, toolsets, and Manager MCP server config.
-- **Manager-as-MCP exists**: the employee can call Manager tools natively through MCP rather than through owner-visible developer plumbing.
-- **Schema-first Manager tools exist**: zod schemas and shared dispatch let HTTP and MCP reuse validation/gates/audit.
-- **Runtime alignment exists in source**: Hermes Sessions/Runs-oriented client code, runtime endpoint records, turn queue, channel router, event ingestion, and metering ledgers are wired.
-- **Provider/runtime acceptance is incomplete**: live proof ids are still required for free-trial readiness.
+- **Manager control plane**: provisioning, tools, claims, owner messaging, artifacts, approvals, webhooks, scheduler, repair, metering, and resource routes.
+- **Hermes profile package**: `packages/agent-template/` renders `SOUL.md`, `config.yaml`, workspace policy, Manager tool docs, brain files, skills, model config, toolsets, and Manager MCP server config.
+- **Manager-as-MCP with scoped per-employee credentials**: the employee calls Manager tools natively over MCP; the shared bearer was replaced by per-employee scoped MCP credentials (`0023`), and `/manager/mcp` derives identity from the credential, not spoofable headers.
+- **Schema-first Manager tools**: zod schemas + shared dispatch let HTTP and MCP reuse validation/gates/audit.
+- **Runtime/event spine**: Hermes Sessions/Runs client, runtime endpoint records, DB-backed turn queue, channel/session/presence router, generic event ingress (two-door), triage/batching, and metering ledgers.
+- **RLS closed and restart-safe**: migrations 0018-0021 (all public tables Manager-only, advisor-verified), turn-claim compare-and-swap, and a stuck-turn reaper.
 
-Current owner-surface state:
+Owner surfaces — now `source-wired` (live proof pending), not "future":
 
-- **Web Work Surface is not trial-grade**. It has cards, resources, approvals, job grouping, a snapshot/SSE route, and MCP-UI sandbox support, but it still reads as a sparse internal prototype.
-- **SMS is not yet a complete surface**. Twilio/SMS routing exists, but SMS does not yet provide a full ambient inbox with signed previews and scoped actions for every task/artifact/approval.
-- **Onboarding/login are not trial-grade**. The create/claim/login flows remain visibly prototype-shaped.
-- **Artifacts are still too estimate-shaped**. The renderer must support every structured deliverable and tool result, not only estimate PDFs.
+- **Web Work Surface is a multi-region employee desk**: Today, Chat, Jobs, Tasks, Outputs, Connected, Abilities, Activity, Settings-lite, and a preview pane, backed by a real Manager read model with SSE + poll fallback.
+- **SMS ambient inbox + signed mobile Review**: a signed, scoped, expiring preview/action link mints a `WorkResource` and renders it at `/agent/[employeeId]/review` — a mobile-first page with sticky approve/reject/reply, inline media/document preview, and quiet receipts. SMS carries the link, not a rich payload. Owner approval now wakes the employee through the normal owner-turn path so approved work actually proceeds.
+- **Tool-agnostic Connector Center + resurfacing**: `Connected` renders generic connected-business cards (`ConnectionSurface`) before raw connector rows; Today/Daily Brief compute "needs attention" from a `ResurfaceItem` projection over tasks and surface envelopes. This is the product use of the Phase 4 materialization/capability layer — the product thinks in "connected business capabilities," not Gmail/Stripe/QBO rows.
+- **MCP-UI generative cards**: the agent emits a typed `table`/`schedule`/`diff`/`form` view that Manager compiles into a sandboxed `ui://` resource, with every action routed back through the approval gate.
 
-## Future Application State
+Connectors — `source-wired`, live provider proof pending:
 
-After the seven second-half phases, the product should look like this:
+- **Gmail** (OAuth/watch/PubSub/history/send), **Stripe** (test-mode deposit invoices), and **QuickBooks Online accounting** (`qbo.stub.ts`: connector lifecycle, entity-name resolution with disambiguation, four approval-gated write previews + a single audited commit path, `query_quickbooks`, and P&L/Balance-Sheet/AR/AP reports, under a new `accounting` capability category).
 
-1. **One Employee, Many Surfaces**
+Operator / factory — `source-wired`, live operator proof pending:
 
-   The owner experiences one employee across SMS, web, signed links, and eventually voice/desktop. The conversation, work queue, approvals, artifacts, receipts, and connector state are the same objects rendered differently.
+- An internal `/admin` console (dashboard, accounts, provisioning, repairs, providers, billing scaffold, readiness, materialization inspector, audited support actions) behind DB-backed platform roles + support-reason audit + server-side redaction. It is operator-facing, a distinct audience from the owner desk. Billing is a **scaffold** (trial/plan/state model + display), not automated collection or a paywall.
 
-2. **Web Employee Desk**
+Still incomplete:
 
-   The web surface becomes a serious small-business desk:
+- **Live provider/runtime acceptance**: no real Twilio/Gmail/Stripe/Intuit/Hermes proof ids yet; the local model bridge returns tool-call JSON as text, so the tool-execution loop is not yet end-to-end proven.
+- **Production deploy/runtime-operations layer**: see the readiness review — supervision, employee-container launch, Caddy reload, backups, observability, and egress are essentially unbuilt.
 
-   - left navigation for Today, Inbox, Jobs, Tasks, Outputs, Connected, Capabilities/Abilities, Activity;
-   - center conversation and live work timeline;
-   - right preview rail for outputs, approvals, connectors, jobs, and generic resources;
-   - queue/stop/edit/retry interaction patterns inspired by Hermes WebUI/Desktop;
-   - mobile-first review flows.
+## Production Readiness Gap (2026-07-11)
 
-3. **SMS Ambient Inbox**
+A source audit found the product layer is far ahead of the **operational** layer. The box is not yet deployable or self-sustaining: nothing in the repo starts/supervises/restarts the core services or the employee containers, employee runtime launch is an undefined env string, a newly provisioned employee subdomain never routes (no `caddy reload`), and there is no backup/observability/egress story. The founder's call is to fix deployability and core-loop reliability **before** any further admin-panel or billing work. Details and sequencing:
 
-   SMS becomes a complete low-friction surface:
+- [`../../mvp-build/docs/production-deploy-readiness-review-2026-07-11.md`](../../mvp-build/docs/production-deploy-readiness-review-2026-07-11.md) — evidence-backed gap list.
+- [`../../mvp-build/second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md`](../../mvp-build/second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md) — the re-sequenced roadmap (docker-compose core + per-account employee containers; admin/billing parked).
 
-   - notify/question/review/failure/receipt grammar;
-   - signed preview links for every resource/action;
-   - text fallbacks for approvals and edits;
-   - delivery receipts and repair paths;
-   - continuity with web history.
+## Remaining Work To Trial-Ready
 
-4. **Materialization Contracts**
+The materialization/capability contracts are done; the remaining path is operational and proof-driven:
 
-   Phase 4 introduces the product contracts:
+1. **Production deploy foundation** (no creds): docker-compose core services, a pinned/concrete employee container launch, Caddy reload wiring, per-employee lifecycle + reboot recovery, and a deploy path.
+2. **Core loop working** (no creds): make the model bridge emit real tool calls and reprovision old profiles onto scoped MCP credentials, so a turn → Manager tool → artifact/approval round-trip is deterministically verifiable.
+3. **Durability/observability/egress** (no creds): backup of Hermes profiles + workspaces, logs/alerting, default-deny egress from employee containers.
+4. **Live provider/runtime acceptance** (on creds): run the Phase 1 harness for real proof ids.
+5. **Free Trial / Paid Pilot Gate**: no trial starts until web, SMS, artifact previews, a generic non-estimate resource, live provider/runtime proof, admin repair, usage/cost visibility, and billing/account state are proven or explicitly waived in a dated launch decision.
 
-   - `SurfaceEnvelope` — any user-visible event/action/message rendered for a surface;
-   - `WorkResource` — every output as a typed resource, not just chat text;
-   - `WorkAction` — approve/send/edit/cancel/retry/connect/download/open/answer as declarative actions;
-   - `EmployeeEventStream` — the owner-safe projection of Hermes events, Manager tool events, artifacts, approvals, connector events, scheduler events, and provider events.
-
-5. **Capability Model**
-
-   AMTECH should use the word capability normally. The capability model is not just one endpoint and not just static provisioning. It is a product layer informed by:
-
-   - Hermes `/v1/capabilities`, `/v1/skills`, `/v1/toolsets`;
-   - rendered profile/package/toolset config;
-   - Manager tools and MCP resources;
-   - connector state;
-   - skills installed in the employee;
-   - entitlements and policy;
-   - runtime/provider health.
-
-   The owner sees this as plain-language abilities: "Email is connected," "I can draft invoices," "Payments need setup," "I will ask before sending or spending."
-
-6. **Factory/Admin Layer**
-
-   AMTECH must operate dozens or hundreds of employee instances:
-
-   - account/employee/provisioning/runtimes;
-   - connector and runtime health;
-   - repair queues and support actions;
-   - metering, costs, budgets, and billing states;
-   - materialization inspector with raw provenance for support.
-
-7. **Free Trial And Paid Pilot Gate**
-
-   No free trial should start until web, SMS, artifact previews, generic non-estimate resources, live provider/runtime proof, admin repair, usage/cost visibility, and billing/account state are proven or explicitly waived in a dated launch decision.
+The capability model the owner sees stays plain-language: "Email is connected," "I can draft invoices and bills," "Payments need setup," "I will ask before sending or spending."
 
 ## Relationship To Existing Wiki
 
@@ -106,18 +73,20 @@ This document updates the older Work Surface and graph-materialization framing:
 - [`principle-deliverable-driven-surfaces.md`](../principle-deliverable-driven-surfaces.md) remains the type-system principle for rendering deliverables.
 - [`../../mvp-build/second-half-plan/surface-research-hermes-gui-and-materialization.md`](../../mvp-build/second-half-plan/surface-research-hermes-gui-and-materialization.md) is the newest detailed research addendum.
 
-## Phase Map
+## Phase Map (status as of 2026-07-11)
 
-| Phase | What Changes | Why It Matters |
+| Phase | What Changes | Status |
 |---|---|---|
-| 0 | Current-state handoff | Cold agents can understand the code/product state without re-reading old plans. |
-| 1 | Preserve and close live gate | Stabilizes the tool-enabled employee path before broad UI work. |
-| 2 | Owner Work Surface redesign | Converts the web app from sparse proof surface into employee desk. |
-| 3 | SMS ambient inbox and links | Makes SMS usable as a primary surface. |
-| 4 | Tool-agnostic capability/rendering | Makes every tool/deliverable render without bespoke connector UI. |
-| 5 | Trial ops/admin/billing | Makes the employee factory supportable and chargeable. |
-| 6 | Free trial/paid pilot readiness | Proves the system can be given to real owners safely. |
+| 0 | Current-state handoff | done |
+| 1 | Preserve and close live gate | `source-wired`; live gate blocked on model/provider path |
+| 2 | Owner Work Surface redesign | `source-wired`; live/browser proof pending |
+| 3 | SMS ambient inbox and links | `source-wired`; live SMS proof pending |
+| 4 | Tool-agnostic capability/rendering | `source-wired` (Connector Center + resurfacing are its product use) |
+| 5 | Trial ops/admin/billing | `source-wired`; billing is scaffold only; live operator proof pending |
+| 6 | Free trial/paid pilot readiness | planned; gated on live proof + deploy foundation |
+
+The product-surface phases (2–4) are built. What remains before a real owner can be handed a trial is **operational**: the production deploy foundation, the working core tool-loop, durability/observability/egress, and live provider proof.
 
 ## Next Concrete Move
 
-Complete Phase 1 using [`../../mvp-build/second-half-plan/phase-01-handoff-prompt.md`](../../mvp-build/second-half-plan/phase-01-handoff-prompt.md). Do not start the major web/SMS redesign until the interrupted tool-enabled employee path is preserved, tested, and either live-proven or honestly blocked with exact proof gaps.
+Per the [re-sequenced roadmap](../../mvp-build/second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md): build the **production deploy foundation** and get the **core tool-loop deterministically working** (both need no live credentials, and creds are ~days out), then run Phase 1 live acceptance when creds land. Admin-panel polish and billing are **parked** — Phase 5 is already source-wired and sufficient for a founder-operated first pilot. Do not upgrade any live gate without real provider/runtime proof ids.

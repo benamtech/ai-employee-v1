@@ -57,7 +57,7 @@ MCP-UI generative cards (source-wired, part of Phase 5's generative-UI slice):
 
 Shared contracts that drive UI:
 
-- `packages/shared/src/resource-payload.ts` — Work Surface snapshot contract: account, employee, runtime health, artifacts, approvals, messages, connectors, invoices, reminders, job commitments, work events, abilities, capabilities, surface envelopes, outputs, tasks. See `data-catalog.md` §2.
+- `packages/shared/src/resource-payload.ts` — Work Surface snapshot contract: account, employee, runtime health, artifacts, approvals, messages, connectors, invoices, reminders, job commitments, work events, abilities, capabilities, surface envelopes, **connection surfaces**, **resurface items**, outputs, tasks. See `data-catalog.md` §2 and §4.5. Note: `Connected` now renders generic `connection_surfaces` cards before raw connector rows, and `Today`/`DailyBrief` compute attention from `resurface_items` — `AgentClient.tsx` (`ConnectionDetails`, `ResurfaceRow`) + `lib/surface-model.ts` (`selectionForResurface`).
 - `packages/shared/src/work-events.ts` — `WorkEventDescriptor`, deliverable types (incl. `tool_activity`), move types, acceptance grammar, `WorkView` (table/schedule/diff/form for MCP-UI), SMS rendering helper (grammar-aware, carries a signed `preview_url`), schema-to-form helper.
 - `packages/shared/src/preview-links.ts` — the `WorkResource`/`WorkAction` contract every preview surface renders, plus `defaultActionsFor`/`actionScopeFor` helpers. See `data-catalog.md` §3.
 - `packages/shared/src/materialization.ts` — `SurfaceEnvelope`, `RenderHints`, `SafetyEnvelope`, `ProofEnvelope`, `CapabilityGraphNode`, `EmployeeEventStreamEvent`, `MaterializedWork` — the Phase 4 generic materialization contract. See `data-catalog.md` §4.
