@@ -2,7 +2,7 @@
 
 **Status: complete**
 
-This wiki turns `../AMTECH-discovery-prompt.md` and the current [`../mvp-build/`](../mvp-build/) work into a decision and call plan for AMTECH AI: a one-person studio turning skills into a managed, textable **AI Employee** and a Work Surface that lets owner-led SMBs supervise real work in seconds.
+This wiki turns AMTECH's go-to-market research and the current [`../mvp-build/`](../mvp-build/) work into a decision and call plan for AMTECH AI: a one-person studio turning skills into a managed, textable **AI Employee** and a Work Surface that lets owner-led SMBs supervise real work in seconds.
 
 ## Headline decision
 

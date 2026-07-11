@@ -4,7 +4,7 @@
 
 ## What this folder is
 
-The **living operating brain for AMTECH AI** — a full, interlinked wiki of markdown files holding the company's current go-to-market decision, offer, segments, and execution plan. It was built from the brief in **`AMTECH-discovery-prompt.md`** (now the historical spec) and is **kept continuously current**.
+The **living operating brain for AMTECH AI** — a full, interlinked wiki of markdown files holding the company's current go-to-market decision, offer, segments, and execution plan. It is **kept continuously current**.
 
 **Start here:** [`CODEGRAPH.md`](CODEGRAPH.md) — the map of every page plus the canonical facts — then `wiki/00-decision.md`.
 
@@ -34,7 +34,7 @@ Every implementation plan must be grounded in files already read, preserve the r
 
 The brain is built. When asked to extend it, sharpen the decision, research a new angle, or update anything:
 
-1. Read [`CODEGRAPH.md`](CODEGRAPH.md) first (the map + canonical facts). The original brief `AMTECH-discovery-prompt.md` is the historical spec if you need the original deliverable list.
+1. Read [`CODEGRAPH.md`](CODEGRAPH.md) first (the map + canonical facts).
 2. Do real primary-source research for any new claim (see THE SOURCE RULE below).
 3. Write changes into `./wiki/` and **propagate** per CODEGRAPH §3/§7 so nothing goes stale.
 4. Keep it a **decision-and-call-list brain**, not an academic survey — and **leave nothing as-is that the change touches**.

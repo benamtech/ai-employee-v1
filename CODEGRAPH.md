@@ -19,7 +19,6 @@ plus the flagship product build in [`mvp-build/`](mvp-build/), **kept continuous
 
 - **Identity first.** Read and embody [`identity.md`](identity.md) before acting — the required operating self-image, voice, and standard for all AMTECH work. Enforced by `CLAUDE.md` and invariant #11.
 - **Operating instructions** live in [`CLAUDE.md`](CLAUDE.md). It overrides default behavior. Read it before editing.
-- **The brief** ([`AMTECH-discovery-prompt.md`](AMTECH-discovery-prompt.md)) is the original/historical spec (brief §3–§6 deliverables).
 - **The brain is built and current.** The decision is locked (see §3). Work now is refinement, extension, execution-logging, and keeping every page current (no superseded content — invariant #10).
 - **Product code lives in `mvp-build/`.** The whole repo is the AMTECH company brain; `mvp-build/` is the code,
   provisioning, runtime, and acceptance home for the AI Employee flagship. Implementation agents should read
@@ -37,9 +36,6 @@ recurring product. Bias everything toward **speed-to-revenue and speed-to-trust*
 ## 2. The decision spine (the through-line every page serves)
 
 ```
-AMTECH-discovery-prompt.md   (the brief / spec)
-        │
-        ▼
 01-method.md ──► evidence/sources.md          (S001–S067 ledger: primary operator voices)
         │                │
         ▼                ▼
@@ -99,7 +95,7 @@ These values are repeated across many pages. If you change one, you must propaga
 | **Full MVP build-plan handoff** | The agent-team handoff for turning the corrected Hermes-aware architecture into a build plan: non-negotiable guardrails, system model, current source truth, target MVP paths, Manager tool surface, real Gmail/Stripe connector-event slices, required workstreams, open decisions, acceptance criteria, and anti-patterns. | `ai-employee-mvp-build-plan-handoff.md` |
 | **Published Skills (4)** | OKF Audit, Knowledge Graph Builder, **Estimate**, Article Research Writer | `product-ai-employee-context.md` (S057) |
 | **Founder** | Benjamin Palaskas, near Scranton PA, `ben@palaskasconsulting.com` | `CLAUDE.md` |
-| **Cash deadline** | ~30 days | `AMTECH-discovery-prompt.md` |
+| **Cash deadline** | ~30 days | `CLAUDE.md` |
 | **Review timebox** | ≤ 90 minutes before Ben starts dialing | `00-decision.md` |
 | **Source count** | 94 ledger entries, S001–S094 (S068–S074 = entrepreneurship/craft; S075–S080 = customer-facing intake/whole-product; **S081–S085 = the now-REMOVED `AI_EMPLOYEE_MVP/` prototype** (historical reference only — `wiki/MVP/` is the MVP source of truth); **S086–S089 = Hermes/connector capability docs** — vendor capability ground truth, not demand evidence; **S090–S094 = agent-UX interaction design patterns** (generative UI, MCP Apps/MCP-UI, HITL decision vocabulary, progressive autonomy, trust-by-design) — design-pattern ground truth, not demand evidence; ⚠️ Reddit `reddit-search-capture` rows are weak — see `01-method.md`) | `evidence/sources.md` |
 
@@ -128,7 +124,6 @@ Status is the page's own first-line marker. `★` = highest-value pages for agen
 |---|---|---|
 | `identity.md` | ★ **Read & embody first, every session.** The operating self-image, voice, and standard: lead manager · son of Ogilvy · relentlessly resourceful founder · psycho-cybernetics · AMTECH spirit. | n/a |
 | `CLAUDE.md` | ★ Operating instructions for agents. Source rule, structure, guardrails, the living-brain prime directive. **Overrides defaults; points to `identity.md` first.** | n/a |
-| `AMTECH-discovery-prompt.md` | ★ The research brief / spec. §3 questions, §4 rubric, §5 competitive map, §6 required output, §7 facts-you-can-rely-on. | n/a |
 | `CODEGRAPH.md` | This file. Workspace map for agents. | n/a |
 | `mvp-build/` | ★ **Where the AMTECH AI Employee MVP gets built** — the only root folder beside `wiki`. Current reconciled build plan = `wiki/MVP/build-plan-current/`; **current second-half forward plan = `mvp-build/second-half-plan/`**; original build packet = `wiki/MVP/old-build-plan/`; product mechanics = `wiki/product-ai-employee-context.md`. The backend now has meaningful Hermes/Manager/runtime/event seams, and second-half Phase 1-5 are source-wired/static-green: Manager-as-MCP identity binding/resources, tool schema cleanup, profile/runtime rendering, artifact fallbacks, descriptor/materialization contracts, scheduler/runtime health, owner Work Surface, SMS signed previews, capability graph, `SurfaceEnvelope` projection, tuple-cursor SSE, atomic signed-link counters, materialization diagnostics, and a Phase 5 internal admin/ops console with production browser-token gate, platform roles, support-access audit, redacted diagnostics, lifecycle controls, MCP credential rotation/revocation, readiness reporting, and billing scaffold. The second-half plan reframes the next era around a Hermes-backed small-business materialization layer: `SurfaceEnvelope`, `WorkResource`, `WorkAction`, `EmployeeEventStream`, generic renderers, SMS signed previews, serious web employee desk, admin/factory operations, billing, and free-trial readiness. Existing source includes profile-package rendering, Manager tools, Manager-as-MCP, artifacts/approvals, Gmail/Stripe/event seams, runtime health, turn queue, channel router, metering ledgers, local live-test tooling, and a UI-only fixture browser flow for web work without Docker/Supabase/Manager/Hermes/model credentials. A per-employee scoped MCP credential (`mcp-auth.ts`, migration `0023`) replaces the shared Manager internal bearer inside employee containers; follow-on 2026-07-10 work centralized approval `action_key` gating (`packages/shared/src/approval-policy.ts`), closed a turn-claim lock-insert race (migration `0024`) and a stuck-turn-reaper lost-update race, added a real production admission guard against the uncontained `local` runtime backend, and added migration `0025` for admin/ops. Provider/runtime live acceptance, live admin operator seeding, egress control, and real owner-surface polish remain pending. **`mvp-build/` is tracked in the root `GTM-RESEARCH` git repo** (branch `main`; GitHub remote `origin` → `benamtech/ai-employee-v1`) with a build-home agent guide (`mvp-build/CLAUDE.md` + mirror `mvp-build/AGENTS.md`) and in-repo durable memory (`mvp-build/memory/`). | n/a |
 | `mvp-build/CODEGRAPH.md` | ★ MVP-specific source map for implementation agents. Explains that `mvp-build/` is the AI Employee product/provisioning/runtime home inside the larger AMTECH brain; maps end-user flows to source files; documents the Hermes/Nous substrate boundary, Manager-owned product layer, working/source-wired features, UI-only fixture workflow, and pending provider/runtime acceptance. | active |
@@ -379,7 +374,6 @@ by a conclusion page — candidates to either wire into a claim or prune.
   "nodes": [
     {"id": "identity.md", "type": "identity", "status": "n/a", "readFirst": true},
     {"id": "CLAUDE.md", "type": "control", "status": "n/a"},
-    {"id": "AMTECH-discovery-prompt.md", "type": "spec", "status": "n/a"},
     {"id": "CODEGRAPH.md", "type": "map", "status": "n/a"},
     {"id": "mvp-build/", "type": "build-home", "status": "phase-6-7-source-wired-provider-runtime-acceptance-pending", "spec": "wiki/MVP/build-plan-current/", "originalSpec": "wiki/MVP/old-build-plan/"},
     {"id": "index.html", "type": "workspace-explorer", "status": "complete"},
