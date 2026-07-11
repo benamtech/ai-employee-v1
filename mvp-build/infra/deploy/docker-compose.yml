@@ -96,9 +96,13 @@ services:
         max-file: "5"
 
 networks:
+  # Host-owned shared runtime network. Marked external so it outlives `compose down`
+  # and so provisioner-launched per-employee Hermes containers (amtech-hermes-<id>)
+  # join the SAME network the core services do — Docker DNS then routes Caddy to each
+  # employee by alias. Create once on the host: `docker network create amtech_runtime`.
   amtech_runtime:
+    external: true
     name: amtech_runtime
-    driver: bridge
 
 volumes:
   caddy_data:
