@@ -1,679 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AMTECH Workspace Explorer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- 98.css — https://github.com/jdan/98.css -->
+  <link rel="stylesheet" href="https://unpkg.com/98.css">
   <style>
-    :root {
-      --bg: #f6f2eb;
-      --ink: #090909;
-      --muted: #6f6861;
-      --soft: #efe8de;
-      --panel: #fffdf9;
-      --panel-2: #f0e8dc;
-      --panel-3: #ffffff;
-      --line: #ddd1c1;
-      --line-strong: #b8aa99;
-      --accent: #cf2029;
-      --accent-2: #9f111a;
-      --inverse: #090909;
-      --inverse-ink: #ffffff;
-      --reader-bg: #fffdf9;
-      --reader-ink: #141414;
-      --code-bg: #14100f;
-      --code-ink: #fff8f0;
-      --good: #54d18a;
-      --warn: #f5b84b;
-      --bad: #ff6464;
-      --blue: #b91622;
-      --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --footer-open-h: clamp(238px, 31vh, 392px);
-      --footer-h: 0px;
-      --sidebar-w: clamp(260px, 22vw, 360px);
-    }
-
-    body[data-theme="red"] {
-      --bg: #c71f2d;
-      --ink: #ffffff;
-      --muted: #ffe0dd;
-      --soft: #a81520;
-      --panel: #ffffff;
-      --panel-2: #130b0b;
-      --panel-3: #fff7f5;
-      --line: rgba(0,0,0,.22);
-      --line-strong: #090909;
-      --accent: #090909;
-      --accent-2: #090909;
-      --inverse: #090909;
-      --inverse-ink: #ffffff;
-      --reader-bg: #fffdf9;
-      --reader-ink: #111111;
-      --code-bg: #090909;
-      --code-ink: #fff8f0;
-      --blue: #c71f2d;
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: var(--sans);
-      overflow: hidden;
-    }
-    button, input, select, textarea {
-      font: inherit;
-    }
-    button, select, input, textarea {
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--panel-2);
-      color: var(--ink);
-    }
-    button {
-      min-height: 32px;
-      padding: 7px 10px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 12px;
-    }
-    button:hover { border-color: var(--line-strong); background: var(--panel-3); }
-    button.primary { background: var(--inverse); color: var(--inverse-ink); border-color: var(--inverse); }
-    button.ghost { background: transparent; }
-    input, select { height: 34px; padding: 7px 10px; }
-    textarea {
-      width: 100%;
-      min-height: 82px;
-      resize: vertical;
-      padding: 10px;
-      font-family: var(--mono);
-      line-height: 1.45;
-      font-size: 12px;
-    }
+    :root { --accent:#cc0000; --accent-dark:#800000; --footer-h:0px; --footer-open-h:44vh; }
+    html, body { height:100%; margin:0; }
+    body { background:#fff; font-size:12px; }
+    * { box-sizing:border-box; }
+    .bevel { border:1px solid #808080; box-shadow:inset -1px -1px #0a0a0a, inset 1px 1px #fff; background:#fff; }
+    .sunken { border:1px solid #808080; box-shadow:inset 1px 1px #0a0a0a, inset -1px -1px #fff; background:#fff; }
 
     .app {
-      display: grid;
-      grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
-      grid-template-rows: 54px minmax(0, 1fr) var(--footer-h);
-      height: 100vh;
-      min-width: 0;
+      display:grid;
+      grid-template:
+        "top  top"  auto
+        "side main" 1fr
+        "dock dock" var(--footer-h) / 300px 1fr;
+      height:100vh; gap:3px; padding:3px;
     }
-    .topbar {
-      grid-column: 1 / 3;
-      display: grid;
-      grid-template-columns: minmax(230px, 310px) minmax(180px, 1fr) auto auto;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border-bottom: 1px solid var(--line);
-      background: color-mix(in srgb, var(--bg) 92%, white);
-      backdrop-filter: blur(12px);
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      letter-spacing: 0;
-    }
-    .mark {
-      width: 30px;
-      height: 30px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--accent);
-      border-radius: 6px;
-      background: var(--accent);
-      color: #fff;
-      font-weight: 900;
-      font-size: 13px;
-    }
-    .brand-main {
-      font-weight: 900;
-      font-size: 14px;
-      white-space: nowrap;
-    }
-    .brand-sub {
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 11px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .search {
-      position: relative;
-      min-width: 0;
-    }
-    .search input {
-      width: 100%;
-      padding-left: 32px;
-      background: var(--panel);
-    }
-    .search span {
-      position: absolute;
-      left: 12px;
-      top: 8px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-weight: 700;
-    }
-    .top-actions, .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
-    }
-    .status {
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 11px;
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--good);
-      box-shadow: 0 0 16px rgba(84, 209, 138, .55);
-    }
-    .dot.warn { background: var(--warn); box-shadow: 0 0 16px rgba(245, 184, 75, .45); }
-    .dot.err { background: var(--bad); box-shadow: 0 0 16px rgba(255, 100, 100, .45); }
 
-    .reader-shell {
-      grid-column: 2;
-      grid-row: 2;
-      min-height: 0;
-      overflow: auto;
-      background:
-        linear-gradient(180deg, rgba(207,32,41,.08), transparent 190px),
-        var(--bg);
-    }
-    .progress {
-      height: 3px;
-      background: transparent;
-      position: sticky;
-      top: 0;
-      z-index: 4;
-    }
-    .progress div { height: 100%; width: 0; background: var(--inverse); }
+    /* top toolbar */
+    .topbar { grid-area:top; display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:4px 6px; }
+    .topbar .brand { font-weight:bold; color:var(--accent); padding-right:6px; }
+    .topbar .search { flex:1; min-width:200px; display:flex; }
+    .topbar .search input { flex:1; }
+    .topbar .status { display:flex; align-items:center; gap:5px; white-space:nowrap; margin-left:auto; }
+    .dot { width:9px; height:9px; border:1px solid #000; background:#0a0; }
+    .dot.warn { background:#dd0; } .dot.err { background:#d00; }
 
-    .sidebar {
-      grid-column: 1;
-      grid-row: 2;
-      min-height: 0;
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr);
-      border-right: 1px solid var(--line);
-      background: color-mix(in srgb, var(--panel) 88%, var(--bg));
-      overflow: hidden;
-    }
-    .sidebar-head {
-      padding: 12px;
-      border-bottom: 1px solid var(--line);
-      background: var(--panel);
-    }
-    .sidebar-title {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-      font-weight: 900;
-      letter-spacing: 0;
-    }
-    .sidebar-tools {
-      display: grid;
-      gap: 8px;
-    }
-    .sidebar-list {
-      min-height: 0;
-      overflow: auto;
-      padding: 10px 8px 18px;
-    }
-    .doc-wrap {
-      width: min(980px, calc(100vw - var(--sidebar-w) - 58px));
-      margin: 0 auto;
-      padding: 26px 0 70px;
-    }
-    .doc-toolbar {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-    .doc-title {
-      font-size: clamp(22px, 3vw, 40px);
-      line-height: 1.08;
-      font-weight: 900;
-      letter-spacing: 0;
-      margin: 0 0 8px;
-    }
-    .doc-meta {
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 12px;
-      line-height: 1.5;
-      word-break: break-word;
-    }
-    .doc-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-    .reader {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--reader-bg);
-      color: var(--reader-ink);
-      padding: clamp(18px, 3vw, 36px);
-      min-height: 360px;
-      box-shadow: 0 24px 60px rgba(20, 14, 8, .08);
-    }
-    .reader h1, .reader h2, .reader h3, .reader h4 {
-      line-height: 1.14;
-      margin: 28px 0 10px;
-      letter-spacing: 0;
-    }
-    .reader h1 { font-size: clamp(28px, 4vw, 48px); margin-top: 0; font-weight: 900; }
-    .reader h2 { font-size: 24px; padding-top: 18px; border-top: 1px solid var(--line); }
-    .reader h3 { font-size: 18px; }
-    .reader h4 { font-size: 15px; color: var(--muted); text-transform: uppercase; }
-    .reader p, .reader li {
-      color: var(--reader-ink);
-      line-height: 1.68;
-      font-size: 16px;
-    }
-    .reader a { color: var(--blue); text-decoration: none; }
-    .reader a:hover { text-decoration: underline; }
-    .reader code {
-      font-family: var(--mono);
-      background: color-mix(in srgb, var(--accent) 10%, white);
-      border: 1px solid color-mix(in srgb, var(--accent) 20%, white);
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-size: .9em;
-    }
-    .reader pre {
-      margin: 14px 0;
-      border: 1px solid #282828;
-      border-radius: 8px;
-      background: var(--code-bg);
-      overflow: auto;
-    }
-    .reader pre code {
-      display: block;
-      min-width: max-content;
-      padding: 14px;
-      border: 0;
-      background: transparent;
-      color: var(--code-ink);
-      font-size: 12px;
-      line-height: 1.55;
-    }
-    .reader table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
-    .reader th, .reader td { border: 1px solid var(--line); padding: 8px 9px; vertical-align: top; }
-    .reader th { text-align: left; background: color-mix(in srgb, var(--accent) 8%, white); }
-    .reader blockquote {
-      margin: 16px 0;
-      padding: 10px 14px;
-      border-left: 3px solid var(--accent);
-      background: color-mix(in srgb, var(--accent) 7%, white);
-      color: var(--reader-ink);
-    }
-    .reader img {
-      max-width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
-    }
-    .source-pill, .tag {
-      display: inline-flex;
-      align-items: center;
-      border: 1px solid #3b4d68;
-      color: var(--accent-2);
-      background: color-mix(in srgb, var(--accent) 8%, white);
-      border-radius: 999px;
-      padding: 1px 7px;
-      font-family: var(--mono);
-      font-size: 11px;
-      cursor: pointer;
-    }
-    .mark-hit { background: #fff2a8; color: #050505; border-radius: 3px; padding: 0 2px; }
+    /* sidebar */
+    .sidebar { grid-area:side; display:flex; flex-direction:column; min-height:0; padding:4px; }
+    .sidebar .head { display:flex; gap:6px; align-items:center; margin-bottom:4px; }
+    .sidebar-tools { display:flex; gap:4px; margin-bottom:4px; }
+    .sidebar-tools select { flex:1; }
+    #fileList { flex:1; overflow:auto; padding:3px; }
 
-    .dock {
-      grid-column: 1 / 3;
-      grid-row: 3;
-      min-height: 0;
-      display: grid;
-      grid-template-rows: 38px minmax(0, 1fr);
-      border-top: 1px solid var(--line-strong);
-      background: var(--panel);
-      overflow: hidden;
-    }
-    .dock-tabs {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 5px 8px;
-      border-bottom: 1px solid var(--line);
-      overflow-x: auto;
-      background: var(--panel);
-    }
-    .footer-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--muted);
-      padding-left: 4px;
-      white-space: nowrap;
-    }
-    .footer-select {
-      width: min(240px, 42vw);
-      height: 28px;
-      padding: 3px 8px;
-      background: var(--panel-3);
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 700;
-    }
-    .dock-tab {
-      border: 0;
-      border-radius: 5px;
-      background: transparent;
-      color: var(--muted);
-      min-height: 28px;
-      padding: 6px 10px;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      font-family: var(--mono);
-      font-size: 11px;
-    }
-    .dock-tab.active { background: var(--accent); color: #fff; }
-    .dock-spacer { flex: 1; }
-    .dock-body {
-      min-height: 0;
-      overflow: hidden;
-    }
-    .panel { display: none; height: 100%; min-height: 0; }
-    .panel.active { display: grid; }
-    .panel-grid {
-      grid-template-columns: minmax(310px, 34%) minmax(0, 1fr) minmax(260px, 28%);
-      gap: 0;
-    }
-    .panel-two {
-      grid-template-columns: minmax(340px, 42%) minmax(0, 1fr);
-      gap: 0;
-    }
-    .dock-pane {
-      min-height: 0;
-      overflow: auto;
-      border-right: 1px solid var(--line);
-      padding: 10px;
-      background: color-mix(in srgb, var(--panel) 92%, var(--bg));
-    }
-    .dock-pane:last-child { border-right: 0; }
-    .pane-label {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    .row { display: flex; align-items: center; gap: 8px; }
-    .row > * { flex: 1; }
-    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
-    .select-row { display: grid; grid-template-columns: minmax(120px, 180px) minmax(140px, 1fr); gap: 8px; margin-bottom: 8px; }
-    .list { display: grid; gap: 4px; }
-    .item {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: center;
-      padding: 7px 8px;
-      border: 1px solid transparent;
-      border-radius: 6px;
-      cursor: pointer;
-      min-width: 0;
-    }
-    .item:hover { background: color-mix(in srgb, var(--accent) 7%, white); border-color: var(--line); }
-    .item.active { background: var(--accent); color: #fff; }
-    .item.active .muted, .item.active .path { color: #444; }
-    body[data-theme="red"] .item.active .muted,
-    body[data-theme="red"] .item.active .path,
-    .item.active .path { color: rgba(255,255,255,.76); }
-    .name {
-      font-size: 12px;
-      font-weight: 800;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .path {
-      margin-top: 2px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 11px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .chip {
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      padding: 2px 7px;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 10px;
-      white-space: nowrap;
-    }
-    .group-title {
-      margin: 10px 0 4px;
-      color: #d0d0d0;
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-    }
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      padding: 10px;
-      margin-bottom: 10px;
-    }
-    .card h3 {
-      margin: 0 0 8px;
-      font-size: 13px;
-      letter-spacing: 0;
-    }
-    .muted { color: var(--muted); }
-    .small { font-size: 12px; line-height: 1.45; }
-    .mono { font-family: var(--mono); }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(80px, 1fr));
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .stat {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--panel);
-      padding: 9px;
-    }
-    .stat strong { display: block; font-size: 18px; }
-    .stat span { color: var(--muted); font-family: var(--mono); font-size: 10px; text-transform: uppercase; }
-    .graph-box {
-      height: 100%;
-      min-height: 170px;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: #050505;
-      overflow: hidden;
-    }
-    svg text { font-family: var(--mono); fill: #dfdfdf; font-size: 10px; }
-    .console-output {
-      white-space: pre-wrap;
-      font-family: var(--mono);
-      font-size: 12px;
-      line-height: 1.48;
-      color: #eeeeee;
-    }
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: calc(var(--footer-h) + 18px);
-      transform: translateX(-50%);
-      border: 1px solid var(--line-strong);
-      border-radius: 8px;
-      background: #ffffff;
-      color: #050505;
-      padding: 10px 13px;
-      font-size: 13px;
-      font-weight: 800;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .16s;
-      z-index: 10;
-    }
-    .toast.show { opacity: 1; }
+    /* reader */
+    #main { grid-area:main; overflow:auto; position:relative; }
+    .progress { position:sticky; top:0; height:3px; background:#e0e0e0; z-index:6; }
+    #readProgress { height:3px; width:0; background:var(--accent); }
+    .doc-toolbar { position:sticky; top:3px; z-index:5; display:flex; justify-content:space-between;
+      gap:8px; align-items:flex-start; padding:6px 10px; background:#fff; border-bottom:1px solid #808080; flex-wrap:wrap; }
+    .doc-title { font-size:15px; margin:0; }
+    .doc-meta { font-size:11px; color:#666; margin-top:2px; }
+    .doc-actions { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+    .reader { padding:12px 18px; max-width:104ch; }
 
-    @media (max-width: 900px) {
-      body { overflow: auto; }
-      .app { display: block; height: auto; min-height: 100vh; }
-      .topbar { position: sticky; top: 0; z-index: 5; grid-template-columns: 1fr; align-items: stretch; }
-      .top-actions, .status { justify-content: space-between; }
-      .sidebar { height: 280px; border-right: 0; border-bottom: 1px solid var(--line); }
-      .reader-shell { overflow: visible; }
-      .doc-wrap { width: calc(100vw - 24px); padding-bottom: 24px; }
-      .doc-toolbar { display: block; }
-      .doc-actions { justify-content: flex-start; margin-top: 12px; }
-      .dock { height: 62vh; }
-      .panel-grid, .panel-two { grid-template-columns: 1fr; }
-      .dock-pane { border-right: 0; border-bottom: 1px solid var(--line); min-height: 220px; }
-      .stats { grid-template-columns: repeat(2, 1fr); }
-    }
+    /* rendered markdown */
+    .reader h1, .reader h2, .reader h3, .reader h4 { margin:.9em 0 .35em; line-height:1.25; }
+    .reader h1 { font-size:17px; color:var(--accent); }
+    .reader h2 { font-size:15px; } .reader h3 { font-size:13px; } .reader h4 { font-size:12px; }
+    .reader p, .reader li { line-height:1.55; }
+    .reader a { color:var(--accent); }
+    .reader code { font-family:"Courier New",monospace; background:#f4f4f4; border:1px solid #e2e2e2; padding:0 3px; }
+    .reader pre { background:#f4f4f4; border:1px solid #808080; padding:8px 10px; overflow:auto; }
+    .reader pre code { background:none; border:none; padding:0; white-space:pre; }
+    .reader table { border-collapse:collapse; margin:8px 0; }
+    .reader th, .reader td { border:1px solid #808080; padding:3px 7px; text-align:left; vertical-align:top; }
+    .reader th { background:#f0f0f0; }
+    .reader blockquote { border-left:3px solid var(--accent); margin:6px 0; padding:2px 10px; color:#333; background:#fafafa; }
+    .reader img { max-width:100%; }
+    .source-pill { background:var(--accent); color:#fff; padding:0 4px; cursor:pointer; font-size:11px; }
+    .mark-hit { background:#ffd400; }
+
+    /* dock */
+    .dock { grid-area:dock; overflow:hidden; display:flex; flex-direction:column; padding:4px; }
+    .dock-tabs { display:flex; align-items:center; gap:8px; padding:2px 2px 5px; }
+    .dock-tabs .lbl { font-weight:bold; color:var(--accent); }
+    .dock-body { flex:1; overflow:auto; }
+    .panel { display:none; gap:6px; }
+    .panel.active { display:grid; }
+    .panel-two { grid-template-columns:1fr 1fr; }
+    .panel-grid { grid-template-columns:1fr 1fr 1fr; }
+    .dock-pane { padding:5px; min-height:0; overflow:auto; max-height:40vh; }
+    .pane-label { display:flex; justify-content:space-between; gap:6px; font-weight:bold; font-size:11px;
+      border-bottom:1px solid #c0c0c0; margin-bottom:4px; padding-bottom:2px; }
+    .pane-label span:last-child { color:#666; font-weight:normal; }
+
+    /* JS-generated bits */
+    .list { display:flex; flex-direction:column; }
+    .item { display:flex; justify-content:space-between; gap:6px; padding:2px 4px; cursor:pointer; border-bottom:1px solid #eee; }
+    .item:hover, .item.active { background:var(--accent); color:#fff; }
+    .item:hover .path, .item:hover .muted, .item.active .path { color:#ffdede; }
+    .item .name { font-weight:bold; }
+    .item .path { font-size:10px; color:#777; }
+    .chip { font-size:10px; background:#f0f0f0; border:1px solid #808080; padding:0 4px; white-space:nowrap; align-self:center; }
+    .group-title { font-weight:bold; font-size:11px; margin:5px 0 1px; color:var(--accent); }
+    .muted { color:#777; } .small { font-size:11px; }
+    .card { border:1px solid #d0d0d0; padding:5px; margin:5px 0; }
+    .card h3 { margin:0 0 4px; font-size:12px; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; margin-bottom:5px; }
+    .stat { border:1px solid #d0d0d0; padding:4px; text-align:center; }
+    .stat strong { display:block; font-size:15px; color:var(--accent); }
+    .stat span { font-size:10px; color:#666; }
+    .actions { display:flex; gap:4px; flex-wrap:wrap; margin:4px 0; }
+    .console-output { white-space:pre-wrap; font-family:"Courier New",monospace; font-size:11px;
+      background:#f4f4f4; border:1px solid #808080; padding:8px; overflow:auto; max-height:36vh; }
+    .select-row { display:flex; gap:4px; margin-bottom:4px; }
+    .select-row > * { flex:1; }
+    textarea { width:100%; min-height:84px; font-family:"Courier New",monospace; resize:vertical; }
+    .graph-box { height:36vh; overflow:hidden; }
+    #graphSvg text { fill:#000; font:11px "Courier New",monospace; }
+    #graphSvg circle { cursor:pointer; }
+
+    .toast { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); background:#000; color:#fff;
+      padding:5px 12px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:99; }
+    .toast.show { opacity:1; }
   </style>
 </head>
 <body>
   <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="mark">A</div>
-        <div>
-          <div class="brand-main">AMTECH Workspace Explorer</div>
-          <div class="brand-sub">root-aware renderer · graph materializer · agent-readable workbench</div>
-        </div>
-      </div>
-      <div class="search"><span>/</span><input id="searchInput" autocomplete="off" placeholder="Search paths, code, source IDs, entities, or type S094"></div>
-      <div class="top-actions">
-        <button id="openFolderBtn" class="primary">Open GTM-RESEARCH folder</button>
-        <button id="themeBtn">Red Mode</button>
-        <button id="copyPathBtn">Copy Path</button>
-        <button id="copyContextBtn">Copy Context</button>
-      </div>
-      <div class="status"><span id="statusDot" class="dot warn"></span><span id="statusText">Loading corpus</span></div>
-    </header>
+    <div class="topbar bevel">
+      <span class="brand">AMTECH Workspace Explorer</span>
+      <div class="search"><input id="searchInput" autocomplete="off" placeholder="Search paths, code, source IDs (e.g. S094)"></div>
+      <button id="openFolderBtn">Open Folder</button>
+      <button id="copyPathBtn">Copy Path</button>
+      <button id="copyContextBtn">Copy Context</button>
+      <span class="status"><span id="statusDot" class="dot warn"></span><span id="statusText">Loading</span></span>
+    </div>
 
-    <aside class="sidebar" aria-label="Workspace files">
-      <div class="sidebar-head">
-        <div class="sidebar-title"><span>Wiki Rail</span><span id="fileCount" class="chip">0</span></div>
-        <div class="sidebar-tools">
-          <select id="scopeSelect">
-            <option value="all">All roots</option>
-            <option value="root">Root</option>
-            <option value="wiki">wiki/</option>
-            <option value="mvp-build">mvp-build/</option>
-          </select>
-          <select id="typeSelect"><option value="all">All filetypes</option></select>
-        </div>
+    <div class="sidebar bevel">
+      <div class="head"><strong>Files</strong><span id="fileCount" class="chip">0</span></div>
+      <div class="sidebar-tools">
+        <select id="scopeSelect">
+          <option value="all">All roots</option>
+          <option value="root">Root</option>
+          <option value="wiki">wiki/</option>
+          <option value="mvp-build">mvp-build/</option>
+        </select>
+        <select id="typeSelect"><option value="all">All types</option></select>
       </div>
-      <div id="fileList" class="sidebar-list list"></div>
-    </aside>
+      <div id="fileList" class="sunken"></div>
+    </div>
 
-    <main id="main" class="reader-shell">
+    <div id="main" class="sunken">
       <div class="progress"><div id="readProgress"></div></div>
-      <div class="doc-wrap">
-        <div class="doc-toolbar">
-          <div>
-            <h1 id="docTitle" class="doc-title">Loading...</h1>
-            <div id="docMeta" class="doc-meta"></div>
-          </div>
-          <div class="doc-actions">
-            <button id="rawBtn">Raw</button>
-            <button id="downloadBtn">Download</button>
-            <button id="pinBtn">Pin</button>
-            <button id="dockBtn">Open Views</button>
-          </div>
+      <div class="doc-toolbar">
+        <div>
+          <h1 id="docTitle" class="doc-title">Loading...</h1>
+          <div id="docMeta" class="doc-meta"></div>
         </div>
-        <article id="reader" class="reader"></article>
+        <div class="doc-actions">
+          <button id="rawBtn">Raw</button>
+          <button id="downloadBtn">Download</button>
+          <button id="pinBtn">Pin</button>
+          <button id="dockBtn">Open Views</button>
+          <span id="currentKind" class="chip">text</span>
+        </div>
       </div>
-    </main>
+      <article id="reader" class="reader"></article>
+    </div>
 
-    <section class="dock" id="dock">
+    <div class="dock bevel" id="dock">
       <div class="dock-tabs">
-        <span class="footer-title">Workspace Views</span>
-        <select id="viewSelect" class="footer-select" aria-label="Workspace view">
+        <span class="lbl">Views</span>
+        <select id="viewSelect">
           <option value="files">Overview</option>
           <option value="outline">Outline</option>
           <option value="graph">Graph</option>
           <option value="materialize">Materialize</option>
-          <option value="logs">Logs</option>
-          <option value="notes">Notes</option>
+          <option value="logs">Log Writer</option>
+          <option value="notes">Notes / Handoff</option>
         </select>
-        <div class="dock-spacer"></div>
         <span id="dockSummary" class="status">0 files</span>
       </div>
 
       <div class="dock-body">
         <div id="tab-files" class="panel panel-two active">
-          <div class="dock-pane">
-            <div class="pane-label"><span>Current File Intelligence</span><span id="currentKind">text</span></div>
-            <div id="fileIntel"></div>
-          </div>
-          <div class="dock-pane">
-            <div class="pane-label"><span>Workspace Inventory</span><span>live</span></div>
-            <div id="inventory"></div>
-          </div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Current File Intelligence</span><span>local</span></div><div id="fileIntel"></div></div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Workspace Inventory</span><span>live</span></div><div id="inventory"></div></div>
         </div>
 
         <div id="tab-outline" class="panel panel-grid">
-          <div class="dock-pane">
-            <div class="pane-label"><span>Headings / Symbols</span><span id="outlineCount">0</span></div>
-            <div id="outlineList" class="list"></div>
-          </div>
-          <div class="dock-pane">
-            <div class="pane-label"><span>Backlinks / Imports</span><span id="backlinkCount">0</span></div>
-            <div id="backlinkList" class="list"></div>
-          </div>
-          <div class="dock-pane">
-            <div class="pane-label"><span>Source IDs / Entities</span><span id="entityCount">0</span></div>
-            <div id="entityList" class="list"></div>
-          </div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Headings / Symbols</span><span id="outlineCount">0</span></div><div id="outlineList" class="list"></div></div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Backlinks / Imports</span><span id="backlinkCount">0</span></div><div id="backlinkList" class="list"></div></div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Source IDs / Entities</span><span id="entityCount">0</span></div><div id="entityList" class="list"></div></div>
         </div>
 
         <div id="tab-graph" class="panel panel-two">
-          <div class="dock-pane">
-            <div class="pane-label"><span>Local Knowledge Graph</span><span id="graphStats">0 nodes</span></div>
-            <div class="graph-box"><svg id="graphSvg" width="100%" height="100%"></svg></div>
-          </div>
-          <div class="dock-pane">
+          <div class="dock-pane sunken"><div class="pane-label"><span>Knowledge Graph (current file)</span><span id="graphStats">0 nodes</span></div><div class="graph-box sunken"><svg id="graphSvg" width="100%" height="100%"></svg></div></div>
+          <div class="dock-pane sunken">
             <div class="pane-label"><span>Graph Edges</span><span>typed</span></div>
-            <div class="actions" style="margin-bottom:8px;">
-              <button id="copyGraphBtn">Copy Graph JSON</button>
-              <button id="copyGraphPromptBtn">Copy Graph Prompt</button>
+            <div class="actions">
+              <button id="copyGraphBtn">Copy JSON</button>
+              <button id="copyGraphPromptBtn">Copy Prompt</button>
               <button id="focusCurrentBtn">Focus Current</button>
             </div>
             <div id="edgeList" class="list"></div>
@@ -681,35 +195,24 @@
         </div>
 
         <div id="tab-materialize" class="panel panel-grid">
-          <div class="dock-pane">
-            <div class="pane-label"><span>Materialization Lab</span><span>local</span></div>
-            <div class="card">
-              <h3>Run Strange Useful Passes</h3>
-              <div class="actions">
-                <button id="runMaterializerBtn" class="primary">Materialize Workspace</button>
-                <button id="copyMaterializerBtn">Copy Output</button>
-                <button id="copyLLMPromptBtn">Copy LLM Prompt</button>
-              </div>
-              <p class="small muted">Runs local heuristics: file centrality, entity frequency, source IDs, TODOs, phase/work-event vocabulary, imports, and doc/code links. No external model call is made here.</p>
+          <div class="dock-pane sunken">
+            <div class="pane-label"><span>Materialize</span><span>local heuristics</span></div>
+            <div class="actions">
+              <button id="runMaterializerBtn">Run</button>
+              <button id="copyMaterializerBtn">Copy Output</button>
+              <button id="copyLLMPromptBtn">Copy LLM Prompt</button>
             </div>
-            <div class="card">
-              <h3>Conformance Lens</h3>
-              <div id="conformanceList" class="list"></div>
-            </div>
+            <p class="small muted">Local passes only: file centrality, entity frequency, source IDs, TODO/proof pressure, phase &amp; work-event vocabulary, imports, and doc/code links. No external model call.</p>
+            <div class="pane-label" style="margin-top:6px;"><span>Conformance</span><span>event &#8594; proof loop</span></div>
+            <div id="conformanceList" class="list"></div>
           </div>
-          <div class="dock-pane">
-            <div class="pane-label"><span>Insight Pack</span><span id="insightStamp">not run</span></div>
-            <div id="materializerOutput" class="console-output"></div>
-          </div>
-          <div class="dock-pane">
-            <div class="pane-label"><span>Emergent Handles</span><span>entities</span></div>
-            <div id="emergentList" class="list"></div>
-          </div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Output</span><span id="insightStamp">not run</span></div><div id="materializerOutput" class="console-output"></div></div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Entities</span><span>frequency</span></div><div id="emergentList" class="list"></div></div>
         </div>
 
         <div id="tab-logs" class="panel panel-two">
-          <div class="dock-pane">
-            <div class="pane-label"><span>Founder / Build Log Writer</span><span>wiki/logs</span></div>
+          <div class="dock-pane sunken">
+            <div class="pane-label"><span>Log Writer</span><span>wiki/logs</span></div>
             <div class="select-row">
               <select id="logType">
                 <option value="daily">Daily work log</option>
@@ -729,43 +232,31 @@
               <input id="logMrr" placeholder="MRR $0">
             </div>
             <textarea id="logNotes" placeholder="What happened, what changed, what proof exists, what is next..."></textarea>
-            <div class="actions" style="margin-top:8px;">
-              <button id="renderLogBtn" class="primary">Render MD</button>
+            <div class="actions">
+              <button id="renderLogBtn">Render</button>
               <button id="saveLogBtn">Save</button>
               <button id="downloadLogBtn">Download</button>
               <button id="copyLogBtn">Copy</button>
             </div>
           </div>
-          <div class="dock-pane">
-            <div class="pane-label"><span>Markdown Output</span><span id="logFilenameLabel"></span></div>
-            <textarea id="logOutput" spellcheck="false"></textarea>
-          </div>
+          <div class="dock-pane sunken"><div class="pane-label"><span>Markdown Output</span><span id="logFilenameLabel"></span></div><textarea id="logOutput" spellcheck="false"></textarea></div>
         </div>
 
         <div id="tab-notes" class="panel panel-grid">
-          <div class="dock-pane">
+          <div class="dock-pane sunken">
             <div class="pane-label"><span>Local Note</span><span>browser only</span></div>
-            <textarea id="localNote" placeholder="Private scratchpad. Use logs for durable, agent-readable records."></textarea>
-            <div class="actions" style="margin-top:8px;">
-              <button id="saveNoteBtn" class="primary">Save Note</button>
-              <button id="clearNoteBtn">Clear</button>
-            </div>
+            <textarea id="localNote" placeholder="Private scratchpad. Use the Log Writer for durable records."></textarea>
+            <div class="actions"><button id="saveNoteBtn">Save</button><button id="clearNoteBtn">Clear</button></div>
           </div>
-          <div class="dock-pane">
-            <div class="pane-label"><span>Pinned Files</span><span id="pinCount">0</span></div>
-            <div id="pinList" class="list"></div>
-          </div>
-          <div class="dock-pane">
+          <div class="dock-pane sunken"><div class="pane-label"><span>Pinned Files</span><span id="pinCount">0</span></div><div id="pinList" class="list"></div></div>
+          <div class="dock-pane sunken">
             <div class="pane-label"><span>Agent Handoff</span><span>copyable</span></div>
-            <div class="card">
-              <h3>Current Work Context</h3>
-              <p class="small muted">Copies the active file, path, symbols, links, source IDs, and current graph neighborhood. Useful before handing this workspace to another agent.</p>
-              <button id="copyAgentContextBtn" class="primary">Copy Agent Context</button>
-            </div>
+            <p class="small muted">Copies the active file, path, symbols, links, source IDs, and current graph neighborhood.</p>
+            <button id="copyAgentContextBtn">Copy Agent Context</button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   </div>
   <div id="toast" class="toast"></div>
 
@@ -774,191 +265,121 @@
 identity.md
 CLAUDE.md
 CODEGRAPH.md
+README.md
 wiki/README.md
 wiki/00-decision.md
 wiki/01-method.md
-wiki/founder-52-week-operating-plan.md
 wiki/product-ai-employee-context.md
 wiki/product-agent-platform-architecture.md
-wiki/ai-employee-mvp-build-plan-handoff.md
-wiki/strategy-4-year-implications.md
-wiki/warm-path.md
-wiki/entrepreneurship-playbook.md
-wiki/principle-agent-leverage.md
 wiki/principle-graph-materialization.md
 wiki/principle-deliverable-driven-surfaces.md
-wiki/segments/bookkeeping.md
-wiki/segments/marketing-agencies.md
-wiki/segments/insurance.md
-wiki/segments/property-management.md
-wiki/segments/freight-staffing.md
-wiki/segments/real-estate.md
-wiki/segments/contractors.md
-wiki/competitors/landscape.md
-wiki/evidence/scoring.md
-wiki/evidence/aulet-beachhead-scoring.md
-wiki/evidence/sources.md
-wiki/offers/pitch-scripts.md
-wiki/offers/wedge-offers.md
-wiki/offers/skill-catalog.md
-wiki/offers/estimator-whole-product.md
-wiki/gtm/consulting-sales-surface.md
-wiki/gtm/outreach-engine.md
-wiki/gtm/outbound-system.md
-wiki/gtm/channel-map.md
-wiki/gtm/agentic-article-research-system.md
-wiki/gtm/sba-sbdc-funding-and-partner-strategy.md
-wiki/logs/README.md
-wiki/MVP/old-build-plan/README.md
-wiki/MVP/old-build-plan/00-source-of-truth-and-rules.md
-wiki/MVP/old-build-plan/01-mvp-scope-and-milestones.md
-wiki/MVP/old-build-plan/02-system-architecture.md
-wiki/MVP/old-build-plan/03-data-model.md
-wiki/MVP/old-build-plan/04-manager-tools.md
-wiki/MVP/old-build-plan/05-front-door-orchestrator.md
-wiki/MVP/old-build-plan/06-interaction-wrapper.md
-wiki/MVP/old-build-plan/07-provisioning-runtime.md
-wiki/MVP/old-build-plan/08-connectors-email-v1.md
-wiki/MVP/old-build-plan/09-event-mesh-v1.md
-wiki/MVP/old-build-plan/10-security-ops-observability.md
-wiki/MVP/old-build-plan/11-agent-team-workstreams.md
-wiki/MVP/old-build-plan/12-tests-demo-acceptance.md
-wiki/MVP/old-build-plan/13-backlog-non-goals.md
-wiki/MVP/old-build-plan/14-agentic-tooling-research-notes.md
-wiki/MVP/old-build-plan/15-interaction-reimagined-the-work-surface.md
-wiki/MVP/implementation-records/README.md
-wiki/MVP/implementation-records/2026-06-29-phase-0-2-record.md
-wiki/MVP/implementation-records/2026-06-29-phase-3-partial-record.md
-wiki/MVP/implementation-records/2026-06-29-phase-5-and-work-surface-record.md
-wiki/MVP/phase-3-generative-ui-reframe.md
+wiki/principle-agent-leverage.md
+wiki/strategy-4-year-implications.md
+wiki/entrepreneurship-playbook.md
+wiki/founder-52-week-operating-plan.md
+wiki/warm-path.md
+wiki/MVP/second-half-current-and-future-state.md
 wiki/MVP/event-driven-office-and-generative-ui.md
 wiki/MVP/agent-inbox-and-channel-architecture.md
 wiki/MVP/hermes-run-session-semantics-research.md
-wiki/MVP/2026-06-29-0351-phase-0-5-loose-ends-and-phase-5-handoff.md
+wiki/MVP/codebase-reading-guide-3-hour.md
+wiki/MVP/prompting-guide.md
+wiki/MVP/implementation-plan-prompt-handoff.md
+wiki/MVP/phase-3-generative-ui-reframe.md
+wiki/MVP/phase-03a-04-live-session-event-spine-handoff.md
 wiki/MVP/build-plan-current/README.md
 wiki/MVP/build-plan-current/00-source-of-truth.md
 wiki/MVP/build-plan-current/01-reconciled-scope-and-status.md
 wiki/MVP/build-plan-current/02-current-system-architecture.md
 wiki/MVP/build-plan-current/03-provider-runtime-acceptance-plan.md
 wiki/MVP/build-plan-current/04-admin-and-metering-plan.md
-wiki/MVP/build-plan-current/05-implementation-workstreams.md
 wiki/MVP/build-plan-current/06-next-agent-handoff.md
 wiki/MVP/build-plan-current/phases/README.md
 wiki/MVP/build-plan-current/phases/phase-00-baseline.md
 wiki/MVP/build-plan-current/phases/phase-01-provider-runtime-acceptance.md
 wiki/MVP/build-plan-current/phases/phase-02-runtime-scheduler-productionization.md
 wiki/MVP/build-plan-current/phases/phase-03-generic-ingress-event-routing.md
-wiki/MVP/build-plan-current/phases/phase-03-implementation-plan.md
 wiki/MVP/build-plan-current/phases/phase-03a-channel-session-presence-layer.md
 wiki/MVP/build-plan-current/phases/phase-04-live-wake-path-descriptors.md
 wiki/MVP/build-plan-current/phases/phase-05-triage-batching-work-surface-stream.md
 wiki/MVP/build-plan-current/phases/phase-06-metering-foundation.md
-wiki/MVP/build-plan-current/phases/phase-07-metering-instrumentation.md
-wiki/MVP/build-plan-current/phases/phase-08-metering-rollups-budgets-summaries.md
 wiki/MVP/build-plan-current/phases/phase-09-admin-foundations.md
-wiki/MVP/build-plan-current/phases/phase-10-admin-operations-surfaces.md
 wiki/MVP/build-plan-current/phases/phase-11-amtech-billing-scaffold.md
-wiki/MVP/build-plan-current/phases/phase-12-llm-provider-registry.md
 wiki/MVP/build-plan-current/phases/phase-13-1000-user-operations.md
-wiki/MVP/prompting-guide.md
-wiki/MVP/implementation-plan-prompt-handoff.md
-wiki/MVP/phase-3-implementation-session-handoff.md
-wiki/MVP/phase-3-planning-session-handoff.md
-wiki/MVP/phase-3-finish-session-handoff.md
-wiki/MVP/phase-03a-04-live-session-event-spine-handoff.md
-wiki/MVP/phase-6-and-event-bus-session-handoff.md
-wiki/MVP/implementation-records/2026-06-30-phase-01-acceptance-harness-record.md
-wiki/MVP/implementation-records/2026-06-30-phase-02-runtime-scheduler-record.md
-wiki/MVP/implementation-records/2026-06-30-phase-6-and-event-bus-record.md
+wiki/MVP/implementation-records/README.md
 wiki/MVP/implementation-records/2026-07-03-phase-03-03a-04-core-record.md
 wiki/MVP/implementation-records/2026-07-03-phase-04-hardening-and-phase-06-record.md
+wiki/MVP/implementation-records/2026-07-04-phase-05-record.md
+wiki/MVP/implementation-records/2026-07-05-mcp-server-toolsets-tool-activity-record.md
+wiki/evidence/sources.md
+wiki/evidence/scoring.md
+wiki/evidence/aulet-beachhead-scoring.md
+wiki/offers/wedge-offers.md
+wiki/offers/skill-catalog.md
+wiki/offers/estimator-whole-product.md
+wiki/offers/pitch-scripts.md
+wiki/segments/contractors.md
+wiki/segments/bookkeeping.md
+wiki/competitors/landscape.md
+wiki/gtm/consulting-sales-surface.md
+wiki/gtm/outbound-system.md
+wiki/gtm/outreach-engine.md
+wiki/gtm/channel-map.md
+wiki/gtm/agentic-article-research-system.md
+wiki/gtm/sba-sbdc-funding-and-partner-strategy.md
 mvp-build/README.md
-mvp-build/package.json
-mvp-build/tsconfig.base.json
-mvp-build/vitest.config.ts
-mvp-build/eslint.config.mjs
-mvp-build/packages/db/migrations/0001_init.sql
-mvp-build/packages/db/migrations/0002_rls.sql
-mvp-build/packages/db/migrations/0003_phase1_profile_packages.sql
-mvp-build/packages/db/migrations/0004_phase2_artifacts.sql
-mvp-build/packages/db/migrations/0005_phase3_gmail.sql
-mvp-build/packages/shared/src/envelope.ts
-mvp-build/packages/shared/src/event-types.ts
+mvp-build/CLAUDE.md
+mvp-build/AGENTS.md
+mvp-build/CODEGRAPH.md
+mvp-build/second-half-plan/README.md
+mvp-build/second-half-plan/phase-00-current-state-handoff.md
+mvp-build/second-half-plan/phase-01-preserve-and-close-live-gate.md
+mvp-build/second-half-plan/phase-02-owner-work-surface-redesign.md
+mvp-build/second-half-plan/phase-03-sms-ambient-inbox-and-link-previews.md
+mvp-build/second-half-plan/phase-04-tool-agnostic-capability-and-renderer-layer.md
+mvp-build/second-half-plan/phase-05-trial-operations-admin-billing.md
+mvp-build/second-half-plan/phase-06-free-trial-and-paid-pilot-readiness.md
+mvp-build/second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md
+mvp-build/second-half-plan/surface-research-hermes-gui-and-materialization.md
+mvp-build/docs/production-deploy-readiness-review-2026-07-11.md
+mvp-build/docs/admin-system-architecture.md
+mvp-build/docs/metering-architecture.md
+mvp-build/docs/hermes-agent-authoritative-record.md
+mvp-build/docs/quickbooks-connector-architecture.md
+mvp-build/docs/quickbooks-api-gotchas.md
+mvp-build/memory/MEMORY.md
+mvp-build/memory/2026-07-11-0100-wiki-refresh-and-production-deploy-review.md
+mvp-build/memory/2026-07-10-2341-tool-agnostic-connector-center-resurfacing.md
+mvp-build/memory/2026-07-10-2232-deep-review-phase5-loose-ends-phase6-groundwork.md
+mvp-build/memory/2026-07-10-1630-quickbooks-connector-phase-a-source-wired.md
+mvp-build/ui-handoff/README.md
+mvp-build/ui-handoff/product-grounding.md
+mvp-build/ui-handoff/data-catalog.md
+mvp-build/ui-handoff/current-ui-map.md
+mvp-build/ui-handoff/experiments-and-future-surfaces.md
+mvp-build/ui-handoff/research-and-principles.md
+mvp-build/ui-handoff/working-protocol.md
+mvp-build/packages/shared/src/materialization.ts
+mvp-build/packages/shared/src/resource-payload.ts
+mvp-build/packages/shared/src/preview-links.ts
 mvp-build/packages/shared/src/work-events.ts
-mvp-build/packages/shared/src/tool-contracts.ts
-mvp-build/packages/shared/src/profile-package.ts
+mvp-build/packages/shared/src/routes.ts
+mvp-build/packages/shared/src/admin.ts
+mvp-build/packages/shared/src/approval-policy.ts
+mvp-build/apps/manager/src/lib/employee-stream.ts
+mvp-build/apps/manager/src/lib/materialization.ts
+mvp-build/apps/manager/src/lib/capability-registry.ts
+mvp-build/apps/manager/src/lib/mcp-server.ts
+mvp-build/apps/manager/src/lib/admin.ts
+mvp-build/apps/manager/src/lib/preview-render.ts
+mvp-build/apps/manager/src/tools/qbo.stub.ts
 mvp-build/apps/manager/src/server.ts
-mvp-build/apps/manager/src/orchestrator.ts
-mvp-build/apps/manager/src/provisioner.ts
-mvp-build/apps/manager/src/lib/google-gmail.ts
-mvp-build/apps/manager/src/lib/employee-events.ts
-mvp-build/apps/manager/src/lib/artifacts.ts
-mvp-build/apps/manager/src/lib/stripe-signature.ts
-mvp-build/apps/manager/src/tools/registry.ts
-mvp-build/apps/manager/src/tools/events.stub.ts
-mvp-build/apps/manager/src/tools/gmail.stub.ts
-mvp-build/apps/manager/src/tools/stripe.stub.ts
-mvp-build/apps/manager/src/webhooks/gmail.ts
-mvp-build/apps/manager/src/webhooks/stripe.ts
-mvp-build/apps/web/app/page.tsx
-mvp-build/apps/web/app/create-ai-employee/page.tsx
 mvp-build/apps/web/app/agent/[employeeId]/AgentClient.tsx
-mvp-build/apps/web/app/api/employee/[employeeId]/resources/route.ts
-mvp-build/apps/web/app/api/employee/[employeeId]/approval/resolve/route.ts
-mvp-build/apps/web/app/api/front-door/message/route.ts
-mvp-build/packages/agent-template/README.md
-mvp-build/packages/agent-template/SOUL.md
-mvp-build/packages/agent-template/config.yaml
-mvp-build/packages/agent-template/workspace/brain/business-brain.md
-mvp-build/packages/agent-template/workspace/manager-tools.md
-mvp-build/packages/agent-template/skills/estimate/SKILL.md
-mvp-build/infra/hermes/RUNBOOK.md
-mvp-build/infra/scripts/profile-validate.mjs
-mvp-build/tests/README.md
-mvp-build/tests/unit/work-events.test.ts
-mvp-build/tests/unit/gmail-pubsub.test.ts
-mvp-build/tests/unit/stripe-tools.test.ts
-mvp-build/tests/golden-path/step1-create-employee.md
-mvp-build/tests/golden-path/step2-estimate-artifact.md
-wiki/MVP/codebase-reading-guide-3-hour.md
-mvp-build/architecture-and-security-review-2026-07.md
-mvp-build/memory/2026-07-09-1815-phase-03-sms-signed-previews-and-live-gate.md
-mvp-build/memory/2026-07-09-2210-mvp-hardening-review-fixes-and-rls-closure.md
-mvp-build/memory/2026-07-10-0012-phase-4-hardening-closure-and-next-session.md
-mvp-build/memory/2026-07-10-0045-phase-4-source-wired-materialization.md
-mvp-build/memory/2026-07-10-0110-next-session-architecture-and-review-prompt.md
-mvp-build/memory/2026-07-10-0116-agent-trust-boundary-hardening.md
-mvp-build/memory/2026-07-10-1022-next-session-ui-phase5-phase6-planning-prompt.md
-mvp-build/packages/db/migrations/0017_phase3_preview_links.sql
-mvp-build/packages/db/migrations/0018_manager_only_rls.sql
-mvp-build/packages/db/migrations/0019_migrations_table_rls.sql
-mvp-build/packages/db/migrations/0020_revoke_turn_rpc_from_anon.sql
-mvp-build/packages/db/migrations/0021_turn_rpc_grants_fix.sql
+mvp-build/apps/web/app/admin/AdminClient.tsx
 mvp-build/packages/db/migrations/0022_phase4_materialization.sql
 mvp-build/packages/db/migrations/0023_agent_boundary_hardening.sql
-mvp-build/packages/shared/src/materialization.ts
-mvp-build/packages/shared/src/preview-links.ts
-mvp-build/apps/manager/src/lib/capability-registry.ts
-mvp-build/apps/manager/src/lib/cleanup.ts
-mvp-build/apps/manager/src/lib/materialization.ts
-mvp-build/apps/manager/src/lib/mcp-auth.ts
-mvp-build/apps/manager/src/lib/preview-links.ts
-mvp-build/apps/manager/src/lib/preview-render.ts
-mvp-build/apps/web/app/agent/[employeeId]/review/page.tsx
-mvp-build/apps/web/app/agent/[employeeId]/review/ReviewClient.tsx
-mvp-build/apps/web/app/api/employee/[employeeId]/preview/action/route.ts
-mvp-build/tests/unit/cleanup.test.ts
-mvp-build/tests/unit/hermes-container-script.test.ts
-mvp-build/tests/unit/materialization.test.ts
-mvp-build/tests/unit/mcp-auth.test.ts
-mvp-build/tests/unit/mcp-resources.test.ts
-mvp-build/tests/unit/mcp-route-auth.test.ts
-mvp-build/tests/unit/preview-action.test.ts
-mvp-build/tests/unit/preview-links.test.ts
-mvp-build/tests/unit/preview-resolve.test.ts
-mvp-build/tests/unit/profile-renderer-security.test.ts
-mvp-build/tests/unit/sms-preview.test.ts
-mvp-build/tests/unit/twilio-status.test.ts
+mvp-build/packages/db/migrations/0025_phase5_admin_ops.sql
+mvp-build/packages/db/migrations/0026_quickbooks_connector.sql
 `.trim().split(/\n+/).map(s => s.trim()).filter(Boolean);
 
     const state = {
@@ -972,7 +393,6 @@ mvp-build/tests/unit/twilio-status.test.ts
       graph: { nodes: [], edges: [] },
       materializer: "",
       dockCollapsed: true,
-      theme: localStorage.getItem("amtechExplorerTheme") || "light",
       pins: JSON.parse(localStorage.getItem("amtechExplorerPins") || "[]")
     };
 
@@ -1020,8 +440,6 @@ mvp-build/tests/unit/twilio-status.test.ts
     }
 
     async function boot() {
-      document.body.dataset.theme = state.theme === "red" ? "red" : "light";
-      $("themeBtn").textContent = state.theme === "red" ? "White Mode" : "Red Mode";
       bindEvents();
       $("logDate").value = today();
       SEED_PATHS.forEach(path => addFile(path));
@@ -1041,7 +459,7 @@ mvp-build/tests/unit/twilio-status.test.ts
       if (ok) {
         setStatus("ok", `${ok} seed files loaded`);
       } else {
-        const fallback = "# AMTECH Workspace Explorer\n\nServe this repository root or click **Open GTM-RESEARCH folder**.\n\n```bash\ncd /home/georgej/AMTECH/GTM-RESEARCH\npython3 -m http.server 8765\n```\n\nThen open `http://127.0.0.1:8765/index.html`.";
+        const fallback = "# AMTECH Workspace Explorer\n\nServe this repository root or click **Open Folder**.\n\n```bash\ncd /home/georgej/AMTECH/GTM-RESEARCH\npython3 -m http.server 8765\n```\n\nThen open `http://127.0.0.1:8765/index.html`.";
         addFile("wiki/README.md", fallback, "fallback");
         setStatus("warn", "Open folder or serve repo root");
       }
@@ -1066,7 +484,6 @@ mvp-build/tests/unit/twilio-status.test.ts
       $("openFolderBtn").addEventListener("click", openFolder);
       $("copyPathBtn").addEventListener("click", () => copyText(state.current));
       $("copyContextBtn").addEventListener("click", copyAgentContext);
-      $("themeBtn").addEventListener("click", toggleTheme);
       $("rawBtn").addEventListener("click", () => { state.raw = !state.raw; renderReader(); });
       $("downloadBtn").addEventListener("click", () => downloadFile(state.current.split("/").pop() || "download.txt", getFile()?.text || ""));
       $("pinBtn").addEventListener("click", togglePin);
@@ -1147,7 +564,7 @@ mvp-build/tests/unit/twilio-status.test.ts
     function renderTypeOptions() {
       const exts = [...new Set([...state.files.values()].map(f => f.ext))].sort();
       const current = $("typeSelect")?.value || "all";
-      $("typeSelect").innerHTML = `<option value="all">All filetypes</option>` + exts.map(ext => `<option value="${escapeAttr(ext)}">.${escapeHtml(ext)}</option>`).join("");
+      $("typeSelect").innerHTML = `<option value="all">All types</option>` + exts.map(ext => `<option value="${escapeAttr(ext)}">.${escapeHtml(ext)}</option>`).join("");
       $("typeSelect").value = exts.includes(current) ? current : "all";
     }
 
@@ -1409,18 +826,17 @@ mvp-build/tests/unit/twilio-status.test.ts
     }
 
     function describeFile(file) {
-      if (file.path.includes("event-driven-office-and-generative-ui")) return "Forward design: the message-to-agent event flow (any system/webhook/cron → employee → typed work), how generative UI is implemented so far and the frontier ahead, and the build-plan re-sequencing for an entire office running through one AI employee.";
-      if (file.path.includes("agent-inbox-and-channel-architecture")) return "Load-bearing interaction architecture: universal message-to-agent inbox, live-session-first conductor, native subagents/Jobs, fallback serialized inbox, presence-aware channel/session router, and one conversation thread per employee.";
-      if (file.path.includes("hermes-run-session-semantics-research")) return "Hermes substrate research: HTTP Runs/Sessions are turn-atomic, delegate_task supports background in-session subagents, Jobs/cron run fresh isolated sessions, profiles isolate Hermes state but not OS filesystem.";
-      if (file.path.includes("phase-03a-channel-session-presence-layer")) return "Phase 3A scope: channel/session/presence router, active-session-wins delivery, cross-channel dedupe, one acceptance primitive, native subagent completions without duplicate SMS, and durable-worker routing.";
-      if (file.path.includes("phase-03a-04-live-session-event-spine-handoff")) return "Current next-session handoff: recent Hermes/subagent/channel decisions, live-session-first MVP posture, and how Phase 3 generic ingress, Phase 3A router, and Phase 4 wake path connect to the AI Employee product.";
-      if (file.path.includes("phase-5-and-work-surface-record")) return "Current implementation record: Phase 0–4 loose ends closed, Phase 5 close-the-loop + reminder firing/watch-renewal scheduler seam, the descriptor-driven Work Surface redesign, and the provider-acceptance-pending table.";
-      if (file.path.includes("phase-3-generative-ui-reframe")) return "Generative UI reframing source: typed work events, deliverable descriptors, conformance-first rendering, and one-second approval/edit loops.";
-      if (file.path.includes("work-events")) return "Work-event source/test surface. Use this when checking provider/Hermes event normalization and typed owner-facing rendering.";
-      if (file.path.includes("MVP/build-plan")) return "MVP source-of-truth planning document.";
-      if (file.path.includes("implementation-records")) return "Factual implementation ledger. Treat as current code-state memory.";
+      if (file.path.includes("second-half-current-and-future-state")) return "Current build-state companion to the second-half plan: which product surfaces are source-wired, and the operational + live-proof gap that remains.";
+      if (file.path.includes("production-deploy-readiness-review")) return "Evidence-backed production deploy readiness review: the operational gaps (supervision, employee-container launch, Caddy reload, backups, observability, egress) that block a real deploy.";
+      if (file.path.includes("production-runtime-and-deploy-roadmap")) return "Re-sequencing decision: production deployability + core tool-loop before admin/billing; docker-compose core + per-account employee containers.";
+      if (file.path.includes("tool-agnostic-connector-center")) return "Tool-agnostic Connector Center + resurfacing projection: generic connected-business cards and a come-back-to-this attention queue over the materialization layer.";
+      if (file.path.includes("event-driven-office-and-generative-ui")) return "Forward design: the message-to-agent event flow (any system/webhook/cron -> employee -> typed work), how generative UI is implemented, and the office running through one AI employee.";
+      if (file.path.includes("agent-inbox-and-channel-architecture")) return "Load-bearing interaction architecture: universal message-to-agent inbox, live-session conductor, native subagents/Jobs, presence-aware channel/session router, one thread per employee.";
+      if (file.path.includes("materialization")) return "Materialization/capability layer: SurfaceEnvelope / WorkResource / WorkAction / CapabilityGraphNode contracts and projections rendered across surfaces.";
+      if (file.path.includes("qbo") || file.path.includes("quickbooks")) return "QuickBooks Online accounting connector surface: entity resolution, approval-gated write previews + audited commit, reports.";
+      if (file.path.includes("implementation-records")) return "Factual implementation ledger. Treat as historical code-state record.";
       if (file.path.startsWith("mvp-build/")) return "MVP implementation file.";
-      if (file.path.startsWith("wiki/")) return "GTM/product/wiki knowledge file.";
+      if (file.path.startsWith("wiki/")) return "GTM / product / wiki knowledge file.";
       return "Workspace control or root reference file.";
     }
 
@@ -1508,13 +924,13 @@ mvp-build/tests/unit/twilio-status.test.ts
       const byId = new Map(positioned.map(n => [n.id, n]));
       state.graph.edges.filter(e => byId.has(e.from) && byId.has(e.to)).forEach(e => {
         const a = byId.get(e.from), b = byId.get(e.to);
-        svg.insertAdjacentHTML("beforeend", `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#343434" stroke-width="1"></line>`);
+        svg.insertAdjacentHTML("beforeend", `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#bbbbbb" stroke-width="1"></line>`);
       });
       positioned.forEach(n => {
         const active = n.id === current;
         const r = active ? 14 : n.type === "folder" ? 8 : n.type === "source" ? 7 : 9;
-        const fill = active ? "#ffffff" : n.type === "source" ? "#8ab4ff" : n.type === "folder" ? "#555555" : "#1f1f1f";
-        const stroke = active ? "#ffffff" : "#777777";
+        const fill = active ? "#cc0000" : n.type === "source" ? "#e07a7a" : n.type === "folder" ? "#999999" : "#333333";
+        const stroke = active ? "#800000" : "#777777";
         svg.insertAdjacentHTML("beforeend", `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${fill}" stroke="${stroke}" data-node="${escapeAttr(n.id)}"></circle><text x="${n.x + 12}" y="${n.y + 4}">${escapeHtml(n.label.slice(0, 30))}</text>`);
       });
       svg.querySelectorAll("[data-node]").forEach(el => el.addEventListener("click", () => {
@@ -1689,14 +1105,7 @@ mvp-build/tests/unit/twilio-status.test.ts
     function toggleDock() {
       state.dockCollapsed = !state.dockCollapsed;
       document.documentElement.style.setProperty("--footer-h", state.dockCollapsed ? "0px" : "var(--footer-open-h)");
-      $("dockBtn").textContent = state.dockCollapsed ? "Open Views" : "Views";
-    }
-
-    function toggleTheme() {
-      state.theme = state.theme === "red" ? "light" : "red";
-      localStorage.setItem("amtechExplorerTheme", state.theme);
-      document.body.dataset.theme = state.theme === "red" ? "red" : "light";
-      $("themeBtn").textContent = state.theme === "red" ? "White Mode" : "Red Mode";
+      $("dockBtn").textContent = state.dockCollapsed ? "Open Views" : "Close Views";
     }
 
     function copyAgentContext() {
