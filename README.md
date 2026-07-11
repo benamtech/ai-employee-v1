@@ -41,7 +41,7 @@ The owner experiences one relationship: one employee, one number, one thread. Th
 
 The power of the product is the **tool-agnostic task flow**:
 
-- Sources are pluggable: Gmail, Stripe, Twilio, Supabase, scheduler ticks, internal Jobs, owner messages, and future connectors can all become event sources.
+- Sources are pluggable: Gmail, Stripe, QuickBooks, Twilio, Supabase, scheduler ticks, internal Jobs, owner messages, and future connectors can all become event sources.
 - Work is type-driven: documents, outbound messages, money movement, schedule mutations, structured record writes, recommendations, job folders, and other deliverables share one preview and approval grammar.
 - The gate is structural: customer-facing and money-touching actions require owner approval; internal reversible work can be done and reported.
 - The surface follows the owner: SMS for ambient updates, web Work Surface for review and artifacts, future voice for urgent or hands-busy work.
@@ -107,8 +107,8 @@ High-value starting points:
 - `wiki/00-decision.md` - current beachhead, offer, pricing, pitch, and execution decision.
 - `wiki/product-ai-employee-context.md` - product mechanics and employee thesis.
 - `wiki/product-agent-platform-architecture.md` - AMTECH-owned platform layer around Hermes.
-- `wiki/MVP/build-plan-current/` - current reconciled AI Employee build plan.
-- `wiki/MVP/build-plan-current/phases/` - dependency-ordered implementation phases.
+- `wiki/MVP/second-half-current-and-future-state.md` - current build state: what is source-wired vs. the operational/live-proof gap.
+- `wiki/MVP/build-plan-current/` - module map + dependency graph (the second-half plan is the active sequence).
 - `wiki/MVP/implementation-records/` - factual record of what is actually wired in `mvp-build/`.
 - `wiki/MVP/agent-inbox-and-channel-architecture.md` - current session/channel architecture decision.
 
@@ -129,13 +129,13 @@ It contains:
 - `packages/agent-template/` - AMTECH-authored Hermes profile package and employee workspace.
 - `infra/` - Caddy, Hermes runbook, acceptance scripts, ops scripts.
 - `tests/` - unit, integration, and golden-path acceptance docs.
-- `docs/` - planned admin and metering architecture.
+- `docs/` - admin and metering architecture, the QuickBooks connector design, and the production deploy readiness review.
 - `memory/` - durable agent handoffs and implementation decisions.
 - `ui-handoff/` - UI contributor orientation, source map, product grounding, research index, experimental surface backlog, and parallel-work protocol.
 
 Use `mvp-build/` to understand **what is actually wired**, what commands to run, what source files to edit, and what proof exists. If the wiki vision and source reality differ, check `mvp-build/CODEGRAPH.md`, `mvp-build/memory/MEMORY.md`, newest memory notes, tests, and source before claiming status.
 
-Current state: the second-half plan is active in `mvp-build/second-half-plan/`. Phase 1 preservation is source/static-green with the live gate blocked by model/provider availability. Phase 2 web Work Surface is source-wired. Phase 3 SMS signed previews, Phase 4 generic materialization contracts, and Phase 5/6 trial operations and readiness remain planned/pending. Live provider/runtime acceptance is still pending real proof IDs where required.
+Current state (2026-07-11): the second-half plan in `mvp-build/second-half-plan/` is the active forward plan, and its product surfaces are `source-wired`: the web Work Surface (Phase 2), the SMS ambient inbox + signed mobile Review page (Phase 3), the tool-agnostic materialization/capability layer with a generic Connector Center and a resurfacing projection (Phase 4), Gmail/Stripe/**QuickBooks** connectors, MCP-UI generative cards, and an internal operator admin console (Phase 5). What remains before real owners is **operational**, not more features: a production deploy/runtime layer (service supervision, employee-container launch, Caddy reload, backups, observability, egress) and a working end-to-end tool loop. Both are captured in `mvp-build/docs/production-deploy-readiness-review-2026-07-11.md` and the re-sequenced `mvp-build/second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md`; admin-panel polish and billing are deliberately **parked** behind them. Live provider/runtime acceptance is still pending real proof IDs.
 
 ## Hermes Agent Boundary
 
@@ -145,13 +145,13 @@ The AI Employee uses **Hermes agent from Nous Research** as the underlying open-
 - the invisible Manager backend control plane;
 - account/session/approval boundaries;
 - web and SMS owner surfaces;
-- Gmail, Stripe, Twilio, Supabase, scheduler, repair, and event-mesh integration;
+- Gmail, Stripe, QuickBooks, Twilio, Supabase, scheduler, repair, and event-mesh integration;
 - Work Surface rendering;
 - admin, metering, and operations plans.
 
 Important architecture rule: the owner should not experience "Hermes" or "Manager." The owner experiences their employee.
 
-The current major product/software priority is session management around the Hermes employee: one employee, one number, one continuous thread across SMS/web/future voice, with a Manager-owned Channel/Session/Presence router deciding where output lands.
+The current major product/software priority is **production deployability and a working end-to-end tool loop**: getting the box deployable and self-sustaining (service supervision, employee-container launch, Caddy reload, reboot recovery) and the core owner → tool → artifact/approval loop deterministically working, before any further admin or billing work. The session model — one employee, one number, one continuous thread across SMS/web/future voice, with a Manager-owned Channel/Session/Presence router deciding where output lands — is already source-wired.
 
 ## How Agents Should Navigate This Repo
 
@@ -179,11 +179,10 @@ Use `wiki/` when you need intent, rationale, scope, or current product truth. Th
 
 For implementation work, do not start from source alone. Read:
 
-1. `wiki/MVP/build-plan-current/README.md`
-2. `wiki/MVP/build-plan-current/phases/README.md`
-3. The relevant phase file.
-4. `wiki/MVP/implementation-records/README.md`
-5. The latest relevant implementation record.
+1. `mvp-build/second-half-plan/README.md` - the active forward plan, plus its re-sequenced roadmap `production-runtime-and-deploy-roadmap-2026-07-11.md`.
+2. `wiki/MVP/second-half-current-and-future-state.md` - current build state.
+3. `wiki/MVP/build-plan-current/` and `phases/` - module map + dependency graph (not the immediate sequence).
+4. `wiki/MVP/implementation-records/README.md` and the latest relevant implementation record.
 
 The original whole-product packet remains in `wiki/MVP/old-build-plan/`; use it for mechanics, not current sequencing.
 
