@@ -60,7 +60,29 @@ const MANAGER_TOOL_META: Partial<Record<ToolName, { category: CapabilityCategory
   get_entitlements: { category: "office", label: "Check account policy", summary: "Read what the account is allowed to use." },
   record_usage: { category: "system", label: "Record usage", summary: "Track work for operations and billing visibility." },
   request_upgrade: { category: "office", label: "Request plan change", summary: "Record that the owner needs more capability or support." },
+  connect_quickbooks: { category: "accounting", label: "Connect QuickBooks", summary: "Start QuickBooks Online consent and connection." },
+  complete_quickbooks_oauth: { category: "accounting", label: "Finish QuickBooks connection", summary: "Complete QuickBooks consent after the owner approves it." },
+  run_quickbooks_connector_test: { category: "accounting", label: "Test QuickBooks connection", summary: "Verify the QuickBooks connection is healthy before booking work." },
+  create_expense: { category: "accounting", label: "Record expenses", summary: "Prepare a QuickBooks expense for owner approval before it posts." },
+  create_bill: { category: "accounting", label: "Enter bills", summary: "Prepare a QuickBooks bill for owner approval before it posts." },
+  create_invoice: { category: "accounting", label: "Create invoices", summary: "Prepare a QuickBooks customer invoice for owner approval before it posts." },
+  create_payment: { category: "accounting", label: "Record payments", summary: "Prepare a QuickBooks customer payment for owner approval before it posts." },
+  commit_quickbooks_write: { category: "accounting", label: "Post approved QuickBooks entry", summary: "Post an approved QuickBooks entry to the books." },
+  query_quickbooks: { category: "accounting", label: "Look up QuickBooks records", summary: "Read QuickBooks records by name and simple filters." },
+  get_profit_and_loss: { category: "accounting", label: "Profit and Loss", summary: "Read a QuickBooks Profit and Loss report in plain language." },
+  get_balance_sheet: { category: "accounting", label: "Balance Sheet", summary: "Read a QuickBooks Balance Sheet in plain language." },
+  get_aged_receivables: { category: "accounting", label: "Who owes the business", summary: "Read QuickBooks A/R aging (overdue customer invoices)." },
+  get_aged_payables: { category: "accounting", label: "What the business owes", summary: "Read QuickBooks A/P aging (overdue bills)." },
 };
+
+/** QBO tools by category, so statusForTool can route them to the QuickBooks
+ *  connector before the Stripe "invoice"/"payment" substring branch catches
+ *  create_invoice/create_payment. Derived from MANAGER_TOOL_META (single source). */
+const QBO_TOOL_NAMES: Set<ToolName> = new Set(
+  (Object.entries(MANAGER_TOOL_META) as Array<[ToolName, { category: CapabilityCategory }]>)
+    .filter(([, meta]) => meta.category === "accounting")
+    .map(([name]) => name),
+);
 
 function runtimeStatus(runtime: RuntimeHealthSummary): CapabilityStatus {
   if (runtime.status === "healthy") return "ready";
@@ -82,6 +104,9 @@ function stripeStatus(snapshot: EmployeeSnapshot): CapabilityStatus {
 }
 
 function statusForTool(name: ToolName, snapshot: EmployeeSnapshot, runtime: RuntimeHealthSummary): CapabilityStatus {
+  // QuickBooks first: several QBO tools contain "invoice"/"payment" substrings
+  // that would otherwise fall into the Stripe branch below.
+  if (name.includes("quickbooks") || QBO_TOOL_NAMES.has(name)) return connectorStatus(snapshot, "quickbooks");
   if (name.includes("email")) return connectorStatus(snapshot, "gmail");
   if (name.includes("invoice") || name.includes("deposit")) return stripeStatus(snapshot);
   if (runtime.status === "unhealthy" && !["connect_email", "request_approval", "resolve_approval"].includes(name)) return "degraded";
@@ -91,6 +116,7 @@ function statusForTool(name: ToolName, snapshot: EmployeeSnapshot, runtime: Runt
 function setupFor(status: CapabilityStatus, category: CapabilityCategory): string | null {
   if (status === "needs_connection" && category === "communication") return "Connect Gmail.";
   if (status === "needs_connection" && category === "money") return "Finish Stripe onboarding.";
+  if (status === "needs_connection" && category === "accounting") return "Connect QuickBooks.";
   if (status === "needs_info") return "Capability is listed but needs a live runtime/schema proof before autonomous use.";
   if (status === "degraded") return "Runtime health is degraded; Manager can still prepare safe work.";
   if (status === "unavailable") return "Runtime is unavailable.";

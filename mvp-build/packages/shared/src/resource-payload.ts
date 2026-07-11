@@ -106,7 +106,7 @@ export interface RuntimeHealthSummary {
 export interface AbilitySummary {
   id: string;
   label: string;
-  category: "communication" | "money" | "office" | "documents" | "automation" | "research" | "system";
+  category: "communication" | "money" | "office" | "documents" | "automation" | "research" | "system" | "accounting";
   status: "ready" | "needs_connection" | "degraded" | "policy_gated" | "unavailable";
   summary: string;
   source: "manager" | "connector" | "runtime" | "profile" | "policy";

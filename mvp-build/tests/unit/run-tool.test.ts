@@ -26,6 +26,31 @@ describe("runManagerTool dispatch guard", () => {
     expect(outcome.envelope.employee_id).toBe("emp_1");
   });
 
+  it("commit_quickbooks_write's .strict() schema rejects ANY extra field (no payload data at commit)", async () => {
+    // The one tool whose schema is .strict() (not the codebase's default
+    // .passthrough()): the entity payload must come only from the stored
+    // pending-write row, never from a field the caller supplies at commit time.
+    const outcome = await runManagerTool("commit_quickbooks_write", {
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      pending_write_id: "qbpw_1",
+      approval_id: "appr_1",
+      canonical_payload: { PaymentType: "Cash" }, // <- extra field must be rejected
+    });
+    expect(outcome.kind).toBe("invalid_input");
+  });
+
+  it("commit_quickbooks_write accepts exactly its three fields + identity", async () => {
+    const outcome = await runManagerTool("commit_quickbooks_write", {
+      account_id: "acct_1",
+      employee_id: "emp_1",
+      pending_write_id: "qbpw_1",
+      approval_id: "appr_1",
+    }).catch((err) => ({ kind: "threw", err } as const));
+    // Passes schema validation (reaches the handler, which then needs a DB).
+    expect(["ok", "threw"]).toContain((outcome as { kind: string }).kind);
+  });
+
   it("accepts a well-formed gated input at the schema boundary (before the handler)", async () => {
     // A complete request_approval payload must pass validation. We can't run the
     // handler here (no DB), but a schema violation would surface as invalid_input.

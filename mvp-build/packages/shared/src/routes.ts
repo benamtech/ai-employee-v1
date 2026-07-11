@@ -50,6 +50,8 @@ export const MANAGER_API = {
     gmail: "/webhooks/gmail",
     gmailOauthCallback: "/webhooks/gmail/oauth/callback",
     stripe: "/webhooks/stripe",
+    quickbooks: "/webhooks/quickbooks",
+    quickbooksOauthCallback: "/webhooks/quickbooks/oauth/callback",
   },
 } as const;
 

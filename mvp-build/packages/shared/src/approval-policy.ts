@@ -49,11 +49,34 @@ export const SEND_GATE_ACTION_KEY_GROUPS = [
   INVOICE_SEND_ACTION_KEYS,
 ] as const;
 
-/** Derived, not hand-maintained: every send-gate key plus the reserved
- *  forward-looking keys. Structurally impossible for a send-gate key to be
- *  missing from this set. */
+// QuickBooks write gates (commit_quickbooks_write). These are their OWN peer
+// array, not folded into SEND_GATE_ACTION_KEY_GROUPS above: that array's scope
+// (see its doc comment) is customer/money-facing SENDS (Gmail send, Stripe
+// invoice send) — a QuickBooks write commits to the books, it doesn't send
+// anything externally. Follows the RESERVED_OWNER_AUTH_ACTION_KEYS precedent
+// of "owner-auth-required but not a send" instead.
+export const QBO_EXPENSE_WRITE_ACTION_KEYS = ["commit_quickbooks_expense"] as const;
+export const QBO_BILL_WRITE_ACTION_KEYS = ["commit_quickbooks_bill"] as const;
+export const QBO_INVOICE_WRITE_ACTION_KEYS = ["commit_quickbooks_invoice"] as const;
+export const QBO_PAYMENT_WRITE_ACTION_KEYS = ["commit_quickbooks_payment"] as const;
+
+/** Every array of action_keys that gates a QuickBooks write via
+ *  commit_quickbooks_write. Add a new group here (not a bespoke Set at the
+ *  call site) and it is AUTOMATICALLY folded into
+ *  OWNER_AUTH_REQUIRED_APPROVAL_ACTION_KEYS below. */
+export const QBO_WRITE_ACTION_KEY_GROUPS = [
+  QBO_EXPENSE_WRITE_ACTION_KEYS,
+  QBO_BILL_WRITE_ACTION_KEYS,
+  QBO_INVOICE_WRITE_ACTION_KEYS,
+  QBO_PAYMENT_WRITE_ACTION_KEYS,
+] as const;
+
+/** Derived, not hand-maintained: every send-gate key, every QBO write-gate key,
+ *  plus the reserved forward-looking keys. Structurally impossible for a
+ *  send-gate or QBO-write-gate key to be missing from this set. */
 export const OWNER_AUTH_REQUIRED_APPROVAL_ACTION_KEYS: ReadonlySet<string> = new Set<string>([
   ...SEND_GATE_ACTION_KEY_GROUPS.flat(),
+  ...QBO_WRITE_ACTION_KEY_GROUPS.flat(),
   ...RESERVED_OWNER_AUTH_ACTION_KEYS,
 ]);
 

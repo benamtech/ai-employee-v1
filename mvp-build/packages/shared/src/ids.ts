@@ -79,6 +79,8 @@ export const ID_PREFIX = {
   platformRole: "prole",
   supportAccess: "supp",
   adminAction: "adact",
+  qboPendingWrite: "qbpw",
+  inboundQboEvent: "iqe",
 } as const;
 
 export type IdPrefix = (typeof ID_PREFIX)[keyof typeof ID_PREFIX];

@@ -48,6 +48,18 @@ const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
   send_employee_event: "Emit an owner-authored internal work event to the Work Surface.",
   set_internal_reminder: "Set an internal job reminder the scheduler will fire.",
   get_reminders: "List the employee's reminders.",
+  connect_quickbooks: "Begin QuickBooks connection (returns a consent URL; not connected until OAuth completes).",
+  run_quickbooks_connector_test: "Verify the QuickBooks connection is healthy (company info check).",
+  create_expense: "Prepare a QuickBooks expense (Purchase) for owner approval; refer to the vendor and category by name. Committing is gated.",
+  create_bill: "Prepare a QuickBooks bill for owner approval; refer to the vendor and category by name. Committing is gated.",
+  create_invoice: "Prepare a QuickBooks customer invoice for owner approval; refer to the customer and items by name. Committing is gated.",
+  create_payment: "Prepare a QuickBooks customer payment for owner approval. Committing is gated.",
+  commit_quickbooks_write: "Commit a previously approved QuickBooks write — requires the pending_write_id and its own approved approval_id.",
+  query_quickbooks: "Read QuickBooks records by entity and filters (owner-safe read; QuickBooks limits which fields are filterable).",
+  get_profit_and_loss: "Read a QuickBooks Profit and Loss report (flattened, owner-summarizable).",
+  get_balance_sheet: "Read a QuickBooks Balance Sheet report (flattened, owner-summarizable).",
+  get_aged_receivables: "Read a QuickBooks A/R aging summary (who owes the business, and how overdue).",
+  get_aged_payables: "Read a QuickBooks A/P aging summary (what the business owes, and how overdue).",
 };
 
 /** Tools the employee may call over MCP: everything except scheduler-only,

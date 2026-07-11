@@ -8,7 +8,7 @@
  * ingress is the Hermes webhook adapter; Manager owns normalization/dedup/triage.
  */
 
-export type EventSource = "gmail" | "stripe" | "twilio" | "manager";
+export type EventSource = "gmail" | "stripe" | "twilio" | "manager" | "quickbooks";
 
 /** Required event types the rail must carry (03-data-model.md). */
 export const EVENT_TYPES = {
@@ -17,6 +17,7 @@ export const EVENT_TYPES = {
   stripeInvoicePaid: "stripe.invoice_paid",
   managerConnectorConnected: "manager.connector_connected",
   managerConnectorFailed: "manager.connector_failed",
+  quickbooksEntityChanged: "quickbooks.entity_changed",
 } as const;
 
 export type EventType = (typeof EVENT_TYPES)[keyof typeof EVENT_TYPES];

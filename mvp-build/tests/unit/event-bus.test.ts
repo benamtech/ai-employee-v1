@@ -180,7 +180,7 @@ describe("event bus delivery", () => {
   });
 
   it("has concrete registered event sources", () => {
-    expect(listEventSources()).toEqual(["gmail", "manager", "stripe"]);
+    expect(listEventSources()).toEqual(["gmail", "manager", "quickbooks", "stripe"]);
   });
 });
 

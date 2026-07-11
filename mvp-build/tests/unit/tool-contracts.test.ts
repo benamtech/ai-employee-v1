@@ -5,14 +5,16 @@ import { TOOL_NAMES, TOOL_PHASE } from "../../packages/shared/src/tool-contracts
 describe("Manager tool contracts", () => {
   it("declares the complete tool surface", () => {
     // Phase 6 adds repair commands; Phase 5 adds daily brief scheduling.
-    expect(TOOL_NAMES.length).toBe(45);
+    // Tool-phase 6 (a different numbering: mvp-build/docs/quickbooks-connector-*)
+    // adds the QuickBooks Online connector's 20 tools.
+    expect(TOOL_NAMES.length).toBe(65);
     expect(new Set(TOOL_NAMES).size).toBe(TOOL_NAMES.length); // no dupes
   });
 
   it("phase-maps every tool", () => {
     for (const name of TOOL_NAMES) {
       expect(TOOL_PHASE[name]).toBeGreaterThanOrEqual(1);
-      expect(TOOL_PHASE[name]).toBeLessThanOrEqual(5);
+      expect(TOOL_PHASE[name]).toBeLessThanOrEqual(6);
     }
   });
 

@@ -67,12 +67,37 @@ export const TOOL_NAMES = [
   "get_entitlements",
   "record_usage",
   "request_upgrade",
+  // QuickBooks Online (Phase A) — connector lifecycle
+  "connect_quickbooks",
+  "complete_quickbooks_oauth",
+  "run_quickbooks_connector_test",
+  // QuickBooks write previews + the single commit path
+  "create_expense",
+  "create_bill",
+  "create_invoice",
+  "create_payment",
+  "commit_quickbooks_write",
+  // QuickBooks read surface
+  "query_quickbooks",
+  "get_profit_and_loss",
+  "get_balance_sheet",
+  "get_aged_receivables",
+  "get_aged_payables",
+  // QuickBooks Phase B seams — registered now, not_supported_yet until Phase B
+  "update_expense",
+  "update_bill",
+  "update_invoice",
+  "create_deposit",
+  "create_journal_entry",
+  "update_journal_entry",
+  "create_bill_payment",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];
 
-/** Which phase implements each tool (drives Phase-0 stub status). */
-export const TOOL_PHASE: Record<ToolName, 1 | 2 | 3 | 4 | 5> = {
+/** Which phase implements each tool (drives Phase-0 stub status). Phase 6 is the
+ *  QuickBooks Online connector (mvp-build/docs/quickbooks-connector-*.md). */
+export const TOOL_PHASE: Record<ToolName, 1 | 2 | 3 | 4 | 5 | 6> = {
   send_phone_verification: 1,
   check_phone_code: 1,
   create_account: 1,
@@ -118,6 +143,26 @@ export const TOOL_PHASE: Record<ToolName, 1 | 2 | 3 | 4 | 5> = {
   get_entitlements: 1,
   record_usage: 1,
   request_upgrade: 1,
+  connect_quickbooks: 6,
+  complete_quickbooks_oauth: 6,
+  run_quickbooks_connector_test: 6,
+  create_expense: 6,
+  create_bill: 6,
+  create_invoice: 6,
+  create_payment: 6,
+  commit_quickbooks_write: 6,
+  query_quickbooks: 6,
+  get_profit_and_loss: 6,
+  get_balance_sheet: 6,
+  get_aged_receivables: 6,
+  get_aged_payables: 6,
+  update_expense: 6,
+  update_bill: 6,
+  update_invoice: 6,
+  create_deposit: 6,
+  create_journal_entry: 6,
+  update_journal_entry: 6,
+  create_bill_payment: 6,
 };
 
 // --- Phase 1 tool input types (the only ones with real bodies in Phase 1) ----
@@ -457,3 +502,121 @@ export interface SuppressEventSourceInput {
 }
 
 export interface RegenerateStripeOnboardingLinkInput extends CreateStripeAccountLinkInput {}
+
+// --- QuickBooks Online groundwork input types (Phase A) ---------------------
+// See mvp-build/docs/quickbooks-connector-architecture.md +
+// quickbooks-connector-implementation-plan.md. Mirrors the Gmail/Stripe
+// connector shape: connect -> OAuth callback -> connector test -> write
+// preview -> approval-gated commit.
+
+export interface ConnectQuickbooksInput {
+  account_id: string;
+  employee_id: string;
+  environment?: "sandbox" | "production";
+}
+
+export interface CompleteQuickbooksOAuthInput {
+  state: string;
+  code: string;
+  /** QBO-specific: the callback query string carries the company id, unlike Gmail. */
+  realmId: string;
+}
+
+export interface RunQuickbooksConnectorTestInput {
+  account_id: string;
+  employee_id: string;
+}
+
+/** Common identity carried by every QBO write-preview tool. */
+interface QboWritePreviewBase {
+  account_id: string;
+  employee_id: string;
+  memo?: string;
+  txn_date?: string;
+}
+
+/** create_expense -> QBO Purchase. Single vendor + account reference, no
+ *  multi-line debit/credit balancing -- the simplest QBO write, and the
+ *  vertical-slice entity per the implementation plan. */
+export interface CreateExpenseInput extends QboWritePreviewBase {
+  vendor_name: string;
+  account_name: string;
+  amount_cents: number;
+  payment_type: "Cash" | "Check" | "CreditCard";
+  department_name?: string;
+}
+
+export interface CreateBillInput extends QboWritePreviewBase {
+  vendor_name: string;
+  account_name: string;
+  amount_cents: number;
+  due_date?: string;
+}
+
+export interface InvoiceLineItemInput {
+  item_name: string;
+  quantity: number;
+  unit_price_cents: number;
+  description?: string;
+}
+
+export interface CreateInvoiceInput extends QboWritePreviewBase {
+  customer_name: string;
+  line_items: InvoiceLineItemInput[];
+}
+
+export interface CreatePaymentInput extends QboWritePreviewBase {
+  customer_name: string;
+  amount_cents: number;
+  /** Optional QBO Invoice DocNumber/id the payment should apply against. */
+  invoice_ref?: string;
+}
+
+/**
+ * The ONLY tool that ever calls the QBO client for a write. Deliberately
+ * `.strict()` in tool-schemas.ts (not the codebase's default `.passthrough()`)
+ * -- no entity payload data may enter here; the payload that gets written
+ * comes exclusively from the stored `quickbooks_pending_writes` row.
+ */
+export interface CommitQuickbooksWriteInput {
+  account_id: string;
+  employee_id: string;
+  pending_write_id: string;
+  approval_id: string;
+}
+
+export interface QueryQuickbooksInput {
+  account_id: string;
+  employee_id: string;
+  entity: string;
+  filters?: Record<string, string>;
+  fields?: string[];
+  limit?: number;
+  start_position?: number;
+}
+
+export interface QboReportInput {
+  account_id: string;
+  employee_id: string;
+  start_date?: string;
+  end_date?: string;
+  /** QBO report date-range shorthand, e.g. "This Fiscal Year", "Last Month". */
+  date_macro?: string;
+}
+
+export interface QboAgingReportInput {
+  account_id: string;
+  employee_id: string;
+  report_date?: string;
+}
+
+// Phase B seams -- registered in TOOL_NAMES/TOOL_PHASE now so the tool is
+// discoverable (schema-validated, listed in MCP tools/list) from Phase A, but
+// every handler below returns `not_supported_yet` until Phase B lands.
+export interface UpdateExpenseInput { account_id: string; employee_id: string }
+export interface UpdateBillInput { account_id: string; employee_id: string }
+export interface UpdateInvoiceInput { account_id: string; employee_id: string }
+export interface CreateDepositInput { account_id: string; employee_id: string }
+export interface CreateJournalEntryInput { account_id: string; employee_id: string }
+export interface UpdateJournalEntryInput { account_id: string; employee_id: string }
+export interface CreateBillPaymentInput { account_id: string; employee_id: string }

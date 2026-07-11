@@ -20,6 +20,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const MODULES = [
   "run1-db-rls", "run2-provision", "run3-artifact", "run4-gmail",
   "run5-stripe", "run6-reminder", "run7-repair-eventbus", "run8-security",
+  "run10-quickbooks",
 ];
 
 const results = [];

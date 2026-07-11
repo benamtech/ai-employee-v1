@@ -154,6 +154,96 @@ const SCHEMAS: Partial<Record<ToolName, z.ZodTypeAny>> = {
     approval_id: z.string().optional(),
   }).passthrough(),
   get_reminders: z.object({ ...ownerCtx, status: z.string().optional(), upcoming_only: z.boolean().optional() }).passthrough(),
+
+  // QuickBooks Online (Phase A) — connector lifecycle
+  connect_quickbooks: z.object({ ...ownerCtx, environment: z.enum(["sandbox", "production"]).optional() }).passthrough(),
+  complete_quickbooks_oauth: z.object({ state: z.string().min(1), code: z.string().min(1), realmId: z.string().min(1) }).passthrough(),
+  run_quickbooks_connector_test: z.object({ ...ownerCtx }).passthrough(),
+
+  // QuickBooks write previews — resolve names via qbo-lookup.ts, never call QBO
+  // directly; each inserts a quickbooks_pending_writes row and calls
+  // request_approval. .passthrough() is fine here: these never reach the API,
+  // commit_quickbooks_write below is the one tool that actually writes.
+  create_expense: z.object({
+    ...ownerCtx,
+    vendor_name: z.string().min(1),
+    account_name: z.string().min(1),
+    amount_cents: z.number().int().positive(),
+    payment_type: z.enum(["Cash", "Check", "CreditCard"]),
+    department_name: z.string().optional(),
+    memo: z.string().optional(),
+    txn_date: z.string().optional(),
+  }).passthrough(),
+  create_bill: z.object({
+    ...ownerCtx,
+    vendor_name: z.string().min(1),
+    account_name: z.string().min(1),
+    amount_cents: z.number().int().positive(),
+    due_date: z.string().optional(),
+    memo: z.string().optional(),
+    txn_date: z.string().optional(),
+  }).passthrough(),
+  create_invoice: z.object({
+    ...ownerCtx,
+    customer_name: z.string().min(1),
+    line_items: z.array(z.object({
+      item_name: z.string().min(1),
+      quantity: z.number().positive(),
+      unit_price_cents: z.number().int().nonnegative(),
+      description: z.string().optional(),
+    })).min(1),
+    memo: z.string().optional(),
+    txn_date: z.string().optional(),
+  }).passthrough(),
+  create_payment: z.object({
+    ...ownerCtx,
+    customer_name: z.string().min(1),
+    amount_cents: z.number().int().positive(),
+    invoice_ref: z.string().optional(),
+    memo: z.string().optional(),
+    txn_date: z.string().optional(),
+  }).passthrough(),
+
+  // commit_quickbooks_write — DELIBERATE EXCEPTION to this file's default
+  // .passthrough() convention (see the file-level doc comment above). This is
+  // the one tool where "no extra fields accepted" is a hard security property:
+  // the entity payload that actually gets written to QuickBooks must come
+  // exclusively from the stored quickbooks_pending_writes row (matched by
+  // pending_write_id), never from anything the model supplies at commit time.
+  // A permissive schema here would let a model resupply/override payload
+  // fields at the one place that must not accept them.
+  commit_quickbooks_write: z.object({
+    ...ownerCtx,
+    pending_write_id: z.string().min(1),
+    approval_id: z.string().min(1),
+  }).strict(),
+
+  // QuickBooks read surface: one generic query tool (not ~40 search_* tools)
+  // plus core reports. qbo-query.ts enforces the per-entity filterable-fields
+  // whitelist and string-literal escaping server-side; this schema only shapes
+  // the request.
+  query_quickbooks: z.object({
+    ...ownerCtx,
+    entity: z.string().min(1),
+    filters: z.record(z.string()).optional(),
+    fields: z.array(z.string()).optional(),
+    limit: z.number().int().positive().optional(),
+    start_position: z.number().int().positive().optional(),
+  }).passthrough(),
+  get_profit_and_loss: z.object({
+    ...ownerCtx,
+    start_date: z.string().optional(),
+    end_date: z.string().optional(),
+    date_macro: z.string().optional(),
+  }).passthrough(),
+  get_balance_sheet: z.object({
+    ...ownerCtx,
+    start_date: z.string().optional(),
+    end_date: z.string().optional(),
+    date_macro: z.string().optional(),
+  }).passthrough(),
+  get_aged_receivables: z.object({ ...ownerCtx, report_date: z.string().optional() }).passthrough(),
+  get_aged_payables: z.object({ ...ownerCtx, report_date: z.string().optional() }).passthrough(),
 };
 
 /** Permissive fallback for tools not yet schema'd — accepts any object, so

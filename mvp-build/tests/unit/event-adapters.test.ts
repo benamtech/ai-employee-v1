@@ -7,8 +7,8 @@ import { makeFakeDb } from "./_helpers/fake-supabase";
 const db = () => makeFakeDb().asClient();
 
 describe("event adapters registry", () => {
-  it("registers exactly gmail, manager, stripe", () => {
-    expect(listEventSources()).toEqual(["gmail", "manager", "stripe"]);
+  it("registers exactly gmail, manager, quickbooks, stripe", () => {
+    expect(listEventSources()).toEqual(["gmail", "manager", "quickbooks", "stripe"]);
   });
 });
 

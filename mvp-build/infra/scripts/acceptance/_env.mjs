@@ -105,6 +105,16 @@ export const RUNS = [
     require: ["MANAGER_BASE_URL"],
     anyOf: [],
   },
+  {
+    id: 10,
+    key: "quickbooks",
+    label: "QuickBooks Online (connect + approved write + webhook)",
+    require: [
+      "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "QBO_CLIENT_ID", "QBO_CLIENT_SECRET",
+      "QBO_OAUTH_REDIRECT_URI", "QBO_WEBHOOK_VERIFIER_TOKEN", "SECRET_REF_MASTER_KEY",
+    ],
+    anyOf: [],
+  },
 ];
 
 export function runById(id) {

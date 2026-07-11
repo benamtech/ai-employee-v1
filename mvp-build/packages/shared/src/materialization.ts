@@ -16,7 +16,8 @@ export type CapabilityCategory =
   | "documents"
   | "automation"
   | "research"
-  | "system";
+  | "system"
+  | "accounting";
 
 export interface RenderHints {
   tier: "native_card" | "mcp_ui" | "generic";

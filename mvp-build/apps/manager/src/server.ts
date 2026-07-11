@@ -15,6 +15,7 @@ import { handleManagerMcpRequest } from "./lib/mcp-server.js";
 import { registerTwilioWebhooks } from "./webhooks/twilio.js";
 import { registerGmailWebhooks } from "./webhooks/gmail.js";
 import { registerStripeWebhooks } from "./webhooks/stripe.js";
+import { registerQuickbooksWebhooks } from "./webhooks/quickbooks.js";
 import { registerProvisionerRoutes } from "./provisioner.js";
 import { registerOrchestratorRoutes } from "./orchestrator.js";
 import { decodeSignedToken, tokenHash, verifySignedToken } from "./lib/signed-links.js";
@@ -707,6 +708,7 @@ export function buildApp(): Hono {
   registerTwilioWebhooks(app);
   registerGmailWebhooks(app);
   registerStripeWebhooks(app);
+  registerQuickbooksWebhooks(app);
   registerProvisionerRoutes(app);
   registerOrchestratorRoutes(app);
 

@@ -12,6 +12,7 @@ import { gmailTools } from "./gmail.stub.js";
 import { stripeTools } from "./stripe.stub.js";
 import { eventTools } from "./events.stub.js";
 import { repairTools } from "./repair.stub.js";
+import { qboTools } from "./qbo.stub.js";
 
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
@@ -21,6 +22,7 @@ const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...stripeTools,
   ...eventTools,
   ...repairTools,
+  ...qboTools,
 };
 
 export function buildToolRegistry(): Map<ToolName, ToolHandler> {

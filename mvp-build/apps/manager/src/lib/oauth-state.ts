@@ -15,14 +15,14 @@ function key(): string {
 
 export interface OAuthStatePayload {
   employee_id: string;
-  provider: "gmail" | "stripe";
+  provider: "gmail" | "stripe" | "quickbooks";
   nonce: string;
   exp: number; // epoch seconds
 }
 
 export function mintOAuthState(
   employee_id: string,
-  provider: "gmail" | "stripe",
+  provider: "gmail" | "stripe" | "quickbooks",
   ttlSeconds = 600,
 ): string {
   const payload: OAuthStatePayload = {
