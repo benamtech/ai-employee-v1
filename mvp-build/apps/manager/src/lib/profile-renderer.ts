@@ -41,6 +41,9 @@ export function profileTokenMap(params: ProfileBuildParams): Record<string, stri
     BRANDING_NOTES: "_(learned as we go)_",
     MANAGER_API_ORIGIN: process.env.MANAGER_API_ORIGIN ?? "http://localhost:8080",
     MANAGER_INTERNAL_TOKEN: process.env.MANAGER_INTERNAL_TOKEN ?? "",
+    HERMES_MODEL_PROVIDER: process.env.HERMES_MODEL_PROVIDER ?? "custom",
+    HERMES_MODEL_DEFAULT: process.env.HERMES_MODEL_DEFAULT ?? process.env.HERMES_INFERENCE_MODEL ?? "gpt-4.1",
+    HERMES_MODEL_BASE_URL: process.env.HERMES_MODEL_BASE_URL ?? process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1",
   };
 }
 

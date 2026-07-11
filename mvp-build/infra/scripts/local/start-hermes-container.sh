@@ -27,6 +27,20 @@ if [[ -n "$workspace" ]]; then
   mount_args+=(-v "$workspace:$workspace")
 fi
 
+provider_env_args=()
+for name in \
+  OPENAI_API_KEY \
+  OPENAI_BASE_URL \
+  OPENROUTER_API_KEY \
+  OPENROUTER_BASE_URL \
+  ANTHROPIC_API_KEY \
+  HERMES_INFERENCE_PROVIDER \
+  HERMES_INFERENCE_MODEL; do
+  if [[ -n "${!name:-}" ]]; then
+    provider_env_args+=(-e "${name}=${!name}")
+  fi
+done
+
 docker run -d \
   --name "$container" \
   --add-host=host.docker.internal:host-gateway \
@@ -36,6 +50,7 @@ docker run -d \
   -e "API_SERVER_HOST=0.0.0.0" \
   -e "MANAGER_API_ORIGIN=${DOCKER_MANAGER_API_ORIGIN:-http://host.docker.internal:8080}" \
   -e "MANAGER_BASE_URL=${DOCKER_MANAGER_BASE_URL:-http://host.docker.internal:8080}" \
+  "${provider_env_args[@]}" \
   -p "127.0.0.1:${port}:${port}" \
   "${mount_args[@]}" \
   "$image" gateway run --no-supervise --replace -q

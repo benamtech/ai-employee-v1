@@ -32,6 +32,7 @@ const VERB_BY_TOOL: Record<string, string> = {
 };
 
 const GENERIC_VERB = "Working on it";
+const SAFE_STATUS_VERBS = new Set(["Waiting for approval"]);
 
 /** Map a raw tool name to a safe, owner-facing work-verb. Never returns the tool
  *  name itself. Unknown tools collapse to a single generic verb. */
@@ -44,5 +45,5 @@ export function workVerbForTool(toolName: string | null | undefined): string {
 /** True when a candidate string would leak a raw tool identity to the owner.
  *  Used by tests to assert no un-mapped tool name escapes onto the surface. */
 export function isSafeWorkVerb(text: string): boolean {
-  return text === GENERIC_VERB || Object.values(VERB_BY_TOOL).includes(text);
+  return text === GENERIC_VERB || SAFE_STATUS_VERBS.has(text) || Object.values(VERB_BY_TOOL).includes(text);
 }
