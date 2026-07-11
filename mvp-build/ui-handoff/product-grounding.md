@@ -21,8 +21,9 @@ The bigger product is a small-business employee that can:
 - create structured estimates and documents;
 - draft customer emails and SMS messages;
 - prepare invoices and payment links;
+- keep the books in order — record expenses, bills, invoices, and payments and read simple P&L/AR/AP summaries (QuickBooks), behind the approval gate;
 - track replies, reminders, job status, and receipts;
-- connect to email, payments, files, browser/web, and future systems;
+- connect to email, payments, accounting, files, browser/web, and future systems;
 - surface work through web, SMS, signed mobile previews, admin, and future clients;
 - keep customer-facing, money, destructive, credential, and broad external actions behind approval gates.
 

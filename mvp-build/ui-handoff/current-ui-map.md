@@ -89,7 +89,7 @@ Manager read model and routes:
 - short-lived optimistic messages while sending;
 - EventSource connection to `/api/employee/[employeeId]/events`;
 - polling fallback to `/api/employee/[employeeId]/resources`;
-- approval resolve calls through `/api/employee/[employeeId]/approval/resolve`;
+- approval resolve calls through `/api/employee/[employeeId]/approval/resolve` — resolving a gated approval (web **or** signed SMS Review) now **carries the approved work forward to execution**: the send/charge/write actually happens and produces receipts and new work events. The employee is always-on from the owner's point of view — approving simply lets the held action proceed. Design the post-approval flow to show the action completing (in-progress → done, with a receipt), not a card that merely flips to "approved";
 - owner messages through `/api/employee/[employeeId]/message`;
 - artifact/output links through `/agent/[employeeId]/output/[artifactId]`.
 

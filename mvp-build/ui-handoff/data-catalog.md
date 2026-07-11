@@ -155,7 +155,7 @@ interface SurfaceEnvelope {
 
 interface CapabilityGraphNode {
   key: string; label: string; summary: string;
-  category: "communication" | "money" | "office" | "documents" | "automation" | "research" | "system";
+  category: "communication" | "money" | "office" | "documents" | "automation" | "research" | "system" | "accounting";
   status: "ready" | "needs_connection" | "needs_info" | "degraded" | "policy_gated" | "unavailable";
   setup_requirement?: string | null;
   trust_level: SafetyEnvelope["trust_level"];
