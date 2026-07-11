@@ -1,6 +1,6 @@
 # mvp-build — the AMTECH AI Employee MVP build
 
-Status: **the second-half plan's product surfaces are `source-wired` — built and green against the local suites (`typecheck` / `test:unit` 76 files / 488 tests / `build` / `lint`) — spanning the web Work Surface, the SMS ambient inbox + signed Review, the tool-agnostic materialization/capability layer (Connector Center + resurfacing), Gmail/Stripe/QuickBooks connectors, MCP-UI cards, and an internal operator admin console. The remaining gap is operations + live proof: a production deploy/runtime layer to run the fleet on a VPS, and live provider/runtime acceptance. Admin-panel polish and billing are parked. See [`CODEGRAPH.md`](CODEGRAPH.md) §3 for authoritative per-phase status.** This is where the AMTECH AI Employee MVP gets built.
+Status: **the second-half plan's product surfaces are `source-wired` — built and green against the local suites (`typecheck` / `test:unit` 76 files / 488 tests / `build` / `lint`) — spanning the web Work Surface, the SMS ambient inbox + signed Review, the tool-agnostic materialization/capability layer (Connector Center + resurfacing), Gmail/Stripe/QuickBooks connectors, MCP-UI cards, and an internal operator admin console. The production orchestration substrate is now proven on a real Docker host: the docker-compose core (`manager`/`web`/`caddy`) builds/starts/healthchecks, and per-employee Hermes containers provision/teardown/reinstate + run concurrently with Docker-DNS + Caddy routing across the fleet (`deploy-smoke` 8/8, `caddy-proof`, `capacity` tier 5, lifecycle). The remaining gap is running it on the real VPS (with crash/reboot recovery + durability/observability + egress `--apply`) and live provider/runtime acceptance (incl. the LLM tool loop, which stays out of scope here). Admin-panel polish and billing are parked. See [`CODEGRAPH.md`](CODEGRAPH.md) §3 for authoritative per-phase status.** This is where the AMTECH AI Employee MVP gets built.
 
 **Agent? Start with [`../identity.md`](../identity.md), [`../CODEGRAPH.md`](../CODEGRAPH.md), [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the current second-half plan **[`second-half-plan/`](second-half-plan/)**, and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol).
 
@@ -28,15 +28,21 @@ employee brain/profile/runtime; AMTECH's code is the product layer around it: pr
 and session boundaries, SMS/web surfaces, connector events, approvals, artifacts, scheduler, repair, admin, and
 metering.
 
-Current priority: **production deployability and live proof of the core loop** — get the box deployable and
-self-sustaining (service supervision, employee-container launch, Caddy reload, reboot recovery) and prove the
-source-wired owner → tool → artifact/approval loop against a live model/runtime, before further admin/billing work
+Current priority: **run the proven orchestration substrate on the real VPS, then live proof of the core loop.**
+The box is now demonstrably deployable and self-sustaining on a real Docker host: the docker-compose core
+(`manager`/`web`/`caddy`) builds/starts/healthchecks on a host-owned `amtech_runtime` bridge, employee
+containers are pinned (`hermes-agent:0.18.0`), launched, torn down, reinstated, and run concurrently, and
+Docker-DNS + Caddy resolve each employee by its `amtech-hermes-<id>` alias. The Pod Alpha operator scripts and
+runbook (`deploy:smoke`, `ops:caddy-proof`, `ops:reprovision-scoped-mcp`, `capacity:pod-alpha`, `ops:backup`,
+`ops:restore`, `ops:red-health`, `ops:egress-policy`; see
+[`docs/pod-alpha-runtime-runbook.md`](docs/pod-alpha-runtime-runbook.md)) captured passing
+`infra/proofs/*.json` on-host (`deploy-smoke` 8/8, `caddy-proof`, `capacity` tier 5, `egress` dry-run,
+lifecycle stop/gc/restart). What remains is the real VPS: crash/reboot auto-recovery proof
+(`--restart=unless-stopped` is configured + verified, but a sandboxed dev daemon does not fire restart-on-kill),
+durability/observability, egress `--apply` (root), a real capacity number (64GB node), and live
+provider/runtime acceptance of the owner → tool → artifact/approval loop — before further admin/billing work
 (see [`second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md`](second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md)
 and [`docs/production-deploy-readiness-review-2026-07-11.md`](docs/production-deploy-readiness-review-2026-07-11.md)).
-The first Pod Alpha operator scripts and runbook now exist (`deploy:smoke`, `ops:caddy-proof`,
-`ops:reprovision-scoped-mcp`, `capacity:pod-alpha`, `ops:backup`, `ops:restore`, `ops:red-health`,
-`ops:egress-policy`; see [`docs/pod-alpha-runtime-runbook.md`](docs/pod-alpha-runtime-runbook.md)), but
-they are still proof-pending until run locally and on a VPS with captured `infra/proofs/*.json`.
 The session model — one employee, one number, one continuous thread across SMS/web/future voice, with a Manager-owned
 Channel/Session/Presence router (active session wins; ambient preferences when idle; silent events record without
 push; duplicate intents never double-deliver) — is already source-wired, along with Hermes Runs/Sessions turn-atomic
@@ -94,11 +100,15 @@ Use `../wiki/` for product vision, strategy, research, and rationale. Use this `
 ## Planned or pending
 
 - Live provider/runtime acceptance is still pending real Supabase/Twilio/Hermes/Caddy/Gmail/PubSub/Stripe
-  credentials, host setup, and proof ids.
-- The **production deploy/runtime layer** is partly source-wired but not accepted: Compose core, version-pinned
-  employee launch, Caddy activation, lifecycle helpers, proof scripts, backup/restore, red-health, egress-policy
-  dry-run, and Pod Alpha capacity harness exist; local/VPS proof remains pending (see
-  [`docs/pod-alpha-runtime-runbook.md`](docs/pod-alpha-runtime-runbook.md)).
+  credentials, host setup, and proof ids. The employee **LLM tool loop** closes on a real provider-backed
+  Hermes model when funded creds land (the local model bridge is dead) — out of scope for the infra layer.
+- The **production orchestration substrate is proven on a real Docker host** (compose core builds/starts/
+  healthchecks; employee lifecycle + Docker-DNS/Caddy routing across a concurrent fleet; `infra/proofs/*.json`
+  captured). What remains before it runs a paid pilot: prove it on the **real VPS** (incl. crash/**reboot
+  recovery** — the `--restart=unless-stopped` policy is set + verified but the sandbox dev daemon doesn't fire
+  restart-on-kill), **backups/DR + observability**, egress **`--apply`** (needs root), and a **real capacity
+  number** (needs a ~64GB node; the tier-5 proof here is a small dev-box sample, not the 20-25 target). See
+  [`docs/pod-alpha-runtime-runbook.md`](docs/pod-alpha-runtime-runbook.md).
 - Metering instrumentation coverage, rollups, and budgets; further admin operations and AMTECH billing collection —
   all deliberately **parked** behind the deploy + core-loop work.
 - Old rendered employee profiles predate the scoped-MCP-credential switch and need reprovisioning before real tenant use.

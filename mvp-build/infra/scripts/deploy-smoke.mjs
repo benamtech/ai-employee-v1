@@ -21,12 +21,17 @@ function dockerCompose(args) {
   return spawnSync("docker", ["compose", "-f", composeFile, ...args], { encoding: "utf8" });
 }
 
-async function httpCheck(name, url, { web = false } = {}) {
+async function httpCheck(name, url, { web = false, proxy = false } = {}) {
   const started = Date.now();
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
-    const ok = res.ok || (web && res.status < 500);
-    return { name, status: ok ? "pass" : "fail", http_status: res.status, url, ms: Date.now() - started };
+    // `redirect: "manual"` so a reverse proxy that enforces HTTPS (Caddy answers
+    // :80 with a 308 -> https) counts as REACHABLE. Following the redirect would
+    // chase into the HTTPS leg, whose cert can't be provisioned on a host without
+    // public DNS (ACME NXDOMAIN) — a TLS failure that says nothing about whether
+    // Caddy is up and routing. A 3xx from the proxy is itself proof it is.
+    const res = await fetch(url, { signal: AbortSignal.timeout(10_000), redirect: proxy ? "manual" : "follow" });
+    const ok = res.ok || ((web || proxy) && res.status < 500) || (proxy && res.type === "opaqueredirect");
+    return { name, status: ok ? "pass" : "fail", http_status: res.status || (res.type === "opaqueredirect" ? 308 : 0), url, ms: Date.now() - started };
   } catch (err) {
     return { name, status: "fail", url, error: String(err?.message ?? err), ms: Date.now() - started };
   }
@@ -78,7 +83,7 @@ function gitSha() {
 const checks = [
   await httpCheck("manager-health", `${baseManager.replace(/\/$/, "")}/health`),
   await httpCheck("web", baseWeb, { web: true }),
-  await httpCheck("caddy", baseCaddy, { web: true }),
+  await httpCheck("caddy", baseCaddy, { proxy: true }),
   composeHealth("manager"),
   composeHealth("web"),
   composeHealth("caddy"),

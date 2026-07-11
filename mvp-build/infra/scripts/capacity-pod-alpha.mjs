@@ -96,14 +96,22 @@ function dockerStats(name) {
 
 function fdCount(pid) {
   if (!pid || !existsSync(`/proc/${pid}/fd`)) return null;
-  return run("bash", ["-lc", `ls /proc/${pid}/fd | wc -l`]).stdout.trim();
+  return run("bash", ["-lc", `ls /proc/${pid}/fd 2>/dev/null | wc -l`]).stdout.trim();
 }
 
 function pssKb(pid) {
+  // Best-effort. Container PIDs run as root in a separate uid namespace, so an
+  // unprivileged operator running this benchmark gets EACCES reading their
+  // smaps_rollup. A missing memory sample must degrade to null, never abort the
+  // whole capacity run (the previous unguarded read threw and zeroed tiers_run).
   if (!pid || !existsSync(`/proc/${pid}/smaps_rollup`)) return null;
-  const text = readFileSync(`/proc/${pid}/smaps_rollup`, "utf8");
-  const line = text.split("\n").find((l) => l.startsWith("Pss:"));
-  return line ? Number(line.replace(/\D+/g, "")) : null;
+  try {
+    const text = readFileSync(`/proc/${pid}/smaps_rollup`, "utf8");
+    const line = text.split("\n").find((l) => l.startsWith("Pss:"));
+    return line ? Number(line.replace(/\D+/g, "")) : null;
+  } catch {
+    return null;
+  }
 }
 
 function logBytes(id) {
@@ -126,15 +134,21 @@ function startEmployee(row) {
 async function httpLatency(name, url) {
   const started = Date.now();
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    return { name, status: res.ok || res.status < 500 ? "pass" : "fail", http_status: res.status, ms: Date.now() - started };
+    // redirect: manual so Caddy's :80 -> 308 https (auto-HTTPS) counts as reachable
+    // rather than chasing into a certless HTTPS leg on a host without public DNS.
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000), redirect: "manual" });
+    const ok = res.ok || res.status < 500 || res.type === "opaqueredirect";
+    return { name, status: ok ? "pass" : "fail", http_status: res.status || (res.type === "opaqueredirect" ? 308 : 0), ms: Date.now() - started };
   } catch (err) {
     return { name, status: "fail", error: String(err?.message ?? err), ms: Date.now() - started };
   }
 }
 
 function dockerDns(alias) {
-  const res = run("docker", ["run", "--rm", "--network", network, "busybox:1.36", "getent", "hosts", alias]);
+  // Probe from a peer container on the shared runtime network. Must use an image
+  // that actually ships `getent` — busybox does NOT, so it always failed with
+  // "getent: not found" and reported false dns failures. alpine's musl provides it.
+  const res = run("docker", ["run", "--rm", "--network", network, "alpine:latest", "getent", "hosts", alias]);
   return { status: res.code === 0 ? "pass" : "fail", ms: res.ms, output: `${res.stdout}${res.stderr}`.trim().slice(0, 1000) };
 }
 
