@@ -1,0 +1,105 @@
+name: amtech-ai-employee
+
+services:
+  manager:
+    build:
+      context: ../..
+      dockerfile: infra/deploy/manager.Dockerfile
+    env_file:
+      - ./.env.production
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+    volumes:
+      - /var/lib/amtech:/var/lib/amtech
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - amtech_runtime
+    ports:
+      - "127.0.0.1:8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  web:
+    build:
+      context: ../..
+      dockerfile: infra/deploy/web.Dockerfile
+    env_file:
+      - ./.env.production
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+    networks:
+      - amtech_runtime
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+    depends_on:
+      manager:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  caddy:
+    image: caddy:2.8-alpine
+    env_file:
+      - ./.env.production
+    environment:
+      WEB_UPSTREAM: ${WEB_UPSTREAM:-web:3000}
+      MANAGER_UPSTREAM: ${MANAGER_UPSTREAM:-manager:8080}
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - /var/lib/amtech/caddy/clients:/etc/caddy/clients
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - amtech_runtime
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+    depends_on:
+      manager:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: local
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  amtech_runtime:
+    name: amtech_runtime
+    driver: bridge
+
+volumes:
+  caddy_data:
+  caddy_config:

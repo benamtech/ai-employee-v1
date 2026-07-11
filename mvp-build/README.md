@@ -33,6 +33,10 @@ self-sustaining (service supervision, employee-container launch, Caddy reload, r
 source-wired owner → tool → artifact/approval loop against a live model/runtime, before further admin/billing work
 (see [`second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md`](second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md)
 and [`docs/production-deploy-readiness-review-2026-07-11.md`](docs/production-deploy-readiness-review-2026-07-11.md)).
+The first Pod Alpha operator scripts and runbook now exist (`deploy:smoke`, `ops:caddy-proof`,
+`ops:reprovision-scoped-mcp`, `capacity:pod-alpha`, `ops:backup`, `ops:restore`, `ops:red-health`,
+`ops:egress-policy`; see [`docs/pod-alpha-runtime-runbook.md`](docs/pod-alpha-runtime-runbook.md)), but
+they are still proof-pending until run locally and on a VPS with captured `infra/proofs/*.json`.
 The session model — one employee, one number, one continuous thread across SMS/web/future voice, with a Manager-owned
 Channel/Session/Presence router (active session wins; ambient preferences when idle; silent events record without
 push; duplicate intents never double-deliver) — is already source-wired, along with Hermes Runs/Sessions turn-atomic
@@ -91,10 +95,10 @@ Use `../wiki/` for product vision, strategy, research, and rationale. Use this `
 
 - Live provider/runtime acceptance is still pending real Supabase/Twilio/Hermes/Caddy/Gmail/PubSub/Stripe
   credentials, host setup, and proof ids.
-- The **production deploy/runtime layer** is essentially unbuilt: service supervision for the core services, a
-  concrete version-pinned employee container launch, `caddy reload` after provisioning, per-employee lifecycle +
-  reboot recovery, backups, observability, and egress control (see
-  [`docs/production-deploy-readiness-review-2026-07-11.md`](docs/production-deploy-readiness-review-2026-07-11.md)).
+- The **production deploy/runtime layer** is partly source-wired but not accepted: Compose core, version-pinned
+  employee launch, Caddy activation, lifecycle helpers, proof scripts, backup/restore, red-health, egress-policy
+  dry-run, and Pod Alpha capacity harness exist; local/VPS proof remains pending (see
+  [`docs/pod-alpha-runtime-runbook.md`](docs/pod-alpha-runtime-runbook.md)).
 - Metering instrumentation coverage, rollups, and budgets; further admin operations and AMTECH billing collection —
   all deliberately **parked** behind the deploy + core-loop work.
 - Old rendered employee profiles predate the scoped-MCP-credential switch and need reprovisioning before real tenant use.

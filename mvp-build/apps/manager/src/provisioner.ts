@@ -11,7 +11,7 @@ import {
   failureResult,
   renderProfilePackage,
   runRuntimeStart,
-  writeCaddySnippet,
+  writeAndActivateCaddySnippet,
 } from "./lib/profile-renderer.js";
 import { sendSms, setIncomingSmsWebhook } from "./lib/twilio.js";
 
@@ -50,7 +50,7 @@ export function registerProvisionerRoutes(app: Hono): void {
       const rendered = await renderProfilePackage(req);
       logs.push(`rendered:${rendered.generated_path}`);
 
-      const caddy = await writeCaddySnippet(req.params);
+      const caddy = await writeAndActivateCaddySnippet(req.params);
       logs.push(`caddy:${caddy}`);
 
       const skipSms = skipSmsProvisioning();

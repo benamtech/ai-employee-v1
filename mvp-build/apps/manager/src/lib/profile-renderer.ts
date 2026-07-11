@@ -1,8 +1,9 @@
-import { mkdir, readFile, readdir, stat, writeFile, copyFile } from "node:fs/promises";
-import { join, relative } from "node:path";
-import { spawn } from "node:child_process";
+import { mkdir, readFile, readdir, rm, stat, writeFile, copyFile } from "node:fs/promises";
+import { join } from "node:path";
 import type { ProfileBuildParams, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import { computeApiServerToolsets, toYamlFlowList } from "@amtech/shared";
+import { activateCaddySnippet, writeCaddySnippetFile } from "./caddy-activation.js";
+import { runCommandString } from "./command-runner.js";
 
 const TEXT_EXTENSIONS = new Set([".md", ".yaml", ".yml", ".json", ".tpl", ".txt", ".example"]);
 
@@ -159,23 +160,6 @@ async function copyRendered(src: string, dst: string, params: ProfileBuildParams
   }
 }
 
-async function runCommand(command: string | undefined, cwd: string, label: string): Promise<string> {
-  if (!command) throw new Error(`${label} command missing.`);
-  const [bin, ...args] = command.split(" ").filter(Boolean);
-  if (!bin) throw new Error(`${label} command empty.`);
-  return await new Promise((resolve, reject) => {
-    const child = spawn(bin, args, { cwd, shell: false, env: process.env });
-    let out = "";
-    child.stdout.on("data", (d) => { out += d.toString(); });
-    child.stderr.on("data", (d) => { out += d.toString(); });
-    child.on("error", reject);
-    child.on("close", (code) => {
-      if (code === 0) resolve(out.trim() || "ok");
-      else reject(new Error(out.trim() || `${command} exited ${code}`));
-    });
-  });
-}
-
 export function buildParams(req: ProvisionerRequest): ProfileBuildParams {
   return req.params;
 }
@@ -192,6 +176,7 @@ export async function renderProfilePackage(req: ProvisionerRequest): Promise<{
   if (!hermesHome) throw new Error("HERMES_HOME missing.");
   if (!req.render_secrets?.manager_mcp_token) throw new Error("manager_mcp_token missing.");
   const generated_path = join(hermesHome, "profiles", profile_id);
+  await rm(generated_path, { recursive: true, force: true });
   await copyRendered(packageRoot(req.profile_package_key), generated_path, params, req.render_secrets);
   await mkdir(params.workspace_dir, { recursive: true });
   await mkdir(join(params.workspace_dir, "output"), { recursive: true });
@@ -203,22 +188,21 @@ export async function renderProfilePackage(req: ProvisionerRequest): Promise<{
   const validationCommand =
     process.env.PROFILE_VALIDATION_COMMAND ??
     `node ${join(workspaceRoot(), "infra", "scripts", "profile-validate.mjs")} .`;
-  const validation_output = await runCommand(validationCommand, generated_path, "profile validation");
+  const validation_output = (await runCommandString(validationCommand, generated_path, "profile validation")).output;
   return { profile_id, generated_path, workspace_dir: params.workspace_dir, validation_output };
 }
 
 export async function runRuntimeStart(generatedPath: string): Promise<string> {
-  return runCommand(process.env.HERMES_RUNTIME_COMMAND, generatedPath, "Hermes runtime start");
+  return (await runCommandString(process.env.HERMES_RUNTIME_COMMAND, generatedPath, "Hermes runtime start")).output;
 }
 
 export async function writeCaddySnippet(params: ProfileBuildParams): Promise<string> {
-  const dir = process.env.CADDY_CLIENTS_DIR;
-  if (!dir) throw new Error("CADDY_CLIENTS_DIR missing.");
-  await mkdir(dir, { recursive: true });
-  const snippet = `${params.client_id}.agents.${process.env.PUBLIC_BASE_DOMAIN ?? "amtechai.com"} {\n\treverse_proxy localhost:${params.gateway_port}\n}\n`;
-  const file = join(dir, `${params.client_id}.caddy`);
-  await writeFile(file, snippet, "utf8");
-  return relative(process.cwd(), file);
+  return (await writeCaddySnippetFile(params)).relative_file;
+}
+
+export async function writeAndActivateCaddySnippet(params: ProfileBuildParams): Promise<string> {
+  const activated = await activateCaddySnippet(params);
+  return `${activated.file} upstream:${activated.upstream} validate:${activated.validation_output} reload:${activated.reload_output}${activated.smoke_output ? ` smoke:${activated.smoke_output}` : ""}`;
 }
 
 export function failureResult(failureState: string, err: unknown): ProvisionerResult {

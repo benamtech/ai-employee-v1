@@ -1,18 +1,9 @@
--- AMTECH AI Employee MVP — turn-claim lock-insert race fix
+-- AMTECH AI Employee MVP — turn-claim ON CONFLICT qualification fix
 --
--- claim_employee_turn_job[_for_employee] (0011/0014): SELECT ... FOR UPDATE
--- SKIP LOCKED only serializes per JOB row, not per employee_id. Two callers
--- can each pick a DIFFERENT queued job row for the SAME employee_id in the
--- same instant (both pass the "no active lock" NOT EXISTS check before either
--- commits), then both attempt `INSERT INTO employee_turn_locks` (PK on
--- employee_id) — the loser gets 23505 and the RPC call throws uncaught
--- (apps/manager/src/lib/turn-queue.ts's orThrow has no code-specific handling),
--- crashing the caller instead of treating it as "nothing claimable now".
---
--- Fix: ON CONFLICT (employee_id) DO NOTHING RETURNING employee_id on the lock
--- insert; if no row comes back, behave exactly like the existing "not found"
--- branch (return zero rows, no throw). Signatures unchanged -> CREATE OR
--- REPLACE preserves the 0021 service_role-only grants; no re-grant needed.
+-- In plpgsql, the output column `employee_id` from RETURNS TABLE can also make
+-- `on conflict (employee_id)` ambiguous. Use the table primary-key constraint
+-- name instead. Fresh databases get the corrected 0024/0027 text; this replaces
+-- already-applied functions in existing environments.
 
 create or replace function claim_employee_turn_job(p_worker_id text, p_lease_seconds integer default 180)
 returns table (
@@ -59,9 +50,6 @@ begin
   returning employee_turn_locks.employee_id into v_locked_employee;
 
   if v_locked_employee is null then
-    -- Lost the per-employee lock race to a concurrent claim of a DIFFERENT
-    -- queued job for the same employee (both passed the NOT EXISTS check
-    -- before either committed). Behave exactly like "nothing claimable now".
     return;
   end if;
 

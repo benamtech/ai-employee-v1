@@ -15,4 +15,5 @@ coverage/
 .vercel/
 hermes-data/
 infra/acceptance/reports/
+infra/proofs/
 infra/.local/

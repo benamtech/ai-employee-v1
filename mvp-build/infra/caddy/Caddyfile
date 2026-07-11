@@ -5,17 +5,17 @@
 
 # --- Public owner web surface (Next.js on the VPS) ---------------------------
 amtechai.com, www.amtechai.com {
-	reverse_proxy localhost:3000
+	reverse_proxy {$WEB_UPSTREAM:localhost:3000}
 }
 
 # --- Owner employee web route (Next.js handles /agent/* routing) -------------
 agent.amtechai.com {
-	reverse_proxy localhost:3000
+	reverse_proxy {$WEB_UPSTREAM:localhost:3000}
 }
 
 # --- Backend Manager API + webhooks (the only surface Twilio/Gmail/Stripe hit)
 api.amtechai.com {
-	reverse_proxy localhost:8080
+	reverse_proxy {$MANAGER_UPSTREAM:localhost:8080}
 }
 
 # --- Per-client employee gateways (Hermes), one subdomain each ---------------

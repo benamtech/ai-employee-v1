@@ -18,6 +18,7 @@ import { buildEmployeeSnapshot } from "./employee-stream.js";
 import { mintEmployeeMcpCredential } from "./mcp-auth.js";
 import { recordRuntimeHealthSnapshots } from "./runtime-health.js";
 import { runManagerTool } from "./run-tool.js";
+import { runEmployeeLifecycleAction } from "./employee-lifecycle.js";
 
 const ROLE_RANK: Record<PlatformRole, number> = {
   support_readonly: 1,
@@ -394,15 +395,21 @@ export async function runAdminSupportAction(db: SupabaseClient, actor: AdminActo
 
   if (input.action === "suspend_employee") {
     await db.from("employees").update({ status: "suspended" }).eq("id", input.employee_id).eq("account_id", input.account_id);
+    const lifecycle = await runEmployeeLifecycleAction("stop", { account_id: input.account_id, employee_id: input.employee_id! });
+    proof.lifecycle = lifecycle;
     changed.push(`employee:${input.employee_id}`);
     summary = "Employee suspended.";
   } else if (input.action === "resume_employee") {
     await db.from("employees").update({ status: "live", disabled_at: null }).eq("id", input.employee_id).eq("account_id", input.account_id);
+    const lifecycle = await runEmployeeLifecycleAction("restart", { account_id: input.account_id, employee_id: input.employee_id! });
+    proof.lifecycle = lifecycle;
     changed.push(`employee:${input.employee_id}`);
     summary = "Employee resumed.";
   } else if (input.action === "disable_employee") {
     if (!input.confirm) return { status: "denied", action: input.action, changed_resources: [], proof: { reason: "confirmation_required" }, user_facing_summary_hint: "Confirmation required." };
     await db.from("employees").update({ status: "retired", disabled_at: nowIso() }).eq("id", input.employee_id).eq("account_id", input.account_id);
+    const lifecycle = await runEmployeeLifecycleAction("stop", { account_id: input.account_id, employee_id: input.employee_id! });
+    proof.lifecycle = lifecycle;
     changed.push(`employee:${input.employee_id}`);
     summary = "Employee disabled.";
   } else if (input.action === "mark_needs_reprovision") {

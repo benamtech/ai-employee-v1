@@ -1,4 +1,4 @@
-import { mkdtemp, readFile } from "node:fs/promises";
+import { mkdtemp, readFile, writeFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -69,5 +69,15 @@ describe("profile renderer secret boundaries", () => {
 
   it("fails closed when a scoped MCP token is missing", async () => {
     await expect(renderProfilePackage(req())).rejects.toThrow(/manager_mcp_token missing/);
+  });
+
+  it("replaces stale generated profile files on rerender", async () => {
+    const first = await renderProfilePackage(req("mcp_scoped_profile_token"));
+    await mkdir(join(first.generated_path, "skills", "stale"), { recursive: true });
+    await writeFile(join(first.generated_path, "skills", "stale", "removed.md"), "{{OLD_TOKEN}}\n", "utf8");
+
+    const second = await renderProfilePackage(req("mcp_scoped_profile_token_2"));
+    await expect(readFile(join(second.generated_path, "skills", "stale", "removed.md"), "utf8"))
+      .rejects.toMatchObject({ code: "ENOENT" });
   });
 });
