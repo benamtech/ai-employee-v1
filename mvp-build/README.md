@@ -1,6 +1,6 @@
 # mvp-build — the AMTECH AI Employee MVP build
 
-Status: **Second-half Phase 1 is source/static-green with live gate blocked by model/provider availability; second-half Phase 2 web Work Surface is source-wired; Phase 3 SMS signed previews, Phase 4 materialization contracts, and trial/admin/billing readiness remain planned/pending.** This is where the AMTECH AI Employee MVP gets built.
+Status: **the second-half plan's product surfaces are `source-wired` — built and green against the local suites (`typecheck` / `test:unit` 76 files / 488 tests / `build` / `lint`) — spanning the web Work Surface, the SMS ambient inbox + signed Review, the tool-agnostic materialization/capability layer (Connector Center + resurfacing), Gmail/Stripe/QuickBooks connectors, MCP-UI cards, and an internal operator admin console. The remaining gap is operations + live proof: a production deploy/runtime layer to run the fleet on a VPS, and live provider/runtime acceptance. Admin-panel polish and billing are parked. See [`CODEGRAPH.md`](CODEGRAPH.md) §3 for authoritative per-phase status.** This is where the AMTECH AI Employee MVP gets built.
 
 **Agent? Start with [`../identity.md`](../identity.md), [`../CODEGRAPH.md`](../CODEGRAPH.md), [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the current second-half plan **[`second-half-plan/`](second-half-plan/)**, and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol).
 
@@ -19,7 +19,7 @@ npm run ui:test:headed  # headed UI-only smoke
 
 These commands use representative local Work Surface fixtures and do not require Manager, Supabase, Docker, Hermes containers, provider credentials, or model calls. They are for UI development, not provider/runtime acceptance.
 
-Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). Current code has `usage_events`, `feature_checks`, and `audit_log`; production metering still needs run ids, typed meter events, wrapper instrumentation, rollups, and budget policies.
+Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). The Phase 6 metering foundation is source-wired (six Manager-only ledgers + `run_id` threading, `lib/metering.ts` helpers); instrumentation coverage, rollups, and budget-policy enforcement remain later work.
 
 ## Hermes boundary
 
@@ -28,11 +28,15 @@ employee brain/profile/runtime; AMTECH's code is the product layer around it: pr
 and session boundaries, SMS/web surfaces, connector events, approvals, artifacts, scheduler, repair, admin, and
 metering.
 
-Current session-management priority: finalize the layer around the current Hermes employee session. The target model
-is one employee, one number, one continuous thread across SMS/web/future voice. Hermes Runs/Sessions are treated as
-turn-atomic; durable work should use Jobs/worker lanes and re-enter the Manager's universal inbox. The planned
-Channel/Session/Presence router decides where employee output lands: active session wins, ambient preferences apply
-when no session is active, silent events record without push, and duplicate intents never double-deliver.
+Current priority: **production deployability and live proof of the core loop** — get the box deployable and
+self-sustaining (service supervision, employee-container launch, Caddy reload, reboot recovery) and prove the
+source-wired owner → tool → artifact/approval loop against a live model/runtime, before further admin/billing work
+(see [`second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md`](second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md)
+and [`docs/production-deploy-readiness-review-2026-07-11.md`](docs/production-deploy-readiness-review-2026-07-11.md)).
+The session model — one employee, one number, one continuous thread across SMS/web/future voice, with a Manager-owned
+Channel/Session/Presence router (active session wins; ambient preferences when idle; silent events record without
+push; duplicate intents never double-deliver) — is already source-wired, along with Hermes Runs/Sessions turn-atomic
+handling and Jobs/worker lanes re-entering the Manager inbox.
 
 ## Product and UI grounding
 
@@ -62,21 +66,43 @@ Use `../wiki/` for product vision, strategy, research, and rationale. Use this `
   Gmail watch renewal, daily briefs, runtime health snapshots.
 - Source-wired repair/event-bus seams: repair tools, source suppression, triage/batching, `deliver_only` vs
   `wake_employee`, generic event-source registry, Work Surface SSE-shaped snapshot route.
-- Phase 1 acceptance harness exists and is locally verified; Phase 2 runtime/scheduler productionization is
-  source-wired.
+- Phase 1 acceptance harness exists and is locally verified; runtime/scheduler productionization is source-wired.
+- Source-wired live-employee spine: real Hermes Sessions client, DB-backed per-employee turn queue, generic two-door
+  event ingress, Channel/Session/Presence router, and Gmail-reply → live wake → validated work-event descriptors.
+- Source-wired owner Work Surface (second-half): a multi-region employee desk (Today, Chat, Jobs, Tasks, Outputs,
+  Connected, Abilities, Activity, Settings-lite) with persisted conversation, live SSE + poll fallback, and a preview pane.
+- Source-wired SMS ambient inbox + signed mobile Review (`/agent/[id]/review`): signed, scoped, expiring
+  preview/action links render a `WorkResource`; approving carries the work forward to execution.
+- Source-wired materialization/capability layer: `SurfaceEnvelope`/`WorkResource`/`WorkAction`/`CapabilityGraphNode`,
+  a Manager capability registry, MCP `resources/list`+`read`, a tool-agnostic Connector Center (`ConnectionSurface`),
+  and a resurfacing projection (`ResurfaceItem`).
+- Source-wired QuickBooks Online accounting connector: connector lifecycle, entity-name resolution with
+  disambiguation, approval-gated write previews + a single audited commit path, `query_quickbooks`, and P&L/BS/AR/AP
+  reports (new `accounting` capability category).
+- Source-wired MCP-UI generative cards: the agent emits a typed table/schedule/diff/form view that Manager compiles
+  into a sandboxed `ui://` resource; card actions route through the same approval gate.
+- Source-wired operator admin console (`/admin`): dashboard/accounts/provisioning/repairs/providers/billing-scaffold/
+  readiness/support-actions behind DB-backed platform roles + support-reason audit + server-side redaction.
+- Source-wired trust-boundary hardening: per-employee scoped MCP credentials (replacing the shared bearer), RLS
+  closure (migrations 0018-0021, advisor-verified), turn-claim compare-and-swap, and a stuck-turn reaper.
+- Source-wired Phase 6 metering foundation: six Manager-only ledgers + `run_id` threading.
 
 ## Planned or pending
 
 - Live provider/runtime acceptance is still pending real Supabase/Twilio/Hermes/Caddy/Gmail/PubSub/Stripe
   credentials, host setup, and proof ids.
-- Phase 3: generic ingress and event routing is source-wired; live provider proof pending.
-- Phase 3A: minimal Channel/Session/Presence router is source-wired; live provider proof pending.
-- Phase 4: live employee wake path core is source-wired against Hermes Sessions; runtime proof pending.
-- Phase 5: triage, batching, and live Work Surface stream.
-- Phases 6-13: metering foundation/instrumentation/rollups, admin foundations/ops surfaces, AMTECH billing scaffold,
-  LLM provider registry, and 1000-user operations.
+- The **production deploy/runtime layer** is essentially unbuilt: service supervision for the core services, a
+  concrete version-pinned employee container launch, `caddy reload` after provisioning, per-employee lifecycle +
+  reboot recovery, backups, observability, and egress control (see
+  [`docs/production-deploy-readiness-review-2026-07-11.md`](docs/production-deploy-readiness-review-2026-07-11.md)).
+- Metering instrumentation coverage, rollups, and budgets; further admin operations and AMTECH billing collection —
+  all deliberately **parked** behind the deploy + core-loop work.
+- Old rendered employee profiles predate the scoped-MCP-credential switch and need reprovisioning before real tenant use.
 
-The detailed phase specs live in [`../wiki/MVP/build-plan-current/phases/`](../wiki/MVP/build-plan-current/phases/).
+Two phase-numbered tracks exist and are **not** one sequence: the active **second-half plan**
+([`second-half-plan/`](second-half-plan/), Phases 0-6) and the earlier reconciled module map
+([`../wiki/MVP/build-plan-current/phases/`](../wiki/MVP/build-plan-current/phases/), Phases 0-13). Read a phase
+number against its plan; **[`CODEGRAPH.md`](CODEGRAPH.md) §3 is the authoritative per-phase status.**
 
 ## The MVP bar (whole product)
 ```
@@ -101,13 +127,13 @@ apps/
   manager/     # Node/TS control plane — tool registry, security libs, webhook routes, server
 packages/
   shared/      # tool envelope, manifest (7-question), routes, event types, ids, tool contracts
-  db/          # full schema migrations (0001 init + 0002 RLS) + migration runner + typed clients
+  db/          # schema migrations 0001-0026 + migration runner + typed clients
   agent-template/  # the Hermes employee template (agent-as-files), rendered per client in Phase 1
 infra/
   caddy/       # Caddyfile + per-client snippet template
   hermes/      # RUNBOOK.md (install + manual smoke test) — gates Phase 0 infra acceptance
   scripts/     # hermes-smoke + number-pool/healthcheck/repair seams
-docs/          # production architecture notes, including metering
+docs/          # production notes: admin, metering, QuickBooks connector, production deploy readiness review
 ui-handoff/    # UI contributor packet: product grounding, current UI map, research, future surfaces
 tests/
   unit/        # security boundary, envelope, contracts, signed links, secrets, manifest
@@ -115,7 +141,14 @@ tests/
   golden-path/ # Step 1 Create Employee acceptance script — Phase 1
 ```
 
-## Current Phase 1 slice
+## How the base loop was built (history)
+
+This section is the build log for the base whole-product loop (Phases 0-2 of the earlier reconciled plan) and stops
+at that era. It is historical detail, not the current frontier — for **current status across all work read
+[`CODEGRAPH.md`](CODEGRAPH.md) §3 and the newest [`memory/`](memory/) handoff**, and see "What works now" above for the
+second-half surfaces (web desk, SMS Review, materialization/Connector Center/resurfacing, QuickBooks, MCP-UI, admin)
+that now sit on top of this base. Migrations have since advanced to `0026`.
+
 Phase 0 foundation remains in place: full data model, Manager tool surface, security helpers, provider setup inventory, Hermes/Caddy runbook, and unit harness.
 
 Phase 1 wires the real claim-to-live-employee path:
@@ -159,7 +192,7 @@ Provider/runtime acceptance still requires real Supabase/Twilio/Hermes/Caddy/Gma
 Current local checks:
 
 - `npm run typecheck` passes.
-- `npm run test:unit` passes: **26 files / 128 tests** (includes forged-request, runtime/scheduler, ingress, router, and wake-path coverage).
+- `npm run test:unit`: **76 files / 488 tests** pass.
 - `npm run test:integration` (env-gated RLS + cross-account artifact denial) skips cleanly without live Supabase creds.
 - `npm run build` passes.
 - `npm run lint` passes.
