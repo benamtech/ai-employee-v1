@@ -41,11 +41,24 @@ mcp_servers:
     url: "{{MANAGER_MCP_URL}}"
     headers:
       Authorization: "Bearer {{MANAGER_MCP_TOKEN}}"
+  # CE-4 custody policy: ONLY read-only connectors are wired directly here. Any
+  # write/money/customer-facing connector is refused a direct path at render time
+  # (renderableDirectMcpConnectors) and stays behind amtech_manager + the approval
+  # gate + egress default-deny. Renders empty until a read-only connector ships.
+{{CONNECTOR_MCP_SERVERS}}
 
-hooks_auto_accept: true
-hooks:
-  pre_llm_call:
-    - command: "node hooks/pre-session-context.mjs"
+# CE-1 primer hook + CE-2 hooks (rendered together). The tool-output hygiene
+# transforms are a Hermes plugin (plugins/amtech-hygiene), not shell hooks.
+{{HOOKS}}
+
+# CE-2 context compression — the safety net. Always enabled; CE-3 session
+# rotation is tuned to trip BEFORE this lossy compaction. Rendered model-agnostic.
+{{COMPRESSION_CONFIG}}
+
+# CE-2 delegation — lets the employee run heavy sub-work in an isolated child
+# context (delegate_task), so only the bounded child summary re-enters this
+# conversation. In-turn context isolation; children inherit the employee model.
+{{DELEGATION_CONFIG}}
 
 gateway:
   sms:

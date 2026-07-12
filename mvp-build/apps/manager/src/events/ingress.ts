@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@amtech/db";
-import { EVENT_TYPES, ID_PREFIX } from "@amtech/shared";
+import { ID_PREFIX, routeForEventType } from "@amtech/shared";
 import { deliverEmployeeEvent } from "../lib/employee-events.js";
 import { enqueueRepair } from "../lib/event-triage.js";
 import { writeAudit } from "../lib/audit.js";
@@ -11,11 +11,6 @@ export interface IngestEventInput {
   source: "gmail" | "stripe" | "manager" | string;
   payload: unknown;
   edgeContext?: Record<string, unknown>;
-}
-
-function classifyRoute(event: NormalizedEvent): "deliver_only" | "wake_employee" {
-  if (event.event_type === EVENT_TYPES.gmailReplyReceived) return "wake_employee";
-  return "deliver_only";
 }
 
 /** Raw-provider field names that must never enter the brain as facts. Matched
@@ -109,7 +104,7 @@ export async function ingestEvent(db: SupabaseClient, input: IngestEventInput) {
       actor: "manager",
       work_event_descriptor: event.work_event_descriptor,
       channel: event.channel,
-      routing_mode: event.routing_mode ?? classifyRoute(event),
+      routing_mode: event.routing_mode ?? routeForEventType(event.event_type),
       triage_hint: event.triage_hint,
     });
     const status: WorkRunStatus = result.event_id.startsWith(`${ID_PREFIX.repairQueue}_`) ? "failed" : "succeeded";

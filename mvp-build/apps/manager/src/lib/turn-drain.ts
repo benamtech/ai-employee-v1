@@ -14,6 +14,7 @@ import { claimAnyQueuedTurn, completeEmployeeTurn } from "./turn-queue.js";
 import { routeEmployeeIntent } from "./channel-router.js";
 import { mustWrite } from "./db.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation } from "./metering.js";
+import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
 
 export interface DrainResult {
   job_id: string;
@@ -142,10 +143,17 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
     }
     const startedAt = Date.now();
     try {
+      // CE-3: rotate before the turn if the transcript is full (under the lock).
+      await rotateSessionIfNeeded(db, { account_id: job.account_id ?? "", employee_id: job.employee_id });
       const api = await resolveRuntimeApi(db, job.employee_id);
       const body = String((job.input as { body?: unknown }).body ?? "");
       const turn = await executeHermesTurn(api, { input: body, work_run_id: job.run_id ?? null });
       await recordExternalRuntimeRun(db, job.run_id ?? null, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
+      await recordSessionOccupancy(db, {
+        account_id: job.account_id ?? "", employee_id: job.employee_id,
+        transcript_session_id: api.sessionId, memory_session_key: api.sessionKey,
+        usage: turn.usage,
+      });
       const messageId = newId(ID_PREFIX.message);
       await mustWrite(
         db.from("employee_messages").insert({

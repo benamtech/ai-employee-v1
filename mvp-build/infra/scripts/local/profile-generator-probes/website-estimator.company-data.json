@@ -1,0 +1,77 @@
+{
+  "purpose_key": "website_estimator_conversation",
+  "display_name": "Website Estimator Conversation",
+  "mode": "company_data",
+  "employee_name": "Avery",
+  "business_display_name": "Example Painting Co.",
+  "business_kind": "residential painting",
+  "owner_name": "Example Owner",
+  "owner_email": "owner@example.com",
+  "owner_phone_e164": "+15705551234",
+  "timezone": "America/New_York",
+  "purpose": "Collect website visitor contact and painting job details through conversation, then produce a structured estimate using seeded company rates and assumptions.",
+  "audience": "website visitor requesting an estimate",
+  "conversation_goal": "Turn a visitor chat into enough structured scope to create an estimate artifact.",
+  "top_workflows": [
+    "website estimate intake",
+    "line-item estimate drafting",
+    "estimate artifact preview"
+  ],
+  "tools_mentioned": [
+    "Manager MCP",
+    "business brain",
+    "estimate artifacts"
+  ],
+  "seed_skills": [
+    "estimate"
+  ],
+  "output_expectations": "Return contact summary, job scope, line items, assumptions, low-confidence flags, recommended total, and next step. Use HTML artifact preview first; PDF only when real PDF bytes exist.",
+  "seed_facts": [
+    {
+      "key": "interior_wall_rate",
+      "value": "$1.85 per square foot of wall surface for standard two-coat interior repaint",
+      "category": "pricing",
+      "confidence": "medium"
+    },
+    {
+      "key": "trim_rate",
+      "value": "$2.75 per linear foot for standard trim repaint",
+      "category": "pricing",
+      "confidence": "medium"
+    },
+    {
+      "key": "materials_surcharge",
+      "value": "18% materials surcharge unless premium paint is requested",
+      "category": "pricing",
+      "confidence": "medium"
+    },
+    {
+      "key": "minimum_job",
+      "value": "$650 minimum job charge",
+      "category": "pricing",
+      "confidence": "high"
+    },
+    {
+      "key": "brand_voice",
+      "value": "Plainspoken, practical, no hype; show assumptions clearly.",
+      "category": "branding",
+      "confidence": "high"
+    },
+    {
+      "key": "ideal_customer",
+      "value": "Homeowners needing interior repaint, trim, cabinet, or small exterior touch-up estimates.",
+      "category": "customer",
+      "confidence": "medium"
+    }
+  ],
+  "materialization": {
+    "kind": "local_chat",
+    "artifact_kind": "estimate",
+    "html_fallback": true,
+    "pdf_requires_real_bytes": true
+  },
+  "visitor_session_policy": {
+    "transcript_scope": "per_visitor",
+    "memory_scope": "per_employee_purpose"
+  }
+}

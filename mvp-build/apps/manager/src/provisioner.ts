@@ -49,6 +49,7 @@ export function registerProvisionerRoutes(app: Hono): void {
     try {
       const rendered = await renderProfilePackage(req);
       logs.push(`rendered:${rendered.generated_path}`);
+      if (rendered.deployed_plugins.length) logs.push(`plugins:${rendered.deployed_plugins.join(",")}`);
 
       const caddy = await writeAndActivateCaddySnippet(req.params);
       logs.push(`caddy:${caddy}`);

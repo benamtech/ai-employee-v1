@@ -1,10 +1,20 @@
 # Phase CE-1 — Agent brain + native memory seed
 
-Status: planned
+Status: source-wired (loose ends closed 2026-07-12; migration `0029` applied live) · live Hermes
+hook/runtime proof `pending`
+
+> Implemented. `MEMORY.md`/`USER.md` are seeded from onboarding, `buildAgentContext` is a reference-shaped
+> once-per-session primer (2000-token cap, not 500), the `pre_llm_call` hook path is wired, and
+> `business-brain`/`business-facts` semantics are index-vs-facts. Loose ends from the merge audit are
+> closed: the primer claim now distinguishes `claim_failed` (unapplied gate / transient) from
+> `already_primed` (so an employee can't silently never-prime), and the gate keys on the **transcript**
+> session id (`transcript_session_id`, renamed from `session_key`) so a CE-3 rotation re-primes. The
+> historical "render drops" and "hook plumbing deferred to CE-2" notes below describe pre-CE-1 state and
+> are retained only as the original problem statement. Full spec:
+> [CE-2/CE-3 production implementation plan](phase-ce-02-03-production-implementation-plan.md) §1–2.
 
 Goal: the employee wakes **knowing its business** (durable facts) and **its live state** (open work,
-connected sources, recent events) — delivered the Hermes-native, token-efficient, cache-safe way. Fix the
-onboarding-to-profile data drops that currently strand what we already learned at onboarding.
+connected sources, recent events) — delivered the Hermes-native, token-efficient, cache-safe way.
 
 ## Why
 
@@ -44,7 +54,8 @@ New `apps/manager/src/lib/agent-context.ts`. Reuse `buildEmployeeSnapshot` + `ma
 - resurfacing attention items;
 - pointers: "read detail via MCP `resources/read`; look up history via `session_search`."
 
-Hard token budget (target ≤ ~500 tokens). Must degrade gracefully: an employee with **no connectors**
+Hard token budget (implemented cap: **2000 estimated tokens**, `MAX_ESTIMATED_TOKENS` in
+`agent-context.ts`; the earlier ≤500 target was superseded). Must degrade gracefully: an employee with **no connectors**
 gets a clean "no systems connected yet; here's how to connect email/payments/accounting" block, not empty
 or noisy output.
 

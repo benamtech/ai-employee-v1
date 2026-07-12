@@ -78,25 +78,27 @@ Two turn worlds meet:
   external → `ingestEvent` → adapter verify/normalize → `deliver_only` vs `wake_employee`; internal →
   `deliverEmployeeEvent`).
 
-**Why turns hold up the agent today, and the fix.** Everything funnels through one serialized lane, and
-`classifyRoute` wakes only on `gmailReplyReceived` (`ingress.ts:16-19`). Hermes-native background work is
-unused. The fix: keep the serialized lane for **owner-facing ordering only**; keep trivial events
-`deliver_only` (no wake); push background/long work to **subagent delegation** (`delegate_task`; async
-background variant if the running Hermes advertises it — verify via `/v1/capabilities`) or **Jobs/cron**,
-so it returns a 1–2k-token summary as a new turn instead of occupying the owner turn. This is the
-"don't let constant trivial tasks nerf a Hermes-class agent" answer, and it matches Anthropic's
-sub-agent pattern (focused child, clean context, condensed summary back).
+**Why turns held up the agent, and the fix (CE-2, now source-wired).** Everything funnels through one
+serialized lane. The routing decision is now a **data-driven policy table** (`routeForEventType`,
+`packages/shared/src/event-types.ts`): the serialized lane carries **owner-facing ordering only**;
+informational/trivial events stay `deliver_only` (no wake); only owner-actionable / customer-reply events
+wake. For heavy multi-step sub-work the employee uses Hermes **`delegate_task`** (config `delegation:`
+block rendered per employee) — an isolated child context whose only the bounded summary re-enters the
+parent, matching Anthropic's sub-agent pattern. Note `delegate_task` is synchronous (in-turn context
+isolation); moving *recurring* work off the lane entirely stays with the AMTECH scheduler. This is the
+"don't let constant trivial tasks nerf a Hermes-class agent" answer.
 
 ## Phase index
 
-| Phase | File | Outcome |
-|---|---|---|
-| CE-1 | [Agent brain + native memory seed](phase-ce-01-agent-brain-and-native-memory.md) | The employee wakes knowing its business (MEMORY.md/USER.md seeded from onboarding) and its live state (reference-shaped `buildAgentContext` injected cache-safely once per session). Fix the render/data drops. |
-| CE-2 | [Compression policy + hooks + turn concurrency](phase-ce-02-compression-hooks-and-turn-concurrency.md) | Stop default 50% compaction; keep noisy tool output out of context (transform hooks); move background/trivial work off the owner turn (delegation/Jobs, `deliver_only`). |
-| CE-3 | [Session rotation + handoff](phase-ce-03-session-rotation-and-handoff.md) | Manager rotates to a fresh session before compaction with an ultra-compact, handoff-oriented carryover; memory scope preserved via `X-Hermes-Session-Key`; MEMORY.md/USER.md carry for free. |
-| CE-4 | [Connector-agnostic capabilities + operator modes](phase-ce-04-connector-agnostic-and-operator-modes.md) (deferred) | Any MCP connector (Jobber/ServiceTitan/Housecall Pro) representable end-to-end with Manager-mediated custody for money/customer-facing tools; per-business-type + operator-mode context policy. |
+| Phase | File | Status | Outcome |
+|---|---|---|---|
+| CE-1 | [Agent brain + native memory seed](phase-ce-01-agent-brain-and-native-memory.md) | `source-wired` (loose ends closed) | The employee wakes knowing its business (MEMORY.md/USER.md seeded from onboarding) and its live state (reference-shaped `buildAgentContext` injected cache-safely once per session, 2k-token cap). Primer claim-failure vs already-primed distinguished; gate keys on the transcript session id. |
+| CE-2 | [Compression policy + hooks + turn concurrency](phase-ce-02-compression-hooks-and-turn-concurrency.md) | `source-wired` | Compression rendered as a safety net (CE-3 rotates first); a deterministic Hermes **plugin** (`amtech-hygiene`) redacts secrets + trims only pathological tool/terminal bulk (never normal results); data-driven `deliver_only` vs `wake_employee` routing table; `delegate_task` enabled for in-turn context isolation. |
+| CE-3 | [Session rotation + handoff](phase-ce-03-session-rotation-and-handoff.md) | `source-wired` | Manager rotates to a fresh transcript **before** compaction (pre-turn check, occupancy recorded post-turn), preserving `X-Hermes-Session-Key` memory scope; carryover reuses `buildAgentContext` + next-action; the new transcript re-primes automatically. |
+| CE-4 | [Connector-agnostic capabilities + operator modes](phase-ce-04-connector-agnostic-and-operator-modes.md) | `source-wired` | Connector metadata now drives capability projection and custody: read-only direct MCP is allowed, write/money/customer-facing connectors stay Manager-mediated; per-business-type + operator-mode context policy seam exists without roles. |
 
-Planning handoff for the next pass: [CE-2/CE-3 production planning handoff prompt](ce-02-03-production-planning-handoff-prompt.md).
+Production build plan (the implemented spec): [CE-2/CE-3 production implementation plan](phase-ce-02-03-production-implementation-plan.md).
+Planning handoff that produced it: [CE-2/CE-3 production planning handoff prompt](ce-02-03-production-planning-handoff-prompt.md).
 
 ## Dependency graph
 
@@ -104,15 +106,18 @@ Planning handoff for the next pass: [CE-2/CE-3 production planning handoff promp
 CE-1 (brain + native memory, cache-safe priming)
   -> CE-2 (compression tuning + tool-output hooks + turn concurrency)
        -> CE-3 (rotation + handoff; reuses CE-1 primer + CE-2 thresholds)
-CE-4 (connector-agnostic + operator modes) : deferred; builds on CE-1..3 once a
-      second connector/package exists and roles/delegation are revisited.
+CE-4 (connector-agnostic + operator modes) : source-wired on CE-1..3; live direct-MCP connector proof
+      remains pending.
 ```
 
 ## Status vocabulary (shared with the build plan)
 
 `source-wired` / `provider-accepted` / `runtime-accepted` / `planned` / `pending`. Live Hermes
 hook/compression/rotation/memory behavior stays a `pending` runtime gate until proven against a real
-Hermes v0.18.x instance (Realness Rule). All phases below are `planned`.
+Hermes v0.18.x instance (Realness Rule). Current state: **CE-1/CE-2/CE-3/CE-4 are `source-wired`** (see
+the phase index) with migrations `0029`/`0030` **applied live**; live-Hermes
+hook/compression/rotation behavior, live employee reprovision, and live direct-MCP connector proof remain
+`pending`.
 
 ## Primary sources (verified 2026-07-12)
 

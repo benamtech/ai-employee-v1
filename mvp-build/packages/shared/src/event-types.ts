@@ -37,3 +37,30 @@ export interface NormalizedEvent {
 /** Owner-facing channel by importance (SMS default). */
 export type NotificationChannel = "sms" | "web" | "voice";
 export const DEFAULT_NOTIFICATION_CHANNEL: NotificationChannel = "sms";
+
+/**
+ * CE-2 turn routing. Whether a normalized event needs a reasoning turn
+ * (`wake_employee`) or can be delivered/rendered/batched without occupying the
+ * employee's serialized turn lane (`deliver_only`).
+ */
+export type RoutingMode = "deliver_only" | "wake_employee";
+
+/**
+ * Data-driven routing policy keyed by event type — adding a connector never
+ * touches router logic, only this table. Default (below) is `deliver_only`; only
+ * owner-actionable / customer-reply events wake the employee. Future wake
+ * candidates: inbound customer SMS, a QBO write-needs-decision variant.
+ */
+export const EVENT_ROUTING_POLICY: Record<string, RoutingMode> = {
+  [EVENT_TYPES.gmailReplyReceived]: "wake_employee",
+  [EVENT_TYPES.stripeInvoiceSent]: "deliver_only",
+  [EVENT_TYPES.stripeInvoicePaid]: "deliver_only",
+  [EVENT_TYPES.managerConnectorConnected]: "deliver_only",
+  [EVENT_TYPES.managerConnectorFailed]: "deliver_only",
+  [EVENT_TYPES.quickbooksEntityChanged]: "deliver_only",
+};
+
+/** Route for an event type; unknown/informational events default to deliver_only. */
+export function routeForEventType(eventType: string): RoutingMode {
+  return EVENT_ROUTING_POLICY[eventType] ?? "deliver_only";
+}

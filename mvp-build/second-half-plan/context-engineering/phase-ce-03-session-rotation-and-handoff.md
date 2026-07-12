@@ -1,6 +1,14 @@
 # Phase CE-3 — Session rotation + handoff
 
-Status: planned (depends on CE-1, CE-2)
+Status: source-wired (2026-07-12; migration `0030` applied live) · live rotation proof `pending`
+
+> Implemented per the [CE-2/CE-3 production implementation plan](phase-ce-02-03-production-implementation-plan.md) §4
+> (the authoritative spec). This sketch is retained as the original design rationale. What shipped:
+> `employee_sessions` (migration `0030`), `lib/session-rotation.ts` with a **pre-turn** `rotateSessionIfNeeded`
+> (rotate before the turn runs, so it executes fresh and re-primes) + a **post-turn** `recordSessionOccupancy`,
+> occupancy captured at all three turn sites (`runtime.ts`/`wake.ts`/`turn-drain.ts`) under the turn lock,
+> `memory_session_key` preserved while the `transcript_session_id` rotates, and carryover via
+> `buildAgentContext` + `deriveNextAction`.
 
 Goal: in production, **rotate to a fresh session before Hermes must compact**, carrying an ultra-compact,
 handoff-oriented note — so work quality never degrades from lossy in-place summarization and the owner

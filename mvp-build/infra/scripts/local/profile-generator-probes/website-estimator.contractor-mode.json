@@ -1,0 +1,46 @@
+{
+  "purpose_key": "website_estimator_conversation_sparse",
+  "display_name": "Website Estimator Conversation Sparse",
+  "mode": "contractor_mode",
+  "employee_name": "Avery",
+  "business_display_name": "Contractor-Supplied Estimate Desk",
+  "business_kind": "contractor",
+  "owner_name": "Example Owner",
+  "owner_email": "owner@example.com",
+  "owner_phone_e164": "+15705551234",
+  "timezone": "America/New_York",
+  "purpose": "Collect website visitor contact and job details through conversation, while accepting rates, material surcharge, fee notes, and assumptions supplied in the conversation instead of preloaded company data.",
+  "audience": "website visitor requesting an estimate",
+  "conversation_goal": "Ask for missing job scope and, when needed, ask for contractor-supplied estimating facts before creating a structured estimate artifact.",
+  "top_workflows": [
+    "website estimate intake",
+    "contractor-mode rate collection",
+    "line-item estimate drafting"
+  ],
+  "tools_mentioned": [
+    "Manager MCP",
+    "estimate artifacts"
+  ],
+  "seed_skills": [
+    "estimate"
+  ],
+  "output_expectations": "Return contact summary, contractor-supplied rate assumptions, job scope, line items, low-confidence flags, recommended total, and next step. Do not pretend company-data mode is loaded.",
+  "contractor_mode_facts": [
+    {
+      "key": "rate_policy",
+      "value": "Rates and surcharge notes must come from the conversation unless explicitly provided by the contractor.",
+      "category": "pricing",
+      "confidence": "high"
+    }
+  ],
+  "materialization": {
+    "kind": "local_chat",
+    "artifact_kind": "estimate",
+    "html_fallback": true,
+    "pdf_requires_real_bytes": true
+  },
+  "visitor_session_policy": {
+    "transcript_scope": "per_visitor",
+    "memory_scope": "per_employee_purpose"
+  }
+}

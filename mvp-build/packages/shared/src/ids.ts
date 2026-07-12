@@ -62,6 +62,7 @@ export const ID_PREFIX = {
   runtimeSecret: "rtsec",
   mcpCredential: "mcpc",
   turnJob: "turn",
+  transcriptSession: "tsess",
   channelSession: "chs",
   deliveryDecision: "deld",
   workRun: "run",

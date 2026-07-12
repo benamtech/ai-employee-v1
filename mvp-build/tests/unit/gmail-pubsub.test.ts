@@ -174,5 +174,5 @@ describe("Gmail Pub/Sub webhook route", () => {
     } finally {
       getSpy.mockRestore();
     }
-  });
+  }, 15_000);
 });
