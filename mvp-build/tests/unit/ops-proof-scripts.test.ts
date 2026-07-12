@@ -23,6 +23,28 @@ describe("Pod Alpha operator proof scripts", () => {
     expect(src).toContain("old_route_alive_after_rollback");
   });
 
+  it("wildcard Caddy proof checks DNS-01 config and Cloudflare module presence", async () => {
+    const src = await script("infra/scripts/caddy-wildcard-proof.mjs");
+    expect(src).toContain("dns.providers.cloudflare");
+    expect(src).toContain("config_mentions_wildcard_dns01");
+    expect(src).toContain("production_caddyfile_validates");
+  });
+
+  it("Cloudflare DNS script defaults to dry-run and gates apply with explicit confirmation", async () => {
+    const src = await script("infra/scripts/cloudflare-dns.mjs");
+    expect(src).toContain("cloudflare_dns_desired_state");
+    expect(src).toContain("CLOUDFLARE_DNS_APPLY_CONFIRM");
+    expect(src).toContain("*.agents");
+    expect(src).toContain("secrets_logged");
+  });
+
+  it("production environment proof labels proof tiers and reads latest proof JSON", async () => {
+    const src = await script("infra/scripts/prod-env-proof.mjs");
+    expect(src).toContain("production_environment_proof");
+    expect(src).toContain("limited_live_infra");
+    expect(src).toContain("provider_runtime_live");
+  });
+
   it("scoped MCP reprovision does not print the raw token and clears reprovision only after proof", async () => {
     const src = await script("infra/scripts/reprovision-scoped-mcp.mjs");
     expect(src).toContain("mcpToolList(minted.token)");

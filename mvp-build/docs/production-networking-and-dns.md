@@ -180,17 +180,35 @@ status callbacks, Gmail Pub/Sub push, Stripe events, Intuit/QuickBooks. Requirem
   surface) cannot reach the socket — only Manager can, and Manager does not execute model-authored code.
 - Recommend `ufw`/`nftables` default-deny inbound except 22 (SSH, key-only, ideally IP-allowlisted) + 80 + 443.
 
+## Built path added after this design
+
+The production networking path is now executable without claiming live DNS/TLS acceptance:
+
+- `infra/scripts/cloudflare-dns.mjs` / `npm run dns:cloudflare:plan` computes the Cloudflare desired state
+  for apex, `www`, `api`, `agent`, and static `*.agents` records. It is dry-run by default; apply requires
+  `--apply` plus `CLOUDFLARE_DNS_APPLY_CONFIRM=amtechai.com`.
+- `infra/deploy/caddy.Dockerfile` builds Caddy with `github.com/caddy-dns/cloudflare`, and
+  `infra/caddy/production.Caddyfile` keeps owner/API hosts on normal Automatic HTTPS while using DNS-01 for
+  `*.agents.amtechai.com`.
+- `npm run ops:caddy-wildcard-proof` validates the production config and plugin presence locally; it does
+  not order a certificate.
+- `npm run prod-env:proof` aggregates the latest proof JSONs into a production-environment status record for
+  admin readiness. Proof tiers stay explicit: `static`, `local_mirror`, `limited_live_infra`, and
+  `provider_runtime_live`.
+- The admin console now displays this environment readiness read-only. Cloudflare apply, egress apply, and
+  production deploy operations remain CLI-gated operator actions.
+
 ## Part D — where networking sits in the sequence
 
-This is design only; nothing here is built this pass. It slots into the deploy-foundation work (roadmap P0)
-and the "limited real-VPS production tests" step, reconciled with
+This is no longer docs-only: the safe desired-state, Caddy build path, proof aggregation, and admin visibility
+are source-wired. It still slots into the deploy-foundation work (roadmap P0) and the "limited real-VPS
+production tests" step, reconciled with
 [`../second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md`](../second-half-plan/production-runtime-and-deploy-roadmap-2026-07-11.md):
 
-1. **Now (this pass):** this design + the Part A map + the Part C roles design. No creds, no build.
-2. **P0 deploy foundation (build, no creds):** stand up the compose stack, the concrete employee `docker run`,
-   and — from this doc — the **Cloudflare zone + wildcard `*.agents` DNS-only record + plugin-built Caddy
-   image + scoped DNS-01 token**. This is the smallest networking slice that makes provisioned employees
-   publicly reachable with valid TLS.
+1. **Now:** source-wired DNS desired-state tooling, plugin Caddy path, local proof scripts, and admin visibility.
+2. **P0 deploy foundation:** stand up the compose stack, the concrete employee `docker run`, and run the
+   Cloudflare/Caddy scripts on the target host. This makes the production path executable but not yet public-DNS
+   or certificate accepted.
 3. **P2 (build, no creds):** egress default-deny (employee containers) with the Manager-outbound allowlist;
    backup of `caddy_data` + profiles/workspaces.
 4. **Limited real-VPS tests (creds):** prove DNS resolves, wildcard cert issues, a provider webhook reaches

@@ -1,0 +1,23 @@
+# AMTECH production Caddy config.
+# Fixed owner/API hosts use normal Automatic HTTPS. Dynamic employee hosts use
+# one wildcard DNS-01 certificate backed by the Cloudflare DNS provider module.
+
+amtechai.com, www.amtechai.com {
+	reverse_proxy {$WEB_UPSTREAM:web:3000}
+}
+
+agent.amtechai.com {
+	reverse_proxy {$WEB_UPSTREAM:web:3000}
+}
+
+api.amtechai.com {
+	reverse_proxy {$MANAGER_UPSTREAM:manager:8080}
+}
+
+*.agents.amtechai.com {
+	tls {
+		dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+	}
+}
+
+import ./clients/*.caddy

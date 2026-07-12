@@ -5,6 +5,7 @@ import {
   type AdminActor,
   type AdminDashboard,
   type AdminEmployeeSummary,
+  type AdminEnvironmentReadiness,
   type AdminReadinessReport,
   type AdminSupportActionInput,
   type AdminSupportActionResult,
@@ -19,6 +20,7 @@ import { mintEmployeeMcpCredential } from "./mcp-auth.js";
 import { recordRuntimeHealthSnapshots } from "./runtime-health.js";
 import { runManagerTool } from "./run-tool.js";
 import { runEmployeeLifecycleAction } from "./employee-lifecycle.js";
+import { latestProofsByKind, readProofFiles } from "./proof-reader.js";
 
 const ROLE_RANK: Record<PlatformRole, number> = {
   support_readonly: 1,
@@ -60,6 +62,89 @@ function runtimeHealth(value: unknown): HealthState {
   if (status === "degraded" || status === "provisioning" || status === "running") return "yellow";
   if (status === "unhealthy" || status === "failed" || status === "suspended" || status === "retired") return "red";
   return "gray";
+}
+
+function proofStatus(value: unknown): "pass" | "fail" | "warn" | "skipped" {
+  const s = String(value ?? "").toLowerCase();
+  if (["pass", "ok", "dry_run", "applied"].includes(s)) return "pass";
+  if (["fail", "failed", "error"].includes(s)) return "fail";
+  if (!s) return "skipped";
+  return "warn";
+}
+
+function latestProofSummary(proof: Record<string, unknown> | undefined): AdminEnvironmentReadiness["latest_proofs"][string] | undefined {
+  if (!proof) return undefined;
+  return {
+    kind: proof.kind as string | undefined,
+    status: proof.status as string | undefined,
+    proof_tier: proof.proof_tier as string | undefined,
+    checked_at: proof.checked_at as string | undefined,
+    proof_path: proof.proof_path as string | undefined,
+  };
+}
+
+function envCheck(input: {
+  key: string;
+  label: string;
+  proof?: Record<string, unknown>;
+  missing: string;
+  detail?: string;
+}): AdminEnvironmentReadiness["checks"][number] {
+  const status = proofStatus(input.proof?.status);
+  return {
+    key: input.key,
+    label: input.label,
+    status,
+    detail: input.detail ?? (input.proof ? `Latest proof status: ${String(input.proof.status ?? "unknown")}.` : input.missing),
+    proof_path: input.proof?.proof_path as string | undefined,
+    checked_at: input.proof?.checked_at as string | undefined,
+  };
+}
+
+export function buildEnvironmentReadiness(): AdminEnvironmentReadiness {
+  const proofs = latestProofsByKind(readProofFiles());
+  const deploy = proofs.deploy_smoke;
+  const caddyActivation = proofs.caddy_activation_rollback_proof;
+  const caddyWildcard = proofs.caddy_wildcard_dns01_proof;
+  const cloudflare = proofs.cloudflare_dns_desired_state;
+  const capacity = proofs.pod_alpha_capacity;
+  const egress = proofs.egress_policy;
+  const backupRestore = proofs.backup_restore;
+  const redHealth = proofs.red_health;
+  const productionEnv = proofs.production_environment_proof;
+  const checks: AdminEnvironmentReadiness["checks"] = [
+    envCheck({ key: "core_compose", label: "Core compose", proof: deploy, missing: "Run deploy:smoke to prove manager/web/caddy health." }),
+    envCheck({ key: "runtime_network", label: "amtech_runtime network", proof: deploy ?? egress, missing: "No proof shows the shared Docker network yet.", detail: deploy ? "deploy:smoke proof exists; inspect checks for Docker DNS coverage." : undefined }),
+    envCheck({ key: "caddy_activation", label: "Caddy activation rollback", proof: caddyActivation, missing: "Run ops:caddy-proof to prove snippet validation and rollback." }),
+    envCheck({ key: "caddy_wildcard_dns01", label: "Caddy wildcard DNS-01", proof: caddyWildcard, missing: "Run ops:caddy-wildcard-proof after building the plugin Caddy image." }),
+    envCheck({ key: "cloudflare_desired_state", label: "Cloudflare desired state", proof: cloudflare, missing: "Run dns:cloudflare:plan in dry-run or live plan mode." }),
+    envCheck({ key: "employee_fleet_routing", label: "Employee fleet routing", proof: capacity ?? deploy, missing: "Run capacity:pod-alpha or deploy:smoke with EMPLOYEE_DNS_ALIAS." }),
+    envCheck({ key: "backup_restore", label: "Backup/restore", proof: backupRestore, missing: "Run ops:backup and ops:restore dry-run/proof." }),
+    envCheck({ key: "red_health", label: "Red-health alert", proof: redHealth, missing: "Run ops:red-health." }),
+    envCheck({ key: "egress", label: "Egress policy", proof: egress, missing: "Run ops:egress-policy dry-run or apply where allowed." }),
+  ];
+  const proofTier = String(productionEnv?.proof_tier ?? cloudflare?.proof_tier ?? deploy?.proof_tier ?? (deploy || capacity ? "local_mirror" : "static")) as AdminEnvironmentReadiness["proof_tier"];
+  const status = checks.some((c) => c.status === "fail") ? "fail" : checks.some((c) => c.status === "skipped") ? "needs_proof" : "pass";
+  return {
+    generated_at: nowIso(),
+    status,
+    proof_tier: ["static", "local_mirror", "limited_live_infra", "provider_runtime_live"].includes(proofTier) ? proofTier : "static",
+    environment_name: process.env.AMTECH_ENVIRONMENT_NAME ?? process.env.NODE_ENV ?? "local",
+    public_domain: process.env.AMTECH_PUBLIC_DOMAIN ?? "amtechai.com",
+    network_name: process.env.HERMES_DOCKER_NETWORK ?? "amtech_runtime",
+    checks,
+    latest_proofs: Object.fromEntries(Object.entries({
+      deploy_smoke: latestProofSummary(deploy),
+      caddy_activation_rollback_proof: latestProofSummary(caddyActivation),
+      caddy_wildcard_dns01_proof: latestProofSummary(caddyWildcard),
+      cloudflare_dns_desired_state: latestProofSummary(cloudflare),
+      pod_alpha_capacity: latestProofSummary(capacity),
+      egress_policy: latestProofSummary(egress),
+      backup_restore: latestProofSummary(backupRestore),
+      red_health: latestProofSummary(redHealth),
+      production_environment_proof: latestProofSummary(productionEnv),
+    }).filter((entry): entry is [string, NonNullable<typeof entry[1]>] => Boolean(entry[1]))),
+  };
 }
 
 function billingState(value: unknown): BillingState {
@@ -214,6 +299,7 @@ export async function buildAdminDashboard(db: SupabaseClient): Promise<AdminDash
       "Egress control remains a pre-tenant launch blocker.",
       "Old rendered profiles may need reprovisioning to remove legacy Manager bearer config.",
     ],
+    environment: buildEnvironmentReadiness(),
   };
 }
 
@@ -345,6 +431,7 @@ export async function buildReadinessReport(db: SupabaseClient, employeeId: strin
     generated_at: nowIso(),
     status: failed ? "blocked" : checks.some((c) => c.status === "warn" || c.status === "unknown") ? "needs_review" : "ready",
     checks,
+    environment: buildEnvironmentReadiness(),
   };
 }
 

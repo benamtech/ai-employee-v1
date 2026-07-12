@@ -5,15 +5,17 @@ import type React from "react";
 import type {
   AdminAccountSummary,
   AdminDashboard,
+  AdminEnvironmentReadiness,
   AdminReadinessReport,
   AdminSupportAction,
   AdminSupportActionResult,
 } from "@amtech/shared";
 
-type View = "dashboard" | "accounts" | "provisioning" | "repairs" | "providers" | "billing";
+type View = "dashboard" | "environment" | "accounts" | "provisioning" | "repairs" | "providers" | "billing";
 
 const NAV: Array<{ id: View; label: string }> = [
   { id: "dashboard", label: "Dashboard" },
+  { id: "environment", label: "Environment" },
   { id: "accounts", label: "Accounts" },
   { id: "provisioning", label: "Provisioning" },
   { id: "repairs", label: "Repairs" },
@@ -44,6 +46,7 @@ export function AdminClient() {
   const [reason, setReason] = useState(DEFAULT_REASON);
   const [adminToken, setAdminToken] = useState("");
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
+  const [environment, setEnvironment] = useState<AdminEnvironmentReadiness | null>(null);
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
   const [accountDetail, setAccountDetail] = useState<any | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
@@ -54,7 +57,9 @@ export function AdminClient() {
   async function loadDashboard(tokenOverride?: string) {
     try {
       setStatus("");
-      setDashboard(await adminFetch("dashboard", { reason, adminToken: tokenOverride ?? adminToken }));
+      const nextDashboard = await adminFetch("dashboard", { reason, adminToken: tokenOverride ?? adminToken }) as AdminDashboard;
+      setDashboard(nextDashboard);
+      setEnvironment(nextDashboard.environment ?? null);
     } catch (err) {
       setStatus(ownerSafeError(err));
     }
@@ -68,6 +73,14 @@ export function AdminClient() {
       setEmployeeDetail(null);
       setReadiness(null);
       setView("accounts");
+    } catch (err) {
+      setStatus(ownerSafeError(err));
+    }
+  }
+
+  async function loadEnvironment() {
+    try {
+      setEnvironment(await adminFetch("environment/readiness", { reason, adminToken }));
     } catch (err) {
       setStatus(ownerSafeError(err));
     }
@@ -164,6 +177,7 @@ export function AdminClient() {
         {status ? <div className="admin-banner">{status}</div> : null}
 
         {view === "dashboard" ? <Dashboard dashboard={dashboard} onOpenAccount={openAccount} /> : null}
+        {view === "environment" ? <Environment readiness={environment} onRefresh={loadEnvironment} /> : null}
         {view === "accounts" ? (
           <Accounts
             accounts={accounts}
@@ -182,6 +196,40 @@ export function AdminClient() {
         {view === "billing" ? <Billing detail={accountDetail} /> : null}
       </section>
     </main>
+  );
+}
+
+function Environment({ readiness, onRefresh }: { readiness: AdminEnvironmentReadiness | null; onRefresh: () => Promise<void> }) {
+  if (!readiness) {
+    return <Panel title="Production environment"><button onClick={() => void onRefresh()}>Load environment readiness</button></Panel>;
+  }
+  return (
+    <div className="stack">
+      <div className="metric-grid">
+        <Metric label="Status" value={readiness.status === "pass" ? 1 : 0} tone={readiness.status === "pass" ? "good" : "warn"} />
+        <Metric label="Checks" value={readiness.checks.length} />
+        <Metric label="Failures" value={readiness.checks.filter((c) => c.status === "fail").length} tone={readiness.checks.some((c) => c.status === "fail") ? "warn" : "good"} />
+        <Metric label="Missing" value={readiness.checks.filter((c) => c.status === "skipped").length} tone={readiness.checks.some((c) => c.status === "skipped") ? "warn" : "good"} />
+      </div>
+      <Panel title="Environment">
+        <Key label="Proof tier" value={readiness.proof_tier} />
+        <Key label="Environment" value={readiness.environment_name} />
+        <Key label="Domain" value={readiness.public_domain ?? "unknown"} />
+        <Key label="Network" value={readiness.network_name ?? "unknown"} />
+        <button onClick={() => void onRefresh()}>Refresh environment</button>
+      </Panel>
+      <Panel title="Production checks">
+        {readiness.checks.map((c) => (
+          <div key={c.key} className="check">
+            <strong>{c.label}</strong>
+            <span className={`pill ${c.status === "skipped" ? "unknown" : c.status}`}>{c.status}</span>
+            <p>{c.detail}</p>
+            {c.proof_path ? <p className="muted">{c.proof_path} · {c.checked_at ?? "unknown time"}</p> : null}
+          </div>
+        ))}
+      </Panel>
+      <Queue title="Latest proof summaries" rows={Object.entries(readiness.latest_proofs).map(([kind, proof]) => ({ kind, ...proof }))} />
+    </div>
   );
 }
 

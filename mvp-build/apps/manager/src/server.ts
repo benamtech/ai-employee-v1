@@ -35,6 +35,7 @@ import {
   buildAdminAccountDetail,
   buildAdminDashboard,
   buildAdminEmployeeDetail,
+  buildEnvironmentReadiness,
   buildReadinessReport,
   recordSupportAccess,
   requirePlatformRole,
@@ -322,6 +323,12 @@ export function buildApp(): Hono {
     });
     if (!access.ok) return c.json({ error: access.error }, access.status as 400);
     return c.json(report);
+  });
+
+  app.get("/manager/admin/environment/readiness", async (c) => {
+    const auth = await adminActor(c);
+    if ("denied" in auth) return auth.denied;
+    return c.json(buildEnvironmentReadiness());
   });
 
   app.post(MANAGER_API.admin.supportAction, async (c) => {

@@ -55,6 +55,31 @@ export interface AdminDashboard {
     estimated_month_cost_cents?: number | null;
   };
   readiness_warnings: string[];
+  environment?: AdminEnvironmentReadiness;
+}
+
+export interface AdminEnvironmentReadiness {
+  generated_at: string;
+  status: "pass" | "fail" | "needs_proof";
+  proof_tier: "static" | "local_mirror" | "limited_live_infra" | "provider_runtime_live";
+  environment_name: string;
+  public_domain?: string | null;
+  network_name?: string | null;
+  checks: Array<{
+    key: string;
+    label: string;
+    status: "pass" | "fail" | "warn" | "skipped";
+    detail: string;
+    proof_path?: string | null;
+    checked_at?: string | null;
+  }>;
+  latest_proofs: Record<string, {
+    kind?: string;
+    status?: string;
+    proof_tier?: string;
+    checked_at?: string;
+    proof_path?: string;
+  }>;
 }
 
 export interface AdminReadinessReport {
@@ -69,6 +94,7 @@ export interface AdminReadinessReport {
     detail: string;
     proof?: Record<string, unknown>;
   }>;
+  environment?: AdminEnvironmentReadiness;
 }
 
 export type AdminSupportAction =

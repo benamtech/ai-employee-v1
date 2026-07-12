@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeFakeDb, type FakeSupabase, SCHEMA_UNIQUES } from "./_helpers/fake-supabase";
 
@@ -47,6 +50,7 @@ describe("admin Manager routes", () => {
 
   beforeEach(() => {
     process.env.MANAGER_INTERNAL_TOKEN = "test-internal";
+    process.env.AMTECH_PROOF_DIR = mkdtempSync(join(tmpdir(), "amtech-admin-proof-"));
     delete process.env.ALLOW_ADMIN_BOOTSTRAP;
     state.db = makeFakeDb(seed(), { uniques: SCHEMA_UNIQUES });
   });
@@ -132,5 +136,22 @@ describe("admin Manager routes", () => {
     expect(json.status).toBe("blocked");
     expect(json.checks.find((c: { key: string }) => c.key === "egress_control").status).toBe("fail");
     expect(json.checks.find((c: { key: string }) => c.key === "tool_loop").status).toBe("unknown");
+  });
+
+  it("returns read-only production environment readiness from proof JSON", async () => {
+    writeFileSync(join(process.env.AMTECH_PROOF_DIR!, "cloudflare-dns-test.json"), JSON.stringify({
+      kind: "cloudflare_dns_desired_state",
+      status: "dry_run",
+      proof_tier: "static",
+      checked_at: "2026-07-11T18:00:00Z",
+      token: "should-not-leak",
+    }));
+    const res = await buildApp().request("/manager/admin/environment/readiness", {
+      headers: headers({ "X-AMTECH-Support-Reason": "Checking production environment proofs" }),
+    });
+    const json = await res.json();
+    expect(res.status).toBe(200);
+    expect(json.checks.find((c: { key: string }) => c.key === "cloudflare_desired_state").status).toBe("pass");
+    expect(JSON.stringify(json)).not.toContain("should-not-leak");
   });
 });

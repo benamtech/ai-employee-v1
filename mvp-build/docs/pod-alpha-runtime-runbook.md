@@ -20,6 +20,18 @@ Hermes model when funded creds land, not via the (dead) local model bridge. This
 
 ## Proof Order
 
+0. **Cloudflare DNS desired state (safe dry-run first)**
+   ```bash
+   AMTECH_PUBLIC_IPV4=203.0.113.10 npm run dns:cloudflare:plan -- --mock
+   AMTECH_PUBLIC_IPV4=<vps-ip> CLOUDFLARE_API_TOKEN=<scoped-token> npm run dns:cloudflare:plan
+   CLOUDFLARE_DNS_APPLY_CONFIRM=amtechai.com npm run dns:cloudflare:apply
+   ```
+   The script writes `infra/proofs/cloudflare-dns-*.json`. Dry-run prints the desired apex, `www`,
+   `api`, `agent`, and static `*.agents` records and never mutates Cloudflare. Apply requires both
+   `--apply` and `CLOUDFLARE_DNS_APPLY_CONFIRM=amtechai.com`; token values are redacted from proof JSON.
+   AAAA records are omitted unless `CLOUDFLARE_ENABLE_AAAA=1` and `AMTECH_PUBLIC_IPV6` are set after
+   Docker/host dual-stack is proven.
+
 1. **Compose smoke**
    ```bash
    docker compose -f infra/deploy/docker-compose.yml --env-file infra/deploy/.env.production up -d --build
@@ -33,9 +45,12 @@ Hermes model when funded creds land, not via the (dead) local model bridge. This
 2. **Caddy rollback proof**
    ```bash
    npm run ops:caddy-proof
+   npm run ops:caddy-wildcard-proof
    ```
    This uses a temporary real Caddy container. It proves a good snippet validates, a bad snippet is
    rejected, rollback config validates, and an old route remains alive.
+   `ops:caddy-wildcard-proof` validates the production DNS-01 config and confirms the plugin-built Caddy
+   image includes `dns.providers.cloudflare`; it does not order a public certificate.
 
 3. **Scoped-MCP reprovision**
    ```bash
@@ -91,6 +106,14 @@ Hermes model when funded creds land, not via the (dead) local model bridge. This
   Dry-run is default. Apply mode writes first-pass `DOCKER-USER` rules for labeled employee runtime
   containers, allowing Manager MCP and blocking arbitrary egress. Provider-domain allowlisting still
   needs a maintained proxy/CIDR policy before paid tenants.
+
+- **Environment proof aggregation**
+  ```bash
+  npm run prod-env:proof
+  ```
+  Aggregates latest proof JSONs into `infra/proofs/prod-env-proof-*.json` so admin can distinguish
+  `static`, `local_mirror`, `limited_live_infra`, and `provider_runtime_live` status without implying
+  public DNS, ACME issuance, provider webhook, or model/runtime acceptance.
 
 ## Realness Rule
 

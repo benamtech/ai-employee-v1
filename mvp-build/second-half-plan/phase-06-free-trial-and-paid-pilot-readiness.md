@@ -62,6 +62,10 @@ UX proof:
 Ops proof:
 
 - operator can see account health;
+- operator can see production-environment health: core compose, `amtech_runtime`, Caddy config/plugin,
+  Cloudflare desired-state proof, DNS/TLS proof tier, employee routing/fleet, backup/restore, red-health,
+  and egress status;
+- operator can distinguish local mirror, limited live infra, and provider/runtime live proof;
 - operator can repair/retry common failures;
 - operator can view cost and budget;
 - operator can suspend/cancel trial;
@@ -102,6 +106,13 @@ Surface/materialization scenario:
 - Known limitations are written in owner-safe language.
 - Demo account and seed data exist.
 - Rollback procedure exists.
+- Production-environment proof exists at the correct tier for the launch decision:
+  - `static`: config/script proof only;
+  - `local_mirror`: compose core + `amtech_runtime` + Caddy/employee routing without public DNS;
+  - `limited_live_infra`: Cloudflare/Caddy/Docker proof where credentials/host allow;
+  - `provider_runtime_live`: real provider/model/runtime proof ids.
+- Cloudflare desired state is visible and safe to apply only through explicit CLI confirmation.
+- Caddy wildcard DNS-01 image/config path is validated; public cert issuance is claimed only after real ACME proof.
 
 ## Tests
 
@@ -112,6 +123,9 @@ Surface/materialization scenario:
 - Security live tests.
 - Billing/account-state tests.
 - Admin support-action tests.
+- Cloudflare DNS planner/dry-run tests.
+- Caddy wildcard DNS-01 config/plugin validation tests.
+- Production-environment proof aggregation tests.
 
 ## Exit Criteria
 
@@ -124,6 +138,7 @@ AMTECH can give a real owner a free trial and know:
 - artifacts and previews work;
 - connectors either work or fail gracefully;
 - operator can see and repair health;
+- operator can diagnose the production environment before adding a real trial owner;
 - usage/cost is visible;
 - conversion to paid is operationally supported.
 
