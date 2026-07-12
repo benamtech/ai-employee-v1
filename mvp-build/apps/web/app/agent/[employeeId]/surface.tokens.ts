@@ -1,42 +1,51 @@
 /**
- * Work Surface design tokens (wiki/MVP/old-build-plan/15-interaction-reimagined-the-work-surface.md).
- * A small, dependency-free token set so the surface reads like a calm coworker tool a
- * non-technical owner trusts — not a developer dashboard. Plain objects, no CSS framework.
+ * Work Surface design tokens — the AMTECH layer.
+ * Two text/background modes only: near-black ink on white, and white on AMTECH
+ * red. Red accents white surfaces (labels, active borders, alerts, key CTAs);
+ * everything else is ink, hairlines, and the light-gray wash. Corners are
+ * sharp, borders are 1px, spacing sits on a 3px grid, there are no shadows.
+ * Inter carries display/body text; IBM Plex Mono carries operational labels.
  */
 export const tokens = {
   color: {
-    bg: "#f7f6f3", // warm paper, not stark white
+    bg: "#ffffff",
     surface: "#ffffff",
-    surfaceMuted: "#faf9f6",
-    border: "#e6e3dc",
-    borderStrong: "#d4d0c6",
-    text: "#23211c",
-    textMuted: "#6b6760",
-    textFaint: "#94908899",
-    accent: "#1f6feb", // trust blue — links/primary
-    accentSoft: "#eaf1fe",
-    success: "#1a7f4b",
-    successSoft: "#e7f4ec",
-    warning: "#8a6d1f",
-    warningSoft: "#fbf3df",
-    danger: "#b42318",
-    dangerSoft: "#fbeae8",
+    surfaceMuted: "#f4f4f4",
+    border: "rgba(10,10,10,0.10)",
+    borderStrong: "rgba(10,10,10,0.15)",
+    text: "#0a0a0a",
+    textMuted: "rgba(10,10,10,0.62)",
+    textFaint: "rgba(10,10,10,0.62)",
+    accent: "#e11d2a", // AMTECH red — the only accent hue
+    accentSoft: "#f4f4f4",
+    success: "#0a0a0a", // completion is stated in ink + glyph, not a new hue
+    successSoft: "#f4f4f4",
+    warning: "#e11d2a", // "needs you" is red
+    warningSoft: "#ffffff",
+    danger: "#e11d2a",
+    dangerSoft: "rgba(225,29,42,0.30)",
   },
-  space: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 },
-  radius: { sm: 6, md: 10, lg: 14, pill: 999 },
+  space: { xs: 3, sm: 6, md: 12, lg: 18, xl: 24, xxl: 36 },
+  radius: { sm: 0, md: 0, lg: 0, pill: 0 },
   font: {
-    family: "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
-    h1: 24, h2: 18, h3: 15, body: 15, small: 13, tiny: 11,
+    family: "var(--font-inter), Inter, -apple-system, 'Helvetica Neue', Arial, sans-serif",
+    mono: "var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace",
+    h1: 24,
+    h2: 18,
+    h3: 15,
+    body: 15,
+    small: 12,
+    tiny: 9,
   },
   shadow: {
-    card: "0 1px 2px rgba(35,33,28,0.05), 0 1px 1px rgba(35,33,28,0.04)",
-    lift: "0 4px 14px rgba(35,33,28,0.08)",
+    card: "none",
+    lift: "none",
   },
 } as const;
 
 /** Move-type accents (notify = calm, question = needs you, review = decision). */
 export const moveStyle = {
   notify: { label: "Heads up", color: tokens.color.textMuted, soft: tokens.color.surfaceMuted, bar: tokens.color.borderStrong },
-  question: { label: "Needs you", color: tokens.color.warning, soft: tokens.color.warningSoft, bar: tokens.color.warning },
-  review: { label: "Your call", color: tokens.color.accent, soft: tokens.color.accentSoft, bar: tokens.color.accent },
+  question: { label: "Needs you", color: tokens.color.accent, soft: "#ffffff", bar: tokens.color.accent },
+  review: { label: "Your call", color: tokens.color.text, soft: tokens.color.surfaceMuted, bar: tokens.color.text },
 } as const;

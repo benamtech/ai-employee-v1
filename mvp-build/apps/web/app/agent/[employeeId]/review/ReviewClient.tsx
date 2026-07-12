@@ -102,24 +102,24 @@ export function ReviewClient({
 
   return (
     <Shell>
-      <div style={{ padding: tokens.space.lg }}>
+      <div style={{ padding: tokens.space.lg, flex: 1 }}>
         {resource.risk && (
-          <span style={{ display: "inline-block", fontSize: tokens.font.tiny, fontWeight: 700, textTransform: "uppercase", letterSpacing: ".04em", color: riskColor[resource.risk], marginBottom: tokens.space.sm }}>
+          <span style={{ display: "inline-block", fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.09em", color: riskColor[resource.risk], marginBottom: tokens.space.sm }}>
             {riskLabel[resource.risk] ?? resource.risk}
           </span>
         )}
-        <h1 style={{ fontSize: tokens.font.h1, color: tokens.color.text, margin: `0 0 ${tokens.space.xs}px` }}>{resource.title}</h1>
+        <h1 style={{ fontSize: tokens.font.h1, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.15, color: tokens.color.text, margin: `0 0 ${tokens.space.xs}px` }}>{resource.title}</h1>
         {resource.subtitle && <div style={{ color: tokens.color.textMuted, fontSize: tokens.font.small }}>{resource.subtitle}</div>}
-        {resource.amount && <div style={{ fontSize: tokens.font.h1, fontWeight: 700, color: tokens.color.text, marginTop: tokens.space.md }}>{resource.amount}</div>}
+        {resource.amount && <div style={{ fontSize: 36, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: "42px", color: tokens.color.text, marginTop: tokens.space.md }}>{resource.amount}</div>}
         {resource.recipient && <div style={{ color: tokens.color.textMuted, fontSize: tokens.font.small, marginTop: tokens.space.xs }}>To: {resource.recipient}</div>}
         {resource.summary && <p style={{ color: tokens.color.text, lineHeight: 1.55, marginTop: tokens.space.md }}>{resource.summary}</p>}
 
         {resource.fields && resource.fields.length > 0 && (
-          <div style={{ marginTop: tokens.space.lg, border: `1px solid ${tokens.color.border}`, borderRadius: tokens.radius.md, overflow: "hidden" }}>
+          <div style={{ marginTop: tokens.space.lg, border: `1px solid ${tokens.color.border}`, overflow: "hidden" }}>
             {resource.fields.map((f, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: tokens.space.md, padding: `${tokens.space.sm}px ${tokens.space.md}px`, borderTop: i ? `1px solid ${tokens.color.border}` : "none", fontSize: tokens.font.small }}>
-                <span style={{ color: tokens.color.textMuted }}>{f.label}</span>
-                <span style={{ color: tokens.color.text, textAlign: "right" }}>{f.value}</span>
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: tokens.space.md, padding: `${tokens.space.sm}px ${tokens.space.md}px`, borderTop: i ? `1px solid ${tokens.color.border}` : "none", fontSize: tokens.font.small }}>
+                <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: tokens.color.textMuted }}>{f.label}</span>
+                <span style={{ color: tokens.color.text, textAlign: "right", fontWeight: 600 }}>{f.value}</span>
               </div>
             ))}
           </div>
@@ -143,7 +143,7 @@ export function ReviewClient({
         )}
 
         {resource.receipts && resource.receipts.map((r, i) => (
-          <a key={i} href={r.value} style={{ display: "inline-block", marginTop: tokens.space.md, color: tokens.color.accent, fontSize: tokens.font.small, textDecoration: "none", fontWeight: 600 }}>
+          <a key={i} href={r.value} style={{ display: "inline-block", marginTop: tokens.space.md, color: tokens.color.accent, fontFamily: tokens.font.mono, fontSize: tokens.font.small, letterSpacing: "0.03em", textDecoration: "underline", textUnderlineOffset: 3, fontWeight: 500 }}>
             {r.label} →
           </a>
         ))}
@@ -155,11 +155,11 @@ export function ReviewClient({
         )}
       </div>
 
-      {/* Sticky action bar */}
+      {/* Sticky action bar — a red top rule marks a gated (money/customer-facing) decision */}
       {!resource.expired && resource.actions.length > 0 && (
-        <div style={{ position: "sticky", bottom: 0, background: tokens.color.surface, borderTop: `1px solid ${tokens.color.border}`, padding: tokens.space.md, boxShadow: tokens.shadow.lift }}>
+        <div style={{ position: "sticky", bottom: 0, background: tokens.color.surface, borderTop: resource.actions.some((a) => a.gated) ? `3px solid ${tokens.color.accent}` : `1px solid ${tokens.color.borderStrong}`, padding: tokens.space.md }}>
           {done ? (
-            <div style={{ textAlign: "center", color: tokens.color.success, fontWeight: 600, padding: tokens.space.sm }}>{outcome}</div>
+            <div style={{ textAlign: "center", color: tokens.color.text, fontFamily: tokens.font.mono, fontWeight: 600, padding: tokens.space.sm }}>✓ {outcome}</div>
           ) : replying ? (
             <div style={{ display: "flex", flexDirection: "column", gap: tokens.space.sm }}>
               <textarea
@@ -210,8 +210,14 @@ export function ReviewClient({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main style={{ minHeight: "100dvh", background: tokens.color.bg, fontFamily: tokens.font.family, color: tokens.color.text, display: "flex", flexDirection: "column" }}>
-      <div style={{ flex: 1, maxWidth: 560, width: "100%", margin: "0 auto", background: tokens.color.surface, display: "flex", flexDirection: "column", minHeight: "100dvh", boxShadow: tokens.shadow.card }}>
+    <main style={{ minHeight: "100dvh", background: tokens.color.surfaceMuted, fontFamily: tokens.font.family, color: tokens.color.text, display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, maxWidth: 561, width: "100%", margin: "0 auto", background: tokens.color.surface, display: "flex", flexDirection: "column", minHeight: "100dvh", borderLeft: `1px solid ${tokens.color.border}`, borderRight: `1px solid ${tokens.color.border}` }}>
+        <header style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: 42, padding: `0 ${tokens.space.lg}px`, borderBottom: `1px solid ${tokens.color.border}`, flexShrink: 0 }}>
+          <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.small, fontWeight: 600, letterSpacing: "0.09em", textTransform: "uppercase" }}>
+            AMTECH<span aria-hidden style={{ color: tokens.color.accent }}>.</span>
+          </span>
+          <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, fontWeight: 500, letterSpacing: "0.09em", textTransform: "uppercase", color: tokens.color.textMuted }}>Secure review</span>
+        </header>
         {children}
       </div>
     </main>
@@ -220,17 +226,22 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function btn(style: "primary" | "danger" | "default"): React.CSSProperties {
   const base: React.CSSProperties = {
-    padding: `${tokens.space.md}px ${tokens.space.lg}px`,
-    borderRadius: tokens.radius.md,
-    fontSize: tokens.font.body,
+    padding: `0 ${tokens.space.lg}px`,
+    height: 48,
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: tokens.font.small,
     fontWeight: 600,
-    fontFamily: tokens.font.family,
+    letterSpacing: "0.06em",
+    textTransform: "uppercase",
+    fontFamily: tokens.font.mono,
     cursor: "pointer",
-    border: `1px solid ${tokens.color.borderStrong}`,
+    border: `1px solid ${tokens.color.text}`,
     background: tokens.color.surface,
     color: tokens.color.text,
   };
-  if (style === "primary") return { ...base, background: tokens.color.accent, borderColor: tokens.color.accent, color: "#fff" };
+  if (style === "primary") return { ...base, background: tokens.color.text, borderColor: tokens.color.text, color: "#ffffff" };
   if (style === "danger") return { ...base, background: tokens.color.surface, borderColor: tokens.color.danger, color: tokens.color.danger };
   return base;
 }

@@ -29,28 +29,28 @@ function Shell({ icon, children }: { icon: string; children: React.ReactNode }) 
   return (
     <div style={{
       display: "flex", gap: tokens.space.sm, alignItems: "baseline",
-      background: tokens.color.surfaceMuted, border: `1px solid ${tokens.color.border}`,
-      borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.md}px`, marginTop: tokens.space.sm,
+      background: tokens.color.surfaceMuted, borderLeft: `1px solid ${tokens.color.borderStrong}`,
+      padding: `${tokens.space.sm}px ${tokens.space.md}px`, marginTop: tokens.space.sm,
     }}>
-      <span aria-hidden style={{ fontSize: tokens.font.body }}>{icon}</span>
+      <span aria-hidden style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: tokens.color.textMuted, flexShrink: 0, lineHeight: "18px" }}>{icon}</span>
       <div style={{ display: "flex", flexWrap: "wrap", gap: tokens.space.md }}>{children}</div>
     </div>
   );
 }
 
 const ICONS: Record<DeliverableType, string> = {
-  document: "📄",
-  outbound_message: "✉️",
-  money_movement: "💵",
-  dataset_report: "📊",
-  recommendation: "💡",
-  schedule_mutation: "🗓️",
-  structured_record_write: "🗂️",
-  media_asset: "🖼️",
-  job_folder: "📁",
-  external_system_action: "🔗",
-  plan: "🧭",
-  tool_activity: "🛠️",
+  document: "doc",
+  outbound_message: "msg",
+  money_movement: "pay",
+  dataset_report: "rpt",
+  recommendation: "rec",
+  schedule_mutation: "cal",
+  structured_record_write: "data",
+  media_asset: "img",
+  job_folder: "job",
+  external_system_action: "ext",
+  plan: "plan",
+  tool_activity: "tool",
 };
 
 /**
@@ -82,7 +82,7 @@ function ViewBlock({ view }: { view: WorkView }) {
 }
 
 export function Deliverable({ d, employeeId }: { d: WorkDeliverableDescriptor; employeeId: string }) {
-  const icon = ICONS[d.type] ?? "•";
+  const icon = ICONS[d.type] ?? "work";
   const refs = d.refs ?? {};
   const gated = Boolean(d.leaves_business || d.money?.involved);
 
@@ -93,7 +93,7 @@ export function Deliverable({ d, employeeId }: { d: WorkDeliverableDescriptor; e
           <strong style={{ fontSize: tokens.font.small }}>{d.title}</strong>
           <Line label="amount" value={money(d.money?.amount_cents, d.money?.currency)} />
           {refs.hosted_invoice_url ? (
-            <a href={refs.hosted_invoice_url} target="_blank" rel="noreferrer" style={{ color: tokens.color.accent, fontSize: tokens.font.small }}>Open invoice</a>
+            <a href={refs.hosted_invoice_url} target="_blank" rel="noreferrer" style={{ color: tokens.color.accent, fontSize: tokens.font.small, textDecoration: "underline", textUnderlineOffset: 3 }}>Open invoice</a>
           ) : null}
           {gated ? <Line label="" value="leaves the business — your approval gates it" /> : null}
         </Shell>
@@ -102,7 +102,7 @@ export function Deliverable({ d, employeeId }: { d: WorkDeliverableDescriptor; e
       return (
         <Shell icon={icon}>
           {refs.estimate_artifact_id || refs.artifact_id ? (
-            <a href={`/agent/${employeeId}/output/${refs.estimate_artifact_id ?? refs.artifact_id}`} target="_blank" rel="noreferrer" style={{ color: tokens.color.accent, fontSize: tokens.font.small }}>
+            <a href={`/agent/${employeeId}/output/${refs.estimate_artifact_id ?? refs.artifact_id}`} target="_blank" rel="noreferrer" style={{ color: tokens.color.accent, fontSize: tokens.font.small, textDecoration: "underline", textUnderlineOffset: 3 }}>
               {d.title || "Open document"}
             </a>
           ) : <strong style={{ fontSize: tokens.font.small }}>{d.title}</strong>}

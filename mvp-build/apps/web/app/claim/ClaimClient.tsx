@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FLOW_CSS } from "../flow-styles";
 
 export function ClaimClient({ tokenParam }: { tokenParam?: string }) {
   const [token, setToken] = useState("");
@@ -60,12 +62,44 @@ export function ClaimClient({ tokenParam }: { tokenParam?: string }) {
   }
 
   return (
-    <main style={{ maxWidth: 640, margin: "6vh auto", padding: 24 }}>
-      <h1>Claim your AI employee</h1>
-      <p>Phone: <strong>{phone || "not locked"}</strong></p>
-      <p><input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="owner@example.com" /> <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" /> <button onClick={createAccount}>Create account</button></p>
-      <p><button disabled={!accountId} onClick={provision}>Provision employee</button></p>
-      <pre style={{ whiteSpace: "pre-wrap", background: "#f6f6f6", padding: 12 }}>{status || JSON.stringify(manifest, null, 2)}</pre>
+    <main className="fl-root">
+      <style>{FLOW_CSS}</style>
+      <div className="fl-card" style={{ maxWidth: 561 }}>
+        <header className="fl-head">
+          <Link className="fl-logo" href="/">AMTECH<span aria-hidden>.</span></Link>
+          <span className="fl-head-note">Claim your employee</span>
+        </header>
+
+        <div className="fl-title">
+          <h1>Claim your AI employee</h1>
+          <p>Your phone is already proven from the text thread. Claim the account and your employee keeps working under your name.</p>
+        </div>
+
+        <section className="fl-step">
+          <span className="fl-step-tag">Proven phone</span>
+          <span className="fl-kv">Phone: <strong>{phone || "not locked"}</strong></span>
+        </section>
+
+        <section className="fl-step">
+          <span className="fl-step-tag">Step 01 — Claim the account</span>
+          <div className="fl-row">
+            <input className="fl-input" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="owner@example.com" />
+            <input className="fl-input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
+            <button className="fl-btn" onClick={createAccount}>Create account</button>
+          </div>
+        </section>
+
+        <section className="fl-step">
+          <span className="fl-step-tag">Step 02 — Put it to work</span>
+          <div className="fl-row">
+            <button className="fl-btn red" disabled={!accountId} onClick={provision}>Start your employee</button>
+          </div>
+        </section>
+
+        {(status || Object.keys(manifest).length > 0) ? (
+          <pre className="fl-status">{status || JSON.stringify(manifest, null, 2)}</pre>
+        ) : null}
+      </div>
     </main>
   );
 }
