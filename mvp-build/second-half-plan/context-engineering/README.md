@@ -96,6 +96,8 @@ sub-agent pattern (focused child, clean context, condensed summary back).
 | CE-3 | [Session rotation + handoff](phase-ce-03-session-rotation-and-handoff.md) | Manager rotates to a fresh session before compaction with an ultra-compact, handoff-oriented carryover; memory scope preserved via `X-Hermes-Session-Key`; MEMORY.md/USER.md carry for free. |
 | CE-4 | [Connector-agnostic capabilities + operator modes](phase-ce-04-connector-agnostic-and-operator-modes.md) (deferred) | Any MCP connector (Jobber/ServiceTitan/Housecall Pro) representable end-to-end with Manager-mediated custody for money/customer-facing tools; per-business-type + operator-mode context policy. |
 
+Planning handoff for the next pass: [CE-2/CE-3 production planning handoff prompt](ce-02-03-production-planning-handoff-prompt.md).
+
 ## Dependency graph
 
 ```
