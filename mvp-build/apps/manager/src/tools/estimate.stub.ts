@@ -26,6 +26,7 @@ import {
   uploadArtifactPdf,
 } from "../lib/artifacts.js";
 import { mintSignedToken, tokenHash } from "../lib/signed-links.js";
+import { buildBusinessBrainIndex } from "../lib/business-brain.js";
 
 async function employeeBelongsToAccount(ctx: Parameters<ToolHandler>[0], account_id: string, employee_id: string): Promise<boolean> {
   const { data } = await ctx.db
@@ -56,33 +57,34 @@ function normalizeApprovalResolution(input: string): "approved" | "rejected" | n
 }
 
 const getBusinessBrain: ToolHandler = async (ctx, raw) => {
-  const input = raw as { account_id?: string; employee_id?: string; fact_keys?: string[] };
+  const input = raw as { account_id?: string; employee_id?: string };
   if (!input?.account_id || !input?.employee_id) {
     return failed("validation_failed", "account_id and employee_id are required.");
   }
-  let query = ctx.db
-    .from("business_brain_facts")
-    .select("*")
-    .eq("account_id", input.account_id)
-    .eq("employee_id", input.employee_id);
-  if (input.fact_keys?.length) query = query.in("fact_key", input.fact_keys);
-  const { data } = await query;
+  const index = await buildBusinessBrainIndex(ctx.db, {
+    account_id: input.account_id,
+    employee_id: input.employee_id,
+  });
   const audit_id = await writeAudit(ctx.db, {
     account_id: input.account_id,
     employee_id: input.employee_id,
     actor: ctx.actor,
     action: "tool:get_business_brain",
     result: "ok",
-    details: { fact_count: data?.length ?? 0 },
+    details: index.proof,
   });
-  return ok({
-    account_id: input.account_id,
-    employee_id: input.employee_id,
-    proof: { fact_count: data?.length ?? 0 },
-    user_facing_summary_hint: "Business brain facts loaded.",
-    changed_resources: [],
-    audit_id,
-  });
+  return {
+    ...ok({
+      account_id: input.account_id,
+      employee_id: input.employee_id,
+      proof: index.proof,
+      user_facing_summary_hint: "Business brain index loaded.",
+      changed_resources: [],
+      audit_id,
+    }),
+    brain_index: index.brain_index,
+    resources: index.resources,
+  };
 };
 
 const saveBusinessBrainFact: ToolHandler = async (ctx, raw) => {

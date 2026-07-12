@@ -38,6 +38,7 @@ describe("Manager MCP resources", () => {
     ({ handleManagerMcpRequest } = await import("../../apps/manager/src/lib/mcp-server"));
     state.db = makeFakeDb({
       employees: [{ id: "emp_1", account_id: "acct_1", name: "Sage", status: "live" }],
+      employee_profile_builds: [{ id: "build_1", account_id: "acct_1", employee_id: "emp_1", package_key: "contractor_estimator", generated_path: "/profiles/client_emp_1", install_status: "installed", validation_status: "passed", updated_at: "2026-07-04T00:00:00Z" }],
       connector_accounts: [{ id: "conn_1", employee_id: "emp_1", account_id: "acct_1", connector_key: "gmail", provider: "gmail", status: "connected", external_email: "owner@example.com", token_secret_ref: "sealed:do-not-leak" }],
       business_brain_facts: [{ id: "fact_1", account_id: "acct_1", employee_id: "emp_1", fact_key: "service_area", fact_value: "Scranton", category: "general", confidence: "high", updated_at: "2026-07-04T00:00:00Z" }],
     });
@@ -49,6 +50,8 @@ describe("Manager MCP resources", () => {
     const uris = body.result.resources.map((r: { uri: string }) => r.uri);
     expect(uris).toContain("amtech://manager/capability-registry");
     expect(uris).toContain("amtech://manager/connector-status");
+    expect(uris).toContain("amtech://manager/business-brain");
+    expect(uris).toContain("amtech://manager/business-facts");
   });
 
   it("reads resources through bound identity and redacts secret refs", async () => {
@@ -67,5 +70,24 @@ describe("Manager MCP resources", () => {
     const res = await handleManagerMcpRequest(rpc("resources/read", { uri: "amtech://manager/business-brain" }));
     const body = parse(await res.text());
     expect(body.result.contents[0].text).toContain("identity_required");
+  });
+
+  it("reads business brain as an index and facts only from the explicit facts resource", async () => {
+    const indexRes = await handleManagerMcpRequest(
+      rpc("resources/read", { uri: "amtech://manager/business-brain" }),
+      { account_id: "acct_1", employee_id: "emp_1" },
+    );
+    const indexBody = parse(await indexRes.text());
+    const indexText = indexBody.result.contents[0].text as string;
+    expect(indexText).toContain("brain_index");
+    expect(indexText).toContain("amtech://manager/business-facts");
+    expect(indexText).not.toContain("Scranton");
+
+    const factsRes = await handleManagerMcpRequest(
+      rpc("resources/read", { uri: "amtech://manager/business-facts" }),
+      { account_id: "acct_1", employee_id: "emp_1" },
+    );
+    const factsBody = parse(await factsRes.text());
+    expect(factsBody.result.contents[0].text).toContain("Scranton");
   });
 });

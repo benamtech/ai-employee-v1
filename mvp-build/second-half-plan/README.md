@@ -40,6 +40,14 @@ The Hermes GUI research is not a separate idea parked after the plan. It is embe
 - Phase 5 adds the operator version of the desk: fleet/admin health, repair, billing, cost, delivery receipts, materialization inspector, and raw provenance.
 - Phase 6 gates launch on proof that web, SMS, generic non-estimate resources, admin, connector repair, billing, and live provider/runtime paths work together.
 
+## Parallel Workstream: Context Engineering
+
+The [Context-Engineering workstream](context-engineering/README.md) (Phases CE-1..CE-4) is authored
+alongside these phases. It makes each employee a real *business brain* — seeding Hermes-native durable
+memory (MEMORY.md/USER.md) from onboarding, injecting a reference-shaped live-state primer cache-safely,
+tuning compression + tool-output hooks, rotating sessions before compaction with handoff notes, and
+keeping trivial/background work off the owner turn. It does not reopen the production infra slice.
+
 ## Implementation Rules
 
 - Do not rewrite Hermes. Package and surface it.

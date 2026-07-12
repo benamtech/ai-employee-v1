@@ -38,3 +38,9 @@ API_SERVER_HOST=0.0.0.0
 OPENAI_API_KEY={{MODEL_BRIDGE_API_KEY}}
 OPENAI_BASE_URL={{MODEL_BRIDGE_BASE_URL}}
 MANAGER_API_ORIGIN={{MANAGER_API_ORIGIN}}
+
+# CE-1 native context primer hook. This scoped credential is the same
+# per-employee Manager MCP bearer rendered into config.yaml; it is not the global
+# Manager internal token.
+HERMES_ACCEPT_HOOKS=1
+MANAGER_MCP_TOKEN={{MANAGER_MCP_TOKEN}}

@@ -20,3 +20,25 @@ seed_skills:
   - estimate
   - invoice
   - daily-checkin
+profile_context:
+  package_key: contractor_estimator
+  generated_from: onboarding_manifest
+  memory_limits:
+    memory_chars: 2200
+    user_chars: 1375
+  resource_pointers:
+    - amtech://manager/business-brain
+    - amtech://manager/business-facts
+    - amtech://manager/connector-status
+    - amtech://manager/work-queue
+    - amtech://manager/artifacts
+    - amtech://manager/approvals
+    - amtech://manager/capability-registry
+  slots:
+    - key: business_identity
+      title: Business identity
+      priority: 10
+      facts:
+        - key: business_name
+          value: Example Painting
+          source: onboarding

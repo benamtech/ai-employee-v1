@@ -4,6 +4,11 @@ import type { ProfileBuildParams, ProvisionerRequest, ProvisionerResult } from "
 import { computeApiServerToolsets, toYamlFlowList } from "@amtech/shared";
 import { activateCaddySnippet, writeCaddySnippetFile } from "./caddy-activation.js";
 import { runCommandString } from "./command-runner.js";
+import {
+  buildNativeMemoryFiles,
+  renderProfileContextMarkdown,
+  renderSlotMarkdown,
+} from "./memory-seed.js";
 
 const TEXT_EXTENSIONS = new Set([".md", ".yaml", ".yml", ".json", ".tpl", ".txt", ".example"]);
 
@@ -71,6 +76,8 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
   // the runtime backend (see employeeManagerOrigin) — the container-start `-e`
   // override is too late for values compiled into config.yaml.
   const managerOrigin = employeeManagerOrigin(runtimeBackend);
+  const context = params.profile_context;
+  const memories = buildNativeMemoryFiles(context);
   return {
     CLIENT_ID: params.client_id,
     ACCOUNT_ID: params.account_id,
@@ -102,8 +109,16 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     TOP_WORKFLOWS: params.top_workflows.join(", "),
     TOOLS_MENTIONED: params.tools_mentioned.join(", "),
     SEED_SKILLS: params.seed_skills.join(", "),
-    PRICING_NOTES: "_(learned as we go)_",
-    BRANDING_NOTES: "_(learned as we go)_",
+    PROFILE_CONTEXT_MARKDOWN: renderProfileContextMarkdown(context),
+    BUSINESS_IDENTITY_CONTEXT: renderSlotMarkdown(context, "business_identity"),
+    OWNER_IDENTITY_CONTEXT: renderSlotMarkdown(context, "owner_identity"),
+    WORKFLOW_CONTEXT: renderSlotMarkdown(context, "workflows"),
+    TOOL_CONTEXT: renderSlotMarkdown(context, "tools"),
+    DURABLE_FACTS_CONTEXT: renderSlotMarkdown(context, "durable_facts"),
+    STANDING_PREFERENCES_CONTEXT: renderSlotMarkdown(context, "standing_preferences"),
+    LIVE_STATE_POINTERS_CONTEXT: renderSlotMarkdown(context, "live_state_pointers"),
+    MEMORY_SEED: memories.memory_md,
+    USER_SEED: memories.user_md,
     MANAGER_API_ORIGIN: managerOrigin,
     MANAGER_MCP_TOKEN: renderSecrets.manager_mcp_token ?? "",
     // Model wiring. Local no-key testing (HERMES_MODEL_PROVIDER set) points the

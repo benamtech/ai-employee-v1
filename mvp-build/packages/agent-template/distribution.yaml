@@ -23,3 +23,43 @@ default_skills:
   - estimate
   - invoice
   - daily-checkin
+context_slots:
+  - key: business_identity
+    title: Business identity
+    priority: 10
+    description: Name, trade, timezone, and stable business identity.
+  - key: owner_identity
+    title: Owner identity
+    priority: 20
+    description: The verified owner identity and primary channel.
+  - key: workflows
+    title: Workflows
+    priority: 30
+    description: Repeated work, team shape, and top owner workflows.
+  - key: tools
+    title: Tools
+    priority: 40
+    description: Software/tools mentioned and initial skills to load.
+  - key: durable_facts
+    title: Durable facts
+    priority: 50
+    description: Compact pricing, branding, customer, and job-shape facts.
+  - key: standing_preferences
+    title: Standing preferences
+    priority: 60
+    description: Owner preferences and package-level standing instructions.
+  - key: live_state_pointers
+    title: Live state pointers
+    priority: 70
+    description: Manager resources to read for current business state.
+memory_limits:
+  memory_chars: 2200
+  user_chars: 1375
+resource_pointers:
+  - amtech://manager/business-brain
+  - amtech://manager/business-facts
+  - amtech://manager/connector-status
+  - amtech://manager/work-queue
+  - amtech://manager/artifacts
+  - amtech://manager/approvals
+  - amtech://manager/capability-registry

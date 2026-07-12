@@ -1,24 +1,26 @@
 # Business brain — {{BUSINESS_DISPLAY_NAME}}
 
-> Starts thin. {{EMPLOYEE_NAME}} fills this in as it works. The verbatim onboarding
-> answers are the source of truth; structure gets refined over time. Pricing/branding
-> facts captured at onboarding are mirrored into `business_brain_facts` so {{EMPLOYEE_NAME}}
-> never re-asks what the owner already said.
+> This is a navigation layer for {{EMPLOYEE_NAME}}'s integrated business brain:
+> native Hermes memory, Manager resources, onboarding context, work history,
+> connector state, approvals, artifacts, and learned durable facts.
 
 ## Business
-- Name: {{BUSINESS_DISPLAY_NAME}}
-- Trade: {{BUSINESS_KIND}}
-- Owner / supervisor: {{OWNER_NAME}}
-- Timezone: {{TIMEZONE}}
+{{BUSINESS_IDENTITY_CONTEXT}}
 
-## Pricing & rates
-{{PRICING_NOTES}}
+## Owner
+{{OWNER_IDENTITY_CONTEXT}}
 
-## Materials & suppliers
-_(learned as we go)_
+## Workflows
+{{WORKFLOW_CONTEXT}}
 
-## Branding / estimate template
-{{BRANDING_NOTES}}
+## Tools and skills
+{{TOOL_CONTEXT}}
+
+## Durable facts
+{{DURABLE_FACTS_CONTEXT}}
 
 ## Standing preferences
-_(learned as we go)_
+{{STANDING_PREFERENCES_CONTEXT}}
+
+## Live-state resources
+{{LIVE_STATE_POINTERS_CONTEXT}}
