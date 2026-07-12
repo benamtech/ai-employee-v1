@@ -27,7 +27,7 @@ import { resolvePreviewLink } from "./lib/preview-links.js";
 import { buildWorkResource } from "./lib/preview-render.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
 import { buildEmployeeSnapshot, cursorFromSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";
-import { buildAgentContext, claimAgentContextPrimer } from "./lib/agent-context.js";
+import { buildAgentContext, claimAgentContextPrimer, deriveNextAction, type SessionCarryover } from "./lib/agent-context.js";
 import { buildBusinessBrainIndex } from "./lib/business-brain.js";
 import { signalEmployeeChange, subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
 import { orThrow, mustWrite } from "./lib/db.js";
@@ -214,37 +214,66 @@ export function buildApp(): Hono {
     if (!token?.startsWith("mcp_")) return c.json({ error: "unauthorized" }, 401);
     const identity = await verifyEmployeeMcpCredential(serviceClient(), c.req.header("Authorization"));
     if (!identity) return c.json({ error: "unauthorized" }, 401);
+    // The primer gate keys on the TRANSCRIPT session id (the run/session id that
+    // rotates in CE-3), never on X-Hermes-Session-Key (the stable memory scope) —
+    // keying on the memory key would prime once per memory lifetime and never
+    // re-prime after a CE-3 rotation. `session_id` (query, forwarded by the hook)
+    // and X-Hermes-Session-Id are transcript identifiers; the memory key is not.
     const requestedSession =
       c.req.query("session_id") ||
       c.req.header("X-Hermes-Session-Id") ||
-      c.req.header("X-Hermes-Session-Key") ||
       "";
-    const sessionKey = requestedSession || `runtime:${identity.credential_id}`;
+    const transcriptSessionId = requestedSession || `runtime:${identity.credential_id}`;
+    const sessionKeySource = requestedSession ? "hermes" : "runtime_credential";
     const db = serviceClient();
-    const claimed = await claimAgentContextPrimer(db, {
+    const claim = await claimAgentContextPrimer(db, {
       account_id: identity.account_id,
       employee_id: identity.employee_id,
-      session_key: sessionKey,
+      transcript_session_id: transcriptSessionId,
     });
-    if (!claimed) {
+    if (claim === "already_primed") {
       return c.json({
         status: "ok",
         context: "",
-        proof: { already_primed: true, session_key_source: requestedSession ? "hermes" : "runtime_credential" },
+        proof: { already_primed: true, session_key_source: sessionKeySource },
       });
     }
+    // claim === "primed" (gate acquired) OR "claim_failed" (gate unavailable —
+    // unapplied 0029 / transient error): prime anyway (fail-open) but surface it
+    // loudly so a never-priming employee is visible instead of masquerading as
+    // already-primed.
     const snapshot = await buildEmployeeSnapshot(db, identity.employee_id, identity.account_id);
     const brain = await buildBusinessBrainIndex(db, {
       account_id: identity.account_id,
       employee_id: identity.employee_id,
       snapshot,
     });
+    // CE-3 carryover: if this transcript was minted by a rotation, carry state +
+    // next step forward once, then clear the flag so later turns don't repeat it.
+    let carryover: SessionCarryover | undefined;
+    const carryoverRow = (await db
+      .from("employee_sessions")
+      .select("pending_carryover")
+      .eq("employee_id", identity.employee_id)
+      .eq("transcript_session_id", transcriptSessionId)
+      .maybeSingle()).data as { pending_carryover?: boolean } | null;
+    if (carryoverRow?.pending_carryover) {
+      carryover = { pending: true, next_action: deriveNextAction(snapshot), last_decision: null };
+      await db
+        .from("employee_sessions")
+        .update({ pending_carryover: false })
+        .eq("employee_id", identity.employee_id)
+        .eq("transcript_session_id", transcriptSessionId);
+    }
     return c.json({
       status: "ok",
-      context: buildAgentContext({ snapshot, brain }),
+      context: buildAgentContext({ snapshot, brain, carryover }),
       proof: {
         already_primed: false,
-        session_key_source: requestedSession ? "hermes" : "runtime_credential",
+        claim,
+        ...(claim === "claim_failed" ? { claim_failed: true } : {}),
+        ...(carryover?.pending ? { carryover: true } : {}),
+        session_key_source: sessionKeySource,
         estimated_token_cap: 2000,
         session_target_tokens: 400000,
       },

@@ -43,6 +43,64 @@ function modelConfigBlock(): string {
 }
 
 /**
+ * CE-2 compression block (safety net; CE-3 rotation trips first).
+ *
+ * Hermes compresses at `threshold x context_length` (default 0.50) with a lossy
+ * structured summary; we NEVER disable it (it is the parachute). Keys are the
+ * documented Hermes defaults (configuration reference). This block is deliberately
+ * MODEL-AGNOSTIC: `threshold` is a *fraction* Hermes applies to whatever the
+ * model's window is, and CE-3 rotates at a smaller fraction (0.40), so rotation
+ * beats compression for every model without any per-model tuning here.
+ */
+function compressionConfigBlock(): string {
+  return [
+    "compression:",
+    "  enabled: true",
+    "  threshold: 0.50",
+    "  target_ratio: 0.20",
+    "  protect_last_n: 20",
+    "  protect_first_n: 3",
+    "  hygiene_hard_message_limit: 5000",
+  ].join("\n");
+}
+
+/**
+ * CE-2 delegation block. Enables the Hermes `delegate_task` tool so the employee
+ * can run heavy multi-step sub-work in an ISOLATED child context and only the
+ * child's bounded summary re-enters the parent conversation — in-turn context
+ * isolation (delegate_task is synchronous; it does not free the owner turn lane).
+ * `delegate_task` is exposed by configuring this block, NOT by a platform_toolsets
+ * entry (there is no valid "delegation" toolset name), so platform-toolsets.ts is
+ * intentionally untouched. Model/provider are omitted so children inherit the
+ * employee's configured model rather than duplicating provider secrets.
+ */
+function delegationConfigBlock(): string {
+  return [
+    "delegation:",
+    "  max_iterations: 50",
+    "  max_concurrent_children: 3",
+    "  max_spawn_depth: 1",
+    "  orchestrator_enabled: true",
+  ].join("\n");
+}
+
+/**
+ * CE-2 hooks block (tokenized so compression/hooks render together instead of a
+ * hardcoded single entry). `pre_llm_call` is the CE-1 once-per-session reference
+ * primer (a fail-open shell hook). The tool-output HYGIENE transforms are NOT here
+ * — `transform_tool_result`/`transform_terminal_output` are Hermes plugin-only
+ * hooks (see packages/agent-template/plugins/amtech-hygiene), not shell hooks.
+ */
+function hooksBlock(): string {
+  return [
+    "hooks_auto_accept: true",
+    "hooks:",
+    "  pre_llm_call:",
+    "    - command: \"node hooks/pre-session-context.mjs\"",
+  ].join("\n");
+}
+
+/**
  * Resolve the Manager control-plane origin a *provisioned employee* must use to
  * call back on. For a Dockerized employee, host loopback URLs (localhost /
  * 127.0.0.1) point at the container's own loopback, not the host — so anything
@@ -125,6 +183,12 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     // employee at the bridge + a dummy OpenAI-compatible key; production leaves
     // these empty (real provider key is a Manager-injected secret ref).
     MODEL_CONFIG: modelConfigBlock(),
+    // CE-2: compression parachute (rotation trips first), delegation for in-turn
+    // context isolation, and the tokenized hooks block (primer only; hygiene
+    // transforms are a Hermes plugin, not a shell hook).
+    COMPRESSION_CONFIG: compressionConfigBlock(),
+    DELEGATION_CONFIG: delegationConfigBlock(),
+    HOOKS: hooksBlock(),
     MODEL_BRIDGE_BASE_URL: process.env.HERMES_MODEL_PROVIDER ? (process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1") : "",
     MODEL_BRIDGE_API_KEY: process.env.HERMES_MODEL_PROVIDER ? (process.env.HERMES_MODEL_API_KEY ?? "bridge-local-dummy") : "",
     // Hermes reads api_server tools from config.yaml platform_toolsets.api_server.
@@ -163,6 +227,10 @@ async function copyRendered(src: string, dst: string, params: ProfileBuildParams
     await mkdir(dst, { recursive: true });
     for (const entry of await readdir(src)) {
       if (entry === "node_modules" || entry === "dist" || entry === ".next") continue;
+      // Hermes discovers plugins at $HERMES_HOME/plugins, NOT inside a profile
+      // dir — so the package `plugins/` is deployed separately (deployPlugins),
+      // not rendered into the profile (would be dead weight + token-mangled).
+      if (entry === "plugins") continue;
       await copyRendered(join(src, entry), join(dst, entry === ".env.tpl" ? ".env" : entry), params, renderSecrets);
     }
     return;
@@ -175,6 +243,47 @@ async function copyRendered(src: string, dst: string, params: ProfileBuildParams
   }
 }
 
+/** Plain recursive copy (no token render) — used to deploy Hermes plugins whose
+ *  `.py`/`.yaml` files must land verbatim. */
+async function copyDir(src: string, dst: string): Promise<void> {
+  const s = await stat(src);
+  if (s.isDirectory()) {
+    await mkdir(dst, { recursive: true });
+    for (const entry of await readdir(src)) {
+      if (entry === "__pycache__" || entry === "node_modules") continue;
+      await copyDir(join(src, entry), join(dst, entry));
+    }
+    return;
+  }
+  await mkdir(join(dst, ".."), { recursive: true });
+  await copyFile(src, dst);
+}
+
+/**
+ * Deploy the package's Hermes plugins (e.g. amtech-hygiene) into
+ * `$HERMES_HOME/plugins/<name>` where Hermes auto-discovers them at startup.
+ * Returns the deployed plugin names. Verbatim copy — plugins are employee-agnostic
+ * (no per-employee tokens), so they are NOT rendered. Enabling a discovered plugin
+ * (config vs `hermes plugins enable`) is a live-Hermes verification item.
+ */
+async function deployPlugins(packageKey: string, hermesHome: string): Promise<string[]> {
+  const src = join(packageRoot(packageKey), "plugins");
+  let entries: string[];
+  try {
+    entries = await readdir(src);
+  } catch {
+    return []; // package ships no plugins
+  }
+  const deployed: string[] = [];
+  for (const entry of entries) {
+    const entrySrc = join(src, entry);
+    if (!(await stat(entrySrc)).isDirectory()) continue;
+    await copyDir(entrySrc, join(hermesHome, "plugins", entry));
+    deployed.push(entry);
+  }
+  return deployed;
+}
+
 export function buildParams(req: ProvisionerRequest): ProfileBuildParams {
   return req.params;
 }
@@ -184,6 +293,7 @@ export async function renderProfilePackage(req: ProvisionerRequest): Promise<{
   generated_path: string;
   workspace_dir: string;
   validation_output: string;
+  deployed_plugins: string[];
 }> {
   const params = buildParams(req);
   const profile_id = `client_${params.employee_id}`;
@@ -204,7 +314,10 @@ export async function renderProfilePackage(req: ProvisionerRequest): Promise<{
     process.env.PROFILE_VALIDATION_COMMAND ??
     `node ${join(workspaceRoot(), "infra", "scripts", "profile-validate.mjs")} .`;
   const validation_output = (await runCommandString(validationCommand, generated_path, "profile validation")).output;
-  return { profile_id, generated_path, workspace_dir: params.workspace_dir, validation_output };
+  // CE-2: deploy Hermes plugins (tool-output hygiene transforms) into
+  // $HERMES_HOME/plugins where Hermes discovers them.
+  const deployed_plugins = await deployPlugins(req.profile_package_key, hermesHome);
+  return { profile_id, generated_path, workspace_dir: params.workspace_dir, validation_output, deployed_plugins };
 }
 
 export async function runRuntimeStart(generatedPath: string): Promise<string> {

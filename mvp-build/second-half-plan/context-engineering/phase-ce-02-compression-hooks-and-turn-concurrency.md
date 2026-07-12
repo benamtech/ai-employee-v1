@@ -1,6 +1,14 @@
 # Phase CE-2 — Compression policy + hooks + turn concurrency
 
-Status: planned (depends on CE-1)
+Status: source-wired (2026-07-12) · live Hermes plugin/compression proof `pending`
+
+> Implemented per the [CE-2/CE-3 production implementation plan](phase-ce-02-03-production-implementation-plan.md) §3
+> (the authoritative spec). This sketch is retained as the original design rationale. What shipped:
+> `{{COMPRESSION_CONFIG}}` (safety net; CE-3 rotates first), a deterministic Hermes **plugin**
+> `packages/agent-template/plugins/amtech-hygiene` for `transform_tool_result`/`transform_terminal_output`
+> (secret redaction always; size-trim only pathological bulk — never normal results), a data-driven
+> `routeForEventType` policy table, and the `delegation:` block enabling `delegate_task` for in-turn
+> context isolation.
 
 Goal: stop the default mid-session compaction, keep noisy tool output out of context, wire the AMTECH hook
 plumbing (which CE-1's primer rides), and move background/trivial work off the owner turn so a Hermes-class

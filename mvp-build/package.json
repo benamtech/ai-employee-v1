@@ -19,6 +19,7 @@
     "test:unit": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:watch": "vitest",
+    "plugins:test": "python3 packages/agent-template/plugins/amtech-hygiene/test_hygiene.py",
     "db:migrate": "node packages/db/migrate.mjs",
     "db:status": "node packages/db/migrate.mjs --status",
     "manager:dev": "npm run dev --workspace @amtech/manager",
