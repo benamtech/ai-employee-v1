@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AMTECH Design System — v1.0</title>
+<style>
+  /* ============================================================
+     AMTECH DESIGN SYSTEM — the 369 method wearing an Ogilvy skin.
+     Rendered in its own language: Inter + IBM Plex Mono,
+     ink-on-white / white-on-red, hairline composition, ×3 grid,
+     radius 0, no decoration. Deliberately single-theme.
+     ============================================================ */
+  :root {
+    --ink: #0a0a0a;
+    --paper: #ffffff;
+    --wash: #f4f4f4;
+    --red: #e11d2a;
+    --red-bright: #ff1a2b;
+    --h5: rgba(10,10,10,0.05);
+    --h10: rgba(10,10,10,0.10);
+    --h15: rgba(10,10,10,0.15);
+    --muted: rgba(10,10,10,0.62);
+    --body: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body { background: var(--wash); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  ::selection { background: var(--red); color: #fff; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  .doc { max-width: 1140px; margin: 0 auto; background: var(--paper); border-left: 1px solid var(--h10); border-right: 1px solid var(--h10); }
+
+  /* Chrome */
+  .winbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; height: 42px; padding: 0 18px; background: var(--ink); color: #fff; }
+  .winbar .wm { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+  .winbar .wm i { font-style: normal; color: var(--red); }
+  .dl { height: 24px; display: inline-flex; align-items: center; padding: 0 9px; background: transparent; border: 1px solid rgba(255,255,255,0.4); color: #fff; font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; }
+  .dl:hover { background: var(--red); border-color: var(--red); }
+
+  .strip { display: flex; align-items: stretch; height: 30px; border-bottom: 1px solid var(--h10); overflow-x: auto; }
+  .strip span { display: inline-flex; align-items: center; padding: 0 12px; font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border-left: 1px solid var(--h10); white-space: nowrap; }
+  .strip span:first-child { border-left: 0; color: var(--ink); }
+  .strip .dot { color: var(--red); margin-right: 6px; }
+
+  /* Soul hero */
+  .soul { padding: 60px 36px; border-bottom: 1px solid var(--h10); }
+  .soul .eyebrow { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--red); margin-bottom: 18px; }
+  .soul h1 { font-size: clamp(2.4rem, 5.5vw, 3.6rem); font-weight: 900; letter-spacing: -0.03em; line-height: 1.02; text-wrap: balance; max-width: 15ch; }
+  .soul h1 .p { color: var(--red); }
+  .soul p { margin-top: 24px; font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 500; line-height: 1.5; color: var(--muted); max-width: 62ch; }
+
+  /* Contents */
+  .toc { display: flex; flex-wrap: wrap; gap: 0; border-bottom: 1px solid var(--h10); }
+  .toc a { flex: 1 1 auto; padding: 12px 18px; font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-left: 1px solid var(--h10); white-space: nowrap; }
+  .toc a:first-child { border-left: 0; }
+  .toc a:hover { background: var(--wash); color: var(--ink); }
+
+  /* Section shell */
+  section { border-bottom: 1px solid var(--h10); }
+  .shead { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; padding: 30px 36px 6px; }
+  .shead .tier { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--red); }
+  .shead h2 { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+  .shead p { flex-basis: 100%; margin-top: 3px; font-size: 12px; color: var(--muted); max-width: 62ch; }
+  .body { padding: 18px 36px 36px; }
+
+  /* Spec row: live sample + caption */
+  .spec { border: 1px solid var(--h10); margin-top: 18px; }
+  .spec > .cap { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 9px 15px; border-bottom: 1px solid var(--h10); }
+  .spec > .cap b { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+  .spec > .cap span { font-family: var(--mono); font-size: 9px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); }
+  .spec > .demo { padding: 24px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center; overflow-x: auto; }
+  .spec > .demo.stack { flex-direction: column; align-items: stretch; }
+  .spec > .demo.stack > table.dt { min-width: 480px; }
+  .spec > .demo.wash { background: var(--wash); }
+
+  .note { font-family: var(--mono); font-size: 9px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); padding: 9px 15px; border-top: 1px solid var(--h5); }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; margin-top: 18px; }
+
+  /* ---- production tokens as reusable component classes ---- */
+  .btn { font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 0 18px; height: 42px; display: inline-flex; align-items: center; cursor: pointer; border: 1px solid var(--ink); background: var(--ink); color: #fff; }
+  .btn:hover { background: var(--red-bright); border-color: var(--red-bright); }
+  .btn.red { background: var(--red); border-color: var(--red); }
+  .btn.red:hover { background: var(--red-bright); border-color: var(--red-bright); }
+  .btn.quiet { background: var(--paper); color: var(--ink); border-color: var(--h15); }
+  .btn.quiet:hover { background: var(--paper); border-color: var(--ink); }
+  .btn.danger { background: var(--paper); color: var(--red); border-color: var(--red); }
+  .btn.danger:hover { background: var(--red); color: #fff; }
+  .btn.sm { height: 30px; font-size: 9px; padding: 0 12px; }
+  .btn[disabled], .btn.off { background: var(--paper); color: var(--h15); border-color: var(--h15); cursor: default; }
+
+  .inp { width: 240px; max-width: 100%; border: 1px solid var(--h15); background: var(--paper); padding: 0 12px; height: 42px; font-family: var(--body); font-size: 15px; outline: none; color: var(--ink); }
+  .inp:focus { border-color: var(--ink); }
+  .lbl { display: block; font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+
+  .pill { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border: 1px solid var(--h15); background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+  .pill.ok { border-color: var(--h15); color: var(--ink); }
+  .pill.need { border-color: var(--red); color: var(--red); }
+  .pill.fail { border-color: var(--red); background: var(--red); color: #fff; }
+  .pill.quiet { border-color: var(--h10); color: var(--muted); }
+
+  .link { color: var(--red); font-family: var(--mono); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; }
+  .link:hover { color: var(--red-bright); }
+
+  .swatch { display: flex; flex-direction: column; border: 1px solid var(--h10); min-width: 132px; flex: 1 1 132px; }
+  .swatch .chip { height: 60px; }
+  .swatch .meta { padding: 9px; }
+  .swatch .meta b { display: block; font-size: 12px; font-weight: 600; }
+  .swatch .meta code { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.03em; color: var(--muted); text-transform: uppercase; margin-top: 3px; }
+
+  table.dt { width: 100%; border-collapse: collapse; }
+  table.dt th, table.dt td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--h10); font-size: 12px; }
+  table.dt thead th { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+  table.dt tr:last-child td { border-bottom: 0; }
+  table.dt td.n, table.dt th.n { text-align: right; font-variant-numeric: tabular-nums; }
+
+  .foot { padding: 24px 36px; }
+  .foot p { font-family: var(--mono); font-size: 9px; line-height: 1.7; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); }
+
+  @media (max-width: 720px) {
+    .soul, .shead, .body, .foot { padding-left: 18px; padding-right: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <div class="winbar">
+    <span class="wm">AMTECH<i>.</i> DESIGN SYSTEM · v1.0</span>
+    <a href="#" class="dl" onclick="event.preventDefault();var b=new Blob(['<!doctype html>\n'+document.documentElement.outerHTML],{type:'text/html'});var u=window.URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download='amtech-design-system.html';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){window.URL.revokeObjectURL(u);},1000);">[&#8595; DOWNLOAD]</a>
+  </div>
+
+  <div class="strip">
+    <span><b class="dot">&#9679;</b>369 METHOD · AMTECH SKIN</span>
+    <span>INK · WHITE · RED</span>
+    <span>INTER · IBM PLEX MONO</span>
+    <span>×3 GRID · RADIUS 0</span>
+    <span class="dot" style="color:var(--muted)">FIXTURE-PROVEN</span>
+  </div>
+
+  <!-- SOUL -->
+  <div class="soul">
+    <div class="eyebrow">The soul</div>
+    <h1>Two type roles. Two color modes. One grid<span class="p">.</span></h1>
+    <p>AMTECH is the 369 method — ×3 spacing, hairline composition, one hero per screen, no decoration — wearing an Ogilvy&ndash;Bloomberg skin: Inter for the voice, IBM Plex Mono for the machine, near-black on white and white on AMTECH red. Everything below is rendered in that system, live, with its real production values. If a choice isn&rsquo;t on this page, it isn&rsquo;t in the product.</p>
+  </div>
+
+  <nav class="toc">
+    <a href="#color">Color</a>
+    <a href="#type">Type</a>
+    <a href="#space">Spacing</a>
+    <a href="#compose">Composition</a>
+    <a href="#relation">369 · AMTECH</a>
+    <a href="#atoms">Atoms</a>
+    <a href="#components">Components</a>
+    <a href="#patterns">Patterns</a>
+    <a href="#copy">Copy</a>
+    <a href="#gate">Audit gate</a>
+  </nav>
+
+  <!-- ============ COLOR ============ -->
+  <section id="color">
+    <div class="shead"><span class="tier">Foundation 01</span><h2>Color</h2><p>Two text/background modes, one accent. Red is the only hue and it is spent only where the owner must look; everything else is ink, hairline, and wash.</p></div>
+    <div class="body">
+
+      <div class="grid2">
+        <div style="border:1px solid var(--h10)">
+          <div style="background:#fff;color:var(--ink);padding:24px">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);margin-bottom:9px">Mode 01</div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em">Near-black on white</div>
+            <p style="font-size:12px;color:var(--muted);margin-top:6px">The reading surface. Red accents it: labels, the logo period, active borders, alerts, key CTAs.</p>
+          </div>
+        </div>
+        <div style="border:1px solid var(--h10)">
+          <div style="background:var(--red);color:#fff;padding:24px">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:9px">Mode 02</div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em">White on AMTECH red</div>
+            <p style="font-size:12px;color:rgba(255,255,255,0.85);margin-top:6px">The commitment surface — the front-door band, a gated decision. White dominates; black may accent but never becomes the reading mode.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="cap"><b>Tokens</b><span>the whole palette — no other values are legal</span></div>
+        <div class="demo">
+          <div class="swatch"><div class="chip" style="background:#0a0a0a"></div><div class="meta"><b>Ink</b><code>#0a0a0a</code></div></div>
+          <div class="swatch"><div class="chip" style="background:#ffffff;border-bottom:1px solid var(--h10)"></div><div class="meta"><b>Paper</b><code>#ffffff</code></div></div>
+          <div class="swatch"><div class="chip" style="background:#f4f4f4"></div><div class="meta"><b>Wash</b><code>#f4f4f4</code></div></div>
+          <div class="swatch"><div class="chip" style="background:#e11d2a"></div><div class="meta"><b>Red</b><code>#e11d2a</code></div></div>
+          <div class="swatch"><div class="chip" style="background:#ff1a2b"></div><div class="meta"><b>Red bright</b><code>#ff1a2b · hover</code></div></div>
+          <div class="swatch"><div class="chip" style="background:rgba(10,10,10,0.62)"></div><div class="meta"><b>Muted ink</b><code>0a0a0a / 62%</code></div></div>
+          <div class="swatch"><div class="chip" style="background:rgba(10,10,10,0.15)"></div><div class="meta"><b>Hairline</b><code>0a0a0a / 5·10·15%</code></div></div>
+        </div>
+        <div class="note">369 deviation, by design — borders are alpha hairlines (ink at 5/10/15%), not 369&rsquo;s solid <code>#999999</code>. The alpha reads quieter on a white product surface and layers cleanly over the wash.</div>
+      </div>
+
+      <div class="spec">
+        <div class="cap"><b>Semantic state ≠ accent</b><span>state is carried by form, not a second hue</span></div>
+        <div class="demo">
+          <span class="pill ok">Ready</span>
+          <span class="pill need">Needs you</span>
+          <span class="pill fail">Failed</span>
+          <span class="pill quiet">Scheduled</span>
+        </div>
+        <div class="note">There is no green/amber. &ldquo;Good&rdquo; is ink + glyph; &ldquo;needs you&rdquo; is a red outline; &ldquo;failed&rdquo; is the only white-on-red inversion. Red doubles as the accent and the alarm — deliberate scarcity.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ TYPE ============ -->
+  <section id="type">
+    <div class="shead"><span class="tier">Foundation 02</span><h2>Typography</h2><p>Inter carries the voice (Ogilvy-bold display, readable body); IBM Plex Mono carries the machine (labels, data, CTAs, proof). Both self-hosted via next/font in production — no CDN, no fallback flash.</p></div>
+    <div class="body">
+
+      <div class="spec">
+        <div class="cap"><b>Scale — Inter</b><span>9 · 12 · 15 · 18 · 24 · 36 · hero clamp · all ×3</span></div>
+        <div class="demo stack">
+          <div style="font-size:36px;font-weight:900;letter-spacing:-0.03em;line-height:1.05">Handle the work<span style="color:var(--red)">.</span> <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500;letter-spacing:0.06em">36 / 900 · hero</span></div>
+          <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em">Nothing leaves without you <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500">24 / 800 · section</span></div>
+          <div style="font-size:18px;font-weight:700;letter-spacing:-0.015em">A couple of things need you <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500">18 / 700 · headline</span></div>
+          <div style="font-size:15px;font-weight:600">Estimate ready for Jane <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500">15 / 600 · row title</span></div>
+          <div style="font-size:15px;font-weight:400">Send a job, a note, a customer request. Your employee turns it into real work. <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500">15 / 400 · body</span></div>
+          <div style="font-size:12px;color:var(--muted)">Customer-facing email is staged and waiting. <span style="font-family:var(--mono);font-size:9px;color:var(--muted);font-weight:500">12 · sub / muted</span></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Mono — IBM Plex</b><span>uppercase · +0.06–0.09em tracking</span></div>
+          <div class="demo stack">
+            <div style="font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase">Daily brief</div>
+            <div style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">01 — Text it</div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.03em;text-transform:uppercase;color:var(--muted)">Proof · gmail msg 18f2c · stripe in_9a</div>
+          </div>
+          <div class="note">Every operational label — nav counts, kickers, tags, proof, CTAs — is mono. It is the machine speaking; Inter is the person.</div>
+        </div>
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Logotype</b><span>the mark is a wordmark + red period</span></div>
+          <div class="demo" style="gap:36px">
+            <span style="font-family:var(--mono);font-size:21px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase">AMTECH<span style="color:var(--red)">.</span></span>
+            <span style="font-size:36px;font-weight:900;letter-spacing:-0.03em">AMTECH<span style="color:var(--red)">.</span></span>
+          </div>
+          <div class="note">The red period is the entire brand device. It recurs: the logo, section eyebrows, the hero&rsquo;s final stop.</div>
+        </div>
+      </div>
+
+      <div class="note" style="border:1px solid var(--h10);margin-top:18px">369 deviation, by design — 369 fixes weights at 400/500 (Helvetica). AMTECH keeps 400/500 for body + labels but adds 600–900 for the Inter display voice: the product sells, and an Ogilvy headline needs the black weight. Measure still caps ~62–66ch; leading 1.5–1.6.</div>
+
+    </div>
+  </section>
+
+  <!-- ============ SPACING ============ -->
+  <section id="space">
+    <div class="shead"><span class="tier">Foundation 03</span><h2>Spacing</h2><p>Every gap, pad, and size is a multiple of 3 — the 369 grid, unchanged. This is the load-bearing discipline AMTECH inherits verbatim.</p></div>
+    <div class="body">
+      <div class="spec">
+        <div class="cap"><b>The ×3 scale</b><span>3 · 6 · 9 · 12 · 15 · 18 · 24 · 36 · 48 · 60</span></div>
+        <div class="demo stack" style="gap:6px">
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">3</span><div style="height:12px;width:3px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">6</span><div style="height:12px;width:6px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">9</span><div style="height:12px;width:9px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">12</span><div style="height:12px;width:12px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">15</span><div style="height:12px;width:15px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">18</span><div style="height:12px;width:18px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">24</span><div style="height:12px;width:24px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">36</span><div style="height:12px;width:36px;background:var(--ink)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">48</span><div style="height:12px;width:48px;background:var(--red)"></div></div>
+          <div style="display:flex;align-items:center;gap:12px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);width:30px;text-align:right">60</span><div style="height:12px;width:60px;background:var(--red)"></div></div>
+        </div>
+        <div class="note">4, 5, 8, 10, 16, 20 are bugs. A 22px gap where 24 was meant is a defect, not a near-miss — re-measure after every layout change.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPOSITION ============ -->
+  <section id="compose">
+    <div class="shead"><span class="tier">Foundation 04</span><h2>Composition</h2><p>Every screen is BASE &rarr; PILLARS &rarr; ROOF: pick the sections, pick the one hero, pick the primitive each section uses. Sections separate by a hairline border, never a whitespace gap.</p></div>
+    <div class="body">
+      <div class="spec">
+        <div class="cap"><b>The spine</b><span>window bar → status → hero → body → footer</span></div>
+        <div class="demo stack" style="gap:0;border:1px solid var(--h10)">
+          <div style="height:27px;display:flex;align-items:center;padding:0 12px;background:var(--ink);color:#fff;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase">Window bar — identity + primary action</div>
+          <div style="height:24px;display:flex;align-items:center;padding:0 12px;border-bottom:1px solid var(--h10);font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Status strip — segmented state</div>
+          <div style="padding:24px 12px;border-bottom:1px solid var(--h10);background:var(--wash)"><div style="font-size:24px;font-weight:800;letter-spacing:-0.03em">Hero — the one thing the eye lands on</div><div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-top:3px">dominates by size + isolation</div></div>
+          <div style="padding:15px 12px;border-bottom:1px solid var(--h10);font-size:12px;color:var(--muted)">Body — bordered sections, dense data in real tables</div>
+          <div style="padding:9px 12px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Footer — quiet hints</div>
+        </div>
+        <div class="note">One hero per screen. Radius 0 everywhere. No shadow, gradient, blur, or icon library — text glyphs and hand-drawn pixel marks only.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 369 · AMTECH ============ -->
+  <section id="relation">
+    <div class="shead"><span class="tier">Provenance</span><h2>369 method &middot; AMTECH skin</h2><p>What is inherited verbatim, and what diverges by deliberate choice. The method is 369&rsquo;s; the skin is AMTECH&rsquo;s.</p></div>
+    <div class="body">
+      <div class="spec">
+        <div class="demo stack" style="padding:0">
+          <table class="dt">
+            <thead><tr><th>Decision</th><th>369 canon</th><th>AMTECH</th><th>Same?</th></tr></thead>
+            <tbody>
+              <tr><td>Spacing grid</td><td>×3 only</td><td>×3 only</td><td><span class="pill ok">Inherited</span></td></tr>
+              <tr><td>Border radius</td><td>0 everywhere</td><td>0 everywhere</td><td><span class="pill ok">Inherited</span></td></tr>
+              <tr><td>Composition</td><td>BASE→PILLARS→ROOF, one hero</td><td>same</td><td><span class="pill ok">Inherited</span></td></tr>
+              <tr><td>Decoration</td><td>none; glyphs only</td><td>none; glyphs + pixel marks</td><td><span class="pill ok">Inherited</span></td></tr>
+              <tr><td>Tokens-first</td><td>every value a token</td><td>every value a token</td><td><span class="pill ok">Inherited</span></td></tr>
+              <tr><td>Atomic tiers</td><td>atom→page, compose up</td><td>same</td><td><span class="pill ok">Inherited</span></td></tr>
+              <tr><td>Palette</td><td>navy / manila / grey</td><td>ink / red / wash</td><td><span class="pill need">Diverged</span></td></tr>
+              <tr><td>Type</td><td>Helvetica, 400/500</td><td>Inter + Plex, 400–900</td><td><span class="pill need">Diverged</span></td></tr>
+              <tr><td>Borders</td><td>solid #999999</td><td>alpha hairlines</td><td><span class="pill need">Diverged</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ATOMS ============ -->
+  <section id="atoms">
+    <div class="shead"><span class="tier">BASE</span><h2>Atoms</h2><p>Token-only primitives — the smallest legal pieces. Every one composes tokens and nothing else.</p></div>
+    <div class="body">
+
+      <div class="spec">
+        <div class="cap"><b>Buttons</b><span>mono uppercase · h42 (h30 compact) · square</span></div>
+        <div class="demo">
+          <button class="btn">Approve</button>
+          <button class="btn red">Create your AI employee</button>
+          <button class="btn danger">Decline</button>
+          <button class="btn quiet">Reply</button>
+          <button class="btn off">Start your employee</button>
+        </div>
+        <div class="demo wash" style="border-top:1px solid var(--h10)">
+          <button class="btn sm">Approve</button>
+          <button class="btn sm quiet">Not yet</button>
+          <span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">compact — inside cards</span>
+        </div>
+        <div class="note">Primary = ink fill. Red fill reserved for the single key CTA. Danger = red outline. Quiet = hairline. Disabled loses the fill. Hover on any filled button → bright red.</div>
+      </div>
+
+      <div class="grid2">
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Inputs</b><span>h42 · focus = ink border</span></div>
+          <div class="demo stack">
+            <span class="lbl" style="margin-bottom:6px">Email</span>
+            <input class="inp" style="width:100%" placeholder="owner@example.com" />
+            <input class="inp" style="width:100%;border-color:var(--ink)" value="+1 570 555 0142" />
+          </div>
+        </div>
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Status pills</b><span>form-encoded state</span></div>
+          <div class="demo">
+            <span class="pill ok">Ready</span>
+            <span class="pill ok">Connected</span>
+            <span class="pill need">Needs you</span>
+            <span class="pill need">Needs help</span>
+            <span class="pill fail">Failed</span>
+            <span class="pill fail">Unreachable</span>
+            <span class="pill quiet">Scheduled</span>
+            <span class="pill quiet">Draft</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Move &amp; deliverable tags</b><span>mono, bordered</span></div>
+          <div class="demo">
+            <span class="pill quiet">Heads up</span>
+            <span class="pill need">Needs you</span>
+            <span style="display:inline-flex;align-items:center;height:18px;padding:0 6px;border:1px solid var(--ink);font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase">Your call</span>
+            <span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">doc · msg · pay · rpt · cal · img · job</span>
+          </div>
+          <div class="note">Deliverable types are mono text tags, never emoji — the 369 no-icon-library rule.</div>
+        </div>
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Links &amp; proof</b><span>red, mono, underlined</span></div>
+          <div class="demo stack">
+            <a class="link" href="#atoms">Open the estimate &rarr;</a>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.03em;text-transform:uppercase;color:var(--muted)"><span style="font-weight:500">Proof </span>gmail msg 18f2c · stripe in_9a4</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="cap"><b>Pixel icons</b><span>12×12 hand-drawn · inline SVG rects · crispEdges</span></div>
+        <div class="demo" style="gap:36px">
+          <div style="text-align:center">
+            <svg viewBox="0 0 12 12" width="36" height="36" shape-rendering="crispEdges"><g fill="#0a0a0a"><rect x="1" y="2" width="9" height="1"/><rect x="1" y="2" width="1" height="5"/><rect x="9" y="2" width="1" height="5"/><rect x="1" y="6" width="9" height="1"/><rect x="3" y="7" width="1" height="2"/><rect x="3" y="8" width="1" height="1"/></g><g fill="#e11d2a"><rect x="3" y="4" width="1" height="1"/><rect x="5" y="4" width="1" height="1"/><rect x="7" y="4" width="1" height="1"/></g></svg>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-top:9px">Text it</div>
+          </div>
+          <div style="text-align:center">
+            <svg viewBox="0 0 12 12" width="36" height="36" shape-rendering="crispEdges"><g fill="#0a0a0a"><rect x="4" y="1" width="4" height="1"/><rect x="3" y="1" width="1" height="4"/><rect x="8" y="1" width="1" height="4"/><rect x="2" y="4" width="8" height="1"/><rect x="2" y="4" width="1" height="6"/><rect x="9" y="4" width="1" height="6"/><rect x="2" y="9" width="8" height="1"/></g><g fill="#e11d2a"><rect x="5" y="6" width="2" height="2"/></g></svg>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-top:9px">It asks first</div>
+          </div>
+          <div style="text-align:center">
+            <svg viewBox="0 0 12 12" width="36" height="36" shape-rendering="crispEdges"><g fill="#0a0a0a"><rect x="2" y="1" width="8" height="1"/><rect x="2" y="1" width="1" height="9"/><rect x="9" y="1" width="1" height="9"/><rect x="3" y="3" width="4" height="1"/><rect x="3" y="5" width="4" height="1"/><rect x="2" y="9" width="1" height="1"/><rect x="4" y="9" width="1" height="1"/><rect x="6" y="9" width="1" height="1"/><rect x="8" y="9" width="1" height="1"/></g><g fill="#e11d2a"><rect x="6" y="6" width="2" height="1"/><rect x="6" y="7" width="2" height="1"/></g></svg>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-top:9px">Proof after</div>
+          </div>
+        </div>
+        <div class="note">SMS bubble · padlock · receipt. Ink + one red accent, no anti-aliasing. Any new icon is a 12×12 grid map through the same <code>PixelIcon</code> primitive.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ COMPONENTS ============ -->
+  <section id="components">
+    <div class="shead"><span class="tier">PILLARS</span><h2>Components</h2><p>Molecules and organisms — atoms composed into the pieces the owner actually operates. Each is domain-named.</p></div>
+    <div class="body">
+
+      <!-- stat strip -->
+      <div class="spec">
+        <div class="cap"><b>Daily Brief — segmented stat strip</b><span>the Today hero</span></div>
+        <div class="demo stack" style="padding:0;border-top:0">
+          <div style="border:1px solid var(--h10)">
+            <div style="padding:18px">
+              <div style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--red);margin-bottom:6px">Daily brief <span style="color:var(--muted)">— Sunday, Jul 12</span></div>
+              <div style="font-size:18px;font-weight:700;letter-spacing:-0.015em;max-width:480px">A couple of things need a quick word from you. The rest is handled.</div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;border-top:1px solid var(--h10)">
+              <div style="flex:1 1 120px;padding:12px 18px;border-right:1px solid var(--h10)"><span style="display:block;font-size:36px;font-weight:800;letter-spacing:-0.03em;line-height:1.15;color:var(--red)">2</span><span style="display:block;margin-top:3px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">need attention</span></div>
+              <div style="flex:1 1 120px;padding:12px 18px;border-right:1px solid var(--h10)"><span style="display:block;font-size:36px;font-weight:800;letter-spacing:-0.03em;line-height:1.15;color:var(--red)">2</span><span style="display:block;margin-top:3px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">customer replies</span></div>
+              <div style="flex:1 1 120px;padding:12px 18px;border-right:1px solid var(--h10)"><span style="display:block;font-size:36px;font-weight:800;letter-spacing:-0.03em;line-height:1.15;color:var(--muted)">0</span><span style="display:block;margin-top:3px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">reminders set</span></div>
+              <div style="flex:1 1 120px;padding:12px 18px"><span style="display:block;font-size:36px;font-weight:800;letter-spacing:-0.03em;line-height:1.15;color:var(--muted)">0</span><span style="display:block;margin-top:3px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">deposits ($)</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="note">36px Inter-black numerals; red only when a count needs the owner. The strip is one segmented bar — hairline between cells, no floating chips.</div>
+      </div>
+
+      <div class="grid2">
+        <!-- work card -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Work card</b><span>notify / question / review</span></div>
+          <div class="demo wash">
+            <div style="display:flex;width:100%;border:1px solid var(--h10);background:#fff">
+              <div style="width:3px;background:var(--ink)"></div>
+              <div style="flex:1;padding:18px">
+                <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--ink);padding:0 6px;height:18px;display:inline-flex;align-items:center">Your call</span><h3 style="font-size:15px;font-weight:600;letter-spacing:-0.015em">Estimate ready for Jane</h3></div>
+                <p style="margin-top:6px;font-size:15px">Kitchen repaint estimate is ready at $4,200. I will not send it until you approve.</p>
+                <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap"><button class="btn sm">Approve</button><button class="btn sm danger">Not yet</button><button class="btn sm quiet">Reply / tweak</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="note">3px move bar (ink=review, red=question, hairline=notify) + mono move tag + acceptance-grammar actions.</div>
+        </div>
+
+        <!-- approval card -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Approval card — the gate</b><span>binding yes/no for money + sends</span></div>
+          <div class="demo wash">
+            <div style="display:flex;width:100%;border:1px solid var(--h10);background:#fff">
+              <div style="width:3px;background:var(--ink)"></div>
+              <div style="flex:1;padding:18px">
+                <div style="display:flex;align-items:center;gap:9px"><span style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--ink);padding:0 6px;height:18px;display:inline-flex;align-items:center">Your call</span><span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--red)">high risk</span></div>
+                <p style="margin-top:6px;font-size:15px">Send a $1,260 deposit invoice to Ridgeview HOA.</p>
+                <div style="display:flex;gap:6px;margin-top:12px"><button class="btn sm">Approve</button><button class="btn sm danger">Not yet</button></div>
+              </div>
+            </div>
+          </div>
+          <div class="note">The conversation happens on the work card; this is the binding gate. Risk shown in red mono.</div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <!-- list row -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>List row</b><span>rail-fed lists · mono kicker</span></div>
+          <div class="demo stack" style="padding:0">
+            <div style="border:1px solid var(--h10)">
+              <button style="width:100%;border:0;border-bottom:1px solid var(--h10);background:#fff;padding:12px;text-align:left;display:grid;grid-template-columns:1fr auto;gap:3px 12px;cursor:pointer;font-family:var(--body)"><span style="grid-column:1;font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);font-weight:500">Review</span><strong style="grid-column:1;font-size:15px;font-weight:600">Approve Jane estimate send</strong><p style="grid-column:1;margin:0;font-size:12px;color:var(--muted)">Customer-facing email is staged and waiting.</p><span class="pill need" style="grid-column:2;grid-row:1/span 3;align-self:center">Needs you</span></button>
+              <button style="width:100%;border:0;background:#fff;padding:12px;text-align:left;display:grid;grid-template-columns:1fr auto;gap:3px 12px;cursor:pointer;font-family:var(--body)"><span style="grid-column:1;font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);font-weight:500">Connector</span><strong style="grid-column:1;font-size:15px;font-weight:600">Payments need attention</strong><p style="grid-column:1;margin:0;font-size:12px;color:var(--muted)">Reconnect Stripe before sending live links.</p><span class="pill need" style="grid-column:2;grid-row:1/span 3;align-self:center">Needs help</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- nav rail -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Nav rail item</b><span>active = red left edge + count</span></div>
+          <div class="demo stack" style="padding:0">
+            <div style="border:1px solid var(--h10)">
+              <div style="border-left:3px solid var(--red);background:var(--wash);padding:6px 15px 6px 18px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;line-height:24px">Today <span style="font-family:var(--mono);font-size:9px;color:#fff;background:var(--red);border:1px solid var(--red);padding:0 6px;line-height:16px;min-width:18px;text-align:center">3</span></div>
+              <div style="border-left:3px solid transparent;padding:6px 15px 6px 18px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:500;color:var(--muted);line-height:24px">Chat <span style="font-family:var(--mono);font-size:9px;color:var(--muted);border:1px solid var(--h15);padding:0 6px;line-height:16px;min-width:18px;text-align:center">2</span></div>
+              <div style="border-left:3px solid transparent;padding:6px 15px 6px 18px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:500;color:var(--muted);line-height:24px">Jobs <span style="font-family:var(--mono);font-size:9px;color:var(--muted);border:1px solid var(--h15);padding:0 6px;line-height:16px;min-width:18px;text-align:center">3</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <!-- chat -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Chat — two voices</b><span>ink bar = employee · wash = owner</span></div>
+          <div class="demo stack wash">
+            <div style="align-self:flex-start;max-width:80%;border:1px solid var(--h10);border-left:3px solid var(--ink);padding:9px 12px;background:#fff"><span style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">Employee</span><p style="margin-top:3px;font-size:15px">Estimate&rsquo;s ready — $4,200. Want me to send it?</p></div>
+            <div style="align-self:flex-end;max-width:80%;border:1px solid var(--h10);padding:9px 12px;background:#fff"><span style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">You</span><p style="margin-top:3px;font-size:15px">yes send it</p></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr auto;border-top:1px solid var(--h10)"><input class="inp" style="border:0;height:48px;width:100%" placeholder="Text your employee..." /><button class="btn" style="height:48px;border:0">Send</button></div>
+        </div>
+
+        <!-- receipt + kv -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Key-value + receipt</b><span>detail rows · quiet proof</span></div>
+          <div class="demo stack">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--h5);padding-bottom:6px"><span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);line-height:18px">Customer</span><strong style="font-weight:600">Jane Miller</strong></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--h5);padding-bottom:6px"><span style="font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);line-height:18px">Job</span><strong style="font-weight:600">Kitchen repaint</strong></div>
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:0.03em;text-transform:uppercase;color:var(--muted)"><span style="font-weight:500">Proof </span>gmail msg 18f2c · stripe in_9a4</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- table -->
+      <div class="spec">
+        <div class="cap"><b>Table</b><span>dense data — a real table, not flex rows</span></div>
+        <div class="demo stack" style="padding:0">
+          <table class="dt">
+            <thead><tr><th>Customer</th><th>Work</th><th>Status</th><th class="n">Amount</th></tr></thead>
+            <tbody>
+              <tr><td>Jane Miller</td><td>Kitchen repaint</td><td><span class="pill need">Needs approval</span></td><td class="n">$4,200</td></tr>
+              <tr><td>Ridgeview HOA</td><td>Exterior touch-up</td><td><span class="pill quiet">Deposit draft</span></td><td class="n">$1,260</td></tr>
+              <tr><td>Maple Street</td><td>Trim repair</td><td><span class="pill quiet">Needs photos</span></td><td class="n">&mdash;</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note">Mono uppercase headers, tabular-nums right-aligned amounts, hairline rows. Density is the 369 soul.</div>
+      </div>
+
+      <div class="grid2">
+        <!-- empty state -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Empty state</b><span>ready, not barren</span></div>
+          <div class="demo stack">
+            <strong style="font-size:15px;font-weight:600">No jobs yet</strong>
+            <p style="font-size:12px;color:var(--muted);margin-top:6px">Jobs collect estimates, replies, invoices, reminders, and proof in one place.</p>
+          </div>
+        </div>
+        <!-- connection card -->
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Connection card</b><span>generic connected-business surface</span></div>
+          <div class="demo stack" style="padding:0">
+            <button style="width:100%;border:0;background:#fff;padding:12px;text-align:left;display:grid;grid-template-columns:1fr auto;gap:3px 12px;font-family:var(--body)"><span style="grid-column:1;font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);font-weight:500">Email</span><strong style="grid-column:1;font-size:15px;font-weight:600">Email</strong><p style="grid-column:1;margin:0;font-size:12px;color:var(--muted)">o***@ferraro.com — draft & send behind approval</p><span class="pill ok" style="grid-column:2;grid-row:1/span 3;align-self:center">Connected</span></button>
+          </div>
+          <div class="note">A new connector lights up a generic card — never a bespoke per-provider layout.</div>
+        </div>
+      </div>
+
+      <!-- review action bar -->
+      <div class="spec">
+        <div class="cap"><b>Review action bar</b><span>signed page — red rule → gated decision</span></div>
+        <div class="demo stack" style="padding:0">
+          <div style="display:flex;gap:9px;padding:12px;border-top:3px solid var(--red);background:#fff">
+            <button class="btn" style="flex:1;justify-content:center;height:48px">Approve</button>
+            <button class="btn danger" style="flex:1;justify-content:center;height:48px">Decline</button>
+          </div>
+          <div style="display:flex;gap:9px;padding:12px;border-top:1px solid var(--h15);background:#fff">
+            <button class="btn quiet" style="flex:1;justify-content:center;height:48px">Reply</button>
+            <button class="btn quiet" style="flex:1;justify-content:center;height:48px">Got it</button>
+          </div>
+        </div>
+        <div class="note">48px thumb targets, bottom-pinned. A 3px red top rule appears only when the decision moves money or leaves the business — the one place the whole system shouts.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ PATTERNS ============ -->
+  <section id="patterns">
+    <div class="shead"><span class="tier">ROOF</span><h2>Patterns</h2><p>Templates — organisms arranged into whole screens. The layout skeleton, filled with real content downstream.</p></div>
+    <div class="body">
+
+      <div class="spec">
+        <div class="cap"><b>The desk shell</b><span>rail · topbar · view · preview</span></div>
+        <div class="demo" style="padding:0">
+          <div style="display:grid;grid-template-columns:120px 1fr 132px;width:100%;border:1px solid var(--h10);min-height:180px">
+            <div style="border-right:1px solid var(--h10);padding:9px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Rail<br/>identity<br/>nav<br/>health</div>
+            <div style="display:flex;flex-direction:column">
+              <div style="border-bottom:1px solid var(--h10);padding:9px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Topbar — kicker + title</div>
+              <div style="flex:1;padding:12px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">View — the active surface</div>
+            </div>
+            <div style="border-left:1px solid var(--h10);padding:9px;font-family:var(--mono);font-size:9px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted)">Preview<br/>selected work</div>
+          </div>
+        </div>
+        <div class="note">On mobile the preview becomes a dismissible bottom sheet (66vh, ink top rule, safe-area aware); the nav becomes a scrolling tab strip.</div>
+      </div>
+
+      <div class="grid2">
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Signed review</b><span>what a text opens</span></div>
+          <div class="demo stack" style="padding:0">
+            <div style="border:1px solid var(--h10)">
+              <div style="display:flex;justify-content:space-between;align-items:center;height:33px;padding:0 12px;border-bottom:1px solid var(--h10)"><span style="font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase">AMTECH<span style="color:var(--red)">.</span></span><span style="font-family:var(--mono);font-size:9px;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted)">Secure review</span></div>
+              <div style="padding:15px"><div style="font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.09em;text-transform:uppercase;color:var(--red)">Please review</div><div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;margin-top:6px">$4,200.00</div><div style="font-size:12px;color:var(--muted);margin-top:3px">To: Jane Miller</div></div>
+              <div style="display:flex;gap:9px;padding:12px;border-top:3px solid var(--red)"><button class="btn sm" style="flex:1;justify-content:center;height:36px">Approve</button><button class="btn sm danger" style="flex:1;justify-content:center;height:36px">Decline</button></div>
+            </div>
+          </div>
+        </div>
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Front door band</b><span>the one white-on-red surface</span></div>
+          <div class="demo" style="padding:0">
+            <div style="width:100%;background:var(--red);color:#fff;padding:24px;text-align:center"><div style="font-size:24px;font-weight:900;letter-spacing:-0.03em;line-height:1.1">Work handled. Never behind your back<span>.</span></div><div style="display:inline-flex;align-items:center;margin-top:15px;border:1px solid #fff;color:#fff;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;padding:0 18px;height:36px">Create your AI employee</div></div>
+          </div>
+          <div class="note">Mode 02 in the wild: white dominates, the CTA is an outlined white button that inverts on hover.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============ COPY ============ -->
+  <section id="copy">
+    <div class="shead"><span class="tier">Voice</span><h2>Copy &amp; vocabulary</h2><p>Owner-facing words name things by what a small-business owner recognizes. Developer vocabulary never reaches an owner surface.</p></div>
+    <div class="body">
+      <div class="grid2">
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Say</b><span>business-native</span></div>
+          <div class="demo stack" style="gap:6px">
+            <div style="font-size:12px">employee · work · task · output · draft · proof</div>
+            <div style="font-size:12px">connected account · ability · recurring work</div>
+            <div style="font-size:12px">waiting for you · needs connection</div>
+            <div style="font-size:12px">sent · delivered · paid · synced</div>
+          </div>
+        </div>
+        <div class="spec" style="margin-top:0">
+          <div class="cap"><b>Never (owner UI)</b><span>developer vocabulary</span></div>
+          <div class="demo stack" style="gap:6px">
+            <div style="font-size:12px;color:var(--muted);text-decoration:line-through">MCP · API · bearer / token · runtime</div>
+            <div style="font-size:12px;color:var(--muted);text-decoration:line-through">config · schema · JSON · stack trace</div>
+            <div style="font-size:12px;color:var(--muted);text-decoration:line-through">toolset · raw payload · service role</div>
+          </div>
+          <div class="note">Admin/operator surfaces may show technical state — but still never raw secrets, provider payloads, or stack traces.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AUDIT GATE ============ -->
+  <section id="gate">
+    <div class="shead"><span class="tier">Ship gate</span><h2>Audit gate</h2><p>Mechanical checks plus a mandatory eyes-on pass. A passing checklist is necessary, not sufficient — render it, look at it, judge it against the soul.</p></div>
+    <div class="body">
+      <div class="spec">
+        <div class="demo stack" style="padding:0">
+          <table class="dt">
+            <thead><tr><th>Check</th><th>Rule</th></tr></thead>
+            <tbody>
+              <tr><td>Every px a multiple of 3</td><td>3 / 6 / 9 / 12 / 15 / 18 / 24 / 36 …</td></tr>
+              <tr><td>Only token hex</td><td>ink · paper · wash · red · red-bright · alpha hairlines</td></tr>
+              <tr><td>Radius 0 everywhere</td><td>no rounded corners</td></tr>
+              <tr><td>No decoration</td><td>no shadow, gradient, blur, icon library, emoji</td></tr>
+              <tr><td>Two type roles</td><td>Inter (voice) · IBM Plex Mono (machine)</td></tr>
+              <tr><td>Two color modes only</td><td>ink-on-white · white-on-red</td></tr>
+              <tr><td>One hero per screen</td><td>sections separate by hairline, not gap</td></tr>
+              <tr><td>Owner-safe copy</td><td>no developer vocabulary on owner surfaces</td></tr>
+              <tr><td>Focus visible</td><td>2px red outline on every interactive element</td></tr>
+              <tr><td>Eyes-on</td><td>render → look → judge vs the soul</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <p>AMTECH Design System v1.0 &middot; rendered in its own language, live &middot; the 369 method (×3 grid · radius 0 · hairline composition · one hero · no decoration · tokens-first · atomic tiers) wearing an Ogilvy&ndash;Bloomberg skin (Inter + IBM Plex Mono · ink-on-white / white-on-red) &middot; production tokens in apps/web/app/agent/[employeeId]/surface.tokens.ts + app/globals.css &middot; deliberately single-theme &middot; fixture-proven, no live provider/runtime acceptance claimed</p>
+  </div>
+
+</div>
+</body>
+</html>
