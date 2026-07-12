@@ -25,6 +25,7 @@ import { TOOL_NAMES, getToolSchema, type ToolName } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { runManagerTool, SCHEDULER_ONLY_TOOLS } from "./run-tool.js";
 import { buildEmployeeSnapshot } from "./employee-stream.js";
+import { buildBusinessBrainIndex, readBusinessFactsResource } from "./business-brain.js";
 
 const SERVER_INFO = { name: "amtech-manager", version: "0.1.0" } as const;
 
@@ -32,8 +33,8 @@ const SERVER_INFO = { name: "amtech-manager", version: "0.1.0" } as const;
  *  (sequences, gate discipline) lives in the workspace AGENTS/manager-tools
  *  prose; this is just the one-line "what is this tool". */
 const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
-  get_business_brain: "Read the business brain (facts the employee has learned about this business).",
-  save_business_brain_fact: "Persist one durable fact about the business to the brain.",
+  get_business_brain: "Read the business brain index and resource map; use business-facts only for explicit fact details.",
+  save_business_brain_fact: "Persist one durable fact resource inside the broader business brain.",
   create_estimate_artifact: "Create a stored, itemized estimate artifact from a line-item payload.",
   render_estimate_pdf: "Render a stored estimate to a PDF artifact.",
   create_signed_artifact_link: "Mint a signed, expiring AMTECH link to an artifact (never a local path).",
@@ -96,7 +97,8 @@ export interface McpIdentity {
 }
 
 const RESOURCE_DEFS = [
-  { uri: "amtech://manager/business-brain", name: "Business brain summary", mimeType: "application/json" },
+  { uri: "amtech://manager/business-brain", name: "Business brain index", mimeType: "application/json" },
+  { uri: "amtech://manager/business-facts", name: "Business facts", mimeType: "application/json" },
   { uri: "amtech://manager/connector-status", name: "Connector status", mimeType: "application/json" },
   { uri: "amtech://manager/artifacts", name: "Artifacts", mimeType: "application/json" },
   { uri: "amtech://manager/approvals", name: "Approvals", mimeType: "application/json" },
@@ -131,16 +133,15 @@ async function readManagerResource(uri: string, identity: McpIdentity) {
   if (uri === "amtech://manager/work-queue") return jsonResource(uri, { tasks: snapshot.tasks ?? [], resurface_items: snapshot.resurface_items ?? [], surface_envelopes: snapshot.surface_envelopes ?? [] });
   if (uri === "amtech://manager/runtime-health") return jsonResource(uri, { runtime_health: snapshot.runtime_health });
   if (uri === "amtech://manager/capability-registry") return jsonResource(uri, { capabilities: snapshot.capabilities ?? [], abilities: snapshot.abilities ?? [] });
-  if (uri === "amtech://manager/business-brain") {
-    const { data } = await db
-      .from("business_brain_facts")
-      .select("id,fact_key,fact_value,category,source,confidence,updated_at")
-      .eq("account_id", identity.account_id)
-      .eq("employee_id", identity.employee_id)
-      .order("updated_at", { ascending: false })
-      .limit(50);
-    return jsonResource(uri, { facts: data ?? [] });
-  }
+  if (uri === "amtech://manager/business-brain") return jsonResource(uri, await buildBusinessBrainIndex(db, {
+    account_id: identity.account_id,
+    employee_id: identity.employee_id,
+    snapshot,
+  }));
+  if (uri === "amtech://manager/business-facts") return jsonResource(uri, await readBusinessFactsResource(db, {
+    account_id: identity.account_id,
+    employee_id: identity.employee_id,
+  }));
   return jsonResource(uri, { error: "resource_not_found" });
 }
 

@@ -31,6 +31,13 @@ function params(runtime_backend?: ProfileBuildParams["runtime_backend"]): Profil
     top_workflows: ["estimates"],
     tools_mentioned: [],
     seed_skills: ["estimate"],
+    profile_context: {
+      package_key: "contractor_estimator",
+      generated_from: "onboarding_manifest",
+      memory_limits: { memory_chars: 2200, user_chars: 1375 },
+      resource_pointers: ["amtech://manager/business-brain"],
+      slots: [],
+    },
   };
 }
 

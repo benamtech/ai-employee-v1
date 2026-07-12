@@ -2,10 +2,31 @@ import { mkdtemp, readFile, writeFile, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { buildProfileContext } from "../../apps/manager/src/lib/profile-context";
 import { renderProfilePackage } from "../../apps/manager/src/lib/profile-renderer";
+import type { OnboardingManifest } from "../../packages/shared/src/manifest";
 import type { ProvisionerRequest } from "../../packages/shared/src/profile-package";
 
 const saved: Record<string, string | undefined> = {};
+
+const manifest: OnboardingManifest = {
+  employee_type: "contractor_estimator",
+  profile_package_key: "contractor_estimator",
+  business_display_name: "Smith Painting",
+  business_kind: "painting",
+  timezone: "America/New_York",
+  owner_name: "Jane",
+  verified_phone_e164: "+15555550100",
+  verification_method: "twilio_verify",
+  consent_channel: "web",
+  employee_name: "Alex",
+  top_workflows: ["estimates"],
+  tools_mentioned: ["QuickBooks"],
+  seed_skills: ["estimate"],
+  pricing_facts: [{ key: "labor_rate", value: "$75/hour", confidence: "high", source_snippet: "never render this raw snippet" }],
+  branding_facts: [{ key: "tone", value: "simple and professional", confidence: "medium" }],
+  customer_job_facts: [],
+};
 
 function req(token?: string): ProvisionerRequest {
   return {
@@ -33,6 +54,7 @@ function req(token?: string): ProvisionerRequest {
       tools_mentioned: [],
       seed_skills: ["estimate"],
       api_server_key: "api_server_secret",
+      profile_context: buildProfileContext({ packageKey: "contractor_estimator", manifest }),
     },
   };
 }
@@ -65,6 +87,21 @@ describe("profile renderer secret boundaries", () => {
     expect(config).not.toContain("X-AMTECH-Account-Id");
     expect(config).not.toContain("global-manager-token");
     expect(params).not.toContain("mcp_scoped_profile_token");
+  });
+
+  it("renders native Hermes memory and workspace brain from profile context", async () => {
+    const rendered = await renderProfilePackage(req("mcp_scoped_profile_token"));
+    const memory = await readFile(join(rendered.generated_path, "memories", "MEMORY.md"), "utf8");
+    const user = await readFile(join(rendered.generated_path, "memories", "USER.md"), "utf8");
+    const brain = await readFile(join(rendered.generated_path, "workspace", "brain", "business-brain.md"), "utf8");
+
+    expect(memory).toContain("business_name: Smith Painting");
+    expect(memory).toContain("pricing.labor_rate: $75/hour");
+    expect(memory).toContain("amtech://manager/business-brain");
+    expect(user.length).toBeLessThanOrEqual(1375);
+    expect(brain).toContain("Tools and skills");
+    expect(brain).toContain("tools_mentioned: QuickBooks");
+    expect(`${memory}\n${user}\n${brain}`).not.toContain("never render this raw snippet");
   });
 
   it("fails closed when a scoped MCP token is missing", async () => {

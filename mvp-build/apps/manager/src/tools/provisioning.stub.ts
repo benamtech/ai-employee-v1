@@ -21,6 +21,7 @@ import { checkFeature } from "../lib/entitlements.js";
 import { isLocalRuntimeBackendAllowed, resolveRuntimeBackend } from "../lib/runtime-backend.js";
 import { sealSecret } from "../lib/secrets.js";
 import { mintEmployeeMcpCredential, revokeEmployeeMcpCredential } from "../lib/mcp-auth.js";
+import { buildProfileContext } from "../lib/profile-context.js";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -178,6 +179,13 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
     .select("*")
     .eq("package_key", packageKey)
     .maybeSingle();
+  const seedSkills = manifest.seed_skills.length
+    ? manifest.seed_skills
+    : ((pkg?.default_skills as string[] | undefined) ?? []);
+  const profileContext = buildProfileContext({
+    packageKey,
+    manifest: { ...manifest, seed_skills: seedSkills },
+  });
   await ctx.db.from("employee_profile_builds").insert({
     id: buildId,
     employee_id: employeeId,
@@ -219,10 +227,9 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
         gateway_port: port,
         top_workflows: manifest.top_workflows,
         tools_mentioned: manifest.tools_mentioned,
-        seed_skills: manifest.seed_skills.length
-          ? manifest.seed_skills
-          : ((pkg?.default_skills as string[] | undefined) ?? []),
+        seed_skills: seedSkills,
         api_server_key: apiServerKey,
+        profile_context: profileContext,
       },
     });
     const smsNumber = skipSmsProvisioning()

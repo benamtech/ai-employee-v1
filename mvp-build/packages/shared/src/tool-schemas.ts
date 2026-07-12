@@ -73,7 +73,16 @@ const SCHEMAS: Partial<Record<ToolName, z.ZodTypeAny>> = {
 
   // Brain (spike-friendly, owner-safe)
   get_business_brain: z.object({ ...ownerCtx }).passthrough(),
-  save_business_brain_fact: z.object({ ...ownerCtx, fact: z.string().min(1), category: z.string().optional() }).passthrough(),
+  save_business_brain_fact: z.object({
+    ...ownerCtx,
+    fact: z.object({
+      key: z.string().min(1),
+      value: z.string().min(1),
+      category: z.string().optional(),
+      confidence: z.enum(["high", "medium", "low"]).optional(),
+    }).passthrough(),
+    source_ref: z.string().optional(),
+  }).passthrough(),
 
   // Estimate & artifact
   create_estimate_artifact: z.object({ ...ownerCtx, estimate_payload: estimatePayload, created_run: z.string().optional() }).passthrough(),

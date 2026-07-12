@@ -7,6 +7,17 @@ export const ProfilePackage = z.object({
   description: z.string().optional(),
   supported_business_kinds: z.array(z.string()).default([]),
   default_skills: z.array(z.string()).default([]),
+  context_slots: z.array(z.object({
+    key: z.string().min(1),
+    title: z.string().min(1),
+    description: z.string().optional(),
+    priority: z.number().int().min(0).default(100),
+  })).default([]),
+  memory_limits: z.object({
+    memory_chars: z.number().int().positive().default(2200),
+    user_chars: z.number().int().positive().default(1375),
+  }).default({ memory_chars: 2200, user_chars: 1375 }),
+  resource_pointers: z.array(z.string().min(1)).default([]),
   template_source: z.object({
     name: z.string(),
     url: z.string().optional(),
@@ -21,6 +32,31 @@ export const ProfilePackage = z.object({
 });
 
 export type ProfilePackage = z.infer<typeof ProfilePackage>;
+
+export interface ProfileContextFact {
+  key: string;
+  value: string;
+  confidence?: "high" | "medium" | "low";
+  source?: "onboarding" | "manifest" | "work";
+}
+
+export interface ProfileContextSlot {
+  key: string;
+  title: string;
+  priority: number;
+  facts: ProfileContextFact[];
+}
+
+export interface ProfileContext {
+  package_key: string;
+  generated_from: "onboarding_manifest";
+  memory_limits: {
+    memory_chars: number;
+    user_chars: number;
+  };
+  resource_pointers: string[];
+  slots: ProfileContextSlot[];
+}
 
 export interface ProfileBuildParams {
   client_id: string;
@@ -41,6 +77,7 @@ export interface ProfileBuildParams {
   tools_mentioned: string[];
   seed_skills: string[];
   api_server_key?: string;
+  profile_context: ProfileContext;
 }
 
 export interface ProvisionerRequest {

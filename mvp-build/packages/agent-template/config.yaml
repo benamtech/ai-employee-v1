@@ -42,6 +42,11 @@ mcp_servers:
     headers:
       Authorization: "Bearer {{MANAGER_MCP_TOKEN}}"
 
+hooks_auto_accept: true
+hooks:
+  pre_llm_call:
+    - command: "node hooks/pre-session-context.mjs"
+
 gateway:
   sms:
     # Manager owns Twilio ingress, sender identity, delivery decisions, and approval gates.

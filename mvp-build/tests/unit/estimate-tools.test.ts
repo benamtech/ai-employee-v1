@@ -123,4 +123,18 @@ describe("Phase 2 estimate/artifact/approval state machine", () => {
     expect(created.status).toBe("failed");
     expect(created.proof.failure_code).toBe("unauthorized");
   });
+
+  it("returns the business brain index and resource map, not raw facts", async () => {
+    const db = makeFakeDb({
+      employees: [{ id: "emp_1", account_id: "acct_1", profile_package_key: "contractor_estimator", status: "live" }],
+      employee_profile_builds: [{ id: "build_1", account_id: "acct_1", employee_id: "emp_1", package_key: "contractor_estimator", generated_path: "/profiles/client_emp_1", install_status: "installed", validation_status: "passed", updated_at: "2026-07-04T00:00:00Z" }],
+      business_brain_facts: [{ id: "fact_1", account_id: "acct_1", employee_id: "emp_1", fact_key: "secret_margin", fact_value: "never dump me", category: "pricing", confidence: "high" }],
+    });
+    const result = await estimateTools.get_business_brain!(ctxFor(db, "acct_1", "emp_1"), { account_id: "acct_1", employee_id: "emp_1" }) as any;
+    expect(result.status).toBe("ok");
+    expect(result.brain_index.profile_package).toBe("contractor_estimator");
+    expect(result.resources.facts).toBe("amtech://manager/business-facts");
+    expect(result.proof.fact_count).toBe(1);
+    expect(JSON.stringify(result)).not.toContain("never dump me");
+  });
 });

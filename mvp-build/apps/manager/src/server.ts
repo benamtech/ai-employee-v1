@@ -27,6 +27,8 @@ import { resolvePreviewLink } from "./lib/preview-links.js";
 import { buildWorkResource } from "./lib/preview-render.js";
 import { runSchedulerCycle } from "./lib/scheduler-runner.js";
 import { buildEmployeeSnapshot, cursorFromSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";
+import { buildAgentContext, claimAgentContextPrimer } from "./lib/agent-context.js";
+import { buildBusinessBrainIndex } from "./lib/business-brain.js";
 import { signalEmployeeChange, subscribeProgress, waitForEmployeeChange } from "./lib/progress-bus.js";
 import { orThrow, mustWrite } from "./lib/db.js";
 import { stampChannelPresence } from "./lib/channel-router.js";
@@ -206,6 +208,48 @@ export function buildApp(): Hono {
   app.post("/manager/mcp", mcp);
   app.get("/manager/mcp", mcp);
   app.delete("/manager/mcp", mcp);
+
+  app.get("/manager/agent-context", async (c) => {
+    const token = bearerToken(c.req.header("Authorization"));
+    if (!token?.startsWith("mcp_")) return c.json({ error: "unauthorized" }, 401);
+    const identity = await verifyEmployeeMcpCredential(serviceClient(), c.req.header("Authorization"));
+    if (!identity) return c.json({ error: "unauthorized" }, 401);
+    const requestedSession =
+      c.req.query("session_id") ||
+      c.req.header("X-Hermes-Session-Id") ||
+      c.req.header("X-Hermes-Session-Key") ||
+      "";
+    const sessionKey = requestedSession || `runtime:${identity.credential_id}`;
+    const db = serviceClient();
+    const claimed = await claimAgentContextPrimer(db, {
+      account_id: identity.account_id,
+      employee_id: identity.employee_id,
+      session_key: sessionKey,
+    });
+    if (!claimed) {
+      return c.json({
+        status: "ok",
+        context: "",
+        proof: { already_primed: true, session_key_source: requestedSession ? "hermes" : "runtime_credential" },
+      });
+    }
+    const snapshot = await buildEmployeeSnapshot(db, identity.employee_id, identity.account_id);
+    const brain = await buildBusinessBrainIndex(db, {
+      account_id: identity.account_id,
+      employee_id: identity.employee_id,
+      snapshot,
+    });
+    return c.json({
+      status: "ok",
+      context: buildAgentContext({ snapshot, brain }),
+      proof: {
+        already_primed: false,
+        session_key_source: requestedSession ? "hermes" : "runtime_credential",
+        estimated_token_cap: 2000,
+        session_target_tokens: 400000,
+      },
+    });
+  });
 
   app.post("/manager/scheduler/run", async (c) => {
     const denied = denyInternal(c);
