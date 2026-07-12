@@ -146,7 +146,12 @@ export async function recordSessionOccupancy(db: SupabaseClient, input: RecordOc
  * and repoints `runtime_endpoints.api_session_id`. The turn then runs on the fresh
  * transcript and re-primes via the existing pre_llm_call gate.
  */
-export async function rotateSessionIfNeeded(db: SupabaseClient, input: { account_id: string; employee_id: string }): Promise<RotationResult> {
+export async function rotateSessionIfNeeded(
+  db: SupabaseClient,
+  // CE-4 seam: an optional `rotate_ratio` (from a business-type/operator-mode
+  // ContextPolicy) overrides the 0.40 default. Absent → today's behavior.
+  input: { account_id: string; employee_id: string; rotate_ratio?: number },
+): Promise<RotationResult> {
   if (rotationDisabled()) return { rotated: false, skipped: "disabled" };
   try {
     const active = orThrow(
@@ -161,7 +166,7 @@ export async function rotateSessionIfNeeded(db: SupabaseClient, input: { account
     if (!active) return { rotated: false, skipped: "no_active" };
 
     const tokens = Number(active.context_tokens ?? 0);
-    const rotateAt = rotateAtTokens(resolveEmployeeModelId());
+    const rotateAt = rotateAtTokens(resolveEmployeeModelId(), input.rotate_ratio);
     if (tokens < rotateAt) return { rotated: false, context_tokens: tokens, skipped: "under_threshold" };
 
     const nowIso = new Date().toISOString();

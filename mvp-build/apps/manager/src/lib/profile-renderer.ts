@@ -1,7 +1,7 @@
 import { mkdir, readFile, readdir, rm, stat, writeFile, copyFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { ProfileBuildParams, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
-import { computeApiServerToolsets, toYamlFlowList } from "@amtech/shared";
+import { computeApiServerToolsets, renderableDirectMcpConnectors, toYamlFlowList } from "@amtech/shared";
 import { activateCaddySnippet, writeCaddySnippetFile } from "./caddy-activation.js";
 import { runCommandString } from "./command-runner.js";
 import {
@@ -27,17 +27,18 @@ function workspaceRoot(): string {
 function modelConfigBlock(): string {
   const provider = process.env.HERMES_MODEL_PROVIDER;
   if (provider) {
-    const def = process.env.HERMES_MODEL_DEFAULT ?? "bridge-agent";
-    const baseUrl = process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1";
-    return [
+    const def = process.env.HERMES_MODEL_DEFAULT ?? (provider === "custom" ? "bridge-agent" : "claude-opus-4-8");
+    const baseUrl = process.env.HERMES_MODEL_BASE_URL ?? (provider === "custom" ? "http://host.docker.internal:8091/v1" : "");
+    const lines = [
       "model:",
       `  provider: ${provider}`,
       `  default: ${def}`,
-      `  base_url: ${baseUrl}`,
       "models:",
       `  default: ${def}`,
       "  compression: claude-haiku-4-5",
-    ].join("\n");
+    ];
+    if (baseUrl) lines.splice(3, 0, `  base_url: ${baseUrl}`);
+    return lines.join("\n");
   }
   return ["models:", "  default: claude-opus-4-8", "  compression: claude-haiku-4-5"].join("\n");
 }
@@ -98,6 +99,21 @@ function hooksBlock(): string {
     "  pre_llm_call:",
     "    - command: \"node hooks/pre-session-context.mjs\"",
   ].join("\n");
+}
+
+/**
+ * CE-4 custody policy at render time. Renders extra config.yaml `mcp_servers`
+ * entries ONLY for read-only connectors (`renderableDirectMcpConnectors` drops any
+ * write/money/customer-facing connector — default-deny). Money/customer/write
+ * connectors are therefore structurally incapable of a direct-MCP path; they stay
+ * behind `amtech_manager` + the approval gate. Renders "" when there are none, so
+ * the token collapses to a blank line under `mcp_servers:`.
+ */
+function connectorMcpServersBlock(params: ProfileBuildParams): string {
+  const allowed = renderableDirectMcpConnectors(params.direct_mcp_connectors ?? []);
+  return allowed
+    .map((c) => [`  ${c.name}:`, `    url: "${c.url}"`].join("\n"))
+    .join("\n");
 }
 
 /**
@@ -189,8 +205,9 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     COMPRESSION_CONFIG: compressionConfigBlock(),
     DELEGATION_CONFIG: delegationConfigBlock(),
     HOOKS: hooksBlock(),
-    MODEL_BRIDGE_BASE_URL: process.env.HERMES_MODEL_PROVIDER ? (process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1") : "",
-    MODEL_BRIDGE_API_KEY: process.env.HERMES_MODEL_PROVIDER ? (process.env.HERMES_MODEL_API_KEY ?? "bridge-local-dummy") : "",
+    MODEL_BRIDGE_BASE_URL: process.env.HERMES_MODEL_PROVIDER === "custom" ? (process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1") : "",
+    MODEL_BRIDGE_API_KEY: process.env.HERMES_MODEL_PROVIDER === "custom" ? (process.env.HERMES_MODEL_API_KEY ?? "bridge-local-dummy") : "",
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? "",
     // Hermes reads api_server tools from config.yaml platform_toolsets.api_server.
     // With no block it falls back to terminal/file/web only — so we render the
     // safe set, tied to backend blast radius + provider-key availability.
@@ -206,6 +223,8 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     // Employee reaches the Manager control plane natively as an MCP server
     // (mcp_servers.amtech_manager in the rendered config.yaml).
     MANAGER_MCP_URL: process.env.MANAGER_MCP_URL ?? `${managerOrigin}/manager/mcp`,
+    // CE-4: read-only connectors wired directly (write/money/customer refused).
+    CONNECTOR_MCP_SERVERS: connectorMcpServersBlock(params),
   };
 }
 

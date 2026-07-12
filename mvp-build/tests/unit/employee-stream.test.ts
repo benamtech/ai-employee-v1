@@ -47,6 +47,7 @@ describe("buildEmployeeSnapshot", () => {
       connector_accounts: [
         { id: "conn_email", employee_id: "emp_1", account_id: "acct_1", connector_key: "gmail", provider: "gmail", status: "connected", external_email: "owner@example.com", last_connector_test_at: "2026-07-04T00:00:04Z" },
         { id: "conn_custom", employee_id: "emp_1", account_id: "acct_1", connector_key: "field_app", provider: "field_ops", status: "connected", external_label: "Field Ops" },
+        { id: "conn_ref", employee_id: "emp_1", account_id: "acct_1", connector_key: "reference_data", provider: "readonly_mcp", status: "connected", external_label: "Reference catalog" },
       ],
     });
     const snap = await buildEmployeeSnapshot(db.asClient(), "emp_1", "acct_1");
@@ -64,6 +65,13 @@ describe("buildEmployeeSnapshot", () => {
       label: "Field Ops",
       category: "custom",
       state: "connected",
+      what_employee_can_do: "Use this connected system through approved Manager capabilities.",
+    });
+    expect(snap.connection_surfaces?.find((c) => c.id === "connection:custom:conn_ref")).toMatchObject({
+      label: "Reference Data",
+      category: "custom",
+      state: "connected",
+      what_employee_can_do: "Query this read-only system directly when it helps the work.",
     });
   });
 

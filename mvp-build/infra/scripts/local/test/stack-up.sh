@@ -17,21 +17,25 @@ cd "$MVP_ROOT"
 load_env
 ensure_shared_built
 
-# 1. Model bridge (parks /v1/chat/completions on disk).
-if [ "$(http_code http://localhost:8091/)" = "200" ]; then
-  log "bridge already up :8091"
-else
-  daemon bridge "npm run local:model-bridge"
-  wait_code http://localhost:8091/ 200 20 && log "bridge up :8091" || err "bridge did not answer :8091 (see logs)"
-fi
+if [ "${LOCAL_MODEL_BRIDGE:-}" = "1" ]; then
+  # 1. Legacy model bridge (parks /v1/chat/completions on disk).
+  if [ "$(http_code http://localhost:8091/)" = "200" ]; then
+    log "bridge already up :8091"
+  else
+    daemon bridge "npm run local:model-bridge"
+    wait_code http://localhost:8091/ 200 20 && log "bridge up :8091" || err "bridge did not answer :8091 (see logs)"
+  fi
 
-# 2. Warm Haiku worker = the LLM. Must be up before any onboarding/employee model call.
-if worker_running; then
-  log "worker already up ($(worker_count) warm Haiku instance)"
+  # 2. Warm Haiku worker = legacy bridge LLM.
+  if worker_running; then
+    log "worker already up ($(worker_count) warm Haiku instance)"
+  else
+    daemon worker "npm run local:model-bridge-worker"
+    for i in $(seq 1 15); do worker_running && break; sleep 1; done
+    worker_running && log "worker up (1 warm Haiku, claude-haiku-4-5)" || err "worker did not start a Haiku instance (see logs)"
+  fi
 else
-  daemon worker "npm run local:model-bridge-worker"
-  for i in $(seq 1 15); do worker_running && break; sleep 1; done
-  worker_running && log "worker up (1 warm Haiku, claude-haiku-4-5)" || err "worker did not start a Haiku instance (see logs)"
+  log "model bridge skipped (using live provider env)"
 fi
 
 # 3. Manager control plane — plain tsx (tsx watch v4.22.4 crashes on Node 26).

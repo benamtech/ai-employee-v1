@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@amtech/db";
+import type { ContextPolicy } from "@amtech/shared";
 import type { EmployeeSnapshot } from "./employee-stream.js";
 import type { buildBusinessBrainIndex } from "./business-brain.js";
 
@@ -34,12 +35,20 @@ export function buildAgentContext(input: {
   snapshot: EmployeeSnapshot;
   brain: BrainIndex;
   carryover?: SessionCarryover;
+  /**
+   * CE-4 seam: optional business-type/operator-mode policy. Absent → today's
+   * behavior exactly. When present, it prepends a one-line emphasis; the custody
+   * framing line below is always emitted (it is accurate regardless of policy).
+   */
+  policy?: ContextPolicy;
 }): string {
   const s = input.snapshot;
   const b = input.brain;
   const lines: string[] = [];
   pushLine(lines, "AMTECH session primer: use references, not payload memory.");
+  if (input.policy?.primer_emphasis) pushLine(lines, input.policy.primer_emphasis);
   pushLine(lines, `Session budget target: stay under ${SESSION_TARGET_TOKENS} total tokens; rotate before compaction in CE-3.`);
+  pushLine(lines, "Custody: money and customer-facing actions are prepared for owner approval; read-only connectors are used directly.");
   if (input.carryover?.pending) {
     pushLine(lines, "Continuing from a rotated session; prior detail is in Hermes session_search and the brain/facts resources.");
     if (input.carryover.last_decision) pushLine(lines, `Last decision: ${input.carryover.last_decision}`);

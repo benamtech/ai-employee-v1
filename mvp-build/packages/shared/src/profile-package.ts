@@ -78,6 +78,13 @@ export interface ProfileBuildParams {
   seed_skills: string[];
   api_server_key?: string;
   profile_context: ProfileContext;
+  /**
+   * CE-4: read-only connectors to wire directly into config.yaml `mcp_servers`.
+   * Enforced default-deny at render time (`renderableDirectMcpConnectors`) — a
+   * write/money/customer-facing connector here is refused a direct path and stays
+   * Manager-mediated. Empty/absent today (no read-only connector ships yet).
+   */
+  direct_mcp_connectors?: import("./connector-registry.js").DirectMcpConnectorSpec[];
 }
 
 export interface ProvisionerRequest {

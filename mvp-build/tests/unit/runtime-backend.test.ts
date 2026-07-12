@@ -9,6 +9,11 @@ afterEach(() => {
   delete process.env.DOCKER_MANAGER_API_ORIGIN;
   delete process.env.MANAGER_MCP_URL;
   delete process.env.HERMES_TERMINAL_BACKEND;
+  delete process.env.HERMES_MODEL_PROVIDER;
+  delete process.env.HERMES_MODEL_DEFAULT;
+  delete process.env.HERMES_MODEL_BASE_URL;
+  delete process.env.HERMES_MODEL_API_KEY;
+  delete process.env.ANTHROPIC_API_KEY;
 });
 
 function params(runtime_backend?: ProfileBuildParams["runtime_backend"]): ProfileBuildParams {
@@ -66,6 +71,21 @@ describe("runtime backend policy", () => {
     expect(tokens).not.toHaveProperty("MANAGER_INTERNAL_TOKEN");
   });
 
+  it("renders only read-only direct MCP connectors into config tokens", () => {
+    const tokens = profileTokenMap({
+      ...params("docker"),
+      direct_mcp_connectors: [
+        { name: "reference_data", url: "http://reference.test/mcp" },
+        { name: "stripe_direct", url: "http://stripe.test/mcp", money: true },
+        { name: "customer_mailer", url: "http://mailer.test/mcp", customer_facing: true },
+      ],
+    });
+    expect(tokens.CONNECTOR_MCP_SERVERS).toContain("reference_data:");
+    expect(tokens.CONNECTOR_MCP_SERVERS).toContain("http://reference.test/mcp");
+    expect(tokens.CONNECTOR_MCP_SERVERS).not.toContain("stripe_direct");
+    expect(tokens.CONNECTOR_MCP_SERVERS).not.toContain("customer_mailer");
+  });
+
   it("renders Hermes terminal backend as in-process 'local' even under docker isolation", () => {
     // The employee already runs inside the Manager's container; Hermes must not
     // attempt docker-in-docker (no socket) or it silently gates terminal/file tools.
@@ -76,6 +96,21 @@ describe("runtime backend policy", () => {
   it("allows an explicit HERMES_TERMINAL_BACKEND override", () => {
     process.env.HERMES_TERMINAL_BACKEND = "docker";
     expect(profileTokenMap(params("docker")).TERMINAL_BACKEND).toBe("docker");
+  });
+
+  it("renders live Anthropic model wiring without the local bridge env", () => {
+    process.env.HERMES_MODEL_PROVIDER = "anthropic";
+    process.env.HERMES_MODEL_DEFAULT = "claude-haiku-4-5-20251001";
+    process.env.ANTHROPIC_API_KEY = "sk-ant-test";
+
+    const tokens = profileTokenMap(params("docker"));
+
+    expect(tokens.MODEL_CONFIG).toContain("provider: anthropic");
+    expect(tokens.MODEL_CONFIG).toContain("default: claude-haiku-4-5-20251001");
+    expect(tokens.MODEL_CONFIG).not.toContain("base_url:");
+    expect(tokens.MODEL_BRIDGE_BASE_URL).toBe("");
+    expect(tokens.MODEL_BRIDGE_API_KEY).toBe("");
+    expect(tokens.ANTHROPIC_API_KEY).toBe("sk-ant-test");
   });
 });
 

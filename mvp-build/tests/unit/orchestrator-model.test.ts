@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  anthropicMessagesRequestBody,
   extractJson,
   openAiCompatibleRequestBody,
   orchestratorModelConfig,
@@ -10,6 +11,7 @@ describe("orchestrator model adapter", () => {
     const config = orchestratorModelConfig({
       OPENAI_API_KEY: "sk-test",
     });
+    expect(config.provider).toBe("openai_compatible");
     expect(config.apiKey).toBe("sk-test");
     expect(config.baseUrl).toBe("https://api.openai.com/v1");
     expect(config.model).toBe("gpt-4.1");
@@ -44,9 +46,23 @@ describe("orchestrator model adapter", () => {
     expect(config.responseFormat).toBe("none");
   });
 
+  it("uses Anthropic Messages API config when requested", () => {
+    const config = orchestratorModelConfig({
+      ORCHESTRATOR_PROVIDER: "anthropic",
+      ANTHROPIC_API_KEY: "sk-ant-test",
+      ORCHESTRATOR_MODEL: "claude-haiku-4-5-20251001",
+    });
+    expect(config.provider).toBe("anthropic");
+    expect(config.apiKey).toBe("sk-ant-test");
+    expect(config.baseUrl).toBe("https://api.anthropic.com/v1");
+    expect(config.model).toBe("claude-haiku-4-5-20251001");
+    expect(config.responseFormat).toBe("none");
+  });
+
   it("builds a chat-completions request body with strict structured output by default", () => {
     const body = openAiCompatibleRequestBody(
       {
+        provider: "openai_compatible",
         apiKey: "sk-test",
         baseUrl: "https://api.openai.com/v1",
         model: "gpt-4.1",
@@ -75,6 +91,35 @@ describe("orchestrator model adapter", () => {
       { role: "system", content: "Return JSON." },
       { role: "user", content: "{\"message\":\"hello\"}" },
     ]);
+  });
+
+  it("builds an Anthropic messages request body with system text separated", () => {
+    const body = anthropicMessagesRequestBody(
+      {
+        provider: "anthropic",
+        apiKey: "sk-ant-test",
+        baseUrl: "https://api.anthropic.com/v1",
+        model: "claude-haiku-4-5-20251001",
+        maxTokens: 1200,
+        temperature: 0.2,
+        responseFormat: "none",
+      },
+      [
+        { role: "system", content: "Return JSON." },
+        { role: "user", content: "{\"message\":\"hello\"}" },
+        { role: "assistant", content: "{\"assistant_message\":\"ok\"}" },
+      ],
+    );
+    expect(body).toMatchObject({
+      model: "claude-haiku-4-5-20251001",
+      max_tokens: 1200,
+      temperature: 0.2,
+      system: "Return JSON.",
+      messages: [
+        { role: "user", content: "{\"message\":\"hello\"}" },
+        { role: "assistant", content: "{\"assistant_message\":\"ok\"}" },
+      ],
+    });
   });
 
   it("extracts the onboarding JSON contract from surrounding text", () => {

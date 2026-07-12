@@ -8,8 +8,14 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/_lib.sh"
 
-b="$(http_code http://localhost:8091/)"; m="$(http_code http://localhost:8080/health)"; w="$(http_code http://localhost:3000/)"
-echo "STACK  bridge:8091=$b  worker=$(worker_count)xHaiku  manager:8080=$m  web:3000=$w   (200=healthy, 000=down)"
+m="$(http_code http://localhost:8080/health)"; w="$(http_code http://localhost:3000/)"
+if [ "${LOCAL_MODEL_BRIDGE:-}" = "1" ]; then
+  b="$(http_code http://localhost:8091/)"
+  model="bridge:8091=$b worker=$(worker_count)xHaiku"
+else
+  model="provider=${HERMES_MODEL_PROVIDER:-default} model=${HERMES_MODEL_DEFAULT:-claude-opus-4-8}"
+fi
+echo "STACK  $model  manager:8080=$m  web:3000=$w   (200=healthy, 000=down)"
 
 echo "EMPLOYEE CONTAINERS:"
 found=0

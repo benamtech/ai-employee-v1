@@ -20,6 +20,7 @@ import type {
   WorkOutput,
   WorkTask,
 } from "@amtech/shared";
+import { custodyFor, resolveConnectorMeta } from "@amtech/shared";
 import { materializeEmployeeSnapshot } from "./materialization.js";
 
 export type EmployeeSnapshot = ResourcePayload & {
@@ -175,16 +176,20 @@ function surfaceForDef(snapshot: EmployeeSnapshot, capabilities: CapabilityGraph
 
 function customConnectionSurface(connector: EmployeeSnapshot["connectors"][number]): ConnectionSurface {
   const connected = CONNECTED_STATUSES.has(normalize(connector.status));
+  const meta = resolveConnectorMeta(connector.provider || connector.connector_key);
+  const directMcp = custodyFor(meta) === "direct_mcp";
   return {
     id: `connection:custom:${connector.id}`,
-    label: humanLabel(connector.provider || connector.connector_key),
+    label: meta.label || humanLabel(connector.provider || connector.connector_key),
     category: "custom",
     state: connected ? "connected" : "needs_you",
     account_label: connector.external_label ?? connector.external_email ?? null,
     health: connector.last_error ?? (connected ? "Ready" : "Needs attention"),
     last_event: null,
     last_action: connector.last_connector_test_at ? `Connection tested at ${connector.last_connector_test_at}` : null,
-    what_employee_can_do: "Use this connected system through approved Manager capabilities.",
+    what_employee_can_do: directMcp
+      ? "Query this read-only system directly when it helps the work."
+      : "Use this connected system through approved Manager capabilities.",
     setup_requirement: connected ? null : "Repair or reconnect this system.",
     connector_id: connector.id,
     capability_keys: [],

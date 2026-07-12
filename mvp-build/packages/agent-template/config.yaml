@@ -41,6 +41,11 @@ mcp_servers:
     url: "{{MANAGER_MCP_URL}}"
     headers:
       Authorization: "Bearer {{MANAGER_MCP_TOKEN}}"
+  # CE-4 custody policy: ONLY read-only connectors are wired directly here. Any
+  # write/money/customer-facing connector is refused a direct path at render time
+  # (renderableDirectMcpConnectors) and stays behind amtech_manager + the approval
+  # gate + egress default-deny. Renders empty until a read-only connector ships.
+{{CONNECTOR_MCP_SERVERS}}
 
 # CE-1 primer hook + CE-2 hooks (rendered together). The tool-output hygiene
 # transforms are a Hermes plugin (plugins/amtech-hygiene), not shell hooks.

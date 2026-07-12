@@ -4,6 +4,7 @@ export interface OrchestratorModelMessage {
 }
 
 export interface OrchestratorModelConfig {
+  provider: "openai_compatible" | "anthropic";
   apiKey: string;
   baseUrl: string;
   model: string;
@@ -28,6 +29,11 @@ interface OpenAiCompatibleChoice {
 
 interface OpenAiCompatibleResponse {
   choices?: OpenAiCompatibleChoice[];
+  error?: { message?: string };
+}
+
+interface AnthropicResponse {
+  content?: Array<{ type?: string; text?: string }>;
   error?: { message?: string };
 }
 
@@ -100,20 +106,28 @@ function sourcedFactSchema(): Record<string, unknown> {
 }
 
 export function orchestratorModelConfig(env: NodeJS.ProcessEnv = process.env): OrchestratorModelConfig {
-  const apiKey = env.ORCHESTRATOR_API_KEY ?? env.XAI_API_KEY ?? env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("ORCHESTRATOR_API_KEY, XAI_API_KEY, or OPENAI_API_KEY missing.");
+  const provider = env.ORCHESTRATOR_PROVIDER === "anthropic" ? "anthropic" : "openai_compatible";
+  const apiKey = provider === "anthropic"
+    ? (env.ORCHESTRATOR_API_KEY ?? env.ANTHROPIC_API_KEY)
+    : (env.ORCHESTRATOR_API_KEY ?? env.XAI_API_KEY ?? env.OPENAI_API_KEY);
+  if (!apiKey) {
+    throw new Error(provider === "anthropic"
+      ? "ORCHESTRATOR_API_KEY or ANTHROPIC_API_KEY missing."
+      : "ORCHESTRATOR_API_KEY, XAI_API_KEY, or OPENAI_API_KEY missing.");
+  }
   const responseFormat =
     env.ORCHESTRATOR_RESPONSE_FORMAT === "none" || env.ORCHESTRATOR_RESPONSE_FORMAT === "json_object"
       ? env.ORCHESTRATOR_RESPONSE_FORMAT
       : "json_schema";
 
   return {
+    provider,
     apiKey,
-    baseUrl: (env.ORCHESTRATOR_API_BASE_URL ?? "https://api.openai.com/v1").replace(/\/$/, ""),
-    model: env.ORCHESTRATOR_MODEL ?? "gpt-4.1",
+    baseUrl: (env.ORCHESTRATOR_API_BASE_URL ?? (provider === "anthropic" ? "https://api.anthropic.com/v1" : "https://api.openai.com/v1")).replace(/\/$/, ""),
+    model: env.ORCHESTRATOR_MODEL ?? (provider === "anthropic" ? "claude-haiku-4-5-20251001" : "gpt-4.1"),
     maxTokens: Number(env.ORCHESTRATOR_MAX_TOKENS ?? 1200),
     temperature: Number(env.ORCHESTRATOR_TEMPERATURE ?? 0.2),
-    responseFormat,
+    responseFormat: provider === "anthropic" ? "none" : responseFormat,
   };
 }
 
@@ -157,6 +171,26 @@ export function openAiCompatibleRequestBody(
   };
 }
 
+export function anthropicMessagesRequestBody(
+  config: OrchestratorModelConfig,
+  messages: OrchestratorModelMessage[],
+): Record<string, unknown> {
+  const system = messages
+    .filter((m) => m.role === "system")
+    .map((m) => m.content)
+    .join("\n\n");
+  const nonSystem = messages
+    .filter((m) => m.role !== "system")
+    .map((m) => ({ role: m.role, content: m.content }));
+  return {
+    model: config.model,
+    max_tokens: config.maxTokens,
+    temperature: config.temperature,
+    ...(system ? { system } : {}),
+    messages: nonSystem,
+  };
+}
+
 function contentToText(content: string | Array<{ type?: string; text?: string }> | undefined): string {
   if (typeof content === "string") return content;
   if (Array.isArray(content)) {
@@ -169,6 +203,21 @@ export async function callOpenAiCompatibleModel(
   messages: OrchestratorModelMessage[],
   config = orchestratorModelConfig(),
 ): Promise<LlmResponse> {
+  if (config.provider === "anthropic") {
+    const res = await fetch(`${config.baseUrl}/messages`, {
+      method: "POST",
+      headers: {
+        "x-api-key": config.apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(anthropicMessagesRequestBody(config, messages)),
+    });
+    const json = (await res.json()) as AnthropicResponse;
+    if (!res.ok) throw new Error(json?.error?.message ?? `model_${res.status}`);
+    return extractJson(contentToText(json.content));
+  }
+
   const res = await fetch(`${config.baseUrl}/chat/completions`, {
     method: "POST",
     headers: {

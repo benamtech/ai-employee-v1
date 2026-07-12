@@ -18,6 +18,23 @@
 /** The beachhead: owner-operated paint/landscape-adjacent trades. */
 export const FIXTURES = [
   {
+    fixture_key: "binghamton_painting",
+    business_kind: "painting",
+    business_display_name: "Southern Tier Precision Painting",
+    owner_name: "Nate Barone",
+    employee_name: "Avery",
+    timezone: "America/New_York",
+    location: "Binghamton NY",
+    years: 9,
+    crew: "me plus a three-person crew",
+    money_shape: "around $410k a year, interior repaint jobs usually run $1,800 to $7,500",
+    ideal_customer: "Binghamton-area homeowners who want clean interior repaints, trim refreshes, and small exterior touch-ups",
+    friction: "turning walkthrough notes, texts, and photos into estimates and follow-ups while I'm on job sites",
+    workflows: ["estimate write-ups", "quote follow-up", "bookkeeping and job-admin reminders"],
+    tools: ["Gmail", "phone", "QuickBooks", "photos from customers"],
+    services: ["interior repaints", "trim repainting", "small exterior touch-ups", "cabinet refinishing"],
+  },
+  {
     business_kind: "painting",
     business_display_name: "Northgate Painting Co.",
     owner_name: "Marcus Delvecchio",
@@ -101,7 +118,7 @@ function seededIndex() {
   }
   const asNum = Number(sel);
   if (Number.isInteger(asNum) && asNum >= 0 && asNum < FIXTURES.length) return asNum;
-  const byKind = FIXTURES.findIndex((f) => f.business_kind === sel);
+  const byKind = FIXTURES.findIndex((f) => f.fixture_key === sel || f.business_kind === sel || slug(f.business_display_name) === sel);
   return byKind >= 0 ? byKind : 0;
 }
 
@@ -134,8 +151,9 @@ export function pickFixture() {
 
 /** Owner messages for the REAL conversational front door (orchestrator builds the manifest). */
 export function conversationTurns(fx) {
+  const location = fx.location ?? "Scranton PA";
   return [
-    `Hey — I run a ${fx.business_kind.replace(/_/g, " ")} business near Scranton PA called ${fx.business_display_name}. ${fx.years} years in, ${fx.crew}.`,
+    `Hey — I run a ${fx.business_kind.replace(/_/g, " ")} business in ${location} called ${fx.business_display_name}. ${fx.years} years in, ${fx.crew}.`,
     `The repeat computer work that eats my time is ${fx.workflows[0]} and ${fx.friction}. I mostly live in ${fx.tools.slice(0, 2).join(" and ")}.`,
     `We do ${fx.money_shape}. Ideal customer is ${fx.ideal_customer}. What really kills me is ${fx.friction}.`,
     `Let's call the assistant ${fx.employee_name}. ${fx.timezone.split("/")[1].replace("_", " ")} time, Eastern. I think that's everything you need.`,
