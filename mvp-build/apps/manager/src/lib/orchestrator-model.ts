@@ -107,9 +107,11 @@ function sourcedFactSchema(): Record<string, unknown> {
 
 export function orchestratorModelConfig(env: NodeJS.ProcessEnv = process.env): OrchestratorModelConfig {
   const provider = env.ORCHESTRATOR_PROVIDER === "anthropic" ? "anthropic" : "openai_compatible";
+  const firstNonBlank = (...values: Array<string | undefined>): string | undefined =>
+    values.find((value) => value !== undefined && value.trim() !== "");
   const apiKey = provider === "anthropic"
-    ? (env.ORCHESTRATOR_API_KEY ?? env.ANTHROPIC_API_KEY)
-    : (env.ORCHESTRATOR_API_KEY ?? env.XAI_API_KEY ?? env.OPENAI_API_KEY);
+    ? firstNonBlank(env.ORCHESTRATOR_API_KEY, env.ANTHROPIC_API_KEY)
+    : firstNonBlank(env.ORCHESTRATOR_API_KEY, env.XAI_API_KEY, env.OPENAI_API_KEY);
   if (!apiKey) {
     throw new Error(provider === "anthropic"
       ? "ORCHESTRATOR_API_KEY or ANTHROPIC_API_KEY missing."
