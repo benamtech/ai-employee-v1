@@ -59,6 +59,15 @@ describe("orchestrator model adapter", () => {
     expect(config.responseFormat).toBe("none");
   });
 
+  it("ignores blank provider keys when falling back to Anthropic key", () => {
+    const config = orchestratorModelConfig({
+      ORCHESTRATOR_PROVIDER: "anthropic",
+      ORCHESTRATOR_API_KEY: "",
+      ANTHROPIC_API_KEY: "sk-ant-test",
+    });
+    expect(config.apiKey).toBe("sk-ant-test");
+  });
+
   it("builds a chat-completions request body with strict structured output by default", () => {
     const body = openAiCompatibleRequestBody(
       {
