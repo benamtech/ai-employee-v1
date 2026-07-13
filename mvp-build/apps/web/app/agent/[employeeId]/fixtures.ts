@@ -30,6 +30,19 @@ function workEvent(
 }
 
 export function fixtureResourcePayload(employeeId: string): ResourcePayload {
+  // A brand-new employee: connected accounts + abilities exist, but no work has
+  // happened yet. Drives the first-run activation state (see FirstRun.tsx).
+  if (employeeId.includes("new")) {
+    return {
+      account_id: "acct_ui_fixture",
+      employee_id: employeeId,
+      employee: { id: employeeId, name: "Sage", status: "ready", profile_id: "contractor_estimator", web_route: `/agent/${employeeId}`, created_at: now },
+      runtime_health: { status: "healthy", checked_at: now, backend_type: "ui_fixture", api_ok: true, sms_number_present: true, message: "Your employee is set up and ready for its first job." },
+      artifacts: [], approvals: [], messages: [], connectors: [], stripe_invoices: [],
+      reminders: [], job_commitments: [], work_events: [], abilities: [],
+      outputs: [], tasks: [], connection_surfaces: [], resurface_items: [],
+    };
+  }
   const payload: ResourcePayload = {
     account_id: "acct_ui_fixture",
     employee_id: employeeId,
@@ -226,6 +239,56 @@ export function fixtureResourcePayload(employeeId: string): ResourcePayload {
             ],
           },
         },
+      ),
+      workEvent(
+        "we_schedule_card",
+        "review",
+        "Confirm the Ridgeview start",
+        "Ridgeview HOA accepted the estimate. Pick the start slot and I lock it in and tell the crew.",
+        {
+          type: "schedule_mutation",
+          title: "Start-date confirmation",
+          refs: { approval_id: "appr_schedule_fixture", customer_ref: "Ridgeview HOA" },
+          acceptance: ["approve", "reject", "respond"],
+          // Manager-compiled MCP-UI card (fixture stand-in): AMTECH-styled HTML in a
+          // sandboxed iframe; every button posts a typed intent back to the host,
+          // which routes through the SAME approval handlers as any other action.
+          ui_resource: {
+            type: "resource",
+            resource: {
+              uri: "ui://fixture/schedule-confirm",
+              mimeType: "text/html",
+              text: [
+                "<!doctype html><html><head><meta charset='utf-8'><style>",
+                "*{box-sizing:border-box;border-radius:0;margin:0;padding:0}",
+                "body{font-family:Inter,-apple-system,'Helvetica Neue',Arial,sans-serif;color:#0a0a0a;background:#ffffff;padding:3px}",
+                ".k{font-family:ui-monospace,'IBM Plex Mono',Menlo,monospace;font-size:9px;font-weight:600;letter-spacing:0.09em;text-transform:uppercase;color:#e11d2a;margin-bottom:6px}",
+                "table{width:100%;border-collapse:collapse;border:1px solid rgba(10,10,10,0.1)}",
+                "td{padding:6px 9px;border-bottom:1px solid rgba(10,10,10,0.1);font-size:12px}",
+                "tr:last-child td{border-bottom:0}",
+                ".slot{font-weight:600}",
+                ".pick{float:right;font-family:ui-monospace,Menlo,monospace;font-size:9px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid rgba(10,10,10,0.15);background:#ffffff;color:#0a0a0a;padding:3px 9px;cursor:pointer}",
+                ".pick:hover{border-color:#0a0a0a}",
+                ".bar{display:flex;gap:6px;margin-top:9px}",
+                ".ok{flex:1;font-family:ui-monospace,Menlo,monospace;font-size:9px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:#0a0a0a;color:#ffffff;border:1px solid #0a0a0a;padding:9px 0;cursor:pointer}",
+                ".no{flex:1;font-family:ui-monospace,Menlo,monospace;font-size:9px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:#ffffff;color:#e11d2a;border:1px solid #e11d2a;padding:9px 0;cursor:pointer}",
+                "</style></head><body>",
+                "<div class='k'>Schedule &middot; pick one</div>",
+                "<table>",
+                "<tr><td class='slot'>Wed Jul 15 &middot; morning</td><td><button class='pick' onclick=\"pick('Wed Jul 15 morning')\">Choose</button></td></tr>",
+                "<tr><td class='slot'>Thu Jul 16 &middot; morning</td><td><button class='pick' onclick=\"pick('Thu Jul 16 morning')\">Choose</button></td></tr>",
+                "<tr><td class='slot'>Mon Jul 20 &middot; all day</td><td><button class='pick' onclick=\"pick('Mon Jul 20 all day')\">Choose</button></td></tr>",
+                "</table>",
+                "<div class='bar'><button class='ok' onclick=\"send('accept',{})\">Confirm first open slot</button><button class='no' onclick=\"send('reject',{})\">Not yet</button></div>",
+                "<script>",
+                "function send(intent,payload){parent.postMessage({source:'amtech-mcp-ui',type:'intent',intent:intent,approval_id:'appr_schedule_fixture',payload:payload},'*');}",
+                "function pick(slot){send('respond',{fields:{slot:slot}});}",
+                "</script></body></html>",
+              ].join(""),
+            },
+          },
+        },
+        "Pick a slot or confirm — I handle the rest.",
       ),
       workEvent(
         "we_media",

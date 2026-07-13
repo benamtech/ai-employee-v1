@@ -10,12 +10,12 @@ export function Receipt({ proof }: { proof?: Record<string, string> }) {
   const ids = Object.entries(proof).filter(([, v]) => v && String(v).trim().length > 0);
   if (!ids.length) return null;
   return (
-    <p style={{ margin: `${tokens.space.sm}px 0 0`, fontSize: tokens.font.tiny, color: tokens.color.textMuted }}>
-      <span aria-hidden>🧾 </span>
+    <p style={{ margin: `${tokens.space.sm}px 0 0`, fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, letterSpacing: "0.03em", color: tokens.color.textMuted }}>
+      <span aria-hidden style={{ textTransform: "uppercase", letterSpacing: "0.09em", fontWeight: 500 }}>Proof </span>
       {ids.map(([k, v], i) => (
         <span key={k}>
           {i > 0 ? " · " : ""}
-          <span style={{ color: tokens.color.textFaint }}>{k.replace(/_/g, " ")}</span> {String(v)}
+          <span style={{ textTransform: "uppercase" }}>{k.replace(/_/g, " ")}</span> {String(v)}
         </span>
       ))}
     </p>

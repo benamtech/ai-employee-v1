@@ -46,7 +46,7 @@ export function McpUiResource({
       title="work item"
       sandbox="allow-scripts"
       srcDoc={html}
-      style={{ width: "100%", minHeight: 160, border: "1px solid #8883", borderRadius: 10, marginTop: 8, background: "transparent" }}
+      style={{ width: "100%", minHeight: 162, border: "1px solid rgba(10,10,10,0.10)", marginTop: 9, background: "transparent" }}
     />
   );
 }

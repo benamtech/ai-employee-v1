@@ -1,0 +1,76 @@
+/*
+ * AMTECH global foundation.
+ * Two text/background modes only: near-black ink on white, white on AMTECH red.
+ * Inter for display/body, IBM Plex Mono for operational labels. Sharp corners,
+ * hairline borders, spacing on a 3px grid. No shadows, no gradients, no emoji.
+ */
+:root {
+  --ink: #0a0a0a;
+  --paper: #ffffff;
+  --wash: #f4f4f4;
+  --red: #e11d2a;
+  --red-bright: #ff1a2b;
+  --hair-5: rgba(10, 10, 10, 0.05);
+  --hair-10: rgba(10, 10, 10, 0.1);
+  --hair-15: rgba(10, 10, 10, 0.15);
+  --ink-muted: rgba(10, 10, 10, 0.62);
+  --font-body: var(--font-inter), Inter, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  border-radius: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--red);
+  color: #ffffff;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 0;
+}

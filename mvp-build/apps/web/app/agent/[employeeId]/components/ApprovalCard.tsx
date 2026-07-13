@@ -25,18 +25,24 @@ export function ApprovalCard({
     try { await onResolve(approval.id, response); } finally { setBusy(false); }
   }
 
+  const btnBase: React.CSSProperties = {
+    fontFamily: tokens.font.mono, fontSize: tokens.font.small, fontWeight: 600,
+    letterSpacing: "0.06em", textTransform: "uppercase",
+    padding: `0 ${tokens.space.lg}px`, height: 30,
+    display: "inline-flex", alignItems: "center", cursor: busy ? "default" : "pointer",
+  };
   return (
-    <article style={{ display: "flex", borderRadius: tokens.radius.md, border: `1px solid ${tokens.color.accentSoft}`, background: tokens.color.surface, boxShadow: tokens.shadow.card, overflow: "hidden" }}>
-      <div aria-hidden style={{ width: 4, background: review.bar }} />
+    <article style={{ display: "flex", border: `1px solid ${tokens.color.border}`, background: tokens.color.surface, overflow: "hidden" }}>
+      <div aria-hidden style={{ width: 3, background: review.bar }} />
       <div style={{ flex: 1, padding: tokens.space.lg }}>
         <div style={{ display: "flex", alignItems: "center", gap: tokens.space.sm }}>
-          <span style={{ fontSize: tokens.font.tiny, fontWeight: 700, letterSpacing: 0.4, textTransform: "uppercase", color: review.color, background: review.soft, padding: "2px 8px", borderRadius: tokens.radius.pill }}>Your call</span>
-          {approval.risk_level ? <span style={{ fontSize: tokens.font.tiny, color: tokens.color.textMuted }}>{approval.risk_level} risk</span> : null}
+          <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, fontWeight: 500, letterSpacing: "0.06em", textTransform: "uppercase", color: review.color, border: `1px solid ${review.bar}`, padding: "0 6px", lineHeight: "16px", height: 18, display: "inline-flex", alignItems: "center" }}>Your call</span>
+          {approval.risk_level ? <span style={{ fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, letterSpacing: "0.06em", textTransform: "uppercase", color: approval.risk_level === "high" ? tokens.color.accent : tokens.color.textMuted }}>{approval.risk_level} risk</span> : null}
         </div>
         <p style={{ margin: `${tokens.space.sm}px 0 0`, fontSize: tokens.font.body, color: tokens.color.text }}>{approval.summary}</p>
         <div style={{ marginTop: tokens.space.md, display: "flex", gap: tokens.space.sm }}>
-          <button disabled={busy} onClick={() => resolve("approved")} style={{ background: tokens.color.success, color: "#fff", border: "none", borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.lg}px`, fontSize: tokens.font.small, cursor: busy ? "default" : "pointer" }}>Approve</button>
-          <button disabled={busy} onClick={() => resolve("rejected")} style={{ background: "transparent", color: tokens.color.danger, border: `1px solid ${tokens.color.dangerSoft}`, borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.lg}px`, fontSize: tokens.font.small, cursor: busy ? "default" : "pointer" }}>Not yet</button>
+          <button disabled={busy} onClick={() => resolve("approved")} style={{ ...btnBase, background: tokens.color.text, color: "#ffffff", border: `1px solid ${tokens.color.text}` }}>Approve</button>
+          <button disabled={busy} onClick={() => resolve("rejected")} style={{ ...btnBase, background: "transparent", color: tokens.color.danger, border: `1px solid ${tokens.color.danger}` }}>Not yet</button>
         </div>
       </div>
     </article>

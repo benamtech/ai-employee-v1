@@ -64,17 +64,18 @@ export function WorkCard({
 
   return (
     <article style={{
-      display: "flex", borderRadius: tokens.radius.md, border: `1px solid ${tokens.color.border}`,
-      background: tokens.color.surface, boxShadow: tokens.shadow.card, overflow: "hidden",
+      display: "flex", border: `1px solid ${tokens.color.border}`,
+      background: tokens.color.surface, overflow: "hidden",
     }}>
-      <div aria-hidden style={{ width: 4, background: move.bar }} />
+      <div aria-hidden style={{ width: 3, background: move.bar }} />
       <div style={{ flex: 1, padding: tokens.space.lg }}>
-        <div style={{ display: "flex", alignItems: "center", gap: tokens.space.sm }}>
+        <div style={{ display: "flex", alignItems: "center", gap: tokens.space.sm, flexWrap: "wrap" }}>
           <span style={{
-            fontSize: tokens.font.tiny, fontWeight: 700, letterSpacing: 0.4, textTransform: "uppercase",
-            color: move.color, background: move.soft, padding: "2px 8px", borderRadius: tokens.radius.pill,
+            fontFamily: tokens.font.mono, fontSize: tokens.font.tiny, fontWeight: 500, letterSpacing: "0.06em",
+            textTransform: "uppercase", color: move.color, border: `1px solid ${move.bar}`,
+            padding: "0 6px", lineHeight: "16px", height: 18, display: "inline-flex", alignItems: "center",
           }}>{move.label}</span>
-          <h3 style={{ margin: 0, fontSize: tokens.font.h3 }}>{descriptor.title}</h3>
+          <h3 style={{ margin: 0, fontSize: tokens.font.h3, fontWeight: 600, letterSpacing: "-0.015em" }}>{descriptor.title}</h3>
         </div>
         <p style={{ margin: `${tokens.space.sm}px 0 0`, fontSize: tokens.font.body, color: tokens.color.text }}>{descriptor.summary}</p>
 
@@ -93,7 +94,7 @@ export function WorkCard({
         <Receipt proof={descriptor.proof} />
 
         {done ? (
-          <p style={{ margin: `${tokens.space.md}px 0 0`, fontSize: tokens.font.small, color: tokens.color.success }}>✓ Sent to your employee.</p>
+          <p style={{ margin: `${tokens.space.md}px 0 0`, fontFamily: tokens.font.mono, fontSize: tokens.font.small, color: tokens.color.text }}>✓ Sent to your employee.</p>
         ) : uiResource ? null : composing ? (
           <div style={{ marginTop: tokens.space.md, display: "flex", gap: tokens.space.sm }}>
             <input
@@ -102,12 +103,12 @@ export function WorkCard({
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
               placeholder="No — tweak this: tell your employee what to change…"
-              style={{ flex: 1, padding: `${tokens.space.sm}px ${tokens.space.md}px`, border: `1px solid ${tokens.color.borderStrong}`, borderRadius: tokens.radius.sm, fontSize: tokens.font.small }}
+              style={{ flex: 1, padding: `0 ${tokens.space.md}px`, height: 30, border: `1px solid ${tokens.color.borderStrong}`, fontSize: tokens.font.small, fontFamily: tokens.font.family, outline: "none" }}
             />
             <button onClick={submit} style={primaryBtn}>Send</button>
           </div>
         ) : (canRespond || canAck || canApprove || canReject) ? (
-          <div style={{ marginTop: tokens.space.md, display: "flex", gap: tokens.space.sm }}>
+          <div style={{ marginTop: tokens.space.md, display: "flex", gap: tokens.space.sm, flexWrap: "wrap" }}>
             {canApprove ? <button onClick={() => void resolve("approved")} style={approveBtn}>Approve</button> : null}
             {canReject ? <button onClick={() => void resolve("rejected")} style={rejectBtn}>Not yet</button> : null}
             {canRespond ? <button onClick={() => setComposing(true)} style={primaryBtn}>Reply / tweak</button> : null}
@@ -119,23 +120,21 @@ export function WorkCard({
   );
 }
 
+const btnBase: React.CSSProperties = {
+  fontFamily: tokens.font.mono, fontSize: tokens.font.small, fontWeight: 600,
+  letterSpacing: "0.06em", textTransform: "uppercase",
+  padding: `0 ${tokens.space.md}px`, height: 30,
+  display: "inline-flex", alignItems: "center", cursor: "pointer",
+};
 const primaryBtn: React.CSSProperties = {
-  background: tokens.color.accent, color: "#fff", border: "none",
-  borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.md}px`,
-  fontSize: tokens.font.small, cursor: "pointer",
+  ...btnBase, background: tokens.color.text, color: "#ffffff", border: `1px solid ${tokens.color.text}`,
 };
 const approveBtn: React.CSSProperties = {
-  background: tokens.color.success, color: "#fff", border: "none",
-  borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.md}px`,
-  fontSize: tokens.font.small, cursor: "pointer",
+  ...btnBase, background: tokens.color.text, color: "#ffffff", border: `1px solid ${tokens.color.text}`,
 };
 const rejectBtn: React.CSSProperties = {
-  background: "transparent", color: tokens.color.danger, border: `1px solid ${tokens.color.dangerSoft}`,
-  borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.md}px`,
-  fontSize: tokens.font.small, cursor: "pointer",
+  ...btnBase, background: "transparent", color: tokens.color.danger, border: `1px solid ${tokens.color.danger}`,
 };
 const ghostBtn: React.CSSProperties = {
-  background: "transparent", color: tokens.color.textMuted, border: `1px solid ${tokens.color.border}`,
-  borderRadius: tokens.radius.sm, padding: `${tokens.space.sm}px ${tokens.space.md}px`,
-  fontSize: tokens.font.small, cursor: "pointer",
+  ...btnBase, background: "transparent", color: tokens.color.textMuted, border: `1px solid ${tokens.color.borderStrong}`,
 };
