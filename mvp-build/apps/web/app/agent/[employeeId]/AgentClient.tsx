@@ -17,6 +17,7 @@ import {
 } from "./lib/surface-model";
 import { tokens } from "./surface.tokens";
 import { DailyBrief } from "./components/DailyBrief";
+import { FirstRun } from "./components/FirstRun";
 import { ApprovalCard } from "./components/ApprovalCard";
 import { WorkCard } from "./components/WorkCard";
 import { JobFolder } from "./components/JobFolder";
@@ -385,6 +386,14 @@ function TodayView({
 }) {
   const resurfacedApprovalIds = new Set(resurfaceItems.flatMap((item) => item.target?.kind === "approval" ? [item.target.id] : []));
   const standaloneApprovals = res.approvals.filter((approval) => !resurfacedApprovalIds.has(approval.id)).slice(0, 3);
+
+  // First-run: a set-up employee with no work, connections, or activity yet.
+  const hasWork = res.work_events.length > 0 || (res.outputs?.length ?? 0) > 0 || (res.tasks?.length ?? 0) > 0 || res.approvals.length > 0;
+  const hasConnections = (res.connection_surfaces?.length ?? 0) > 0 || res.connectors.length > 0;
+  if (res.employee && !hasWork && !hasConnections) {
+    return <FirstRun employeeId={employeeId} employeeName={res.employee.name} />;
+  }
+
   return (
     <>
       <DailyBrief approvals={res.approvals} reminders={res.reminders} workEvents={res.work_events} invoices={res.stripe_invoices} resurfaceItems={res.resurface_items ?? []} />

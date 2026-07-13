@@ -30,6 +30,19 @@ function workEvent(
 }
 
 export function fixtureResourcePayload(employeeId: string): ResourcePayload {
+  // A brand-new employee: connected accounts + abilities exist, but no work has
+  // happened yet. Drives the first-run activation state (see FirstRun.tsx).
+  if (employeeId.includes("new")) {
+    return {
+      account_id: "acct_ui_fixture",
+      employee_id: employeeId,
+      employee: { id: employeeId, name: "Sage", status: "ready", profile_id: "contractor_estimator", web_route: `/agent/${employeeId}`, created_at: now },
+      runtime_health: { status: "healthy", checked_at: now, backend_type: "ui_fixture", api_ok: true, sms_number_present: true, message: "Your employee is set up and ready for its first job." },
+      artifacts: [], approvals: [], messages: [], connectors: [], stripe_invoices: [],
+      reminders: [], job_commitments: [], work_events: [], abilities: [],
+      outputs: [], tasks: [], connection_surfaces: [], resurface_items: [],
+    };
+  }
   const payload: ResourcePayload = {
     account_id: "acct_ui_fixture",
     employee_id: employeeId,
