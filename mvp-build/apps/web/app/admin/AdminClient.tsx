@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type React from "react";
+import * as adminFixtures from "./fixtures";
 import type {
   AdminAccountSummary,
   AdminDashboard,
@@ -24,6 +25,7 @@ const NAV: Array<{ id: View; label: string }> = [
 ];
 
 const DEFAULT_REASON = "Operator review for pilot readiness";
+const UI_FIXTURE_MODE = process.env.NEXT_PUBLIC_AMTECH_UI_FIXTURES === "1";
 
 async function adminFetch(path: string, opts: { method?: "GET" | "POST"; body?: unknown; reason?: string; adminToken?: string } = {}) {
   const headers: Record<string, string> = {
@@ -55,6 +57,13 @@ export function AdminClient() {
   const [status, setStatus] = useState("");
 
   async function loadDashboard(tokenOverride?: string) {
+    if (UI_FIXTURE_MODE) {
+      const fx = adminFixtures;
+      setDashboard(fx.fixtureDashboard);
+      setEnvironment(fx.fixtureEnvironment);
+      setStatus("");
+      return;
+    }
     try {
       setStatus("");
       const nextDashboard = await adminFetch("dashboard", { reason, adminToken: tokenOverride ?? adminToken }) as AdminDashboard;
@@ -66,6 +75,16 @@ export function AdminClient() {
   }
 
   async function openAccount(accountId: string) {
+    if (UI_FIXTURE_MODE) {
+      const fx = adminFixtures;
+      setSelectedAccount(accountId);
+      setAccountDetail(fx.fixtureAccountDetail[accountId] ?? null);
+      setSelectedEmployee(null);
+      setEmployeeDetail(null);
+      setReadiness(null);
+      setView("accounts");
+      return;
+    }
     try {
       setSelectedAccount(accountId);
       setAccountDetail(await adminFetch(`accounts/${accountId}`, { reason, adminToken }));
@@ -79,6 +98,11 @@ export function AdminClient() {
   }
 
   async function loadEnvironment() {
+    if (UI_FIXTURE_MODE) {
+      const fx = adminFixtures;
+      setEnvironment(fx.fixtureEnvironment);
+      return;
+    }
     try {
       setEnvironment(await adminFetch("environment/readiness", { reason, adminToken }));
     } catch (err) {
@@ -87,6 +111,13 @@ export function AdminClient() {
   }
 
   async function openEmployee(employeeId: string) {
+    if (UI_FIXTURE_MODE) {
+      const fx = adminFixtures;
+      setSelectedEmployee(employeeId);
+      setEmployeeDetail(fx.fixtureEmployeeDetail[employeeId] ?? null);
+      setReadiness(fx.fixtureReadiness[employeeId] ?? null);
+      return;
+    }
     try {
       setSelectedEmployee(employeeId);
       setEmployeeDetail(await adminFetch(`employees/${employeeId}`, { reason, adminToken }));
@@ -98,6 +129,10 @@ export function AdminClient() {
 
   async function runAction(action: AdminSupportAction, input: Record<string, unknown> = {}) {
     if (!selectedAccount) return;
+    if (UI_FIXTURE_MODE) {
+      setStatus(`UI fixture mode: "${action.replace(/_/g, " ")}" simulated locally — no Manager call.`);
+      return;
+    }
     try {
       const result = await adminFetch("support-action", {
         method: "POST",
@@ -146,7 +181,7 @@ export function AdminClient() {
       <style>{CSS}</style>
       <aside className="admin-rail">
         <div className="admin-brand">
-          <strong>AMTECH Admin</strong>
+          <strong>AMTECH<span aria-hidden className="admin-dot">.</span> ADMIN</strong>
           <span>Internal operations</span>
         </div>
         <nav>
@@ -398,47 +433,61 @@ function ownerSafeError(err: unknown): string {
 }
 
 const CSS = `
-  .admin-root { min-height: 100vh; display: grid; grid-template-columns: 240px minmax(0,1fr); background: #f5f6f3; color: #20231f; font-family: ui-sans-serif, system-ui, sans-serif; }
-  .admin-rail { border-right: 1px solid #d9ddd2; padding: 18px; display: grid; align-content: start; gap: 18px; background: #ffffff; }
+  .admin-root { min-height: 100vh; display: grid; grid-template-columns: 240px minmax(0,1fr); background: #ffffff; color: #0a0a0a; font-family: var(--font-inter), Inter, -apple-system, 'Helvetica Neue', Arial, sans-serif; --a-hair: rgba(10,10,10,0.10); --a-hair-strong: rgba(10,10,10,0.15); --a-muted: rgba(10,10,10,0.62); --a-red: #e11d2a; --a-wash: #f4f4f4; --a-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace; }
+  .admin-rail { border-right: 1px solid var(--a-hair); padding: 18px; display: grid; align-content: start; gap: 18px; background: #ffffff; }
   .admin-brand strong, .admin-brand span { display: block; }
-  .admin-brand span, .muted { color: #6d746a; font-size: 13px; }
-  nav { display: grid; gap: 5px; }
-  nav button, .button-row button, .admin-top button { border: 1px solid #d9ddd2; background: #fff; border-radius: 7px; padding: 9px 10px; text-align: left; cursor: pointer; }
-  nav button.active, .row.active { border-color: #2f6f64; background: #e8f3ef; }
-  .admin-reason { display: grid; gap: 6px; font-size: 12px; color: #6d746a; }
-  .admin-reason textarea, .admin-reason input { border: 1px solid #d9ddd2; border-radius: 7px; padding: 8px; }
-  .admin-reason textarea { min-height: 80px; resize: vertical; }
-  .admin-main { padding: 22px; display: grid; gap: 16px; align-content: start; }
-  .admin-top { display: flex; justify-content: space-between; gap: 16px; align-items: start; }
-  .admin-top p { margin: 0; color: #6d746a; font-size: 12px; text-transform: uppercase; font-weight: 700; }
-  .admin-top h1 { margin: 3px 0 0; font-size: 28px; }
-  .admin-banner { border: 1px solid #b88a2a; background: #fff3d7; border-radius: 7px; padding: 10px 12px; }
-  .stack { display: grid; gap: 14px; }
-  .metric-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
-  .metric, .panel { border: 1px solid #d9ddd2; background: #fff; border-radius: 8px; padding: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-  .metric span { color: #6d746a; font-size: 12px; display: block; }
-  .metric strong { font-size: 26px; }
-  .metric.good strong { color: #24734f; }
-  .metric.warn strong { color: #9a6a0a; }
-  .panel h2 { margin: 0 0 12px; font-size: 16px; }
-  .admin-split { display: grid; grid-template-columns: 330px minmax(0,1fr); gap: 14px; align-items: start; }
-  .row { width: 100%; border: 1px solid #d9ddd2; border-radius: 7px; background: #fff; padding: 10px; margin-bottom: 8px; text-align: left; display: grid; gap: 4px; cursor: pointer; }
-  .row span, .check span { color: #6d746a; font-size: 12px; }
-  .key { display: flex; justify-content: space-between; gap: 14px; border-bottom: 1px solid #edf0ea; padding: 7px 0; font-size: 13px; }
-  .key span { color: #6d746a; }
-  .button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-  .check { border-top: 1px solid #edf0ea; padding: 9px 0; display: grid; gap: 4px; }
-  .check p { margin: 0; color: #444b42; font-size: 13px; }
-  .pill { width: max-content; border-radius: 999px; padding: 2px 8px; font-size: 11px; text-transform: uppercase; font-weight: 700; background: #eef0eb; }
-  .pill.pass { color: #24734f; background: #e5f3eb; }
-  .pill.warn, .pill.unknown { color: #80610c; background: #fff3d7; }
-  .pill.fail { color: #a83226; background: #fde9e5; }
-  pre { overflow: auto; max-height: 220px; background: #f5f6f3; border: 1px solid #e4e7df; border-radius: 7px; padding: 10px; font-size: 12px; }
+  .admin-brand strong { font-family: var(--a-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+  .admin-brand strong .admin-dot { display: inline; color: var(--a-red); }
+  .admin-brand span, .muted { color: var(--a-muted); font-size: 12px; }
+  .admin-brand span { font-family: var(--a-mono); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; margin-top: 3px; }
+  nav { display: grid; gap: 0; border: 1px solid var(--a-hair); }
+  nav button { border: 0; border-bottom: 1px solid var(--a-hair); border-left: 3px solid transparent; background: #fff; padding: 6px 12px; text-align: left; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--a-muted); line-height: 24px; }
+  nav button:last-child { border-bottom: 0; }
+  nav button:hover { background: var(--a-wash); color: #0a0a0a; }
+  nav button.active { border-left-color: var(--a-red); background: var(--a-wash); color: #0a0a0a; font-weight: 600; }
+  .button-row button, .admin-top button { border: 1px solid var(--a-hair-strong); background: #fff; padding: 0 12px; height: 30px; text-align: center; cursor: pointer; font-family: var(--a-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #0a0a0a; }
+  .button-row button:hover, .admin-top button:hover { border-color: #0a0a0a; }
+  .row.active { border-left: 3px solid var(--a-red); background: var(--a-wash); }
+  .admin-reason { display: grid; gap: 6px; font-family: var(--a-mono); font-size: 9px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--a-muted); }
+  .admin-reason textarea, .admin-reason input { border: 1px solid var(--a-hair-strong); padding: 6px 9px; font-family: var(--a-mono); font-size: 12px; letter-spacing: 0; text-transform: none; outline: none; }
+  .admin-reason textarea:focus, .admin-reason input:focus { border-color: #0a0a0a; }
+  .admin-reason textarea { min-height: 78px; resize: vertical; }
+  .admin-main { padding: 24px; display: grid; gap: 18px; align-content: start; }
+  .admin-top { display: flex; justify-content: space-between; gap: 18px; align-items: end; border-bottom: 1px solid var(--a-hair); padding-bottom: 15px; }
+  .admin-top p { margin: 0; font-family: var(--a-mono); color: var(--a-red); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 500; }
+  .admin-top h1 { margin: 3px 0 0; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
+  .admin-banner { border: 1px solid var(--a-hair); border-left: 3px solid var(--a-red); background: #fff; padding: 9px 12px; font-size: 12px; }
+  .stack { display: grid; gap: 15px; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--a-hair); border: 1px solid var(--a-hair); }
+  .metric { background: #fff; padding: 15px; }
+  .panel { border: 1px solid var(--a-hair); background: #fff; padding: 15px; }
+  .metric span { font-family: var(--a-mono); color: var(--a-muted); font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; font-weight: 500; display: block; }
+  .metric strong { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
+  .metric.good strong { color: #0a0a0a; }
+  .metric.warn strong { color: var(--a-red); }
+  .panel h2 { margin: -15px -15px 12px; padding: 9px 12px; font-family: var(--a-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; border-bottom: 1px solid var(--a-hair); }
+  .admin-split { display: grid; grid-template-columns: 330px minmax(0,1fr); gap: 15px; align-items: start; }
+  .row { width: 100%; border: 1px solid var(--a-hair); border-left: 3px solid transparent; background: #fff; padding: 9px 12px; margin-bottom: -1px; text-align: left; display: grid; gap: 3px; cursor: pointer; font-family: inherit; color: #0a0a0a; }
+  .row:hover { background: var(--a-wash); }
+  .row strong { font-size: 15px; font-weight: 600; letter-spacing: -0.015em; }
+  .row span, .check span { color: var(--a-muted); font-size: 12px; }
+  .key { display: flex; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(10,10,10,0.05); padding: 6px 0; font-size: 12px; }
+  .key span { font-family: var(--a-mono); color: var(--a-muted); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 18px; }
+  .key strong { font-weight: 600; }
+  .button-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 12px; }
+  .check { border-top: 1px solid rgba(10,10,10,0.05); padding: 9px 0; display: grid; gap: 3px; }
+  .check strong { font-size: 12px; font-weight: 600; }
+  .check p { margin: 0; color: var(--a-muted); font-size: 12px; }
+  .pill { width: max-content; border: 1px solid var(--a-hair-strong); background: #fff; color: #0a0a0a; padding: 0 6px; font-family: var(--a-mono); font-size: 9px; line-height: 16px; height: 18px; display: inline-flex; align-items: center; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+  .pill.pass { color: #0a0a0a; border-color: var(--a-hair-strong); }
+  .pill.warn, .pill.unknown { color: var(--a-red); border-color: var(--a-red); background: #fff; }
+  .pill.fail { color: #ffffff; border-color: var(--a-red); background: var(--a-red); }
+  pre { overflow: auto; max-height: 220px; background: var(--a-wash); border: 1px solid var(--a-hair); padding: 9px; font-family: var(--a-mono); font-size: 12px; margin: 0 0 9px; }
   @media (max-width: 900px) {
     .admin-root, .admin-split { display: block; }
-    .admin-rail { border-right: 0; border-bottom: 1px solid #d9ddd2; }
-    nav { display: flex; overflow-x: auto; }
-    .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
-    .admin-main { padding: 14px; }
+    .admin-rail { border-right: 0; border-bottom: 1px solid var(--a-hair); }
+    nav { display: flex; overflow-x: auto; border: 1px solid var(--a-hair); }
+    nav button { border-bottom: 0; border-left: 0; border-right: 1px solid var(--a-hair); white-space: nowrap; }
+    .admin-main { padding: 15px; }
   }
 `;

@@ -1,5 +1,7 @@
 import { AgentClient } from "./AgentClient";
 
+export const metadata = { title: "Your employee — AMTECH" };
+
 export default async function AgentSurface({
   params,
 }: {
