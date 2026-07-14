@@ -94,6 +94,28 @@ function item(name, proof, reason) {
   };
 }
 
+function isProductionLikeEnv(env) {
+  if (env.NODE_ENV === "production") return true;
+  if (env.AMTECH_PRODUCTION_LIKE === "1") return true;
+  return /(^|[-_])(pod|prod|production|staging)([-_]|$)/i.test(env.AMTECH_ENVIRONMENT_NAME ?? "");
+}
+
+function uiFixtureItem(env) {
+  const enabled = env.NEXT_PUBLIC_AMTECH_UI_FIXTURES === "1";
+  const productionLike = isProductionLikeEnv(env);
+  return {
+    name: "ui_fixture_mode",
+    status: enabled && productionLike ? "fail" : "pass",
+    enabled,
+    production_like: productionLike,
+    reason: enabled && productionLike
+      ? "NEXT_PUBLIC_AMTECH_UI_FIXTURES must not be enabled in production-like or pod-like environments"
+      : enabled
+        ? "fixture mode is enabled for local UI proof only"
+        : undefined,
+  };
+}
+
 function proofSummary(proof) {
   if (!proof) return undefined;
   return {
@@ -117,6 +139,7 @@ export function summarizeEnvironment(proofs, env = process.env) {
     item("backup_restore", latest.backup_restore, "ops:backup/ops:restore proof not found"),
     item("red_health", latest.red_health, "ops:red-health proof not found"),
     item("egress", latest.egress, "ops:egress-policy proof not found"),
+    uiFixtureItem(env),
   ];
   const failed = items.some((check) => check.status === "fail");
   const skipped = items.some((check) => check.status === "skipped");

@@ -6,7 +6,7 @@ Status: **the second-half plan's product surfaces are `source-wired` and the act
 
 Current second-half plan: **[`second-half-plan/`](second-half-plan/)**. Current wiki companion: **[`../wiki/MVP/second-half-current-and-future-state.md`](../wiki/MVP/second-half-current-and-future-state.md)**. Older reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)**. Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**.
 
-For UI contributors, start with the active **[`ui-redesign/`](ui-redesign/)** packet after the core orientation docs. It supersedes the older dashboard/agent-desktop/chat-native directions and includes screenshots of the current Avery-first owner MVP route. The historical **[`ui-handoff/`](ui-handoff/)** packet remains useful for source maps and broader surface inventory.
+For UI contributors, start with **[`docs/ux/`](docs/ux/)** for the master UX system, research ledger, coverage audit, generative-UI frontier, and fixture/production policy. Then read the active **[`ui-redesign/`](ui-redesign/)** packet for the current owner MVP direction and screenshots. The historical **[`ui-handoff/`](ui-handoff/)** packet remains useful for source maps and broader surface inventory.
 
 UI contributors can work without full infrastructure:
 
@@ -17,9 +17,20 @@ npm run ui:test         # headless UI-only Playwright smoke
 npm run ui:test:headed  # headed UI-only smoke
 ```
 
-These commands use representative local Work Surface fixtures and do not require Manager, Supabase, Docker, Hermes containers, provider credentials, or model calls. They are for UI development, not provider/runtime acceptance.
+These commands use representative local Work Surface fixtures and do not require Manager, Supabase, Docker, Hermes containers, provider credentials, or model calls. They are for UI development, not provider/runtime acceptance. Fixture mode is guarded by [`docs/ux/06-fixture-production-ui-policy.md`](docs/ux/06-fixture-production-ui-policy.md) and must not be enabled in pod-like or production-like environments.
 
-Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). The Phase 6 metering foundation is source-wired (six Manager-only ledgers + `run_id` threading, `lib/metering.ts` helpers); instrumentation coverage, rollups, and budget-policy enforcement remain later work.
+Current fixture-guarded screenshots are copied into [`ui-redesign/screenshots/`](ui-redesign/screenshots/)
+from the latest local `npm run ui:test` proof:
+
+![Avery-first desktop Home](ui-redesign/screenshots/work-surface-desktop.png)
+
+![Avery-first mobile Home](ui-redesign/screenshots/work-surface-mobile.png)
+
+![Proof surface](ui-redesign/screenshots/proof-desktop.png)
+
+![Signed mobile Review](ui-redesign/screenshots/review-mobile.png)
+
+Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). Production UX organization lives in [`docs/ux/`](docs/ux/). The Phase 6 metering foundation is source-wired (six Manager-only ledgers + `run_id` threading, `lib/metering.ts` helpers); instrumentation coverage, rollups, and budget-policy enforcement remain later work.
 
 ## Hermes boundary
 

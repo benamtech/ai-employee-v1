@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { MANAGER_API } from "@amtech/shared";
+import { uiFixtureMode } from "../../../../_lib/ui-fixtures";
 import { managerPost } from "../../../../api/_lib/manager";
-
-const UI_FIXTURE_MODE = process.env.NEXT_PUBLIC_AMTECH_UI_FIXTURES === "1";
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ employeeId: string; artifactId: string }> },
 ) {
   const { employeeId, artifactId } = await params;
-  if (UI_FIXTURE_MODE) {
+  if (uiFixtureMode()) {
     return new Response(fixtureArtifactHtml(employeeId, artifactId), {
       headers: {
         "Content-Type": "text/html; charset=utf-8",

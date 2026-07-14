@@ -38,8 +38,6 @@ const EMPTY: ResourcePayload = {
   resurface_items: [],
 };
 
-const UI_FIXTURE_MODE = process.env.NEXT_PUBLIC_AMTECH_UI_FIXTURES === "1";
-
 type PrimaryView = "home" | "talk" | "proof" | "connected";
 type PendingMessage = { id: string; role: "owner" | "employee"; body: string; status: "sending" | "failed" };
 
@@ -50,19 +48,19 @@ const VIEWS: Array<{ id: PrimaryView; label: string }> = [
   { id: "connected", label: "Connected" },
 ];
 
-export function AgentClient({ employeeId }: { employeeId: string }) {
-  const [res, setRes] = useState<ResourcePayload>(() => (UI_FIXTURE_MODE ? fixtureResourcePayload(employeeId) : EMPTY));
+export function AgentClient({ employeeId, fixtureMode }: { employeeId: string; fixtureMode: boolean }) {
+  const [res, setRes] = useState<ResourcePayload>(() => (fixtureMode ? fixtureResourcePayload(employeeId) : EMPTY));
   const [view, setView] = useState<PrimaryView>("home");
   const [selected, setSelected] = useState<PreviewSelection | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState("");
-  const [loading, setLoading] = useState(!UI_FIXTURE_MODE);
-  const [streamState, setStreamState] = useState<"connecting" | "live" | "reconnecting" | "offline">(UI_FIXTURE_MODE ? "live" : "connecting");
+  const [loading, setLoading] = useState(!fixtureMode);
+  const [streamState, setStreamState] = useState<"connecting" | "live" | "reconnecting" | "offline">(fixtureMode ? "live" : "connecting");
   const [pending, setPending] = useState<PendingMessage[]>([]);
 
   const refresh = useCallback(async () => {
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       setRes((current) => {
         const next = current.account_id ? current : fixtureResourcePayload(employeeId);
         setSelected((selection) => selection ?? defaultSelection(next));
@@ -85,7 +83,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     setRes(next);
     setSelected((current) => current ?? defaultSelection(next));
     setLoading(false);
-  }, [employeeId]);
+  }, [employeeId, fixtureMode]);
 
   const mergeWorkEvent = useCallback((ev: WorkEventRow) => {
     setRes((prev) => {
@@ -97,7 +95,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   useEffect(() => { void refresh(); }, [refresh]);
 
   useEffect(() => {
-    if (UI_FIXTURE_MODE) return;
+    if (fixtureMode) return;
     let cancelled = false;
     async function beat() {
       if (cancelled) return;
@@ -106,10 +104,10 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     void beat();
     const timer = window.setInterval(() => { void beat(); }, 30_000);
     return () => { cancelled = true; window.clearInterval(timer); };
-  }, [employeeId]);
+  }, [employeeId, fixtureMode]);
 
   useEffect(() => {
-    if (UI_FIXTURE_MODE) return;
+    if (fixtureMode) return;
     let es: EventSource | null = null;
     let closed = false;
     let backoff = 1000;
@@ -153,12 +151,12 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     connect();
     const pollTimer = window.setInterval(() => { void refresh(); }, 20000);
     return () => { closed = true; es?.close(); window.clearInterval(pollTimer); };
-  }, [employeeId, refresh, mergeWorkEvent]);
+  }, [employeeId, fixtureMode, refresh, mergeWorkEvent]);
 
   const sendToEmployee = useCallback(async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       const created = new Date().toISOString();
       setRes((prev) => ({
         ...prev,
@@ -197,11 +195,11 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     }
     setPending((p) => p.filter((m) => m.id !== pendingId));
     await refresh();
-  }, [employeeId, refresh]);
+  }, [employeeId, fixtureMode, refresh]);
 
   const resolveApproval = useCallback(async (approvalId: string, response: "approved" | "rejected") => {
     if (!approvalId) return;
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       setRes((prev) => ({
         ...prev,
         approvals: prev.approvals.filter((approval) => approval.id !== approvalId),
@@ -245,7 +243,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
     const json = await r.json().catch(() => ({}));
     setStatus(json.user_facing_summary_hint ?? ownerError(json.error ?? "Updated."));
     await refresh();
-  }, [employeeId, res.account_id, refresh]);
+  }, [employeeId, fixtureMode, res.account_id, refresh]);
 
   function select(selection: PreviewSelection) {
     setSelected(selection);
