@@ -1,6 +1,6 @@
 # Graphic Design And Social Media Intern Handoff
 
-Status: active
+Status: archived reference
 
 Audience: graphic design, social media, lightweight brand/content support.
 

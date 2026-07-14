@@ -2,12 +2,13 @@
 
 Subject: AMTECH UI handoff for your agent
 
-Use this note to orient your UI/design agent before it touches the repo:
+Archived note. This was written before the Avery-first owner MVP reset. For current UI work, start
+with `mvp-build/docs/ux/` and `mvp-build/ui-redesign/`; use this only as historical context.
 
 ```text
 You are helping with AMTECH's UI/design implementation. AMTECH is building the Macintosh of AI agents for the modern American business: a trusted AI employee for small-business owners, not a chatbot, developer dashboard, or automation builder.
 
-Start with the canonical UI handoff:
+Historical starting list from the old UI handoff:
 
 - mvp-build/ui-handoff/README.md
 - mvp-build/ui-handoff/data-catalog.md

@@ -1,6 +1,6 @@
 # Working Protocol For UI Contributors
 
-Status: active
+Status: archived reference
 
 This protocol is for a UI-focused contributor working in parallel with ongoing MVP functionality work.
 

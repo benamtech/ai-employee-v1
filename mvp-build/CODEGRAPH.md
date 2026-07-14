@@ -170,7 +170,9 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `CLAUDE.md`, `AGENTS.md` | Build-home operating guide; keep mirrored. |
 | `README.md` | Human-facing build status, stack, run commands, working/planned feature overview. |
 | `CODEGRAPH.md` | This file; keep current when source layout or phase status changes materially. |
-| `ui-handoff/` | UI contributor packet for working on owner surfaces while MVP functionality continues: orientation, current UI map, research/principles, experimental future surfaces, and handoff protocol. |
+| `docs/ux/` | Active UX organization layer: Aqua/HIG translation, current UX map, research ledger, implementation coverage audit, generative UI frontier, fixture/production policy, and post-release roadmap. |
+| `ui-redesign/` | Active owner MVP UI redesign packet and fixture-guarded screenshots. This is the current owner-surface direction. |
+| `docs/archive/ui-handoff-2026-07-14/` | Archived predecessor UI collaborator packet. Historical reference only; do not use as the current UI starting point. |
 
 ### Web app - owner surfaces and browser routes
 
@@ -425,13 +427,16 @@ report outputs are not authoritative. Prefer authored source, migrations, docs, 
 | `docs/inbound-two-way-surface-map.md` | Docs-only Part A review of the as-built inbound/two-way surface: web owner turns, owner inbound SMS, provider webhooks, turn queue serialization, stuck-turn recovery, idempotency/dedupe, presence routing, and load fragilities. |
 | `docs/production-networking-and-dns.md` | Part B design + source-wired path for Pod Alpha public DNS/TLS: Cloudflare DNS-only records, static `*.agents.amtechai.com`, Caddy wildcard DNS-01, IPv4-first with optional/deferred IPv6, webhook ingress vs egress default-deny, firewall posture, and the new DNS/Caddy/proof/admin commands. |
 | `docs/roles-and-delegated-permissions-design.md` | Docs-only Part C design for deferred account-member roles/delegated permissions: reuse `account_memberships`, keep `platform_user_roles` for AMTECH staff only, requester != approver owner approvals, per-user phone/web identity, audit binding, and per-turn Hermes authority context. |
-| `ui-handoff/README.md` | Entry point for a UI-focused partner: read order, current phase position, safe work areas, and product mental model. |
-| `ui-handoff/data-catalog.md` | Full inventory of every data shape/route available to the UI (`ResourcePayload`, `WorkResource`/`WorkAction`, `SurfaceEnvelope`/`CapabilityGraphNode`, admin contracts), across every surface (web desk, signed mobile review, admin console, MCP-UI generative cards), plus the concrete artifact-link/preview-image rendering plumbing. |
-| `ui-handoff/product-grounding.md` | Product grounding for UI agents: AMTECH product power, owner mental model, wiki-vs-`mvp-build` distinction, current source reality, and UI north star. |
-| `ui-handoff/current-ui-map.md` | Source map for the current web UI, Work Surface data flow, styling state, and refactor boundaries. |
-| `ui-handoff/research-and-principles.md` | Index of UI research, Hermes GUI discoveries, generative UI principles, and owner-facing vocabulary. |
-| `ui-handoff/experiments-and-future-surfaces.md` | Design backlog for signed SMS previews, preview images/media/video, task progress, artifact representations, and cross-surface data renderings; web remains first priority. |
-| `ui-handoff/working-protocol.md` | Parallel UI contributor workflow: checks, memory/handoff rules, contract boundaries, and coordination guidance. |
+| `docs/ux/README.md` | Current UI contributor entry point and source order. Start here for UX work. |
+| `docs/ux/01-aqua-ai-interface-principles.md` | Aqua/HIG principles translated into AMTECH AI-employee interface rules. |
+| `docs/ux/02-current-ux-system-map.md` | Current cross-surface UX map after the Avery-first owner reset. |
+| `docs/ux/03-research-source-ledger.md` | External and internal UX source ledger. |
+| `docs/ux/04-implementation-coverage-audit.md` | What the current UI covers, where it is fixture-proven, and what remains unproven. |
+| `docs/ux/05-generative-ui-frontier.md` | Current status and acceptance boundary for generated UI/work-object surfaces. |
+| `docs/ux/06-fixture-production-ui-policy.md` | Fixture-mode policy: same routes/components, fake local data only, fail closed in pod-like/production-like environments. |
+| `docs/ux/07-post-release-ui-roadmap.md` | Post-release UX roadmap. |
+| `ui-redesign/README.md` | Active owner MVP UI redesign packet with current screenshots. |
+| `docs/archive/ui-handoff-2026-07-14/` | Archived old UI collaborator packet and data catalog. Historical reference only. |
 | `memory/MEMORY.md` | Durable memory writing protocol and handoff index. |
 | `memory/YYYY-MM-DD-HHMM-*.md` | Dated agentic-dev handoffs and architectural decisions. |
 

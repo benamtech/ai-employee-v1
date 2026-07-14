@@ -1,6 +1,6 @@
 # Product Grounding For UI Work
 
-Status: active
+Status: archived reference
 
 Purpose: ground a UI coding agent in what AMTECH is, why the product is powerful, and how to navigate the wiki versus `mvp-build/`.
 

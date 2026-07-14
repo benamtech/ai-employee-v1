@@ -1,6 +1,6 @@
 # Current UI Map
 
-Status: active
+Status: archived reference
 
 This document maps the current UI implementation so a UI contributor can work without rediscovering the whole backend.
 

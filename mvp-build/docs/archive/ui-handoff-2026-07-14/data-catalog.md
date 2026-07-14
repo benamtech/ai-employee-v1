@@ -1,6 +1,6 @@
 # Data Catalog: Everything Available To The UI
 
-Status: active
+Status: archived reference
 
 Purpose: one place that inventories every data shape, route, and rendering primitive the UI can draw
 on today, across every surface (web Work Surface, signed mobile review, admin console, MCP-UI

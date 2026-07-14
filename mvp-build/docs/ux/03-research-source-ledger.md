@@ -25,4 +25,4 @@ Purpose: keep external and internal UX research findable
 | `wiki/MVP/event-driven-office-and-generative-ui.md` | Event flow and generative UI product framing. |
 | `mvp-build/second-half-plan/surface-research-hermes-gui-and-materialization.md` | Hermes/materialization research behind `SurfaceEnvelope` and work resources. |
 | `mvp-build/second-half-plan/context-engineering/` | Context-engineering UX substrate: memory, primer, compression, hooks, rotation, connector policy. |
-| `mvp-build/ui-handoff/` | Historical UI collaborator packet and data catalog. |
+| `mvp-build/docs/archive/ui-handoff-2026-07-14/` | Archived historical UI collaborator packet and data catalog. Use only for provenance or older source inventory; current UX work starts in `mvp-build/docs/ux/` and `mvp-build/ui-redesign/`. |
