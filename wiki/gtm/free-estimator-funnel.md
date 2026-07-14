@@ -25,7 +25,7 @@ cold email / SEO tool page / referral
   -> upload notes/photos/template/logo as available
   -> estimate draft + assumptions + downloadable output
   -> feedback request
-  -> soft CTA: tune it to your pricing / give your business its own AI employee
+  -> soft CTA: start a free trial / make this your own AI employee
 ```
 
 This replaces phone-first as the primary contractor acquisition wedge. Phone remains useful for callbacks, warm paths, local trust, no-website rows, and high-intent follow-up, but the main first touch should be the public estimator because it is lower friction, more scalable, and better aligned with SEO.
@@ -34,7 +34,7 @@ This replaces phone-first as the primary contractor acquisition wedge. Phone rem
 
 - **It sells by doing the work.** The contractor does not have to believe an AI pitch. They hand over one real job and judge the result.
 - **It teaches the new mental model.** The contractor learns "I talk to the employee, it makes a work object, I approve or correct it."
-- **It is product-led but still service-aware.** No signup is required, but the output naturally exposes the need for tuning, pricing rules, templates, connectors, and a persistent employee.
+- **It is product-led but still service-aware.** No signup is required, but the output naturally exposes the value of a persistent employee that remembers pricing rules, templates, customer context, connectors, and follow-up.
 - **It creates SEO assets with utility.** Cost calculators and estimate generators can rank because they solve a problem directly. AMTECH should not only write articles about estimating; it should publish useful estimators as indexable tool pages.
 - **It reveals qualified leads.** A contractor who uploads one real job, asks for line-item corrections, or downloads a draft has more intent than someone who clicked a generic AI article.
 
@@ -50,7 +50,7 @@ The public estimator page should:
 - allow a logo/template upload path when supported, or clearly mark it as an optional follow-up if not yet wired;
 - allow download/copy of the estimate output;
 - ask for feedback immediately after the draft;
-- offer a soft next step: "Want this to know your pricing and format every time?"
+- offer a soft next step: "Want this estimator to remember your pricing and format for the next job?"
 
 The page should not require account creation before the first estimate. It should not claim autonomous sending. Anything sent to a homeowner remains an owner-approved action in the installed employee product.
 
@@ -65,7 +65,7 @@ Subject: We give contractors free estimates.
 
 Pick one job you need to estimate and send it through this page. You can talk to it like you would talk to a secretary or estimator. It will draft the estimate, show the assumptions, and let you download it. No signup.
 
-If it is useful, tell us what was right or wrong. If you want, we can tune it to your pricing and format so it becomes your own AI employee.
+If it is useful, tell us what was right or wrong. If you want, you can start a free trial so this estimator remembers your pricing, format, and follow-up rules for the next job.
 
 [link]
 ```
@@ -96,7 +96,7 @@ Each tool page should have:
 - example estimate output;
 - internal links to practical articles;
 - structured data where appropriate;
-- a CTA into tuning or AI Employee setup.
+- a CTA into the free AI Employee trial.
 
 This is a better AI-search strategy than only writing "best estimating software" articles. AMTECH becomes the source that performs the task.
 
@@ -106,14 +106,14 @@ The free estimator creates natural upgrade moments:
 
 | Moment | Upgrade |
 |---|---|
-| The draft is close but not in their pricing | Tuned Estimate package |
+| The draft is useful but not in their pricing | Start the free AI Employee trial; the employee learns pricing and format |
 | They want their logo/template every time | Business brain + document format setup |
 | They want to send through Gmail | Live AI Employee with approval gate |
 | They want follow-up, deposit invoices, reminders, and bookkeeping | Managed office loop |
 
-The sales close should stay concrete:
+The trial invitation should stay concrete:
 
-> "This free one worked from what you typed. Your own employee knows your pricing, format, materials, service area, email, and follow-up rules, so you do not rebuild context every time."
+> "This free one worked from what you typed. Want this estimator to remember your pricing, format, materials, service area, and follow-up rules for the next job?"
 
 ## Guardrails
 
@@ -137,7 +137,7 @@ Track:
 - feedback submitted;
 - "tune this" clicks;
 - calls booked;
-- paid tuned packages;
+- free trial starts;
 - live Employees provisioned.
 
-The key metric is not email replies. It is **real estimate attempts that become tuning or Employee conversations**.
+The key metric is not email replies. It is **real estimate attempts that become free-trial Employee conversations**.

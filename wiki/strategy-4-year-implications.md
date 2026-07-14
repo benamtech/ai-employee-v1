@@ -61,7 +61,7 @@ What must be true:
 
 Commercial motion:
 
-- Product-led wedge: contractor lands on the no-signup free estimator, submits one real job, receives a draft, gives feedback, and escalates to tuning or Employee setup.
+- Product-led wedge: contractor lands on the no-signup free estimator, submits one real job, receives a draft, gives feedback, and escalates to a free AI Employee trial when they want the estimator to remember their business.
 - Follow-up-led close: phone/local/referral follow-up focuses on high-intent estimator attempts and no-website owners who need a human bridge.
 - Wedge: Estimate remains the first work object because it is frequent, money-proximate, visual, and easy for the owner to judge.
 
@@ -69,7 +69,7 @@ Success metrics:
 
 - 3-5 provider-accepted golden-path demos.
 - 6-10 contractor Employees provisioned or seriously piloted.
-- 20+ free-estimator attempts with useful inputs, and 8+ tuned/customization transactions only if they feed Employee learning.
+- 20+ free-estimator attempts with useful inputs, and 8+ free-trial starts that feed Employee learning.
 - One stable `contractor_estimator` profile package with a repeatable onboarding/consulting script.
 
 ## Year 2 — turn service learning into profile packages

@@ -6,7 +6,7 @@
 
 ```
 INPUTS                AGENT-RUN CONVEYOR (Tier A/B)                  FOUNDER (Tier D)        OUTPUT
-~350 names    ->   enrich -> trade-tag -> estimator email ->  ->   high-intent follow-up +  ->  tuned packages
+~350 names    ->   enrich -> trade-tag -> estimator email ->  ->   high-intent follow-up +  ->  free trials
 + SEO/tools        tool page -> attempt triage -> feedback log      trust/price close          + live Employees
                    phone/local callback -> CRM log
 ```
@@ -55,7 +55,7 @@ Grounded in home-services benchmarks: cold conversion ~2–3% average, 6–10% w
 - ~1,000 outbound touches over the month, weighted to email/SEO/tool-page CTA plus phone follow-up.
 - ~60–100 estimator starts.
 - ~25–40 completed estimate drafts with useful inputs.
-- ~10–15 tuned estimate packages at $300-class pricing ≈ **$3,000–$4,500**, if the paid package is the chosen close.
+- ~8–15 AI Employee free trials started.
 - ~2–3 live Employees moved into setup/monthly or serious pilot.
 
 Hormozi's law applies: **~100 primary actions/day, volume negates luck** [S072]. The agent conveyor is what makes 100/day sustainable for one person.

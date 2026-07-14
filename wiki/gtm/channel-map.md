@@ -1,6 +1,6 @@
 # GTM - Channel & Receptivity Map
 
-**Status: complete** · _Revised 2026-07-14 for the current motion: every channel drives into the no-signup free estimator or a guided estimator attempt, then the tuned package + live Employee. See [`free-estimator-funnel.md`](free-estimator-funnel.md)._
+**Status: complete** · _Revised 2026-07-14 for the current motion: every channel drives into the no-signup free estimator or a guided estimator attempt, then an AI Employee free trial. See [`free-estimator-funnel.md`](free-estimator-funnel.md)._
 
 ## Beachhead: owner-operated painting & landscaping/hardscaping contractors
 
@@ -39,6 +39,6 @@ Bookkeepers fix the one contractor weakness (reachability) but require **buildin
 
 1. Show you understand the estimate workflow (talk pricing, not AI).
 2. Produce a line-item estimate artifact from *their* real job, through the free estimator or live Work Surface — within ~5%, with assumptions visible.
-3. Provision the live Employee and sell the **tuned package ($300, paid discovery)** that installs their pricing brain; deliver in 48 hours.
+3. Start the AI Employee free trial and let the employee learn the pricing brain through the normal estimator conversation.
 4. Climb to the recurring Employee + Pro lanes (Gmail send/reply, deposits, follow-up, job folders) as the owner feels each loop — the [progressive-trust ladder](../principle-deliverable-driven-surfaces.md).
 5. Keep everything customer-facing / money-touching behind one-tap approval — structurally, by deliverable type.

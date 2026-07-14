@@ -1,10 +1,10 @@
 # Pitch Scripts — Paint/Landscape Contractors
 
-**Status: complete** · _Revised 2026-06-29 for the current motion: the demo is the live onboarding surface, you provision the Employee early, and the $300 tuned package is paid discovery — not the product. The condensed version lives in [`../00-decision.md`](../00-decision.md) §8–9; offer detail in [`wedge-offers.md`](wedge-offers.md) and [`../gtm/consulting-sales-surface.md`](../gtm/consulting-sales-surface.md)._
+**Status: complete** · _Revised 2026-07-14 for the current motion: no-signup free estimate first, then an AI Employee free trial if the contractor wants the estimator to remember their business. The condensed version lives in [`../00-decision.md`](../00-decision.md) §8–9; offer detail in [`wedge-offers.md`](wedge-offers.md) and [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md)._
 
 ## Golden rule
 
-Lead with the **free estimate result**; hold the tech until after the contractor has tried one real job. The seller's failure mode is retreating into explaining the AI under pressure. Every script below keeps you on the contractor's estimate pain, not on Hermes.
+Lead with the **free estimate result**; hold the tech until after the contractor has tried one real job. Do not sell the AI Employee before they understand why they would want one. Every script below keeps you on the contractor's estimate pain and makes the next step feel like "let this remember my business," not "buy software."
 
 Primary CTA now lives in [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md): send contractors to the no-signup estimator first, then follow up on high-intent attempts.
 
@@ -22,7 +22,7 @@ If "what is it / how": go to **Redirect 1**. If "I'm busy / on a job": "Totally 
 >
 > Pick one job you need to estimate and send it through this page. You can talk to it like you would talk to a secretary or estimator. It will draft the estimate, show the assumptions, and let you download it. No signup.
 >
-> If it is useful, tell us what was right or wrong. If you want, we can tune it to your pricing and format so it becomes your own AI employee.
+> If it is useful, tell us what was right or wrong. If you want, you can start a free trial so this estimator remembers your pricing, format, and follow-up rules for the next job.
 >
 > [link]
 
@@ -38,11 +38,11 @@ If "what is it / how": go to **Redirect 1**. If "I'm busy / on a job": "Totally 
 1. Use the contractor's **own** recent job (photos + the customer's messages). Never a generic example.
 2. In the public estimator or live surface, produce a **line-item** estimate artifact — scope, quantity, unit price, the assumption behind each — with download/review visible. He's looking at his employee's actual output, not a slide.
 3. Ask: **"Is that within a few percent of what you'd have charged?"** Let him check the lines.
-4. On yes, set up his Employee on the spot (it provisions free-by-default) and sell the tuning: "That's *before* I tune it to your exact pricing. For $300 I load your markup, labor rates, and materials so it becomes your employee's pricing brain — dialed in, back to you in 48 hours."
+4. On yes, start the free trial: "That's before it knows your exact pricing and format. Want this estimator to remember your markup, labor rates, materials, and template for the next job?"
 
-## Tuned-package close ($300, paid discovery)
+## Free-trial start
 
-"Here's how it works: 20 minutes on the phone, you tell me your pricing the way you'd tell a new estimator — markup, crew day rate, material costs, your standard line items. I load it into your employee, send it back in two days, and from then on it writes your estimates within about 5%. Three hundred bucks, paid up front. Want the link?" _(Internally this is paid discovery that installs the business brain and improves the reusable `contractor_estimator` package — not a one-off file.)_
+"Here's how it works: you tell the AI employee your pricing the way you'd tell a new estimator — markup, crew day rate, material costs, your standard line items, your logo or template if you have one. Then the next estimate starts from your business instead of a blank chat. No charge to start the trial; just use it on the next real job and tell us what is right or wrong." _(Internally this installs the business brain and improves the reusable `contractor_estimator` package — but do not sell that abstraction to the contractor.)_
 
 ## Employee — provision after the free estimator proves useful
 
@@ -60,8 +60,8 @@ Pro upsell (later): "Want it to also pull from your past estimates and photos au
 **"Is this just ChatGPT?"**
 "No. ChatGPT is a blank box you'd have to feed and babysit every time. This already knows your pricing, your markup, your materials, your format — so it writes *your* estimate, not a generic one. And it gets better on its own as the AI improves, without you doing anything."
 
-**"That's too expensive."**
-"An office person to do this is three to five grand a month. The tuning is three hundred bucks once — and if it wins you one extra job a month, it's paid for the year. If estimates aren't eating your evenings, don't buy it." Then stop talking.
+**"Are you trying to sell me something?"**
+"No. Try one estimate first. If it saves you the write-up, start the free trial and let it remember your pricing for the next one. You should not pay for anything until it has done useful work on your jobs." Then stop talking.
 
 ## Objection: "I don't trust AI to price my jobs"
 
@@ -76,5 +76,5 @@ Pro upsell (later): "Want it to also pull from your past estimates and photos au
 1. Their real job, their inputs, in the live onboarding surface.
 2. Line-item estimate artifact + approval card, same day or live.
 3. "Within a few percent?" — let them verify.
-4. Provision the Employee; "$300 to tune it to your pricing, link now, back in 48 hours."
+4. Start the free trial; "Want this estimator to remember your pricing and format for the next one?"
 5. As they feel each loop: climb to Gmail send/reply, deposit invoice, follow-up, Pro lanes.

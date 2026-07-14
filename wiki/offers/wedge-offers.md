@@ -1,16 +1,16 @@
-# Wedge Offers — Free Estimator → Tuned Package → AI Employee
+# Wedge Offers — Free Estimator → Free Trial → AI Employee
 
 **Status: active** · _Revised 2026-07-10: QuickBooks connector tier is now built (Phase A source-wired, live creds pending). See [`../00-decision.md`](../00-decision.md), [`../gtm/consulting-sales-surface.md`](../gtm/consulting-sales-surface.md), and [`../MVP/old-build-plan/`](../MVP/old-build-plan/)._
 
 ## The core motion
 
-AMTECH does not sell a one-off artifact. It sells a ladder where every rung is an easy yes that earns the next, and where the through-line is: **more context -> less owner effort -> more of the office loop handled by the Employee behind a visible approval gate.** The Estimate skill is the first proof object; the **connected Employee and Work Surface are the product**. The primary contractor wedge is now the no-signup public estimator in [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md): one real job, chat-native intake, estimate draft, assumptions, download, feedback. The full menu of back-office lanes the Employee grows into is the [Skill Catalog](skill-catalog.md).
+AMTECH does not sell a one-off artifact. It sells a ladder where every rung is an easy yes that earns the next, and where the through-line is: **more context -> less owner effort -> more of the office loop handled by the Employee behind a visible approval gate.** The Estimate skill is the first proof object; the **connected Employee and Work Surface are the product**. The primary contractor wedge is now the no-signup public estimator in [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md): one real job, chat-native intake, estimate draft, assumptions, download, feedback. The next rung is not a paid tuning package; it is the contractor starting a free AI Employee trial because they want the same estimator to remember their business. The full menu of back-office lanes the Employee grows into is the [Skill Catalog](skill-catalog.md).
 
 | Rung | Buyer-facing name | What changes | Commercial role |
 |---|---|---|---|
 | **0 — Free estimator** | **We give contractors free estimates.** | Contractor uses a no-signup public estimator on one real job; the AI employee captures messy notes/photos/messages and returns a line-item estimate draft. | Scalable proof / top of funnel |
-| **1 — Tuned package** | **Your Estimate, Tuned** | 20-min interview loads pricing, markup, materials, suppliers, assemblies, format, and owner rules into the skill/profile package. | **$300-class paid discovery** |
-| **2 — Employee (Starter)** | **Your AI Estimator** | Own SMS/web surface + estimate artifact + approval + Gmail send/reply. Voice memo/job notes -> draft -> approve -> send. | Setup + monthly |
+| **1 — Free trial** | **Your AI Estimator Trial** | The employee learns pricing, markup, materials, suppliers, assemblies, format, logo/template, and owner rules through conversation. | Trial / business-brain capture |
+| **2 — Employee (Starter)** | **Your AI Estimator** | Own SMS/web surface + estimate artifact + approval + Gmail send/reply. Voice memo/job notes -> draft -> approve -> send. | Paid setup + monthly after value is felt |
 | **3 — Employee (Office)** | **Your AI Office** | Adds deposit invoices, reminders, follow-up, job folders, QuickBooks/Drive/Calendar lanes, standing policies where safe. | Expansion/retention |
 
 ## Connector tiers (what each rung plugs in)
@@ -46,9 +46,9 @@ The Estimate skill, with proper context loaded, lands within ~5% of what the con
 ## Beachhead offer (paint/landscape) — the one to sell now
 
 **Rung 0 free estimator:** send the contractor to a public estimator page with the literal offer "We give contractors free estimates." They pick a job they need to estimate, provide the notes/photos/customer messages they already have, and receive a line-item draft with assumptions and a downloadable output. Frame it as *the first loop*, not a detached demo.
-**Rung 1 close on the call:** "If that's close, I'll tune it to your exact pricing and format for $300, then it becomes the pricing brain your Employee uses." Book the 20-minute interview; collect via payment link before the build unless this is a free MVP provisioning test.
-**Interview captures:** markup %, labor rates, crew/day costs, material & supplier pricing, standard assemblies/line items, service area, document format/branding.
-**Rung 2 trigger:** once the first work is trusted, "This free one worked from what you typed. Want your own employee to know your pricing, format, email, and follow-up rules so you can text it from the truck every time?" -> Starter Employee.
+**Rung 1 trial start:** "This free one worked from what you typed. Want this estimator to remember your pricing and format for the next job?" Start the AI Employee free trial and let the employee ask the same pricing/context questions a new estimator would ask.
+**Trial captures:** markup %, labor rates, crew/day costs, material & supplier pricing, standard assemblies/line items, service area, document format/branding, logo/template, send/follow-up preferences.
+**Rung 2 paid trigger:** once repeated work is trusted, "Want it to handle the whole loop — text it the job, it writes the estimate, sends after you approve, watches the reply, and asks about the deposit?" -> Starter Employee.
 
 ## Beachhead #2 wedge (bookkeepers) — build, don't sell yet
 
@@ -62,10 +62,10 @@ Same ladder, different first skill. **Requires building a doc-sorter / missing-d
 
 ## Other segments (parked — same ladder if revisited)
 
-Insurance, property management, freight/staffing, real estate, and general contractors outside paint/landscape are **not** the current motion. If revisited, apply the identical ladder (free proof object -> tuned package -> live Employee -> managed office loop) and the line-item/approval discipline. Prior per-segment notes live in [`../segments/`](../segments/).
+Insurance, property management, freight/staffing, real estate, and general contractors outside paint/landscape are **not** the current motion. If revisited, apply the identical ladder (free proof object -> free trial employee -> paid Employee -> managed office loop) and the line-item/approval discipline. Prior per-segment notes live in [`../segments/`](../segments/).
 
 ## Revision / scope boundary
 
-- **Included** at Rung 1: one 20-minute interview, one tuned estimate package, one document format, one revision after feedback, and business-brain/profile updates usable by the Employee.
+- **Included** at Rung 1: free-trial employee setup, pricing/context interview, document format/logo/template capture where supported, one revision after feedback, and business-brain/profile updates usable by the Employee.
 - **Included** at Rung 2+: provisioning, listed connectors, the estimate/send/reply/deposit/reminder lanes named in the tier, ongoing tuning as pricing changes, and absorbing model/runtime drift.
 - **Not included:** final-number ownership (the contractor always approves), autonomous sending, contract/lien/legal language, lead generation, or cold outbound.

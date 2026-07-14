@@ -30,7 +30,7 @@ Before the forms, the mechanism that delivers them. **AMTECH's key GTM move is p
 | Expand | **Web UI / notifications** | Sees lead history, more skills offered, it remembers and improves |
 | Convert | **Upgrade prompt → or a scheduled call** | Felt the value; the call is the trust close, not a cold pitch |
 
-This spine changes the first rung of the price ladder ([`wedge-offers.md`](wedge-offers.md): free estimator -> $300 tuned Estimate package -> $1,000/$1,500-mo Employee -> managed office loop). It changes **how the first work is delivered** (public page, zero signup) and **how the upsell happens** (the agent self-escalates after doing useful work). It is the lowest-friction version of "do things that don't scale / make something people want" [S063, S070] — concierge value without forcing the contractor into a sales call first.
+This spine changes the first rung of the ladder ([`wedge-offers.md`](wedge-offers.md): free estimator -> free AI Employee trial -> paid Employee -> managed office loop). It changes **how the first work is delivered** (public page, zero signup) and **how the upsell happens** (the agent self-escalates after doing useful work). It is the lowest-friction version of "do things that don't scale / make something people want" [S063, S070] — concierge value without forcing the contractor into a sales call first.
 
 ## 1. The three standard skill forms (the portable wedge)
 
@@ -42,7 +42,7 @@ The Estimate skill ships as a portable **SKILL.md** artifact so it works inside 
 | 2 | **GitHub-linked** | SKILL.md lives in a versioned repo folder (signed, in the `amtechai.com/skills` registry [S057]); install/reference by link | Tinkerers, agents, and our own Employee loading it as a procedure |
 | 3 | **AMTECH-hosted, self-bootstrapping** | Run the hosted skill; it **interviews him and emits his *custom* skill** | The real wedge — the generic skill that upgrades itself |
 
-**Form 3 is the genius idea lying in front of us.** The hosted Estimate skill follows the AMTECH standard *and contains the procedure to become the $300 tuned Estimate package*: it runs the 20-minute pricing interview (markup %, labor rates, crew/day, materials/suppliers, standard assemblies, service area, document format), then **materializes a tuned skill repo for him** via the same profile-factory mechanism that builds Employees [S060, S061]. The wedge literally **bootstraps itself up the ladder** — generic skill → loads his context → tuned skill → ready to drop into his Employee. No human build step for the common case; the founder supervises pricing (Tier C) and stays the gate.
+**Form 3 is the genius idea lying in front of us.** The hosted Estimate skill follows the AMTECH standard *and contains the procedure to become the trial Employee's pricing brain*: it runs the pricing/context interview (markup %, labor rates, crew/day, materials/suppliers, standard assemblies, service area, document format), then writes those facts into the business brain/profile package the Employee uses [S060, S061]. The wedge literally **bootstraps itself up the ladder** — generic public estimate -> loads his context -> trial Employee -> paid managed loop. No human build step for the common case; the founder supervises pricing only where trust or edge cases require it.
 
 ## 2. The customer-facing intake — the layer between SaaS and a form
 
