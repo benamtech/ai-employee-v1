@@ -2,9 +2,12 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   ID_PREFIX,
   TOOL_NAMES,
+  custodyFor,
   getToolSchema,
   hasExplicitToolSchema,
+  knownConnectors,
   newId,
+  resolveConnectorMeta,
   type AbilitySummary,
   type CapabilityCategory,
   type CapabilityGraphNode,
@@ -13,6 +16,15 @@ import {
   type ToolName,
 } from "@amtech/shared";
 import type { EmployeeSnapshot } from "./employee-stream.js";
+
+/**
+ * CE-4: categories that are backed by a real connector, derived from the shared
+ * connector registry (not hardcoded here). A tool in one of these categories routes
+ * to its connector's status instead of a per-tool substring branch, so adding a
+ * connector is data, not a code branch. `money` (Stripe) is handled specially
+ * because its connection state lives in `stripe_connections`, not `connector_accounts`.
+ */
+const CONNECTOR_BACKED_CATEGORIES = new Set<CapabilityCategory>(knownConnectors().map((c) => c.category));
 
 const MANAGER_TOOL_META: Partial<Record<ToolName, { category: CapabilityCategory; label: string; summary: string }>> = {
   send_phone_verification: { category: "office", label: "Verify owner phone", summary: "Confirm the owner can receive and approve work by phone." },
@@ -75,15 +87,6 @@ const MANAGER_TOOL_META: Partial<Record<ToolName, { category: CapabilityCategory
   get_aged_payables: { category: "accounting", label: "What the business owes", summary: "Read QuickBooks A/P aging (overdue bills)." },
 };
 
-/** QBO tools by category, so statusForTool can route them to the QuickBooks
- *  connector before the Stripe "invoice"/"payment" substring branch catches
- *  create_invoice/create_payment. Derived from MANAGER_TOOL_META (single source). */
-const QBO_TOOL_NAMES: Set<ToolName> = new Set(
-  (Object.entries(MANAGER_TOOL_META) as Array<[ToolName, { category: CapabilityCategory }]>)
-    .filter(([, meta]) => meta.category === "accounting")
-    .map(([name]) => name),
-);
-
 function runtimeStatus(runtime: RuntimeHealthSummary): CapabilityStatus {
   if (runtime.status === "healthy") return "ready";
   if (runtime.status === "degraded") return "degraded";
@@ -104,11 +107,17 @@ function stripeStatus(snapshot: EmployeeSnapshot): CapabilityStatus {
 }
 
 function statusForTool(name: ToolName, snapshot: EmployeeSnapshot, runtime: RuntimeHealthSummary): CapabilityStatus {
-  // QuickBooks first: several QBO tools contain "invoice"/"payment" substrings
-  // that would otherwise fall into the Stripe branch below.
-  if (name.includes("quickbooks") || QBO_TOOL_NAMES.has(name)) return connectorStatus(snapshot, "quickbooks");
-  if (name.includes("email")) return connectorStatus(snapshot, "gmail");
-  if (name.includes("invoice") || name.includes("deposit")) return stripeStatus(snapshot);
+  // CE-4: route by the tool's CATEGORY (from MANAGER_TOOL_META) to its connector's
+  // status, via the shared registry — no per-tool substring branches. A tool's
+  // category is stable data; the connector for that category comes from the registry.
+  const category = MANAGER_TOOL_META[name]?.category;
+  if (category && CONNECTOR_BACKED_CATEGORIES.has(category)) {
+    // `money` connection state lives in `stripe_connections` (charges_enabled), not
+    // `connector_accounts`, so it keeps its dedicated status resolver.
+    if (category === "money") return stripeStatus(snapshot);
+    const meta = knownConnectors().find((c) => c.category === category);
+    if (meta) return connectorStatus(snapshot, meta.key);
+  }
   if (runtime.status === "unhealthy" && !["connect_email", "request_approval", "resolve_approval"].includes(name)) return "degraded";
   return hasExplicitToolSchema(name) ? "ready" : "needs_info";
 }
@@ -166,6 +175,37 @@ export function buildCapabilityRegistry(snapshot: EmployeeSnapshot): CapabilityG
     };
   });
 
+  // CE-4: generic connector nodes. Any connector present on the employee that the
+  // registry does not recognize (an arbitrary MCP connector) still appears in the
+  // capability graph — derived from its metadata (category, connected state, custody),
+  // with ZERO per-tool code. Known Manager-mediated connectors (gmail/stripe/qbo)
+  // already have rich tool nodes above, so they are skipped here; known read-only
+  // direct-MCP connectors still get generic connector nodes. Mirrors
+  // `customConnectionSurface`.
+  const genericConnectorNodes: CapabilityGraphNode[] = (snapshot.connectors ?? []).flatMap((connector) => {
+    const meta = resolveConnectorMeta(connector.provider || connector.connector_key);
+    const directMcp = custodyFor(meta) === "direct_mcp";
+    if (meta.known && !directMcp) return [];
+    const status = connectorStatus(snapshot, connector.provider || connector.connector_key);
+    return [{
+      id: newId(ID_PREFIX.capabilityNode),
+      account_id: snapshot.account_id,
+      employee_id: snapshot.employee_id,
+      key: `connector:${connector.connector_key || connector.provider}`,
+      label: meta.label,
+      summary: directMcp
+        ? "A connected read-only system the employee can query directly."
+        : "A connected system used through approved Manager capabilities (money/customer-facing actions stay owner-gated).",
+      category: meta.category,
+      status,
+      setup_requirement: status === "ready" ? null : "Repair or reconnect this system.",
+      trust_level: "connector",
+      can_run_now: status === "ready" && directMcp,
+      sources: ["connector", "policy"],
+      proof: { source_table: "connector_accounts", source_id: connector.id },
+    } satisfies CapabilityGraphNode];
+  });
+
   const policyNode: CapabilityGraphNode = {
     id: newId(ID_PREFIX.capabilityNode),
     account_id: snapshot.account_id,
@@ -182,7 +222,7 @@ export function buildCapabilityRegistry(snapshot: EmployeeSnapshot): CapabilityG
     proof: { source_table: "policy", source_id: "approval-gates-v1" },
   };
 
-  return [runtimeNode, ...toolNodes, policyNode];
+  return [runtimeNode, ...toolNodes, ...genericConnectorNodes, policyNode];
 }
 
 export function abilitiesFromCapabilities(nodes: CapabilityGraphNode[]): AbilitySummary[] {

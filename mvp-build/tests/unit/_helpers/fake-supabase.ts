@@ -279,5 +279,6 @@ export const SCHEMA_UNIQUES: UniqueSpec = {
   employee_mcp_credentials: [["token_hash"]],
   stripe_webhook_events: [["stripe_event_id"]],
   preview_links: [["token_hash"]],
-  agent_context_primer_sessions: [["employee_id", "session_key"]],
+  agent_context_primer_sessions: [["employee_id", "transcript_session_id"]],
+  employee_sessions: [["employee_id", "transcript_session_id"]],
 };

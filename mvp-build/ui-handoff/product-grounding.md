@@ -6,9 +6,9 @@ Purpose: ground a UI coding agent in what AMTECH is, why the product is powerful
 
 ## The Product In One Sentence
 
-AMTECH packages Hermes Agent by Nous Research into a trusted AI employee for small-business owners, starting with owner-operated painters and landscapers.
+AMTECH packages Hermes Agent by Nous Research into a trusted AI employee and chat-native business work surface for small-business owners, starting with owner-operated painters and landscapers.
 
-The owner should experience one capable employee who can be texted, inspected on the web, and trusted to do office work with approval gates. The owner should not experience a model, a tool catalog, a developer console, or a pile of disconnected automations.
+The owner should experience one capable employee who can be texted, inspected on the web, and trusted to do office work with approval gates. The owner should not experience a model, a tool catalog, a developer console, or a pile of disconnected automations. The current UI risk is that chat, tasks, outputs, and activity look like separate products; the target is one operating surface where chat creates work objects and those objects carry preview, action, proof, and history.
 
 ## Why This Is Powerful
 
@@ -93,6 +93,7 @@ High-value UI/product wiki docs:
 - `wiki/principle-deliverable-driven-surfaces.md`
 - `wiki/MVP/second-half-current-and-future-state.md`
 - `wiki/MVP/event-driven-office-and-generative-ui.md`
+- `wiki/MVP/ai-native-work-surface-research.md`
 - `wiki/MVP/old-build-plan/15-interaction-reimagined-the-work-surface.md`
 
 ### `mvp-build/`
@@ -163,3 +164,7 @@ A contractor should be able to open AMTECH and understand, in seconds:
 > My employee is working. Here is what it knows, what it made, what it needs from me, what it can do next, and what will happen if I say yes.
 
 That is the UI job.
+
+The sharper north star:
+
+> I can tell Avery what happened in plain language, and the right business surface appears: estimate, approval, customer reply, connector repair, deposit, reminder, or proof.

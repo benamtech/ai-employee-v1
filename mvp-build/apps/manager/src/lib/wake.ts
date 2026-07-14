@@ -3,6 +3,7 @@ import { assertWorkEventDescriptor, type WorkEventDescriptor } from "@amtech/sha
 import { executeHermesTurnStreaming, resolveRuntimeApi } from "./hermes-client.js";
 import { runEmployeeTurn } from "./turn-queue.js";
 import { recordExternalRuntimeRun, recordToolInvocation } from "./metering.js";
+import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
 import { publishProgress } from "./progress-bus.js";
 
 export interface WakeDescriptorPayload {
@@ -70,22 +71,36 @@ export async function wakeEmployeeForDescriptor(db: SupabaseClient, payload: Wak
       run_id: payload.run_id ?? null,
     },
     async () => {
+      // CE-3: rotate the transcript BEFORE the turn if the prior turn filled it.
+      await rotateSessionIfNeeded(db, { account_id: payload.account_id, employee_id: payload.employee_id });
       const api = await resolveRuntimeApi(db, payload.employee_id);
       let retryError: string | undefined;
+      let lastUsage: Record<string, unknown> | undefined;
+      let result: { descriptor: WorkEventDescriptor; runtime_mode: "runs" | "sessions"; external_run_id: string | null } | undefined;
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const res = await executeHermesTurnStreaming(api, {
           input: "Produce the work-event descriptor for the internal event.",
           system_message: systemPrompt(payload, retryError),
           work_run_id: payload.run_id ?? null,
         }, (p) => publishProgress(payload.employee_id, { run_id: payload.run_id ?? payload.source_event_id, verb: p.verb, state: p.state }));
+        lastUsage = res.usage;
         await recordExternalRuntimeRun(db, payload.run_id ?? null, { provider: "hermes", external_run_id: res.external_run_id ?? null });
         try {
           const descriptor = stampDescriptor(extractJson(res.text), payload);
-          return { descriptor, runtime_mode: res.mode, external_run_id: res.external_run_id ?? null };
+          result = { descriptor, runtime_mode: res.mode, external_run_id: res.external_run_id ?? null };
+          break;
         } catch (err) {
           retryError = String((err as Error).message ?? err);
         }
       }
+      // CE-3: record occupancy once for the turn (context was consumed even if the
+      // descriptor failed to parse).
+      await recordSessionOccupancy(db, {
+        account_id: payload.account_id, employee_id: payload.employee_id,
+        transcript_session_id: api.sessionId, memory_session_key: api.sessionKey,
+        usage: lastUsage,
+      });
+      if (result) return result;
       throw new Error(`wake_descriptor_invalid:${retryError ?? "unknown"}`);
     },
   );

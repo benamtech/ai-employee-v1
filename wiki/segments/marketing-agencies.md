@@ -15,6 +15,8 @@ Marketing/SEO/content agencies look attractive — reachable, AI-comfortable, re
 
 Agencies do feel fulfillment, reporting, and client-communication pain [S001–S003], and an account coordinator is a real paid substitute [S004]. But pain ≠ buyability for *this* product and *this* founder. The same recurring-back-office thesis is far stronger aimed at AI-naive contractors who own the decision and can't self-serve.
 
+There is one useful implication: a marketing company that already bought AMTECH for itself could eventually operate much of its internal fulfillment with a few AI Employee instances. That illustrates the platform ceiling — AMTECH can run real business work across clients, deliverables, approvals, and proof — but it does **not** reopen agencies as the beachhead. Use it as an example of the product's power, not as a market pivot.
+
 ## If ever revisited
 
 Only as a **channel** (an agency reselling AMTECH Employees to its SMB clients), and only after the contractor beachhead is won — never as a direct beachhead. Until then: closed.

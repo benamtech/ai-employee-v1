@@ -1,6 +1,6 @@
 # Phase CE-4 — Connector-agnostic capabilities + operator modes
 
-Status: planned (deferred — build after CE-1..3 are proven and a second connector/package exists)
+Status: source-wired (2026-07-12; live direct-MCP connector proof pending)
 
 Goal: make the brain projection cover **any MCP connector** end-to-end (Jobber, ServiceTitan, Housecall
 Pro, or any MCP tool), and let context policy vary by **business type** and **operator mode** — without
@@ -45,15 +45,14 @@ adapter contract). But two things are not yet connector-agnostic:
   `profile-renderer.ts` (per-connector custody + `mcp_servers` rendering for read-only connectors),
   `packages/shared/src` (connector metadata + operator-mode/business-type policy types).
 
-## Acceptance gates (when built)
+## Acceptance gates
 
-- A new read-only MCP connector appears in the capability graph, Connected surface, resurfacing, and the
-  agent primer with no per-tool code.
-- A write/money connector is refused a direct-MCP path and routed through Manager mediation.
-- Primer/compression/rotation vary correctly by a fixture business-type + operator-mode policy.
+- A read-only MCP connector appears in the capability graph and Connected surface with no per-tool code.
+- A write/money/customer-facing connector is refused a direct-MCP path and routed through Manager mediation.
+- Primer and rotation vary correctly by a fixture business-type + operator-mode policy seam; roles are not
+  built here.
 
 ## Note
 
-This phase is intentionally last and lightest. Do not start it until CE-1..3 are proven and there is a
-real second connector or profile package to generalize against — premature generalization here would be
-speculative.
+This phase is intentionally light. The source-wired implementation adds the metadata/custody seams without
+claiming a live direct-MCP connector proof.

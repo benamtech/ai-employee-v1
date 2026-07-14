@@ -17,6 +17,7 @@ import {
 } from "./lib/surface-model";
 import { tokens } from "./surface.tokens";
 import { DailyBrief } from "./components/DailyBrief";
+import { FirstRun } from "./components/FirstRun";
 import { ApprovalCard } from "./components/ApprovalCard";
 import { WorkCard } from "./components/WorkCard";
 import { JobFolder } from "./components/JobFolder";
@@ -66,6 +67,10 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
   const [streamState, setStreamState] = useState<"connecting" | "live" | "reconnecting" | "offline">(UI_FIXTURE_MODE ? "live" : "connecting");
   const [progress, setProgress] = useState<{ run_id: string; verb: string; state: string } | null>(null);
   const [pending, setPending] = useState<PendingMessage[]>([]);
+  // Hydration marker: the kicker reads "Starting" until React is interactive, so
+  // both owners and browser checks only see "Work Surface" once clicks actually work.
+  const [interactive, setInteractive] = useState(false);
+  useEffect(() => { setInteractive(true); }, []);
 
   const refresh = useCallback(async () => {
     if (UI_FIXTURE_MODE) {
@@ -276,11 +281,9 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
       <style>{WORK_SURFACE_CSS}</style>
       <aside className="ws-rail" aria-label="Employee sections">
         <div className="ws-brand">
-          <span className="ws-mark">A</span>
-          <div>
-            <strong>{res.employee?.name ?? "Employee"}</strong>
-            <span>{res.employee?.status ?? "loading"}</span>
-          </div>
+          <p className="ws-logo">AMTECH<span aria-hidden>.</span></p>
+          <strong>{res.employee?.name ?? "Employee"}</strong>
+          <span className="ws-emp-status">{res.employee?.status ?? "loading"}</span>
         </div>
         <nav className="ws-nav">
           {NAV.map((item) => (
@@ -296,7 +299,7 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
       <section className="ws-main" aria-busy={loading}>
         <header className="ws-topbar">
           <div>
-            <p className="ws-kicker">Work Surface</p>
+            <p className="ws-kicker">{interactive ? "Work Surface" : "Starting"}</p>
             <h1>{titleForView(active)}</h1>
           </div>
           <div className="ws-status-row">
@@ -346,13 +349,14 @@ export function AgentClient({ employeeId }: { employeeId: string }) {
         </div>
       </section>
 
-      <aside className="ws-preview" aria-label="Selected work preview">
+      <aside className={selected ? "ws-preview open" : "ws-preview"} aria-label="Selected work preview">
         <PreviewPane
           employeeId={employeeId}
           res={res}
           preview={preview}
           selection={selected}
           onSelect={setSelected}
+          onClose={() => setSelected(null)}
           onRespond={sendToEmployee}
           onResolve={resolveApproval}
         />
@@ -382,6 +386,14 @@ function TodayView({
 }) {
   const resurfacedApprovalIds = new Set(resurfaceItems.flatMap((item) => item.target?.kind === "approval" ? [item.target.id] : []));
   const standaloneApprovals = res.approvals.filter((approval) => !resurfacedApprovalIds.has(approval.id)).slice(0, 3);
+
+  // First-run: a set-up employee with no work, connections, or activity yet.
+  const hasWork = res.work_events.length > 0 || (res.outputs?.length ?? 0) > 0 || (res.tasks?.length ?? 0) > 0 || res.approvals.length > 0;
+  const hasConnections = (res.connection_surfaces?.length ?? 0) > 0 || res.connectors.length > 0;
+  if (res.employee && !hasWork && !hasConnections) {
+    return <FirstRun employeeId={employeeId} employeeName={res.employee.name} />;
+  }
+
   return (
     <>
       <DailyBrief approvals={res.approvals} reminders={res.reminders} workEvents={res.work_events} invoices={res.stripe_invoices} resurfaceItems={res.resurface_items ?? []} />
@@ -555,6 +567,7 @@ function PreviewPane({
   preview,
   selection,
   onSelect,
+  onClose,
   onRespond,
   onResolve,
 }: {
@@ -563,6 +576,7 @@ function PreviewPane({
   preview: ReturnType<typeof previewItem>;
   selection: PreviewSelection | null;
   onSelect: (selection: PreviewSelection) => void;
+  onClose: () => void;
   onRespond: (text: string) => void;
   onResolve: (approvalId: string, response: "approved" | "rejected") => Promise<void> | void;
 }) {
@@ -581,6 +595,7 @@ function PreviewPane({
 
   return (
     <div className="ws-preview-inner">
+      <button className="ws-preview-close" onClick={onClose} aria-label="Close preview">Close ✕</button>
       <p className="ws-kicker">{preview.eyebrow}</p>
       <h2>{preview.title}</h2>
       {preview.summary ? <p className="ws-muted">{preview.summary}</p> : null}
@@ -774,95 +789,119 @@ function ownerError(code: string): string {
 
 const WORK_SURFACE_CSS = `
   :root {
-    --ws-bg: #f3f1ec;
-    --ws-panel: #fffefa;
-    --ws-panel-2: #f8f6ef;
-    --ws-border: #ded8cb;
-    --ws-border-strong: #c7bfaf;
-    --ws-text: #242018;
-    --ws-muted: #716b60;
-    --ws-faint: #969086;
-    --ws-blue: #1769aa;
-    --ws-blue-soft: #e8f1f8;
-    --ws-green: #1a7f4b;
-    --ws-green-soft: #e7f4ec;
-    --ws-amber: #8a6d1f;
-    --ws-amber-soft: #fbf3df;
-    --ws-red: #b42318;
-    --ws-red-soft: #fbeae8;
+    --ws-ink: #0a0a0a;
+    --ws-paper: #ffffff;
+    --ws-wash: #f4f4f4;
+    --ws-red: #e11d2a;
+    --ws-red-bright: #ff1a2b;
+    --ws-hair-5: rgba(10,10,10,0.05);
+    --ws-hair: rgba(10,10,10,0.10);
+    --ws-hair-strong: rgba(10,10,10,0.15);
+    --ws-muted: rgba(10,10,10,0.62);
+    --ws-font: var(--font-inter), Inter, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+    --ws-mono: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
   }
-  .ws-root { min-height: 100vh; display: grid; grid-template-columns: 236px minmax(0, 1fr) 360px; background: radial-gradient(circle at 20% -10%, #fff8df 0, transparent 38%), linear-gradient(135deg, #f5f2ea 0%, #edf3f2 100%); color: var(--ws-text); font-family: ui-sans-serif, system-ui, sans-serif; }
-  .ws-rail { border-right: 1px solid var(--ws-border); padding: 18px; display: flex; flex-direction: column; gap: 18px; min-height: 100vh; background: rgba(255,255,255,.55); backdrop-filter: blur(10px); }
-  .ws-brand { display: flex; gap: 10px; align-items: center; }
-  .ws-brand strong, .ws-brand span { display: block; }
-  .ws-brand span { color: var(--ws-muted); font-size: 12px; }
-  .ws-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--ws-text); color: white; display: grid; place-items: center; font-weight: 800; }
-  .ws-nav { display: grid; gap: 4px; }
-  .ws-nav button { border: 0; background: transparent; color: var(--ws-muted); text-align: left; border-radius: 7px; padding: 9px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 14px; }
-  .ws-nav button.active, .ws-nav button:hover { background: var(--ws-panel); color: var(--ws-text); box-shadow: inset 0 0 0 1px var(--ws-border); }
-  .ws-nav b { font-size: 11px; color: var(--ws-blue); background: var(--ws-blue-soft); border-radius: 999px; padding: 1px 7px; }
-  .ws-health { margin-top: auto; border: 1px solid var(--ws-border); border-radius: 8px; padding: 12px; background: var(--ws-panel); }
-  .ws-health > span, .ws-kicker { display: block; color: var(--ws-faint); font-size: 11px; text-transform: uppercase; letter-spacing: 0; font-weight: 700; }
-  .ws-health p, .ws-muted { color: var(--ws-muted); font-size: 13px; line-height: 1.45; }
-  .ws-main { min-width: 0; padding: 22px; overflow: auto; max-height: 100vh; }
-  .ws-topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 18px; }
-  .ws-topbar h1 { margin: 2px 0 0; font-size: 28px; line-height: 1.1; }
-  .ws-status-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-  .ws-banner { border: 1px solid var(--ws-amber); background: var(--ws-amber-soft); color: var(--ws-text); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 14px; }
-  .ws-view { display: grid; gap: 16px; }
-  .ws-grid.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
-  .ws-panel, .ws-empty, .ws-chat, .ws-preview-inner { border: 1px solid var(--ws-border); border-radius: 8px; background: var(--ws-panel); box-shadow: 0 1px 2px rgba(36,32,24,.05); padding: 16px; }
-  .ws-panel h2 { margin: 0 0 12px; font-size: 16px; }
-  .ws-list { display: grid; gap: 10px; }
-  .ws-row { width: 100%; border: 1px solid var(--ws-border); background: var(--ws-panel); border-radius: 8px; padding: 12px; text-align: left; display: grid; gap: 5px; cursor: pointer; color: var(--ws-text); }
-  .ws-row:hover { border-color: var(--ws-border-strong); }
-  .ws-row span { color: var(--ws-faint); font-size: 11px; text-transform: uppercase; letter-spacing: 0; font-weight: 700; }
-  .ws-row strong { font-size: 15px; }
-  .ws-row p { margin: 0; color: var(--ws-muted); font-size: 13px; line-height: 1.45; }
+  .ws-root { min-height: 100vh; display: grid; grid-template-columns: 240px minmax(0, 1fr) 360px; background: var(--ws-paper); color: var(--ws-ink); font-family: var(--ws-font); }
+  .ws-rail { border-right: 1px solid var(--ws-hair); display: flex; flex-direction: column; min-height: 100vh; background: var(--ws-paper); }
+  .ws-brand { padding: 18px; border-bottom: 1px solid var(--ws-hair); }
+  .ws-logo { margin: 0 0 12px; font-family: var(--ws-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+  .ws-logo span { color: var(--ws-red); }
+  .ws-brand strong { display: block; font-size: 18px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
+  .ws-emp-status { display: block; margin-top: 3px; font-family: var(--ws-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ws-muted); }
+  .ws-nav { display: block; padding: 9px 0; }
+  .ws-nav button { width: 100%; border: 0; border-left: 3px solid transparent; background: transparent; color: var(--ws-muted); text-align: left; padding: 6px 15px 6px 18px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-family: var(--ws-font); font-size: 15px; font-weight: 500; line-height: 24px; }
+  .ws-nav button:hover { background: var(--ws-wash); color: var(--ws-ink); }
+  .ws-nav button.active { border-left-color: var(--ws-red); background: var(--ws-wash); color: var(--ws-ink); font-weight: 600; }
+  .ws-nav b { font-family: var(--ws-mono); font-size: 9px; font-weight: 500; color: var(--ws-muted); border: 1px solid var(--ws-hair-strong); padding: 0 6px; line-height: 16px; min-width: 18px; text-align: center; }
+  .ws-nav button.active b { color: #ffffff; background: var(--ws-red); border-color: var(--ws-red); }
+  .ws-health { margin-top: auto; border-top: 1px solid var(--ws-hair); padding: 18px; }
+  .ws-health > span, .ws-kicker { display: block; font-family: var(--ws-mono); color: var(--ws-muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; font-weight: 500; }
+  .ws-health .ws-pill { margin-top: 6px; }
+  .ws-health p, .ws-muted { color: var(--ws-muted); font-size: 12px; line-height: 1.5; }
+  .ws-health p { margin-top: 6px; }
+  .ws-main { min-width: 0; overflow: auto; max-height: 100vh; display: flex; flex-direction: column; }
+  .ws-topbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; padding: 18px 24px 15px; border-bottom: 1px solid var(--ws-hair); }
+  .ws-topbar h1 { margin: 3px 0 0; font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+  .ws-status-row { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+  .ws-status-row .ws-pill { margin-left: -1px; }
+  .ws-banner { border-bottom: 1px solid var(--ws-hair); border-left: 3px solid var(--ws-red); background: var(--ws-paper); color: var(--ws-ink); padding: 9px 24px; font-size: 12px; }
+  .ws-view { display: grid; gap: 18px; padding: 24px; align-content: start; }
+  .ws-grid.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; align-items: start; }
+  .ws-panel, .ws-empty, .ws-chat, .ws-preview-inner { border: 1px solid var(--ws-hair); background: var(--ws-paper); padding: 0; }
+  .ws-panel h2 { margin: 0; padding: 9px 12px; font-family: var(--ws-mono); font-size: 9px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; border-bottom: 1px solid var(--ws-hair); }
+  .ws-panel > .ws-muted { padding: 12px; }
+  .ws-panel .ws-row, .ws-panel .ws-card-wrap { border-left: 0; border-right: 0; }
+  .ws-panel .ws-row { border-top: 0; }
+  .ws-panel .ws-card-wrap { padding: 12px; border-bottom: 1px solid var(--ws-hair-5); }
+  .ws-panel .ws-card-wrap:last-child { border-bottom: 0; }
+  .ws-list { display: block; border: 1px solid var(--ws-hair); background: var(--ws-paper); }
+  .ws-list > .ws-card-wrap { padding: 12px; border-bottom: 1px solid var(--ws-hair); }
+  .ws-list > .ws-card-wrap:last-child { border-bottom: 0; }
+  .ws-row { width: 100%; border: 0; border-bottom: 1px solid var(--ws-hair); background: var(--ws-paper); padding: 12px; text-align: left; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 12px; cursor: pointer; color: var(--ws-ink); font-family: var(--ws-font); }
+  .ws-row:last-child { border-bottom: 0; }
+  .ws-row:hover { background: var(--ws-wash); }
+  .ws-row > span { grid-column: 1; font-family: var(--ws-mono); color: var(--ws-muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; font-weight: 500; }
+  .ws-row > strong { grid-column: 1; font-size: 15px; font-weight: 600; letter-spacing: -0.015em; }
+  .ws-row > p { grid-column: 1; margin: 0; color: var(--ws-muted); font-size: 12px; line-height: 1.5; }
+  .ws-row > .ws-pill { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
   .ws-card-wrap { display: grid; gap: 6px; }
-  .ws-preview-action { justify-self: start; border: 1px solid var(--ws-border); border-radius: 999px; background: var(--ws-panel); color: var(--ws-muted); padding: 4px 9px; font-size: 12px; font-weight: 700; cursor: pointer; }
-  .ws-preview-action:hover { border-color: var(--ws-border-strong); color: var(--ws-text); }
-  .ws-chat { min-height: calc(100vh - 120px); display: grid; grid-template-rows: 1fr auto; gap: 14px; }
-  .ws-thread { overflow: auto; display: flex; flex-direction: column; gap: 10px; min-height: 320px; }
-  .ws-message { max-width: 76%; border: 1px solid var(--ws-border); border-radius: 10px; padding: 10px 12px; text-align: left; background: var(--ws-panel-2); color: var(--ws-text); cursor: pointer; }
-  .ws-message.owner { align-self: flex-end; background: var(--ws-blue-soft); }
-  .ws-message span { color: var(--ws-faint); font-size: 11px; font-weight: 700; }
-  .ws-message p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; }
-  .ws-message small { color: var(--ws-muted); }
-  .ws-composer { display: grid; grid-template-columns: 1fr auto; gap: 8px; border: 1px solid var(--ws-border); border-radius: 8px; padding: 8px; background: var(--ws-panel-2); }
-  .ws-composer input { border: 0; background: transparent; min-width: 0; padding: 8px; font-size: 15px; outline: none; color: var(--ws-text); }
-  .ws-composer button, .ws-primary { border: 0; border-radius: 7px; background: var(--ws-blue); color: white; padding: 9px 14px; cursor: pointer; font-weight: 700; }
-  .ws-preview { border-left: 1px solid var(--ws-border); padding: 22px 18px; background: rgba(255,255,255,.45); max-height: 100vh; overflow: auto; }
-  .ws-preview-inner h2 { margin: 2px 0 8px; font-size: 22px; }
-  .ws-preview-body { display: grid; gap: 12px; margin-top: 14px; }
-  .ws-detail { display: grid; gap: 10px; border-top: 1px solid var(--ws-border); padding-top: 12px; }
-  .ws-detail p { margin: 0; color: var(--ws-muted); font-size: 14px; line-height: 1.45; }
-  .ws-kv { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; border-bottom: 1px solid var(--ws-border); padding-bottom: 7px; }
-  .ws-kv span { color: var(--ws-faint); }
-  .ws-kv strong { text-align: right; }
-  .ws-link { color: var(--ws-blue); font-weight: 700; text-decoration: none; }
-  .ws-pill { width: max-content; border-radius: 999px; padding: 2px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0; }
-  .ws-pill.good { color: var(--ws-green); background: var(--ws-green-soft); }
-  .ws-pill.warn { color: var(--ws-amber); background: var(--ws-amber-soft); }
-  .ws-pill.bad { color: var(--ws-red); background: var(--ws-red-soft); }
-  .ws-pill.quiet { color: var(--ws-muted); background: var(--ws-panel-2); }
-  .ws-empty strong { display: block; font-size: 15px; }
-  .ws-empty p { margin: 6px 0 0; color: var(--ws-muted); font-size: 13px; line-height: 1.45; }
+  .ws-preview-action { justify-self: start; border: 1px solid var(--ws-hair-strong); background: var(--ws-paper); color: var(--ws-muted); padding: 0 9px; font-family: var(--ws-mono); font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; line-height: 19px; height: 21px; cursor: pointer; }
+  .ws-preview-action:hover { border-color: var(--ws-ink); color: var(--ws-ink); }
+  .ws-chat { min-height: calc(100vh - 150px); display: grid; grid-template-rows: 1fr auto; }
+  .ws-thread { overflow: auto; display: flex; flex-direction: column; gap: 12px; min-height: 320px; padding: 18px; }
+  .ws-message { max-width: 76%; border: 1px solid var(--ws-hair); border-left: 3px solid var(--ws-hair-strong); padding: 9px 12px; text-align: left; background: var(--ws-paper); color: var(--ws-ink); cursor: pointer; font-family: var(--ws-font); }
+  .ws-message.owner { align-self: flex-end; background: var(--ws-wash); border-left: 1px solid var(--ws-hair); }
+  .ws-message span { font-family: var(--ws-mono); color: var(--ws-muted); font-size: 9px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; }
+  .ws-message p { margin: 3px 0 0; font-size: 15px; line-height: 1.6; }
+  .ws-message small { color: var(--ws-muted); font-family: var(--ws-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .ws-composer { display: grid; grid-template-columns: 1fr auto; border-top: 1px solid var(--ws-hair); background: var(--ws-paper); }
+  .ws-composer input { border: 0; background: transparent; min-width: 0; padding: 15px 18px; font-size: 15px; outline: none; color: var(--ws-ink); font-family: var(--ws-font); }
+  .ws-composer button, .ws-primary { border: 0; background: var(--ws-ink); color: #ffffff; padding: 0 24px; cursor: pointer; font-family: var(--ws-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; }
+  .ws-composer button:hover, .ws-primary:hover { background: var(--ws-red-bright); }
+  .ws-primary { padding: 9px 18px; justify-self: start; }
+  .ws-preview { border-left: 1px solid var(--ws-hair); background: var(--ws-paper); max-height: 100vh; overflow: auto; }
+  .ws-preview .ws-empty { border: 0; }
+  .ws-preview-inner { border: 0; padding: 18px; position: relative; }
+  .ws-preview-close { display: none; position: absolute; top: 12px; right: 12px; border: 1px solid var(--ws-hair-strong); background: var(--ws-paper); color: var(--ws-muted); padding: 0 9px; height: 24px; font-family: var(--ws-mono); font-size: 9px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; }
+  .ws-preview-close:hover { border-color: var(--ws-ink); color: var(--ws-ink); }
+  .ws-preview-inner .ws-kicker { color: var(--ws-red); }
+  .ws-preview-inner h2 { margin: 3px 0 6px; font-size: 18px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.2; }
+  .ws-preview-body { display: grid; gap: 12px; margin-top: 12px; }
+  .ws-detail { display: grid; gap: 9px; border-top: 1px solid var(--ws-hair); padding-top: 12px; }
+  .ws-detail p { margin: 0; color: var(--ws-muted); font-size: 12px; line-height: 1.5; }
+  .ws-kv { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; border-bottom: 1px solid var(--ws-hair-5); padding-bottom: 6px; }
+  .ws-kv span { font-family: var(--ws-mono); color: var(--ws-muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; line-height: 18px; }
+  .ws-kv strong { text-align: right; font-weight: 600; }
+  .ws-link { display: inline-block; color: var(--ws-red); font-family: var(--ws-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; }
+  .ws-link:hover { color: var(--ws-red-bright); }
+  .ws-pill { width: max-content; border: 1px solid var(--ws-hair-strong); background: var(--ws-paper); color: var(--ws-ink); padding: 0 6px; font-family: var(--ws-mono); font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; line-height: 16px; height: 18px; display: inline-flex; align-items: center; }
+  .ws-pill.good { color: var(--ws-ink); border-color: var(--ws-hair-strong); }
+  .ws-pill.warn { color: var(--ws-red); border-color: var(--ws-red); }
+  .ws-pill.bad { color: #ffffff; background: var(--ws-red); border-color: var(--ws-red); }
+  .ws-pill.quiet { color: var(--ws-muted); border-color: var(--ws-hair); }
+  .ws-empty { padding: 18px; }
+  .ws-empty strong { display: block; font-size: 15px; font-weight: 600; letter-spacing: -0.015em; }
+  .ws-empty p { margin: 6px 0 0; color: var(--ws-muted); font-size: 12px; line-height: 1.5; }
   @media (max-width: 1100px) {
-    .ws-root { grid-template-columns: 190px minmax(0, 1fr); }
-    .ws-preview { grid-column: 2; border-left: 0; border-top: 1px solid var(--ws-border); max-height: none; }
+    .ws-root { grid-template-columns: 210px minmax(0, 1fr); }
+    .ws-preview { grid-column: 2; border-left: 0; border-top: 1px solid var(--ws-hair); max-height: none; }
   }
   @media (max-width: 760px) {
     .ws-root { display: block; }
-    .ws-rail { position: sticky; top: 0; z-index: 2; min-height: 0; border-right: 0; border-bottom: 1px solid var(--ws-border); padding: 12px; }
-    .ws-nav { display: flex; overflow-x: auto; padding-bottom: 4px; }
-    .ws-nav button { white-space: nowrap; }
+    .ws-rail { position: sticky; top: 0; z-index: 2; min-height: 0; border-right: 0; border-bottom: 1px solid var(--ws-hair); }
+    .ws-brand { padding: 12px 15px; border-bottom: 1px solid var(--ws-hair-5); }
+    .ws-nav { display: flex; overflow-x: auto; padding: 0; background: var(--ws-paper); }
+    .ws-nav button { white-space: nowrap; width: auto; border-left: 0; border-bottom: 3px solid transparent; padding: 9px 12px; gap: 6px; }
+    .ws-nav button.active { border-bottom-color: var(--ws-red); background: var(--ws-paper); }
     .ws-health { display: none; }
-    .ws-main, .ws-preview { padding: 14px; max-height: none; }
-    .ws-grid.two { grid-template-columns: 1fr; }
-    .ws-topbar { display: block; }
-    .ws-status-row { justify-content: flex-start; margin-top: 10px; }
+    .ws-topbar { display: block; padding: 15px; }
+    .ws-status-row { justify-content: flex-start; margin-top: 9px; }
+    .ws-view { padding: 15px; gap: 15px; }
     .ws-chat { min-height: 70vh; }
     .ws-message { max-width: 92%; }
+    /* Preview becomes a bottom sheet: hidden until work is selected, dismissed explicitly. */
+    .ws-preview { display: none; }
+    .ws-preview.open { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 9; max-height: 66vh; overflow: auto; border-left: 0; border-top: 3px solid var(--ws-ink); background: var(--ws-paper); padding-bottom: calc(9px + env(safe-area-inset-bottom)); }
+    .ws-preview-close { display: inline-flex; align-items: center; }
   }
 `;

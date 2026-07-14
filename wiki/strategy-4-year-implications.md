@@ -4,9 +4,9 @@
 
 ## Bottom line
 
-AMTECH is the **Macintosh layer for AI agents**. Hermes/frontier models are the personal-computer substrate: powerful, general, and still mostly legible to developers. AMTECH is the product layer that makes that power usable by an owner-led SMB: a textable employee, a consulting-sales onboarding surface, typed work cards, artifacts, approval gates, connector proof, and a Manager control plane that hides the machinery.
+AMTECH is the **Macintosh layer for AI agents**, and more specifically the first AI-native operating surface for owner-led business work. Hermes/frontier models are the personal-computer substrate: powerful, general, and still mostly legible to developers. AMTECH is the product layer that makes that power usable by an owner-led SMB: a textable employee, a chat-native command surface, typed work objects, artifacts, approval gates, connector proof, and a Manager control plane that hides the machinery.
 
-The four-year opportunity is not "build automations for contractors." It is to become the **managed AI-work surface for owner-led businesses**: the place where work formerly stuck in email, forms, invoices, folders, calls, and ad hoc admin becomes supervised, typed, approval-gated agent work.
+The four-year opportunity is not "build automations for contractors." It is to become the **managed AI-work surface for owner-led businesses**: the place where work formerly stuck in email, forms, invoices, folders, calls, and ad hoc admin becomes supervised, typed, approval-gated agent work. Research spine: [`MVP/ai-native-work-surface-research.md`](MVP/ai-native-work-surface-research.md).
 
 ## The current product fact
 
@@ -18,7 +18,7 @@ The MVP is no longer just a skill ladder. The current `mvp-build/` source state 
 - Whole-product loop: signup/claim -> live employee -> estimate PDF -> approved Gmail send -> real Gmail reply event -> approved Stripe Connect test-mode deposit invoice -> internal reminder.
 - Acceptance boundary: Gmail/Stripe/Twilio must travel through real provider rails. Source wiring is strong; live provider/runtime acceptance is still pending.
 
-That changes the strategy. AMTECH does not have to sell a static skill first and hope the customer later imagines an Employee. The onboarding and work surface can **demonstrate the Employee while diagnosing the business**. The first sale becomes a consulting-sales experience: the owner talks to the Employee-like front door, sees it understand their business, sees a real work object, then either provisions immediately or schedules the human close.
+That changes the strategy. AMTECH does not have to sell a static skill first and hope the customer later imagines an Employee. The free contractor estimator and onboarding/work surface can **demonstrate the Employee while diagnosing the business**. The first sale becomes a product-led work experience: the owner talks to the Employee-like front door, sees it understand one real job, sees a real work object, then either tunes it to their pricing, provisions immediately, or schedules the human close.
 
 ## The economic thesis
 
@@ -61,15 +61,15 @@ What must be true:
 
 Commercial motion:
 
-- Field-led: call/referral/in-person demo into the consulting-sales surface.
-- Product-led: owner lands on `/create-ai-employee`, chats, verifies, provisions, then escalates to a paid setup/consulting call when the work gets valuable.
+- Product-led wedge: contractor lands on the no-signup free estimator, submits one real job, receives a draft, gives feedback, and escalates to tuning or Employee setup.
+- Follow-up-led close: phone/local/referral follow-up focuses on high-intent estimator attempts and no-website owners who need a human bridge.
 - Wedge: Estimate remains the first work object because it is frequent, money-proximate, visual, and easy for the owner to judge.
 
 Success metrics:
 
 - 3-5 provider-accepted golden-path demos.
 - 6-10 contractor Employees provisioned or seriously piloted.
-- 20+ estimate/customization transactions only if they feed Employee learning.
+- 20+ free-estimator attempts with useful inputs, and 8+ tuned/customization transactions only if they feed Employee learning.
 - One stable `contractor_estimator` profile package with a repeatable onboarding/consulting script.
 
 ## Year 2 — turn service learning into profile packages

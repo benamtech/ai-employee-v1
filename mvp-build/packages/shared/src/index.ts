@@ -10,6 +10,8 @@ export * from "./materialization.js";
 export * from "./work-stream.js";
 export * from "./hermes.js";
 export * from "./platform-toolsets.js";
+export * from "./model-context.js";
+export * from "./connector-registry.js";
 export * from "./channel-routing.js";
 export * from "./tool-contracts.js";
 export * from "./tool-schemas.js";

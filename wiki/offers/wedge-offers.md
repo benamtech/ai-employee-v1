@@ -1,14 +1,14 @@
-# Wedge Offers — Consultative Work → Tuned Package → AI Employee
+# Wedge Offers — Free Estimator → Tuned Package → AI Employee
 
 **Status: active** · _Revised 2026-07-10: QuickBooks connector tier is now built (Phase A source-wired, live creds pending). See [`../00-decision.md`](../00-decision.md), [`../gtm/consulting-sales-surface.md`](../gtm/consulting-sales-surface.md), and [`../MVP/old-build-plan/`](../MVP/old-build-plan/)._
 
 ## The core motion
 
-AMTECH does not sell a one-off artifact. It sells a ladder where every rung is an easy yes that earns the next, and where the through-line is: **more context -> less owner effort -> more of the office loop handled by the Employee behind a visible approval gate.** The Estimate skill is the first proof object; the **connected Employee and Work Surface are the product**. The full menu of back-office lanes the Employee grows into is the [Skill Catalog](skill-catalog.md).
+AMTECH does not sell a one-off artifact. It sells a ladder where every rung is an easy yes that earns the next, and where the through-line is: **more context -> less owner effort -> more of the office loop handled by the Employee behind a visible approval gate.** The Estimate skill is the first proof object; the **connected Employee and Work Surface are the product**. The primary contractor wedge is now the no-signup public estimator in [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md): one real job, chat-native intake, estimate draft, assumptions, download, feedback. The full menu of back-office lanes the Employee grows into is the [Skill Catalog](skill-catalog.md).
 
 | Rung | Buyer-facing name | What changes | Commercial role |
 |---|---|---|---|
-| **0 — Consultative first work** | "Let's run it on a real job" | Founder/front-door agent captures context and produces a useful first work object: estimate draft, intake summary, or next-action card. | Free diagnostic/demo |
+| **0 — Free estimator** | **We give contractors free estimates.** | Contractor uses a no-signup public estimator on one real job; the AI employee captures messy notes/photos/messages and returns a line-item estimate draft. | Scalable proof / top of funnel |
 | **1 — Tuned package** | **Your Estimate, Tuned** | 20-min interview loads pricing, markup, materials, suppliers, assemblies, format, and owner rules into the skill/profile package. | **$300-class paid discovery** |
 | **2 — Employee (Starter)** | **Your AI Estimator** | Own SMS/web surface + estimate artifact + approval + Gmail send/reply. Voice memo/job notes -> draft -> approve -> send. | Setup + monthly |
 | **3 — Employee (Office)** | **Your AI Office** | Adds deposit invoices, reminders, follow-up, job folders, QuickBooks/Drive/Calendar lanes, standing policies where safe. | Expansion/retention |
@@ -19,7 +19,7 @@ The Employee's value is staged by connector. Each one is a capability the owner 
 
 | Tier | Connectors live | New capability | Why he pays for it |
 |---|---|---|---|
-| Consultative skill | none or demo account | Drafts a line-item estimate from supplied context | Sees the proof on his own job |
+| Free estimator | public estimator page, no account | Drafts a line-item estimate from supplied context | Sees the proof on his own job before signup |
 | Employee · email | Dedicated SMS/web surface + Gmail | Voice memo/job notes in -> it pulls/sends through Gmail and watches replies | Stops re-typing context; estimates off a text/voice note from the truck |
 | Employee · deposit | + Stripe Connect test/prod path | Drafts/sends a deposit invoice after owner approval and watches payment events | Closes the money loop, same approval gate |
 | Employee · + QuickBooks | + QuickBooks Online (native Manager connector, **built — source-wired, live creds pending**; see [`../../mvp-build/docs/quickbooks-connector-architecture.md`](../../mvp-build/docs/quickbooks-connector-architecture.md)) | Records expenses/bills/invoices/payments by vendor/customer *name* (never an ID; asks instead of guessing on ambiguity), reads P&L/balance sheet/aging on request, flags uncategorized bills and paid invoices — every write still behind the same owner-approval gate | Not a "bigger business" tier — QBO is the default small-business accounting tool even well under $500k/yr, and it's the bookkeeper's (Beachhead #2) whole world. This is the connector that lets the Employee stop being a bystander to the books. |
@@ -45,10 +45,10 @@ The Estimate skill, with proper context loaded, lands within ~5% of what the con
 
 ## Beachhead offer (paint/landscape) — the one to sell now
 
-**Rung 0 consultative first work:** pick a job the contractor recently quoted; run the Estimate skill or front-door flow on his photos + the customer's messages; show the line-item draft, the approval gate, and the next action the Employee would take. Frame it as *the first loop*, not a detached demo.
+**Rung 0 free estimator:** send the contractor to a public estimator page with the literal offer "We give contractors free estimates." They pick a job they need to estimate, provide the notes/photos/customer messages they already have, and receive a line-item draft with assumptions and a downloadable output. Frame it as *the first loop*, not a detached demo.
 **Rung 1 close on the call:** "If that's close, I'll tune it to your exact pricing and format for $300, then it becomes the pricing brain your Employee uses." Book the 20-minute interview; collect via payment link before the build unless this is a free MVP provisioning test.
 **Interview captures:** markup %, labor rates, crew/day costs, material & supplier pricing, standard assemblies/line items, service area, document format/branding.
-**Rung 2 trigger:** once the first work is trusted, "Want it to just *do* this — text it the job, it writes the estimate, sends after you approve, watches the reply, and asks about the deposit?" -> Starter Employee.
+**Rung 2 trigger:** once the first work is trusted, "This free one worked from what you typed. Want your own employee to know your pricing, format, email, and follow-up rules so you can text it from the truck every time?" -> Starter Employee.
 
 ## Beachhead #2 wedge (bookkeepers) — build, don't sell yet
 
@@ -62,7 +62,7 @@ Same ladder, different first skill. **Requires building a doc-sorter / missing-d
 
 ## Other segments (parked — same ladder if revisited)
 
-Insurance, property management, freight/staffing, real estate, and general contractors outside paint/landscape are **not** the current motion. If revisited, apply the identical ladder (consultative first work → tuned package → live Employee → managed office loop) and the line-item/approval discipline. Prior per-segment notes live in [`../segments/`](../segments/).
+Insurance, property management, freight/staffing, real estate, and general contractors outside paint/landscape are **not** the current motion. If revisited, apply the identical ladder (free proof object -> tuned package -> live Employee -> managed office loop) and the line-item/approval discipline. Prior per-segment notes live in [`../segments/`](../segments/).
 
 ## Revision / scope boundary
 

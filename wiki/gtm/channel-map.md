@@ -1,15 +1,15 @@
 # GTM - Channel & Receptivity Map
 
-**Status: complete** · _Revised 2026-06-29 for the current motion: every channel drives into the Employee-like onboarding/consulting-sales surface and a real work object, then the tuned package + live Employee. See [`consulting-sales-surface.md`](consulting-sales-surface.md)._
+**Status: complete** · _Revised 2026-07-14 for the current motion: every channel drives into the no-signup free estimator or a guided estimator attempt, then the tuned package + live Employee. See [`free-estimator-funnel.md`](free-estimator-funnel.md)._
 
 ## Beachhead: owner-operated painting & landscaping/hardscaping contractors
 
-The first channel is **the list already in hand** — ~150 phone-only (no website) + ~200 with-website contractors — worked by phone, plus local in-person demos and referrals. This is a phone-first, founder-led motion, not a content/inbound motion.
+The first channel is **the list already in hand** — ~150 phone-only (no website) + ~200 with-website contractors — plus SEO/tool pages and referrals. This is now a free-estimator-first motion: with-website contractors get the public estimator link, phone-only rows get guided estimator calls/local follow-up, and founder time concentrates on high-intent attempts.
 
 | Channel | Why receptive | Intent signal | Message angle | Action | What not to do |
 |---|---|---|---|---|---|
-| **Phone-only list (no website)** | Least marketed-to, most AI-naive, reachable now, and "no website" signals an owner doing everything himself | You already have the number | "A textable employee that writes your estimates, in your pricing, and asks before anything sends" | Call early AM / evening; offer free first work on their job | Pitch software or "AI automation" |
-| **With-website list** | Slightly easier to research; you can run the surface on their own site/recent job | Public job photos, service pages | "I set up your employee on a recent job — reply with a job and it'll write the estimate" | Email + phone follow-up with a real artifact | Generic blast; long copy |
+| **Phone-only list (no website)** | Least marketed-to, most AI-naive, reachable now, and "no website" signals an owner doing everything himself | You already have the number | "We give contractors one free estimate from real job notes/photos" | Call early AM / evening; guide them into one estimator attempt | Pitch software or "AI automation" |
+| **With-website list** | Slightly easier to research; best fit for email + public tool CTA | Public job photos, service pages | **"We give contractors free estimates."** | Email estimator link + phone follow-up on starts/downloads | Generic blast; long copy |
 | **Local in-person** | Ben's geographic advantage; contractors trust face-to-face | Local shop, owner reachable | "Bring your last estimate, I'll set up your employee on it in 5 minutes" | Coffee/site visit demos near Scranton | Travel far before the motion works |
 | **Referrals** | Contractors trust other contractors | A happy first-work / Employee buyer | "Who else is writing estimates at 9pm?" | Ask every paid customer for one name; $100 credit after a paid close | Ask before delivering value |
 | **Supply houses / trade groups** | Owners gather there; word travels | Paint/landscape suppliers, local trade FB groups | Share a real before/after estimate artifact, not a pitch | Value-first presence; let them ask | Spam the group |
@@ -38,7 +38,7 @@ Bookkeepers fix the one contractor weakness (reachability) but require **buildin
 ## Trust path
 
 1. Show you understand the estimate workflow (talk pricing, not AI).
-2. Produce a line-item estimate artifact from *their* real job, in the live onboarding surface — within ~5%, with the approval gate visible.
+2. Produce a line-item estimate artifact from *their* real job, through the free estimator or live Work Surface — within ~5%, with assumptions visible.
 3. Provision the live Employee and sell the **tuned package ($300, paid discovery)** that installs their pricing brain; deliver in 48 hours.
 4. Climb to the recurring Employee + Pro lanes (Gmail send/reply, deposits, follow-up, job folders) as the owner feels each loop — the [progressive-trust ladder](../principle-deliverable-driven-surfaces.md).
 5. Keep everything customer-facing / money-touching behind one-tap approval — structurally, by deliverable type.

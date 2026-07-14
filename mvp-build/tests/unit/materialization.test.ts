@@ -58,6 +58,26 @@ describe("Phase 4 materialization", () => {
     expect(out.abilities.find((a) => a.id === "ability:payments")?.status).toBe("needs_connection");
   });
 
+  it("projects a read-only MCP connector as a direct connector capability", () => {
+    const s = snapshot();
+    s.connectors.push({
+      id: "conn_ref",
+      connector_key: "reference_data",
+      provider: "readonly_mcp",
+      status: "connected",
+      external_label: "Reference catalog",
+    });
+    const out = materializeEmployeeSnapshot(s);
+    expect(out.capabilities.find((c) => c.key === "connector:reference_data")).toMatchObject({
+      label: "Reference Data",
+      category: "research",
+      status: "ready",
+      trust_level: "connector",
+      can_run_now: true,
+      sources: ["connector", "policy"],
+    });
+  });
+
   it("does not expose raw Manager tool names as owner ability labels", () => {
     const out = materializeEmployeeSnapshot(snapshot());
     const toolNodes = out.capabilities.filter((c) => c.key.startsWith("manager_tool:"));

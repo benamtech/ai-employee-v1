@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildAgentContext, estimatedTokens } from "../../apps/manager/src/lib/agent-context";
+import { buildAgentContext, claimAgentContextPrimer, deriveNextAction, estimatedTokens } from "../../apps/manager/src/lib/agent-context";
+import { makeFakeDb, SCHEMA_UNIQUES } from "./_helpers/fake-supabase";
 import type { EmployeeSnapshot } from "../../apps/manager/src/lib/employee-stream";
+
+const asClient = (db: unknown) => db as import("@amtech/db").SupabaseClient;
 
 const snapshot: EmployeeSnapshot = {
   account_id: "acct_1",
@@ -69,5 +72,47 @@ describe("agent context primer", () => {
     expect(text).toContain("Session budget target: stay under 400000 total tokens");
     expect(text).not.toContain("normalized_payload");
     expect(text).not.toContain("sealed:");
+  });
+
+  it("adds a CE-3 carryover handoff only when pending", () => {
+    const withCarry = buildAgentContext({ snapshot, brain, carryover: { pending: true, last_decision: "Approved deposit invoice", next_action: "Resolve approval send_estimate_email (appr_1)" } });
+    expect(withCarry).toContain("Continuing from a rotated session");
+    expect(withCarry).toContain("Last decision: Approved deposit invoice");
+    expect(withCarry).toContain("Next action: Resolve approval send_estimate_email (appr_1)");
+
+    const noCarry = buildAgentContext({ snapshot, brain, carryover: { pending: false } });
+    expect(noCarry).not.toContain("Continuing from a rotated session");
+  });
+});
+
+describe("deriveNextAction", () => {
+  it("prefers the first open approval", () => {
+    expect(deriveNextAction(snapshot)).toBe("Resolve approval send_estimate_email (appr_1)");
+  });
+
+  it("returns null with nothing pending", () => {
+    const empty = { ...snapshot, approvals: [], resurface_items: [], tasks: [] } as EmployeeSnapshot;
+    expect(deriveNextAction(empty)).toBeNull();
+  });
+});
+
+describe("claimAgentContextPrimer (once-per-transcript gate)", () => {
+  it("returns 'primed' on first claim for a transcript", async () => {
+    const db = makeFakeDb({}, { uniques: SCHEMA_UNIQUES });
+    const r = await claimAgentContextPrimer(asClient(db), { account_id: "acct_1", employee_id: "emp_1", transcript_session_id: "t1" });
+    expect(r).toBe("primed");
+  });
+
+  it("returns 'already_primed' on a duplicate (PK conflict), not a claim failure", async () => {
+    const db = makeFakeDb({}, { uniques: SCHEMA_UNIQUES });
+    await claimAgentContextPrimer(asClient(db), { account_id: "acct_1", employee_id: "emp_1", transcript_session_id: "t1" });
+    const again = await claimAgentContextPrimer(asClient(db), { account_id: "acct_1", employee_id: "emp_1", transcript_session_id: "t1" });
+    expect(again).toBe("already_primed");
+  });
+
+  it("distinguishes 'claim_failed' (e.g. unapplied 0029 / non-conflict error) from already_primed", async () => {
+    const failing = { from: () => ({ insert: async () => ({ error: { code: "42P01", message: "relation does not exist" } }) }) };
+    const r = await claimAgentContextPrimer(asClient(failing), { account_id: "acct_1", employee_id: "emp_1", transcript_session_id: "t1" });
+    expect(r).toBe("claim_failed");
   });
 });

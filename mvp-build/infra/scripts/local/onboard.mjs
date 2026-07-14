@@ -18,7 +18,7 @@
  * Prereqs: web + Manager running, migrations applied, Docker up, and
  *   TWILIO_VERIFY_DEV_BYPASS=1 in the Manager env.
  * The conversational step (1) requires a funded orchestrator model key
- *   (ORCHESTRATOR_API_KEY / XAI_API_KEY / OPENAI_API_KEY). Without it the harness
+ *   (ORCHESTRATOR_API_KEY / ANTHROPIC_API_KEY / XAI_API_KEY / OPENAI_API_KEY). Without it the harness
  *   stops honestly at step 1 with the exact remediation — the same funded-key
  *   blocker as the Phase 5 runtime gate. Use local:bootstrap for the no-model
  *   BYPASS path.
@@ -70,7 +70,7 @@ for (const message of conversationTurns(fx)) {
   if (r.status !== 200 || r.json.error) {
     fail("orchestrator message", r,
       "The conversational front door needs a funded orchestrator model key " +
-      "(ORCHESTRATOR_API_KEY / XAI_API_KEY / OPENAI_API_KEY). This is the same funded-key " +
+      "(ORCHESTRATOR_API_KEY / ANTHROPIC_API_KEY / XAI_API_KEY / OPENAI_API_KEY). This is the same funded-key " +
       "blocker as the Phase 5 runtime gate. For the no-model path use: npm run local:bootstrap");
   }
   sessionId = r.json.session_id ?? sessionId;

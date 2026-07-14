@@ -4,6 +4,8 @@ Status: active
 
 This is the UI research index for AMTECH's AI Employee surfaces. It is meant to keep UI work aligned with the product architecture while leaving visual direction open.
 
+Canonical strategic research now lives in `wiki/MVP/ai-native-work-surface-research.md`. Read that before redesign work. The short version: AMTECH should feel like a chat-native operating surface for business work. Chat is the command language, but the product state is typed work objects, approvals, generated task surfaces, business events, and proof.
+
 ## The Current Product Thesis
 
 AMTECH should not be a chat wrapper, developer dashboard, or bespoke estimate app. It should be the business-native materialization layer over Hermes Agent.
@@ -21,6 +23,18 @@ AMTECH supplies the product layer:
 - metering, billing, and support operations;
 - trust and proof.
 
+The owner-facing experience should not read as "chat plus dashboards." It should read as:
+
+```text
+tell Avery what happened
+  -> Avery creates or updates a work object
+  -> the right surface appears for that object
+  -> approve/edit/reply in natural language or one tap
+  -> proof returns to the same object
+```
+
+That is the UI thesis to protect while the visual design changes.
+
 ## Research To Read
 
 Newest and most directly relevant:
@@ -37,6 +51,7 @@ Newest and most directly relevant:
 Foundational UI/product docs:
 
 - `wiki/MVP/event-driven-office-and-generative-ui.md` — event-driven office, typed work descriptors, generative UI frontier.
+- `wiki/MVP/ai-native-work-surface-research.md` — AI-native Work Surface research: Engelbart/Licklider/Xerox Star/Malone/Suchman/Winograd translated into product principles.
 - `wiki/principle-deliverable-driven-surfaces.md` — deliverable type drives preview, proof, and gate.
 - `wiki/principle-graph-materialization.md` — one business graph, many materialized surfaces.
 - `wiki/MVP/phase-3-generative-ui-reframe.md` — static/typed generative UI and conformance over novelty.
@@ -133,6 +148,19 @@ Still forward work, not yet built:
   admin inline preview, instead of three separate implementations.
 
 Core principle: do not design a bespoke screen for every skill. Type the work/output, then let the surface render that type.
+
+## AI-Native Work Surface Direction
+
+Near-term redesign work should make the existing source-wired primitives feel like one environment:
+
+- **Chat as command line.** Keep the employee input persistent and central, but do not make the transcript the only place where work lives.
+- **Work objects as apps.** Estimates, approvals, connector repairs, customer replies, deposits, and daily briefs should open task-specific surfaces from the same underlying `WorkResource`/`WorkAction` state.
+- **Events as office inbox.** `Today` / resurfacing should answer "what needs me?" and "what happened?" rather than showing provider counts.
+- **Approvals as permissions.** Approval cards need exact payload, recipient, risk, consequence, and proof after completion.
+- **Proof as trust.** Receipts should be quiet but retrievable from the object, preview, SMS link, and admin support view.
+- **Teach by one real loop.** Empty states and first-run should invite the user to give Avery one job, not explain every feature.
+
+For novice owners, this should feel like supervising a capable employee. For AI-savvy users, it should reveal that AMTECH is more than chat: typed work, generated surfaces, cross-channel continuity, and proof are visible.
 
 ## UI Concepts To Preserve
 

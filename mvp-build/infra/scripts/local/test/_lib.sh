@@ -17,23 +17,23 @@ mkdir -p "$RUN" "$LOGS"
 log() { echo "[live] $*"; }
 err() { echo "[live][ERROR] $*" >&2; }
 
-# Load the gitignored .env and force the local-test overrides that repoint the
-# orchestrator at the bridge and enable the dev owner-login. Callers inherit these
-# in their environment, and setsid children inherit them too.
+# Load the gitignored .env and enable dev owner-login. The old no-key model
+# bridge is opt-in only via LOCAL_MODEL_BRIDGE=1; otherwise live provider env
+# from .env is preserved for both onboarding and employee runtimes.
 load_env() {
   set -a
   # shellcheck disable=SC1090
   source "$MVP_ROOT/.env"
   set +a
-  export ORCHESTRATOR_API_BASE_URL="http://localhost:8091/v1"
-  export ORCHESTRATOR_API_KEY="bridge-local"
-  export ORCHESTRATOR_MODEL="bridge-agent"
   export DEV_OWNER_LOGIN="1"
-  # Point newly provisioned employees' model at the bridge (you-are-the-LLM), so the
-  # Manager renders the custom-provider model block instead of claude-opus-4-8.
-  export HERMES_MODEL_PROVIDER="custom"
-  export HERMES_MODEL_BASE_URL="http://host.docker.internal:8091/v1"
-  export HERMES_MODEL_DEFAULT="bridge-agent"
+  if [ "${LOCAL_MODEL_BRIDGE:-}" = "1" ]; then
+    export ORCHESTRATOR_API_BASE_URL="http://localhost:8091/v1"
+    export ORCHESTRATOR_API_KEY="bridge-local"
+    export ORCHESTRATOR_MODEL="bridge-agent"
+    export HERMES_MODEL_PROVIDER="custom"
+    export HERMES_MODEL_BASE_URL="http://host.docker.internal:8091/v1"
+    export HERMES_MODEL_DEFAULT="bridge-agent"
+  fi
 }
 
 http_code() { curl -s --max-time 3 -o /dev/null -w '%{http_code}' "$1" 2>/dev/null || echo "000"; }

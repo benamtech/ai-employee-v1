@@ -4,6 +4,8 @@
 
 Owner-operated residential **painting and landscaping/hardscaping** contractors (1–10 person shops) are AMTECH's beachhead. They do high-frequency, money-deciding estimates by hand, are among the least AI-savvy buyers in the market (so a live demo lands hard and they can't DIY it), and AMTECH already owns the Estimate skill that does their #1 task.
 
+**Current wedge:** the first touch is the free public estimator, not a phone-first demo. The contractor brings one real job, talks to an AMTECH AI employee, receives a line-item estimate draft with assumptions, then optionally tunes it to their pricing or installs their own Employee. See [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md).
+
 ## Pain and task shape
 
 Estimating is the recurring, structured, money-proximate task at the center of the day: walk the job, price it, write it up, send it — often at night after the work. Around it sits the rest of the back office: scheduling, materials ordering, change orders, invoicing, payment chasing, follow-up. Operators describe struggling to keep up with new clients, paperwork, scheduling, and physical work all at once [S029, S030].
@@ -40,8 +42,8 @@ Same buyer throughout. The trigger is concrete: the owner is in a customer's kit
 
 ## Reachability
 
-The known friction, and it's real: the owner may be on a roof at 11am. It is handled, not ignored — Ben already holds ~150 phone-only and ~200 with-website contractors, calls at estimate hours (early AM/evening), uses local in-person demos (his geographic edge), and works referrals. Contractors also answer unknown numbers more than most owners, because every call could be a job. **Discipline:** start with one trade (paint or landscape) so the custom-skill template is ~80% reusable; don't sell "contractors" generically.
+The known friction, and it's real: the owner may be on a roof at 11am. The free estimator changes the reachability strategy. With-website contractors can be reached by email/SEO/tool pages and asked to try one real estimate asynchronously. Phone still matters for no-website rows, local trust, callbacks, and high-intent follow-up. Ben already holds ~150 phone-only and ~200 with-website contractors; use the with-website group for estimator-email-first and the phone-only group for guided-estimator-call-first. **Discipline:** start with one trade (paint or landscape) so the custom-skill template is ~80% reusable; don't sell "contractors" generically.
 
 ## Why this is the beachhead
 
-Highest intersection of: an asset AMTECH already owns, an AI-naive buyer who can't DIY and is wowed by the demo, a money-deciding task, a one-person decision-maker, a felt skill→Employee ladder, a list already in hand, and competitive whitespace. Full rationale and scoring: [`../00-decision.md`](../00-decision.md) §2 and [`../evidence/scoring.md`](../evidence/scoring.md).
+Highest intersection of: an asset AMTECH already owns, an AI-naive buyer who can't DIY and is wowed by the output, a money-deciding task, a one-person decision-maker, a felt estimator→Employee ladder, a list already in hand, and competitive whitespace. Full rationale and scoring: [`../00-decision.md`](../00-decision.md) §2 and [`../evidence/scoring.md`](../evidence/scoring.md).
