@@ -6,7 +6,7 @@
 
 Two things must be held apart:
 
-- **The course is fixed** (do not re-litigate it): sell installed AI office workers to owner-operated SMBs; **beachhead = paint/landscape contractors**; ladder = Rung 0 consultative first work → Rung 1 tuned Estimate package ($300 paid discovery) → Rung 2 live AI Employee → Rung 3 managed office loop (the skill is the proof object + supply chain; the Employee is the product); positioning = the commercialization layer on improving intelligence, pro-human; operating model = maximize agent leverage.
+- **The course is fixed** (do not re-litigate it): sell installed AI office workers to owner-operated SMBs; **beachhead = paint/landscape contractors**; ladder = Rung 0 free public estimator -> Rung 1 tuned Estimate package ($300 paid discovery) -> Rung 2 live AI Employee -> Rung 3 managed office loop (the skill is the proof object + supply chain; the Employee is the product); positioning = the commercialization layer on improving intelligence, pro-human; operating model = maximize agent leverage.
 - **The open question is the craft:** *how exactly do you attain a client, and how do you build out every aspect of the beachhead?* This is unknown and must be discovered empirically — Blank's "there are no facts inside the building" [S071]. The rest of this page is the method for that search.
 
 ## The canon, applied to paint/landscape
@@ -21,7 +21,7 @@ Aulet's framework is the checklist for "every aspect of the beachhead built out.
 | **2. What can you do for them?** (full life-cycle use case, value prop, your "core," competitive position) | **Done:** use case = walk job → estimate → win; quantified value = evenings back + win-rate + ~5% accuracy; **core** = installed context + intelligence-curve packaging; position = done-for-you, vertical, owner-supervised. **Next:** put a clean dollar number on the value per persona. |
 | **3. How do they acquire it?** (DMU, buying process, sales process, cost of acquisition) | This is the [`gtm/outbound-system.md`](gtm/outbound-system.md). **Next:** drive down cost-of-acquisition via the iterate/lateral search. |
 | **4. How do you make money?** (model, pricing, LTV, COCA) | **Done:** ladder pricing; LTV via Employee + catalog lanes; ~97% margin. **Next:** measure real LTV and COCA from live deals. |
-| **5. How do you build it?** (Minimum Viable Business Product, test assumptions) | **Largely built:** MVBP = the live onboarding surface that produces a real estimate artifact, provisions the Employee, *and* collects the tuned package ($300) — see [`../mvp-build/`](../mvp-build/). **Next:** reach provider acceptance on the whole loop and test lane expansion (does first work → recurring Employee + Pro lanes?). |
+| **5. How do you build it?** (Minimum Viable Business Product, test assumptions) | **Largely built:** MVBP = the free estimator + live onboarding/Work Surface that produces a real estimate artifact, provisions the Employee, *and* collects the tuned package ($300) — see [`../mvp-build/`](../mvp-build/). **Next:** reach provider acceptance on the whole loop and test lane expansion (does first work -> recurring Employee + Pro lanes?). |
 | **6. How do you scale?** (follow-on TAM, design to scale) | The bowling-pin (below) + the profile factory + agent-run GTM. |
 
 ### Paul Graham
@@ -74,7 +74,7 @@ A rough shape of $10M ARR: **~550 accounts at ~$1,500/mo**, or a mix of tuned pa
 
 1. Pick the beachhead persona's next 10 (Aulet theme 1).
 2. Run the warmest acquisition play first (Hormozi); agent-prep it (leverage principle).
-3. Run the live surface on their own job (PG "make something people want"); provision the Employee; close the tuned package.
+3. Get them through the free estimator or live surface on their own job (PG "make something people want"); close the tuned package or provision the Employee after the output creates trust.
 4. Deepen lanes/deliverable types (skill catalog) as each loop is felt — the progressive-trust upsell.
 5. Weekly: iterate the play, or go lateral if it capped (the method).
 6. When paint/landscape is owned: roll to the next pin (Moore).

@@ -1,15 +1,15 @@
 # Founder 52-Week Operating Plan
 
-**Status: complete** · _Rewritten 2026-06-29 for the current motion: the onboarding/consulting-sales surface and the live AI Employee are the product; the Estimate skill is the first proof object and the supply chain. See [`00-decision.md`](00-decision.md), [`gtm/consulting-sales-surface.md`](gtm/consulting-sales-surface.md), [`offers/wedge-offers.md`](offers/wedge-offers.md), and the MVP build state in [`MVP/implementation-records/`](MVP/implementation-records/)._
+**Status: complete** · _Revised 2026-07-14 for the current motion: the free public estimator is the first contractor wedge; the Work Surface and live AI Employee are the product; the Estimate skill is the first proof object and the supply chain. See [`00-decision.md`](00-decision.md), [`gtm/free-estimator-funnel.md`](gtm/free-estimator-funnel.md), [`offers/wedge-offers.md`](offers/wedge-offers.md), and the MVP build state in [`MVP/implementation-records/`](MVP/implementation-records/)._
 
 ## Operating premise
 
 AMTECH is a bootstrapped startup, not a funded company and not a lifestyle agency. The first year must do two things at once:
 
-1. **Make cash fast** by getting owners into a real work loop with the Employee-like onboarding surface — diagnose the business, produce a real work object (a line-item estimate), and sell the **tuned Estimate package (paid discovery)** and the **live AI Employee (setup + monthly)**. The buyer already has the pain and answers the phone.
+1. **Make cash fast** by getting owners into a real work loop through the free public estimator — one real job, one line-item estimate draft, then sell the **tuned Estimate package (paid discovery)** and the **live AI Employee (setup + monthly)**. The buyer already has the pain; the estimator lets them feel the product before a sales call.
 2. **Compound product value** by turning every sale into a better Hermes profile package, a tighter vertical skill, a reusable onboarding/consulting script, more deliverable types on the Work Surface, and a referenceable proof asset — and by riding the intelligence curve instead of hand-building.
 
-**Beachhead: owner-operated residential painting & landscaping/hardscaping contractors (1–10 person shops).** The ladder is the offer: **Rung 0 consultative first work (free/diagnostic) → Rung 1 tuned Estimate package ($300-class paid discovery) → Rung 2 live AI Employee ($750 setup + $1,000/mo Starter / $1,500/mo Pro) → Rung 3 managed office loop.** The skill is the proof object and the supply chain; the **Employee relationship is the product.** Beachhead #2 (bookkeepers/desk-based offices) is a sequenced fast-follow, not a parallel bet. Full rationale: [`00-decision.md`](00-decision.md); surface mechanics: [`gtm/consulting-sales-surface.md`](gtm/consulting-sales-surface.md).
+**Beachhead: owner-operated residential painting & landscaping/hardscaping contractors (1–10 person shops).** The ladder is the offer: **Rung 0 free public estimator → Rung 1 tuned Estimate package ($300-class paid discovery) → Rung 2 live AI Employee ($750 setup + $1,000/mo Starter / $1,500/mo Pro) → Rung 3 managed office loop.** The skill is the proof object and the supply chain; the **Employee relationship is the product.** Beachhead #2 (bookkeepers/desk-based offices) is a sequenced fast-follow, not a parallel bet. Full rationale: [`00-decision.md`](00-decision.md); funnel mechanics: [`gtm/free-estimator-funnel.md`](gtm/free-estimator-funnel.md).
 
 ### The product is largely built — so Year 1 is acceptance + selling, not building from scratch
 
@@ -59,7 +59,7 @@ Operating targets, not promises.
 
 ## Weekly time budget (40-hour week)
 
-- 18 hrs: prospecting, calls, demos (the onboarding surface on a real job), closing.
+- 18 hrs: prospecting, estimator-attempt follow-up, guided calls, closing.
 - 8 hrs: paid delivery (tuned packages, Employee provisioning) and customer success.
 - 8 hrs: productizing into the `contractor_estimator` profile package + Work Surface deliverable types; reaching/holding provider acceptance.
 - 3 hrs: proof assets (before/after estimates, short clips, real artifacts).
@@ -78,9 +78,9 @@ At 30 hrs, cut proof/admin first, never sales. At 50 hrs, add to prospecting and
 
 ## Funnel metrics (track weekly in one sheet)
 
-new prospects enriched · calls made · contacts reached · **real work objects produced** · tuned packages sold · **Employees provisioned** · revenue collected · MRR · provider-proof loops completed · delivery hours · reusable assets/deliverable types created · referrals asked/received · biggest objection · best customer quote · what was learned.
+new prospects enriched · emails sent · calls made · estimator starts · completed drafts · downloads · feedback · **real work objects produced** · tuned packages sold · **Employees provisioned** · revenue collected · MRR · provider-proof loops completed · delivery hours · reusable assets/deliverable types created · referrals asked/received · biggest objection · best customer quote · what was learned.
 
-Minimum weekly outbound baseline after Week 1: **60 call attempts, 40 emails, 8 demos, 5 referral asks.**
+Minimum weekly outbound baseline after Week 1: **60 targeted estimator emails/follow-ups, 30 calls, 8 completed estimator attempts reviewed, 5 referral asks.**
 
 ---
 
@@ -90,10 +90,10 @@ You hold ~150 phone-only (no-website) contractors and ~200 with websites. **Step
 
 ### Week 1 — get the surface acceptance-ready, work the no-website list
 
-- Tag every painter/landscaper/hardscaper in the ~350; flag no-website phone rows as **call-first**.
+- Tag every painter/landscaper/hardscaper in the ~350; flag with-website rows as **estimator-email-first** and no-website phone rows as **guided-estimator-call-first**.
 - **Make the close-able demo the real onboarding surface:** drive the front-door flow on 3 real sample jobs and produce clean **line-item** estimate artifacts with the approval card. Frame generic output as *pre-tuning*. Close any open provider-acceptance gaps blocking a believable live run ([implementation record](MVP/implementation-records/2026-06-29-phase-3-partial-record.md)).
-- Call 60 no-website contractors early morning/evening. Pitch the *result*, not the tech: "a textable employee that writes your estimate, in your format, off the photos and messages — and asks before anything goes out."
-- Offer Rung 0 (free first work on a job they pick) → set up the Employee and book the tuned-package interview.
+- Send the free-estimator email to with-website rows and call 30 no-website contractors early morning/evening. Pitch the *result*, not the tech: "we give contractors one free estimate from a real job."
+- Offer Rung 0 (free estimator attempt on a job they pick) -> book the tuned-package interview or Employee setup after the draft creates trust.
 - Tracking sheet live.
 - **Kill criterion:** if no demos booked, narrow the trade (lead painters only) and tighten the opener to one sentence about night-time estimates.
 

@@ -18,6 +18,8 @@ document preview rendering and the signed mobile Review page — both of those a
 actually looks at during a trial. SMS, signed links, and future desktop/admin/customer views should be
 designed as renderers of the same underlying work, not as separate apps.
 
+Read this file with `wiki/MVP/ai-native-work-surface-research.md`. The next design pass is not just visual polish. It should make the app feel like an AI-native operating surface: chat as command language, work objects as the task apps, events as the office inbox, approvals as business permissions, and proof as the trust layer.
+
 ## Priority Order
 
 **Needed now, for the first paying trial:**
@@ -72,6 +74,17 @@ These are reasonable near-term UI explorations:
   - preview as full-screen drawer/page;
   - sticky approve/reject/reply controls;
   - SMS-link landing mode that hides full app chrome when appropriate.
+
+## Chat-Native Operating Surface Experiments
+
+These are the specific experiments implied by the new research spine:
+
+- **Persistent employee command area:** one input for "I walked this job," "send it," "bump labor 10%," "what needs me?", and "show proof," with results materialized outside the transcript.
+- **Work-object focus mode:** selecting an estimate/job/approval opens a surface with preview, assumptions, actions, proof, and related chat/history together.
+- **Generated surface labels:** make it obvious that the employee created the useful surface from the work, not that the user navigated to a generic dashboard page.
+- **Novice first loop:** empty state asks for one real job and shows a tiny promise of the loop: notes/photos -> draft -> approve -> proof.
+- **Expert jump-in:** command palette or compact quick actions for "new estimate," "needs me," "recent outputs," "connected accounts," and "proof."
+- **Event-to-work grouping:** customer replies, deposits, connector failures, and reminders should roll up into jobs/outputs rather than appearing as unstructured activity.
 
 ## Signed SMS Preview Ideas
 
