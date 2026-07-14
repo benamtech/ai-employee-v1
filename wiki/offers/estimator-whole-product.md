@@ -10,9 +10,11 @@ Two things stay invariant across **every** form below, carried from the wedge ([
 - **Line-item + owner approval gate.** Every number the customer sees is itemized with assumptions and low-confidence flags, and **nothing money- or customer-facing leaves without the owner's "yeah, looks good."** The accuracy is the proof; the gate is the trust.
 - **Inbound / TCPA-safe.** Every customer-facing surface here is *inbound* (the homeowner comes to the contractor's site, or replies to him) or owner-directed. No cold outbound on the customer's behalf.
 
-## 0. The delivery spine — a *loaded agent over text* (the GTM core)
+## 0. The delivery spine — a free public estimator first
 
 Before the forms, the mechanism that delivers them. **AMTECH's key GTM move is provisioning a "loaded" agent for a person over text** — not selling software they install. This is what makes us *the easiest thing in the market to run with*:
+
+**2026-07-14 update:** the first public version of that move is the no-signup free estimator in [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md). The contractor does not start by booking a demo or installing anything. They land on a page, bring one real job, talk to the AMTECH estimator, upload or paste the context they already have, receive a line-item draft, and tell AMTECH what was right or wrong. That is the primary contractor funnel.
 
 - **[`amtechai.com/claim`](https://amtechai.com/claim)** [S052, S083] — "**Claim Your AI Employee — a textable teammate that knows your pricing, brand, and customers.**" The real flow: seven business questions + consent, phone verified inline (Twilio Verify, or a signed text-in link), then a manifest is built and handed to the host. Output is a live agent on its own number in the owner's text messages.
 - **The per-client factory makes it near-free to stand up.** The factory takes that manifest and renders the agent **template** into a live, isolated, textable agent **in under a minute** — a deterministic token-render proven in prototype [S082] and specified in [`../MVP/old-build-plan/07-provisioning-runtime.md`](../MVP/old-build-plan/07-provisioning-runtime.md) (claims a Twilio number, creates the profile, registers the check-ins, maps the subdomain, starts the gateway). The `codegraphtheory/hermes-profile-template` prompt-to-repo system [S060–S062] is the *upstream authoring* tool — it scaffolds **new vertical profiles and custom skills**; it is not the per-client stamp. Either way, a *loaded paint/landscape Estimator agent* is a render-and-provision away, not an engineering project.
@@ -20,15 +22,15 @@ Before the forms, the mechanism that delivers them. **AMTECH's key GTM move is p
 
 > **Current implementation caveat.** The SMS/web first-touch routing layer now exists in `mvp-build/`: both surfaces call the same LLM-only onboarding orchestrator, preserve a manifest draft, and move the owner into account setup and provisioning. This is still not a completed live funnel until the real Supabase/Twilio/Hermes/Caddy/provisioner environment passes the golden path. The post-claim profile path renders a selected AMTECH profile package; it does not run the full `hermes-profile-template` prompt-to-repo authoring pipeline during claim.
 
-**The self-escalating funnel** (the founder's words, made canonical): **SMS first touchpoint → it visibly out-performs default ChatGPT and *offers to do more* and *learns like Hermes does* → move him to the web UI (richer surface) → prompt the upgrade, or — better — schedule the call.** Each step is the *same loaded profile re-materialized on a richer surface* (see [`../principle-graph-materialization.md`](../principle-graph-materialization.md)); the agent itself drives the climb because it keeps doing more than he expected. The founder's scarce Tier-D hours ([`../principle-agent-leverage.md`](../principle-agent-leverage.md)) are spent only on the call at the top of the funnel, not on provisioning.
+**The self-escalating funnel** (the founder's words, updated): **public estimator first touchpoint -> it visibly out-performs default ChatGPT and old-school calculators -> it offers to tune the estimate to the contractor's pricing -> it moves the contractor into the persistent Employee / web UI when the work gets valuable.** Each step is the same Estimate brain re-materialized on a richer surface (see [`../principle-graph-materialization.md`](../principle-graph-materialization.md)); the agent itself drives the climb because it keeps doing more than the contractor expected. The founder's scarce Tier-D hours ([`../principle-agent-leverage.md`](../principle-agent-leverage.md)) are spent on high-intent estimator attempts and trust closes, not on explaining AI from scratch.
 
 | Funnel step | Surface | What earns the next step |
 |---|---|---|
-| First touch | **SMS** loaded agent (own/temp number) | Real estimate on his job in his texts; "this already beats ChatGPT and I didn't set anything up" |
+| First touch | **No-signup public estimator** | Real estimate on his job; "this already beats ChatGPT/calculators and I didn't set anything up" |
 | Expand | **Web UI / notifications** | Sees lead history, more skills offered, it remembers and improves |
 | Convert | **Upgrade prompt → or a scheduled call** | Felt the value; the call is the trust close, not a cold pitch |
 
-This spine doesn't change the price ladder ([`wedge-offers.md`](wedge-offers.md): consultative first work → $300 tuned Estimate package → $1,000/$1,500-mo Employee → managed office loop). It changes **how the first work is delivered** (in his texts, zero install) and **how the upsell happens** (the agent self-escalates). It is the lowest-friction version of "do things that don't scale / make something people want" [S063, S070] — concierge value in the channel he already uses.
+This spine changes the first rung of the price ladder ([`wedge-offers.md`](wedge-offers.md): free estimator -> $300 tuned Estimate package -> $1,000/$1,500-mo Employee -> managed office loop). It changes **how the first work is delivered** (public page, zero signup) and **how the upsell happens** (the agent self-escalates after doing useful work). It is the lowest-friction version of "do things that don't scale / make something people want" [S063, S070] — concierge value without forcing the contractor into a sales call first.
 
 ## 1. The three standard skill forms (the portable wedge)
 
@@ -109,8 +111,8 @@ Every form above is the **same Estimate brain materialized for a different actor
 ## 8. Where each form sits in the motion (and what to build first)
 
 - **Phone-only, no-website cohort (~150)** [`../00-decision.md`](../00-decision.md) §11: lead with the **SMS loaded agent** + the on-site flows. The intake widget is irrelevant to them until they have a web presence — don't lead with it.
-- **With-website cohort (~200):** the **conversational intake widget** is a strong, concrete extra hook ("instant estimates on your own site, and they feed your AI office") and a clean standalone ~$300-class sale that ladders into the Employee.
-- **Build order (agent-leverage, Tier-tagged):** (1) the SMS/web loaded-agent first-touch and account claim; (2) walkthrough → estimate PDF artifact; (3) Gmail send + real reply listener; (4) Stripe Connect test-mode deposit invoice + webhook; (5) internal reminder; (6) hosted self-bootstrapping skill and intake widget. The MVP is the real whole-product loop, not a clever estimate demo with manually injected downstream events.
+- **With-website cohort (~200):** the free public estimator is the primary email CTA and SEO wedge. The **conversational intake widget** then becomes the contractor-owned version of the same idea ("instant estimates on your own site, and they feed your AI office").
+- **Build order (agent-leverage, Tier-tagged):** (1) no-signup public estimator first-touch; (2) walkthrough -> estimate PDF/download artifact; (3) account claim / persistent Employee; (4) Gmail send + real reply listener; (5) Stripe Connect test-mode deposit invoice + webhook; (6) internal reminder; (7) contractor-owned intake widget. The MVP is the real whole-product loop, not a clever estimate demo with manually injected downstream events.
 
 ## Scope boundary (unchanged, restated for the new surfaces)
 

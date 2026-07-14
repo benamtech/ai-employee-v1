@@ -4,9 +4,9 @@
 
 ## 1. Beachhead call
 
-Sell first to **owner-operated residential painting and landscaping / hardscaping contractors** (1–10 person shops). Lead with a real estimate/work loop inside the **onboarding + consulting-sales surface**, then climb into a connected, textable **AI Employee**.
+Sell first to **owner-operated residential painting and landscaping / hardscaping contractors** (1–10 person shops). Lead with a no-signup public estimator: **"We give contractors free estimates."** The contractor brings one real job, chats with an AMTECH AI employee, receives a line-item estimate draft, then climbs into a tuned Estimate package and a connected, textable **AI Employee**.
 
-**Two-sentence why:** These owners do high-frequency, money-deciding estimates by hand, are among the least AI-savvy buyers in the market, and AMTECH **already owns the exact skill that does their #1 task** — now wrapped in a superior onboarding/work surface that can diagnose the business, produce the first work object, and provision the Employee. They are phone-reachable, Ben already has a list of them, and the estimate is the first proof object inside the recurring Employee that absorbs the rest of the back office.
+**Two-sentence why:** These owners do high-frequency, money-deciding estimates by hand, are among the least AI-savvy buyers in the market, and AMTECH **already owns the exact skill that does their #1 task** — now wrapped in a public estimator that can produce value before signup and a Work Surface that can later run the whole office loop. The estimate is the first proof object inside the recurring Employee that absorbs the rest of the back office.
 
 ## 2. Why contractors, not agencies
 
@@ -50,12 +50,12 @@ Full spec in [`offers/wedge-offers.md`](offers/wedge-offers.md), with the new su
 
 | Rung | What it is | Commercial role |
 |---|---|---|
-| **0 — Consultative first work** | The founder or front-door agent runs a real job/work loop: captures business context, drafts or frames an estimate, and shows the approval gate. | Free/diagnostic door-opener |
+| **0 — Free public estimator** | Contractor lands from email/SEO/referral, gives one real job to a public AMTECH estimator, gets a line-item estimate draft and assumptions with no signup. | Scalable proof / lead capture |
 | **1 — Tuned Estimate package** | 20-minute pricing interview loads markup, labor, materials, suppliers, assemblies, service area, and format into the business brain/profile package. | **$300-class paid discovery** |
 | **2 — Live AI Employee** | Own SMS/web surface, estimate artifact, signed links, approvals, Gmail send/reply, Stripe deposit invoice, reminders. | **Setup + monthly managed product** |
 | **3 — Managed office loop** | Follow-up, invoicing, reviews, AR, job folders, scheduled briefs, Drive/Calendar/QBO-style connectors, standing policies where safe. | Expansion/retention |
 
-The $300 custom/tuned package is not the profit center — it is **paid discovery + trust purchase + business-brain installation.** It gets Ben paid to learn the customer deeply and improves the reusable `contractor_estimator` package. The money is the installed Employee and the managed office loop.
+The $300 custom/tuned package is not the profit center — it is **paid discovery + trust purchase + business-brain installation.** The free estimator gets the contractor to experience the product; the tuned package makes the estimate match their pricing and improves the reusable `contractor_estimator` package. The money is the installed Employee and the managed office loop. Canonical funnel: [`gtm/free-estimator-funnel.md`](gtm/free-estimator-funnel.md).
 
 ## 5. The line-item / accuracy rule (how to sell the ~5%)
 
@@ -78,7 +78,7 @@ Not abstract "management pain." A concrete, hands-dirty moment: **the contractor
 
 ## 8. Pitch
 
-"I work with painters and landscapers who are still writing estimates at night. I set up a textable AI employee that knows your pricing and drafts the estimate in your format, shows you the PDF, and asks before it sends anything. First, let's run it on a real job you pick. If it's close, I tune it to your exact pricing; if you want it to handle the whole loop, we connect email and deposits behind your approval."
+"We give contractors free estimates. Pick one real job and send the notes, photos, measurements, or customer messages through our estimator. It drafts the line-item estimate, shows the assumptions, and lets you download it without signing up. If it's useful, I can tune it to your pricing and format so it becomes your own AI employee: text it from the truck, it writes the estimate, asks before sending, watches replies, and helps with deposits and follow-up."
 
 ## 9. Three redirects (for the panic moments)
 
@@ -101,25 +101,25 @@ Bookkeepers and desk-based professional offices (tax prep, fractional CFO/CAS, p
 
 ## 11. Where to find buyers (Ben already has the list)
 
-Ben currently holds **~150 contractors with phone numbers but no website**, and **~200 with a website** — trade not yet tagged.
+Ben currently holds **~150 contractors with phone numbers but no website**, and **~200 with a website** — trade not yet tagged. The with-website/email cohort should now be driven primarily to the free estimator page; the phone-only cohort remains a call/local follow-up path into the same offer.
 
-- **The 150 phone-only, no-website contractors are cold-call gold.** No website signals an owner doing everything himself (drowning), the least marketed-to and most AI-naive cohort, and you already have the number — the exact channel contractors answer.
-- **The 200 with-website contractors** get email + a "demo from your own site/recent job" angle and are slightly easier to research.
+- **The 150 phone-only, no-website contractors are call/local-follow-up gold.** No website signals an owner doing everything himself (drowning), the least marketed-to and most AI-naive cohort, and you already have the number — use phone to get them to try one free estimate.
+- **The 200 with-website contractors** get the primary cold email: "We give contractors free estimates." The CTA is the no-signup estimator page, not a request to book a demo first.
 - **Step 1 is enrichment, not more list-building:** tag each row by trade (paint / landscape / hardscape vs. other), owner first name, and city. Prioritize painting and landscaping; park the rest.
 
 ## 12. 40-name list method (this week)
 
 You don't need to *build* 40 — you need to *enrich and rank* the names you have, then top up.
 
-1. From the existing ~350, pull every painter / landscaper / hardscaper into a working sheet. Columns: owner name, phone, website/email, trade, city, source, demo status, custom-skill status, Employee status, objection.
-2. Tag trade fast from business name + a 10-second search; flag the no-website phone rows as **call-first**.
+1. From the existing ~350, pull every painter / landscaper / hardscaper into a working sheet. Columns: owner name, phone, website/email, trade, city, source, estimator-start status, draft-completed status, tuned-package status, Employee status, objection.
+2. Tag trade fast from business name + a 10-second search; flag with-website rows as **estimator-email-first** and no-website phone rows as **guided-estimator-call-first**.
 3. Top up from Google Maps ("painters near [town]", "landscaping [town]"), local trade groups, and supply-house bulletin boards if the painting/landscaping count is thin.
 4. **Seasonality is in your favor right now:** late June is peak paint/landscape season — estimate volume and the pain are at their annual high. Call early morning and evening; lead with the pain, not the tech.
 
 ## 13. Warm-path prompt
 
-"Quick favor — do you know any painters or landscapers running their own crew? I built something that writes their estimates for them, in their own pricing and format, off the photos and messages from a job. I just want to show one of them on a real job they pick — no charge to look."
+"Quick favor — do you know any painters or landscapers running their own crew? I built a free estimator for contractors: they can bring one real job, give it notes/photos/messages like they'd give a secretary, and it drafts the estimate with assumptions. No signup. I just want them to try it and tell me what is right or wrong."
 
 ## 14. Hard timebox
 
-Ben should spend **no more than 90 minutes** reviewing this wiki before he starts dialing the painting/landscaping rows. The research exists to point the calls, not replace them. Peak season is now; the list is already in hand.
+Ben should spend **no more than 90 minutes** reviewing this wiki before he starts pushing the free-estimator page to painting/landscaping rows and following up with the highest-intent attempts. The research exists to point real estimate attempts, not replace them. Peak season is now; the list is already in hand.

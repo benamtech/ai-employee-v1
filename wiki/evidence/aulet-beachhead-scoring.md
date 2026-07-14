@@ -35,7 +35,7 @@ This page validates **painting & landscaping contractors** as the beachhead thro
 
 ## Customer-access plan (this week)
 
-Enrich the ~350 names by trade; pull painters/landscapers into a working sheet; flag no-website rows as call-first. Top up from Google Maps and supply-house boards only if a town runs thin. Lead warm (referrals, local), then cold at volume. Detail: [`../gtm/outbound-system.md`](../gtm/outbound-system.md).
+Enrich the ~350 names by trade; pull painters/landscapers into a working sheet; flag with-website rows as estimator-email-first and no-website rows as guided-estimator-call-first. Top up from Google Maps and supply-house boards only if a town runs thin. Lead with the free estimator where possible, then follow up warm/local and cold at volume. Detail: [`../gtm/outbound-system.md`](../gtm/outbound-system.md).
 
 ## Whole-product requirement
 

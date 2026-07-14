@@ -2,6 +2,8 @@
 
 **Status: active** · _Created 2026-06-29. This is the GTM update implied by the current MVP build and Work Surface UX research. Source of truth for product capability remains [`../MVP/old-build-plan/`](../MVP/old-build-plan/) and [`../../mvp-build/`](../../mvp-build/)._
 
+**2026-07-14 note:** the primary contractor first touch is now the no-signup free estimator in [`free-estimator-funnel.md`](free-estimator-funnel.md). This page still matters because the estimator must escalate into a consulting-sales experience once the contractor shows intent, asks for tuning, or wants a persistent Employee.
+
 ## The shift
 
 The old GTM assumed:
@@ -13,10 +15,11 @@ free skill demo -> $300 custom skill -> later, maybe, connected AI Employee
 The current product supports a stronger motion:
 
 ```text
-first conversation with the Employee-like front door
+free public estimator on one real job
   -> diagnosis of the owner's real work
   -> one visible work object
-  -> account/phone/email setup
+  -> feedback / tune-to-my-pricing CTA
+  -> account/phone/email setup when value is proven
   -> live Employee
   -> consulting close around the next painful loop
 ```
@@ -38,7 +41,8 @@ That is the consulting sale: diagnose pain by doing a small piece of the work in
 
 | Path | Entry | What happens | Human role |
 |---|---|---|---|
-| **Field-led** | Call, referral, in-person demo | Founder gets the owner into the front-door flow or runs it live on a real job. The surface captures the brain and produces/frames the first work object. | Founder closes trust, price, and scope. |
+| **Estimator-led** | Public free estimator, SEO tool page, email link | Contractor submits one real job, receives a draft, gives feedback, and gets invited to tune or install the Employee. | Founder enters after high-intent attempts. |
+| **Field-led** | Call, referral, in-person demo | Founder guides the owner into the estimator/front-door flow or runs it live on a real job. | Founder closes trust, price, and scope. |
 | **Product-led** | `/create-ai-employee`, `/claim`, SMS keyword | Owner chats, verifies phone/email, provisions a free/default-allow Employee, and sees the Work Surface. | Founder enters when the agent detects high-intent pain or schedules a call. |
 
 These are not separate funnels. They are two doors into the same Employee relationship.
@@ -47,7 +51,7 @@ These are not separate funnels. They are two doors into the same Employee relati
 
 | Rung | Buyer experience | Commercial purpose |
 |---|---|---|
-| **0 — Consultative first work** | "Show me a job you're quoting." The front door/founder produces a useful work object and diagnoses the business loop. | Build trust and reveal pain. |
+| **0 — Free estimator** | "Pick one job you need to estimate." The public estimator produces a useful work object with assumptions and download. | Build trust, reveal pain, create qualified lead. |
 | **1 — Tuned work package** | Estimate skill tuned to pricing, format, materials, and owner rules; now represented as a reusable profile/skill update. | Paid discovery; business-brain capture; switching cost. |
 | **2 — Live Employee** | Own SMS/web surface, artifacts, approvals, Gmail send/reply, Stripe deposit, reminders. | Recurring product; real time-back. |
 | **3 — Managed office loop** | Job folders, follow-up, invoices, reviews, AR, scheduled briefs, more connectors, standing policies. | Retention and expansion. |

@@ -4,9 +4,9 @@
 
 ## Purpose
 
-Build a volume-first article engine for AMTECH that publishes many high-utility, high-information-gain articles across a large graph around AI agents for small business.
+Build a volume-first article and utility-surface engine for AMTECH that publishes many high-utility, high-information-gain pages across a large graph around AI agents for small business.
 
-This is not a narrow contractor blog and not an AI spam workflow. The system should pre-empt real questions, explain fast-moving AI news, and materialize the same knowledge into many surfaces: human article, AI Overview-ready answer, schema, OKF/concept node, internal links, image pack, Pinterest pin, social/forum answer, and future tool/calculator nodes.
+This is not a narrow contractor blog and not an AI spam workflow. The system should pre-empt real questions, explain fast-moving AI news, and materialize the same knowledge into many surfaces: human article, AI Overview-ready answer, schema, OKF/concept node, internal links, image pack, Pinterest pin, social/forum answer, and **interactive tools/calculators/estimators**. The contractor free-estimator funnel is now the model for this: AMTECH should rank by doing useful work, not only writing about it.
 
 The website-repo implementation target is a portable skill named:
 
@@ -30,11 +30,12 @@ Implementation agents should read these local files before building the skill:
 - [`../00-decision.md`](../00-decision.md) - AMTECH position, AI Employee ladder, pricing, beachhead, second beachhead.
 - [`../segments/contractors.md`](../segments/contractors.md) - contractor graph and estimate pain.
 - [`../segments/bookkeeping.md`](../segments/bookkeeping.md) - second beachhead and document-intake graph.
-- [`../offers/wedge-offers.md`](../offers/wedge-offers.md) - consultative first work, tuned package, Employee ladder, connector tiers, approval gate.
+- [`../offers/wedge-offers.md`](../offers/wedge-offers.md) - free estimator, tuned package, Employee ladder, connector tiers, approval gate.
 - [`../offers/skill-catalog.md`](../offers/skill-catalog.md) - contractor skill lanes and graph traversals.
 - [`../principle-graph-materialization.md`](../principle-graph-materialization.md) - graph and materialized-view doctrine.
 - [`../principle-deliverable-driven-surfaces.md`](../principle-deliverable-driven-surfaces.md) - deliverable types, previews, proof, and approval gates.
 - [`../product-agent-platform-architecture.md`](../product-agent-platform-architecture.md) - AMTECH-owned layer over Hermes, Manager, connectors, and event mesh.
+- [`free-estimator-funnel.md`](free-estimator-funnel.md) - primary contractor SEO/outbound wedge and the model for utility tool pages.
 
 ## External research foundation
 
@@ -73,7 +74,7 @@ The article system should maintain a broad AMTECH-tuned knowledge graph. The gra
 | Cluster | Purpose | Example entities |
 |---|---|---|
 | AI agents for small business | Own the practical "AI employee" category before buyers know the term. | AI employee, business brain, approval gate, skill, connector, Gmail, Stripe, calendar, files, onboarding, operating context |
-| Contractor AI | Capture practical demand and AMTECH's strongest product wedge. | estimate, line item, job photos, customer message, painting, landscaping, hardscaping, deposit invoice, materials, follow-up |
+| Contractor AI | Capture practical demand and AMTECH's strongest product wedge through both articles and tools. | estimate generator, cost calculator, line item, job photos, customer message, painting, landscaping, hardscaping, deposit invoice, materials, follow-up |
 | Business setup with AI | Capture founders and SMB owners at formation moments. | business setup, Stripe account, business email, CRM, website, bookkeeping, first offer, AI employee onboarding |
 | Current AI news for SMBs | Turn fast-moving AI news into durable explainers with small-business implications. | sovereign AI, physical AI, AI agents, model releases, agent protocols, AI search changes, robotics, local automation |
 | Agentic SEO and GEO | Build authority around the publishing strategy AMTECH is using. | query fan-out, evidence ecosystem, AI citations, OKF, llms.txt, schema, Reddit/forum citation, image SEO, Pinterest |
@@ -127,7 +128,7 @@ The skill should support multiple article shapes so volume does not collapse int
 | Operational comparison | Buyer compares DIY AI, software, human assistant, and AMTECH-style employee. | Decision table, costs, trust/risk, workflow fit, recommendation by scenario. |
 | Business setup playbook | User is forming or reorganizing a business. | Ordered setup path, tool/account explanations, approvals, risks, skill/agent automation points. |
 | Agentic SEO field note | AMTECH observes or uses a publishing tactic. | Claim, evidence, method, limitations, tactical checklist, graph implication. |
-| Tool/calculator seed | Article implies an interactive asset. | Explanation plus future tool spec and data inputs. |
+| Tool/calculator/estimator page | Searcher wants a useful result, not an article. | Interactive asset first, short explanation, assumptions/limits, example output, internal links, and CTA into AMTECH tuning/Employee. |
 
 ## Current-event pattern
 

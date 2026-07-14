@@ -4,7 +4,9 @@
 
 ## Golden rule
 
-Lead with the **result and a dollar number**; hold the tech until the demo. The seller's failure mode is retreating into explaining the AI under pressure. Every script below keeps you on the contractor's estimate pain, not on Hermes.
+Lead with the **free estimate result**; hold the tech until after the contractor has tried one real job. The seller's failure mode is retreating into explaining the AI under pressure. Every script below keeps you on the contractor's estimate pain, not on Hermes.
+
+Primary CTA now lives in [`../gtm/free-estimator-funnel.md`](../gtm/free-estimator-funnel.md): send contractors to the no-signup estimator first, then follow up on high-intent attempts.
 
 ## Cold call opener (no-website / phone-only list)
 
@@ -14,9 +16,15 @@ If "what is it / how": go to **Redirect 1**. If "I'm busy / on a job": "Totally 
 
 ## Email opener (with-website list)
 
-> Subject: writing your estimates for you
+> Subject: We give contractors free estimates.
 >
-> [Name] — saw [company]. Quick one: I set up textable AI employees for painters/landscapers that write the estimate from the job photos and the customer's messages — in your pricing and your format, usually within ~5%, and nothing sends without your okay. I'll set it up on one of your recent jobs for free so you can see the whole loop. Reply with a job and I'll send back the estimate.
+> [Name] — quick one. AMTECH built a special AI employee for contractors that helps turn job notes, photos, measurements, and customer messages into clean estimate drafts.
+>
+> Pick one job you need to estimate and send it through this page. You can talk to it like you would talk to a secretary or estimator. It will draft the estimate, show the assumptions, and let you download it. No signup.
+>
+> If it is useful, tell us what was right or wrong. If you want, we can tune it to your pricing and format so it becomes your own AI employee.
+>
+> [link]
 
 ## Discovery questions (keep it about their day)
 
@@ -25,10 +33,10 @@ If "what is it / how": go to **Redirect 1**. If "I'm busy / on a job": "Totally 
 - "What does a bid usually look like — back of a notepad, a spreadsheet, software?"
 - "If I could write the next one *for* you off a voice memo, which job would be the best test?"
 
-## The demo (this is the close) — run the real onboarding surface
+## The demo (this is the close) — run the free estimator or Work Surface
 
 1. Use the contractor's **own** recent job (photos + the customer's messages). Never a generic example.
-2. In the live surface, produce a **line-item** estimate artifact — scope, quantity, unit price, the assumption behind each — with the signed link and the **approval card** visible. He's looking at his employee's actual output, not a slide.
+2. In the public estimator or live surface, produce a **line-item** estimate artifact — scope, quantity, unit price, the assumption behind each — with download/review visible. He's looking at his employee's actual output, not a slide.
 3. Ask: **"Is that within a few percent of what you'd have charged?"** Let him check the lines.
 4. On yes, set up his Employee on the spot (it provisions free-by-default) and sell the tuning: "That's *before* I tune it to your exact pricing. For $300 I load your markup, labor rates, and materials so it becomes your employee's pricing brain — dialed in, back to you in 48 hours."
 
@@ -36,7 +44,7 @@ If "what is it / how": go to **Redirect 1**. If "I'm busy / on a job": "Totally 
 
 "Here's how it works: 20 minutes on the phone, you tell me your pricing the way you'd tell a new estimator — markup, crew day rate, material costs, your standard line items. I load it into your employee, send it back in two days, and from then on it writes your estimates within about 5%. Three hundred bucks, paid up front. Want the link?" _(Internally this is paid discovery that installs the business brain and improves the reusable `contractor_estimator` package — not a one-off file.)_
 
-## Employee — provision early, then deepen as the loop is felt
+## Employee — provision after the free estimator proves useful
 
 Provision the Employee during/after the first work, not "someday." The trigger to climb is the felt pain:
 
