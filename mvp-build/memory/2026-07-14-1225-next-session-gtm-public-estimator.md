@@ -13,13 +13,15 @@ Start from the latest `main` branch. If this prompt has not been merged yet, use
 UI/UX canonicalization and fixture-guard work needed for this prompt is already on `main` as of merge commit
 `0a07ce7ac6eefc1b03cd0d5b5fec110a7500732b`.
 
-Strong prior from the founder: the best next step is to make the public landing-page estimator employee completely real. That means a no-signup contractor can land on an AMTECH page, talk to an AI employee about one real job, get a useful estimate draft, revise it conversationally, download/copy it, optionally receive it by email from AMTECH, and then enter the free-trial AI Employee funnel.
+Strong prior from the founder: the best next step is to make the public landing-page estimator employee completely real. This is an AI employee provisioned by AMTECH's own software, not a separate estimator app. The proof of concept is that one AMTECH-provisioned employee can be materialized into a public acquisition surface: a web form/chat for contractor visitors, estimate draft artifacts for download/copy, and follow-up emails sent from AMTECH.
 
-This is not a generic chatbot, calculator, or demo. It is the acquisition version of the AMTECH employee loop:
+That means a no-signup contractor can land on an AMTECH page, talk to the provisioned AI employee about one real job, get a useful estimate draft, revise it conversationally, download/copy it, optionally receive it by email from AMTECH, and then enter the free-trial AI Employee funnel.
+
+This is not a generic chatbot, calculator, or demo. It is a real AMTECH employee instance, provisioned by the AMTECH employee factory, exposed through public web and email materializations as the acquisition version of the employee loop:
 
 ```text
 visitor lands from cold email / SEO / referral
-  -> starts one estimator conversation with no signup
+  -> starts one public conversation with the provisioned estimator employee
   -> gives job notes, measurements, customer messages, photos/files if supported
   -> employee asks only for missing facts
   -> employee produces a line-item estimate draft with assumptions
@@ -95,6 +97,7 @@ Use official docs or source. Do not cite random blog posts for provider behavior
 Build toward this public estimator behavior:
 
 - One estimator employee can handle many visitors concurrently without mixing context.
+- The estimator is an AMTECH-provisioned AI employee. The public landing page, web form/chat, estimate artifact, download, and Resend email are materializations of that employee's work, not a parallel product.
 - Each visitor has a stable `visitor_session_id` or equivalent, separate transcript/session state, scoped artifacts, and scoped funnel state.
 - The workflow is guided by prompts/hooks/context, not a long rigid form.
 - The employee asks only for missing facts needed to make a reasonable draft.
@@ -110,13 +113,13 @@ Build toward this public estimator behavior:
 
 Expect most of the work to be API and product plumbing:
 
-- public web route/page for the estimator;
+- public web route/page that materializes the provisioned estimator employee as a landing-page form/chat;
 - visitor-session creation/resume endpoint;
 - message endpoint that routes visitor turns to the estimator employee;
 - turn serialization that isolates visitors while preserving one shared estimator capability;
 - artifact/draft retrieval endpoint scoped to visitor session;
 - download/copy/email actions;
-- Resend email service wrapper and tests;
+- Resend email materialization of the employee's draft estimate, with service wrapper and tests;
 - customer/funnel state persistence;
 - admin/founder inspection path if the existing admin surface can be extended safely;
 - prompt/profile/hook/context changes that make the estimator reliably follow the workflow.
