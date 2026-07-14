@@ -43,7 +43,9 @@ For a cold session:
 Use `../wiki/MVP/old-build-plan/` for original whole-product mechanics only. The immediate forward sequencing now lives in
 `second-half-plan/`; the older reconciled modular phase graph remains in `../wiki/MVP/build-plan-current/`. The parallel
 Hermes context-engineering lives in `second-half-plan/context-engineering/`. CE-1 is source-wired; CE-2+
-remain planned.
+remain planned — the production build plan is
+`second-half-plan/context-engineering/phase-ce-02-03-production-implementation-plan.md` (CE-2 compression/hooks/
+turn-routing/background-work, CE-3 rotation-before-compaction + Manager-state carryover, CE-1 loose ends).
 
 ## 3. Current status
 

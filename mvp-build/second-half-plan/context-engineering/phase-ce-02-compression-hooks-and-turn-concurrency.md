@@ -2,6 +2,12 @@
 
 Status: planned (depends on CE-1)
 
+> **Implementation lives in the production plan:**
+> [`phase-ce-02-03-production-implementation-plan.md`](phase-ce-02-03-production-implementation-plan.md).
+> That doc is the authoritative build plan (source-grounded audit, model-agnostic compression policy,
+> deterministic hygiene transforms, routing table, background-work seam, files/gates/rollout). This file is
+> the earlier design sketch; where they differ, the production plan wins.
+
 Goal: stop the default mid-session compaction, keep noisy tool output out of context, wire the AMTECH hook
 plumbing (which CE-1's primer rides), and move background/trivial work off the owner turn so a Hermes-class
 agent is never held up by trivial tasks.

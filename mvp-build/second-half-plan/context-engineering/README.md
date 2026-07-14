@@ -89,14 +89,18 @@ sub-agent pattern (focused child, clean context, condensed summary back).
 
 ## Phase index
 
-| Phase | File | Outcome |
-|---|---|---|
-| CE-1 | [Agent brain + native memory seed](phase-ce-01-agent-brain-and-native-memory.md) | The employee wakes knowing its business (MEMORY.md/USER.md seeded from onboarding) and its live state (reference-shaped `buildAgentContext` injected cache-safely once per session). Fix the render/data drops. |
-| CE-2 | [Compression policy + hooks + turn concurrency](phase-ce-02-compression-hooks-and-turn-concurrency.md) | Stop default 50% compaction; keep noisy tool output out of context (transform hooks); move background/trivial work off the owner turn (delegation/Jobs, `deliver_only`). |
-| CE-3 | [Session rotation + handoff](phase-ce-03-session-rotation-and-handoff.md) | Manager rotates to a fresh session before compaction with an ultra-compact, handoff-oriented carryover; memory scope preserved via `X-Hermes-Session-Key`; MEMORY.md/USER.md carry for free. |
-| CE-4 | [Connector-agnostic capabilities + operator modes](phase-ce-04-connector-agnostic-and-operator-modes.md) (deferred) | Any MCP connector (Jobber/ServiceTitan/Housecall Pro) representable end-to-end with Manager-mediated custody for money/customer-facing tools; per-business-type + operator-mode context policy. |
+| Phase | File | Status | Outcome |
+|---|---|---|---|
+| CE-1 | [Agent brain + native memory seed](phase-ce-01-agent-brain-and-native-memory.md) | `source-wired` (live proof `pending`) | The employee wakes knowing its business (MEMORY.md/USER.md seeded from onboarding) and its live state (reference-shaped `buildAgentContext` injected cache-safely once per session, capped at **2000 est. tokens**, 400k session target). Render/data drops fixed; `pre_llm_call` hook wired. |
+| CE-2 | [Compression policy + hooks + turn concurrency](phase-ce-02-compression-hooks-and-turn-concurrency.md) | `planned` | Stop default 50% compaction; keep noisy tool output out of context (transform hooks); move background/trivial work off the owner turn (delegation/Jobs, `deliver_only`). |
+| CE-3 | [Session rotation + handoff](phase-ce-03-session-rotation-and-handoff.md) | `planned` | Manager rotates to a fresh session before compaction with an ultra-compact, handoff-oriented carryover; memory scope preserved via `X-Hermes-Session-Key`; MEMORY.md/USER.md carry for free. |
+| CE-4 | [Connector-agnostic capabilities + operator modes](phase-ce-04-connector-agnostic-and-operator-modes.md) (deferred) | `planned` | Any MCP connector (Jobber/ServiceTitan/Housecall Pro) representable end-to-end with Manager-mediated custody for money/customer-facing tools; per-business-type + operator-mode context policy. |
 
-Planning handoff for the next pass: [CE-2/CE-3 production planning handoff prompt](ce-02-03-production-planning-handoff-prompt.md).
+**Production implementation plan for CE-2 + CE-3 (+ CE-1 loose ends):**
+[phase-ce-02-03-production-implementation-plan.md](phase-ce-02-03-production-implementation-plan.md) — the
+concrete build plan (current-state audit, model-agnostic compression policy, deterministic hygiene transforms,
+rotation-before-compaction with Manager-state carryover, files/gates/rollout). Authored from the
+[CE-2/CE-3 planning handoff prompt](ce-02-03-production-planning-handoff-prompt.md).
 
 ## Dependency graph
 
@@ -112,7 +116,8 @@ CE-4 (connector-agnostic + operator modes) : deferred; builds on CE-1..3 once a
 
 `source-wired` / `provider-accepted` / `runtime-accepted` / `planned` / `pending`. Live Hermes
 hook/compression/rotation/memory behavior stays a `pending` runtime gate until proven against a real
-Hermes v0.18.x instance (Realness Rule). All phases below are `planned`.
+Hermes v0.18.x instance (Realness Rule). **CE-1 is `source-wired`** (live proof `pending`); **CE-2/CE-3/CE-4
+are `planned`** — see the phase index for per-phase status.
 
 ## Primary sources (verified 2026-07-12)
 

@@ -208,6 +208,7 @@ Status is the page's own first-line marker. `★` = highest-value pages for agen
 | Path | Role | Status |
 |---|---|---|
 | `competitors/landscape.md` | Brief §5. Tiers (toy / DIY-build / single-function DFY / AI agencies / RAG chatbot / human substitutes), price anchors, AMTECH whitespace, MIT/RAND/NBER failure stats, "how to say the difference on a call." | complete |
+| `competitors/top-competitor-map.md` | ★ Current competitor map (created 2026-07-12) using AMTECH's updated product reality: source-wired AI Employee, Work Surface, SMS Review, Connector Center, QBO/Gmail/Stripe, approval gates, and event-driven office. Defines actual direct/indirect and possible direct/indirect pass/fail gates; ranks top 5 in each category across national vendors plus local/regional substitutes. | active |
 
 ### `wiki/offers/`
 | Path | Role | Status |

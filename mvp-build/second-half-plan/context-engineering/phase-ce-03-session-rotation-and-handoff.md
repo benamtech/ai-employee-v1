@@ -2,6 +2,13 @@
 
 Status: planned (depends on CE-1, CE-2)
 
+> **Implementation lives in the production plan:**
+> [`phase-ce-02-03-production-implementation-plan.md`](phase-ce-02-03-production-implementation-plan.md).
+> That doc is the authoritative build plan (occupancy capture, `employee_sessions` schema,
+> rotate-before-compaction under the turn lock, `buildAgentContext`-reuse carryover, files/gates/rollout).
+> This file is the earlier design sketch; where they differ, the production plan wins. Note the terminology
+> fix: `transcript_session_id` (rotates) vs `memory_session_key` = `X-Hermes-Session-Key` (preserved).
+
 Goal: in production, **rotate to a fresh session before Hermes must compact**, carrying an ultra-compact,
 handoff-oriented note — so work quality never degrades from lossy in-place summarization and the owner
 experience stays flawless.

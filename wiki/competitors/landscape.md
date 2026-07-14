@@ -2,6 +2,8 @@
 
 **Status: complete** · _Revised 2026-06-27: added the intelligence-curve differentiator and contractor-tuned call language._
 
+For the current named top-competitor ranking, including actual direct, actual indirect, possible direct, and possible indirect competitors, see [`top-competitor-map.md`](top-competitor-map.md). This page is the strategic tiering and call-language companion.
+
 ## Competitive tiers
 
 | Tier | Examples | What they are | Why they are not the AMTECH wedge |

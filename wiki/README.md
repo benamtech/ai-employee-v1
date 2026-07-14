@@ -83,6 +83,7 @@ This wiki turns AMTECH's go-to-market research and the current [`../mvp-build/`]
 ### Competition
 
 - [`competitors/landscape.md`](competitors/landscape.md) - tiers, price anchors, AMTECH whitespace, failure stats - `complete`
+- [`competitors/top-competitor-map.md`](competitors/top-competitor-map.md) - top 5 actual direct, actual indirect, possible direct, and possible indirect competitors, with pass/fail category gates and current-product lens - `active`
 
 ### GTM
 
