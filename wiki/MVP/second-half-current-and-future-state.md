@@ -1,6 +1,6 @@
 # AI Employee Second-Half Current And Future State
 
-**Status: active** · _Created 2026-07-09; brought current 2026-07-14. This is the wiki companion to [`../../mvp-build/second-half-plan/`](../../mvp-build/second-half-plan/): it summarizes what is actually built in `mvp-build/` today and what remains before free trials and paid pilots. It does not replace implementation records; it points agents to the plan and explains the product architecture. The authoritative per-phase status is `mvp-build/CODEGRAPH.md` §3 and [`../../mvp-build/docs/state-of-progress-2026-07-14.md`](../../mvp-build/docs/state-of-progress-2026-07-14.md)._
+**Status: active** · _Created 2026-07-09; brought current 2026-07-14. This is the wiki companion to [`../../mvp-build/second-half-plan/`](../../mvp-build/second-half-plan/): it summarizes what is actually built in `mvp-build/` today and what remains before free trials and paid pilots. It does not replace implementation records; it points agents to the plan and explains the product architecture. The authoritative per-phase status is `mvp-build/CODEGRAPH.md` §3, [`../../mvp-build/docs/state-of-progress-2026-07-14.md`](../../mvp-build/docs/state-of-progress-2026-07-14.md), and the UX organization layer in [`../../mvp-build/docs/ux/`](../../mvp-build/docs/ux/)._
 
 ## Why This Exists
 
@@ -54,6 +54,11 @@ Recent context-engineering substrate — `source-wired`, live Hermes/provider pr
   session rotation/carryover are in source.
 - **CE-4**: connector custody/readiness is generalized through a shared registry; direct read-only MCP projection is allowed
   where safe, while write/money/customer-facing work stays Manager-mediated.
+
+UX organization — active:
+
+- **Master UX system**: `../../mvp-build/docs/ux/` now organizes Aqua HIG translation, current surface map,
+  implementation coverage, generative UI frontier, fixture/production policy, and the post-release UI roadmap.
 
 ## Production Readiness: Substrate Proven On-Host (2026-07-11)
 

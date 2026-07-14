@@ -5,10 +5,9 @@
  * UI-fixture mode it renders representative resources with no Manager/creds.
  */
 import { MANAGER_API, type WorkResource } from "@amtech/shared";
+import { uiFixtureMode } from "../../../_lib/ui-fixtures";
 import { managerPost } from "../../../api/_lib/manager";
 import { ReviewClient } from "./ReviewClient";
-
-const UI_FIXTURE_MODE = process.env.NEXT_PUBLIC_AMTECH_UI_FIXTURES === "1";
 
 export const metadata = { title: "Review — AMTECH" };
 
@@ -23,7 +22,7 @@ export default async function ReviewPage({
   const { t } = await searchParams;
   const token = t ?? "";
 
-  if (UI_FIXTURE_MODE) {
+  if (uiFixtureMode()) {
     return <ReviewClient employeeId={employeeId} token={token} resource={fixtureResource(token)} />;
   }
 

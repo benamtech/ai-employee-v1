@@ -13,7 +13,9 @@ software is not a dashboard, CRM, inbox, task manager, admin console, or giant c
 a calm place to talk to Avery, see what needs the owner's judgment, inspect exact work before risky
 actions, and find proof later.
 
-Read [`00-index-and-reading-order.md`](00-index-and-reading-order.md) first.
+Read [`00-index-and-reading-order.md`](00-index-and-reading-order.md) first. For cross-surface UX organization,
+research ledger, implementation coverage, generative-UI frontier, and fixture/production policy, read
+[`../docs/ux/`](../docs/ux/).
 
 ## Current Implementation Status
 

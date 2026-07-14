@@ -13,4 +13,15 @@ describe("production environment proof aggregation", () => {
     expect(proof.checks.find((c: { name: string }) => c.name === "core_compose").status).toBe("pass");
     expect(JSON.stringify(proof)).not.toContain("provider_runtime_live proof exists");
   });
+
+  it("fails production-like proof when UI fixture mode is enabled", async () => {
+    const mod = await import("../../infra/scripts/prod-env-proof.mjs") as any;
+    const proof = mod.summarizeEnvironment([], {
+      AMTECH_ENVIRONMENT_NAME: "pod-alpha",
+      NEXT_PUBLIC_AMTECH_UI_FIXTURES: "1",
+    });
+    expect(proof.status).toBe("fail");
+    const fixture = proof.checks.find((c: { name: string }) => c.name === "ui_fixture_mode");
+    expect(fixture.status).toBe("fail");
+  });
 });

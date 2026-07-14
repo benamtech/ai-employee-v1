@@ -25,7 +25,6 @@ const NAV: Array<{ id: View; label: string }> = [
 ];
 
 const DEFAULT_REASON = "Operator review for pilot readiness";
-const UI_FIXTURE_MODE = process.env.NEXT_PUBLIC_AMTECH_UI_FIXTURES === "1";
 
 async function adminFetch(path: string, opts: { method?: "GET" | "POST"; body?: unknown; reason?: string; adminToken?: string } = {}) {
   const headers: Record<string, string> = {
@@ -43,7 +42,7 @@ async function adminFetch(path: string, opts: { method?: "GET" | "POST"; body?: 
   return json;
 }
 
-export function AdminClient() {
+export function AdminClient({ fixtureMode }: { fixtureMode: boolean }) {
   const [view, setView] = useState<View>("dashboard");
   const [reason, setReason] = useState(DEFAULT_REASON);
   const [adminToken, setAdminToken] = useState("");
@@ -57,7 +56,7 @@ export function AdminClient() {
   const [status, setStatus] = useState("");
 
   async function loadDashboard(tokenOverride?: string) {
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       const fx = adminFixtures;
       setDashboard(fx.fixtureDashboard);
       setEnvironment(fx.fixtureEnvironment);
@@ -75,7 +74,7 @@ export function AdminClient() {
   }
 
   async function openAccount(accountId: string) {
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       const fx = adminFixtures;
       setSelectedAccount(accountId);
       setAccountDetail(fx.fixtureAccountDetail[accountId] ?? null);
@@ -98,7 +97,7 @@ export function AdminClient() {
   }
 
   async function loadEnvironment() {
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       const fx = adminFixtures;
       setEnvironment(fx.fixtureEnvironment);
       return;
@@ -111,7 +110,7 @@ export function AdminClient() {
   }
 
   async function openEmployee(employeeId: string) {
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       const fx = adminFixtures;
       setSelectedEmployee(employeeId);
       setEmployeeDetail(fx.fixtureEmployeeDetail[employeeId] ?? null);
@@ -129,7 +128,7 @@ export function AdminClient() {
 
   async function runAction(action: AdminSupportAction, input: Record<string, unknown> = {}) {
     if (!selectedAccount) return;
-    if (UI_FIXTURE_MODE) {
+    if (fixtureMode) {
       setStatus(`UI fixture mode: "${action.replace(/_/g, " ")}" simulated locally — no Manager call.`);
       return;
     }
