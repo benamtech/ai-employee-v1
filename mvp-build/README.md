@@ -6,7 +6,7 @@ Status: **the second-half plan's product surfaces are `source-wired` and the act
 
 Current second-half plan: **[`second-half-plan/`](second-half-plan/)**. Current wiki companion: **[`../wiki/MVP/second-half-current-and-future-state.md`](../wiki/MVP/second-half-current-and-future-state.md)**. Older reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)**. Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**.
 
-For UI contributors, start with **[`docs/ux/`](docs/ux/)** for the master UX system, research ledger, coverage audit, generative-UI frontier, and fixture/production policy. Then read the active **[`ui-redesign/`](ui-redesign/)** packet for the current owner MVP direction and screenshots. The historical **[`ui-handoff/`](ui-handoff/)** packet remains useful for source maps and broader surface inventory.
+For UI contributors, start with **[`docs/ux/`](docs/ux/)** for the master UX system, research ledger, coverage audit, generative-UI frontier, and fixture/production policy. Then read the active **[`ui-redesign/`](ui-redesign/)** packet for the current owner MVP direction and screenshots. The old UI collaborator packet now lives at **[`docs/archive/ui-handoff-2026-07-14/`](docs/archive/ui-handoff-2026-07-14/)** as historical reference only; do not use it as the current starting point.
 
 UI contributors can work without full infrastructure:
 
@@ -159,8 +159,8 @@ infra/
   caddy/       # Caddyfile + per-client snippet template
   hermes/      # RUNBOOK.md (install + manual smoke test) — gates Phase 0 infra acceptance
   scripts/     # hermes-smoke + number-pool/healthcheck/repair seams
-docs/          # production notes: admin, metering, QuickBooks connector, production deploy readiness review
-ui-handoff/    # UI contributor packet: product grounding, current UI map, research, future surfaces
+docs/          # UX system, production notes, admin, metering, QuickBooks connector, archive
+ui-redesign/   # active owner MVP UI redesign packet and screenshots
 tests/
   unit/        # security boundary, envelope, contracts, signed links, secrets, manifest
   integration/ # RLS cross-account denial (real Supabase) — skeleton

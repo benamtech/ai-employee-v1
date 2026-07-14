@@ -1,6 +1,6 @@
 # Experiments And Future Surfaces
 
-Status: active design backlog
+Status: archived design backlog
 
 Purpose: separate what needs real design work **now, for the first paying trial**, from ideas that
 are genuinely speculative and should not be prioritized yet. Despite this file's name, most of what's

@@ -55,15 +55,18 @@ The minimum engineering acceptance path is deliberately narrower than the produc
 
 The current product frontier is the owner surface: making the power of the Hermes-backed employee legible to a nontechnical business owner. The backend now has meaningful Manager, MCP, artifact, approval, event, runtime, scheduler, and metering seams. UI work turns that raw power into an employee desk the owner can understand and trust.
 
-For UI contributors, start at `mvp-build/ui-handoff/`. That packet explains:
+For UI contributors, start at `mvp-build/docs/ux/`, then read the active owner-surface packet at
+`mvp-build/ui-redesign/`. Those are the current UX sources for:
 
-- what AMTECH is and why this product is powerful;
-- how to distinguish `wiki/` product truth from `mvp-build/` implementation truth;
-- the current Work Surface source map;
-- current styling and component scaffolding;
-- Hermes GUI and generative-UI research;
-- experimental future surface ideas: SMS signed previews, preview thumbnails, image/video/media artifacts, task progress, reports, and cross-surface representations;
-- how to write memories and handoffs while UI work happens in parallel with MVP functionality.
+- the Avery-first owner MVP direction;
+- the source-wired Home / Talk / Proof / Connected implementation;
+- current fixture-guarded screenshots;
+- the UX research ledger, implementation coverage audit, and fixture/production policy;
+- the generative-UI frontier and post-release UI roadmap.
+
+The older `mvp-build/ui-handoff/` packet has been moved to
+`mvp-build/docs/archive/ui-handoff-2026-07-14/`. Treat it as historical reference only, not as a
+starting point or source of current design direction.
 
 The immediate UI priority is the web Work Surface. SMS, signed preview links, media/video previews, admin, and future desktop clients should be designed as renderers of the same underlying work/resources/actions, but the web client is the richest and most urgent place to make the product understandable.
 
@@ -129,9 +132,9 @@ It contains:
 - `packages/agent-template/` - AMTECH-authored Hermes profile package and employee workspace.
 - `infra/` - Caddy, Hermes runbook, acceptance scripts, ops scripts.
 - `tests/` - unit, integration, and golden-path acceptance docs.
-- `docs/` - admin and metering architecture, the QuickBooks connector design, and the production deploy readiness review.
+- `docs/` - active UX system, admin and metering architecture, the QuickBooks connector design, production deploy readiness review, and archived docs.
 - `memory/` - durable agent handoffs and implementation decisions.
-- `ui-handoff/` - UI contributor orientation, source map, product grounding, research index, experimental surface backlog, and parallel-work protocol.
+- `ui-redesign/` - active owner MVP UI redesign packet and screenshots.
 
 Use `mvp-build/` to understand **what is actually wired**, what commands to run, what source files to edit, and what proof exists. If the wiki vision and source reality differ, check `mvp-build/CODEGRAPH.md`, `mvp-build/memory/MEMORY.md`, newest memory notes, tests, and source before claiming status.
 

@@ -1,6 +1,6 @@
 # Research And Principles
 
-Status: active
+Status: archived reference
 
 This is the UI research index for AMTECH's AI Employee surfaces. It is meant to keep UI work aligned with the product architecture while leaving visual direction open.
 

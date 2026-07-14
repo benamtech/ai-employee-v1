@@ -92,9 +92,11 @@ profile-package / `SOUL.md` / skills would we reuse vs re-derive for a first-pri
 rotation, connector-agnostic capabilities, operator modes) map onto this per-session form employee? What
 does this say about the product being **one materialization layer over Hermes** serving many shapes?
 
-**Method:** read-only research of `apps/`, `packages/`, `infra/`, the `wiki/MVP/` design docs, and the
-`ui-handoff/` packet; use subagents for broad sweeps and keep only findings. Then write the plan/research
-doc + a short "what this reveals about the product" section. Ground every claim in a file you read.
+**Method:** read-only research of `apps/`, `packages/`, `infra/`, the `wiki/MVP/` design docs, the active
+UX system at `docs/ux/`, and the active owner UI packet at `ui-redesign/`; use subagents for broad sweeps
+and keep only findings. The archived `docs/archive/ui-handoff-2026-07-14/` packet may be checked for
+provenance, but it is not the current UI direction. Then write the plan/research doc + a short "what this
+reveals about the product" section. Ground every claim in a file you read.
 
 ## Wrap-up
 

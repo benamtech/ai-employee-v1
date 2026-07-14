@@ -1,8 +1,17 @@
 # UI Handoff
 
-Status: active
+Status: archived reference
 
-Purpose: this is the canonical handoff packet for a UI/design implementation agent taking AMTECH from functional MVP surfaces to a coherent product experience. Treat it as a working prompt, source map, and product brief for redesigning and implementing the browser-facing UI across the project.
+Superseded on 2026-07-14 by:
+
+1. `../../ux/`
+2. `../../../ui-redesign/`
+
+Do not use this packet as the current UI starting point. It is preserved for provenance, older source
+inventory, and historical design context. The active owner MVP direction is Avery-first Home / Talk /
+Proof / Connected, documented in `ui-redesign/`, with cross-surface UX organization in `docs/ux/`.
+
+Historical purpose: this was the canonical handoff packet for a UI/design implementation agent taking AMTECH from functional MVP surfaces to a coherent product experience. Treat it as a working prompt, source map, and product brief for redesigning and implementing the browser-facing UI across the project.
 
 North star: **the Macintosh of AI agents for the modern American business**. AMTECH should feel like a capable employee inside a precise, legible business machine - not a chatbot skin, developer dashboard, or collection of disconnected automations.
 
