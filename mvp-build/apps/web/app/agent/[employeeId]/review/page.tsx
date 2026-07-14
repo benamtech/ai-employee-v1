@@ -126,11 +126,11 @@ function fixtureResource(token: string): WorkResource {
     return {
       resource_type: "artifact",
       resource_id: "art_fixture_estimate",
-      title: "Estimate for Jane Miller",
+      title: "Riverbend estimate",
       subtitle: "Estimate",
-      amount: "$4,200.00",
+      amount: "$9,280.00",
       body_kind: "document",
-      body_html: "<!doctype html><meta charset='utf-8'><body style=\"font-family:system-ui;padding:16px;color:#23211c\"><table style='width:100%;border-collapse:collapse'><tr><td style='padding:6px'>Prep and protect</td><td style='padding:6px;text-align:right'>$650</td></tr><tr><td style='padding:6px'>Walls and trim, two coats</td><td style='padding:6px;text-align:right'>$2,950</td></tr><tr><td style='padding:6px'>Materials and cleanup</td><td style='padding:6px;text-align:right'>$600</td></tr><tr><td style='padding:6px;font-weight:700'>Total</td><td style='padding:6px;text-align:right;font-weight:700'>$4,200</td></tr></table></body>",
+      body_html: "<!doctype html><meta charset='utf-8'><body style=\"font-family:system-ui;padding:16px;color:#101418\"><table style='width:100%;border-collapse:collapse'><tr><td style='padding:8px;border-bottom:1px solid #d8e0df'>Hallway wall repair and prep</td><td style='padding:8px;border-bottom:1px solid #d8e0df;text-align:right'>$2,140</td></tr><tr><td style='padding:8px;border-bottom:1px solid #d8e0df'>Two-coat repaint, common areas</td><td style='padding:8px;border-bottom:1px solid #d8e0df;text-align:right'>$5,720</td></tr><tr><td style='padding:8px;border-bottom:1px solid #d8e0df'>Stairwell touchup allowance</td><td style='padding:8px;border-bottom:1px solid #d8e0df;text-align:right'>$1,420</td></tr><tr><td style='padding:8px;font-weight:700'>Total</td><td style='padding:8px;text-align:right;font-weight:700'>$9,280</td></tr></table></body>",
       actions: [
         { action: "respond", label: "Reply", style: "default" },
         { action: "acknowledge", label: "Got it", style: "default" },
@@ -140,21 +140,22 @@ function fixtureResource(token: string): WorkResource {
   return {
     resource_type: "approval",
     resource_id: "appr_fixture",
-    title: "Needs your decision",
-    subtitle: "Send estimate email",
-    amount: "$4,200.00",
-    recipient: "Jane Miller",
+    title: "Send Riverbend reply",
+    subtitle: "Customer-facing approval",
+    amount: "$9,280.00",
+    recipient: "Melissa Grant",
     risk: "medium",
-    summary: "Send the kitchen repaint estimate to Jane so she can review and put down a deposit.",
+    summary: "Send the Riverbend hallway repaint reply and estimate so the customer can review scope, schedule, and deposit terms.",
     body_kind: "structured",
     fields: [
-      { label: "Customer", value: "Jane Miller" },
-      { label: "Job", value: "Kitchen repaint" },
+      { label: "Customer", value: "Melissa Grant" },
+      { label: "Job", value: "Riverbend hallway repaint" },
+      { label: "Held because", value: "Customer-facing send" },
     ],
     actions: [
-      { action: "approve", label: "Approve", style: "primary", gated: true },
+      { action: "approve", label: "Approve send", style: "primary", gated: true },
       { action: "reject", label: "Decline", style: "danger", gated: true },
-      { action: "respond", label: "Reply", style: "default" },
+      { action: "respond", label: "Tweak with Avery", style: "default" },
     ],
   };
 }

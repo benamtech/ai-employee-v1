@@ -1,12 +1,12 @@
 # mvp-build — the AMTECH AI Employee MVP build
 
-Status: **the second-half plan's product surfaces are `source-wired` — built and green against the local suites (`typecheck` / `test:unit` 76 files / 488 tests / `build` / `lint`) — spanning the web Work Surface, the SMS ambient inbox + signed Review, the tool-agnostic materialization/capability layer (Connector Center + resurfacing), Gmail/Stripe/QuickBooks connectors, MCP-UI cards, and an internal operator admin console. The production orchestration substrate is now proven on a real Docker host: the docker-compose core (`manager`/`web`/`caddy`) builds/starts/healthchecks, and per-employee Hermes containers provision/teardown/reinstate + run concurrently with Docker-DNS + Caddy routing across the fleet (`deploy-smoke` 8/8, `caddy-proof`, `capacity` tier 5, lifecycle). The remaining gap is running it on the real VPS (with crash/reboot recovery + durability/observability + egress `--apply`) and live provider/runtime acceptance (incl. the LLM tool loop, which stays out of scope here). Admin-panel polish and billing are parked. See [`CODEGRAPH.md`](CODEGRAPH.md) §3 for authoritative per-phase status.** This is where the AMTECH AI Employee MVP gets built.
+Status: **the second-half plan's product surfaces are `source-wired` and the active owner MVP UI is now Avery-first — Home, Talk, Proof, Connected, Tell Avery, Needs your say, quiet Watching, exact approvals, and proof — with local fixture/headed UI proof. The broader product remains source-wired, not trial-ready: SMS signed Review, materialization/capability contracts, Connector Center/resurfacing, Gmail/Stripe/QuickBooks seams, MCP-UI cards, admin/ops scaffold, metering foundation, context-engineering substrate, and the Docker/Caddy runtime substrate are in source or locally proven as noted, but the remaining gap is the real VPS plus live provider/runtime acceptance (incl. funded provider-backed Hermes tool-loop proof). Admin-panel polish and billing remain parked. See [`docs/state-of-progress-2026-07-14.md`](docs/state-of-progress-2026-07-14.md) and [`CODEGRAPH.md`](CODEGRAPH.md) §3 for authoritative current status.** This is where the AMTECH AI Employee MVP gets built.
 
 **Agent? Start with [`../identity.md`](../identity.md), [`../CODEGRAPH.md`](../CODEGRAPH.md), [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the current second-half plan **[`second-half-plan/`](second-half-plan/)**, and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol).
 
 Current second-half plan: **[`second-half-plan/`](second-half-plan/)**. Current wiki companion: **[`../wiki/MVP/second-half-current-and-future-state.md`](../wiki/MVP/second-half-current-and-future-state.md)**. Older reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)**. Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**.
 
-For UI contributors, start with **[`ui-handoff/`](ui-handoff/)** after the core orientation docs. It explains the product grounding, current UI source map, research/principles, future surface experiments, and parallel working protocol.
+For UI contributors, start with the active **[`ui-redesign/`](ui-redesign/)** packet after the core orientation docs. It supersedes the older dashboard/agent-desktop/chat-native directions and includes screenshots of the current Avery-first owner MVP route. The historical **[`ui-handoff/`](ui-handoff/)** packet remains useful for source maps and broader surface inventory.
 
 UI contributors can work without full infrastructure:
 
@@ -54,7 +54,7 @@ AMTECH is not selling a model, an estimate generator, or a developer dashboard. 
 
 The UI job is to make that power visible and safe:
 
-- Web is the primary high-fidelity employee desk.
+- Web is the primary high-fidelity Avery interaction surface.
 - SMS is the ambient inbox and approval path.
 - Signed links are scoped mobile previews/actions.
 - Admin is the operator proof/repair surface.
@@ -79,8 +79,9 @@ Use `../wiki/` for product vision, strategy, research, and rationale. Use this `
 - Phase 1 acceptance harness exists and is locally verified; runtime/scheduler productionization is source-wired.
 - Source-wired live-employee spine: real Hermes Sessions client, DB-backed per-employee turn queue, generic two-door
   event ingress, Channel/Session/Presence router, and Gmail-reply → live wake → validated work-event descriptors.
-- Source-wired owner Work Surface (second-half): a multi-region employee desk (Today, Chat, Jobs, Tasks, Outputs,
-  Connected, Abilities, Activity, Settings-lite) with persisted conversation, live SSE + poll fallback, and a preview pane.
+- Source-wired Avery-first owner MVP UI (second-half Phase 2 reset): Home / Talk / Proof / Connected with Tell Avery,
+  inline Needs your say exact review, quiet Watching, Recent proof, optional work sheet, persisted conversation, live
+  SSE + poll fallback, and durable screenshots in `ui-redesign/screenshots/`.
 - Source-wired SMS ambient inbox + signed mobile Review (`/agent/[id]/review`): signed, scoped, expiring
   preview/action links render a `WorkResource`; approving carries the work forward to execution.
 - Source-wired materialization/capability layer: `SurfaceEnvelope`/`WorkResource`/`WorkAction`/`CapabilityGraphNode`,
@@ -159,8 +160,9 @@ tests/
 
 This section is the build log for the base whole-product loop (Phases 0-2 of the earlier reconciled plan) and stops
 at that era. It is historical detail, not the current frontier — for **current status across all work read
-[`CODEGRAPH.md`](CODEGRAPH.md) §3 and the newest [`memory/`](memory/) handoff**, and see "What works now" above for the
-second-half surfaces (web desk, SMS Review, materialization/Connector Center/resurfacing, QuickBooks, MCP-UI, admin)
+[`CODEGRAPH.md`](CODEGRAPH.md) §3, [`docs/state-of-progress-2026-07-14.md`](docs/state-of-progress-2026-07-14.md),
+and the newest [`memory/`](memory/) handoff**, and see "What works now" above for the
+second-half surfaces (Avery-first owner UI, SMS Review, materialization/Connector Center/resurfacing, QuickBooks, MCP-UI, admin)
 that now sit on top of this base. Migrations have since advanced to `0026`.
 
 Phase 0 foundation remains in place: full data model, Manager tool surface, security helpers, provider setup inventory, Hermes/Caddy runbook, and unit harness.
@@ -189,7 +191,9 @@ Phase 5 closes the loop and adds the first scheduler seam:
 
 - `set_internal_reminder` now takes an owner-confirmation gate (`approval_id` → `set_job_reminder`) and an employee-written `message`, creating `job_commitments` + `reminders` rows (additive migration `0006_phase5_reminders.sql`).
 - `dispatch_due_reminders` fires due reminders by SMS (idempotent) and `renew_expiring_watches` renews Gmail watches before expiry.
-- The owner Work Surface (`apps/web/app/agent/[employeeId]/`) was rebuilt into a descriptor-driven coworker surface: a daily brief, job folders (estimate→reply→deposit→reminder), notify/question/review cards with an iterative "no, tweak this" feedback loop, the confirmation gate as a decision card, per-`DeliverableType` renderers, and quiet provider-proof receipts — no raw payloads, no tool names.
+- The owner Work Surface (`apps/web/app/agent/[employeeId]/`) has since been rebuilt again into the active Avery-first
+  MVP shape: Home / Talk / Proof / Connected, Tell Avery, inline Needs your say, quiet Watching, exact approval review,
+  and Recent proof. The older descriptor-driven coworker surface and multi-region employee desk are historical context.
 - Phase 6/7 source seams add `0007_phase6_repair_and_jobs.sql`, repair tools (`replay_*`, relink, duplicate, redeliver, suppress, regenerate onboarding link), safe audit redaction, source suppression, triage/batching, stored `[SILENT]` daily briefs, auto-bound approvals for gated work cards, `deliver_only` vs `wake_employee` routing, a generic event-source registry, and a Work Surface SSE endpoint with polling fallback.
 
 New-era Phase 2 runtime/scheduler productionization is source-wired:
@@ -240,6 +244,6 @@ npm run acceptance:preflight # Phase 1: which acceptance runs are runnable with 
 npm run acceptance:report    # Phase 1: run the 8 verifiers, write infra/acceptance/reports/
 ```
 
-The `ui:*` commands use fixture data and avoid Manager, Supabase, Docker, Hermes, provider credentials, and model calls. `ui:test` warms the fixture Work Surface route and writes desktop/mobile screenshots under `infra/.local/ui-fixtures/`.
+The `ui:*` commands use fixture data and avoid Manager, Supabase, Docker, Hermes, provider credentials, and model calls. `ui:test` warms the fixture Work Surface route and writes screenshots under `infra/.local/ui-fixtures/`; current durable packet screenshots are copied into `ui-redesign/screenshots/`.
 
 > Before building, read [`../identity.md`](../identity.md) and [`../CODEGRAPH.md`](../CODEGRAPH.md), then `wiki/MVP/`.

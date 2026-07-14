@@ -1,10 +1,22 @@
 # AI-Native Work Surface Research
 
-**Status: active** · _Created 2026-07-14. This is the canonical research note for making AMTECH feel like a new kind of business software: a chat-native operating surface for AI employees, not a chatbot bolted onto dashboards._
+**Status: active** · _Created 2026-07-14; implementation note added 2026-07-14. This is the canonical research note for making AMTECH feel like a new kind of business software: an AI-native operating surface for AI employees, not a chatbot bolted onto dashboards._
+
+## 2026-07-14 Implementation Note
+
+This research now resolves into the active Avery-first owner MVP UI in `mvp-build/ui-redesign/` and
+`mvp-build/apps/web/app/agent/[employeeId]/`. The current implementation is not the older dashboard,
+multi-region employee desk, or rejected chat-native agent desktop. It is Home / Talk / Proof / Connected,
+with Tell Avery as the command language, Needs your say as the exact permission moment, quiet Watching
+as ambient awareness, and proof available without making the owner manage a ledger.
+
+The underlying research lesson still holds: chat is the command language, not the whole product. The
+source-wired UI now makes Avery the primary interface while preserving work objects, approvals, proof,
+and connected-account capability contracts underneath.
 
 ## The design problem
 
-The current Work Surface is functional, but the product can still read as **AI chat plus a new dashboard to learn**. That undersells what AMTECH has actually built. The employee can receive business events, reason over tools and context, produce artifacts, ask for approval, leave proof, and continue work across SMS, web, signed links, and admin surfaces. Those are not disconnected dashboard panels. They are pieces of one work environment.
+The pre-reset Work Surface was functional, but the product could still read as **AI chat plus a new dashboard to learn**. That undersold what AMTECH had actually built. The employee can receive business events, reason over tools and context, produce artifacts, ask for approval, leave proof, and continue work across SMS, web, signed links, and admin surfaces. Those are not disconnected dashboard panels. They are pieces of one work environment.
 
 The target is closer to an **operating surface for a business employee**:
 

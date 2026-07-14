@@ -1,6 +1,6 @@
 # AI Employee Second-Half Current And Future State
 
-**Status: active** · _Created 2026-07-09; brought current 2026-07-11. This is the wiki companion to [`../../mvp-build/second-half-plan/`](../../mvp-build/second-half-plan/): it summarizes what is actually built in `mvp-build/` today and what remains before free trials and paid pilots. It does not replace implementation records; it points agents to the plan and explains the product architecture. The authoritative per-phase status is `mvp-build/CODEGRAPH.md` §3._
+**Status: active** · _Created 2026-07-09; brought current 2026-07-14. This is the wiki companion to [`../../mvp-build/second-half-plan/`](../../mvp-build/second-half-plan/): it summarizes what is actually built in `mvp-build/` today and what remains before free trials and paid pilots. It does not replace implementation records; it points agents to the plan and explains the product architecture. The authoritative per-phase status is `mvp-build/CODEGRAPH.md` §3 and [`../../mvp-build/docs/state-of-progress-2026-07-14.md`](../../mvp-build/docs/state-of-progress-2026-07-14.md)._
 
 ## Why This Exists
 
@@ -12,7 +12,7 @@ The core conclusion from the Hermes Workspace/WebUI/Desktop research still holds
 
 The AI Employee is usable through web, SMS, signed preview links, and (as contracts) admin and future desktop/Deno clients, with all of those surfaces rendering the same underlying employee state.
 
-## Current Application State (2026-07-11)
+## Current Application State (2026-07-14)
 
 Backend / control plane — `source-wired`:
 
@@ -25,7 +25,10 @@ Backend / control plane — `source-wired`:
 
 Owner surfaces — now `source-wired` (live proof pending), not "future":
 
-- **Web Work Surface is a multi-region employee desk**: Today, Chat, Jobs, Tasks, Outputs, Connected, Abilities, Activity, Settings-lite, and a preview pane, backed by a real Manager read model with SSE + poll fallback.
+- **Web owner MVP UI is Avery-first**: Home, Talk, Proof, and Connected, centered on Tell Avery, Needs your say,
+  quiet Watching, exact approvals, and proof. This supersedes the older multi-region employee desk and rejected
+  chat-native agent desktop directions. The route is backed by the same Manager read model, persisted conversation,
+  SSE + poll fallback, `WorkResource` / `WorkAction` review contracts, and local fixture/headed UI proof.
 - **SMS ambient inbox + signed mobile Review**: a signed, scoped, expiring preview/action link mints a `WorkResource` and renders it at `/agent/[employeeId]/review` — a mobile-first page with sticky approve/reject/reply, inline media/document preview, and quiet receipts. SMS carries the link, not a rich payload. Owner approval now wakes the employee through the normal owner-turn path so approved work actually proceeds.
 - **Tool-agnostic Connector Center + resurfacing**: `Connected` renders generic connected-business cards (`ConnectionSurface`) before raw connector rows; Today/Daily Brief compute "needs attention" from a `ResurfaceItem` projection over tasks and surface envelopes. This is the product use of the Phase 4 materialization/capability layer — the product thinks in "connected business capabilities," not Gmail/Stripe/QBO rows.
 - **MCP-UI generative cards**: the agent emits a typed `table`/`schedule`/`diff`/`form` view that Manager compiles into a sandboxed `ui://` resource, with every action routed back through the approval gate.
@@ -42,6 +45,15 @@ Still incomplete:
 
 - **Live provider/runtime acceptance**: no real Twilio/Gmail/Stripe/Intuit/Hermes proof ids yet. The employee **LLM tool loop** closes on a real provider-backed Hermes model when funded creds land (the throwaway local model bridge is dead — not used, not fixed); it is a separate concern from the infra layer.
 - **Real-VPS run + durability/egress**: the orchestration substrate is proven on a real Docker host locally, but crash/**reboot auto-recovery** (the `--restart=unless-stopped` policy is set + verified, but a sandboxed dev daemon doesn't fire restart-on-kill), **backups/DR + observability**, egress **`--apply`** (needs root), and a **real capacity number** (needs a ~64GB node) still have to be proven on the VPS.
+
+Recent context-engineering substrate — `source-wired`, live Hermes/provider proof pending:
+
+- **CE-1**: business brain is an integrated reference/index layer, with Hermes-native memory files and a once-per-session
+  Manager primer rather than per-turn digest injection.
+- **CE-2/CE-3**: compression/delegation/hook config, the `amtech-hygiene` plugin, data-driven event routing, and Manager-owned
+  session rotation/carryover are in source.
+- **CE-4**: connector custody/readiness is generalized through a shared registry; direct read-only MCP projection is allowed
+  where safe, while write/money/customer-facing work stays Manager-mediated.
 
 ## Production Readiness: Substrate Proven On-Host (2026-07-11)
 
@@ -81,19 +93,19 @@ This document updates the older Work Surface and graph-materialization framing:
 - [`principle-deliverable-driven-surfaces.md`](../principle-deliverable-driven-surfaces.md) remains the type-system principle for rendering deliverables.
 - [`../../mvp-build/second-half-plan/surface-research-hermes-gui-and-materialization.md`](../../mvp-build/second-half-plan/surface-research-hermes-gui-and-materialization.md) is the newest detailed research addendum.
 
-## Phase Map (status as of 2026-07-11)
+## Phase Map (status as of 2026-07-14)
 
 | Phase | What Changes | Status |
 |---|---|---|
 | 0 | Current-state handoff | done |
 | 1 | Preserve and close live gate | `source-wired`; live gate blocked on model/provider path |
-| 2 | Owner Work Surface redesign | `source-wired`; live/browser proof pending |
+| 2 | Owner Work Surface redesign | Avery-first UI `source-wired`; local fixture/headed proof passed; live provider/runtime proof pending |
 | 3 | SMS ambient inbox and links | `source-wired`; live SMS proof pending |
 | 4 | Tool-agnostic capability/rendering | `source-wired` (Connector Center + resurfacing are its product use) |
 | 5 | Trial ops/admin/billing | `source-wired`; billing is scaffold only; live operator proof pending |
 | 6 | Free trial/paid pilot readiness | planned; deploy foundation proven on-host — now gated on the real-VPS run + live provider proof |
 
-The product-surface phases (2–4) are built and the production deploy foundation is proven on a real Docker host. What remains before a real owner can be handed a trial is the **real-VPS run** (crash/reboot recovery, durability/observability, egress apply, a real capacity number) and **live provider proof** (incl. the LLM tool loop).
+The product-surface phases (2–4) are built and the production deploy foundation is proven on a real Docker host. Phase 2 now means the Avery-first owner UI, not the older desk. What remains before a real owner can be handed a trial is the **real-VPS run** (crash/reboot recovery, durability/observability, egress apply, a real capacity number) and **live provider proof** (incl. the LLM tool loop).
 
 ## Next Concrete Move
 

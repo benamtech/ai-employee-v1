@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ResourcePayload } from "../../apps/web/app/agent/[employeeId]/surface-types";
+import { fixtureResourcePayload } from "../../apps/web/app/agent/[employeeId]/fixtures";
 import { defaultSelection, labelConnector, navCounts, previewItem, statusTone } from "../../apps/web/app/agent/[employeeId]/lib/surface-model";
 
 function payload(overrides: Partial<ResourcePayload> = {}): ResourcePayload {
@@ -50,11 +51,11 @@ describe("Work Surface model", () => {
       abilities: [{ id: "ability_1", label: "Email", category: "communication", status: "ready", summary: "x", source: "connector" }],
     }));
     expect(counts.today).toBe(1);
-    expect(counts.chat).toBe(1);
-    expect(counts.tasks).toBe(2);
-    expect(counts.outputs).toBe(1);
+    expect(counts.ask).toBe(1);
+    expect(counts.work).toBe(2);
+    expect(counts.library).toBe(1);
     expect(counts.connected).toBe(1);
-    expect(counts.abilities).toBe(1);
+    expect(counts.history).toBe(0);
   });
 
   it("translates connector and status labels into owner-facing buckets", () => {
@@ -63,5 +64,15 @@ describe("Work Surface model", () => {
     expect(statusTone("needs_connection")).toBe("warn");
     expect(statusTone("unhealthy")).toBe("bad");
     expect(statusTone("ready")).toBe("good");
+  });
+
+  it("keeps the Avery-first fixture focused on needs, watching, approvals, and proof", () => {
+    const res = fixtureResourcePayload("emp_ui_fixture");
+    expect(res.messages.some((message) => message.body.includes("Avery,"))).toBe(true);
+    expect(res.resurface_items?.some((item) => item.title.includes("Riverbend reply"))).toBe(true);
+    expect(res.connection_surfaces?.filter((connection) => connection.state === "working").length).toBeGreaterThanOrEqual(2);
+    expect(res.work_events.some((event) => event.work_event_descriptor?.deliverable?.view?.kind === "table")).toBe(true);
+    expect(res.surface_envelopes?.some((envelope) => envelope.safety.requires_approval && envelope.resource?.actions.some((action) => action.gated))).toBe(true);
+    expect(res.work_events.some((event) => event.work_event_descriptor?.proof?.fixture === "avery_home")).toBe(true);
   });
 });

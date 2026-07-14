@@ -52,31 +52,35 @@ try {
   const url = `${baseUrl}/agent/${employeeId}`;
   await waitForAppRoute(url);
   await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  await page.getByText("Work Surface").waitFor({ timeout: 20_000 });
-  await page.getByText("fixture data").waitFor({ timeout: 10_000 });
-  await page.getByText("Estimate ready for Jane").waitFor({ timeout: 10_000 });
+  await page.getByText("Avery is here.").waitFor({ timeout: 20_000 });
+  await page.getByRole("heading", { name: "Needs your say" }).waitFor({ timeout: 10_000 });
+  await page.getByText("Riverbend reply is ready").waitFor({ timeout: 10_000 });
 
-  await page.getByRole("button", { name: /Outputs/ }).click();
-  await page.getByText("Before/after gallery concept").waitFor({ timeout: 10_000 });
-
-  await page.getByRole("button", { name: /Chat/ }).click();
-  await page.getByPlaceholder("Text your employee...").fill("Add a fixture note for the UI review.");
-  await page.getByRole("button", { name: "Send" }).click();
-  await page.getByText("UI fixture reply").waitFor({ timeout: 10_000 });
-
-  await page.getByRole("button", { name: /Today/ }).click();
-  const janeReview = page.locator("article").filter({ hasText: "Estimate ready for Jane" }).first();
-  await janeReview.getByRole("button", { name: "Approve" }).click();
-  await janeReview.getByText("Sent to your employee").waitFor({ timeout: 10_000 });
+  await page.locator(".featured-review").getByRole("button", { name: "Approve send" }).waitFor({ timeout: 10_000 });
 
   const screenshotDir = join(root, "infra/.local/ui-fixtures");
   await mkdir(screenshotDir, { recursive: true });
   await page.screenshot({ path: join(screenshotDir, "work-surface-desktop.png"), fullPage: true });
 
+  await page.getByRole("button", { name: "Talk", exact: true }).click();
+  await page.getByPlaceholder("Tell Avery what happened or what you want done...").fill("Add a fixture note for the UI review.");
+  await page.getByRole("button", { name: "Send to Avery", exact: true }).click();
+  await page.getByText("I picked that up.").waitFor({ timeout: 10_000 });
+
+  await page.getByRole("button", { name: "Home", exact: true }).click();
+  await page.locator(".featured-review").getByRole("button", { name: "Approve send" }).scrollIntoViewIfNeeded();
+  await page.locator(".featured-review").getByRole("button", { name: "Approve send" }).click();
+  await page.locator(".avery-banner").getByText("Approved. Avery can continue.").waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Connected", exact: true }).click();
+  await page.getByRole("heading", { name: "What Avery can do" }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Proof", exact: true }).click();
+  await page.locator(".proof-list").getByText("Approved. Avery can continue.").waitFor({ timeout: 10_000 });
+  await page.screenshot({ path: join(screenshotDir, "proof-desktop.png"), fullPage: true });
+
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await mobile.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  await mobile.getByText("Work Surface").waitFor({ timeout: 20_000 });
-  await mobile.screenshot({ path: join(screenshotDir, "work-surface-mobile.png"), fullPage: true });
+  await mobile.getByText("Avery is here.").waitFor({ timeout: 20_000 });
+  await mobile.screenshot({ path: join(screenshotDir, "work-surface-mobile.png"), fullPage: false });
   await mobile.close();
 
   // Signed mobile review surface (Phase 3), fixture mode — no Manager/creds.
@@ -84,8 +88,8 @@ try {
   const review = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
   await waitForAppRoute(reviewUrl);
   await review.goto(reviewUrl, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  await review.getByText("Needs your decision").waitFor({ timeout: 20_000 });
-  await review.getByRole("button", { name: "Approve" }).waitFor({ timeout: 10_000 });
+  await review.getByText("Send Riverbend reply").waitFor({ timeout: 20_000 });
+  await review.getByRole("button", { name: "Approve send" }).waitFor({ timeout: 10_000 });
   await review.screenshot({ path: join(screenshotDir, "review-mobile.png"), fullPage: true });
   await review.close();
 
