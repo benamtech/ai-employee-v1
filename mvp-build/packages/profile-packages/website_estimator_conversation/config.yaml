@@ -1,0 +1,70 @@
+# Hermes profile config (template) — rendered per client by provision_employee.
+# Spec: product-ai-employee-context.md ("the architecture, as built").
+
+profile:
+  id: "client_{{CLIENT_ID}}"
+  name: "{{EMPLOYEE_NAME}}"
+
+# Model — rendered per employee by profile-renderer. Production ships
+# claude-opus-4-8; local no-key testing (HERMES_MODEL_PROVIDER=custom) points this
+# at the agent-in-the-loop bridge so the warm Haiku worker is the LLM. See
+# infra/local/agent-model-bridge.md.
+{{MODEL_CONFIG}}
+
+terminal:
+  # Hermes' own terminal/file execution backend. The employee already runs inside
+  # its Manager-provided isolation runtime (a Docker container), so Hermes executes
+  # in-process ("local") — the container IS the sandbox. Nesting Docker here would
+  # need a socket that isn't mounted and silently gates terminal/file tools off.
+  # The Manager's runtime_backend (docker) remains the real blast-radius tier.
+  backend: "{{TERMINAL_BACKEND}}"
+  home_mode: "profile"
+  cwd: "{{WORKSPACE_DIR}}"
+
+# Toolsets Hermes exposes to this employee on the api_server platform. Without
+# this block Hermes falls back to terminal/file/web only (a nearly tool-less
+# frontier agent). Rendered per employee from the safe-set policy in
+# packages/shared/src/platform-toolsets.ts — tied to runtime-backend blast
+# radius + provider-key availability. Money/customer-facing safety stays
+# enforced by the Manager approval gate, never by omitting a tool here.
+platform_toolsets:
+  api_server: {{PLATFORM_TOOLSETS}}
+
+# The AMTECH Manager control plane, exposed to this employee as a native MCP
+# server. Enabled mcp_servers auto-attach to the api_server platform's tools
+# (Hermes tools_config), so the employee calls Manager tools (estimates,
+# approvals, connectors, reminders) natively instead of parsing a prose HTTP
+# contract. Auth rides a scoped per-employee MCP bearer; Manager derives
+# account_id/employee_id from that credential, not from caller-supplied headers.
+mcp_servers:
+  amtech_manager:
+    url: "{{MANAGER_MCP_URL}}"
+    headers:
+      Authorization: "Bearer {{MANAGER_MCP_TOKEN}}"
+  # CE-4 custody policy: ONLY read-only connectors are wired directly here. Any
+  # write/money/customer-facing connector is refused a direct path at render time
+  # (renderableDirectMcpConnectors) and stays behind amtech_manager + the approval
+  # gate + egress default-deny. Renders empty until a read-only connector ships.
+{{CONNECTOR_MCP_SERVERS}}
+
+# CE-1 primer hook + CE-2 hooks (rendered together). The tool-output hygiene
+# transforms are a Hermes plugin (plugins/amtech-hygiene), not shell hooks.
+{{HOOKS}}
+
+# CE-2 context compression — the safety net. Always enabled; CE-3 session
+# rotation is tuned to trip BEFORE this lossy compaction. Rendered model-agnostic.
+{{COMPRESSION_CONFIG}}
+
+# CE-2 delegation — lets the employee run heavy sub-work in an isolated child
+# context (delegate_task), so only the bounded child summary re-enters this
+# conversation. In-turn context isolation; children inherit the employee model.
+{{DELEGATION_CONFIG}}
+
+gateway:
+  sms:
+    # Manager owns Twilio ingress, sender identity, delivery decisions, and approval gates.
+    enabled: false
+
+# tool_progress off for SMS — acknowledge, then deliver; never narrate tool steps.
+ui:
+  tool_progress: "off"

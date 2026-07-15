@@ -39,6 +39,20 @@ function skipSmsProvisioning(): boolean {
   return skip;
 }
 
+export function smsPlan(req: ProvisionerRequest): {
+  enabled: boolean;
+  configure_webhook: boolean;
+  send_first_message: boolean;
+} {
+  const sms = req.options?.sms;
+  const enabled = sms?.enabled ?? true;
+  return {
+    enabled,
+    configure_webhook: enabled && (sms?.configure_webhook ?? true),
+    send_first_message: enabled && (sms?.send_first_message ?? true),
+  };
+}
+
 export function registerProvisionerRoutes(app: Hono): void {
   app.get("/provision/health", (c) => c.json({ status: "ok" }));
 
@@ -55,10 +69,13 @@ export function registerProvisionerRoutes(app: Hono): void {
       logs.push(`caddy:${caddy}`);
 
       const skipSms = skipSmsProvisioning();
-      const smsNumber = skipSms ? null : employeeNumber();
-      if (smsNumber) {
+      const plan = skipSms ? { enabled: false, configure_webhook: false, send_first_message: false } : smsPlan(req);
+      const smsNumber = plan.enabled ? employeeNumber() : null;
+      if (smsNumber && plan.configure_webhook) {
         const webhook = await setIncomingSmsWebhook(smsNumber, req.params.webhook_url);
         logs.push(`twilio_webhook:${webhook.phone_number_sid}`);
+      } else if (smsNumber) {
+        logs.push("twilio_webhook:skipped");
       } else {
         logs.push("sms:skipped");
       }
@@ -66,7 +83,7 @@ export function registerProvisionerRoutes(app: Hono): void {
       const runtime = await runRuntimeStart(rendered.generated_path);
       logs.push(`runtime:${runtime}`);
 
-      const first = smsNumber
+      const first = smsNumber && plan.send_first_message
         ? await sendSms({
           to: req.params.owner_phone_e164,
           from: smsNumber,
@@ -74,6 +91,7 @@ export function registerProvisionerRoutes(app: Hono): void {
         })
         : null;
       if (first) logs.push(`first_sms:${first.sid}`);
+      else if (smsNumber) logs.push("first_sms:skipped");
 
       const result: ProvisionerResult = {
         status: "ok",

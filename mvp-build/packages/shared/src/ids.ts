@@ -82,6 +82,10 @@ export const ID_PREFIX = {
   adminAction: "adact",
   qboPendingWrite: "qbpw",
   inboundQboEvent: "iqe",
+  publicEstimatorSession: "pes",
+  publicEstimatorEvent: "pevt",
+  publicEstimatorArtifact: "peart",
+  publicEstimatorEmailSend: "pemail",
 } as const;
 
 export type IdPrefix = (typeof ID_PREFIX)[keyof typeof ID_PREFIX];

@@ -50,6 +50,8 @@ describe("Pod Alpha operator proof scripts", () => {
     expect(src).toContain("mcpToolList(minted.token)");
     expect(src).toContain("needs_reprovision=false");
     expect(src).toContain("raw_token_logged: false");
+    expect(src).toContain("provisioner_result");
+    expect(src).toContain("REPROVISION_SMS_ENABLED");
     expect(src).not.toMatch(/console\.log\([^)]*minted\.token/);
   });
 

@@ -195,6 +195,7 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     USER_SEED: memories.user_md,
     MANAGER_API_ORIGIN: managerOrigin,
     MANAGER_MCP_TOKEN: renderSecrets.manager_mcp_token ?? "",
+    HERMES_DOCKER_NETWORK: process.env.HERMES_DOCKER_NETWORK ?? "",
     // Model wiring. Local no-key testing (HERMES_MODEL_PROVIDER set) points the
     // employee at the bridge + a dummy OpenAI-compatible key; production leaves
     // these empty (real provider key is a Manager-injected secret ref).

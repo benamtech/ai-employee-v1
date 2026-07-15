@@ -93,6 +93,13 @@ export interface ProvisionerRequest {
   manifest_id: string;
   profile_package_key: string;
   params: ProfileBuildParams;
+  options?: {
+    sms?: {
+      enabled?: boolean;
+      configure_webhook?: boolean;
+      send_first_message?: boolean;
+    };
+  };
   render_secrets?: {
     manager_mcp_token?: string;
   };

@@ -76,15 +76,29 @@ function readProfileParams(generatedPath) {
   return JSON.parse(readFileSync(file, "utf8"));
 }
 
+function packageRoot(packageKey) {
+  const configured = process.env.PROFILE_PACKAGES_DIR;
+  if (configured) return join(configured, packageKey);
+  if (packageKey === "contractor_estimator") return join(process.cwd(), "packages", "agent-template");
+  return join(process.cwd(), "packages", "profile-packages", packageKey);
+}
+
+function packageProfileContext(packageKey) {
+  const file = join(packageRoot(packageKey), "purpose.profile-context.json");
+  if (!existsSync(file)) return undefined;
+  return JSON.parse(readFileSync(file, "utf8"));
+}
+
 function latestManifestParams(row, endpoint, build) {
   const manifest = row.manifest ?? {};
   const params = readProfileParams(build?.generated_path) ?? {};
   const env = parseEnv(build?.generated_path ? join(build.generated_path, ".env") : "");
+  const profilePackageKey = row.profile_package_key ?? manifest.profile_package_key ?? "contractor_estimator";
   return {
     client_id: params.client_id ?? clientSlug(row.employee_id),
     account_id: row.account_id,
     employee_id: row.employee_id,
-    profile_package_key: row.profile_package_key ?? manifest.profile_package_key ?? "contractor_estimator",
+    profile_package_key: profilePackageKey,
     runtime_backend: endpoint?.backend_type ?? params.runtime_backend ?? process.env.HERMES_BACKEND_TYPE ?? "docker",
     business_display_name: params.business_display_name ?? manifest.business_display_name ?? row.business_display_name ?? row.employee_id,
     business_kind: params.business_kind ?? manifest.business_kind ?? "contractor",
@@ -99,6 +113,7 @@ function latestManifestParams(row, endpoint, build) {
     tools_mentioned: params.tools_mentioned ?? manifest.tools_mentioned ?? [],
     seed_skills: params.seed_skills ?? manifest.seed_skills ?? [],
     api_server_key: params.api_server_key ?? env.API_SERVER_KEY ?? randomBytes(32).toString("base64url"),
+    profile_context: params.profile_context ?? manifest.profile_context ?? packageProfileContext(profilePackageKey),
   };
 }
 
@@ -196,9 +211,27 @@ async function callProvisioner(req) {
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.status !== "ok") {
-    throw new Error(`provisioner_failed:${res.status}:${JSON.stringify(json).slice(0, 800)}`);
+    const err = new Error(`provisioner_failed:${res.status}:${json.failure_state ?? "unknown"}`);
+    err.provisioner_http_status = res.status;
+    err.provisioner_result = json;
+    throw err;
   }
   return json;
+}
+
+function redact(value) {
+  if (typeof value === "string") {
+    return value
+      .replace(/(Bearer\s+|mcp_|re_|cfat_)[A-Za-z0-9._-]+/g, "$1[redacted]")
+      .replace(/(token|secret|key)(=|:)[^\s,}]+/gi, "$1$2[redacted]");
+  }
+  if (Array.isArray(value)) return value.map(redact);
+  if (value && typeof value === "object") {
+    const out = {};
+    for (const [key, child] of Object.entries(value)) out[key] = /(token|secret|authorization|api_key)/i.test(key) ? "[redacted]" : redact(child);
+    return out;
+  }
+  return value;
 }
 
 async function mcpToolList(token) {
@@ -245,6 +278,13 @@ try {
     manifest_id: employee.manifest_id,
     profile_package_key: params.profile_package_key,
     render_secrets: { manager_mcp_token: minted.token },
+    options: {
+      sms: {
+        enabled: process.env.REPROVISION_SMS_ENABLED === "1",
+        configure_webhook: process.env.REPROVISION_SMS_CONFIGURE_WEBHOOK === "1",
+        send_first_message: process.env.REPROVISION_SMS_SEND_FIRST_MESSAGE === "1",
+      },
+    },
     params,
   });
 
@@ -293,6 +333,7 @@ try {
   console.log(`PASS reprovision-scoped-mcp employee:${employeeId} credential:${minted.credential_id} tools:${tools.length}`);
   writeProof(proof);
 } catch (err) {
+  const provisionerResult = err?.provisioner_result ? redact(err.provisioner_result) : undefined;
   const proof = {
     kind: "reprovision_scoped_mcp",
     status: "fail",
@@ -300,6 +341,8 @@ try {
     host: hostname(),
     employee_id: employeeId ?? null,
     error: String(err?.message ?? err),
+    provisioner_http_status: err?.provisioner_http_status ?? undefined,
+    provisioner_result: provisionerResult,
   };
   console.error(`FAIL reprovision-scoped-mcp ${proof.error}`);
   writeProof(proof);

@@ -18,6 +18,7 @@ import { registerStripeWebhooks } from "./webhooks/stripe.js";
 import { registerQuickbooksWebhooks } from "./webhooks/quickbooks.js";
 import { registerProvisionerRoutes } from "./provisioner.js";
 import { registerOrchestratorRoutes } from "./orchestrator.js";
+import { registerPublicEstimatorRoutes } from "./public-estimator.js";
 import { decodeSignedToken, tokenHash, verifySignedToken } from "./lib/signed-links.js";
 import { requireOwnerSession, mintOwnerSession } from "./lib/owner-session.js";
 import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
@@ -888,6 +889,7 @@ export function buildApp(): Hono {
   registerGmailWebhooks(app);
   registerStripeWebhooks(app);
   registerQuickbooksWebhooks(app);
+  registerPublicEstimatorRoutes(app, denyInternal);
   registerProvisionerRoutes(app);
   registerOrchestratorRoutes(app);
 

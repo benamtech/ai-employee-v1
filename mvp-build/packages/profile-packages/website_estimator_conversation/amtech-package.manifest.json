@@ -1,0 +1,24 @@
+{
+  "id": "pkg_website_estimator_conversation",
+  "package_key": "website_estimator_conversation",
+  "display_name": "Website Estimator Conversation",
+  "version": "0.1.0",
+  "description": "AMTECH-adapted Hermes profile-generator output: Collect website visitor contact and painting job details through conversation, then produce a structured estimate using seeded company rates and assumptions.",
+  "supported_business_kinds": [
+    "residential painting",
+    "contractor",
+    "home_services",
+    "b2b"
+  ],
+  "default_skills": [
+    "estimate"
+  ],
+  "template_source": {
+    "name": "codegraphtheory/hermes-profile-template",
+    "url": "https://github.com/codegraphtheory/hermes-profile-template",
+    "relationship": "generated-by-profile-generator-adapted-for-amtech"
+  },
+  "env_requires": [],
+  "validation_command": null,
+  "status": "active"
+}
