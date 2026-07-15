@@ -281,4 +281,7 @@ export const SCHEMA_UNIQUES: UniqueSpec = {
   preview_links: [["token_hash"]],
   agent_context_primer_sessions: [["employee_id", "transcript_session_id"]],
   employee_sessions: [["employee_id", "transcript_session_id"]],
+  public_estimator_sessions: [["visitor_token_hash"]],
+  public_estimator_artifacts: [["visitor_session_id", "artifact_id"]],
+  public_estimator_email_sends: [["idempotency_key"]],
 };

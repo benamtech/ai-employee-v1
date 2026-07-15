@@ -2,7 +2,7 @@ import { ID_PREFIX, newId } from "@amtech/shared";
 import type { SupabaseClient } from "@amtech/db";
 import { insertDedup, mustWrite, orThrow } from "./db.js";
 
-export type EmployeeTurnKind = "owner_web_chat" | "owner_sms_chat" | "employee_event_wake";
+export type EmployeeTurnKind = "owner_web_chat" | "owner_sms_chat" | "employee_event_wake" | "public_estimator_chat";
 
 export interface EmployeeTurnInput {
   account_id?: string | null;

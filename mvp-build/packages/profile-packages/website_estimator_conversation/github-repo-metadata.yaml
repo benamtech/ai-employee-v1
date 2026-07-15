@@ -1,0 +1,10 @@
+description: Collect website visitor contact and painting job details through conversation,
+  then produce a structured estimate using seeded company rates and assumptions.
+homepage: ''
+topics:
+- hermes-agent
+- ai-agents
+- agent-profile
+- profile-distribution
+- b2b-onboarding
+- estimating

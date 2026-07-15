@@ -89,6 +89,7 @@ export default function Home() {
       <header className="fd-bar">
         <span className="fd-logo">AMTECH<span aria-hidden>.</span></span>
         <nav className="fd-nav">
+          <Link href="/estimator">Try free estimator</Link>
           <Link href="/login">Sign in</Link>
           <Link className="fd-nav-cta" href="/create-ai-employee">Create your employee</Link>
         </nav>
@@ -104,6 +105,7 @@ export default function Home() {
           preps the invoices — and asks you before anything leaves the business.
         </p>
         <div className="fd-cta-row">
+          <Link className="fd-cta" href="/estimator">Try the free estimator</Link>
           <Link className="fd-cta" href="/create-ai-employee">Create your AI employee</Link>
           <Link className="fd-cta-quiet" href="/login">Sign in</Link>
         </div>

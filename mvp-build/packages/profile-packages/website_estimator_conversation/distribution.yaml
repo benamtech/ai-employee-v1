@@ -1,0 +1,61 @@
+name: website_estimator_conversation
+display_name: "Website Estimator Conversation"
+version: 0.1.0
+description: "AMTECH-adapted profile-generator output: Collect website visitor contact and painting job details through conversation, then produce a structured estimate using seeded company rates and assumptions."
+hermes_requires: ">=0.12.0"
+template_source:
+  name: codegraphtheory/hermes-profile-template
+  url: https://github.com/codegraphtheory/hermes-profile-template
+  relationship: generated-by-profile-generator-adapted-for-amtech
+distribution_owned:
+  - SOUL.md
+  - config.yaml
+  - config.generated.yaml
+  - distribution.yaml
+  - distribution.generated.yaml
+  - .env.tpl
+  - hooks/
+  - memories/
+  - plugins/
+  - workspace/
+  - skills/
+  - docs/
+env_requires:
+  - name: ANTHROPIC_API_KEY
+    description: Employee model provider key.
+    required: true
+default_skills:
+  - estimate
+context_slots:
+  - key: business_identity
+    title: Business identity
+    priority: 10
+  - key: owner_identity
+    title: Owner identity
+    priority: 20
+  - key: workflows
+    title: Workflows
+    priority: 30
+  - key: tools
+    title: Tools
+    priority: 40
+  - key: durable_facts
+    title: Durable facts
+    priority: 50
+  - key: standing_preferences
+    title: Standing preferences
+    priority: 60
+  - key: live_state_pointers
+    title: Live state pointers
+    priority: 70
+memory_limits:
+  memory_chars: 2200
+  user_chars: 1375
+resource_pointers:
+  - amtech://manager/business-brain
+  - amtech://manager/business-facts
+  - amtech://manager/connector-status
+  - amtech://manager/work-queue
+  - amtech://manager/artifacts
+  - amtech://manager/approvals
+  - amtech://manager/capability-registry

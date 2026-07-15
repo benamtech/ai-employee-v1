@@ -1,0 +1,30 @@
+name: website-estimator-conversation
+version: 0.1.0
+description: Collect website visitor contact and painting job details through conversation,
+  then produce a structured estimate using seeded company rates and assumptions.
+hermes_requires: '>=0.12.0'
+author: AMTECH local profile-generator harness
+license: MIT
+template_source:
+  name: codegraphtheory/hermes-profile-template
+  url: https://github.com/codegraphtheory/hermes-profile-template
+  relationship: generated-from-template
+env_requires: []
+distribution_owned:
+- SOUL.md
+- config.yaml
+- mcp.json
+- skills/
+- templates/
+- scripts/
+- distribution.yaml
+- README.md
+- AGENTS.md
+- CHANGELOG.md
+- CONTRIBUTING.md
+- SECURITY.md
+- github-repo-metadata.yaml
+- requirements.txt
+- Makefile
+- docs/
+- .env.EXAMPLE

@@ -39,6 +39,7 @@ OPENAI_API_KEY={{MODEL_BRIDGE_API_KEY}}
 OPENAI_BASE_URL={{MODEL_BRIDGE_BASE_URL}}
 ANTHROPIC_API_KEY={{ANTHROPIC_API_KEY}}
 MANAGER_API_ORIGIN={{MANAGER_API_ORIGIN}}
+HERMES_DOCKER_NETWORK={{HERMES_DOCKER_NETWORK}}
 
 # CE-1 native context primer hook. This scoped credential is the same
 # per-employee Manager MCP bearer rendered into config.yaml; it is not the global

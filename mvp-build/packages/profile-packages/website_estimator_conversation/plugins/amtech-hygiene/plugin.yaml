@@ -1,0 +1,11 @@
+name: amtech-hygiene
+version: 0.1.0
+description: >-
+  Deterministic tool-output hygiene for AMTECH employees. Registers Hermes
+  transform_tool_result and transform_terminal_output plugin hooks that strip
+  bulk (raw rfc822/base64 blobs, large HTML, big JSON arrays, terminal spew)
+  while preserving ids, counts, error text, owner-visible fields, and amtech://
+  resource pointers, and redacting secret-shaped keys. No LLM, no network — pure
+  and self-contained so it adds no per-tool latency. Security boundary stays
+  Manager-side; this is context hygiene, not a gate.
+entrypoint: "__init__.py"
