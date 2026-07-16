@@ -68,6 +68,7 @@ function modelConfigBlock(): string {
       "  compression: claude-haiku-4-5",
     ];
     if (config.baseUrl) lines.splice(3, 0, `  base_url: ${config.baseUrl}`);
+    if (config.apiKey) lines.splice(config.baseUrl ? 4 : 3, 0, `  api_key: ${config.apiKey}`);
     return lines.join("\n");
   }
   return ["models:", "  default: claude-opus-4-8", "  compression: claude-haiku-4-5"].join("\n");

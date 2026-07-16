@@ -131,6 +131,7 @@ describe("runtime backend policy", () => {
 
     expect(tokens.MODEL_CONFIG).toContain("provider: custom");
     expect(tokens.MODEL_CONFIG).toContain("base_url: https://api.x.ai/v1");
+    expect(tokens.MODEL_CONFIG).toContain("api_key: xai-test");
     expect(tokens.MODEL_CONFIG).toContain("default: grok-4.3");
     expect(tokens.MODEL_CONFIG).not.toContain("provider: openai_compatible");
     expect(tokens.MODEL_BRIDGE_BASE_URL).toBe("https://api.x.ai/v1");
