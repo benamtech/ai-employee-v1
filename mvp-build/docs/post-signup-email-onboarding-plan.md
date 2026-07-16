@@ -5,16 +5,18 @@ Scope: after-signup email setup routing, connector-first UX, and memory capture 
 
 ## Problem
 
-The first instinct during email setup drifted toward terminal IMAP configuration instead of the product's actual onboarding seam: the interactive MCP/UI path and the Gmail connector UI.
+The first instinct during the live employee's first chat drifted toward terminal IMAP configuration instead of the product's actual owner-facing surface: the interactive MCP/UI path and the Gmail connector UI.
 
-That is the wrong default for an after-signup experience.
+That is the wrong default for a first-contact experience. It needs a light tutorial/orientation layer that feels powerful, not a support script or a form wizard.
 
 ## Intended Behavior
 
+- Start with a short, capable orientation when the live employee is new or the owner is asking for a first setup action.
 - When a new owner says "set up my email", prefer the interactive Gmail connector UI or the interactive MCP UI.
 - Keep the flow inside the product unless the owner explicitly asks for mailbox-only terminal setup.
 - If the needed account or connector fact is unknown, ask one focused question or capture it in memory instead of guessing.
 - Treat IMAP/SMTP terminal setup as an operator fallback, not the first path.
+- Make the experience feel like an employee helping, not a technician reading a checklist.
 
 ## Why
 
@@ -46,6 +48,7 @@ This is consistent with the public interaction standard: conversation captures i
 - `docs/public-interaction-standard.md`
 - `docs/onboarding-live-review-2026-07-16.md`
 - `docs/production-normal-employee-live-deploy-runbook.md`
+- `docs/live-employee-first-chat-ux-gap.md`
 - `email/himalaya/SKILL.md`
 
 ## Carry-Forward
@@ -56,4 +59,3 @@ The next implementation pass should update the onboarding/system prompt and any 
 2. interactive MCP UI;
 3. memory capture when facts are missing;
 4. terminal IMAP setup only as an explicit fallback.
-
