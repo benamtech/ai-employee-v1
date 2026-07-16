@@ -8,27 +8,28 @@ This document tracks the aggressive, systematic application of `AMTECH_WEB_DESIG
 
 ## 1. Palette Application
 
-### AgentSurface (owner web)
+### AgentSurface (owner web) — Light Base Only
 
 | Element | Token Used | Hex | Rationale |
 |---------|------------|-----|-----------|
-| Page background | `ink` | `#111111` | High-contrast, premium B2B dark mode |
-| Text | `white` / neutral-100 | `#FFFFFF` / `#F5F5F5` | Strong hierarchy |
-| Primary CTA (active nav, Send button) | `red` | `#E11D2A` | Brand + primary action |
+| Page background | `canvas` | `#F7F9FC` | Light operational base with subtle gradient |
+| Text | `ink` | `#111111` | High-contrast primary text |
+| Primary CTA (active nav, Send) | `red` | `#E11D2A` | Brand + primary action |
 | Status / progress | `green` | `#168A57` | Success / working states |
 | Informational | `blue` | `#2563EB` | Data / system states |
-| Cards / panels | Glass over dark | `rgba(255,255,255,.06-.10)` | Subtle elevation on dark canvas |
+| Cards / panels | White + glass | `rgba(255,255,255,.88)` + thin border | Light glass elevation |
 
 **Rules followed:**
 - No orange/gold/beige/rainbow.
 - Red only for brand/action, blue for systems, green for success.
+- **No dark mode ever** — all surfaces remain light.
 
 ## 2. Surfaces
 
-- Base: Dark ink (`#111111`) with restrained glass cards.
-- Glass: Low-opacity white + thin black border (already matches 6-8% rule).
+- Base: White (`#FFFFFF`) or `canvas` (`#F7F9FC`) with subtle blue/red-tinted gradients.
+- Glass: `rgba(255,255,255,.70-.88)`, `backdrop-blur: 24-40px`, `1px black/6-8%` border.
 - Cards: 16-24px radius, soft shadow, generous padding.
-- Dark panels used only for high-contrast feature areas (header, primary actions).
+- No dark surfaces permitted anywhere in the public product.
 
 ## 3. Typography
 

@@ -16,14 +16,14 @@
 | `cyan` | `#DFF6FF` | Cool highlights, subtle emphasis |
 | `green` | `#168A57` | Success, rewards, verified states |
 
-**Rule:** No orange, gold, beige, rainbow palettes, or competing accent colors.
+**Rule:** No orange, gold, beige, rainbow palettes, or competing accent colors. **No dark mode ever.**
 
 ## Surfaces
 
-- **Base:** Cool white (`canvas`) with subtle blue-tinted radial/linear gradients.
+- **Base:** White (`#FFFFFF`) or `canvas` (`#F7F9FC`) with subtle blue/red-tinted radial or linear gradients.
 - **Glass:** `rgba(255,255,255,.70-.88)`, `backdrop-blur: 24-40px`, `1px black/6-8%` border.
 - **Cards:** 16-24px radius, soft shadow, generous padding. Hover only slightly increases border/shadow.
-- **Dark:** Use near-black sparingly for high-contrast feature panels.
+- **Dark surfaces:** Never used. All surfaces remain light.
 
 ## Typography
 
