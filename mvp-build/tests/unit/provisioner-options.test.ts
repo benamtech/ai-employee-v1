@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { smsPlan } from "../../apps/manager/src/provisioner";
+import { runtimeApiBaseUrl, smsPlan } from "../../apps/manager/src/provisioner";
 import type { ProvisionerRequest } from "../../packages/shared/src/profile-package";
 
 function req(options?: ProvisionerRequest["options"]): ProvisionerRequest {
@@ -62,5 +62,15 @@ describe("provisioner options", () => {
       configure_webhook: true,
       send_first_message: false,
     });
+  });
+
+  it("returns a Manager-reachable Docker DNS runtime URL for docker employees", () => {
+    expect(runtimeApiBaseUrl(req())).toBe("http://amtech-hermes-emp_1:8101");
+  });
+
+  it("keeps localhost runtime URLs for local backend employees", () => {
+    const local = req();
+    local.params.runtime_backend = "local";
+    expect(runtimeApiBaseUrl(local)).toBe("http://localhost:8101");
   });
 });

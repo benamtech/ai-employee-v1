@@ -13,6 +13,14 @@ afterEach(() => {
   delete process.env.HERMES_MODEL_DEFAULT;
   delete process.env.HERMES_MODEL_BASE_URL;
   delete process.env.HERMES_MODEL_API_KEY;
+  delete process.env.ORCHESTRATOR_API_BASE_URL;
+  delete process.env.ORCHESTRATOR_MODEL;
+  delete process.env.ORCHESTRATOR_API_KEY;
+  delete process.env.XAI_API_TOKEN;
+  delete process.env.XAI_API_KEY;
+  delete process.env.xai_api_key;
+  delete process.env.XAI_MODEL;
+  delete process.env.xai_model;
   delete process.env.ANTHROPIC_API_KEY;
 });
 
@@ -111,6 +119,22 @@ describe("runtime backend policy", () => {
     expect(tokens.MODEL_BRIDGE_BASE_URL).toBe("");
     expect(tokens.MODEL_BRIDGE_API_KEY).toBe("");
     expect(tokens.ANTHROPIC_API_KEY).toBe("sk-ant-test");
+  });
+
+  it("maps deployment openai_compatible model env to Hermes custom provider", () => {
+    process.env.HERMES_MODEL_PROVIDER = "openai_compatible";
+    process.env.HERMES_MODEL_DEFAULT = "grok-4.3";
+    process.env.ORCHESTRATOR_API_BASE_URL = "https://api.x.ai/v1";
+    process.env.XAI_API_TOKEN = "xai-test";
+
+    const tokens = profileTokenMap(params("docker"));
+
+    expect(tokens.MODEL_CONFIG).toContain("provider: custom");
+    expect(tokens.MODEL_CONFIG).toContain("base_url: https://api.x.ai/v1");
+    expect(tokens.MODEL_CONFIG).toContain("default: grok-4.3");
+    expect(tokens.MODEL_CONFIG).not.toContain("provider: openai_compatible");
+    expect(tokens.MODEL_BRIDGE_BASE_URL).toBe("https://api.x.ai/v1");
+    expect(tokens.MODEL_BRIDGE_API_KEY).toBe("xai-test");
   });
 });
 

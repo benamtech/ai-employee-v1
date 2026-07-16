@@ -16,28 +16,58 @@ function workspaceRoot(): string {
   return process.env.AMTECH_MVP_ROOT ?? process.cwd();
 }
 
+function firstEnv(...keys: string[]): string {
+  for (const key of keys) {
+    const value = process.env[key];
+    if (value) return value;
+  }
+  return "";
+}
+
+function renderedModelConfig(): { provider: string; model: string; baseUrl: string; apiKey: string } | null {
+  const provider = process.env.HERMES_MODEL_PROVIDER;
+  if (!provider) return null;
+  if (provider === "openai_compatible") {
+    return {
+      provider: "custom",
+      model: firstEnv("HERMES_MODEL_DEFAULT", "XAI_MODEL", "xai_model", "ORCHESTRATOR_MODEL") || "grok-4.3",
+      baseUrl: firstEnv("HERMES_MODEL_BASE_URL", "ORCHESTRATOR_API_BASE_URL") || "https://api.x.ai/v1",
+      apiKey: firstEnv("HERMES_MODEL_API_KEY", "XAI_API_TOKEN", "XAI_API_KEY", "xai_api_key", "ORCHESTRATOR_API_KEY"),
+    };
+  }
+  if (provider === "custom") {
+    return {
+      provider,
+      model: process.env.HERMES_MODEL_DEFAULT ?? "bridge-agent",
+      baseUrl: process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1",
+      apiKey: process.env.HERMES_MODEL_API_KEY ?? "bridge-local-dummy",
+    };
+  }
+  return {
+    provider,
+    model: process.env.HERMES_MODEL_DEFAULT ?? "claude-opus-4-8",
+    baseUrl: process.env.HERMES_MODEL_BASE_URL ?? "",
+    apiKey: "",
+  };
+}
+
 /**
- * The rendered config.yaml model block. Production ships `claude-opus-4-8`. When
- * HERMES_MODEL_PROVIDER is set (local no-key testing), the employee's model is
- * pointed at the agent-in-the-loop bridge instead — the "you-are-the-LLM" design
- * where the persistent Haiku worker answers every model call (see
- * infra/local/agent-model-bridge.md). The paired OPENAI_API_KEY/OPENAI_BASE_URL
- * env come from the .env.tpl MODEL_BRIDGE_* tokens below.
+ * The rendered config.yaml model block. Hermes names arbitrary OpenAI-compatible
+ * endpoints `custom`; deployment env may still use `openai_compatible` because
+ * the onboarding orchestrator uses that vocabulary for xAI/Grok.
  */
 function modelConfigBlock(): string {
-  const provider = process.env.HERMES_MODEL_PROVIDER;
-  if (provider) {
-    const def = process.env.HERMES_MODEL_DEFAULT ?? (provider === "custom" ? "bridge-agent" : "claude-opus-4-8");
-    const baseUrl = process.env.HERMES_MODEL_BASE_URL ?? (provider === "custom" ? "http://host.docker.internal:8091/v1" : "");
+  const config = renderedModelConfig();
+  if (config) {
     const lines = [
       "model:",
-      `  provider: ${provider}`,
-      `  default: ${def}`,
+      `  provider: ${config.provider}`,
+      `  default: ${config.model}`,
       "models:",
-      `  default: ${def}`,
+      `  default: ${config.model}`,
       "  compression: claude-haiku-4-5",
     ];
-    if (baseUrl) lines.splice(3, 0, `  base_url: ${baseUrl}`);
+    if (config.baseUrl) lines.splice(3, 0, `  base_url: ${config.baseUrl}`);
     return lines.join("\n");
   }
   return ["models:", "  default: claude-opus-4-8", "  compression: claude-haiku-4-5"].join("\n");
@@ -152,6 +182,7 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
   const managerOrigin = employeeManagerOrigin(runtimeBackend);
   const context = params.profile_context;
   const memories = buildNativeMemoryFiles(context);
+  const modelConfig = renderedModelConfig();
   return {
     CLIENT_ID: params.client_id,
     ACCOUNT_ID: params.account_id,
@@ -196,9 +227,9 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     MANAGER_API_ORIGIN: managerOrigin,
     MANAGER_MCP_TOKEN: renderSecrets.manager_mcp_token ?? "",
     HERMES_DOCKER_NETWORK: process.env.HERMES_DOCKER_NETWORK ?? "",
-    // Model wiring. Local no-key testing (HERMES_MODEL_PROVIDER set) points the
-    // employee at the bridge + a dummy OpenAI-compatible key; production leaves
-    // these empty (real provider key is a Manager-injected secret ref).
+    // Model wiring. Hermes calls arbitrary OpenAI-compatible endpoints `custom`;
+    // deployment may set HERMES_MODEL_PROVIDER=openai_compatible for xAI/Grok,
+    // which is translated above and injected here as OPENAI_* env.
     MODEL_CONFIG: modelConfigBlock(),
     // CE-2: compression parachute (rotation trips first), delegation for in-turn
     // context isolation, and the tokenized hooks block (primer only; hygiene
@@ -206,8 +237,8 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     COMPRESSION_CONFIG: compressionConfigBlock(),
     DELEGATION_CONFIG: delegationConfigBlock(),
     HOOKS: hooksBlock(),
-    MODEL_BRIDGE_BASE_URL: process.env.HERMES_MODEL_PROVIDER === "custom" ? (process.env.HERMES_MODEL_BASE_URL ?? "http://host.docker.internal:8091/v1") : "",
-    MODEL_BRIDGE_API_KEY: process.env.HERMES_MODEL_PROVIDER === "custom" ? (process.env.HERMES_MODEL_API_KEY ?? "bridge-local-dummy") : "",
+    MODEL_BRIDGE_BASE_URL: modelConfig?.provider === "custom" ? modelConfig.baseUrl : "",
+    MODEL_BRIDGE_API_KEY: modelConfig?.provider === "custom" ? modelConfig.apiKey : "",
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ?? "",
     // Hermes reads api_server tools from config.yaml platform_toolsets.api_server.
     // With no block it falls back to terminal/file/web only — so we render the

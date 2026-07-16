@@ -20,6 +20,7 @@ import type {
   WorkOutput,
   WorkTask,
 } from "@amtech/shared";
+import type { WorkDeliverableDescriptor, WorkEventDescriptor } from "@amtech/shared";
 import { custodyFor, resolveConnectorMeta } from "@amtech/shared";
 import { materializeEmployeeSnapshot } from "./materialization.js";
 
@@ -118,6 +119,112 @@ function connectorMatches(connector: EmployeeSnapshot["connectors"][number], def
 
 function capabilityMatches(capability: CapabilityGraphNode, def: ConnectionDef): boolean {
   return Boolean(def.capabilityCategories?.includes(capability.category));
+}
+
+function ownerSafeCapability(node: CapabilityGraphNode): CapabilityGraphNode | null {
+  if (node.key.startsWith("manager_tool:")) return null;
+  if (node.sources.includes("manager_mcp")) return null;
+  return {
+    ...node,
+    key: node.key.startsWith("connector:") ? node.key : `owner:${node.category}:${node.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+    trust_level: node.trust_level === "manager_mcp" ? "native_manager" : node.trust_level,
+    sources: node.sources.filter((source) => source !== "manager_mcp" && source !== "manager_tool"),
+    proof: {},
+  };
+}
+
+function ownerSafeCapabilities(
+  nodes: CapabilityGraphNode[],
+  abilities: NonNullable<ResourcePayload["abilities"]>,
+  accountId: string,
+  employeeId: string,
+): CapabilityGraphNode[] {
+  const abilityNodes = abilities.map((ability) => ({
+    id: `capability:${ability.id}`,
+    account_id: accountId,
+    employee_id: employeeId,
+    key: `ability:${ability.id.replace(/^ability:/, "")}`,
+    label: ability.label,
+    summary: ability.summary,
+    category: ability.category,
+    status: ability.status === "degraded" ? "degraded" : ability.status,
+    setup_requirement: null,
+    trust_level: ability.source === "connector" ? "connector" : ability.source === "policy" ? "native_manager" : "runtime",
+    can_run_now: ability.status === "ready" || ability.status === "policy_gated" || ability.status === "degraded",
+    sources: ability.source === "connector" ? ["connector"] : ability.source === "policy" ? ["policy"] : ["hermes"],
+    proof: {},
+  } satisfies CapabilityGraphNode));
+  const connectorNodes = nodes.flatMap((node) => {
+    const safe = ownerSafeCapability(node);
+    return safe ? [{ ...safe, account_id: accountId, employee_id: employeeId }] : [];
+  });
+  return [...abilityNodes, ...connectorNodes].filter((node, index, all) => all.findIndex((other) => other.key === node.key) === index);
+}
+
+function ownerSafeDeliverable(deliverable: WorkDeliverableDescriptor | undefined): WorkDeliverableDescriptor | undefined {
+  if (!deliverable) return undefined;
+  const refs = Object.fromEntries(
+    Object.entries(deliverable.refs ?? {}).filter(([key]) =>
+      ["approval_id", "artifact_id", "estimate_id", "estimate_artifact_id", "message_id", "invoice_id", "job_id"].includes(key),
+    ),
+  );
+  return {
+    type: deliverable.type === "tool_activity" ? "recommendation" : deliverable.type,
+    title: deliverable.title,
+    refs,
+    leaves_business: deliverable.leaves_business,
+    money: deliverable.money,
+    reversible: deliverable.reversible,
+    acceptance: deliverable.acceptance,
+    view: deliverable.view,
+  };
+}
+
+function ownerSafeDescriptor(descriptor: WorkEventDescriptor | undefined): WorkEventDescriptor | undefined {
+  if (!descriptor) return undefined;
+  return {
+    account_id: descriptor.account_id,
+    employee_id: descriptor.employee_id,
+    source_event_id: descriptor.source_event_id,
+    move: descriptor.move,
+    title: descriptor.title,
+    summary: descriptor.summary,
+    suggested_next_action: descriptor.suggested_next_action,
+    preview_url: descriptor.preview_url,
+    deliverable: ownerSafeDeliverable(descriptor.deliverable),
+    proof: descriptor.proof
+      ? Object.fromEntries(Object.entries(descriptor.proof).filter(([key]) => ["run_id", "audit_id", "artifact_id", "approval_id"].includes(key)))
+      : undefined,
+  };
+}
+
+function ownerSafeWorkEvents(rows: WorkEventRow[]): WorkEventRow[] {
+  return rows.map((row) => ({ ...row, work_event_descriptor: ownerSafeDescriptor(row.work_event_descriptor) }));
+}
+
+function ownerSafeSurfaceEnvelope(envelope: SurfaceEnvelope): SurfaceEnvelope {
+  const wasTool = envelope.kind === "tool_activity" || envelope.safety.trust_level === "manager_mcp";
+  return {
+    ...envelope,
+    kind: envelope.kind === "tool_activity" ? "work_event" : envelope.kind,
+    render_hints: wasTool
+      ? { ...envelope.render_hints, tier: "generic", component: "work_event" }
+      : envelope.render_hints,
+    safety: {
+      ...envelope.safety,
+      trust_level: envelope.safety.trust_level === "manager_mcp" ? "native_manager" : envelope.safety.trust_level,
+      redacted: envelope.safety.redacted || wasTool,
+    },
+    proof: {
+      audit_id: envelope.proof.audit_id,
+      artifact_id: envelope.proof.artifact_id,
+      approval_id: envelope.proof.approval_id,
+      inbound_event_id: envelope.proof.inbound_event_id,
+      preview_link_id: envelope.proof.preview_link_id,
+      source_table: envelope.proof.source_table,
+      source_id: envelope.proof.source_id,
+    },
+  };
 }
 
 function connectionState(input: {
@@ -304,7 +411,11 @@ export function deriveResurfaceItems(input: {
 function toWorkEvents(inboundEvents: Array<Record<string, unknown>>, employeeId: string, accountId: string): WorkEventRow[] {
   return inboundEvents
     .map((event) => ({
-      ...event,
+      id: String(event.id ?? ""),
+      event_type: String(event.event_type ?? "work_event"),
+      provider_id: typeof event.provider_id === "string" ? event.provider_id : null,
+      status: String(event.status ?? "delivered"),
+      created_at: String(event.created_at ?? ""),
       work_event_descriptor: (event.normalized_payload as { work_event_descriptor?: unknown } | undefined)?.work_event_descriptor,
     }))
     .filter((event: { work_event_descriptor?: unknown }) =>
@@ -548,7 +659,8 @@ export async function buildEmployeeSnapshot(db: SupabaseClient, employeeId: stri
     }),
   };
   const materialized = materializeEmployeeSnapshot(snapshot);
-  const connection_surfaces = deriveConnectionSurfaces(snapshot, materialized.capabilities);
+  const ownerCapabilities = ownerSafeCapabilities(materialized.capabilities, materialized.abilities, accountId, employeeId);
+  const connection_surfaces = deriveConnectionSurfaces(snapshot, ownerCapabilities);
   const resurface_items = deriveResurfaceItems({
     tasks: snapshot.tasks ?? [],
     envelopes: materialized.surface_envelopes,
@@ -556,9 +668,10 @@ export async function buildEmployeeSnapshot(db: SupabaseClient, employeeId: stri
   });
   return {
     ...snapshot,
+    work_events: ownerSafeWorkEvents(snapshot.work_events),
     abilities: materialized.abilities,
-    capabilities: materialized.capabilities,
-    surface_envelopes: materialized.surface_envelopes,
+    capabilities: ownerCapabilities,
+    surface_envelopes: materialized.surface_envelopes.map(ownerSafeSurfaceEnvelope),
     connection_surfaces,
     resurface_items,
   };
@@ -610,7 +723,7 @@ export async function fetchWorkEventsSince(db: SupabaseClient, employeeId: strin
     .order("created_at", { ascending: true }).limit(50);
   const rows = ((inboundEvents ?? []) as Array<Record<string, unknown> & { id?: string; created_at?: string }>)
     .filter((row) => afterCursor(row, c));
-  const workEvents = toWorkEvents(rows, employeeId, accountId);
+  const workEvents = ownerSafeWorkEvents(toWorkEvents(rows, employeeId, accountId));
 
   const { data: newApprovals } = await db
     .from("approvals")

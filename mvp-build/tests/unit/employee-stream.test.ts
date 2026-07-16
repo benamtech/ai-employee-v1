@@ -6,6 +6,42 @@ function descriptorPayload(account: string, employee: string) {
   return { work_event_descriptor: { account_id: account, employee_id: employee, move: "notify", title: "T", summary: "S" } };
 }
 
+function toolDescriptorPayload(account: string, employee: string) {
+  return {
+    work_event_descriptor: {
+      account_id: account,
+      employee_id: employee,
+      move: "notify",
+      title: "Tool result",
+      summary: "Avery prepared a customer update.",
+      deliverable: {
+        type: "tool_activity",
+        title: "Create account",
+        refs: {
+          approval_id: "appr_1",
+          tool_call_id: "call_1",
+          manager_account_id: account,
+        },
+        acceptance: ["acknowledge"],
+        ui_resource: {
+          type: "rawHtml",
+          uri: "ui://manager/create_account",
+          mimeType: "text/html",
+          text: "<div>create_account</div>",
+        },
+        tool: {
+          name: "create_account",
+          toolset: "manager_mcp",
+          input: { email: "owner@example.com", password: "secret", provision_employee: true },
+          input_schema: { type: "object", properties: { email: { type: "string" } } },
+          result_summary: "Created Manager account.",
+        },
+      },
+      proof: { run_id: "run_1", tool: "manager_tool:create_account" },
+    },
+  };
+}
+
 const seed = () => ({
   approvals: [{ id: "appr_1", employee_id: "emp_1", account_id: "acct_1", action_key: "send_email", summary: "x", risk_level: "high", resolution: null, created_at: "2026-07-04T00:00:00Z" }],
   employees: [{ id: "emp_1", account_id: "acct_1", name: "Sage", status: "live", profile_id: "client_emp_1", created_at: "2026-07-04T00:00:00Z" }],
@@ -32,13 +68,40 @@ describe("buildEmployeeSnapshot", () => {
     expect(snap.tasks?.some((t) => t.id === "approval:appr_1")).toBe(true);
     expect(snap.tasks?.some((t) => t.id === "connector:conn_1")).toBe(true);
     expect(snap.abilities?.some((a) => a.id === "ability:email" && a.status === "needs_connection")).toBe(true);
-    expect(snap.capabilities?.some((c) => c.key === "manager_tool:create_estimate_artifact")).toBe(true);
+    expect(snap.capabilities?.some((c) => c.key === "ability:estimate")).toBe(true);
+    expect(snap.capabilities?.some((c) => c.key.startsWith("manager_tool:"))).toBe(false);
     expect(snap.surface_envelopes?.some((e) => e.kind === "approval" && e.safety.requires_approval)).toBe(true);
     expect(snap.connection_surfaces?.map((c) => c.label)).toEqual(expect.arrayContaining(["Email", "Payments", "Accounting", "Files", "Calendar", "Store"]));
     expect(snap.connection_surfaces?.find((c) => c.label === "Email")?.state).toBe("needs_you");
-    expect(snap.connection_surfaces?.find((c) => c.label === "Payments")?.capability_keys).toContain("manager_tool:send_deposit_invoice");
+    expect(snap.connection_surfaces?.find((c) => c.label === "Payments")?.capability_keys).toContain("ability:payments");
     expect(snap.resurface_items?.some((item) => item.kind === "connector" && item.target?.kind === "task")).toBe(true);
     expect(snap.resurface_items?.some((item) => item.kind === "review" && item.target?.kind === "approval")).toBe(true);
+  });
+
+  it("projects owner resources without Manager account, MCP, tool schema, or UI-resource internals", async () => {
+    const db = makeFakeDb({
+      ...seed(),
+      inbound_events: [
+        { id: "e_tool", account_id: "acct_1", employee_id: "emp_1", source: "manager_mcp", event_type: "manager.tool_activity", status: "delivered", created_at: "2026-07-04T00:00:05Z", normalized_payload: toolDescriptorPayload("acct_1", "emp_1") },
+      ],
+    });
+
+    const snap = await buildEmployeeSnapshot(db.asClient(), "emp_1", "acct_1");
+    const json = JSON.stringify(snap);
+
+    expect(json).not.toContain("create_account");
+    expect(json).not.toContain("provision_employee");
+    expect(json).not.toContain("manager_tool:");
+    expect(json).not.toContain("manager_mcp");
+    expect(json).not.toContain("input_schema");
+    expect(json).not.toContain("\"input\"");
+    expect(json).not.toContain("ui_resource");
+    expect(json).not.toContain("owner@example.com");
+    expect(snap.work_events[0]?.work_event_descriptor?.deliverable).toMatchObject({
+      type: "recommendation",
+      title: "Create account",
+      refs: { approval_id: "appr_1" },
+    });
   });
 
   it("derives generic connection surfaces from connector rows and capability categories", async () => {

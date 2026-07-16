@@ -130,7 +130,7 @@ export function AgentClient({ employeeId, fixtureMode }: { employeeId: string; f
             setSelected((current) => current ?? defaultSelection(next));
             setStreamState("live");
           }
-        } catch { /* polling remains fallback */ }
+        } catch { /* ignore malformed stream chunks */ }
       });
       es.addEventListener("work_event", (event) => {
         try {
@@ -149,8 +149,7 @@ export function AgentClient({ employeeId, fixtureMode }: { employeeId: string; f
     }
 
     connect();
-    const pollTimer = window.setInterval(() => { void refresh(); }, 20000);
-    return () => { closed = true; es?.close(); window.clearInterval(pollTimer); };
+    return () => { closed = true; es?.close(); };
   }, [employeeId, fixtureMode, refresh, mergeWorkEvent]);
 
   const sendToEmployee = useCallback(async (text: string) => {

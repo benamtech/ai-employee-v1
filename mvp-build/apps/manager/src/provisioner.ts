@@ -53,6 +53,13 @@ export function smsPlan(req: ProvisionerRequest): {
   };
 }
 
+export function runtimeApiBaseUrl(req: ProvisionerRequest): string {
+  if (req.params.runtime_backend === "docker") {
+    return `http://amtech-hermes-${req.employee_id}:${req.params.gateway_port}`;
+  }
+  return `http://localhost:${req.params.gateway_port}`;
+}
+
 export function registerProvisionerRoutes(app: Hono): void {
   app.get("/provision/health", (c) => c.json({ status: "ok" }));
 
@@ -100,8 +107,8 @@ export function registerProvisionerRoutes(app: Hono): void {
         workspace_dir: rendered.workspace_dir,
         sms_number_e164: smsNumber ?? undefined,
         twilio_webhook_url: smsNumber ? req.params.webhook_url : undefined,
-        webchat_api_url: `http://localhost:${req.params.gateway_port}`,
-        api_base_url: `http://localhost:${req.params.gateway_port}`,
+        webchat_api_url: runtimeApiBaseUrl(req),
+        api_base_url: runtimeApiBaseUrl(req),
         api_session_id: "amtech-owner-thread",
         public_web_route: `/agent/${req.employee_id}`,
         gateway_port: req.params.gateway_port,

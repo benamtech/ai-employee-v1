@@ -37,6 +37,21 @@ describe("hermes-client resolveRuntimeApi", () => {
     expect(resolved.bearer).toBe("hermes-key");
   });
 
+  it("rewrites persisted localhost runtime URLs to Docker DNS for docker employees", async () => {
+    const db = makeFakeDb({
+      employees: [{ id: "emp_1", account_id: "acct_1" }],
+      runtime_endpoints: [{
+        id: "rt_1",
+        employee_id: "emp_1",
+        api_base_url: "http://localhost:8975",
+        backend_type: "docker",
+        gateway_port: 8975,
+      }],
+      runtime_endpoint_secrets: [{ runtime_endpoint_id: "rt_1", api_key_ref: sealSecret("k") }],
+    });
+    expect((await resolveRuntimeApi(db.asClient(), "emp_1")).baseUrl).toBe("http://amtech-hermes-emp_1:8975");
+  });
+
   it("throws when the runtime API row is missing", async () => {
     await expect(resolveRuntimeApi(makeFakeDb().asClient(), "emp_1")).rejects.toThrow("employee runtime API missing");
   });

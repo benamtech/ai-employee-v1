@@ -66,6 +66,29 @@ function cleanBaseUrl(value: string): string {
   return value.replace(/\/$/, "");
 }
 
+function dockerRuntimeBaseUrl(employeeId: string, gatewayPort: number): string {
+  return `http://amtech-hermes-${employeeId}:${gatewayPort}`;
+}
+
+function managerReachableBaseUrl(runtime: {
+  employee_id?: string | null;
+  api_base_url?: string | null;
+  webchat_api_url?: string | null;
+  backend_type?: string | null;
+  gateway_port?: number | null;
+}, employeeId: string): string | null {
+  const base = runtime.api_base_url ?? runtime.webchat_api_url ?? null;
+  if (
+    runtime.backend_type === "docker" &&
+    runtime.gateway_port &&
+    base &&
+    /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::|\/|$)/.test(base)
+  ) {
+    return dockerRuntimeBaseUrl(runtime.employee_id ?? employeeId, runtime.gateway_port);
+  }
+  return base;
+}
+
 function timeoutMs(): number {
   return Number(process.env.HERMES_TURN_TIMEOUT_MS ?? 120_000);
 }
@@ -114,7 +137,7 @@ export async function resolveRuntimeApi(db: SupabaseClient, employeeId: string):
   const runtime = orThrow(
     await db
       .from("runtime_endpoints")
-      .select("id,employee_id,api_base_url,webchat_api_url,api_session_id,api_session_key")
+      .select("id,employee_id,api_base_url,webchat_api_url,api_session_id,api_session_key,backend_type,gateway_port")
       .eq("employee_id", employeeId)
       .maybeSingle(),
     "runtime_endpoints.lookup",
@@ -125,9 +148,11 @@ export async function resolveRuntimeApi(db: SupabaseClient, employeeId: string):
     webchat_api_url?: string | null;
     api_session_id?: string | null;
     api_session_key?: string | null;
+    backend_type?: string | null;
+    gateway_port?: number | null;
   } | null;
   if (!runtime) throw new Error("employee runtime API missing");
-  const base = runtime.api_base_url ?? runtime.webchat_api_url;
+  const base = managerReachableBaseUrl(runtime, employeeId);
   if (!base) throw new Error("employee runtime API missing");
   const employee = orThrow(
     await db.from("employees").select("id,account_id").eq("id", employeeId).maybeSingle(),
