@@ -108,6 +108,15 @@ docker run -d --name amtech-tunnel --network host --restart unless-stopped \
 
 Use `--network host` so cloudflared can reach Caddy on `localhost:80`.
 
+The named tunnel must expose both public hostnames to the same local Caddy origin:
+
+- `agent.amtechai.com` for owner web onboarding, dashboard, and `/agent/*`.
+- `api.amtechai.com` for Manager health and provider callbacks such as Twilio SMS webhooks.
+
+Both Cloudflare pieces must exist: a DNS route/CNAME to the named tunnel, and a tunnel public-hostname
+ingress rule pointing the hostname to `http://localhost:80`. If `api.amtechai.com` returns a Cloudflare
+404 without `via: 1.1 Caddy`, DNS may exist but the tunnel ingress config is missing the API hostname.
+
 ## Health checks
 
 Core:
@@ -122,12 +131,14 @@ Caddy origin:
 
 ```bash
 curl -I http://127.0.0.1/create-ai-employee -H 'Host: agent.amtechai.com'
+curl -sS http://127.0.0.1/health -H 'Host: api.amtechai.com'
 ```
 
 Public ingress:
 
 ```bash
 curl -I -L https://agent.amtechai.com/create-ai-employee
+curl -sS https://api.amtechai.com/health
 ```
 
 Expected public proof includes:

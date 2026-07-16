@@ -25,6 +25,7 @@ const argValue = (name, fallback = undefined) => {
 };
 
 const webOrigin = argValue("--web-origin", process.env.PUBLIC_WEB_ORIGIN ?? "https://agent.amtechai.com");
+const apiOrigin = argValue("--api-origin", process.env.API_PUBLIC_ORIGIN ?? "https://api.amtechai.com");
 const managerHealthUrl = argValue("--manager-url", "http://127.0.0.1:8080");
 const webHealthUrl = argValue("--web-url", "http://127.0.0.1:3000");
 const caddyHealthUrl = argValue("--caddy-url", "http://127.0.0.1");
@@ -236,7 +237,7 @@ async function httpCheck(name, url, attempts = 30, headers = {}) {
     const started = Date.now();
     try {
       const res = await fetch(url, { headers, signal: AbortSignal.timeout(5000), redirect: "manual" });
-      last = { name, status: res.status < 500 ? "pass" : "fail", http_status: res.status, url, ms: Date.now() - started };
+      last = { name, status: res.status >= 200 && res.status < 400 ? "pass" : "fail", http_status: res.status, url, ms: Date.now() - started };
       if (last.status === "pass") return last;
     } catch (err) {
       last = { name, status: "fail", url, error: String(err?.message ?? err), ms: Date.now() - started };
@@ -244,6 +245,30 @@ async function httpCheck(name, url, attempts = 30, headers = {}) {
     await new Promise((resolveDelay) => setTimeout(resolveDelay, 2000));
   }
   return last ?? { name, status: "fail", url, error: "not_checked" };
+}
+
+function curlCheck(name, url, extraArgs = []) {
+  const result = spawnSync("curl", [
+    "-sS",
+    "-o",
+    "/dev/null",
+    "-w",
+    "%{http_code}",
+    "--max-time",
+    "10",
+    ...extraArgs,
+    url,
+  ], { cwd: root, encoding: "utf8" });
+  const statusCode = Number((result.stdout ?? "").trim());
+  return {
+    name,
+    status: result.status === 0 && statusCode >= 200 && statusCode < 400 ? "pass" : "fail",
+    http_status: Number.isFinite(statusCode) ? statusCode : null,
+    url,
+    command: `curl ${extraArgs.join(" ")} ${url}`.replace(/\s+/g, " ").trim(),
+    exit_code: result.status,
+    output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim().slice(0, 4000),
+  };
 }
 
 function dockerNetwork() {
@@ -280,7 +305,7 @@ function tunnelCheck(env) {
     "run",
   ], { env: { TUNNEL_TOKEN: token } });
   if (started.status !== "pass") return { ...started, name: "cloudflare_named_tunnel" };
-  return { name: "cloudflare_named_tunnel", status: "pass", container: tunnelContainerName, tunnel: tunnelName, token_source, public_host: webOrigin };
+  return { name: "cloudflare_named_tunnel", status: "pass", container: tunnelContainerName, tunnel: tunnelName, token_source, public_hosts: [webOrigin, apiOrigin] };
 }
 
 function writeProof(proof) {
@@ -302,9 +327,12 @@ if (!skipCompose) {
   checks.push(compose(upArgs, { stdio: "inherit" }));
   checks.push(await httpCheck("manager_health", `${managerHealthUrl.replace(/\/$/, "")}/health`));
   checks.push(await httpCheck("web_health", webHealthUrl));
-  checks.push(await httpCheck("caddy_agent_route", caddyHealthUrl, 10, { Host: "agent.amtechai.com" }));
+  checks.push(curlCheck("caddy_agent_route", "http://agent.amtechai.com/create-ai-employee", ["--resolve", "agent.amtechai.com:80:127.0.0.1"]));
+  checks.push(curlCheck("caddy_api_route", "http://api.amtechai.com/health", ["--resolve", "api.amtechai.com:80:127.0.0.1"]));
   checks.push(compose(["exec", "-T", "caddy", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]));
   checks.push(tunnelCheck(env));
+  checks.push(await httpCheck("public_agent_route", `${webOrigin.replace(/\/$/, "")}/create-ai-employee`, 10));
+  checks.push(await httpCheck("public_api_health", `${apiOrigin.replace(/\/$/, "")}/health`, 10));
 }
 
 const failed = checks.some((check) => check.status === "fail");
@@ -316,6 +344,7 @@ const proof = {
   host: hostname(),
   git_sha: gitSha(),
   public_origin: webOrigin,
+  public_api_origin: apiOrigin,
   compose_files: [composeFile, tunnelComposeFile],
   notes: {
     success_target: "brand-new normal employee only; public estimator scripts and ids are not acceptance evidence",

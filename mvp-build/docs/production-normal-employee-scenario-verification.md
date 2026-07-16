@@ -64,6 +64,17 @@ public browser
   -> amtech-hermes-<employee_id> runtime when owner messages the employee
 ```
 
+Provider callback path:
+
+```text
+Twilio webhook
+  -> Cloudflare HTTPS for api.amtechai.com
+  -> same named Cloudflare Tunnel
+  -> local Caddy on host :80
+  -> Manager /webhooks/twilio/<employee_id>
+  -> employee runtime via Manager-owned channel routing
+```
+
 VPS/direct production path:
 
 ```text
@@ -206,7 +217,9 @@ Core and ingress:
 docker ps -a --format '{{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}'
 curl -sS http://127.0.0.1:8080/health
 curl -I http://127.0.0.1/create-ai-employee -H 'Host: agent.amtechai.com'
+curl -sS http://127.0.0.1/health -H 'Host: api.amtechai.com'
 curl -I -L --max-time 30 https://agent.amtechai.com/create-ai-employee
+curl -sS --max-time 30 https://api.amtechai.com/health
 ```
 
 Production observer:
