@@ -33,6 +33,7 @@ export const MANAGER_API = {
     `/manager/artifacts/${employeeId}/${artifactId}/resolve`,
   previewResolve: "/manager/preview/resolve",
   previewAction: "/manager/preview/action",
+  ownerDashboard: "/manager/owner/dashboard",
   employeeResources: (employeeId: string) => `/manager/employee/${employeeId}/resources`,
   employeeStream: (employeeId: string) => `/manager/employee/${employeeId}/stream`,
   employeeHeartbeat: (employeeId: string) => `/manager/employee/${employeeId}/heartbeat`,

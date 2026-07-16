@@ -253,7 +253,18 @@ export function buildApp(): Hono {
       idempotency_key: input.idempotency_key,
     }, { actor: "manager" });
     if (outcome.kind === "invalid_input") return c.json(outcome.envelope, 400);
-    if (outcome.kind !== "ok") return c.json(failed("validation_failed", "The employee could not be started."), 400);
+    if (outcome.kind !== "ok") {
+      const envelope: ToolEnvelope | null = "envelope" in outcome ? outcome.envelope as ToolEnvelope : null;
+      return c.json(failed("validation_failed", "The employee could not be started.", {
+        account_id: input.account_id,
+        employee_id: envelope?.employee_id ?? null,
+        proof: {
+          provisioning_job_id: envelope?.proof.provisioning_job_id ?? null,
+          failure_state: envelope?.proof.failure_state ?? null,
+          failure_code: envelope?.proof.failure_code ?? null,
+        },
+      }), 400);
+    }
     if (outcome.envelope.status === "ok" || outcome.envelope.status === "pending") {
       await db
         .from("onboarding_sessions")
@@ -603,6 +614,41 @@ export function buildApp(): Hono {
       return c.json({ employee_id: employeeId, reply: turn.reply, turn_job_id: turn.job_id });
     }
     return c.json({ employee_id: employeeId, reply: "", status: turn.status, turn_job_id: turn.job_id, error: turn.error ?? null }, turn.status === "failed" ? 502 : 202);
+  });
+
+  app.post(MANAGER_API.ownerDashboard, async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const { owner_session_token } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    const session = await requireOwnerSession(db, owner_session_token);
+    if (!session) return c.json({ error: "owner_session_invalid" }, 401);
+    const { data: account } = await db
+      .from("accounts")
+      .select("id,display_name,slug,timezone,created_at")
+      .eq("id", session.account_id)
+      .maybeSingle();
+    const { data: employees } = await db
+      .from("employees")
+      .select("id,account_id,name,status,profile_id,web_route,profile_package_key,created_at")
+      .eq("account_id", session.account_id)
+      .order("created_at", { ascending: false });
+    const employeeIds = (employees ?? []).map((employee: { id: string }) => employee.id);
+    const { data: endpoints } = employeeIds.length
+      ? await db
+        .from("runtime_endpoints")
+        .select("employee_id,sms_number_e164,public_web_route,gateway_port,backend_type,health,created_at")
+        .in("employee_id", employeeIds)
+      : { data: [] };
+    const endpointByEmployee = new Map((endpoints ?? []).map((endpoint: { employee_id: string }) => [endpoint.employee_id, endpoint]));
+    return c.json({
+      account,
+      employees: (employees ?? []).map((employee: { id: string; web_route?: string | null }) => ({
+        ...employee,
+        runtime_endpoint: endpointByEmployee.get(employee.id) ?? null,
+        open_route: employee.web_route ?? `/agent/${employee.id}`,
+      })),
+    });
   });
 
   app.post("/manager/employee/:employeeId/heartbeat", async (c) => {

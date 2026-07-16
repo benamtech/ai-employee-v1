@@ -272,6 +272,8 @@ export function makeFakeDb(seed?: Record<string, Row[]>, options?: { uniques?: U
  *  makeFakeDb when a test needs dedupe/idempotency to actually bite. */
 export const SCHEMA_UNIQUES: UniqueSpec = {
   inbound_events: [["idempotency_key"]],
+  provisioning_jobs: [["idempotency_key"]],
+  verified_phones: [["account_id", "phone_e164"]],
   employee_turn_jobs: [["idempotency_key"]],
   delivery_decisions: [["employee_id", "intent_key"]],
   channel_sessions: [["employee_id", "channel"]],

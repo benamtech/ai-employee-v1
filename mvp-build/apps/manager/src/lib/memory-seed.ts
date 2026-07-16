@@ -1,6 +1,7 @@
 import type { ProfileContext, ProfileContextFact, ProfileContextSlot } from "@amtech/shared";
 
 const EMPTY = "_(learned as we go)_";
+const DEFAULT_MEMORY_LIMITS = { memory_chars: 2200, user_chars: 1375 };
 
 function confidenceRank(value?: string): number {
   if (value === "high") return 0;
@@ -83,9 +84,9 @@ export function renderProfileContextMarkdown(context: ProfileContext): string {
 }
 
 export function buildNativeMemoryFiles(context: ProfileContext): { memory_md: string; user_md: string } {
+  const limits = context.memory_limits ?? DEFAULT_MEMORY_LIMITS;
   return {
-    memory_md: renderSections(context, context.memory_limits.memory_chars, { includePointers: true }),
-    user_md: renderSections(context, context.memory_limits.user_chars, { includePointers: false }),
+    memory_md: renderSections(context, limits.memory_chars, { includePointers: true }),
+    user_md: renderSections(context, limits.user_chars, { includePointers: false }),
   };
 }
-

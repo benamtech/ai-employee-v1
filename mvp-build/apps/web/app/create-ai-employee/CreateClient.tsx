@@ -51,6 +51,7 @@ export function CreateAiEmployeeClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accountId, setAccountId] = useState("");
+  const [employeeHref, setEmployeeHref] = useState("");
   const [status, setStatus] = useState("");
   const [businessReady, setBusinessReady] = useState(false);
   const [missingFields, setMissingFields] = useState<string[]>([]);
@@ -333,8 +334,11 @@ export function CreateAiEmployeeClient() {
       const json = await res.json();
       setStatus(userFacingStatus(json, "I could not start the employee yet. Finish the missing setup items and try again."));
       if (json.status === "ok" || json.status === "pending") {
+        const employeeId = typeof json.employee_id === "string" ? json.employee_id : typeof json.proof?.employee_id === "string" ? json.proof.employee_id : "";
+        const href = typeof json.proof?.web_route === "string" ? json.proof.web_route : employeeId ? `/agent/${employeeId}` : "";
+        setEmployeeHref(href);
         setProvisionState("done");
-        appendMessage("employee", "The employee start request is in. Once it is live, you can open the owner chat and talk to it directly.");
+        appendMessage("employee", href ? "The employee is started. Open it now and send the first real work message." : "The employee start request is in. Once it is live, you can open the owner chat and talk to it directly.");
       } else {
         setProvisionState("error");
       }
@@ -412,6 +416,8 @@ export function CreateAiEmployeeClient() {
                 <strong>Start the employee</strong>
                 <div className="fl-row">
                   <button className="fl-btn red" disabled={!canProvision} onClick={provision}>{provisionState === "pending" ? "Starting..." : provisionState === "done" ? "Started" : "Start employee"}</button>
+                  {employeeHref ? <Link className="fl-btn" href={employeeHref}>Open employee</Link> : null}
+                  {employeeHref ? <Link className="fl-btn" href="/dashboard">Dashboard</Link> : null}
                 </div>
               </div>
             ) : null}

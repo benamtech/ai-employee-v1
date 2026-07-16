@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { provisioningTools } from "../../apps/manager/src/tools/provisioning.stub";
 import type { ToolContext } from "../../apps/manager/src/tools/types";
-import { makeFakeDb } from "./_helpers/fake-supabase";
+import { makeFakeDb, SCHEMA_UNIQUES } from "./_helpers/fake-supabase";
 
 /**
  * Call-site smoke test proving the runtime-backend admission guard added in
@@ -10,7 +10,15 @@ import { makeFakeDb } from "./_helpers/fake-supabase";
  * "local runtime backend admission" describe block for the guard's own logic).
  */
 
-const ENV_KEYS = ["NODE_ENV", "ALLOW_LOCAL_RUNTIME_BACKEND", "HERMES_BACKEND_TYPE", "AMTECH_CLIENTS_DIR"];
+const ENV_KEYS = [
+  "NODE_ENV",
+  "ALLOW_LOCAL_RUNTIME_BACKEND",
+  "HERMES_BACKEND_TYPE",
+  "AMTECH_CLIENTS_DIR",
+  "PROVISIONER_ORIGIN",
+  "PROVISIONER_TOKEN",
+  "SECRET_REF_MASTER_KEY",
+];
 let saved: Record<string, string | undefined>;
 
 beforeEach(() => {
@@ -46,11 +54,31 @@ const manifest = {
   employee_name: "Sam",
 };
 
+function ctx(db: ReturnType<typeof makeFakeDb>, accountId = "acct_1"): ToolContext {
+  return { db: db.asClient(), account_id: accountId, employee_id: null, actor: "manager" };
+}
+
+function allowProvisioner() {
+  process.env.ALLOW_LOCAL_RUNTIME_BACKEND = "1";
+  process.env.PROVISIONER_ORIGIN = "http://provisioner.test";
+  process.env.PROVISIONER_TOKEN = "provisioner-token";
+  process.env.SECRET_REF_MASTER_KEY = "test-secret-master-key";
+}
+
+function okProvisioner() {
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+    status: "ok",
+    profile_id: "client_from_provisioner",
+    validation_status: "passed",
+    validation_output: "profile ok",
+    logs: ["rendered", "started"],
+  }), { status: 200 })));
+}
+
 describe("provision_employee: runtime backend admission", () => {
   it("rejects HERMES_BACKEND_TYPE=local provisioning when ALLOW_LOCAL_RUNTIME_BACKEND is unset", async () => {
     const db = makeFakeDb();
-    const ctx: ToolContext = { db: db.asClient(), account_id: "acct_1", employee_id: null, actor: "manager" };
-    const result = await provisioningTools.provision_employee!(ctx, {
+    const result = await provisioningTools.provision_employee!(ctx(db), {
       account_id: "acct_1",
       manifest,
       idempotency_key: "idem_1",
@@ -63,8 +91,7 @@ describe("provision_employee: runtime backend admission", () => {
   it("allows HERMES_BACKEND_TYPE=local provisioning when explicitly opted in", async () => {
     process.env.ALLOW_LOCAL_RUNTIME_BACKEND = "1";
     const db = makeFakeDb();
-    const ctx: ToolContext = { db: db.asClient(), account_id: "acct_1", employee_id: null, actor: "manager" };
-    const result = await provisioningTools.provision_employee!(ctx, {
+    const result = await provisioningTools.provision_employee!(ctx(db), {
       account_id: "acct_1",
       manifest,
       idempotency_key: "idem_2",
@@ -75,5 +102,78 @@ describe("provision_employee: runtime backend admission", () => {
     expect(result.status).toBe("failed");
     expect(result.proof.failure_code).not.toBe("unauthorized");
     expect(db.tables.employees ?? []).toHaveLength(1); // the employee row IS written before the network call
+  });
+
+  it("preserves provisioner failure state, http status, and redacted logs", async () => {
+    allowProvisioner();
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+      status: "failed",
+      failure_state: "caddy_reload_failed",
+      logs: ["token=super-secret-value", "Caddy reload failed"],
+    }), { status: 500 })));
+    const db = makeFakeDb({}, { uniques: SCHEMA_UNIQUES });
+    const result = await provisioningTools.provision_employee!(ctx(db), {
+      account_id: "acct_1",
+      manifest,
+      idempotency_key: "idem_logs",
+    });
+    expect(result.status).toBe("failed");
+    expect(result.proof.failure_state).toBe("caddy_reload_failed");
+    expect(result.proof.http_status).toBe(500);
+    expect(db.tables.provisioning_jobs[0].failure_state).toBe("caddy_reload_failed");
+    expect(db.tables.provisioning_jobs[0].logs.join("\n")).toContain("token=[REDACTED]");
+    expect(db.tables.provisioning_jobs[0].logs.join("\n")).not.toContain("super-secret-value");
+    expect(db.tables.employee_profile_builds[0].validation_output).toContain("caddy_reload_failed");
+  });
+
+  it("retries a failed idempotency key by creating a fresh provisioning job", async () => {
+    allowProvisioner();
+    okProvisioner();
+    const db = makeFakeDb({
+      provisioning_jobs: [{
+        id: "pjob_failed",
+        account_id: "acct_1",
+        employee_id: "emp_failed",
+        idempotency_key: "acct_1:onb_1",
+        state: "failed",
+        failure_state: "provisioner_failed",
+        logs: [],
+      }],
+    }, { uniques: SCHEMA_UNIQUES });
+    const result = await provisioningTools.provision_employee!(ctx(db), {
+      account_id: "acct_1",
+      manifest,
+      idempotency_key: "acct_1:onb_1",
+    });
+    expect(result.status).toBe("ok");
+    expect(db.tables.provisioning_jobs).toHaveLength(2);
+    const retry = db.tables.provisioning_jobs.find((job) => job.id !== "pjob_failed")!;
+    expect(retry.state).toBe("success");
+    expect(retry.idempotency_key).toMatch(/^acct_1:onb_1:retry:pjob_/);
+    expect(retry.logs[0].retry_of_provisioning_job_id).toBe("pjob_failed");
+  });
+
+  it("creates separate employees, jobs, endpoints, and MCP credentials for repeated account provisions", async () => {
+    allowProvisioner();
+    okProvisioner();
+    const db = makeFakeDb({}, { uniques: SCHEMA_UNIQUES });
+    const first = await provisioningTools.provision_employee!(ctx(db), {
+      account_id: "acct_1",
+      manifest: { ...manifest, employee_name: "Sam" },
+      idempotency_key: "acct_1:onb_first",
+    });
+    const second = await provisioningTools.provision_employee!(ctx(db), {
+      account_id: "acct_1",
+      manifest: { ...manifest, employee_name: "Riley" },
+      idempotency_key: "acct_1:onb_second",
+    });
+    expect(first.status).toBe("ok");
+    expect(second.status).toBe("ok");
+    expect(db.tables.employees).toHaveLength(2);
+    expect(db.tables.provisioning_jobs).toHaveLength(2);
+    expect(db.tables.runtime_endpoints).toHaveLength(2);
+    expect(db.tables.employee_mcp_credentials).toHaveLength(2);
+    expect(new Set(db.tables.employees.map((row) => row.id)).size).toBe(2);
+    expect(new Set(db.tables.runtime_endpoints.map((row) => row.employee_id)).size).toBe(2);
   });
 });

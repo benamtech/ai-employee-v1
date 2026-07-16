@@ -45,6 +45,49 @@ function skipSmsProvisioning(): boolean {
   return process.env.PROVISIONER_SKIP_SMS === "1" || process.env.PROVISIONER_SKIP_SMS === "true";
 }
 
+function redactProvisionerText(value: unknown): string {
+  return String(value ?? "")
+    .replace(/(Bearer\s+)[A-Za-z0-9._~+/=-]+/gi, "$1[REDACTED]")
+    .replace(/((?:api[_-]?key|token|secret|password)[=:]\s*)[^\s,;]+/gi, "$1[REDACTED]")
+    .slice(0, 2000);
+}
+
+class ProvisionerCallError extends Error {
+  failure_state: string;
+  http_status: number;
+  logs: string[];
+
+  constructor(input: { failure_state: string; http_status: number; logs?: unknown[]; message?: string }) {
+    super(input.failure_state);
+    this.name = "ProvisionerCallError";
+    this.failure_state = input.failure_state;
+    this.http_status = input.http_status;
+    this.logs = (input.logs?.length ? input.logs : [input.message ?? input.failure_state]).map(redactProvisionerText);
+  }
+}
+
+function provisionerFailureDetails(err: unknown): { failure_state: string; http_status: number | null; logs: string[]; validation_output: string } {
+  if (err instanceof ProvisionerCallError) {
+    return {
+      failure_state: err.failure_state,
+      http_status: err.http_status,
+      logs: err.logs,
+      validation_output: JSON.stringify({
+        failure_state: err.failure_state,
+        http_status: err.http_status,
+        logs: err.logs,
+      }),
+    };
+  }
+  const message = redactProvisionerText((err as Error).message ?? err);
+  return {
+    failure_state: message,
+    http_status: null,
+    logs: [message],
+    validation_output: message,
+  };
+}
+
 async function callProvisioner(req: ProvisionerRequest): Promise<ProvisionerResult> {
   const origin = requiredEnv("PROVISIONER_ORIGIN").replace(/\/$/, "");
   const token = requiredEnv("PROVISIONER_TOKEN");
@@ -56,9 +99,18 @@ async function callProvisioner(req: ProvisionerRequest): Promise<ProvisionerResu
     },
     body: JSON.stringify(req),
   });
-  const json = (await res.json()) as ProvisionerResult;
+  const json = (await res.json().catch(() => ({
+    status: "failed",
+    failure_state: `provisioner_${res.status}`,
+    logs: [`Provisioner returned non-JSON response with HTTP ${res.status}.`],
+  }))) as ProvisionerResult;
   if (!res.ok || json.status !== "ok") {
-    throw new Error(json.failure_state ?? `provisioner_${res.status}`);
+    throw new ProvisionerCallError({
+      failure_state: json.failure_state ?? `provisioner_${res.status}`,
+      http_status: res.status,
+      logs: json.logs,
+      message: json.validation_output ?? json.smoke_output,
+    });
   }
   return json;
 }
@@ -95,7 +147,19 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
     .select("*")
     .eq("idempotency_key", input.idempotency_key)
     .maybeSingle();
-  if (existing.data) {
+  let effectiveIdempotencyKey = input.idempotency_key;
+  let retryOfProvisioningJobId: string | null = null;
+  if (existing.data && existing.data.account_id !== input.account_id) {
+    const audit_id = await writeAudit(ctx.db, {
+      account_id: input.account_id,
+      actor: ctx.actor,
+      action: "tool:provision_employee",
+      result: "failed",
+      details: { reason: "idempotency_key_account_mismatch", existing_job_id: existing.data.id },
+    });
+    return failed("idempotency_conflict", "Provisioning request belongs to a different account.", { account_id: input.account_id, audit_id });
+  }
+  if (existing.data && existing.data.state !== "failed") {
     return pending({
       account_id: input.account_id,
       employee_id: existing.data.employee_id ?? null,
@@ -103,6 +167,10 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
       user_facing_summary_hint: "Provisioning request already exists.",
       next_suggested_action: "Poll provisioning status.",
     });
+  }
+  if (existing.data?.state === "failed") {
+    retryOfProvisioningJobId = existing.data.id;
+    effectiveIdempotencyKey = `${input.idempotency_key}:retry:${newId(ID_PREFIX.provisioningJob)}`;
   }
 
   const employeeId = newId(ID_PREFIX.employee);
@@ -166,13 +234,18 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
     })));
   }
 
+  const jobStartLogs = [{
+    at: new Date().toISOString(),
+    message: "Provisioning requested.",
+    ...(retryOfProvisioningJobId ? { retry_of_provisioning_job_id: retryOfProvisioningJobId } : {}),
+  }];
   await ctx.db.from("provisioning_jobs").insert({
     id: jobId,
     account_id: input.account_id,
     employee_id: employeeId,
-    idempotency_key: input.idempotency_key,
+    idempotency_key: effectiveIdempotencyKey,
     state: "running",
-    logs: [{ at: new Date().toISOString(), message: "Provisioning requested." }],
+    logs: jobStartLogs,
   });
   const { data: pkg } = await ctx.db
     .from("profile_packages")
@@ -276,7 +349,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
     }).eq("id", buildId);
     await ctx.db.from("provisioning_jobs").update({
       state: "success",
-      logs: result.logs ?? [],
+      logs: [...jobStartLogs, ...(result.logs ?? [])],
       updated_at: new Date().toISOString(),
     }).eq("id", jobId);
 
@@ -315,17 +388,19 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
       audit_id,
     });
   } catch (err) {
+    const failure = provisionerFailureDetails(err);
     if (mcpCredentialId) await revokeEmployeeMcpCredential(ctx.db, mcpCredentialId).catch(() => {});
     await ctx.db.from("employees").update({ status: "failed" }).eq("id", employeeId);
     await ctx.db.from("employee_profile_builds").update({
       validation_status: "failed",
       install_status: "failed",
-      validation_output: String((err as Error).message ?? err),
+      validation_output: failure.validation_output,
       updated_at: new Date().toISOString(),
     }).eq("id", buildId);
     await ctx.db.from("provisioning_jobs").update({
       state: "failed",
-      failure_state: String((err as Error).message ?? err),
+      failure_state: failure.failure_state,
+      logs: failure.logs,
       updated_at: new Date().toISOString(),
     }).eq("id", jobId);
     const audit_id = await writeAudit(ctx.db, {
@@ -335,12 +410,21 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
       action: "tool:provision_employee",
       resource: employeeId,
       result: "failed",
-      details: { provisioning_job_id: jobId, message: String((err as Error).message ?? err) },
+      details: {
+        provisioning_job_id: jobId,
+        failure_state: failure.failure_state,
+        http_status: failure.http_status,
+        logs: failure.logs,
+      },
     });
     return failed("provider_error", "Provisioner failed to create a live employee.", {
       account_id: input.account_id,
       employee_id: employeeId,
-      proof: { provisioning_job_id: jobId },
+      proof: {
+        provisioning_job_id: jobId,
+        failure_state: failure.failure_state,
+        http_status: failure.http_status,
+      },
       audit_id,
     });
   }

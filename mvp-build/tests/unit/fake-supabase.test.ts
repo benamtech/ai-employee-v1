@@ -30,6 +30,17 @@ describe("fake-supabase: unique-index enforcement", () => {
     expect(db.tables.channel_sessions).toHaveLength(2);
   });
 
+  it("allows the same verified phone across accounts while preventing duplicates inside one account", async () => {
+    const db = makeFakeDb({}, { uniques: SCHEMA_UNIQUES });
+    const first = await db.from("verified_phones").insert({ id: "phone_1", account_id: "acct_1", phone_e164: "+18058869173" });
+    const secondAccount = await db.from("verified_phones").insert({ id: "phone_2", account_id: "acct_2", phone_e164: "+18058869173" });
+    const duplicateAccount = await db.from("verified_phones").insert({ id: "phone_3", account_id: "acct_1", phone_e164: "+18058869173" });
+    expect(first.error).toBeNull();
+    expect(secondAccount.error).toBeNull();
+    expect(duplicateAccount.error?.code).toBe("23505");
+    expect(db.tables.verified_phones).toHaveLength(2);
+  });
+
   it("leaves inserts unconstrained when no uniques are declared (back-compat)", async () => {
     const db = makeFakeDb();
     await db.from("inbound_events").insert({ id: "e1", idempotency_key: "same" });

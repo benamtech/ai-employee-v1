@@ -50,10 +50,18 @@ describe("profile context and native memory seed", () => {
     expect(memories.user_md).not.toContain("amtech://manager/business-brain");
   });
 
+  it("defaults missing native memory limits instead of crashing malformed profile contexts", () => {
+    const context = buildProfileContext({ packageKey: "contractor_estimator", manifest: manifest() });
+    delete (context as Partial<typeof context>).memory_limits;
+    const memories = buildNativeMemoryFiles(context);
+    expect(memories.memory_md).toContain("business_name: North Star Painting");
+    expect(memories.memory_md.length).toBeLessThanOrEqual(2200);
+    expect(memories.user_md.length).toBeLessThanOrEqual(1375);
+  });
+
   it("uses the generic package fallback without creating platform-specific types", () => {
     const context = buildProfileContext({ packageKey: "future_vertical", manifest: manifest({ profile_package_key: "future_vertical" }) });
     expect(context.package_key).toBe("future_vertical");
     expect(context.slots.map((slot) => slot.key)).toEqual(expect.arrayContaining(["business_identity", "workflows", "durable_facts"]));
   });
 });
-
