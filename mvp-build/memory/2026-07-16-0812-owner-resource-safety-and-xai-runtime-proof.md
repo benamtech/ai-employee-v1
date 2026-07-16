@@ -6,6 +6,11 @@ Scope: Hermes xAI custom provider rendering, owner resource payload safety, web 
 
 ## What changed
 
+- Added a production normal startup entrypoint after the live proof.
+  - `infra/scripts/production-normal-up.mjs` is the operator wrapper.
+  - `npm run prod:up` / `npm run prod:normal:up` starts the local production-like named-tunnel shape from `mvp-build`.
+  - `npm run prod:vps:normal:up` starts the direct live VPS shape using production Caddy/Compose.
+  - `docs/production-normal-vps-startup.md` maps the local command and the 8-core/64 GB VPS command to their scripts, compose files, and acceptance boundaries.
 - Fixed owner resource projection in `apps/manager/src/lib/employee-stream.ts`.
   - Browser snapshots now project capabilities from owner-safe abilities/connectors/runtime/policy nodes instead of exposing raw `manager_tool:*` nodes.
   - Work event rows are explicitly shaped as `WorkEventRow` instead of spreading raw `inbound_events`, preventing `normalized_payload` leaks.
@@ -72,6 +77,7 @@ Seams:
 ## Carry-forward / next
 
 1. Rebuild/restart the production-like stack again before creating another employee so commit `f1a30d3` is live in Manager.
+   - Completed after this handoff was first written: latest proof is `infra/proofs/prod-like-normal-up-2026-07-16T12-23-26-421Z.json`.
 2. Continue the public onboarding acceptance path from the live browser:
    - verify the web UI no longer receives full `/resources` payloads after heartbeat-only requests;
    - send an owner web message through the browser surface and confirm it returns instead of bad gateway;
@@ -91,6 +97,7 @@ npm run test:unit -- tests/unit/employee-stream.test.ts tests/unit/runtime-backe
 npm run typecheck --workspace @amtech/manager
 npm run typecheck --workspace @amtech/web
 npm run prod-like:normal:up -- --down-first --require-tunnel
+node --check infra/scripts/production-normal-up.mjs
 curl -sS http://127.0.0.1:8080/health
 curl -I -L --max-time 30 https://agent.amtechai.com/create-ai-employee
 docker ps -a --format '{{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Ports}}'
@@ -103,5 +110,5 @@ Manager health: {"status":"ok","tools":65,"expected":65}
 Public route: HTTP/2 200, server cloudflare, via 1.1 Caddy
 Direct message: HTTP 200, turn_4hoq2m3kuu3fz3bkjf2ff7
 Resource leak check: HTTP 200, forbidden []
+Startup wrapper committed: fb6b6bd (`npm run prod:up`, `npm run prod:vps:normal:up`)
 ```
-
