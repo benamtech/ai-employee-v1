@@ -18,6 +18,8 @@ const ENV_KEYS = [
   "PROVISIONER_ORIGIN",
   "PROVISIONER_TOKEN",
   "SECRET_REF_MASTER_KEY",
+  "MANAGER_API_ORIGIN",
+  "SMS_WEBHOOK_BASE_URL",
 ];
 let saved: Record<string, string | undefined>;
 
@@ -27,6 +29,8 @@ beforeEach(() => {
   process.env.AMTECH_CLIENTS_DIR = "/tmp/amtech-clients-test";
   process.env.HERMES_BACKEND_TYPE = "local";
   delete process.env.ALLOW_LOCAL_RUNTIME_BACKEND;
+  delete process.env.MANAGER_API_ORIGIN;
+  delete process.env.SMS_WEBHOOK_BASE_URL;
   // The guard rejects before any network call, but stub fetch anyway so a bug
   // in call-site ordering surfaces as an unexpected fetch rather than a
   // silent pass.
@@ -175,5 +179,30 @@ describe("provision_employee: runtime backend admission", () => {
     expect(db.tables.employee_mcp_credentials).toHaveLength(2);
     expect(new Set(db.tables.employees.map((row) => row.id)).size).toBe(2);
     expect(new Set(db.tables.runtime_endpoints.map((row) => row.employee_id)).size).toBe(2);
+  });
+
+  it("uses the public SMS webhook base for Twilio even when Manager origin is Docker-internal", async () => {
+    allowProvisioner();
+    process.env.MANAGER_API_ORIGIN = "http://manager:8080";
+    process.env.SMS_WEBHOOK_BASE_URL = "https://api.amtechai.com/webhooks/twilio/";
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({
+      status: "ok",
+      profile_id: "client_from_provisioner",
+      validation_status: "passed",
+      validation_output: "profile ok",
+      logs: ["rendered", "started"],
+    }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const db = makeFakeDb({}, { uniques: SCHEMA_UNIQUES });
+    const result = await provisioningTools.provision_employee!(ctx(db), {
+      account_id: "acct_1",
+      manifest,
+      idempotency_key: "acct_1:onb_public_webhook",
+    });
+    expect(result.status).toBe("ok");
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
+    expect(body.params.webhook_url).toMatch(/^https:\/\/api\.amtechai\.com\/webhooks\/twilio\/emp_/);
+    expect(body.params.webhook_url).not.toContain("manager:8080");
+    expect(db.tables.runtime_endpoints[0].twilio_webhook_url).toBe(body.params.webhook_url);
   });
 });

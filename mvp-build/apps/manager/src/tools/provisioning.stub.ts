@@ -45,6 +45,13 @@ function skipSmsProvisioning(): boolean {
   return process.env.PROVISIONER_SKIP_SMS === "1" || process.env.PROVISIONER_SKIP_SMS === "true";
 }
 
+function publicTwilioWebhookUrl(employeeId: string): string {
+  const webhookBase = process.env.SMS_WEBHOOK_BASE_URL?.replace(/\/$/, "");
+  if (webhookBase) return `${webhookBase}/${employeeId}`;
+  const managerOrigin = (process.env.MANAGER_API_ORIGIN ?? "https://api.amtechai.com").replace(/\/$/, "");
+  return `${managerOrigin}/webhooks/twilio/${employeeId}`;
+}
+
 function redactProvisionerText(value: unknown): string {
   return String(value ?? "")
     .replace(/(Bearer\s+)[A-Za-z0-9._~+/=-]+/gi, "$1[REDACTED]")
@@ -181,7 +188,7 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
   const portBase = Number(process.env.HERMES_GATEWAY_PORT_BASE ?? 8100);
   const port = gatewayPort(portBase, Math.floor(Math.random() * 1000) + 1);
   const baseDomain = process.env.PUBLIC_BASE_DOMAIN ?? "amtechai.com";
-  const webhookUrl = `${process.env.MANAGER_API_ORIGIN ?? "https://api.amtechai.com"}/webhooks/twilio/${employeeId}`;
+  const webhookUrl = publicTwilioWebhookUrl(employeeId);
   const workspaceDir = `${requiredEnv("AMTECH_CLIENTS_DIR")}/${employeeId}/workspace`;
   const packageKey = manifest.profile_package_key ?? "contractor_estimator";
   const runtimeBackend = resolveRuntimeBackend();

@@ -52,6 +52,13 @@ function clientSlug(id) {
   return id.replace(/^emp_/, "client-").slice(0, 40);
 }
 
+function publicTwilioWebhookUrl(employeeId) {
+  const webhookBase = process.env.SMS_WEBHOOK_BASE_URL?.replace(/\/$/, "");
+  if (webhookBase) return `${webhookBase}/${employeeId}`;
+  const managerOrigin = (process.env.MANAGER_API_ORIGIN ?? "https://api.amtechai.com").replace(/\/$/, "");
+  return `${managerOrigin}/webhooks/twilio/${employeeId}`;
+}
+
 async function db() {
   if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL missing");
   const client = new Client({ connectionString: process.env.DATABASE_URL });
@@ -107,7 +114,7 @@ function latestManifestParams(row, endpoint, build) {
     employee_name: params.employee_name ?? manifest.employee_name ?? row.employee_name ?? "Sage",
     timezone: params.timezone ?? manifest.timezone ?? "America/New_York",
     workspace_dir: params.workspace_dir ?? `${process.env.AMTECH_CLIENTS_DIR ?? "/var/lib/amtech/clients"}/${row.employee_id}/workspace`,
-    webhook_url: params.webhook_url ?? endpoint?.twilio_webhook_url ?? `${process.env.MANAGER_API_ORIGIN ?? "https://api.amtechai.com"}/webhooks/twilio/${row.employee_id}`,
+    webhook_url: params.webhook_url ?? endpoint?.twilio_webhook_url ?? publicTwilioWebhookUrl(row.employee_id),
     gateway_port: Number(params.gateway_port ?? endpoint?.gateway_port ?? env.API_SERVER_PORT),
     top_workflows: params.top_workflows ?? manifest.top_workflows ?? [],
     tools_mentioned: params.tools_mentioned ?? manifest.tools_mentioned ?? [],
