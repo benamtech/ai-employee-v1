@@ -9,7 +9,7 @@ one employee; the Manager is the invisible backend control plane.
 
 1. [`../identity.md`](../identity.md) — operating self-image (required, every session).
 2. [`../CODEGRAPH.md`](../CODEGRAPH.md) — workspace map + canonical facts.
-3. For live normal employee deploy/testing, read [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md) before any script docs. The launch proof path is public DNS/Cloudflare Tunnel -> Caddy -> real `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee -> live owner web client -> provider-backed reply; `local:*`, `live:*`, fixture mode, `/api/dev/login`, and `prod-like:public-estimator:*` are not launch proof.
+3. For live normal employee deploy/testing, read [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md) and the newest live-run handoff in [`memory/MEMORY.md`](memory/MEMORY.md) before any script docs. The launch proof path is public DNS/Cloudflare Tunnel -> Caddy -> real `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee -> live owner web client -> provider-backed reply + useful tool connections; `local:*`, `live:*`, fixture mode, `/api/dev/login`, and `prod-like:public-estimator:*` are not launch proof.
 4. [`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/) — the reconciled plan; the
    **forward roadmap is [`../wiki/MVP/build-plan-current/phases/`](../wiki/MVP/build-plan-current/phases/)**
    (Phase 0 baseline + Phases 1–13, dependency-ordered modular phases).

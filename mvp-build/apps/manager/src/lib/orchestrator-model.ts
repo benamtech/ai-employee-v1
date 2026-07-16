@@ -63,6 +63,15 @@ interface OpenAiCompatibleResponse {
   error?: { message?: string };
 }
 
+interface OpenAiCompatibleStreamChunk {
+  choices?: Array<{
+    delta?: {
+      content?: string | Array<{ type?: string; text?: string }>;
+    };
+  }>;
+  error?: { message?: string };
+}
+
 interface AnthropicResponse {
   content?: Array<{ type?: string; text?: string }>;
   error?: { message?: string };
@@ -122,10 +131,31 @@ const ONBOARDING_RESPONSE_SCHEMA = {
         business_kind: { type: "string" },
         timezone: { type: "string" },
         owner_name: { type: "string" },
-        owner_email: { type: "string" },
         employee_name: { type: "string" },
         top_workflows: { type: "array", items: { type: "string" } },
         tools_mentioned: { type: "array", items: { type: "string" } },
+        current_software: { type: "array", items: { type: "string" } },
+        field_service_platforms: { type: "array", items: { type: "string" } },
+        accounting_payment_tools: { type: "array", items: { type: "string" } },
+        website_setup: {
+          type: "object",
+          additionalProperties: true,
+          properties: {
+            platform: { type: "string" },
+            domain_status: { type: "string" },
+            known_notes: { type: "string" },
+          },
+        },
+        paid_ads: {
+          type: "object",
+          additionalProperties: true,
+          properties: {
+            uses_paid_ads: { type: "string", enum: ["yes", "no", "unknown"] },
+            channels: { type: "array", items: { type: "string" } },
+            known_notes: { type: "string" },
+          },
+        },
+        lead_sources: { type: "array", items: { type: "string" } },
         seed_skills: { type: "array", items: { type: "string" } },
         pricing_facts: { type: "array", items: sourcedFactSchema() },
         branding_facts: { type: "array", items: sourcedFactSchema() },
@@ -184,7 +214,7 @@ export function orchestratorModelConfig(env: NodeJS.ProcessEnv = process.env): O
           : "https://api.openai.com/v1")).replace(/\/$/, ""),
     model: env.ORCHESTRATOR_MODEL ?? env.xai_model ?? env.XAI_MODEL ?? (provider === "anthropic" ? "claude-haiku-4-5-20251001" : "gpt-4.1"),
     maxTokens: Number(env.ORCHESTRATOR_MAX_TOKENS ?? 1200),
-    temperature: Number(env.ORCHESTRATOR_TEMPERATURE ?? 0.2),
+    temperature: Number(env.ORCHESTRATOR_TEMPERATURE ?? 0.45),
     responseFormat: provider === "anthropic" ? "none" : responseFormat,
   };
 }
@@ -207,6 +237,7 @@ export function extractJson(text: string): LlmResponse {
 export function openAiCompatibleRequestBody(
   config: OrchestratorModelConfig,
   messages: OrchestratorModelMessage[],
+  overrides: Record<string, unknown> = {},
 ): Record<string, unknown> {
   return {
     model: config.model,
@@ -226,6 +257,7 @@ export function openAiCompatibleRequestBody(
         }
       : {}),
     ...(config.responseFormat === "json_object" ? { response_format: { type: "json_object" } } : {}),
+    ...overrides,
   };
 }
 
@@ -271,6 +303,10 @@ function contentToText(content: string | Array<{ type?: string; text?: string }>
   return "";
 }
 
+function streamChunkToText(chunk: OpenAiCompatibleStreamChunk): string {
+  return contentToText(chunk.choices?.[0]?.delta?.content);
+}
+
 export async function callOpenAiCompatibleModel(
   messages: OrchestratorModelMessage[],
   config = orchestratorModelConfig(),
@@ -302,4 +338,82 @@ export async function callOpenAiCompatibleModel(
   if (!res.ok) throw providerErrorFromResponse(res, json, config);
   const text = contentToText(json.choices?.[0]?.message?.content);
   return extractJson(text);
+}
+
+export async function streamOpenAiCompatibleText(
+  messages: OrchestratorModelMessage[],
+  config = orchestratorModelConfig(),
+  onDelta?: (delta: string) => Promise<void> | void,
+): Promise<string> {
+  if (config.provider === "anthropic") {
+    const res = await fetch(`${config.baseUrl}/messages`, {
+      method: "POST",
+      headers: {
+        "x-api-key": config.apiKey,
+        "anthropic-version": "2023-06-01",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(anthropicMessagesRequestBody({ ...config, responseFormat: "none" }, messages)),
+    });
+    const json = (await res.json()) as AnthropicResponse;
+    if (!res.ok) throw providerErrorFromResponse(res, json, config);
+    const text = contentToText(json.content);
+    if (text) await onDelta?.(text);
+    return text;
+  }
+
+  const res = await fetch(`${config.baseUrl}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: config.model,
+      messages,
+      max_tokens: config.maxTokens,
+      temperature: config.temperature,
+      stream: true,
+    }),
+  });
+  if (!res.ok) {
+    const json = (await res.json().catch(() => ({}))) as OpenAiCompatibleResponse;
+    throw providerErrorFromResponse(res, json, config);
+  }
+  if (!res.body) throw new Error("orchestrator_stream_missing_body");
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let sseBuffer = "";
+  let fullText = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    sseBuffer += decoder.decode(value, { stream: true });
+    const lines = sseBuffer.split(/\r?\n/);
+    sseBuffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const data = trimmed.slice(5).trim();
+      if (!data || data === "[DONE]") continue;
+      const chunk = JSON.parse(data) as OpenAiCompatibleStreamChunk;
+      if (chunk.error?.message) {
+        throw new OrchestratorProviderError({
+          status: 500,
+          provider: config.provider,
+          model: config.model,
+          baseUrl: config.baseUrl,
+          message: chunk.error.message,
+        });
+      }
+      const textDelta = streamChunkToText(chunk);
+      if (!textDelta) continue;
+      fullText += textDelta;
+      await onDelta?.(textDelta);
+    }
+  }
+
+  return fullText;
 }

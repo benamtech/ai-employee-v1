@@ -32,8 +32,12 @@ export const FLOW_CSS = `
   .fl-msg { max-width: 84%; border: 1px solid rgba(10,10,10,0.10); padding: 9px 12px; font-size: 15px; line-height: 1.5; }
   .fl-msg.owner { align-self: flex-end; background: #f4f4f4; }
   .fl-msg.fl-control { max-width: 100%; width: min(100%, 560px); background: #ffffff; border-color: rgba(225,29,42,0.35); }
+  .fl-msg.fl-control.done { border-color: rgba(10,10,10,0.10); background: #f8f8f8; }
+  .fl-msg.fl-control.error { border-color: rgba(225,29,42,0.70); }
+  .fl-msg.working { border-color: rgba(10,10,10,0.18); background: #fff; }
   .fl-msg.fl-control strong { display: block; font-size: 14px; margin-bottom: 3px; }
   .fl-msg .who { display: block; font-family: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(10,10,10,0.62); margin-bottom: 3px; }
+  .fl-step-state { font-family: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace; font-size: 11px; color: rgba(10,10,10,0.62); margin-top: 6px; }
   .fl-empty { color: rgba(10,10,10,0.62); font-size: 12px; align-self: center; margin: auto; }
   .fl-status { margin: 0; padding: 12px 24px 18px; font-family: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; line-height: 1.6; color: rgba(10,10,10,0.62); white-space: pre-wrap; word-break: break-word; border-top: 1px solid rgba(10,10,10,0.10); background: #f4f4f4; }
   .fl-status .lbl { display: block; font-size: 9px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; margin: 6px 0; color: #0a0a0a; }

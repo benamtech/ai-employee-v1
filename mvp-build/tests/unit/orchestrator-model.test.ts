@@ -16,6 +16,7 @@ describe("orchestrator model adapter", () => {
     expect(config.apiKey).toBe("sk-test");
     expect(config.baseUrl).toBe("https://api.openai.com/v1");
     expect(config.model).toBe("gpt-4.1");
+    expect(config.temperature).toBe(0.45);
     expect(config.responseFormat).toBe("json_schema");
   });
 
@@ -111,6 +112,25 @@ describe("orchestrator model adapter", () => {
       { role: "system", content: "Return JSON." },
       { role: "user", content: "{\"message\":\"hello\"}" },
     ]);
+    expect(JSON.stringify(body)).not.toContain("owner_email");
+  });
+
+  it("allows provider request overrides without changing the strict schema contract", () => {
+    const body = openAiCompatibleRequestBody(
+      {
+        provider: "openai_compatible",
+        apiKey: "sk-test",
+        baseUrl: "https://api.openai.com/v1",
+        model: "gpt-4.1",
+        maxTokens: 1200,
+        temperature: 0.2,
+        responseFormat: "json_schema",
+      },
+      [{ role: "user", content: "hello" }],
+      { stream: true },
+    );
+    expect(body.stream).toBe(true);
+    expect(body.response_format).toMatchObject({ type: "json_schema" });
   });
 
   it("builds an Anthropic messages request body with system text separated", () => {

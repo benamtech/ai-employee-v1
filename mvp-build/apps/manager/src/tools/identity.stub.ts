@@ -7,6 +7,7 @@ import {
   type CreateAccountInput,
   type SendPhoneVerificationInput,
   type CheckPhoneCodeInput,
+  type ToolFailureCode,
   type ToolName,
 } from "@amtech/shared";
 import type { ToolHandler } from "./types.js";
@@ -306,13 +307,17 @@ const createAccount: ToolHandler = async (ctx, raw) => {
     user_metadata: { account_id: accountId },
   });
   if (auth.error || !auth.data.user) {
+    const accountError = createAccountAuthError(auth.error?.message);
     const audit_id = await writeAudit(ctx.db, {
       actor: ctx.actor,
       action: "tool:create_account",
       result: "failed",
-      details: { reason: "supabase_auth_error", message: auth.error?.message },
+      details: { reason: accountError.reason, message: accountError.audit_message },
     });
-    return failed("provider_error", "Supabase could not create the account user.", { audit_id });
+    return failed(accountError.code, accountError.user_facing_summary_hint, {
+      audit_id,
+      user_facing_summary_hint: accountError.user_facing_summary_hint,
+    });
   }
 
   await ctx.db.from("accounts").insert({
@@ -387,6 +392,29 @@ const createAccount: ToolHandler = async (ctx, raw) => {
     audit_id,
   });
 };
+
+export function createAccountAuthError(message = ""): {
+  code: ToolFailureCode;
+  reason: string;
+  audit_message: string;
+  user_facing_summary_hint: string;
+} {
+  const lower = message.toLowerCase();
+  if (lower.includes("already") && lower.includes("registered")) {
+    return {
+      code: "account_email_already_registered",
+      reason: "account_email_already_registered",
+      audit_message: "email already registered",
+      user_facing_summary_hint: "That email already has an AMTECH account. Use a different email for this new employee setup.",
+    };
+  }
+  return {
+    code: "account_create_failed",
+    reason: "supabase_auth_error",
+    audit_message: message ? message.slice(0, 160) : "supabase auth create user failed",
+    user_facing_summary_hint: "I could not create the account. Try a different email and password, then run it again.",
+  };
+}
 
 export const identityTools: Partial<Record<ToolName, ToolHandler>> = {
   send_phone_verification: sendPhoneVerification,

@@ -40,6 +40,7 @@ export const FIXTURES = [
       "clean customer follow-up",
     ],
     tools: ["Gmail", "phone", "SMS approval", "QuickBooks", "job photos", "spreadsheets"],
+    operating_stack: "We use QuickBooks for books, Gmail/SMS for customer communication, a basic WordPress site, Google Business Profile, and a little Google Ads. No Jobber or ServiceTitan yet.",
     services: [
       "interior painting",
       "exterior painting",
@@ -63,6 +64,7 @@ export const FIXTURES = [
     friction: "turning walkthrough notes, texts, and photos into estimates and follow-ups while I'm on job sites",
     workflows: ["estimate write-ups", "quote follow-up", "bookkeeping and job-admin reminders"],
     tools: ["Gmail", "phone", "QuickBooks", "photos from customers"],
+    operating_stack: "QuickBooks handles the books, leads come from Google Business Profile and referrals, and the website is a simple Wix site. No paid ads right now.",
     services: ["interior repaints", "trim repainting", "small exterior touch-ups", "cabinet refinishing"],
   },
   {
@@ -78,6 +80,7 @@ export const FIXTURES = [
     friction: "people who go quiet after I email the estimate",
     workflows: ["estimate walkthroughs", "quote follow-up", "daily office reminders"],
     tools: ["Gmail", "phone", "a paper quote pad"],
+    operating_stack: "I mostly use Gmail, phone, and paper quotes. The website is old and I am not sure who hosts it. No paid ads, Jobber, ServiceTitan, QuickBooks, or Square.",
     services: ["interior repaints", "exterior repaints", "cabinet refinishing"],
   },
   {
@@ -93,6 +96,7 @@ export const FIXTURES = [
     friction: "writing up planting estimates at night and chasing deposits",
     workflows: ["design estimates", "deposit follow-up", "seasonal scheduling reminders"],
     tools: ["Gmail", "phone", "a whiteboard", "spreadsheets"],
+    operating_stack: "We use Google Business Profile, spreadsheets, Square for some deposits, and a Squarespace website. We tried Meta ads in spring but do not run them every month.",
     services: ["landscape design", "hardscape/patios", "plantings", "drainage"],
   },
   {
@@ -108,6 +112,7 @@ export const FIXTURES = [
     friction: "scoping jobs and remembering to follow up on the ones I bid weeks ago",
     workflows: ["bid write-ups", "follow-up on open bids", "material-order reminders"],
     tools: ["Gmail", "phone", "notes app"],
+    operating_stack: "I use Gmail, phone notes, and QuickBooks Self-Employed. I have a GoDaddy domain but no real website. Leads are referrals and some Facebook posts.",
     services: ["decks", "built-ins", "trim carpentry", "door/window install"],
   },
   {
@@ -123,6 +128,7 @@ export const FIXTURES = [
     friction: "juggling estimates and deposits while I'm out on job sites all day",
     workflows: ["estimate visits", "deposit invoicing follow-up", "install scheduling"],
     tools: ["Gmail", "phone", "QuickBooks"],
+    operating_stack: "QuickBooks for invoices, Gmail and phone for leads, Google Business Profile for search, and a custom site a local designer built. We have not used Jobber or ServiceTitan.",
     services: ["deck builds", "fence installs", "railings", "pergolas"],
   },
   {
@@ -138,6 +144,7 @@ export const FIXTURES = [
     friction: "so many small quotes and no-shows on scheduled washes",
     workflows: ["quick quotes", "appointment reminders", "review requests"],
     tools: ["Gmail", "phone", "a booking sheet"],
+    operating_stack: "Square for card payments, a Facebook page, Google Business Profile, no standalone website yet, and no paid ads beyond occasional boosted posts.",
     services: ["house soft-wash", "driveway/concrete", "roof cleaning", "gutter brightening"],
   },
 ];
@@ -186,6 +193,7 @@ export function conversationTurns(fx) {
   return [
     `Hey — I run a ${fx.business_kind.replace(/_/g, " ")} business in ${location} called ${fx.business_display_name}. ${fx.years} years in, ${fx.crew}.`,
     `The repeat computer work that eats my time is ${fx.workflows[0]} and ${fx.friction}. I mostly live in ${fx.tools.slice(0, 2).join(" and ")}.`,
+    `For software and marketing setup: ${fx.operating_stack}`,
     `We do ${fx.money_shape}. Ideal customer is ${fx.ideal_customer}. What really kills me is ${fx.friction}.`,
     `Let's call the assistant ${fx.employee_name}. ${fx.timezone.split("/")[1].replace("_", " ")} time, Eastern. I think that's everything you need.`,
   ];
@@ -207,6 +215,18 @@ export function bypassManifest(fx) {
     employee_name: fx.employee_name,
     top_workflows: fx.workflows,
     tools_mentioned: fx.tools,
+    current_software: fx.tools,
+    field_service_platforms: (fx.operating_stack.match(/Jobber|ServiceTitan|Housecall Pro/gi) ?? []),
+    accounting_payment_tools: (fx.operating_stack.match(/QuickBooks|Square|Stripe/gi) ?? []),
+    website_setup: {
+      known_notes: fx.operating_stack,
+    },
+    paid_ads: {
+      uses_paid_ads: /paid ads|Google Ads|Meta ads|boosted posts/i.test(fx.operating_stack) ? "yes" : "unknown",
+      channels: (fx.operating_stack.match(/Google Ads|Meta ads|Facebook|boosted posts/gi) ?? []),
+      known_notes: fx.operating_stack,
+    },
+    lead_sources: (fx.operating_stack.match(/Google Business Profile|referrals|Facebook|Google Ads|Meta ads/gi) ?? []),
     seed_skills: ["estimate", "invoice", "daily-checkin"],
     pricing_facts: [{ key: "local_test_rate", value: "Use conservative local-test assumptions until owner pricing is supplied.", confidence: "low" }],
     branding_facts: [{ key: "tone", value: "Plainspoken, contractor-friendly, concise.", confidence: "medium" }],
@@ -216,6 +236,7 @@ export function bypassManifest(fx) {
       team: fx.crew,
       repeat_computer_work: `${fx.workflows[0]} and ${fx.friction}.`,
       tools_in_use: fx.tools.join(", "),
+      operating_stack: fx.operating_stack,
       money_shape: fx.money_shape,
       ideal_customer: fx.ideal_customer,
       friction_customer: fx.friction,

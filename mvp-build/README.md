@@ -7,6 +7,11 @@
 > -> live owner web client -> provider-backed reply. Do **not** count
 > `local:*`, `live:*`, fixture mode, `/api/dev/login`, or
 > `prod-like:public-estimator:*` as launch proof.
+> Latest live status is in
+> [`memory/2026-07-16-0538-provisioner-failure-live-production-handoff.md`](memory/2026-07-16-0538-provisioner-failure-live-production-handoff.md):
+> xAI/Grok and public ingress are working, onboarding/account creation reached
+> Start Employee, and the current blocker is a provisioner failure/retry fix
+> before completing the full employee + tool-connection proof.
 
 Status: **the second-half plan's product surfaces are `source-wired` and the active owner MVP UI is now Avery-first — Home, Talk, Proof, Connected, Tell Avery, Needs your say, quiet Watching, exact approvals, and proof — with local fixture/headed UI proof. The broader product remains source-wired, not trial-ready: SMS signed Review, materialization/capability contracts, Connector Center/resurfacing, Gmail/Stripe/QuickBooks seams, MCP-UI cards, admin/ops scaffold, metering foundation, context-engineering substrate, and the Docker/Caddy runtime substrate are in source or locally proven as noted, but the remaining gap is the real VPS plus live provider/runtime acceptance (incl. funded provider-backed Hermes tool-loop proof). Admin-panel polish and billing remain parked. See [`docs/state-of-progress-2026-07-14.md`](docs/state-of-progress-2026-07-14.md) and [`CODEGRAPH.md`](CODEGRAPH.md) §3 for authoritative current status.** This is where the AMTECH AI Employee MVP gets built.
 

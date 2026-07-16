@@ -59,7 +59,9 @@ export type ToolFailureCode =
   | "provider_error"
   | "signature_invalid"
   | "idempotency_conflict"
-  | "entitlement_denied";
+  | "entitlement_denied"
+  | "account_create_failed"
+  | "account_email_already_registered";
 
 export interface ToolEnvelopeMeta {
   account_id?: string | null;
