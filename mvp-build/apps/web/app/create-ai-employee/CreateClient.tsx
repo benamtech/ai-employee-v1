@@ -40,7 +40,7 @@ const initialAssistantMessage = [
   "What business are we setting up, what work do you do, and what should this employee handle first?",
 ].join(" ");
 
-export function CreateAiEmployeeClient() {
+export function CreateAiEmployeeClient({ useCurrentAccount = false }: { useCurrentAccount?: boolean }) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [manifest, setManifest] = useState<Record<string, any>>({});
   const [messages, setMessages] = useState<ChatMessage[]>([{ id: "initial", role: "employee", body: initialAssistantMessage }]);
@@ -51,6 +51,7 @@ export function CreateAiEmployeeClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accountId, setAccountId] = useState("");
+  const [existingAccountName, setExistingAccountName] = useState("");
   const [employeeHref, setEmployeeHref] = useState("");
   const [status, setStatus] = useState("");
   const [businessReady, setBusinessReady] = useState(false);
@@ -65,6 +66,7 @@ export function CreateAiEmployeeClient() {
   const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inFlightRef = useRef(false);
   const sessionIdRef = useRef<string | null>(null);
+  const ownerContextAttachedRef = useRef<string | null>(null);
 
   const manifestBusinessName = typeof manifest.business_display_name === "string" ? manifest.business_display_name : "";
   const manifestTimezone = typeof manifest.timezone === "string" ? manifest.timezone : "America/New_York";
@@ -73,12 +75,18 @@ export function CreateAiEmployeeClient() {
   const accountReady = Boolean(accountId);
   const canSendPhone = Boolean(sessionId && businessReady && phone.trim() && !phoneReady && phoneSendState !== "pending");
   const canCheckCode = Boolean(verificationSent && code.trim() && !phoneReady && codeState !== "pending");
-  const canCreateAccount = Boolean(sessionId && businessReady && phoneReady && email.trim() && password && accountState !== "pending" && !accountReady);
+  const canCreateAccount = Boolean(!useCurrentAccount && sessionId && businessReady && phoneReady && email.trim() && password && accountState !== "pending" && !accountReady);
   const canProvision = Boolean(sessionId && accountId && phoneReady && provisionState !== "pending");
 
   useEffect(() => {
     sessionIdRef.current = sessionId;
   }, [sessionId]);
+
+  useEffect(() => {
+    if (!useCurrentAccount || !sessionId || ownerContextAttachedRef.current === sessionId) return;
+    ownerContextAttachedRef.current = sessionId;
+    void attachOwnerContext(sessionId);
+  }, [sessionId, useCurrentAccount]);
 
   useEffect(() => {
     return () => {
@@ -109,6 +117,30 @@ export function CreateAiEmployeeClient() {
       setStatus(`Still needed: ${nextMissing.join(", ")}.`);
     } else {
       setStatus("");
+    }
+  }
+
+  async function attachOwnerContext(nextSessionId: string) {
+    try {
+      const res = await fetch("/api/front-door/owner-context", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: nextSessionId }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.status !== "ok" || !json.account?.id) {
+        setStatus("Open this from the dashboard to create another employee for the current account.");
+        return;
+      }
+      setAccountId(json.account.id);
+      setExistingAccountName(json.account.display_name ?? "current account");
+      setAccountState("done");
+      if (json.owner?.email) setEmail(json.owner.email);
+      if (json.verified_phone?.id) setVerifiedPhoneRef(json.verified_phone.id);
+      if (json.verified_phone?.phone_e164) setPhone(json.verified_phone.phone_e164);
+      setStatus(`This employee will be added to ${json.account.display_name ?? "the current account"}.`);
+    } catch {
+      setStatus("I could not confirm the current account. Open Dashboard and try Create another again.");
     }
   }
 
@@ -377,7 +409,7 @@ export function CreateAiEmployeeClient() {
               </div>
             ) : null}
 
-            {businessReady ? (
+            {businessReady && !useCurrentAccount ? (
               <div className={`fl-msg fl-control ${phoneReady ? "done" : phoneSendState === "error" || codeState === "error" ? "error" : ""}`}>
                 <span className="who">Secure step</span>
                 <strong>{phoneReady ? "Phone verified" : "Verify your phone"}</strong>
@@ -396,7 +428,7 @@ export function CreateAiEmployeeClient() {
               </div>
             ) : null}
 
-            {phoneReady ? (
+            {phoneReady && !useCurrentAccount ? (
               <div className={`fl-msg fl-control ${accountReady ? "done" : accountState === "error" ? "error" : ""}`}>
                 <span className="who">Secure step</span>
                 <strong>{accountReady ? "Owner account created" : "Create owner account"}</strong>
@@ -413,7 +445,7 @@ export function CreateAiEmployeeClient() {
             {accountReady ? (
               <div className="fl-msg fl-control">
                 <span className="who">Launch</span>
-                <strong>Start the employee</strong>
+                <strong>{useCurrentAccount ? `Start another employee${existingAccountName ? ` for ${existingAccountName}` : ""}` : "Start the employee"}</strong>
                 <div className="fl-row">
                   <button className="fl-btn red" disabled={!canProvision} onClick={provision}>{provisionState === "pending" ? "Starting..." : provisionState === "done" ? "Started" : "Start employee"}</button>
                   {employeeHref ? <Link className="fl-btn" href={employeeHref}>Open employee</Link> : null}

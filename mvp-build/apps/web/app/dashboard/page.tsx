@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       <header className="dash-bar">
         <Link className="dash-logo" href="/">AMTECH<span>.</span></Link>
         <nav className="dash-nav" aria-label="Owner navigation">
-          <Link href="/create-ai-employee">New employee</Link>
+          <Link href="/create-ai-employee?account=current">New employee</Link>
           <Link href="/dashboard">Dashboard</Link>
         </nav>
       </header>
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
         <section className="dash-panel">
           <div className="dash-panel-head">
             <h2>Employees</h2>
-            <Link className="dash-btn" href="/create-ai-employee">Create another</Link>
+            <Link className="dash-btn" href="/create-ai-employee?account=current">Create another</Link>
           </div>
           {employees.length ? (
             <div className="dash-list">

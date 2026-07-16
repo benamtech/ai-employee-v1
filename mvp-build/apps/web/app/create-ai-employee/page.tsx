@@ -5,6 +5,7 @@ export const metadata = {
   description: "Four short steps: tell it about the business, prove your phone, claim the account, and it goes to work.",
 };
 
-export default function CreateAiEmployee() {
-  return <CreateAiEmployeeClient />;
+export default async function CreateAiEmployee({ searchParams }: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  return <CreateAiEmployeeClient useCurrentAccount={params?.account === "current"} />;
 }

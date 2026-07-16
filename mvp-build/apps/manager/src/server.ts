@@ -274,6 +274,77 @@ export function buildApp(): Hono {
     return c.json(outcome.envelope);
   });
 
+  app.post("/manager/onboarding/owner-context", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const { owner_session_token, session_id } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    const ownerSession = await requireOwnerSession(db, owner_session_token);
+    if (!ownerSession) return c.json({ error: "owner_session_invalid" }, 401);
+
+    const { data: account } = await db
+      .from("accounts")
+      .select("id,display_name,timezone")
+      .eq("id", ownerSession.account_id)
+      .maybeSingle();
+    const { data: user } = await db
+      .from("users")
+      .select("email,full_name")
+      .eq("id", ownerSession.user_id)
+      .maybeSingle();
+    const { data: phone } = await db
+      .from("verified_phones")
+      .select("id,phone_e164,verification_method,consent_channel,verified_at")
+      .eq("account_id", ownerSession.account_id)
+      .order("verified_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (session_id) {
+      const { data: onboarding } = await db
+        .from("onboarding_sessions")
+        .select("manifest_draft")
+        .eq("id", String(session_id))
+        .maybeSingle();
+      if (onboarding) {
+        await db
+          .from("onboarding_sessions")
+          .update({
+            account_id: ownerSession.account_id,
+            manifest_draft: {
+              ...((onboarding.manifest_draft as Record<string, unknown> | null) ?? {}),
+              account_id: ownerSession.account_id,
+              owner_email: typeof user?.email === "string" ? user.email : undefined,
+              owner_name: typeof user?.full_name === "string" && user.full_name.trim() ? user.full_name : undefined,
+              timezone: typeof account?.timezone === "string" ? account.timezone : "America/New_York",
+              ...(phone?.id ? { verified_phone_ref: phone.id } : {}),
+              ...(phone?.phone_e164 ? { verified_phone_e164: phone.phone_e164 } : {}),
+              verification_method: typeof phone?.verification_method === "string" ? phone.verification_method : "twilio_verify",
+              consent_channel: typeof phone?.consent_channel === "string" ? phone.consent_channel : "web",
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", String(session_id));
+      }
+    }
+
+    return c.json({
+      status: "ok",
+      account: account ? {
+        id: account.id,
+        display_name: account.display_name,
+        timezone: account.timezone,
+      } : { id: ownerSession.account_id },
+      owner: user ? { email: user.email, full_name: user.full_name ?? null } : null,
+      verified_phone: phone ? {
+        id: phone.id,
+        phone_e164: phone.phone_e164,
+        verification_method: phone.verification_method,
+        consent_channel: phone.consent_channel,
+      } : null,
+    });
+  });
+
   // Backend tool invocation (front door / employee → Manager).
   app.post("/manager/tools/:name", async (c) => {
     const denied = denyInternal(c);
