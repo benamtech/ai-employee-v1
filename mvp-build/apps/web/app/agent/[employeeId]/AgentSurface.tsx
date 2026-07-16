@@ -90,18 +90,18 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
   const workEvents = (res?.work_events ?? []).slice(0, 12);
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      <header className="border-b border-neutral-800 px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-[#F7F9FC] text-[#111111]">
+      <header className="border-b border-black/10 bg-white/80 backdrop-blur-xl px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="font-semibold tracking-tight">Avery</div>
-          <div className="text-xs px-2 py-0.5 rounded bg-neutral-800 text-neutral-400">your employee</div>
+          <div className="text-xs px-2 py-0.5 rounded bg-black/5 text-black/60">your employee</div>
         </div>
         <nav className="flex gap-1 text-sm">
           {VIEWS.map(v => (
             <button
               key={v.id}
               onClick={() => setView(v.id)}
-              className={`px-3 py-1 rounded transition ${view === v.id ? "bg-white text-black" : "hover:bg-neutral-900"}`}
+              className={`px-3 py-1 rounded transition ${view === v.id ? "bg-[#E11D2A] text-white" : "hover:bg-black/5"}`}
             >
               {v.label}
             </button>
@@ -110,29 +110,29 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
       </header>
 
       <div className="max-w-4xl mx-auto p-6">
-        {status && <div className="mb-4 text-sm text-amber-400">{status}</div>}
-        {progress && <div className="mb-4 text-xs text-emerald-400">Avery is working: {progress}</div>}
+        {status && <div className="mb-4 text-sm text-amber-600">{status}</div>}
+        {progress && <div className="mb-4 text-xs text-[#168A57]">Avery is working: {progress}</div>}
 
         {/* HOME — attention first, then live work objects */}
         {view === "home" && (
           <div className="space-y-8">
             <section>
-              <div className="text-xs uppercase tracking-[2px] text-neutral-500 mb-3">Needs your say</div>
-              {attention.length === 0 && <div className="text-sm text-neutral-500">Nothing waiting right now.</div>}
+              <div className="text-xs uppercase tracking-[2px] text-black/50 mb-3">Needs your say</div>
+              {attention.length === 0 && <div className="text-sm text-black/50">Nothing waiting right now.</div>}
               {attention.map((item, idx) => (
-                <div key={idx} className="mb-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+                <div key={idx} className="mb-3 rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
                   <div className="font-medium">{item.title}</div>
-                  <div className="text-sm text-neutral-400 mt-1">{item.why}</div>
+                  <div className="text-sm text-black/60 mt-1">{item.why}</div>
                 </div>
               ))}
             </section>
 
             <section>
-              <div className="text-xs uppercase tracking-[2px] text-neutral-500 mb-3">Recent work</div>
-              {workEvents.length === 0 && <div className="text-sm text-neutral-500">No recent events.</div>}
+              <div className="text-xs uppercase tracking-[2px] text-black/50 mb-3">Recent work</div>
+              {workEvents.length === 0 && <div className="text-sm text-black/50">No recent events.</div>}
               {workEvents.map((ev: WorkEventRow, idx: number) => (
-                <div key={idx} className="mb-2 text-sm border-l-2 border-neutral-700 pl-3 text-neutral-300">
-                  {ev.summary ?? ev.event_type}
+                <div key={idx} className="mb-2 text-sm border-l-2 border-black/20 pl-3 text-black/70">
+                  {(ev.work_event_descriptor as any)?.title ?? ev.event_type}
                 </div>
               ))}
             </section>
@@ -142,29 +142,29 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
         {/* TALK — command language only */}
         {view === "talk" && (
           <div className="space-y-4">
-            <div className="text-xs uppercase tracking-[2px] text-neutral-500">Tell Avery what happened or what you need</div>
+            <div className="text-xs uppercase tracking-[2px] text-black/50">Tell Avery what happened or what you need</div>
             <div className="flex gap-2">
               <input
-                className="flex-1 bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-sm outline-none"
+                className="flex-1 bg-white border border-black/10 rounded-2xl px-4 py-3 text-sm outline-none placeholder:text-black/40"
                 placeholder="e.g. Customer just paid the deposit"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               />
-              <button onClick={sendMessage} className="px-6 rounded-xl bg-white text-black text-sm">Send</button>
+              <button onClick={sendMessage} className="px-6 rounded-2xl bg-[#E11D2A] text-white text-sm">Send</button>
             </div>
-            <div className="text-[10px] text-neutral-500">Chat is the command language. Avery will create work objects, ask for approval, and leave proof.</div>
+            <div className="text-[10px] text-black/50">Chat is the command language. Avery will create work objects, ask for approval, and leave proof.</div>
           </div>
         )}
 
         {/* PROOF — audit + what left the business */}
         {view === "proof" && (
           <div>
-            <div className="text-xs uppercase tracking-[2px] text-neutral-500 mb-3">Proof ledger</div>
-            {approvals.length === 0 && <div className="text-sm text-neutral-500">No approvals yet.</div>}
+            <div className="text-xs uppercase tracking-[2px] text-black/50 mb-3">Proof ledger</div>
+            {approvals.length === 0 && <div className="text-sm text-black/50">No approvals yet.</div>}
             {approvals.map((a, idx) => (
-              <div key={idx} className="mb-2 text-sm border-l-2 border-emerald-700 pl-3 text-neutral-300">
-                {a.kind} — {a.status}
+              <div key={idx} className="mb-2 text-sm border-l-2 border-[#168A57] pl-3 text-black/70">
+                {a.action_key} — {a.summary}
               </div>
             ))}
           </div>
@@ -173,8 +173,8 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
         {/* CONNECTED — accounts & connectors */}
         {view === "connected" && (
           <div>
-            <div className="text-xs uppercase tracking-[2px] text-neutral-500 mb-3">Connected systems</div>
-            <div className="text-sm text-neutral-500">Connector status and health will appear here.</div>
+            <div className="text-xs uppercase tracking-[2px] text-black/50 mb-3">Connected systems</div>
+            <div className="text-sm text-black/50">Connector status and health will appear here.</div>
           </div>
         )}
       </div>
