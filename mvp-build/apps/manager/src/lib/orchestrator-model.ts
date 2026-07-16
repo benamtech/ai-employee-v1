@@ -109,13 +109,14 @@ export function orchestratorModelConfig(env: NodeJS.ProcessEnv = process.env): O
   const provider = env.ORCHESTRATOR_PROVIDER === "anthropic" ? "anthropic" : "openai_compatible";
   const firstNonBlank = (...values: Array<string | undefined>): string | undefined =>
     values.find((value) => value !== undefined && value.trim() !== "");
+  const xaiConfigured = firstNonBlank(env.XAI_API_KEY, env.xai_api_key, env.XAI_MODEL, env.xai_model);
   const apiKey = provider === "anthropic"
     ? firstNonBlank(env.ORCHESTRATOR_API_KEY, env.ANTHROPIC_API_KEY)
-    : firstNonBlank(env.ORCHESTRATOR_API_KEY, env.XAI_API_KEY, env.OPENAI_API_KEY);
+    : firstNonBlank(env.ORCHESTRATOR_API_KEY, env.XAI_API_KEY, env.xai_api_key, env.OPENAI_API_KEY, env.openai_api_key);
   if (!apiKey) {
     throw new Error(provider === "anthropic"
       ? "ORCHESTRATOR_API_KEY or ANTHROPIC_API_KEY missing."
-      : "ORCHESTRATOR_API_KEY, XAI_API_KEY, or OPENAI_API_KEY missing.");
+      : "ORCHESTRATOR_API_KEY, XAI_API_KEY, xai_api_key, or OPENAI_API_KEY missing.");
   }
   const responseFormat =
     env.ORCHESTRATOR_RESPONSE_FORMAT === "none" || env.ORCHESTRATOR_RESPONSE_FORMAT === "json_object"
@@ -125,8 +126,13 @@ export function orchestratorModelConfig(env: NodeJS.ProcessEnv = process.env): O
   return {
     provider,
     apiKey,
-    baseUrl: (env.ORCHESTRATOR_API_BASE_URL ?? (provider === "anthropic" ? "https://api.anthropic.com/v1" : "https://api.openai.com/v1")).replace(/\/$/, ""),
-    model: env.ORCHESTRATOR_MODEL ?? (provider === "anthropic" ? "claude-haiku-4-5-20251001" : "gpt-4.1"),
+    baseUrl: (env.ORCHESTRATOR_API_BASE_URL
+      ?? (provider === "anthropic"
+        ? "https://api.anthropic.com/v1"
+        : xaiConfigured
+          ? "https://api.x.ai/v1"
+          : "https://api.openai.com/v1")).replace(/\/$/, ""),
+    model: env.ORCHESTRATOR_MODEL ?? env.xai_model ?? env.XAI_MODEL ?? (provider === "anthropic" ? "claude-haiku-4-5-20251001" : "gpt-4.1"),
     maxTokens: Number(env.ORCHESTRATOR_MAX_TOKENS ?? 1200),
     temperature: Number(env.ORCHESTRATOR_TEMPERATURE ?? 0.2),
     responseFormat: provider === "anthropic" ? "none" : responseFormat,

@@ -144,7 +144,7 @@ Every claimed capability must leave provider-backed proof (Twilio SID, Gmail/Str
 - **Single VPS** runs Hermes (Python engine), Docker-contained employee runtimes, the Manager, per-employee gateways, Caddy, and the Next.js web app (`next start`). Production-like laptop testing also uses Docker + Caddy/tunnel; the `local` backend is dev/demo only.
 - **Twilio Verify** for phone; **10DLC long codes** for employee/front-door numbers (A2P registration is a long-lead item — start Day 1).
 - Front door: **web + SMS both** (built in Phase 1).
-- Front-door model call: **OpenAI-compatible Chat Completions workflow** with strict `json_schema` structured output by default (`ORCHESTRATOR_API_BASE_URL`, `ORCHESTRATOR_API_KEY`/`XAI_API_KEY`/`OPENAI_API_KEY`, `ORCHESTRATOR_MODEL`) so OpenAI, Grok/xAI, or compatible providers can be swapped without rewriting onboarding state logic.
+- Front-door model call: **OpenAI-compatible Chat Completions workflow** with strict `json_schema` structured output by default (`ORCHESTRATOR_API_BASE_URL`, `ORCHESTRATOR_API_KEY`/`XAI_API_KEY`/`xai_api_key`/`OPENAI_API_KEY`, `ORCHESTRATOR_MODEL`/`xai_model`) so OpenAI, Grok/xAI, or compatible providers can be swapped without rewriting onboarding state logic. Current prod default is xAI/Grok.
 
 ## Layout
 ```

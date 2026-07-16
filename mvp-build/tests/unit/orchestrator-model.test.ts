@@ -29,6 +29,16 @@ describe("orchestrator model adapter", () => {
     expect(config.model).toBe("grok-4.3");
   });
 
+  it("accepts lowercase xAI aliases and defaults the base URL to xAI when xAI env is present", () => {
+    const config = orchestratorModelConfig({
+      xai_api_key: "xai-test",
+      xai_model: "grok-4.3",
+    });
+    expect(config.apiKey).toBe("xai-test");
+    expect(config.baseUrl).toBe("https://api.x.ai/v1");
+    expect(config.model).toBe("grok-4.3");
+  });
+
   it("allows provider base URL, model, and response_format override", () => {
     const config = orchestratorModelConfig({
       ORCHESTRATOR_API_KEY: "provider-key",
