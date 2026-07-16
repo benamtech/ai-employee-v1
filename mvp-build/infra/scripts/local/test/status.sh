@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Token-efficient health of the whole live-test stack in one compact block.
-# Prints service codes, the warm-Haiku count, employee containers, and per-employee
-# tool-wiring (does the rendered config.yaml attach the Manager MCP tools?).
+# Prints service codes, provider/model wiring, employee containers, and per-employee
+# tool-wiring. Loads the same selective local + provider env as live:up.
 # Run:  bash infra/scripts/local/test/status.sh   (or: npm run live:status)
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "$HERE/_lib.sh"
+load_env
 
 m="$(http_code http://localhost:8080/health)"; w="$(http_code http://localhost:3000/)"
 if [ "${LOCAL_MODEL_BRIDGE:-}" = "1" ]; then

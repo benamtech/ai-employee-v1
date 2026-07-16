@@ -1,0 +1,25 @@
+{
+	auto_https off
+}
+
+# AMTECH Caddy origin config for Cloudflare Tunnel.
+# Cloudflare terminates public HTTPS for agent.amtechai.com and forwards HTTP
+# to this Caddy origin, keeping Caddy in the routing path without local ACME.
+
+http://amtechai.com, http://www.amtechai.com {
+	reverse_proxy {$WEB_UPSTREAM:web:3000}
+}
+
+http://agent.amtechai.com {
+	reverse_proxy {$WEB_UPSTREAM:web:3000}
+}
+
+http://localhost, http://127.0.0.1 {
+	reverse_proxy {$WEB_UPSTREAM:web:3000}
+}
+
+http://api.amtechai.com {
+	reverse_proxy {$MANAGER_UPSTREAM:manager:8080}
+}
+
+import ./clients/*.caddy

@@ -157,6 +157,28 @@ const checkPhoneCode: ToolHandler = async (ctx, raw) => {
       consent_channel: "web",
       twilio_proof: { verification_attempt_id: input.verification_attempt_id, dev_bypass: true },
     });
+    if (attempt.onboarding_session_id) {
+      const { data: session } = await ctx.db
+        .from("onboarding_sessions")
+        .select("manifest_draft")
+        .eq("id", attempt.onboarding_session_id)
+        .maybeSingle();
+      await ctx.db
+        .from("onboarding_sessions")
+        .update({
+          state: "phone_verified",
+          phone_e164: attempt.phone_e164,
+          manifest_draft: {
+            ...((session?.manifest_draft as Record<string, unknown> | null) ?? {}),
+            verified_phone_ref: phoneId,
+            verified_phone_e164: attempt.phone_e164,
+            verification_method: "twilio_verify",
+            consent_channel: "web",
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", attempt.onboarding_session_id);
+    }
     const audit_id = await writeAudit(ctx.db, {
       actor: ctx.actor,
       action: "tool:check_phone_code",
@@ -199,6 +221,28 @@ const checkPhoneCode: ToolHandler = async (ctx, raw) => {
       consent_channel: "web",
       twilio_proof: { verification_attempt_id: input.verification_attempt_id, ...proof },
     });
+    if (attempt.onboarding_session_id) {
+      const { data: session } = await ctx.db
+        .from("onboarding_sessions")
+        .select("manifest_draft")
+        .eq("id", attempt.onboarding_session_id)
+        .maybeSingle();
+      await ctx.db
+        .from("onboarding_sessions")
+        .update({
+          state: "phone_verified",
+          phone_e164: attempt.phone_e164,
+          manifest_draft: {
+            ...((session?.manifest_draft as Record<string, unknown> | null) ?? {}),
+            verified_phone_ref: phoneId,
+            verified_phone_e164: attempt.phone_e164,
+            verification_method: "twilio_verify",
+            consent_channel: "web",
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", attempt.onboarding_session_id);
+    }
     const audit_id = await writeAudit(ctx.db, {
       actor: ctx.actor,
       action: "tool:check_phone_code",
@@ -293,6 +337,30 @@ const createAccount: ToolHandler = async (ctx, raw) => {
     .from("verified_phones")
     .update({ account_id: accountId })
     .eq("id", input.verified_phone_ref);
+  if (input.session_id) {
+    const { data: session } = await ctx.db
+      .from("onboarding_sessions")
+      .select("manifest_draft")
+      .eq("id", input.session_id)
+      .maybeSingle();
+    await ctx.db
+      .from("onboarding_sessions")
+      .update({
+        state: "amtech_account_created",
+        account_id: accountId,
+        manifest_draft: {
+          ...((session?.manifest_draft as Record<string, unknown> | null) ?? {}),
+          account_id: accountId,
+          business_display_name: input.business_display_name,
+          timezone: input.timezone || "America/New_York",
+          owner_email: input.email,
+          ...(input.owner_name ? { owner_name: input.owner_name } : {}),
+          verified_phone_ref: input.verified_phone_ref,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", input.session_id);
+  }
 
   const ownerSession = await mintOwnerSession(ctx.db, accountId, userId);
   const audit_id = await writeAudit(ctx.db, {

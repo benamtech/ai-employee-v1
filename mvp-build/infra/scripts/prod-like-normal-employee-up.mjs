@@ -10,8 +10,9 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const deployEnvPath = join(root, "infra", "deploy", ".env.production");
 const deployEnvExamplePath = join(root, "infra", "deploy", ".env.production.example");
 const localEnvPath = join(root, ".env");
-const composeFile = "infra/deploy/docker-compose.yml";
 const proofDir = process.env.AMTECH_PROOF_DIR ?? "infra/proofs";
+const composeFile = "infra/deploy/docker-compose.yml";
+const tunnelComposeFile = "infra/deploy/docker-compose.tunnel.yml";
 
 const args = new Set(process.argv.slice(2));
 const argValue = (name, fallback = undefined) => {
@@ -20,16 +21,15 @@ const argValue = (name, fallback = undefined) => {
   return found ? found.slice(prefix.length) : fallback;
 };
 
-const employeeId = argValue("--employee-id", process.env.PUBLIC_ESTIMATOR_EMPLOYEE_ID ?? "emp_5omv4ihbvggc8ibe31nj43");
-const accountId = argValue("--account-id", process.env.PUBLIC_ESTIMATOR_ACCOUNT_ID ?? "acct_x7kt6lu4hjl0r9fzjj5q3b");
-const webOrigin = argValue("--web-origin", process.env.PUBLIC_WEB_ORIGIN ?? "http://localhost:3000");
+const webOrigin = argValue("--web-origin", process.env.PUBLIC_WEB_ORIGIN ?? "https://agent.amtechai.com");
 const managerHealthUrl = argValue("--manager-url", "http://127.0.0.1:8080");
 const webHealthUrl = argValue("--web-url", "http://127.0.0.1:3000");
+const caddyHealthUrl = argValue("--caddy-url", "http://127.0.0.1");
 const noBuild = args.has("--no-build");
 const downFirst = args.has("--down-first");
 const skipCompose = args.has("--skip-compose");
-const requireCaddy = args.has("--require-caddy");
-const reprovisionEmployee = args.has("--reprovision-employee");
+const skipTunnel = args.has("--skip-tunnel");
+const requireTunnel = args.has("--require-tunnel");
 
 function stamp() {
   return new Date().toISOString().replace(/[:.]/g, "-");
@@ -56,11 +56,11 @@ function readEnv(path) {
 }
 
 function isPlaceholder(value) {
-  return !value || /^change-me/.test(value) || /change-me/.test(value);
+  return !value || /^change-me/.test(String(value)) || /change-me/.test(String(value));
 }
 
 function hasRealValue(value) {
-  return value !== undefined && value !== null && value !== "" && !isPlaceholder(String(value));
+  return value !== undefined && value !== null && value !== "" && !isPlaceholder(value);
 }
 
 function setEnvValue(lines, key, value) {
@@ -77,6 +77,14 @@ function setEnvValue(lines, key, value) {
   return next;
 }
 
+function putEnv(linesState, key, value, { overwrite = true, secret = false } = {}) {
+  if (value === undefined || value === null || value === "") return;
+  if (!overwrite && hasRealValue(linesState.current[key])) return;
+  linesState.lines = setEnvValue(linesState.lines, key, value);
+  linesState.current[key] = String(value);
+  linesState.changed.push(secret ? `${key}=[set]` : `${key}=${value}`);
+}
+
 function writeMergedDeployEnv() {
   if (!existsSync(deployEnvPath)) {
     const seed = existsSync(deployEnvExamplePath) ? readFileSync(deployEnvExamplePath, "utf8") : "";
@@ -85,54 +93,39 @@ function writeMergedDeployEnv() {
 
   const localEnv = readEnv(localEnvPath);
   const current = readEnv(deployEnvPath);
-  let lines = readFileSync(deployEnvPath, "utf8").split("\n");
-  const changed = [];
+  const state = { lines: readFileSync(deployEnvPath, "utf8").split("\n"), current, changed: [] };
+  const put = (key, value, opts) => putEnv(state, key, value, opts);
 
-  function put(key, value, { overwrite = true, secret = false } = {}) {
-    if (value === undefined || value === null || value === "") return;
-    if (!overwrite && hasRealValue(current[key])) return;
-    lines = setEnvValue(lines, key, value);
-    current[key] = String(value);
-    changed.push(secret ? `${key}=[set]` : `${key}=${value}`);
-  }
-
-  const copyIfUseful = [
+  for (const key of [
     "DATABASE_URL",
     "SUPABASE_URL",
     "SUPABASE_SERVICE_ROLE_KEY",
     "SIGNING_SECRET",
     "MANAGER_INTERNAL_TOKEN",
     "PROVISIONER_TOKEN",
-    "ANTHROPIC_API_KEY",
+    "SECRET_REF_MASTER_KEY",
+    "TWILIO_ACCOUNT_SID",
+    "TWILIO_AUTH_TOKEN",
+    "TWILIO_TEST_NUMBER",
+    "TWILIO_TEST_TO_PHONE",
+    "TWILIO_VERIFY_SERVICE_SID",
+    "TWILIO_VERIFY_DEV_BYPASS",
+    "TWILIO_VERIFY_DEV_CODE",
     "XAI_API_TOKEN",
     "XAI_MODEL",
     "XAI_API_KEY",
     "xai_api_key",
     "xai_model",
-    "HERMES_MODEL_PROVIDER",
-    "HERMES_MODEL_DEFAULT",
-    "HERMES_MODEL_BASE_URL",
-    "HERMES_MODEL_API_KEY",
-    "ORCHESTRATOR_PROVIDER",
-    "ORCHESTRATOR_API_BASE_URL",
-    "ORCHESTRATOR_API_KEY",
-    "ORCHESTRATOR_MODEL",
-    "RESEND_API_KEY",
-    "PUBLIC_ESTIMATOR_FROM_EMAIL",
-    "PUBLIC_ESTIMATOR_REPLY_TO",
-    "PUBLIC_ESTIMATOR_SENDING_DOMAIN",
-    "PUBLIC_ESTIMATOR_EMAIL_ENABLED",
     "CLOUDFLARE_API_TOKEN",
-    "CLOUDFLARE_ZONE_NAME",
-  ];
-  for (const key of copyIfUseful) {
+    "CLOUDFLARE_TUNNEL_TOKEN",
+  ]) {
     if (hasRealValue(localEnv[key]) && (!hasRealValue(current[key]) || args.has("--refresh-env"))) {
       put(key, localEnv[key], { overwrite: true, secret: /(TOKEN|KEY|SECRET|DATABASE_URL)/.test(key) });
     }
   }
 
   const xaiToken = localEnv.XAI_API_TOKEN ?? current.XAI_API_TOKEN ?? localEnv.XAI_API_KEY ?? current.XAI_API_KEY ?? localEnv.xai_api_key ?? current.xai_api_key;
-  const xaiModel = localEnv.XAI_MODEL ?? current.XAI_MODEL ?? localEnv.xai_model ?? current.xai_model;
+  const xaiModel = localEnv.XAI_MODEL ?? current.XAI_MODEL ?? localEnv.xai_model ?? current.xai_model ?? "grok-4.3";
   if (hasRealValue(xaiToken)) {
     put("XAI_API_TOKEN", xaiToken, { overwrite: true, secret: true });
     put("XAI_API_KEY", xaiToken, { overwrite: true, secret: true });
@@ -141,38 +134,36 @@ function writeMergedDeployEnv() {
     put("ORCHESTRATOR_PROVIDER", "openai_compatible");
     put("ORCHESTRATOR_API_BASE_URL", "https://api.x.ai/v1");
   }
-  if (hasRealValue(xaiModel)) {
-    put("XAI_MODEL", xaiModel, { overwrite: true });
-    put("xai_model", xaiModel, { overwrite: true });
-    put("ORCHESTRATOR_MODEL", xaiModel);
-  }
-  if (hasRealValue(xaiToken) || hasRealValue(xaiModel)) {
-    put("HERMES_MODEL_PROVIDER", "openai_compatible");
-    put("HERMES_MODEL_DEFAULT", xaiModel ?? current.HERMES_MODEL_DEFAULT ?? "grok-4.3");
-  }
+  put("XAI_MODEL", xaiModel);
+  put("xai_model", xaiModel);
+  put("ORCHESTRATOR_MODEL", xaiModel);
+  put("HERMES_MODEL_PROVIDER", "openai_compatible");
+  put("HERMES_MODEL_DEFAULT", xaiModel);
 
+  put("PUBLIC_BASE_DOMAIN", "amtechai.com");
   put("NODE_ENV", "production");
   put("MANAGER_API_ORIGIN", "http://manager:8080");
   put("PROVISIONER_ORIGIN", "http://manager:8080");
   put("DOCKER_MANAGER_API_ORIGIN", "http://manager:8080");
   put("DOCKER_MANAGER_BASE_URL", "http://manager:8080");
+  put("PUBLIC_WEB_ORIGIN", webOrigin);
+  put("AGENT_WEB_ORIGIN", webOrigin);
+  put("WEB_APP_ORIGIN", webOrigin);
   put("CADDY_CLIENTS_DIR", "/var/lib/amtech/caddy/clients");
   put("CADDY_VALIDATE_COMMAND", "docker exec amtech-ai-employee-caddy-1 caddy validate --config /etc/caddy/Caddyfile");
   put("CADDY_RELOAD_COMMAND", "docker exec amtech-ai-employee-caddy-1 caddy reload --config /etc/caddy/Caddyfile");
+  put("CADDY_EMPLOYEE_UPSTREAM_HOST", "amtech-hermes-{{EMPLOYEE_ID}}");
   put("CLOUDFLARE_ZONE_NAME", "amtechai.com", { overwrite: !hasRealValue(current.CLOUDFLARE_ZONE_NAME) });
   put("AMTECH_PUBLIC_DOMAIN", "amtechai.com", { overwrite: !hasRealValue(current.AMTECH_PUBLIC_DOMAIN) });
-  put("PUBLIC_WEB_ORIGIN", webOrigin);
   put("HERMES_DOCKER_NETWORK", "amtech_runtime");
   put("HERMES_BACKEND_TYPE", "docker");
   put("HERMES_RUNTIME_COMMAND", "/app/infra/scripts/deploy/start-hermes-container.sh");
-  put("PUBLIC_ESTIMATOR_EMPLOYEE_ID", employeeId);
-  put("PUBLIC_ESTIMATOR_ACCOUNT_ID", accountId);
   put("AMTECH_PROOF_DIR", proofDir);
   put("LOCAL_MODEL_BRIDGE", "", { overwrite: true });
 
-  lines = lines.filter((line) => !line.startsWith("LOCAL_MODEL_BRIDGE="));
-  writeFileSync(deployEnvPath, `${lines.join("\n").replace(/\n+$/, "")}\n`, "utf8");
-  return { changed, env: current };
+  state.lines = state.lines.filter((line) => !line.startsWith("LOCAL_MODEL_BRIDGE="));
+  writeFileSync(deployEnvPath, `${state.lines.join("\n").replace(/\n+$/, "")}\n`, "utf8");
+  return { changed: state.changed, env: state.current };
 }
 
 function run(name, command, argsList, options = {}) {
@@ -192,15 +183,24 @@ function run(name, command, argsList, options = {}) {
 }
 
 function compose(argsList, options = {}) {
-  return run(`compose:${argsList.join(" ")}`, "docker", ["compose", "-f", composeFile, "--env-file", "infra/deploy/.env.production", ...argsList], options);
+  return run("compose", "docker", [
+    "compose",
+    "-f",
+    composeFile,
+    "-f",
+    tunnelComposeFile,
+    "--env-file",
+    "infra/deploy/.env.production",
+    ...argsList,
+  ], options);
 }
 
-async function httpCheck(name, url, attempts = 30) {
+async function httpCheck(name, url, attempts = 30, headers = {}) {
   let last = null;
   for (let i = 0; i < attempts; i += 1) {
     const started = Date.now();
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(5000), redirect: "manual" });
+      const res = await fetch(url, { headers, signal: AbortSignal.timeout(5000), redirect: "manual" });
       last = { name, status: res.status < 500 ? "pass" : "fail", http_status: res.status, url, ms: Date.now() - started };
       if (last.status === "pass") return last;
     } catch (err) {
@@ -211,39 +211,41 @@ async function httpCheck(name, url, attempts = 30) {
   return last ?? { name, status: "fail", url, error: "not_checked" };
 }
 
-function caddyTokenState(env) {
-  const token = env.CLOUDFLARE_API_TOKEN;
-  if (!hasRealValue(token)) return { name: "caddy_dns_token", status: "gated", reason: "CLOUDFLARE_API_TOKEN missing or placeholder" };
-  return { name: "caddy_dns_token", status: "pass" };
-}
-
 function dockerNetwork() {
-  const inspect = run("docker-network:inspect", "docker", ["network", "inspect", "amtech_runtime"]);
+  const inspect = run("docker_network_inspect", "docker", ["network", "inspect", "amtech_runtime"]);
   if (inspect.status === "pass") return inspect;
-  return run("docker-network:create", "docker", ["network", "create", "amtech_runtime"]);
+  return run("docker_network_create", "docker", ["network", "create", "amtech_runtime"]);
 }
 
-function reprovision(env) {
-  if (!reprovisionEmployee) {
-    return { name: "employee_reprovision", status: "skip", reason: "Pass --reprovision-employee to rotate scoped MCP, render profile, activate Caddy, and restart Hermes." };
+function tunnelCheck(env) {
+  if (skipTunnel) return { name: "cloudflare_named_tunnel", status: "skip", reason: "skipped by --skip-tunnel" };
+  if (!hasRealValue(env.CLOUDFLARE_TUNNEL_TOKEN)) {
+    return { name: "cloudflare_named_tunnel", status: "gated", reason: "CLOUDFLARE_TUNNEL_TOKEN missing" };
   }
-  if (!hasRealValue(env.CLOUDFLARE_API_TOKEN)) {
-    return { name: "employee_reprovision", status: "gated", reason: "CLOUDFLARE_API_TOKEN missing; production provisioner requires Caddy activation." };
-  }
-  return run("employee_reprovision", "node", ["infra/scripts/reprovision-scoped-mcp.mjs", employeeId], {
-    env: {
-      ...env,
-      PROVISIONER_ORIGIN: managerHealthUrl,
-      MANAGER_API_ORIGIN: managerHealthUrl,
-      MANAGER_SMOKE_URL: managerHealthUrl,
-      REPROVISIONER_ORIGIN: managerHealthUrl,
-    },
-  });
+  run("cloudflare_tunnel_rm", "docker", ["rm", "-f", "amtech-cloudflared-agent"]);
+  const started = run("cloudflare_tunnel_start", "docker", [
+    "run",
+    "-d",
+    "--name",
+    "amtech-cloudflared-agent",
+    "--network",
+    "host",
+    "--restart",
+    "unless-stopped",
+    "-e",
+    "TUNNEL_TOKEN",
+    "cloudflare/cloudflared:latest",
+    "tunnel",
+    "--no-autoupdate",
+    "run",
+  ], { env: { TUNNEL_TOKEN: env.CLOUDFLARE_TUNNEL_TOKEN } });
+  if (started.status !== "pass") return { ...started, name: "cloudflare_named_tunnel" };
+  return { name: "cloudflare_named_tunnel", status: "pass", container: "amtech-cloudflared-agent", public_host: webOrigin };
 }
 
 function writeProof(proof) {
   mkdirSync(join(root, proofDir), { recursive: true });
-  const path = join(proofDir, `prod-like-public-estimator-up-${stamp()}.json`);
+  const path = join(proofDir, `prod-like-normal-up-${stamp()}.json`);
   writeFileSync(join(root, path), JSON.stringify(proof, null, 2));
   return path;
 }
@@ -251,9 +253,8 @@ function writeProof(proof) {
 const checks = [];
 const { changed, env } = writeMergedDeployEnv();
 checks.push({ name: "deploy_env_prepared", status: "pass", path: "infra/deploy/.env.production", changed });
-checks.push(caddyTokenState(env));
 
-if (downFirst && !skipCompose) checks.push(compose(["down"], { stdio: "pipe" }));
+if (downFirst && !skipCompose) checks.push(compose(["down"]));
 if (!skipCompose) {
   checks.push(dockerNetwork());
   const upArgs = ["up", "-d"];
@@ -261,29 +262,25 @@ if (!skipCompose) {
   checks.push(compose(upArgs, { stdio: "inherit" }));
   checks.push(await httpCheck("manager_health", `${managerHealthUrl.replace(/\/$/, "")}/health`));
   checks.push(await httpCheck("web_health", webHealthUrl));
-  if (checks.find((check) => check.name === "caddy_dns_token")?.status === "gated") {
-    checks.push(compose(["stop", "caddy"]));
-  } else {
-    checks.push(compose(["exec", "-T", "caddy", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]));
-  }
-  checks.push(reprovision(env));
+  checks.push(await httpCheck("caddy_agent_route", caddyHealthUrl, 10, { Host: "agent.amtechai.com" }));
+  checks.push(compose(["exec", "-T", "caddy", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]));
+  checks.push(tunnelCheck(env));
 }
 
 const failed = checks.some((check) => check.status === "fail");
 const gated = checks.some((check) => check.status === "gated");
 const proof = {
-  kind: "prod_like_public_estimator_up",
+  kind: "prod_like_normal_employee_up",
   status: failed ? "fail" : gated ? "partial" : "pass",
   checked_at: new Date().toISOString(),
   host: hostname(),
   git_sha: gitSha(),
-  employee_id: employeeId,
-  account_id: accountId,
-  compose_file: composeFile,
+  public_origin: webOrigin,
+  compose_files: [composeFile, tunnelComposeFile],
   notes: {
-    caddy_missing_token_behavior: "When CLOUDFLARE_API_TOKEN is absent, Caddy is stopped after compose up to avoid a restart loop.",
-    reprovision_behavior: "Employee reprovision is opt-in with --reprovision-employee because it activates Caddy, restarts Hermes, and may perform production provider side effects.",
-    model_bridge: "LOCAL_MODEL_BRIDGE is removed from the deploy env; this path expects real provider env such as ANTHROPIC_API_KEY.",
+    success_target: "brand-new normal employee only; public estimator scripts and ids are not acceptance evidence",
+    tunnel_origin: "Cloudflare named tunnel points at local Caddy, not directly at Next.js",
+    browser_auth: "production mode requires the real owner cookie minted by create-account; /api/dev/login is intentionally not used",
     provider_acceptance: "This script does not claim provider-accepted LLM proof.",
   },
   checks,
@@ -296,4 +293,4 @@ for (const check of checks) {
 }
 console.log(`proof_json:${proofPath}`);
 
-if (failed || (requireCaddy && gated)) process.exit(1);
+if (failed || (requireTunnel && gated)) process.exit(1);

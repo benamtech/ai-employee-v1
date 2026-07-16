@@ -2,6 +2,14 @@
 
 **Status: complete**
 
+> **2026-07-16 launch-run note:** For normal employee live deploy execution,
+> default to `../mvp-build/docs/production-normal-employee-live-deploy-runbook.md`.
+> The proof path is public DNS/Cloudflare Tunnel -> Caddy -> real
+> `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee
+> -> live owner web client -> provider-backed reply. Do not count local
+> `live:*`, fixture/browser harnesses, `/api/dev/login`, or
+> `prod-like:public-estimator:*` as launch proof.
+
 This wiki turns AMTECH's go-to-market research and the current [`../mvp-build/`](../mvp-build/) work into a decision and call plan for AMTECH AI: a one-person studio turning skills into a managed, textable **AI Employee** and a Work Surface that lets owner-led SMBs supervise real work in seconds.
 
 ## Headline decision

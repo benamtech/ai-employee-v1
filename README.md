@@ -1,5 +1,14 @@
 # AMTECH AI Employee v1
 
+> **2026-07-16 launch-run note:** For normal employee live deploy work, the
+> default execution path is
+> `mvp-build/docs/production-normal-employee-live-deploy-runbook.md`. Do not
+> treat local `live:*`, fixture/browser harnesses, `/api/dev/login`, or
+> `prod-like:public-estimator:*` as launch proof. The proof path is public
+> DNS/Cloudflare Tunnel -> Caddy -> real `/create-ai-employee` -> Twilio Verify
+> -> account creation -> Start Employee -> live owner web client ->
+> provider-backed reply.
+
 This repository is the AMTECH company brain plus the build home for the AMTECH AI Employee MVP.
 
 AMTECH AI is building a pro-human, owner-operated SMB AI Employee: a textable, always-on office worker that can receive events from the tools a business already uses, understand them against the company's own context, do the safe work, and ask the owner for judgment only when it matters. The first beachhead is owner-operated painting and landscaping contractors, but the architecture is built for vertical employees across many SMB back-office roles.

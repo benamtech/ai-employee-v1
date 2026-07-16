@@ -1,0 +1,4 @@
+services:
+  caddy:
+    volumes:
+      - ../caddy/tunnel.Caddyfile:/etc/caddy/Caddyfile:ro

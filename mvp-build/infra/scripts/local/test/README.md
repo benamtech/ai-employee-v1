@@ -1,14 +1,24 @@
-# Live headed testing toolkit
+# Local live headed testing toolkit
 
 Status: active
 
-Bring up the whole local stack + a real employee's Docker Hermes runtime and drive
-it from a headed browser — **without a funded model key**. The "model" is a single
-persistent Claude Code **Haiku** instance behind the agent-in-the-loop bridge (the
-"you-are-the-LLM" design, [`../../../local/agent-model-bridge.md`](../../local/agent-model-bridge.md)):
-the bridge parks each `/v1/chat/completions` call and the ONE warm worker answers it.
-Onboarding AND every live employee turn route through it, so **the worker must be up
-for any model call.**
+> **Launch-run warning:** This toolkit is for local development and fast
+> diagnosis. It is **not** the default path for production-level normal employee
+> onboarding proof. For launch work, start with
+> [`../../../../docs/production-normal-employee-live-deploy-runbook.md`](../../../../docs/production-normal-employee-live-deploy-runbook.md)
+> and use public DNS/Cloudflare Tunnel -> Caddy -> real `/create-ai-employee` ->
+> Twilio Verify -> account creation -> Start Employee -> live owner web client.
+> Do not count `live:login`, `/api/dev/login`, fixture mode, or this toolkit as
+> normal-employee launch proof.
+
+Bring up the local live stack + a real employee's Docker Hermes runtime and drive it
+from a headed browser using the normal provider path. The toolkit loads local host
+invariants from `.env`, then selectively overlays xAI/Grok OpenAI-compatible provider
+values from `infra/deploy/.env.production`; it does **not** source production
+`NODE_ENV` or Docker-only origins into the host stack.
+
+The legacy `LOCAL_MODEL_BRIDGE=1` bridge/Haiku path still exists as a dev shim, but
+it is not acceptance proof and should not be used for the normal live deploy path.
 
 The point of this toolkit is token efficiency: one command per operation instead of
 dozens of `curl`/`docker`/`pkill` calls. Prefer `npm run live:status` over ad-hoc probing.
@@ -17,8 +27,8 @@ dozens of `curl`/`docker`/`pkill` calls. Prefer `npm run live:status` over ad-ho
 
 | Command | What it does |
 |---|---|
-| `npm run live:up` | Build `@amtech/shared` if stale, then start (detached, idempotent): **bridge** :8091, **worker** (1 warm Haiku = the LLM), **manager** :8080 (plain `tsx`, not `tsx watch`), **web** :3000. Ends by printing status. |
-| `npm run live:status` | **One compact block**: service codes, warm-Haiku count, employee containers + whether each has the Manager MCP tools wired. Your default health check. |
+| `npm run live:up` | Build `@amtech/shared` if stale, then start (detached, idempotent): provider env, **manager** :8080 (plain `tsx`, not `tsx watch`), **web** :3000. If `LOCAL_MODEL_BRIDGE=1`, also starts bridge/worker. Ends by printing status. |
+| `npm run live:status` | **One compact block**: provider/model, service codes, employee containers + whether each has the Manager MCP tools wired. Your default health check. |
 | `npm run live:list` | List all employees (id, name, business, container status). |
 | `npm run live:reprovision -- <sourceEmployeeId>` | Provision a FRESH employee (new id) reusing an existing one's manifest + account. The new profile renders with the current template → MCP tools + bridge model + `0.0.0.0` bind. Prints the new id + dev-login URL. |
 | `npm run live:login -- <employeeId>` | Print + open a headed browser at the dev-login URL (mints an owner session, sets the cookie, lands on `/agent/<id>`). Add `--print` to only print. |
@@ -27,8 +37,8 @@ dozens of `curl`/`docker`/`pkill` calls. Prefer `npm run live:status` over ad-ho
 
 Scripts live in `infra/scripts/local/test/`: `stack-up.sh`, `status.sh`, `stack-down.sh`,
 `reprovision.mjs`, `devlogin.sh`, `employee-recover.sh`, shared `_lib.sh`. Logs:
-`infra/.local/test/logs/<svc>.log`. All read the gitignored `.env` and force the
-local-test overrides (bridge + `DEV_OWNER_LOGIN=1` + `HERMES_MODEL_*`).
+`infra/.local/test/logs/<svc>.log`. All read the gitignored `.env`, force
+`DEV_OWNER_LOGIN=1`, and keep host origins local.
 
 ## Fill-in-the-blanks: run a scenario
 
@@ -38,7 +48,7 @@ Replace the ⟨…⟩ placeholders with your scenario.
    ```
    npm run live:up
    ```
-   Expect `bridge:8091=200 worker=1xHaiku manager:8080=200 web:3000=200`.
+   Expect `provider=openai_compatible model=<grok model> manager:8080=200 web:3000=200`.
 
 2. **Pick / create the employee.** List existing: `npm run live:list`.
    - An employee showing `tools:NONE(reprovision needed)` in `live:status` was
@@ -70,18 +80,21 @@ Replace the ⟨…⟩ placeholders with your scenario.
    curl -s "http://localhost:3000/api/employee/$EMP/message" -H 'Content-Type: application/json' \
      -H "Cookie: amtech_owner_session=$TOKEN" -d '{"message":"⟨your test message⟩"}'
    ```
-   `{"reply":"…","...":"ok"}` = the full loop works (session + employee + bridge + Haiku).
+   A real employee reply means the full loop works. If xAI auth/credit blocks the
+   turn, record it as `provider-gated`, not as a Hermes/runtime outage.
 
 ## Token-efficient health checking
 
 - **One call:** `npm run live:status`. Read the single block; don't probe ports
-  individually. `200`=healthy, `000`=down; `worker=1xHaiku` must be ≥1 (it is the LLM).
+  individually. `200`=healthy, `000`=down; provider/model should show the intended
+  OpenAI-compatible Grok path unless you intentionally opted into `LOCAL_MODEL_BRIDGE=1`.
 - **A turn failed?** Map the error, don't spelunk:
   - `owner_session_invalid` → not logged in for that employee → `npm run live:login -- <id>`.
   - `runtime_unreachable` → the employee container isn't reachable → `live:status`; if
     `[Exited]` or missing, `npm run live:recover -- <id>` (or reprovision).
-  - `No inference provider configured` → the employee wasn't rendered for the bridge
-    (old profile) → `npm run live:reprovision -- <id>` and use the new id.
+  - `No inference provider configured` → provider env/rendering mismatch; check
+    `live:status`, selective xAI overlay, and whether the employee was provisioned
+    after the current profile-renderer changes.
 - Only then read a specific log: `infra/.local/test/logs/<svc>.log` or
   `docker logs amtech-hermes-<id>`.
 
@@ -98,9 +111,9 @@ Replace the ⟨…⟩ placeholders with your scenario.
 
 - **Node 26:** the Manager runs on plain `tsx`, not `tsx watch` (v4.22.4 crashes on
   Node 26 resolving `@amtech/shared`). `live:up` also rebuilds a stale `@amtech/shared` dist.
-- **Worker before employee:** if the warm Haiku worker is down when an employee makes
-  a model call, its container times out and crashes. Keep the stack up while testing.
+- **Provider before proof:** a funded/authenticated provider-backed reply is required
+  for acceptance. The legacy bridge is a dev shim only.
 - **Old employees have no tools:** anything provisioned before the MCP-tools fix shows
   `tools:NONE` — reprovision to get a tool-capable employee.
-- **`.env` untouched:** overrides (bridge, dev-login, `HERMES_MODEL_*`) are applied at
-  launch by the scripts, not written to your `.env`.
+- **`.env` untouched:** overrides (dev-login, selective provider overlay, optional
+  bridge mode) are applied at launch by the scripts, not written to your `.env`.

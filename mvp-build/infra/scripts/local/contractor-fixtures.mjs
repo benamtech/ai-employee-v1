@@ -18,6 +18,37 @@
 /** The beachhead: owner-operated paint/landscape-adjacent trades. */
 export const FIXTURES = [
   {
+    fixture_key: "pocono_paint_remodel",
+    business_kind: "painting_and_remodeling",
+    business_display_name: "Pocono Paint & Remodel",
+    owner_name: "Mike Caruso",
+    employee_name: "Jordan",
+    timezone: "America/New_York",
+    location: "Pocono Township PA",
+    years: 11,
+    crew: "me, a small field crew, and a secretary who helps draft follow-ups for my approval",
+    money_shape: "around $620k a year, repaint jobs usually run $2,500 to $14,000 and small remodels can reach $35,000",
+    ideal_customer: "Pocono Township and Monroe County homeowners who want a clean painting job, cabinet refresh, or small remodel without chasing the contractor for updates",
+    friction: "keeping estimate walkthrough notes, invoices, employee hours, material costs, change orders, social posts, and customer follow-up organized while I am on jobs",
+    workflows: [
+      "estimate walkthroughs",
+      "invoicing and job-cost tracking",
+      "employee-hours and material-cost follow-up",
+      "change-order follow-up",
+      "scheduling reminders",
+      "social media content drafts",
+      "clean customer follow-up",
+    ],
+    tools: ["Gmail", "phone", "SMS approval", "QuickBooks", "job photos", "spreadsheets"],
+    services: [
+      "interior painting",
+      "exterior painting",
+      "drywall and trim repair",
+      "cabinet refreshes",
+      "small remodels",
+    ],
+  },
+  {
     fixture_key: "binghamton_painting",
     business_kind: "painting",
     business_display_name: "Southern Tier Precision Painting",

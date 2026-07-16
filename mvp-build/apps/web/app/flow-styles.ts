@@ -27,9 +27,12 @@ export const FLOW_CSS = `
   .fl-btn:disabled, .fl-btn.red:disabled { background: #ffffff; color: rgba(10,10,10,0.35); border-color: rgba(10,10,10,0.15); cursor: default; }
   .fl-btn.quiet { background: #ffffff; color: #0a0a0a; border-color: rgba(10,10,10,0.15); }
   .fl-btn.quiet:hover { border-color: #0a0a0a; background: #ffffff; }
-  .fl-thread { border: 1px solid rgba(10,10,10,0.10); min-height: 180px; max-height: 300px; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 9px; }
+  .fl-chat-step { padding-top: 24px; }
+  .fl-thread { border: 1px solid rgba(10,10,10,0.10); min-height: 420px; max-height: 68vh; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 9px; }
   .fl-msg { max-width: 84%; border: 1px solid rgba(10,10,10,0.10); padding: 9px 12px; font-size: 15px; line-height: 1.5; }
   .fl-msg.owner { align-self: flex-end; background: #f4f4f4; }
+  .fl-msg.fl-control { max-width: 100%; width: min(100%, 560px); background: #ffffff; border-color: rgba(225,29,42,0.35); }
+  .fl-msg.fl-control strong { display: block; font-size: 14px; margin-bottom: 3px; }
   .fl-msg .who { display: block; font-family: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace; font-size: 9px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(10,10,10,0.62); margin-bottom: 3px; }
   .fl-empty { color: rgba(10,10,10,0.62); font-size: 12px; align-self: center; margin: auto; }
   .fl-status { margin: 0; padding: 12px 24px 18px; font-family: var(--font-plex-mono), 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; line-height: 1.6; color: rgba(10,10,10,0.62); white-space: pre-wrap; word-break: break-word; border-top: 1px solid rgba(10,10,10,0.10); background: #f4f4f4; }

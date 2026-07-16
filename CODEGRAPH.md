@@ -1,5 +1,13 @@
 # CODEGRAPH.md — AMTECH GTM-RESEARCH workspace map
 
+> **2026-07-16 launch-run note:** For normal employee live deploy work, default
+> to `mvp-build/docs/production-normal-employee-live-deploy-runbook.md`. The
+> launch proof path is public DNS/Cloudflare Tunnel -> Caddy -> real
+> `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee
+> -> live owner web client -> provider-backed reply. Do not count local
+> `live:*`, fixture/browser harnesses, `/api/dev/login`, or
+> `prod-like:public-estimator:*` as launch proof.
+
 > **Audience: AI agents.** This is the orientation + structural index for the whole
 > `GTM-RESEARCH` workspace. Read this first. It tells you what every file is, how
 > they link, which facts are canonical (never contradict them silently), the

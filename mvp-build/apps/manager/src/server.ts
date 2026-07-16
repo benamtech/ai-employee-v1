@@ -7,7 +7,17 @@
 import { Hono, type Context } from "hono";
 import { streamSSE } from "hono/streaming";
 import { serve } from "@hono/node-server";
-import { ID_PREFIX, MANAGER_API, TOOL_NAMES, newId, type ToolEnvelope, type ToolName, type PreviewActionType } from "@amtech/shared";
+import {
+  ID_PREFIX,
+  MANAGER_API,
+  OnboardingManifest,
+  TOOL_NAMES,
+  failed,
+  newId,
+  type ToolEnvelope,
+  type ToolName,
+  type PreviewActionType,
+} from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { TOOL_REGISTRY } from "./tools/registry.js";
 import { runManagerTool } from "./lib/run-tool.js";
@@ -78,6 +88,43 @@ function denyInternal(c: Context): Response | null {
 }
 
 type ApprovalResolution = "approved" | "rejected";
+
+function nonBlank(value: unknown): value is string {
+  return typeof value === "string" && value.trim() !== "";
+}
+
+function ownerNameFromEmail(email: string | undefined): string {
+  if (!email) return "Owner";
+  const local = email.split("@")[0] ?? "";
+  const cleaned = local.replace(/[._-]+/g, " ").trim();
+  return cleaned ? cleaned.replace(/\b\w/g, (char) => char.toUpperCase()) : "Owner";
+}
+
+export function compileOnboardingManifest(session: Record<string, any>, accountId: string): {
+  manifest?: Record<string, unknown>;
+  missing_fields: string[];
+} {
+  const draft = (session.manifest_draft ?? {}) as Record<string, unknown>;
+  const ownerEmail = nonBlank(draft.owner_email) ? draft.owner_email : undefined;
+  const manifest = {
+    ...draft,
+    employee_type: nonBlank(draft.employee_type) ? draft.employee_type : "contractor_estimator",
+    profile_package_key: nonBlank(draft.profile_package_key) ? draft.profile_package_key : "contractor_estimator",
+    timezone: nonBlank(draft.timezone) ? draft.timezone : "America/New_York",
+    owner_name: nonBlank(draft.owner_name) ? draft.owner_name : ownerNameFromEmail(ownerEmail),
+    employee_name: nonBlank(draft.employee_name) ? draft.employee_name : "Jordan",
+    verification_method: nonBlank(draft.verification_method) ? draft.verification_method : "twilio_verify",
+    consent_channel: nonBlank(draft.consent_channel) ? draft.consent_channel : "web",
+    account_id: accountId,
+    transcript_ref: session.id,
+    ...(ownerEmail ? { owner_email: ownerEmail } : {}),
+  };
+  const parsed = OnboardingManifest.safeParse(manifest);
+  if (parsed.success) return { manifest: parsed.data, missing_fields: [] };
+  return {
+    missing_fields: parsed.error.issues.map((issue) => issue.path.join(".") || "manifest"),
+  };
+}
 
 interface ApprovalFollowupTurn {
   status: "succeeded" | "queued" | "duplicate" | "failed";
@@ -164,6 +211,57 @@ export function buildApp(): Hono {
   app.get("/health", (c) =>
     c.json({ status: "ok", tools: TOOL_REGISTRY.size, expected: TOOL_NAMES.length }),
   );
+
+  app.post("/manager/onboarding/provision-from-session", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const input = await c.req.json().catch(() => ({})) as {
+      session_id?: string;
+      account_id?: string;
+      idempotency_key?: string;
+    };
+    if (!input.session_id || !input.account_id || !input.idempotency_key) {
+      return c.json(failed("validation_failed", "Finish the account setup before starting the employee."), 400);
+    }
+
+    const db = serviceClient();
+    const { data: session } = await db
+      .from("onboarding_sessions")
+      .select("*")
+      .eq("id", input.session_id)
+      .maybeSingle();
+    if (!session) {
+      return c.json(failed("validation_failed", "I could not find this onboarding session. Refresh and try again."), 404);
+    }
+    if (session.account_id && session.account_id !== input.account_id) {
+      return c.json(failed("validation_failed", "This account does not match the onboarding session."), 400);
+    }
+
+    const compiled = compileOnboardingManifest(session, input.account_id);
+    if (!compiled.manifest) {
+      return c.json(failed(
+        "validation_failed",
+        `Before starting the employee, finish: ${Array.from(new Set(compiled.missing_fields)).join(", ")}.`,
+        { account_id: input.account_id },
+      ), 400);
+    }
+
+    const outcome = await runManagerTool("provision_employee", {
+      account_id: input.account_id,
+      manifest: compiled.manifest,
+      transcript_ref: input.session_id,
+      idempotency_key: input.idempotency_key,
+    }, { actor: "manager" });
+    if (outcome.kind === "invalid_input") return c.json(outcome.envelope, 400);
+    if (outcome.kind !== "ok") return c.json(failed("validation_failed", "The employee could not be started."), 400);
+    if (outcome.envelope.status === "ok" || outcome.envelope.status === "pending") {
+      await db
+        .from("onboarding_sessions")
+        .update({ state: "provision_requested", updated_at: new Date().toISOString() })
+        .eq("id", input.session_id);
+    }
+    return c.json(outcome.envelope);
+  });
 
   // Backend tool invocation (front door / employee → Manager).
   app.post("/manager/tools/:name", async (c) => {

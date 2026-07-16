@@ -21,6 +21,37 @@ export interface LlmResponse {
   missing_fields: string[];
 }
 
+export type OrchestratorProviderErrorKind =
+  | "auth_or_credit"
+  | "rate_limited"
+  | "provider_unavailable"
+  | "bad_request"
+  | "unknown";
+
+export class OrchestratorProviderError extends Error {
+  status: number;
+  provider: OrchestratorModelConfig["provider"];
+  model: string;
+  baseUrl: string;
+  kind: OrchestratorProviderErrorKind;
+
+  constructor(params: {
+    status: number;
+    provider: OrchestratorModelConfig["provider"];
+    model: string;
+    baseUrl: string;
+    message: string;
+  }) {
+    super(params.message || `model_${params.status}`);
+    this.name = "OrchestratorProviderError";
+    this.status = params.status;
+    this.provider = params.provider;
+    this.model = params.model;
+    this.baseUrl = params.baseUrl;
+    this.kind = classifyProviderError(params.status, params.message);
+  }
+}
+
 interface OpenAiCompatibleChoice {
   message?: {
     content?: string | Array<{ type?: string; text?: string }>;
@@ -35,6 +66,25 @@ interface OpenAiCompatibleResponse {
 interface AnthropicResponse {
   content?: Array<{ type?: string; text?: string }>;
   error?: { message?: string };
+}
+
+export function classifyProviderError(status: number, message = ""): OrchestratorProviderErrorKind {
+  const lower = message.toLowerCase();
+  if (
+    status === 401 ||
+    status === 403 ||
+    lower.includes("credit") ||
+    lower.includes("spending limit") ||
+    lower.includes("insufficient") ||
+    lower.includes("unauthorized") ||
+    lower.includes("forbidden")
+  ) {
+    return "auth_or_credit";
+  }
+  if (status === 429 || lower.includes("rate limit")) return "rate_limited";
+  if (status >= 500) return "provider_unavailable";
+  if (status >= 400) return "bad_request";
+  return "unknown";
 }
 
 const ONBOARDING_RESPONSE_SCHEMA = {
@@ -179,6 +229,20 @@ export function openAiCompatibleRequestBody(
   };
 }
 
+function providerErrorFromResponse(
+  res: Response,
+  json: AnthropicResponse | OpenAiCompatibleResponse,
+  config: OrchestratorModelConfig,
+): OrchestratorProviderError {
+  return new OrchestratorProviderError({
+    status: res.status,
+    provider: config.provider,
+    model: config.model,
+    baseUrl: config.baseUrl,
+    message: json?.error?.message ?? `model_${res.status}`,
+  });
+}
+
 export function anthropicMessagesRequestBody(
   config: OrchestratorModelConfig,
   messages: OrchestratorModelMessage[],
@@ -222,7 +286,7 @@ export async function callOpenAiCompatibleModel(
       body: JSON.stringify(anthropicMessagesRequestBody(config, messages)),
     });
     const json = (await res.json()) as AnthropicResponse;
-    if (!res.ok) throw new Error(json?.error?.message ?? `model_${res.status}`);
+    if (!res.ok) throw providerErrorFromResponse(res, json, config);
     return extractJson(contentToText(json.content));
   }
 
@@ -235,7 +299,7 @@ export async function callOpenAiCompatibleModel(
     body: JSON.stringify(openAiCompatibleRequestBody(config, messages)),
   });
   const json = (await res.json()) as OpenAiCompatibleResponse;
-  if (!res.ok) throw new Error(json?.error?.message ?? `model_${res.status}`);
+  if (!res.ok) throw providerErrorFromResponse(res, json, config);
   const text = contentToText(json.choices?.[0]?.message?.content);
   return extractJson(text);
 }

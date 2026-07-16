@@ -11,10 +11,10 @@ repo (no worktree): /home/georgej/AMTECH/GTM-RESEARCH/mvp-build  — run all com
 from there. Do NOT commit or change code unless I ask; this is a testing session.
 
 CONTEXT YOU NEED
-- There is NO funded model key. The "model" is ONE persistent Claude Code Haiku
-  instance behind the agent-in-the-loop bridge (you-are-the-LLM): the bridge parks
-  each model call and the warm worker answers it. It MUST stay up for any model call.
-  Design doc: infra/local/agent-model-bridge.md.
+- Use the normal live provider path. The toolkit keeps host `.env` invariants and
+  selectively overlays xAI/Grok OpenAI-compatible provider variables from
+  infra/deploy/.env.production. Do NOT source the whole production env into the host
+  stack. The legacy LOCAL_MODEL_BRIDGE=1 path is only a dev shim, not proof.
 - The full toolkit + guide is infra/scripts/local/test/README.md. Read it first.
   Prefer its npm aliases over ad-hoc curl/docker/pkill — that is the whole point.
 - House rules: no emojis. Honest status vocabulary. Secrets by reference only
@@ -22,18 +22,13 @@ CONTEXT YOU NEED
 
 BRING UP THE STACK (idempotent)
   npm run live:up
-  npm run live:status     # expect: bridge:8091=200 worker=1xHaiku manager:8080=200 web:3000=200
+  npm run live:status     # expect: provider=openai_compatible model=<grok model> manager:8080=200 web:3000=200
 
-PICK OR RECREATE AN EMPLOYEE
-  npm run live:list
-  - In live:status, an employee marked tools:NONE(reprovision needed) was provisioned
-    before the MCP-tools fix and CANNOT call tools. Recreate it (new id, MCP tools +
-    bridge model + reachable bind, container auto-started):
-      npm run live:reprovision -- <sourceEmployeeId>
-    Use the NEW id it prints. Confirm live:status shows it [Up ...] tools:MCP-wired.
-  - Known-good recreated Sage as of this handoff: <FILL IN: e.g. emp_pnutiyn47n8g4rdagosl6u>
-    (verify it still shows [Up] tools:MCP-wired; if not, reprovision from it or from
-    the original Ferraro employee emp_rz6k8puuv9xu1zzpiwygk0).
+CREATE THE EMPLOYEE THROUGH CHAT-FIRST ONBOARDING
+  LOCAL_BROWSER_HEADLESS=0 npm run local:acceptance:browser-onboard
+  Use the headed browser. The create-ai-employee flow is chat-first; phone, code,
+  password, account creation, and Start Employee are secure controls inside the chat.
+  Capture session_id, account_id, employee_id, owner email, proof path, and runtime id.
 
 LOG IN + OPEN THE WEBCHAT (headed browser)
   npm run live:login -- <employeeId>
@@ -53,7 +48,8 @@ TOKEN-EFFICIENT HEALTH / TRIAGE (don't spelunk — map the error)
   - A turn failed? Map it:
       owner_session_invalid  -> npm run live:login -- <id>
       runtime_unreachable    -> npm run live:recover -- <id>   (or reprovision)
-      No inference provider configured -> npm run live:reprovision -- <id> (use new id)
+      No inference provider configured -> provider/render env mismatch; check live:status and reprovision if needed
+      xAI auth/credit rejection -> provider-gated, not a Hermes/runtime outage
   - Only then read one log: infra/.local/test/logs/<svc>.log or docker logs amtech-hermes-<id>.
 
 WHEN DONE

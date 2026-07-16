@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Bring up the full local live-test stack, detached and idempotent.
 #
-#   bridge  :8091  agent-in-the-loop model bridge (parks model calls)
-#   worker         ONE warm Claude Code Haiku instance = the LLM (you-are-the-LLM)
+#   provider       default path: live OpenAI-compatible provider env (xAI/Grok overlay)
+#   bridge/worker  optional legacy LOCAL_MODEL_BRIDGE=1 dev shim, not acceptance proof
 #   manager :8080  control plane (plain `tsx` — NOT `tsx watch`, which breaks on Node 26)
 #   web     :3000  front door + owner Work Surface (/agent/<id>)
 #

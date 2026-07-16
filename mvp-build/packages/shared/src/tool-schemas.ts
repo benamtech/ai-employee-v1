@@ -62,6 +62,8 @@ const SCHEMAS: Partial<Record<ToolName, z.ZodTypeAny>> = {
     verified_phone_ref: z.string().min(1),
     business_display_name: z.string().min(1),
     timezone: z.string().min(1),
+    session_id: z.string().optional(),
+    owner_name: z.string().optional(),
   }).passthrough(),
   provision_employee: z.object({
     account_id: z.string().min(1),

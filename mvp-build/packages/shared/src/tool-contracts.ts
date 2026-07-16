@@ -183,6 +183,8 @@ export interface CreateAccountInput {
   verified_phone_ref: string;
   business_display_name: string;
   timezone: string;
+  session_id?: string;
+  owner_name?: string;
 }
 
 export interface ProvisionEmployeeInput {

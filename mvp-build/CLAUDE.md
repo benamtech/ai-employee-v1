@@ -9,12 +9,13 @@ one employee; the Manager is the invisible backend control plane.
 
 1. [`../identity.md`](../identity.md) — operating self-image (required, every session).
 2. [`../CODEGRAPH.md`](../CODEGRAPH.md) — workspace map + canonical facts.
-3. [`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/) — the reconciled plan; the
+3. For live normal employee deploy/testing, read [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md) before any script docs. The launch proof path is public DNS/Cloudflare Tunnel -> Caddy -> real `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee -> live owner web client -> provider-backed reply; `local:*`, `live:*`, fixture mode, `/api/dev/login`, and `prod-like:public-estimator:*` are not launch proof.
+4. [`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/) — the reconciled plan; the
    **forward roadmap is [`../wiki/MVP/build-plan-current/phases/`](../wiki/MVP/build-plan-current/phases/)**
    (Phase 0 baseline + Phases 1–13, dependency-ordered modular phases).
-4. [`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/) — factual code-state ledger.
-5. [`memory/`](memory/) — in-repo durable dev handoffs + the memory writing protocol (read the newest).
-6. The relevant source under `apps/`, `packages/`, `infra/` before changing code.
+5. [`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/) — factual code-state ledger.
+6. [`memory/`](memory/) — in-repo durable dev handoffs + the memory writing protocol (read the newest).
+7. The relevant source under `apps/`, `packages/`, `infra/` before changing code.
 
 `../wiki/MVP/old-build-plan/` is the preserved original mechanics packet — do **not** rewrite it.
 
@@ -85,6 +86,10 @@ npm run scheduler:hermes-jobs  # production-oriented Hermes Jobs entrypoint
 
 ## Non-negotiables (Realness Rules + security)
 
+- **Normal employee launch proof uses the production runbook.** Use
+  [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md)
+  by default. Local live toolkit, browser fixtures, dev-login cookies, and public-estimator scripts are
+  diagnostics/development only.
 - **No faked proof.** A capability is accepted only with real provider/runtime proof ids (Twilio SID,
   Gmail/Stripe ids, Pub/Sub message id, Supabase storage/migration evidence, Hermes job proof).
   Manually injected provider results, mocks, or stubbed successes are **never** acceptance. Records

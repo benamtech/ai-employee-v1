@@ -1,8 +1,16 @@
 # mvp-build — the AMTECH AI Employee MVP build
 
+> **2026-07-16 launch-run note:** For normal employee live deploy work, the
+> default path is now [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md).
+> Use public DNS/Cloudflare Tunnel -> Caddy -> Web/Manager -> real
+> `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee
+> -> live owner web client -> provider-backed reply. Do **not** count
+> `local:*`, `live:*`, fixture mode, `/api/dev/login`, or
+> `prod-like:public-estimator:*` as launch proof.
+
 Status: **the second-half plan's product surfaces are `source-wired` and the active owner MVP UI is now Avery-first — Home, Talk, Proof, Connected, Tell Avery, Needs your say, quiet Watching, exact approvals, and proof — with local fixture/headed UI proof. The broader product remains source-wired, not trial-ready: SMS signed Review, materialization/capability contracts, Connector Center/resurfacing, Gmail/Stripe/QuickBooks seams, MCP-UI cards, admin/ops scaffold, metering foundation, context-engineering substrate, and the Docker/Caddy runtime substrate are in source or locally proven as noted, but the remaining gap is the real VPS plus live provider/runtime acceptance (incl. funded provider-backed Hermes tool-loop proof). Admin-panel polish and billing remain parked. See [`docs/state-of-progress-2026-07-14.md`](docs/state-of-progress-2026-07-14.md) and [`CODEGRAPH.md`](CODEGRAPH.md) §3 for authoritative current status.** This is where the AMTECH AI Employee MVP gets built.
 
-**Agent? Start with [`../identity.md`](../identity.md), [`../CODEGRAPH.md`](../CODEGRAPH.md), [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the current second-half plan **[`second-half-plan/`](second-half-plan/)**, and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol).
+**Agent? Start with [`../identity.md`](../identity.md), [`../CODEGRAPH.md`](../CODEGRAPH.md), [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md) for any live normal-employee launch work, [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the current second-half plan **[`second-half-plan/`](second-half-plan/)**, and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol).
 
 Current second-half plan: **[`second-half-plan/`](second-half-plan/)**. Current wiki companion: **[`../wiki/MVP/second-half-current-and-future-state.md`](../wiki/MVP/second-half-current-and-future-state.md)**. Older reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)**. Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**.
 

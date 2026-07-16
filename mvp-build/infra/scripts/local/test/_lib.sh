@@ -2,11 +2,10 @@
 # Shared helpers for the live-test toolkit (infra/scripts/local/test/*).
 # Source this from the other scripts; not meant to run standalone.
 #
-# The local stack has NO funded model key. The "model" is a persistent Claude Code
-# Haiku instance behind the agent-in-the-loop bridge (the "you-are-the-LLM" design,
-# infra/local/agent-model-bridge.md): the bridge parks each /v1/chat/completions
-# request and the ONE warm Haiku worker answers it. Onboarding AND every live
-# employee turn route through it, so the worker MUST be up for any model call.
+# The local live stack now defaults to real provider env. `load_env` keeps host
+# invariants from `.env`, then selectively overlays xAI/Grok-compatible provider
+# values from `infra/deploy/.env.production`. The legacy LOCAL_MODEL_BRIDGE=1
+# path is still available as a dev shim, but it is not acceptance proof.
 
 # mvp-build root (this file lives at infra/scripts/local/test/_lib.sh -> 4 up).
 MVP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
@@ -17,14 +16,51 @@ mkdir -p "$RUN" "$LOGS"
 log() { echo "[live] $*"; }
 err() { echo "[live][ERROR] $*" >&2; }
 
-# Load the gitignored .env and enable dev owner-login. The old no-key model
-# bridge is opt-in only via LOCAL_MODEL_BRIDGE=1; otherwise live provider env
-# from .env is preserved for both onboarding and employee runtimes.
+# Read one KEY=VALUE from an env file without shell-sourcing command-valued lines.
+env_file_value() {
+  local path="$1" key="$2" line value
+  [ -f "$path" ] || return 1
+  line="$(grep -E "^${key}=" "$path" 2>/dev/null | tail -1)" || return 1
+  [ -n "$line" ] || return 1
+  value="${line#*=}"
+  value="${value%$'\r'}"
+  value="${value%\"}"
+  value="${value#\"}"
+  value="${value%\'}"
+  value="${value#\'}"
+  printf '%s' "$value"
+}
+
+# Load local live-test env, then selectively overlay production provider vars.
+# Do not import production NODE_ENV or Docker-only origins into the host dev stack:
+# /api/dev/login requires non-production, and Web must reach Manager on localhost.
 load_env() {
   set -a
   # shellcheck disable=SC1090
   source "$MVP_ROOT/.env"
   set +a
+
+  local deploy_env="$MVP_ROOT/infra/deploy/.env.production" xai_token xai_model
+  xai_token="$(env_file_value "$deploy_env" "xai_api_key" || env_file_value "$deploy_env" "XAI_API_TOKEN" || true)"
+  xai_model="$(env_file_value "$deploy_env" "xai_model" || env_file_value "$deploy_env" "XAI_MODEL" || true)"
+  if [ -n "${xai_token:-}" ]; then
+    export XAI_API_TOKEN="$xai_token"
+    export XAI_API_KEY="$xai_token"
+    export xai_api_key="$xai_token"
+    export ORCHESTRATOR_API_KEY="$xai_token"
+    export ORCHESTRATOR_PROVIDER="openai_compatible"
+    export ORCHESTRATOR_API_BASE_URL="https://api.x.ai/v1"
+  fi
+  if [ -n "${xai_model:-}" ]; then
+    export XAI_MODEL="$xai_model"
+    export xai_model="$xai_model"
+    export ORCHESTRATOR_MODEL="$xai_model"
+    export HERMES_MODEL_DEFAULT="$xai_model"
+  fi
+  if [ -n "${xai_token:-}" ] || [ -n "${xai_model:-}" ]; then
+    export HERMES_MODEL_PROVIDER="openai_compatible"
+  fi
+
   export DEV_OWNER_LOGIN="1"
   if [ "${LOCAL_MODEL_BRIDGE:-}" = "1" ]; then
     export ORCHESTRATOR_API_BASE_URL="http://localhost:8091/v1"

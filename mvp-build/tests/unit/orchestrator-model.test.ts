@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   anthropicMessagesRequestBody,
+  classifyProviderError,
   extractJson,
   openAiCompatibleRequestBody,
   orchestratorModelConfig,
@@ -154,5 +155,12 @@ ignore`);
     expect(parsed.assistant_message).toContain("estimate");
     expect(parsed.manifest_patch.business_kind).toBe("painting");
     expect(parsed.missing_fields).toEqual(["phone_e164"]);
+  });
+
+  it("classifies provider auth, credit, and spending-limit failures distinctly from runtime failures", () => {
+    expect(classifyProviderError(403, "used all available credits")).toBe("auth_or_credit");
+    expect(classifyProviderError(403, "monthly spending limit")).toBe("auth_or_credit");
+    expect(classifyProviderError(429, "rate limit exceeded")).toBe("rate_limited");
+    expect(classifyProviderError(503, "provider overloaded")).toBe("provider_unavailable");
   });
 });
