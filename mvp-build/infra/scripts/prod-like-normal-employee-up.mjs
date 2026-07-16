@@ -13,6 +13,9 @@ const localEnvPath = join(root, ".env");
 const proofDir = process.env.AMTECH_PROOF_DIR ?? "infra/proofs";
 const composeFile = "infra/deploy/docker-compose.yml";
 const tunnelComposeFile = "infra/deploy/docker-compose.tunnel.yml";
+const cloudflaredCertPath = "infra/.local/cloudflared/cert.pem";
+const tunnelName = "amtech-tunnel";
+const tunnelContainerName = "amtech-tunnel";
 
 const args = new Set(process.argv.slice(2));
 const argValue = (name, fallback = undefined) => {
@@ -182,6 +185,38 @@ function run(name, command, argsList, options = {}) {
   };
 }
 
+function deriveTunnelTokenFromCert() {
+  const certFullPath = join(root, cloudflaredCertPath);
+  if (!existsSync(certFullPath)) {
+    return { status: "gated", reason: `${cloudflaredCertPath} missing` };
+  }
+  const result = spawnSync("docker", [
+    "run",
+    "--rm",
+    "--user",
+    "0",
+    "--network",
+    "host",
+    "-v",
+    `${certFullPath}:/cert.pem:ro`,
+    "cloudflare/cloudflared:latest",
+    "tunnel",
+    "--origincert",
+    "/cert.pem",
+    "token",
+    tunnelName,
+  ], { cwd: root, encoding: "utf8" });
+  const token = (result.stdout ?? "").split("\n").map((line) => line.trim()).filter(Boolean).at(-1) ?? "";
+  if (result.status !== 0 || !hasRealValue(token)) {
+    return {
+      status: "fail",
+      reason: "could not derive token from origin cert",
+      output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim().slice(0, 4000),
+    };
+  }
+  return { status: "pass", token };
+}
+
 function compose(argsList, options = {}) {
   return run("compose", "docker", [
     "compose",
@@ -219,15 +254,20 @@ function dockerNetwork() {
 
 function tunnelCheck(env) {
   if (skipTunnel) return { name: "cloudflare_named_tunnel", status: "skip", reason: "skipped by --skip-tunnel" };
-  if (!hasRealValue(env.CLOUDFLARE_TUNNEL_TOKEN)) {
-    return { name: "cloudflare_named_tunnel", status: "gated", reason: "CLOUDFLARE_TUNNEL_TOKEN missing" };
+  let token = env.CLOUDFLARE_TUNNEL_TOKEN;
+  let token_source = "env:CLOUDFLARE_TUNNEL_TOKEN";
+  if (!hasRealValue(token)) {
+    const derived = deriveTunnelTokenFromCert();
+    if (derived.status !== "pass") return { ...derived, name: "cloudflare_named_tunnel" };
+    token = derived.token;
+    token_source = cloudflaredCertPath;
   }
-  run("cloudflare_tunnel_rm", "docker", ["rm", "-f", "amtech-cloudflared-agent"]);
+  run("cloudflare_tunnel_rm", "docker", ["rm", "-f", tunnelContainerName]);
   const started = run("cloudflare_tunnel_start", "docker", [
     "run",
     "-d",
     "--name",
-    "amtech-cloudflared-agent",
+    tunnelContainerName,
     "--network",
     "host",
     "--restart",
@@ -238,9 +278,9 @@ function tunnelCheck(env) {
     "tunnel",
     "--no-autoupdate",
     "run",
-  ], { env: { TUNNEL_TOKEN: env.CLOUDFLARE_TUNNEL_TOKEN } });
+  ], { env: { TUNNEL_TOKEN: token } });
   if (started.status !== "pass") return { ...started, name: "cloudflare_named_tunnel" };
-  return { name: "cloudflare_named_tunnel", status: "pass", container: "amtech-cloudflared-agent", public_host: webOrigin };
+  return { name: "cloudflare_named_tunnel", status: "pass", container: tunnelContainerName, tunnel: tunnelName, token_source, public_host: webOrigin };
 }
 
 function writeProof(proof) {

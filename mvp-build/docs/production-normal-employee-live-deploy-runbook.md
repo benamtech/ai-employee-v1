@@ -86,12 +86,24 @@ If source has not changed and only env/tunnel routing changed, avoid a rebuild:
 npm run prod-like:normal:up -- --no-build --require-tunnel
 ```
 
-If the tunnel is managed manually:
+If `CLOUDFLARE_TUNNEL_TOKEN` is not stored in env, the production-like up script derives a fresh named-tunnel token from:
+
+```text
+infra/.local/cloudflared/cert.pem
+```
+
+That cert is intentionally local and private. The script runs the token derivation container as root so the read-only mounted `0600` cert can be read without weakening file permissions, then starts the connector as `amtech-tunnel`.
+
+Equivalent manual path:
 
 ```bash
 docker rm -f amtech-tunnel || true
+TOKEN=$(docker run --rm --user 0 --network host \
+  -v "$PWD/infra/.local/cloudflared/cert.pem:/cert.pem:ro" \
+  cloudflare/cloudflared:latest tunnel --origincert /cert.pem token amtech-tunnel)
+test -n "$TOKEN"
 docker run -d --name amtech-tunnel --network host --restart unless-stopped \
-  cloudflare/cloudflared:latest tunnel --no-autoupdate run --token "$CLOUDFLARE_TUNNEL_TOKEN"
+  cloudflare/cloudflared:latest tunnel --no-autoupdate run --token "$TOKEN"
 ```
 
 Use `--network host` so cloudflared can reach Caddy on `localhost:80`.
