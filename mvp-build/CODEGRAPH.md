@@ -9,6 +9,12 @@ Status: active
 > Employee -> live owner web client -> provider-backed reply. Local `live:*`
 > tooling, fixture harnesses, `/api/dev/login`, and `prod-like:public-estimator:*`
 > are development aids only and must not be marked as normal-employee launch proof.
+>
+> **Active forward plan:** `second-half-plan/` is now the **only** active forward plan.
+> All phases except billing and admin live testing are considered complete/source-wired.
+> Provider/runtime acceptance now means real creds on the production Docker stack
+> (Cloudflare + Caddy + manager/web + Hermes fleet).
+>
 > Latest live-run handoff:
 > [`memory/2026-07-16-0538-provisioner-failure-live-production-handoff.md`](memory/2026-07-16-0538-provisioner-failure-live-production-handoff.md).
 > Current blocker is provisioner failure observability/retry after successful public

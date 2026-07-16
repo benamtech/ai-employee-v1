@@ -48,6 +48,17 @@ memory (MEMORY.md/USER.md) from onboarding, injecting a reference-shaped live-st
 tuning compression + tool-output hooks, rotating sessions before compaction with handoff notes, and
 keeping trivial/background work off the owner turn. It does not reopen the production infra slice.
 
+## Remaining Work – Billing + Admin Live Validation
+
+**Current focus (2026-07-16):** Only two workstreams remain active:
+
+1. **Live Production Deploy Baseline** — A clean, running production-grade employee reachable via `agent.amtechai.com` using live Twilio, Gmail, Stripe, Supabase, and xAI/Grok credentials. Must produce real proof IDs for onboarding, `provision_employee` with scoped MCP, owner web replies, at least one functional connector, and one full owner turn with tool + artifact.
+2. **Admin Portal Live Testing** — Exercise the internal `/admin` console and all `/manager/admin/*` routes against the live production stack with real operator credentials (suspend/resume/disable, MCP credential rotate/revoke, event repair, readiness reports, redacted diagnostics, audit trail). Must confirm `AMTECH_ADMIN_BROWSER_TOKEN` gate + production RLS.
+
+Billing implementation follows immediately after the above two gates are green. All other phases and workstreams are declared complete/source-wired.
+
+---
+
 ## Implementation Rules
 
 - Do not rewrite Hermes. Package and surface it.

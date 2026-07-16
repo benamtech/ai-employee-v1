@@ -19,6 +19,11 @@ function pushLine(lines: string[], line: string): void {
   if (estimatedTokens(next) <= MAX_ESTIMATED_TOKENS) lines.push(line);
 }
 
+function compact(value: string, max = 180): string {
+  const text = value.replace(/\s+/g, " ").trim();
+  return text.length <= max ? text : `${text.slice(0, max - 3)}...`;
+}
+
 /**
  * CE-3 carryover: when the primer fires on a transcript that was just rotated
  * (`pending_carryover`), it carries STATE + next step forward — not the raw
@@ -49,6 +54,10 @@ export function buildAgentContext(input: {
   if (input.policy?.primer_emphasis) pushLine(lines, input.policy.primer_emphasis);
   pushLine(lines, `Session budget target: stay under ${SESSION_TARGET_TOKENS} total tokens; rotate before compaction in CE-3.`);
   pushLine(lines, "Custody: money and customer-facing actions are prepared for owner approval; read-only connectors are used directly.");
+  const priorEmployeeReplies = (s.messages ?? []).filter((m) => m.direction === "to_owner").length;
+  if (priorEmployeeReplies === 0) {
+    pushLine(lines, "First owner contact: give a light orientation in business language, show one useful next step, and avoid subsystem/tool jargon.");
+  }
   if (input.carryover?.pending) {
     pushLine(lines, "Continuing from a rotated session; prior detail is in Hermes session_search and the brain/facts resources.");
     if (input.carryover.last_decision) pushLine(lines, `Last decision: ${input.carryover.last_decision}`);
@@ -60,6 +69,17 @@ export function buildAgentContext(input: {
   pushLine(lines, `Profile package: ${b.brain_index.profile_package}; slots: ${b.brain_index.context_slots.map((slot) => slot.key).join(", ") || "none"}.`);
   pushLine(lines, `Counts: facts ${b.proof.fact_count}, connectors ${b.proof.connector_count}, artifacts ${b.proof.artifact_count}, open approvals ${b.proof.open_approval_count}, work items ${b.proof.work_queue_count}, capabilities ${b.proof.capability_count}.`);
   pushLine(lines, `Resources: ${Object.values(b.resources).join(", ")}.`);
+
+  for (const slot of (b.brain_index.context_slots ?? []).slice(0, 6)) {
+    const facts = "facts" in slot && Array.isArray(slot.facts) ? slot.facts : [];
+    if (!facts.length) continue;
+    pushLine(lines, `Business context - ${slot.title}:`);
+    for (const fact of facts.slice(0, 6)) {
+      const key = "key" in fact ? String(fact.key) : "fact";
+      const value = "value" in fact ? String(fact.value) : "";
+      pushLine(lines, `- ${key}: ${compact(value)}`);
+    }
+  }
 
   for (const connection of (s.connection_surfaces ?? []).slice(0, 4)) {
     pushLine(lines, `Connection: ${connection.label} is ${connection.state}${connection.health ? ` (${connection.health})` : ""}.`);

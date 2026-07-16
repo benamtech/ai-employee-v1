@@ -70,6 +70,12 @@ export async function buildBusinessBrainIndex(db: SupabaseClient, input: {
     key: slot.key,
     title: slot.title,
     fact_count: slot.facts.length,
+    facts: slot.facts.slice(0, 8).map((fact) => ({
+      key: fact.key,
+      value: fact.value.length > 240 ? `${fact.value.slice(0, 237)}...` : fact.value,
+      source: fact.source,
+      confidence: fact.confidence,
+    })),
   })) ?? [];
 
   return {
@@ -121,4 +127,3 @@ export async function readBusinessFactsResource(db: SupabaseClient, input: {
     .limit(100);
   return { facts: data ?? [] };
 }
-

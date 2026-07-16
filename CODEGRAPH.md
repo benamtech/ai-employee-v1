@@ -7,6 +7,11 @@
 > -> live owner web client -> provider-backed reply. Do not count local
 > `live:*`, fixture/browser harnesses, `/api/dev/login`, or
 > `prod-like:public-estimator:*` as launch proof.
+>
+> **Active forward plan:** `mvp-build/second-half-plan/` is now the **only** active forward plan.
+> All phases except billing and admin live testing are considered complete/source-wired.
+> Provider/runtime acceptance now means real creds on the production Docker stack
+> (Cloudflare + Caddy + manager/web + Hermes fleet).
 
 > **Audience: AI agents.** This is the orientation + structural index for the whole
 > `GTM-RESEARCH` workspace. Read this first. It tells you what every file is, how

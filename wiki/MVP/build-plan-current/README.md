@@ -1,6 +1,10 @@
 # AMTECH AI Employee Build Plan Current
 
-Status: active
+Status: superseded (2026-07-16)
+
+**Superseded by the reconciled plan in `mvp-build/second-half-plan/README.md` (Remaining Work – Billing + Admin Live Validation section). All phases except billing and admin live testing are considered complete/source-wired.**
+
+Provider/runtime acceptance now means real creds on the production Docker stack (Cloudflare + Caddy + manager/web + Hermes fleet).
 
 Date: 2026-06-30
 

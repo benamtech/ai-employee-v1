@@ -84,6 +84,8 @@
     "prod-like:normal:browser-onboard": "node infra/scripts/local/acceptance/06-browser-onboard.mjs",
     "prod:onboarding-proof": "node infra/scripts/prod-onboarding-proof.mjs",
     "prod:normal:validate": "node infra/scripts/prod-normal-employee-validate.mjs",
+    "prod-like:env:sync": "node infra/scripts/prod-env-overlay.mjs",
+    "prod-like:tunnel:ensure": "node infra/scripts/prod-env-overlay.mjs ensure-tunnel",
     "live:up": "bash infra/scripts/local/test/stack-up.sh",
     "live:down": "bash infra/scripts/local/test/stack-down.sh",
     "live:status": "bash infra/scripts/local/test/status.sh",

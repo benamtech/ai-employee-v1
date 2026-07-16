@@ -1,13 +1,13 @@
-import { AgentClient } from "./AgentClient";
+import { AgentSurface } from "./AgentSurface";
 import { uiFixtureMode } from "../../_lib/ui-fixtures";
 
 export const metadata = { title: "Your employee — AMTECH" };
 
-export default async function AgentSurface({
+export default async function AgentPage({
   params,
 }: {
   params: Promise<{ employeeId: string }>;
 }) {
   const { employeeId } = await params;
-  return <AgentClient employeeId={employeeId} fixtureMode={uiFixtureMode()} />;
+  return <AgentSurface employeeId={employeeId} fixtureMode={uiFixtureMode()} />;
 }

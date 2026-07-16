@@ -1,9 +1,16 @@
 import type { SupabaseClient } from "@amtech/db";
 import { assertWorkEventDescriptor, type WorkEventDescriptor } from "@amtech/shared";
-import { executeHermesTurn, resolveRuntimeApi } from "./hermes-client.js";
+import { executeHermesTurnStreaming, resolveRuntimeApi } from "./hermes-client.js";
 import { runEmployeeTurn } from "./turn-queue.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation, startWorkRun } from "./metering.js";
 import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
+import { buildOwnerTurnSystemMessage } from "./owner-turn-context.js";
+import { publishProgress } from "./progress-bus.js";
+import { recoverEmployeeRuntime } from "./runtime-recovery.js";
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export async function deliverToRuntime(apiUrl: string, body: string, channel: "sms" | "web"): Promise<string> {
   throw new Error(`legacy_runtime_path_removed:${channel}:${apiUrl ? "api_url_supplied" : "missing_api_url"}`);
@@ -24,6 +31,39 @@ export async function deliverOwnerTurnToRuntime(
     trigger_type: "owner_message", trigger_ref: params.idempotency_key,
   });
   const startedAt = Date.now();
+  async function executeOwnerTurn(runId: string) {
+    const api = await resolveRuntimeApi(db, params.employee_id);
+    const systemMessage = await buildOwnerTurnSystemMessage(db, {
+      account_id: params.account_id,
+      employee_id: params.employee_id,
+      channel: params.channel,
+    });
+    const turn = await executeHermesTurnStreaming(api, {
+      input: params.body,
+      system_message: systemMessage,
+      work_run_id: runId,
+    }, (p) => publishProgress(params.employee_id, { run_id: runId, verb: p.verb, state: p.state }));
+    await recordExternalRuntimeRun(db, runId, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
+    await recordSessionOccupancy(db, {
+      account_id: params.account_id, employee_id: params.employee_id,
+      transcript_session_id: api.sessionId, memory_session_key: api.sessionKey,
+      usage: turn.usage,
+    });
+    return turn;
+  }
+  async function executeOwnerTurnAfterRecovery(runId: string) {
+    let last: unknown;
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      try {
+        return await executeOwnerTurn(runId);
+      } catch (err) {
+        last = err;
+        if (String((err as Error).message ?? err) !== "runtime_unreachable") throw err;
+        await sleep(1000);
+      }
+    }
+    throw last;
+  }
   const result = await runEmployeeTurn(
     db,
     {
@@ -38,14 +78,15 @@ export async function deliverOwnerTurnToRuntime(
       // CE-3: rotate the transcript BEFORE the turn if the prior turn filled it,
       // so this turn runs fresh and re-primes; both calls run under the turn lock.
       await rotateSessionIfNeeded(db, { account_id: params.account_id, employee_id: params.employee_id });
-      const api = await resolveRuntimeApi(db, params.employee_id);
-      const turn = await executeHermesTurn(api, { input: params.body, work_run_id: runId });
-      await recordExternalRuntimeRun(db, runId, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
-      await recordSessionOccupancy(db, {
-        account_id: params.account_id, employee_id: params.employee_id,
-        transcript_session_id: api.sessionId, memory_session_key: api.sessionKey,
-        usage: turn.usage,
-      });
+      let turn: Awaited<ReturnType<typeof executeOwnerTurn>>;
+      try {
+        turn = await executeOwnerTurn(runId);
+      } catch (err) {
+        if (String((err as Error).message ?? err) !== "runtime_unreachable") throw err;
+        publishProgress(params.employee_id, { run_id: runId, verb: "Restarting employee", state: "started" });
+        await recoverEmployeeRuntime(db, { account_id: params.account_id, employee_id: params.employee_id });
+        turn = await executeOwnerTurnAfterRecovery(runId);
+      }
       return { reply: turn.text, usage: turn.usage ?? {}, runtime_mode: turn.mode, external_run_id: turn.external_run_id ?? null };
     },
   );

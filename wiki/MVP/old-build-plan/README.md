@@ -1,6 +1,8 @@
 # AMTECH AI Employee MVP Build Plan
 
-Status: complete
+Status: superseded (2026-07-16)
+
+**Superseded by the reconciled plan in `mvp-build/second-half-plan/README.md` (Remaining Work – Billing + Admin Live Validation section). All phases except billing and admin live testing are considered complete/source-wired.**
 
 This folder is the implementation handoff for the real AMTECH AI Employee MVP. The MVP is not a staged demo and not a form plus a manually injected provider result. It is the smallest whole product that actually works: a non-technical business owner creates an employee, uses it to produce an estimate, sends the estimate through a real email connector, receives a real customer reply event, sends a real Stripe deposit invoice in provider test mode, and gets the next job reminder.
 

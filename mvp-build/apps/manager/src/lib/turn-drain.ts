@@ -9,12 +9,15 @@
  */
 import type { SupabaseClient } from "@amtech/db";
 import { ID_PREFIX, newId } from "@amtech/shared";
-import { executeHermesTurn, resolveRuntimeApi } from "./hermes-client.js";
+import { executeHermesTurnStreaming, resolveRuntimeApi } from "./hermes-client.js";
 import { claimAnyQueuedTurn, completeEmployeeTurn } from "./turn-queue.js";
 import { routeEmployeeIntent } from "./channel-router.js";
 import { mustWrite } from "./db.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation } from "./metering.js";
 import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
+import { buildOwnerTurnSystemMessage } from "./owner-turn-context.js";
+import { publishProgress } from "./progress-bus.js";
+import { recoverEmployeeRuntime } from "./runtime-recovery.js";
 
 export interface DrainResult {
   job_id: string;
@@ -25,6 +28,10 @@ export interface DrainResult {
 
 /** Owner-chat turns are safe to retry; a straggler is re-run by the drain lane. */
 const MAX_TURN_ATTEMPTS = 5;
+
+async function sleep(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export interface ReapResult {
   requeued: number;
@@ -147,7 +154,41 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
       await rotateSessionIfNeeded(db, { account_id: job.account_id ?? "", employee_id: job.employee_id });
       const api = await resolveRuntimeApi(db, job.employee_id);
       const body = String((job.input as { body?: unknown }).body ?? "");
-      const turn = await executeHermesTurn(api, { input: body, work_run_id: job.run_id ?? null });
+      const channel = job.kind === "owner_sms_chat" ? "sms" : "web";
+      const accountId = job.account_id ?? "";
+      const employeeId = job.employee_id;
+      const systemMessage = await buildOwnerTurnSystemMessage(db, {
+        account_id: accountId,
+        employee_id: employeeId,
+        channel,
+      });
+      const runId = job.run_id ?? job.id;
+      const execute = () => executeHermesTurnStreaming(api, {
+        input: body,
+        system_message: systemMessage,
+        work_run_id: job.run_id ?? null,
+      }, (p) => publishProgress(job.employee_id, { run_id: runId, verb: p.verb, state: p.state }));
+      async function executeWithRecovery() {
+        try {
+          return await execute();
+        } catch (err) {
+          if (String((err as Error).message ?? err) !== "runtime_unreachable") throw err;
+          publishProgress(employeeId, { run_id: runId, verb: "Restarting employee", state: "started" });
+          await recoverEmployeeRuntime(db, { account_id: accountId, employee_id: employeeId });
+          let last: unknown = err;
+          for (let attempt = 0; attempt < 12; attempt += 1) {
+            try {
+              return await execute();
+            } catch (retryErr) {
+              last = retryErr;
+              if (String((retryErr as Error).message ?? retryErr) !== "runtime_unreachable") throw retryErr;
+              await sleep(1000);
+            }
+          }
+          throw last;
+        }
+      }
+      const turn = await executeWithRecovery();
       await recordExternalRuntimeRun(db, job.run_id ?? null, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
       await recordSessionOccupancy(db, {
         account_id: job.account_id ?? "", employee_id: job.employee_id,
@@ -161,7 +202,7 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
           employee_id: job.employee_id,
           direction: "to_owner",
           source: "employee",
-          channel: job.kind === "owner_sms_chat" ? "sms" : "web",
+          channel,
           body: turn.text,
           status: "pending",
         }),

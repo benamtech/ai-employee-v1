@@ -138,6 +138,15 @@ export function AgentClient({ employeeId, fixtureMode }: { employeeId: string; f
           if (json?.event?.id) mergeWorkEvent(json.event);
         } catch { /* ignore malformed stream chunks */ }
       });
+      es.addEventListener("work_progress", (event) => {
+        try {
+          const json = JSON.parse((event as MessageEvent).data);
+          const verb = typeof json?.verb === "string" ? json.verb : "Working";
+          const state = typeof json?.state === "string" ? json.state : "step";
+          setStatus(state === "completed" ? "Avery is wrapping up." : `${verb}...`);
+          setStreamState("live");
+        } catch { /* ignore malformed stream chunks */ }
+      });
       es.addEventListener("approval_update", () => { void refresh(); });
       es.onerror = () => {
         es?.close();
