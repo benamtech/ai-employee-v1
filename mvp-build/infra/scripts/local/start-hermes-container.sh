@@ -23,6 +23,7 @@ port="${API_SERVER_PORT:?API_SERVER_PORT missing from profile .env}"
 workspace="${WORKSPACE_DIR:?WORKSPACE_DIR missing from profile .env}"
 model_gateway_url="${MODEL_GATEWAY_URL:?MODEL_GATEWAY_URL missing from profile .env}"
 model_gateway_health_url="${model_gateway_url%%/v1*}/health"
+runtime_health_url="http://127.0.0.1:${port}/health"
 
 case "$image" in
   hermes-agent:*|ghcr.io/nousresearch/hermes-agent:*) ;;
@@ -92,14 +93,22 @@ docker run -d \
   "$image" gateway run --no-supervise --replace -q
 
 # Runtime acceptance is fail-closed: the actual employee container must reach the
-# host-private gateway over its explicit host-gateway mapping before provisioning
-# can advance to runtime health or public routing.
+# host-private gateway and its own Hermes API must report healthy before the
+# reconciler may activate public routing or provider bindings.
 model_gateway_reachable=0
-for _ in $(seq 1 "${MODEL_GATEWAY_REACHABILITY_ATTEMPTS:-30}"); do
-  if docker exec "$container" python3 -c \
+runtime_healthy=0
+for _ in $(seq 1 "${RUNTIME_ACCEPTANCE_ATTEMPTS:-30}"); do
+  if [[ "$model_gateway_reachable" != "1" ]] && docker exec "$container" python3 -c \
     'import os, urllib.request; u=os.environ["MODEL_GATEWAY_URL"].split("/v1",1)[0]+"/health"; r=urllib.request.urlopen(u, timeout=3); print(r.status); raise SystemExit(0 if r.status < 500 else 1)' \
     >/dev/null 2>&1; then
     model_gateway_reachable=1
+  fi
+  if [[ "$runtime_healthy" != "1" ]] && docker exec "$container" python3 -c \
+    'import os, urllib.request; u="http://127.0.0.1:"+os.environ["API_SERVER_PORT"]+"/health"; r=urllib.request.urlopen(u, timeout=3); print(r.status); raise SystemExit(0 if r.status < 500 else 1)' \
+    >/dev/null 2>&1; then
+    runtime_healthy=1
+  fi
+  if [[ "$model_gateway_reachable" == "1" && "$runtime_healthy" == "1" ]]; then
     break
   fi
   sleep 1
@@ -111,4 +120,10 @@ if [[ "$model_gateway_reachable" != "1" ]]; then
   exit 1
 fi
 
-echo "container:$container network:$network loopback_port:$port model_gateway_reachable:$model_gateway_health_url"
+if [[ "$runtime_healthy" != "1" ]]; then
+  echo "employee runtime health did not pass: $runtime_health_url" >&2
+  docker logs --tail 100 "$container" >&2 || true
+  exit 1
+fi
+
+echo "container:$container network:$network loopback_port:$port runtime_healthy:$runtime_health_url model_gateway_reachable:$model_gateway_health_url"
