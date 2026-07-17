@@ -1,0 +1,44 @@
+name: Employee Work Test Contract Fix
+
+on:
+  push:
+    branches:
+      - employee-work
+    paths:
+      - "mvp-build/infra/scripts/employee-work-test-contract-fix.mjs"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: employee-work-test-contract-fix
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/employee-work'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: employee-work
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node mvp-build/infra/scripts/employee-work-test-contract-fix.mjs
+      - name: Commit focused contract corrections
+        run: |
+          if git diff --quiet; then
+            echo "No patch required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add mvp-build/tests/unit/model-profile-isolation.test.ts \
+                  mvp-build/tests/unit/model-gateway-http-isolation.test.ts \
+                  mvp-build/tests/unit/production-boundary-source.test.ts \
+                  mvp-build/tests/unit/production-live-harness.test.ts \
+                  mvp-build/packages/agent-template/README.md
+          git commit -m "Correct production boundary test contracts"
+          git push origin HEAD:employee-work
