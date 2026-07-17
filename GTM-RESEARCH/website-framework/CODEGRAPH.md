@@ -11,7 +11,7 @@ Scope: `GTM-RESEARCH/website-framework/`
 3. `../../CODEGRAPH.md`
 4. `AGENTS.md`
 5. `README.md`
-6. numbered specifications in order
+6. numbered specifications in order, including the canonical Phase 2 first-pass plan in `14-phase-2-experience-materialization-engine-plan.md`
 7. `../../docs/amtech-website-rewrite-brief.md`
 8. `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`
 9. `../../docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`
@@ -33,7 +33,7 @@ It combines parts of:
 - agentic and generative UI infrastructure;
 - SEO knowledge graphs and structured-data compilers.
 
-It is not a covert CDP, fingerprinting product, arbitrary AI page generator, ad cloaking system, or replacement for human brand judgment.
+It is not a covert CDP, fingerprinting product, arbitrary AI page generator, ad cloaking system, OSINT identity-resolution pipeline, or replacement for human brand judgment.
 
 ## System graph
 
@@ -77,7 +77,7 @@ relevance + effort + conversion + latency + privacy + SEO + accessibility + trut
 
 ### Orientation and authority
 
-- `README.md`: mission, stack hypothesis, invariants, targets, and phase state.
+- `README.md`: mission, stack hypothesis, invariants, targets, phase state, and Phase 2 authority.
 - `identity.md`: scoped mathematical, metaprogramming, quantum-boundary, and interaction-design operating identity.
 - `AGENTS.md`: implementation and editing rules.
 - `CODEGRAPH.md`: this structural map.
@@ -101,7 +101,8 @@ relevance + effort + conversion + latency + privacy + SEO + accessibility + trut
 ### v0.1 and execution
 
 - `07-v0.1-request-mirror-lab.md`: transparent noindex diagnostic product.
-- `08-implementation-plan.md`: Phase 2 build sequence.
+- `08-implementation-plan.md`: original v0.1 Request Mirror build sequence and detailed component scaffold.
+- `14-phase-2-experience-materialization-engine-plan.md`: canonical Phase 2 first-pass plan; prioritizes the deterministic materialization engine and defines five two-part workstreams with explicit validation/pass/fail vectors.
 - `site-manifest.yaml`: machine-readable initial feature/candidate/fixture/headers/budget contract.
 - `scripts/generate-synthetic-persona-matrix.mjs`: deterministic 100-entry synthetic benchmark generator.
 - `fixtures/synthetic-persona-matrix.toon`: reproducible generated output when materialized; never hand-edit and do not require committing it while the validation report records its hash.
@@ -145,18 +146,33 @@ interface ExperienceModule {
 
 The IR, not any vendor package, is the durable contract.
 
+The Phase 2 materialization plan extends the runtime shape contract into five explicit views:
+
+```text
+HRR hypervector
++ low-dimensional auditable facet point
++ graph/hypergraph relationship state
++ hard eligibility state
++ provenance/confidence state
+```
+
+High-dimensional convex hulls, graph transport, spectral partitions, and point-set distances are offline benchmark arms until they beat the exact simpler controls.
+
 ## Runtime invariants
 
 - no arbitrary copy generation in the default edge path;
 - no dynamic symbol creation;
 - no remote database call in the default hot path;
 - no browser fingerprint or named-person profile;
+- no covert cross-site identity resolution or OSINT enrichment of arbitrary visitors;
+- raw Google/Bing/Reddit/search/place/history data cannot enter request-time artifacts;
 - canonical baseline always available;
 - signed/bounded variant IDs only;
 - evidence and CTA eligibility are hard gates;
 - failure returns baseline;
 - exact scan remains the first benchmark;
-- candidate clustering must measure coverage versus replication.
+- candidate clustering must measure coverage versus replication;
+- external experimentation platforms cannot become a page-availability dependency.
 
 ## Phase state
 
@@ -171,38 +187,46 @@ The IR, not any vendor package, is the durable contract.
 - deterministic synthetic benchmark generator;
 - local generator execution and independent constraint/hash validation record;
 - software category and design/content operating model;
-- academic/normative evidence map and revised pass/fail gates.
+- academic/normative evidence map and revised pass/fail gates;
+- canonical Phase 2 first-pass execution plan.
 
 ### Not complete
 
 - TypeScript HRR reference implementation;
 - compiler/content IR implementation;
+- two real compiled AMTECH landing-page families;
+- flat exact resolver benchmark;
+- candidate coverage/replication benchmark;
+- consented context observability implementation;
 - Worker Request Mirror app;
 - Zig/WASM implementation;
 - Cloudflare deployment;
 - Next.js integration;
-- actual landing-page compiler;
 - browser/accessibility/load/SEO testing;
 - conversion or autonomy evidence.
 
 ## Editing map
 
-- Change math or feature encoding -> update `00`, `02`, `04`, `05`, `13`, `site-manifest.yaml`, fixtures, and research notes.
-- Change architecture/runtime -> update `01`, `07`, `08`, `CODEGRAPH.md`, validation vectors, and notes.
-- Change privacy/experiments -> update `06`, `04`, `05`, manifest, and notes.
-- Change page/content/design model -> update `03`, `10`, `11`, design addendum, compiler validation addendum, and handoff.
-- Change canonical AMTECH offer/product truth -> update root CODEGRAPH, rewrite brief, GTM authority, manifest candidates, and truth gates.
-- Add implementation -> update phase state, scripts/tests, research notes, and record exact validation run.
+- Change math or feature encoding -> update `00`, `02`, `04`, `05`, `13`, `14`, `site-manifest.yaml`, fixtures, and research notes.
+- Change architecture/runtime -> update `01`, `07`, `08`, `14`, `CODEGRAPH.md`, validation vectors, and notes.
+- Change privacy/experiments -> update `06`, `04`, `05`, `14`, manifest, and notes.
+- Change page/content/design model -> update `03`, `10`, `11`, `12`, `14`, design addendum, and handoff.
+- Change canonical AMTECH offer/product truth -> update root CODEGRAPH, rewrite brief, GTM authority, manifest candidates, truth gates, and compiled page fixtures.
+- Add implementation -> update phase state, scripts/tests, research notes, and record the exact validation run.
 
 ## Next code path
 
 ```text
-implement TypeScript deterministic vectors/HRR
--> build typed content IR/compiler skeleton
--> compile two real AMTECH landing-page families
--> benchmark flat rules/facets/HRR
--> quantify candidate coverage/replication
--> implement noindex Worker baseline
--> add shadow-only resolver diagnostics
--> consider Zig/WASM after correctness and performance evidence
+1A materialize fixture + implement deterministic TypeScript kernel
+-> 1B formalize typed multi-view shape + benchmark correspondence arms
+-> 2A implement owned content/design IR and deterministic compiler
+-> 2B compile two real AMTECH landing-page families
+-> 3A implement flat exact resolver and hard policy/confidence gate
+-> 3B quantify candidate coverage/replication frontier
+-> 5A implement consented context mirror and source ablation fixtures
+-> 4A deploy noindex Worker in shadow/baseline-only mode
+-> 4B compare Zig scalar/SIMD and integrate signed finite variants with Next.js
+-> 5B add OpenFeature boundary and optional GrowthBook adapter
 ```
+
+The older v0.1 scaffold in `08-implementation-plan.md` remains useful implementation detail, but `14-phase-2-experience-materialization-engine-plan.md` controls first-pass priority and acceptance boundaries.
