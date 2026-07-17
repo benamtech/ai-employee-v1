@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { appendFile, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ProvisionerOperation, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import {
@@ -12,6 +12,7 @@ import {
   writeAndActivateCaddySnippet,
 } from "./lib/profile-renderer.js";
 import { runCommandString } from "./lib/command-runner.js";
+import { createProvisionerIdempotencyStore } from "./lib/provisioner-idempotency.js";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const MAX_TTL_MS = 60_000;
@@ -100,55 +101,27 @@ function validateRequest(input: unknown): HostProvisionerRequest {
   return { ...req, request_id, nonce, idempotency_key } as HostProvisionerRequest;
 }
 
-function markerPath(kind: "nonce" | "idempotency", key: string): string {
-  return join(stateRoot(), kind, encodeURIComponent(key));
-}
-
-function resultPath(key: string): string {
-  return join(stateRoot(), "results", encodeURIComponent(key) + ".json");
+function idempotencyStore() {
+  return createProvisionerIdempotencyStore({
+    root: stateRoot(),
+    staleMs: Math.max(30_000, Number(process.env.PROVISIONER_IDEMPOTENCY_STALE_MS ?? 10 * 60_000)),
+  });
 }
 
 async function cachedResult(key: string): Promise<ProvisionerResult | null> {
-  try {
-    return JSON.parse(await readFile(resultPath(key), "utf8")) as ProvisionerResult;
-  } catch {
-    return null;
-  }
+  return idempotencyStore().cachedResult(key);
 }
 
 async function claimOnce(kind: "nonce" | "idempotency", key: string): Promise<boolean> {
-  const dir = join(stateRoot(), kind);
-  await mkdir(dir, { recursive: true, mode: 0o700 });
-  const path = markerPath(kind, key);
-  try {
-    await writeFile(path, new Date().toISOString(), { flag: "wx", mode: 0o600 });
-    return true;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
-    if (kind !== "idempotency" || await cachedResult(key)) return false;
-    const staleMs = Math.max(30_000, Number(process.env.PROVISIONER_IDEMPOTENCY_STALE_MS ?? 10 * 60_000));
-    try {
-      const info = await stat(path);
-      if (Date.now() - info.mtimeMs <= staleMs) return false;
-      await rm(path, { force: true });
-      await writeFile(path, new Date().toISOString(), { flag: "wx", mode: 0o600 });
-      return true;
-    } catch (reclaimErr) {
-      if ((reclaimErr as NodeJS.ErrnoException).code === "EEXIST") return false;
-      throw reclaimErr;
-    }
-  }
+  return idempotencyStore().claim(kind, key);
 }
 
 async function releaseFailedIdempotencyClaim(key: string): Promise<void> {
-  if (await cachedResult(key)) return;
-  await rm(markerPath("idempotency", key), { force: true });
+  return idempotencyStore().releaseFailedIdempotencyClaim(key);
 }
 
 async function storeResult(key: string, result: ProvisionerResult): Promise<void> {
-  const dir = join(stateRoot(), "results");
-  await mkdir(dir, { recursive: true, mode: 0o700 });
-  await writeFile(resultPath(key), JSON.stringify(result), { mode: 0o600 });
+  return idempotencyStore().storeResult(key, result);
 }
 
 async function audit(entry: Record<string, unknown>): Promise<void> {
@@ -277,8 +250,7 @@ async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> 
   if (req.operation === "rotate_model_gateway_credential") {
     const rotated = await rotateRenderedModelGatewayCredential(req);
     const container = `amtech-hermes-${req.employee_id}`;
-    const restarted = await bestEffortCommand(`docker restart ${container}`, "restart runtime after credential rotation");
-    if (restarted.startsWith("failed:")) throw new Error(restarted);
+    const drift = await inspectRuntime(req);
     return {
       status: "ok",
       request_id: req.request_id,
@@ -288,9 +260,9 @@ async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> 
       profile_checksum: rotated.profile_checksum,
       container_name: container,
       model_gateway_credential_version: req.params.model_gateway.credential_version,
-      smoke_output: restarted,
-      drift: await inspectRuntime(req),
-      logs: [`rotated_model_gateway_credential:${req.params.model_gateway.credential_version}`, `restart:${restarted}`],
+      smoke_output: rotated.runtime_reload_output,
+      drift,
+      logs: [`rotated_model_gateway_credential:${req.params.model_gateway.credential_version}`, `recreate:${rotated.runtime_reload_output}`],
     };
   }
   if (req.operation === "repair_drift") {
