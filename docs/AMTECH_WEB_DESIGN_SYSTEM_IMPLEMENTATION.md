@@ -1,111 +1,154 @@
-# AMTECH Web Design System — Implementation on prod-ux
+# AMTECH Web Design System — Implementation Status
 
-**Branch:** `prod-ux`  
-**Date:** 2026-07-17  
-**Status:** In progress — AgentSurface + design system foundation
+**Branch:** `research`  
+**Updated:** 2026-07-17  
+**Status:** canonical design system established; owner surface implemented; public website and remaining surfaces pending
 
-This document tracks the aggressive, systematic application of `AMTECH_WEB_DESIGN_SYSTEM.md` across all public AMTECH surfaces, starting with the owner web client.
+This document tracks implementation of `AMTECH_WEB_DESIGN_SYSTEM.md` across public AMTECH surfaces. The canonical visual system is already established. Individual surfaces remain at different implementation and proof levels.
 
-## 1. Palette Application
+## Canonical rules
 
-### AgentSurface (owner web) — Light Base Only
+- Light surfaces only: white and `canvas` backgrounds with restrained cool gradients.
+- `ink` for primary text and high contrast.
+- AMTECH red for brand and primary action.
+- Blue for systems/information.
+- Green for verified/success states.
+- No orange, gold, beige, rainbow palette, generic purple-AI treatment, or dark mode.
+- Inter/system sans typography.
+- One eyebrow maximum per section.
+- Strong hierarchy, wide alignment, generous space, and an 8px rhythm.
+- Glass, borders, radii, shadows, and motion remain restrained and operational.
+- Every element must improve hierarchy, comprehension, trust, or action.
 
-| Element | Token Used | Hex | Rationale |
-|---------|------------|-----|-----------|
-| Page background | `canvas` | `#F7F9FC` | Light operational base with subtle gradient |
-| Text | `ink` | `#111111` | High-contrast primary text |
-| Primary CTA (active nav, Send) | `red` | `#E11D2A` | Brand + primary action |
-| Status / progress | `green` | `#168A57` | Success / working states |
-| Informational | `blue` | `#2563EB` | Data / system states |
-| Cards / panels | White + glass | `rgba(255,255,255,.88)` + thin border | Light glass elevation |
+## Implemented owner-product direction
 
-**Rules followed:**
-- No orange/gold/beige/rainbow.
-- Red only for brand/action, blue for systems, green for success.
-- **No dark mode ever** — all surfaces remain light.
+The owner web client established the current product grammar:
 
-## 2. Surfaces
+- Home / Talk / Proof / Connected;
+- “Tell Avery” command language;
+- “Needs your say” approval language;
+- calm Working/Watching states;
+- proof and work resources rather than dashboard metrics;
+- light operational surfaces with red action, blue system, and green success states;
+- mobile-first review and approval behavior.
 
-- Base: White (`#FFFFFF`) or `canvas` (`#F7F9FC`) with subtle blue/red-tinted gradients.
-- Glass: `rgba(255,255,255,.70-.88)`, `backdrop-blur: 24-40px`, `1px black/6-8%` border.
-- Cards: 16-24px radius, soft shadow, generous padding.
-- No dark surfaces permitted anywhere in the public product.
+Primary implementation reference:
 
-## 3. Typography
+- `mvp-build/apps/web/app/agent/[employeeId]/AgentSurface.tsx`
 
-- Family: `Inter, system-ui, sans-serif` (default system stack).
-- Hierarchy: Large bold headlines (`font-semibold tracking-tight`), compact body (`text-sm`).
-- Eyebrows: Small uppercase mono/letter-spaced (`text-xs uppercase tracking-[2px] text-neutral-500`).
-- One eyebrow maximum per section (enforced in current markup).
+This source direction is current, but screenshots or local fixture output do not by themselves establish provider/runtime acceptance.
 
-## 4. Layout
+## Public website direction
 
-- Wide centered container (`max-w-4xl mx-auto`).
-- Strong alignment, large whitespace.
-- Responsive 1-3 column grids (current is single-column stack on mobile).
-- Consistent 8px spacing scale (`space-y-8`, `gap-3`, `gap-2`).
+The public AMTECH website should use the same visual grammar while teaching the category through concrete work rather than reproducing the internal owner application.
 
-## 5. Components
+Product/copy brief:
+
+- `docs/amtech-website-rewrite-brief.md`
+
+Experimental website framework and v0.1 lab:
+
+- `GTM-RESEARCH/website-framework/README.md`
+- `GTM-RESEARCH/website-framework/07-v0.1-request-mirror-lab.md`
+
+The first framework implementation is intentionally a plain, noindex Request Mirror Lab. Its Web-1 diagnostic appearance is an explicit research exception and must not be mistaken for the final AMTECH marketing design.
+
+## Surface status
+
+| Surface | Current status | Next design work |
+|---|---|---|
+| Owner web client | implemented direction; current acceptance depends on live product proof | Continue consistency/accessibility/performance audit as product changes. |
+| Signed Review surface | source exists; current design/proof state requires direct inspection | Align with current approval/proof grammar and mobile behavior. |
+| Front-door onboarding | canonical product path; design state requires direct inspection | Apply the design system without weakening the real onboarding flow. |
+| Public estimator | outdated and non-canonical | Preserve only as a clearly separated regression/acquisition harness where still useful; do not redesign it as the flagship. |
+| Public marketing site | implementation pending | Build from `docs/amtech-website-rewrite-brief.md` after the v0.1 framework lab proves the resolver assumptions. |
+| Request Mirror Lab | specification only | Implement as an intentionally plain diagnostic surface under `GTM-RESEARCH/website-framework/`. |
+| Admin/billing | internal/operator surface; not the public-site priority | Apply tokens and hierarchy where useful without confusing operator and owner audiences. |
+
+## Component guidance
 
 ### Navigation
-- Glass/white shell on dark.
-- Active state uses AMTECH red (`bg-white text-black` on selected view).
+
+- White/glass shell.
+- AMTECH red for the primary action or active state.
+- No dark navigation treatment.
 
 ### Buttons
-- Primary: Red fill, white text, pill radius (`bg-white text-black` for Send — will be updated to red primary in next pass).
-- Secondary: Soft neutral/glass.
-- Status: Green for working, blue for info, red for destructive.
+
+- Primary: red fill, white text, clear label, appropriate radius.
+- Secondary: neutral/glass surface with dark text.
+- Status actions use semantic green, blue, or red only when their meaning warrants it.
 
 ### Forms
-- Large fields, explicit labels (Talk input is large, clear placeholder).
 
-### Tables / Lists
-- Quiet borders, strong headers, grouped actions (future work).
+- Large fields and tap targets.
+- Explicit labels.
+- Visible validation.
+- Minimal steps.
+- No ornamental form chrome.
 
-### Dashboards
-- Prioritizes status ("Needs your say"), next action (Talk composer), measurable outcomes (Proof ledger).
+### Work and proof surfaces
 
-## 6. Visual Rules Enforcement
+Prioritize:
 
-- Red for brand/action, blue for systems/data, green for success — enforced.
-- Cool gradients + glass + thin borders + restrained shadows — in use.
-- No ornamental UI, excessive badges, floating pills, fake metrics, generic AI copy — avoided.
-- Every element supports hierarchy, comprehension, trust, or action — audited.
-- Icons used only for scanning (none currently; added only when needed).
-- Animations: subtle, 180-300ms (no bouncing/spectacle).
+1. what happened or was requested;
+2. what the employee prepared;
+3. what needs the owner's decision;
+4. what action occurred;
+5. the resulting proof.
 
-## 7. Copy
+Avoid generic KPI tiles when a concrete work object communicates more.
 
-- Tone: Direct, concrete, confident, human.
-- Structure: Outcome → capability → operational detail → proof/action.
-- Avoided: Repetition, vague superlatives, "unlock/empower/revolutionize," unnecessary headings.
+## Copy implementation
 
-Current copy examples:
-- "Needs your say" (outcome + gate)
-- "Tell Avery what happened or what you need" (capability + command language)
-- "Proof ledger" (operational detail)
+Required tone:
 
-## 8. Files Updated / Created
+- direct;
+- specific;
+- calm;
+- human;
+- operational;
+- evidence-aware.
 
-- `docs/AMTECH_WEB_DESIGN_SYSTEM.md` — canonical spec (new)
-- `docs/AMTECH_WEB_DESIGN_SYSTEM_IMPLEMENTATION.md` — this tracking doc (new)
-- `mvp-build/apps/web/app/agent/[employeeId]/AgentSurface.tsx` — first surface fully aligned (dark ink, red accents, glass cards, Inter typography, 8px rhythm, one-eyebrow rule)
+Preferred structure:
 
-## 9. Next Surfaces to Apply (Priority Order)
+```text
+owner situation
+-> work performed
+-> concrete result
+-> approval/control
+-> proof or next action
+```
 
-1. Review page (`review/ReviewClient.tsx`) — signed preview surface
-2. Front-door / onboarding flows
-3. Public estimator landing + experience
-4. Admin / billing surfaces
-5. Marketing site (when created)
+Avoid “unlock,” “empower,” “revolutionize,” “AI-powered solutions,” unsupported superlatives, fake metrics, and repeated explanations of the same benefit.
 
-## 10. Validation Against Four-Layer Framework
+## Evidence and claim rule
 
-- **UX Philosophy:** Fully aligned with `ai-native-work-surface-research.md` (Avery-first, Home/Talk/Proof/Connected, command language) and `phase-3-generative-ui-reframe.md` (conformance).
-- **Pi Technical Patterns:** No conflict — design system is purely visual/presentation layer.
-- **Architecture Style:** No new contracts or bypasses.
-- **Specific Features:** Design system applied to existing `WorkEventDescriptor` / `WorkResource` rendering path.
+Visual polish must not inflate acceptance.
 
-## 11. Enforcement
+Every public proof object should carry one of:
 
-This implementation document will be updated on every surface migration. Any deviation from the design system must be recorded here with rationale and linked to the canonical spec.
+- `live_production_proof`;
+- `product_demonstration`;
+- `source_wired_preview`;
+- `concept`.
+
+The interface must never imply that a source-wired preview or controlled demonstration is current live provider/customer proof.
+
+## Validation expectations
+
+For each migrated surface, record:
+
+- exact source files;
+- route and audience;
+- desktop/mobile screenshots;
+- keyboard and reduced-motion behavior;
+- contrast/accessibility results;
+- performance impact;
+- copy/claim review;
+- provider/runtime evidence where relevant;
+- anything not run.
+
+## Enforcement
+
+`AMTECH_WEB_DESIGN_SYSTEM.md` remains the visual authority. This implementation-status document must be updated when a surface materially changes. Deviations require an explicit rationale, scope, and review record.
