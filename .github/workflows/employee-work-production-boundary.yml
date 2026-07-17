@@ -138,8 +138,19 @@ jobs:
       - name: Validate acceptance script syntax
         run: find infra/scripts/acceptance -name '*.mjs' -print0 | xargs -0 -n1 node --check
       - name: Production boundary unit and source proofs
+        shell: bash
         env:
           HERMES_RUNTIME_COMMAND: node -e "process.exit(0)"
-        run: npm run test:production-boundary
+        run: |
+          set +e
+          npm run test:production-boundary 2>&1 | tee production-boundary-tests.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload production boundary test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-boundary-tests-${{ github.run_id }}
+          path: mvp-build/production-boundary-tests.log
+          if-no-files-found: warn
       - name: Production image inclusion
         run: docker build -f infra/deploy/manager.Dockerfile .
