@@ -142,11 +142,14 @@ try {
     values($1, $2, $3, $4, 'welcome_sent', jsonb_build_object('welcome_event_inbox_id', $5::text))
   `, [welcomeJobId, accountId, employeeId, `welcome-job:${suffix}`, welcomeId]);
   let readyRejected = false;
+  await client.query("savepoint ready_gate_negative_assertion");
   try {
     await client.query("update provisioning_jobs set state = 'ready' where id = $1", [welcomeJobId]);
   } catch (err) {
     readyRejected = String(err.message).includes("temporarily_welcome_effect_not_processed");
+    await client.query("rollback to savepoint ready_gate_negative_assertion");
   }
+  await client.query("release savepoint ready_gate_negative_assertion");
   check("ready_rejected_before_welcome_effect", readyRejected);
   await client.query("update ambient_event_inbox set processing_state = 'processed', processed_at = now() where inbox_id = $1", [welcomeId]);
   const welcomeMessage = await one("select id, body, status from employee_messages where provider_id = $1", [welcomeId]);
