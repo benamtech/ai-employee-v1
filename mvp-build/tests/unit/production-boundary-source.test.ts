@@ -20,13 +20,15 @@ describe("production image inclusion", () => {
 });
 
 describe("employee model-gateway network boundary", () => {
-  it("requires explicit host-gateway mapping and a probe from the actual employee container", async () => {
+  it("requires explicit host-gateway mapping plus gateway and runtime probes from the employee container", async () => {
     const launcher = await source("infra/scripts/local/start-hermes-container.sh");
     expect(launcher).toContain("--network \"$network\"");
     expect(launcher).toContain("--add-host=host.docker.internal:host-gateway");
     expect(launcher).toContain("docker exec \"$container\" python3");
     expect(launcher).toContain("MODEL_GATEWAY_URL");
     expect(launcher).toContain("employee runtime cannot reach host-private model gateway");
+    expect(launcher).toContain("employee runtime health did not pass");
+    expect(launcher).toContain('os.environ["API_SERVER_PORT"]+"/health"');
   });
 
   it("keeps the gateway loopback-bound and absent from public Caddy ingress", async () => {
@@ -70,6 +72,22 @@ describe("durable worker contracts", () => {
     expect(leases).toContain("ambient_event_dead_letters");
     expect(receipts).toContain("ambient_effect_receipts");
     expect(receipts).toContain("completed_at is null");
+  });
+
+  it("grants the backend role explicitly while preserving browser-role revocations", async () => {
+    const grants = await source("packages/db/migrations/0036_worker_service_role_grants.sql");
+    expect(grants).toContain("to service_role");
+    expect(grants).toContain("from anon, authenticated");
+    expect(grants).toContain("grant execute on function claim_next_provisioning_job");
+  });
+
+  it("gates ready on a processed owner-facing welcome effect", async () => {
+    const welcome = await source("packages/db/migrations/0037_welcome_effect_ready_gate.sql");
+    expect(welcome).toContain("materialize_processed_employee_welcome");
+    expect(welcome).toContain("ambient_employee_welcome_effect");
+    expect(welcome).toContain("provisioning_ready_requires_welcome");
+    expect(welcome).toContain("temporarily_welcome_effect_not_processed");
+    expect(welcome).toContain("Your AI Employee is ready");
   });
 
   it("persists effect keys before host calls and schedules fleet drift checks", async () => {
