@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm } from "node:fs/promises";
+import { chmod, lstat, mkdtemp, readFile, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -120,6 +120,22 @@ class FakeSupabase {
   }
 }
 
+async function thawTree(path: string): Promise<void> {
+  try {
+    const info = await lstat(path);
+    if (info.isDirectory()) {
+      await chmod(path, 0o700);
+      for (const entry of await readdir(path, { withFileTypes: true })) {
+        await thawTree(join(path, entry.name));
+      }
+      return;
+    }
+    await chmod(path, 0o600);
+  } catch {
+    // Best-effort test cleanup; rm below remains authoritative.
+  }
+}
+
 let tempRoot: string | null = null;
 const previousEnv = { ...process.env };
 
@@ -135,7 +151,10 @@ beforeEach(() => {
 
 afterEach(async () => {
   process.env = { ...previousEnv };
-  if (tempRoot) await rm(tempRoot, { recursive: true, force: true });
+  if (tempRoot) {
+    await thawTree(tempRoot);
+    await rm(tempRoot, { recursive: true, force: true });
+  }
   tempRoot = null;
 });
 
