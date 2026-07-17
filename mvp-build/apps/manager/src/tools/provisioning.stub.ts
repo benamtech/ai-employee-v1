@@ -1,17 +1,15 @@
-/** Provisioning tools — claim-time profile creation + runtime proof. */
+/** Provisioning tools — create durable desired state; the reconciler owns effects. */
 import {
   ID_PREFIX,
   OnboardingManifest,
   employeeWebRoute,
   gatewayPort,
   newId,
-  ok,
   pending,
   failed,
+  ok,
   type ProvisionEmployeeInput,
   type GetProvisioningStatusInput,
-  type ProvisionerRequest,
-  type ProvisionerResult,
   type ToolName,
 } from "@amtech/shared";
 import type { ToolHandler } from "./types.js";
@@ -20,17 +18,12 @@ import { writeAudit } from "../lib/audit.js";
 import { checkFeature } from "../lib/entitlements.js";
 import { isLocalRuntimeBackendAllowed, resolveRuntimeBackend } from "../lib/runtime-backend.js";
 import { sealSecret } from "../lib/secrets.js";
-import { mintEmployeeMcpCredential, revokeEmployeeMcpCredential } from "../lib/mcp-auth.js";
-import { mintModelGatewayCredential, revokeModelGatewayCredential } from "../lib/model-gateway.js";
 import {
   canonicalProvisioningGraph,
-  classifyProvisioningError,
+  freshProvisioningOperationKey,
   persistProvisioningResourceGraph,
   recordProvisioningResource,
-  transitionProvisioning,
-  type ProvisioningState,
 } from "../lib/provisioning-state-machine.js";
-import { buildProfileContext } from "../lib/profile-context.js";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -42,14 +35,6 @@ function clientSlug(employeeId: string): string {
   return employeeId.replace(/^emp_/, "client-").slice(0, 40);
 }
 
-function hermesSessionKey(accountId: string, employeeId: string): string {
-  return `amtech:v1:account:${accountId}:employee:${employeeId}`;
-}
-
-function skipSmsProvisioning(): boolean {
-  return process.env.PROVISIONER_SKIP_SMS === "1" || process.env.PROVISIONER_SKIP_SMS === "true";
-}
-
 function publicTwilioWebhookUrl(employeeId: string): string {
   const webhookBase = process.env.SMS_WEBHOOK_BASE_URL?.replace(/\/$/, "");
   if (webhookBase) return `${webhookBase}/${employeeId}`;
@@ -57,72 +42,81 @@ function publicTwilioWebhookUrl(employeeId: string): string {
   return `${managerOrigin}/webhooks/twilio/${employeeId}`;
 }
 
-function redactProvisionerText(value: unknown): string {
-  return String(value ?? "")
-    .replace(/(Bearer\s+)[A-Za-z0-9._~+/=-]+/gi, "$1[REDACTED]")
-    .replace(/((?:api[_-]?key|token|secret|password)[=:]\s*)[^\s,;]+/gi, "$1[REDACTED]")
-    .slice(0, 2000);
+function isTerminalRetryableState(state: unknown): boolean {
+  return state === "failed" || state === "compensated";
 }
 
-class ProvisionerCallError extends Error {
-  failure_state: string;
-  http_status: number;
-  logs: string[];
+async function latestRequestJob(ctx: Parameters<ToolHandler>[0], accountId: string, baseIdempotencyKey: string) {
+  const exact = await ctx.db.from("provisioning_jobs").select("*").eq("idempotency_key", baseIdempotencyKey).maybeSingle();
+  if (exact.error) throw exact.error;
+  if (exact.data && exact.data.account_id !== accountId) return { conflict: exact.data, latest: null };
 
-  constructor(input: { failure_state: string; http_status: number; logs?: unknown[]; message?: string }) {
-    super(input.failure_state);
-    this.name = "ProvisionerCallError";
-    this.failure_state = input.failure_state;
-    this.http_status = input.http_status;
-    this.logs = (input.logs?.length ? input.logs : [input.message ?? input.failure_state]).map(redactProvisionerText);
-  }
+  const latest = await ctx.db
+    .from("provisioning_jobs")
+    .select("*")
+    .eq("account_id", accountId)
+    .eq("command_type", "ensure_runtime")
+    .contains("worker_context", { base_idempotency_key: baseIdempotencyKey })
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (latest.error) throw latest.error;
+  return { conflict: null, latest: latest.data ?? exact.data ?? null };
 }
 
-function provisionerFailureDetails(err: unknown): { failure_state: string; http_status: number | null; logs: string[]; validation_output: string } {
-  if (err instanceof ProvisionerCallError) {
-    return {
-      failure_state: err.failure_state,
-      http_status: err.http_status,
-      logs: err.logs,
-      validation_output: JSON.stringify({ failure_state: err.failure_state, http_status: err.http_status, logs: err.logs }),
-    };
-  }
-  const message = redactProvisionerText((err as Error).message ?? err);
-  return { failure_state: message, http_status: null, logs: [message], validation_output: message };
-}
-
-async function callProvisioner(req: ProvisionerRequest): Promise<ProvisionerResult> {
-  const origin = requiredEnv("PROVISIONER_ORIGIN").replace(/\/$/, "");
-  const token = requiredEnv("PROVISIONER_TOKEN");
-  const res = await fetch(`${origin}/provision`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(req),
-  });
-  const json = (await res.json().catch(() => ({ status: "failed", failure_state: `provisioner_${res.status}`, logs: [`Provisioner returned non-JSON response with HTTP ${res.status}.`] }))) as ProvisionerResult;
-  if (!res.ok || json.status !== "ok") {
-    throw new ProvisionerCallError({ failure_state: json.failure_state ?? `provisioner_${res.status}`, http_status: res.status, logs: json.logs, message: json.validation_output ?? json.smoke_output });
-  }
-  return json;
-}
-
-async function advanceProvisioning(ctx: Parameters<ToolHandler>[0], input: {
-  jobId: string;
+async function createRetryJob(ctx: Parameters<ToolHandler>[0], input: {
   accountId: string;
-  employeeId: string;
-  from: ProvisioningState | "running";
-  to: ProvisioningState;
-  evidence?: Record<string, unknown>;
-}): Promise<void> {
-  const transition = await transitionProvisioning(ctx.db, {
-    provisioning_job_id: input.jobId,
+  baseIdempotencyKey: string;
+  previous: Record<string, any>;
+}): Promise<{ jobId: string; employeeId: string }> {
+  const previousContext = input.previous.worker_context && typeof input.previous.worker_context === "object"
+    ? input.previous.worker_context as Record<string, unknown>
+    : {};
+  const employeeId = String(input.previous.employee_id ?? "");
+  const manifestId = String(previousContext.manifest_id ?? "");
+  if (!employeeId || !manifestId) throw new Error("retry_context_incomplete");
+  const jobId = newId(ID_PREFIX.provisioningJob);
+  const retryIdempotencyKey = `${input.baseIdempotencyKey}:retry:${jobId}`;
+  const resourceGraph = canonicalProvisioningGraph({ account_id: input.accountId, employee_id: employeeId, manifest_id: manifestId });
+  const workerContext = {
+    ...previousContext,
+    base_idempotency_key: input.baseIdempotencyKey,
+    retry_of_provisioning_job_id: input.previous.id,
+    effect_keys: {},
+    mcp_credential_id: null,
+    model_gateway_credential_id: null,
+    render_result: null,
+    runtime_result: null,
+    runtime_health_result: null,
+    routing_result: null,
+    welcome_event_inbox_id: null,
+    compensation_phase: null,
+  };
+  const inserted = await ctx.db.from("provisioning_jobs").insert({
+    id: jobId,
     account_id: input.accountId,
-    employee_id: input.employeeId,
-    expected_state: input.from,
-    to_state: input.to,
-    evidence: input.evidence ?? {},
+    employee_id: employeeId,
+    idempotency_key: retryIdempotencyKey,
+    command_type: "ensure_runtime",
+    operation_key: freshProvisioningOperationKey({
+      command_type: "ensure_runtime",
+      account_id: input.accountId,
+      employee_id: employeeId,
+      retry_of: String(input.previous.id),
+    }),
+    state: "requested",
+    desired_state: "ready",
+    desired_resource_graph: resourceGraph,
+    worker_context: workerContext,
+    logs: [{ at: new Date().toISOString(), message: "Provisioning retry requested with fresh operation and effect keys.", retry_of_provisioning_job_id: input.previous.id }],
   });
-  if (!transition.applied) throw new Error(`provisioning_transition_conflict:${input.from}->${input.to}`);
+  if (inserted.error) throw inserted.error;
+  await persistProvisioningResourceGraph(ctx.db, { provisioning_job_id: jobId, account_id: input.accountId, employee_id: employeeId, resources: resourceGraph });
+  await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "account", observed_state: "present", evidence: { account_id: input.accountId } });
+  await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "employee_record", observed_state: "present", evidence: { employee_id: employeeId, retry: true } });
+  const employeeWrite = await ctx.db.from("employees").update({ status: "provisioning" }).eq("id", employeeId).eq("account_id", input.accountId);
+  if (employeeWrite.error) throw employeeWrite.error;
+  return { jobId, employeeId };
 }
 
 const provisionEmployee: ToolHandler = async (ctx, raw) => {
@@ -140,151 +134,125 @@ const provisionEmployee: ToolHandler = async (ctx, raw) => {
   }
   const manifest = parsed.data;
 
-  const existing = await ctx.db.from("provisioning_jobs").select("*").eq("idempotency_key", input.idempotency_key).maybeSingle();
-  let effectiveIdempotencyKey = input.idempotency_key;
-  let retryOfProvisioningJobId: string | null = null;
-  if (existing.data && existing.data.account_id !== input.account_id) {
-    const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, actor: ctx.actor, action: "tool:provision_employee", result: "failed", details: { reason: "idempotency_key_account_mismatch", existing_job_id: existing.data.id } });
-    return failed("idempotency_conflict", "Provisioning request belongs to a different account.", { account_id: input.account_id, audit_id });
-  }
-  if (existing.data && !["failed", "compensated"].includes(String(existing.data.state))) {
-    return pending({
-      account_id: input.account_id,
-      employee_id: existing.data.employee_id ?? null,
-      proof: { provisioning_job_id: existing.data.id, state: existing.data.state },
-      user_facing_summary_hint: "Provisioning request already exists.",
-      next_suggested_action: "Poll provisioning status.",
-    });
-  }
-  if (existing.data?.state === "failed") {
-    retryOfProvisioningJobId = existing.data.id;
-    effectiveIdempotencyKey = `${input.idempotency_key}:retry:${newId(ID_PREFIX.provisioningJob)}`;
-  }
-
-  const employeeId = newId(ID_PREFIX.employee);
-  const manifestId = newId(ID_PREFIX.manifest);
-  const jobId = newId(ID_PREFIX.provisioningJob);
-  const buildId = newId(ID_PREFIX.profileBuild);
-  const slug = clientSlug(employeeId);
-  const portBase = Number(process.env.HERMES_GATEWAY_PORT_BASE ?? 8100);
-  const port = gatewayPort(portBase, Math.floor(Math.random() * 1000) + 1);
-  const webhookUrl = publicTwilioWebhookUrl(employeeId);
-  const workspaceDir = `${requiredEnv("AMTECH_CLIENTS_DIR")}/${employeeId}/workspace`;
-  const packageKey = manifest.profile_package_key ?? "contractor_estimator";
-  const runtimeBackend = resolveRuntimeBackend();
-  if (runtimeBackend === "local" && !isLocalRuntimeBackendAllowed()) {
-    const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, actor: ctx.actor, action: "tool:provision_employee", result: "denied", details: { reason: "runtime_backend_not_allowed", runtime_backend: runtimeBackend } });
-    return failed("unauthorized", "This deployment is not configured to provision employees on the local runtime backend.", { account_id: input.account_id, audit_id });
-  }
-  const apiServerKey = randomBytes(32).toString("base64url");
-  let mcpCredentialId: string | null = null;
-  let modelGatewayCredentialId: string | null = null;
-
-  await ctx.db.from("employees").insert({ id: employeeId, account_id: input.account_id, name: manifest.employee_name, status: "provisioning", profile_package_key: packageKey, web_route: employeeWebRoute(employeeId) });
-  await ctx.db.from("employee_manifests").insert({ id: manifestId, employee_id: employeeId, manifest, raw_answers: manifest.seven_question_answers ?? {}, transcript_ref: input.transcript_ref ?? manifest.transcript_ref ?? null, profile_package_key: packageKey });
-
-  const allFacts = [...manifest.pricing_facts.map((fact) => ({ ...fact, category: "pricing" })), ...manifest.branding_facts.map((fact) => ({ ...fact, category: "branding" })), ...manifest.customer_job_facts.map((fact) => ({ ...fact, category: "customer" }))];
-  if (allFacts.length) {
-    await ctx.db.from("business_brain_facts").insert(allFacts.map((fact) => ({ id: newId(ID_PREFIX.brainFact), employee_id: employeeId, account_id: input.account_id, fact_key: fact.key, fact_value: fact.value, category: fact.category, source: "onboarding", source_ref: fact.source_snippet ?? null, confidence: fact.confidence })));
-  }
-
-  const jobStartLogs = [{ at: new Date().toISOString(), message: "Provisioning requested.", ...(retryOfProvisioningJobId ? { retry_of_provisioning_job_id: retryOfProvisioningJobId } : {}) }];
-  await ctx.db.from("provisioning_jobs").insert({ id: jobId, account_id: input.account_id, employee_id: employeeId, idempotency_key: effectiveIdempotencyKey, command_type: "ensure_runtime", operation_key: `ensure_runtime:${input.account_id}:${input.idempotency_key}`, state: "running", logs: jobStartLogs });
-  const resourceGraph = canonicalProvisioningGraph({ account_id: input.account_id, employee_id: employeeId, manifest_id: manifestId });
-  await ctx.db.from("provisioning_jobs").update({ desired_resource_graph: resourceGraph }).eq("id", jobId);
-  await persistProvisioningResourceGraph(ctx.db, { provisioning_job_id: jobId, account_id: input.account_id, employee_id: employeeId, resources: resourceGraph });
-  await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "employee_record", observed_state: "present", evidence: { employee_id: employeeId } });
-  await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "running", to: "resources_reserved", evidence: { employee_id: employeeId, manifest_id: manifestId, build_id: buildId } });
-
-  const { data: pkg } = await ctx.db.from("profile_packages").select("*").eq("package_key", packageKey).maybeSingle();
-  const seedSkills = manifest.seed_skills.length ? manifest.seed_skills : ((pkg?.default_skills as string[] | undefined) ?? []);
-  const profileContext = buildProfileContext({ packageKey, manifest: { ...manifest, seed_skills: seedSkills } });
-  await ctx.db.from("employee_profile_builds").insert({ id: buildId, employee_id: employeeId, account_id: input.account_id, profile_package_id: pkg?.id ?? null, package_key: packageKey, package_version: pkg?.version ?? null, params: manifest });
-
   try {
-    const mcpCredential = await mintEmployeeMcpCredential(ctx.db, { account_id: input.account_id, employee_id: employeeId });
-    mcpCredentialId = mcpCredential.credential_id;
-    const modelGatewayCredential = await mintModelGatewayCredential(ctx.db, { account_id: input.account_id, employee_id: employeeId });
-    modelGatewayCredentialId = modelGatewayCredential.credential_id;
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "scoped_credentials", observed_state: "minted", evidence: { mcp_credential_id: mcpCredentialId, model_gateway_credential_id: modelGatewayCredentialId, model_gateway_credential_version: modelGatewayCredential.policy.credential_version } });
-    await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "resources_reserved", to: "credentials_minted", evidence: { mcp_credential_id: mcpCredentialId, model_gateway_credential_id: modelGatewayCredentialId } });
+    const request = await latestRequestJob(ctx, input.account_id, input.idempotency_key);
+    if (request.conflict) {
+      const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, actor: ctx.actor, action: "tool:provision_employee", result: "failed", details: { reason: "idempotency_key_account_mismatch", existing_job_id: request.conflict.id } });
+      return failed("idempotency_conflict", "Provisioning request belongs to a different account.", { account_id: input.account_id, audit_id });
+    }
+    if (request.latest && !isTerminalRetryableState(request.latest.state)) {
+      return pending({
+        account_id: input.account_id,
+        employee_id: request.latest.employee_id ?? null,
+        proof: { provisioning_job_id: request.latest.id, state: request.latest.state },
+        user_facing_summary_hint: "Provisioning request already exists and is owned by the reconciler.",
+        next_suggested_action: "Poll provisioning status.",
+      });
+    }
+    if (request.latest && isTerminalRetryableState(request.latest.state)) {
+      const retry = await createRetryJob(ctx, { accountId: input.account_id, baseIdempotencyKey: input.idempotency_key, previous: request.latest as Record<string, any> });
+      const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, employee_id: retry.employeeId, actor: ctx.actor, action: "tool:provision_employee", resource: retry.employeeId, result: "ok", details: { provisioning_job_id: retry.jobId, retry_of_provisioning_job_id: request.latest.id, previous_state: request.latest.state, reconciler_owned: true } });
+      return pending({
+        account_id: input.account_id,
+        employee_id: retry.employeeId,
+        proof: { provisioning_job_id: retry.jobId, retry_of_provisioning_job_id: request.latest.id, state: "requested" },
+        user_facing_summary_hint: "Provisioning retry queued with fresh operation keys.",
+        next_suggested_action: "Poll provisioning status.",
+        audit_id,
+      });
+    }
 
-    const result = await callProvisioner({
+    const employeeId = newId(ID_PREFIX.employee);
+    const manifestId = newId(ID_PREFIX.manifest);
+    const jobId = newId(ID_PREFIX.provisioningJob);
+    const buildId = newId(ID_PREFIX.profileBuild);
+    const packageKey = manifest.profile_package_key ?? "contractor_estimator";
+    const runtimeBackend = resolveRuntimeBackend();
+    if (runtimeBackend === "local" && !isLocalRuntimeBackendAllowed()) {
+      const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, actor: ctx.actor, action: "tool:provision_employee", result: "denied", details: { reason: "runtime_backend_not_allowed", runtime_backend: runtimeBackend } });
+      return failed("unauthorized", "This deployment is not configured to provision employees on the local runtime backend.", { account_id: input.account_id, audit_id });
+    }
+    const portBase = Number(process.env.HERMES_GATEWAY_PORT_BASE ?? 8100);
+    const port = gatewayPort(portBase, Math.floor(Math.random() * 1000) + 1);
+    const workspaceDir = `${requiredEnv("AMTECH_CLIENTS_DIR")}/${employeeId}/workspace`;
+    const apiServerKeyRef = sealSecret(randomBytes(32).toString("base64url"));
+    const resourceGraph = canonicalProvisioningGraph({ account_id: input.account_id, employee_id: employeeId, manifest_id: manifestId });
+    const workerContext = {
+      base_idempotency_key: input.idempotency_key,
+      manifest_id: manifestId,
+      build_id: buildId,
+      package_key: packageKey,
+      runtime_backend: runtimeBackend,
+      gateway_port: port,
+      workspace_dir: workspaceDir,
+      webhook_url: publicTwilioWebhookUrl(employeeId),
+      client_id: clientSlug(employeeId),
+      api_server_key_ref: apiServerKeyRef,
+      effect_keys: {},
+    };
+
+    const employeeWrite = await ctx.db.from("employees").insert({ id: employeeId, account_id: input.account_id, name: manifest.employee_name, status: "provisioning", profile_package_key: packageKey, web_route: employeeWebRoute(employeeId) });
+    if (employeeWrite.error) throw employeeWrite.error;
+    const manifestWrite = await ctx.db.from("employee_manifests").insert({ id: manifestId, employee_id: employeeId, manifest, raw_answers: manifest.seven_question_answers ?? {}, transcript_ref: input.transcript_ref ?? manifest.transcript_ref ?? null, profile_package_key: packageKey });
+    if (manifestWrite.error) throw manifestWrite.error;
+
+    const allFacts = [
+      ...manifest.pricing_facts.map((fact) => ({ ...fact, category: "pricing" })),
+      ...manifest.branding_facts.map((fact) => ({ ...fact, category: "branding" })),
+      ...manifest.customer_job_facts.map((fact) => ({ ...fact, category: "customer" })),
+    ];
+    if (allFacts.length) {
+      const factsWrite = await ctx.db.from("business_brain_facts").insert(allFacts.map((fact) => ({ id: newId(ID_PREFIX.brainFact), employee_id: employeeId, account_id: input.account_id, fact_key: fact.key, fact_value: fact.value, category: fact.category, source: "onboarding", source_ref: fact.source_snippet ?? null, confidence: fact.confidence })));
+      if (factsWrite.error) throw factsWrite.error;
+    }
+
+    const pkg = await ctx.db.from("profile_packages").select("*").eq("package_key", packageKey).maybeSingle();
+    if (pkg.error) throw pkg.error;
+    const buildWrite = await ctx.db.from("employee_profile_builds").insert({ id: buildId, employee_id: employeeId, account_id: input.account_id, profile_package_id: pkg.data?.id ?? null, package_key: packageKey, package_version: pkg.data?.version ?? null, params: manifest, install_status: "queued" });
+    if (buildWrite.error) throw buildWrite.error;
+
+    const jobWrite = await ctx.db.from("provisioning_jobs").insert({
+      id: jobId,
       account_id: input.account_id,
       employee_id: employeeId,
-      manifest_id: manifestId,
-      profile_package_key: packageKey,
-      render_secrets: { manager_mcp_token: mcpCredential.token, model_gateway_token: modelGatewayCredential.token },
-      params: {
-        client_id: slug,
-        account_id: input.account_id,
-        employee_id: employeeId,
-        profile_package_key: packageKey,
-        runtime_backend: runtimeBackend,
-        business_display_name: manifest.business_display_name,
-        business_kind: manifest.business_kind,
-        owner_name: manifest.owner_name,
-        owner_phone_e164: manifest.verified_phone_e164,
-        employee_name: manifest.employee_name,
-        timezone: manifest.timezone,
-        workspace_dir: workspaceDir,
-        webhook_url: webhookUrl,
-        gateway_port: port,
-        top_workflows: manifest.top_workflows,
-        tools_mentioned: manifest.tools_mentioned,
-        seed_skills: seedSkills,
-        api_server_key: apiServerKey,
-        profile_context: profileContext,
-        model_gateway: modelGatewayCredential.policy,
-      },
+      idempotency_key: input.idempotency_key,
+      command_type: "ensure_runtime",
+      operation_key: freshProvisioningOperationKey({ command_type: "ensure_runtime", account_id: input.account_id, employee_id: employeeId }),
+      state: "requested",
+      desired_state: "ready",
+      desired_resource_graph: resourceGraph,
+      worker_context: workerContext,
+      logs: [{ at: new Date().toISOString(), message: "Provisioning desired state persisted; reconciler owns all external effects." }],
     });
+    if (jobWrite.error) throw jobWrite.error;
+    await persistProvisioningResourceGraph(ctx.db, { provisioning_job_id: jobId, account_id: input.account_id, employee_id: employeeId, resources: resourceGraph });
+    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "account", observed_state: "present", evidence: { account_id: input.account_id } });
+    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "employee_record", observed_state: "present", evidence: { employee_id: employeeId, manifest_id: manifestId, build_id: buildId } });
 
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "rendered_profile", observed_state: "checksum_verified_frozen", evidence: { profile_id: result.profile_id, checksum: result.profile_checksum } });
-    await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "credentials_minted", to: "profile_rendered", evidence: { profile_id: result.profile_id, checksum: result.profile_checksum } });
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "employee_network", observed_state: "isolated", evidence: { network_name: result.network_name } });
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "runtime", observed_state: "started", evidence: { container_name: result.container_name, gateway_port: result.gateway_port } });
-    await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "profile_rendered", to: "runtime_started", evidence: { container_name: result.container_name, network_name: result.network_name } });
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "gateway_routing", observed_state: "loopback_route_active", evidence: { public_web_route: result.public_web_route, api_base_url: result.api_base_url } });
-    await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "runtime_started", to: "routing_activated", evidence: { public_web_route: result.public_web_route } });
-
-    const smsNumber = skipSmsProvisioning() ? null : (result.sms_number_e164 ?? process.env.TWILIO_TEST_NUMBER ?? null);
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "channel_provider_bindings", observed_state: "configured_after_runtime", evidence: { sms_skipped: skipSmsProvisioning(), sms_number_present: Boolean(smsNumber) } });
-    await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "routing_activated", to: "channel_configured", evidence: { sms_skipped: skipSmsProvisioning() } });
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "health_acceptance", observed_state: "accepted", evidence: { validation_status: result.validation_status, smoke_output_present: Boolean(result.smoke_output) } });
-    await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "channel_configured", to: "runtime_healthy", evidence: { validation_status: result.validation_status } });
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "welcome_ready", observed_state: "idempotent_business_effect_ready", evidence: { host_setup_complete: true, welcome_not_sent_by_host: true } });
-    await advanceProvisioning(ctx, { jobId, accountId: input.account_id, employeeId, from: "runtime_healthy", to: "ready", evidence: { host_setup_complete: true } });
-
-    await ctx.db.from("employees").update({ status: "live", profile_id: result.profile_id ?? `client_${employeeId}`, web_route: result.public_web_route ?? employeeWebRoute(employeeId) }).eq("id", employeeId);
-    const runtimeEndpointId = newId(ID_PREFIX.runtime);
-    await ctx.db.from("runtime_endpoints").insert({ id: runtimeEndpointId, employee_id: employeeId, sms_number_e164: smsNumber, twilio_webhook_url: result.twilio_webhook_url ?? webhookUrl, webchat_api_url: result.webchat_api_url ?? null, api_base_url: result.api_base_url ?? result.webchat_api_url ?? null, api_session_id: result.api_session_id ?? "amtech-owner-thread", api_session_key: hermesSessionKey(input.account_id, employeeId), public_web_route: result.public_web_route ?? employeeWebRoute(employeeId), gateway_port: result.gateway_port ?? port, backend_type: runtimeBackend, health: { profile_id: result.profile_id, profile_checksum: result.profile_checksum, validation_status: result.validation_status, first_sms_sid: result.first_sms_sid, model_gateway_credential_id: modelGatewayCredentialId } });
-    await ctx.db.from("runtime_endpoint_secrets").insert({ id: newId(ID_PREFIX.runtimeSecret), runtime_endpoint_id: runtimeEndpointId, employee_id: employeeId, api_key_ref: sealSecret(apiServerKey) });
-    await ctx.db.from("employee_profile_builds").update({ generated_path: result.generated_path ?? null, validation_status: result.validation_status ?? "passed", install_status: "installed", validation_output: result.validation_output ?? null, smoke_output: result.smoke_output ?? null, updated_at: new Date().toISOString() }).eq("id", buildId);
-    await ctx.db.from("provisioning_jobs").update({ state: "ready", logs: [...jobStartLogs, ...(result.logs ?? [])], updated_at: new Date().toISOString() }).eq("id", jobId);
-
-    const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, employee_id: employeeId, actor: ctx.actor, action: "tool:provision_employee", resource: employeeId, result: "ok", details: { provisioning_job_id: jobId, profile_package_key: packageKey, first_sms_sid: result.first_sms_sid ?? null, sms_skipped: skipSmsProvisioning(), mcp_credential_prefix: mcpCredential.token_prefix, model_gateway_credential_id: modelGatewayCredentialId, model_gateway_credential_version: modelGatewayCredential.policy.credential_version } });
-    return ok({ account_id: input.account_id, employee_id: employeeId, changed_resources: [`employee:${employeeId}`, `provisioning_job:${jobId}`, `profile_build:${buildId}`], proof: { employee_id: employeeId, provisioning_job_id: jobId, profile_id: result.profile_id ?? null, profile_checksum: result.profile_checksum ?? null, web_route: result.public_web_route ?? employeeWebRoute(employeeId), model_gateway_credential_version: modelGatewayCredential.policy.credential_version }, user_facing_summary_hint: skipSmsProvisioning() ? "Employee provisioned for local web testing; SMS was skipped." : "Employee provisioned; welcome delivery is ready as the final idempotent business effect.", next_suggested_action: skipSmsProvisioning() ? "Send a web chat message to the employee." : "Send the owner welcome message through the idempotent delivery path.", audit_id });
+    const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, employee_id: employeeId, actor: ctx.actor, action: "tool:provision_employee", resource: employeeId, result: "ok", details: { provisioning_job_id: jobId, profile_package_key: packageKey, reconciler_owned: true, operation_key: "redacted" } });
+    return pending({
+      account_id: input.account_id,
+      employee_id: employeeId,
+      changed_resources: [`employee:${employeeId}`, `provisioning_job:${jobId}`, `profile_build:${buildId}`],
+      proof: { employee_id: employeeId, provisioning_job_id: jobId, state: "requested", reconciler_owned: true },
+      user_facing_summary_hint: "Employee provisioning is queued in the durable reconciler.",
+      next_suggested_action: "Poll provisioning status.",
+      audit_id,
+    });
   } catch (err) {
-    const failure = provisionerFailureDetails(err);
-    const retryClass = classifyProvisioningError(err);
-    if (modelGatewayCredentialId) await revokeModelGatewayCredential(ctx.db, modelGatewayCredentialId).catch(() => {});
-    if (mcpCredentialId) await revokeEmployeeMcpCredential(ctx.db, mcpCredentialId).catch(() => {});
-    await ctx.db.from("employees").update({ status: "failed" }).eq("id", employeeId);
-    await ctx.db.from("employee_profile_builds").update({ validation_status: "failed", install_status: "failed", validation_output: failure.validation_output, updated_at: new Date().toISOString() }).eq("id", buildId);
-    await ctx.db.from("provisioning_jobs").update({ state: "failed", retry_class: retryClass, failure_state: failure.failure_state, logs: failure.logs, updated_at: new Date().toISOString() }).eq("id", jobId);
-    await recordProvisioningResource(ctx.db, { provisioning_job_id: jobId, resource_key: "runtime", observed_state: "failed", retry_class: retryClass, error: { failure_state: failure.failure_state, http_status: failure.http_status } }).catch(() => {});
-    const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, employee_id: employeeId, actor: ctx.actor, action: "tool:provision_employee", resource: employeeId, result: "failed", details: { provisioning_job_id: jobId, failure_state: failure.failure_state, retry_class: retryClass, http_status: failure.http_status, logs: failure.logs } });
-    return failed("provider_error", "Provisioner failed to create a live employee.", { account_id: input.account_id, employee_id: employeeId, proof: { provisioning_job_id: jobId, failure_state: failure.failure_state, retry_class: retryClass, http_status: failure.http_status }, audit_id });
+    const message = String((err as Error).message ?? err).slice(0, 500);
+    const audit_id = await writeAudit(ctx.db, { account_id: input.account_id, actor: ctx.actor, action: "tool:provision_employee", result: "failed", details: { reason: "durable_request_failed", error: message } });
+    return failed("provider_error", "The durable provisioning request could not be created.", { account_id: input.account_id, proof: { failure_state: message }, audit_id });
   }
 };
 
 const getProvisioningStatus: ToolHandler = async (ctx, raw) => {
   const input = raw as GetProvisioningStatusInput;
   if (!input?.account_id || !input?.employee_id_or_job_id) return failed("validation_failed", "account_id and employee_id_or_job_id are required.");
-  const { data } = await ctx.db.from("provisioning_jobs").select("*").eq("account_id", input.account_id).or(`id.eq.${input.employee_id_or_job_id},employee_id.eq.${input.employee_id_or_job_id}`).maybeSingle();
+  const { data } = await ctx.db.from("provisioning_jobs").select("*").eq("account_id", input.account_id).or(`id.eq.${input.employee_id_or_job_id},employee_id.eq.${input.employee_id_or_job_id}`).order("created_at", { ascending: false }).limit(1).maybeSingle();
   if (!data) return failed("validation_failed", "Provisioning job not found.", { account_id: input.account_id });
   const resources = await ctx.db.from("provisioning_resource_states").select("resource_key,resource_type,desired_state,observed_state,retry_class,evidence,error,updated_at").eq("provisioning_job_id", data.id).order("created_at", { ascending: true });
-  return ok({ account_id: input.account_id, employee_id: data.employee_id ?? null, proof: { provisioning_job_id: data.id, state: data.state, failure_state: data.failure_state ?? null, retry_class: data.retry_class ?? null, resources: resources.data ?? [] }, user_facing_summary_hint: `Provisioning is ${data.state}.` });
+  return ok({ account_id: input.account_id, employee_id: data.employee_id ?? null, proof: { provisioning_job_id: data.id, state: data.state, failure_state: data.failure_state ?? null, retry_class: data.retry_class ?? null, next_attempt_at: data.next_attempt_at ?? null, attempt_count: data.attempt_count ?? 0, resources: resources.data ?? [] }, user_facing_summary_hint: `Provisioning is ${data.state}.` });
 };
 
 export const provisioningTools: Partial<Record<ToolName, ToolHandler>> = {
