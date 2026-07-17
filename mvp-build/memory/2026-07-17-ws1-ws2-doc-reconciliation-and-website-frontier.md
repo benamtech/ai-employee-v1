@@ -10,7 +10,7 @@ Status: documentation reconciled; source-wired only; no build, migration, runtim
 - Reconciled root, build-home, runbook, security, GTM, wiki, implementation-record, and memory orientation docs against source, migrations, scripts, and the WS1/WS2 handoff.
 - Preserved one canonical normal-employee path: public DNS/Cloudflare Tunnel -> Caddy -> Web/Manager -> real `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee -> owner web client -> provider-backed reply.
 - Marked the public estimator as outdated and non-canonical for product UX, pricing, and launch acceptance.
-- Staged the next major product direction in `docs/amtech-website-rewrite-brief.md` and `GTM-RESEARCH/WEBSITE/README.md`.
+- Staged the public website product/copy direction in `docs/amtech-website-rewrite-brief.md` and the experimental implementation/research direction in `GTM-RESEARCH/website-framework/`.
 
 ## Current production boundary truth
 
@@ -32,8 +32,8 @@ Status: documentation reconciled; source-wired only; no build, migration, runtim
 
 ## Validation not run
 
-Per session instruction, no full build, typecheck, unit suite, migration application, production Compose run, browser onboarding, provider call, hostile runtime probe, or live proof artifact generation was performed.
+Per session instruction, no full build, typecheck, unit suite, migration application, production Compose run, browser onboarding, provider call, hostile runtime probe, live proof artifact generation, Cloudflare deployment, Next.js build, or Zig/WASM benchmark was performed.
 
 ## Next move
 
-Close the P0 now-to-live checklist in the production runbook and CODEGRAPH. In parallel, use the website rewrite brief to implement a first-principles public AMTECH site that explains the category through concrete work, proof, owner approval gates, and the free + $400 managed offer.
+Close the P0 now-to-live checklist in the production runbook and CODEGRAPH. In parallel, implement the noindex Web-1 Request Mirror Lab from `GTM-RESEARCH/website-framework/07-v0.1-request-mirror-lab.md`, record every platform/result discrepancy, and only then apply the resolver to the canonical AMTECH website brief.
