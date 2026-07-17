@@ -1,8 +1,13 @@
 import { bind, cosine, deterministicSymbol, hash32, weightedSuperposition, type Vector } from "./core.js";
 
-export const FEATURE_ROLES = ["vertical", "task", "stage", "proof", "constraint", "geography", "device", "surface"] as const;
-export type FeatureRole = typeof FEATURE_ROLES[number];
-export type FeatureMap = Partial<Record<FeatureRole, string>>;
+export const FEATURE_ROLES = [
+  "vertical", "industry", "problem", "use_case", "location", "audience", "task", "stage", "proof",
+  "constraint", "geography", "device", "surface", "intent", "offer", "information_object",
+  "design_capability", "agent_instruction",
+] as const;
+export type KnownFeatureRole = typeof FEATURE_ROLES[number];
+export type FeatureRole = string;
+export type FeatureMap = { [role: string]: string | undefined };
 
 export const DESIGN_CAPABILITIES = [
   "semantic-hierarchy", "responsive-grid", "evidence-dense", "comparison-table", "workflow-steps",
@@ -123,7 +128,7 @@ export function generateBenchmarkFixture(contextCount = 500): BenchmarkFixture {
 
 export function compileHrrFeatures(features: FeatureMap, dimensions = 512): Vector {
   const parts = Object.entries(features)
-    .filter((entry): entry is [FeatureRole, string] => Boolean(entry[1]))
+    .filter((entry): entry is [string, string] => Boolean(entry[1]))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([role, value]) => ({
       vector: bind(deterministicSymbol(`role:${role}`, dimensions), deterministicSymbol(`value:${role}:${value}`, dimensions)),
@@ -197,29 +202,34 @@ export function benchmarkAllArms(fixture: BenchmarkFixture, dimensions = 512): B
 }
 
 function hardCompatible(context: SearchContextPrototype, page: CandidatePagePrototype): boolean {
-  if (context.features.task && page.features.task !== context.features.task) return false;
-  if (context.features.vertical && page.features.vertical !== context.features.vertical) return false;
+  for (const role of ["task", "vertical", "industry"] as const) {
+    const value = context.features[role];
+    if (value && page.features[role] !== value) return false;
+  }
   return true;
 }
 function weightedFacetFit(left: FeatureMap, right: FeatureMap): number {
   let numerator = 0; let denominator = 0;
-  for (const role of FEATURE_ROLES) {
+  for (const role of Object.keys(left).sort()) {
     const leftValue = left[role]; if (!leftValue) continue;
     const weight = roleWeight(role); denominator += weight;
     if (right[role] === leftValue) numerator += weight;
   }
   return denominator === 0 ? 0 : numerator / denominator;
 }
-function roleWeight(role: FeatureRole): number {
+function roleWeight(role: string): number {
   switch (role) {
-    case "task": return 1.4;
-    case "vertical": return 1.25;
+    case "task": case "problem": case "use_case": return 1.4;
+    case "vertical": case "industry": return 1.25;
+    case "intent": case "audience": return 1.1;
     case "stage": return 1.0;
-    case "proof": return 0.9;
-    case "constraint": return 0.75;
-    case "geography": return 0.35;
+    case "proof": case "information_object": return 0.9;
+    case "constraint": case "offer": return 0.75;
+    case "location": case "geography": return 0.35;
+    case "design_capability": case "agent_instruction": return 0.25;
     case "device": return 0.2;
     case "surface": return 0.15;
+    default: return 0.5;
   }
 }
 function queryPhrase(task: string, stage: string, proof: string, index: number): string {
