@@ -14,6 +14,7 @@ Use the three layers correctly:
 
 ## Index — newest first
 
+- [2026-07-17 — holographic website framework and v0.1 Request Mirror Lab](2026-07-17-holographic-website-framework-v0.1.md) — Established the research-grounded HRR/VSA + graph materialization framework, explicit feature/pass-fail vectors, privacy/SEO boundaries, and the plain noindex Cloudflare Request Mirror Lab as v0.1. No build/deploy run.
 - [2026-07-17 — WS1/WS2 documentation reconciliation and website frontier](2026-07-17-ws1-ws2-doc-reconciliation-and-website-frontier.md) — Rebased `research` onto latest `main`, reconciled canonical docs to the source-wired production-boundary state, recorded static risks and validation not run, and staged the first-principles AMTECH website rewrite.
 - [2026-07-16 — WS1/WS2 production boundary pass](2026-07-16-ws1-ws2-production-boundary-pass.md) — Model gateway credential custody, profile integrity, durable provisioning/reconciler foundations, credential rotation, drift operations, and WS3 ambient inbox schema groundwork. Source-wired only; no live acceptance.
 - [2026-07-17 01:45 — leverage and method distilled](2026-07-17-0145-leverage-and-method-distilled.md) — Distilled the prod-UX implementation method and measured agent leverage.
