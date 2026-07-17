@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-07-17
-Active branch: `research` (rebased onto latest `main`)
+Active branch: `employee-work` (based on `research`; draft PR `#18` targets `research`)
 
 ## Cold-session read order
 
@@ -33,7 +33,9 @@ public DNS / Cloudflare Tunnel
 -> Twilio Verify
 -> account creation
 -> Start Employee
--> host-private provisioning
+-> durable provisioning request
+-> leased DB-backed reconciler
+-> signed host-private provisioner
 -> isolated Hermes runtime
 -> owner web client
 -> provider-backed reply
@@ -54,7 +56,7 @@ The public estimator and `prod-like:public-estimator:*` scripts are outdated acq
 | `planned` | Designed, not implemented. |
 | `pending` | Unattempted, blocked, or missing proof. |
 
-**Current overall status: `source-wired_not_accepted`.** Existing point-in-time live proofs remain historical evidence, but the WS1/WS2 boundary changes have not been build-, migration-, hostile-runtime-, or provider-accepted.
+**Current overall status: `source-wired_not_accepted`.** The worker, ingress, and isolation boundaries now exist in source, but migrations `0032`–`0038` are unapplied and no build-, runtime-, provider-, or browser-acceptance packet was produced in this pass.
 
 ## Current production state
 
@@ -63,11 +65,11 @@ The public estimator and `prod-like:public-estimator:*` scripts are outdated acq
 | Normal employee path | canonical | Public onboarding through owner web and provider-backed reply is the only launch path. |
 | Owner product | source-wired | Home / Talk / Proof / Connected, Tell Avery, approval/review resources, persisted conversation, SSE/poll fallback, and owner-safe materialization are implemented. |
 | Manager + Hermes runtime spine | source-wired | Provisioning, scoped Manager MCP, owner turns, event routing, approvals, connectors, artifacts, scheduler, metering, admin, and runtime seams exist. |
-| WS1 model gateway | source-wired | Employee profiles receive gateway URL, employee-scoped token, alias, credential version, and non-secret policy; provider master keys stay behind the host-private gateway. |
-| WS1 profile integrity | source-wired | Rendering rejects forbidden secret slots/values and unresolved tokens, freezes permissions, and computes a deterministic checksum. |
-| WS2 reconciler foundation | source-wired foundation | Resource graph, transition evidence, leases, retry classes, commands, drift operations, credential rotation, and compensation vocabulary exist. Provisioning still runs inline; a true worker loop is pending. |
-| WS3 ambient inbox | groundwork only | `ambient_event_inbox` exists, but Twilio/Gmail/Stripe/provider webhooks are not fully migrated to inbox-first leased processing. |
-| Runtime boundary | source-wired, live proof pending | Host-private provisioner, private employee bridges, loopback runtime ports, immutable profile mounts, and gateway custody exist in source. Hostile/runtime proof is pending. |
+| WS1 model gateway | source-wired | Employee-bound routes and credentials, host-private gateway custody, fail-closed token checks, and production-unbound-route rejection are implemented. |
+| WS1 profile integrity | source-wired | Rendering rejects forbidden secret slots/values and unresolved tokens, freezes permissions, computes a deterministic checksum, and recreates the runtime on credential rotation. |
+| WS2 reconciler | source-wired, migration/runtime proof pending | A continuously running DB-backed worker claims jobs/commands, applies one bounded effect, verifies/persists, retries or compensates, reconstructs after reboot, and schedules fleet drift inspection/repair. |
+| WS3 ambient inbox | source-wired, migration/provider proof pending | Twilio, Gmail, Stripe, and QuickBooks verify authenticity before inbox insertion; leased processing, retries, ordering, dead letters, effect receipts, and replay exist. |
+| Runtime boundary | source-wired, live proof pending | Host-private provisioner, private employee bridges, loopback runtime ports, immutable profile mounts, in-container gateway/health probes, and gateway custody exist in source. |
 | GTM | canonical | Start free; managed AI Employee from $400/month; higher-volume workforce is custom. |
 | Public website | next major frontier | Rewrite from first principles using `docs/amtech-website-rewrite-brief.md`. |
 
@@ -90,6 +92,7 @@ Boundary:
 
 ```text
 employee runtime
+-> employee-bound host-private gateway URL
 -> employee-scoped model-gateway credential
 -> host-private OpenAI-compatible gateway
 -> provider master credential
@@ -97,18 +100,25 @@ employee runtime
 
 Production profiles must not contain provider master keys or provider-specific master-key slots. Local direct-provider mode is an explicit non-production exception only.
 
-## WS2 — durable provisioning and reconciliation foundation
+## WS2 — durable provisioning and reconciliation
 
 Primary files:
 
 - `apps/manager/src/lib/provisioning-state-machine.ts`
+- `apps/manager/src/lib/provisioning-reconciler.ts`
 - `apps/manager/src/tools/provisioning.stub.ts`
+- `apps/manager/src/provisioner.ts`
 - `apps/manager/src/provisioner-host.ts`
 - `packages/db/migrations/0031_runtime_boundary_foundations.sql`
 - `packages/db/migrations/0032_gateway_reconciler_inbox_foundations.sql`
 - `packages/db/migrations/0033_provisioning_operation_key_retry_idx.sql`
+- `packages/db/migrations/0034_reconciler_workers_and_ambient_replay.sql`
+- `packages/db/migrations/0035_worker_terminal_claim_and_effect_receipts.sql`
+- `packages/db/migrations/0036_worker_service_role_grants.sql`
+- `packages/db/migrations/0037_welcome_effect_ready_gate.sql`
+- `packages/db/migrations/0038_needs_reprovision_command_trigger.sql`
 
-Desired loop:
+Implemented loop:
 
 ```text
 claim job or command
@@ -120,7 +130,44 @@ claim job or command
 -> retry, compensate, or continue
 ```
 
-The schema and helper layer exist. The production reconciler worker, unified admin command path, drift scan/repair loop, and deterministic recovery remain pending.
+Strict initial ordering:
+
+```text
+requested
+-> resources_reserved
+-> credentials_minted
+-> profile_rendered
+-> runtime_started
+-> runtime_healthy
+-> routing_activated
+-> channel_configured
+-> welcome_sent
+-> ready
+```
+
+The database prevents `ready` until the welcome inbox event is processed and an idempotent owner-facing welcome message exists.
+
+## WS3 — verified ambient ingress
+
+Primary files:
+
+- `apps/manager/src/lib/ambient-inbox.ts`
+- `apps/manager/src/webhooks/twilio.ts`
+- `apps/manager/src/webhooks/gmail.ts`
+- `apps/manager/src/webhooks/stripe.ts`
+- `apps/manager/src/webhooks/quickbooks.ts`
+
+Boundary:
+
+```text
+provider request
+-> provider authenticity verification
+-> atomic ambient_event_inbox insertion
+-> lease + ordering check
+-> existing business handler
+-> effect receipt / durable evidence
+-> processed, retry, waiting-for-binding, or dead letter
+```
 
 ## Security and realness invariants
 
@@ -128,40 +175,53 @@ The schema and helper layer exist. The production reconciler worker, unified adm
 2. Employee runtimes receive scoped credentials, never provider or platform master secrets.
 3. Customer-, money-, and reputation-affecting actions require the appropriate owner approval gate.
 4. Webhooks verify provider authenticity before durable insertion and asynchronous processing.
-5. RLS and grants are reviewed for every browser-visible or control-plane table.
+5. RLS and explicit service-role grants are reviewed for every browser-visible or control-plane table.
 6. No capability becomes accepted without real proof IDs/artifacts.
 7. Welcome delivery and provider/channel binding occur only after runtime and route acceptance.
 8. One owner relationship; Manager remains invisible.
 
 ## Static review findings requiring proof or repair
 
-- Apply `0031`–`0033` to a disposable production-shaped DB and verify constraints, indexes, grants, and existing row compatibility.
-- Verify shared exports, Hono server entry/build inclusion, Supabase row shapes, and `ProvisionerResult` fields through typecheck.
-- The model-gateway rate bucket is process-local; spend-limit enforcement is not yet a transactional accumulated-usage budget.
-- Failed host-provisioner executions can leave filesystem idempotency markers without a cached result; retry behavior needs a deterministic cleanup/new-key rule.
-- Compensated provisioning retry semantics need validation because fresh idempotency-key generation is explicit only for failed jobs.
-- Credential rotation rewrites profile token/checksum, but runtime reload and old-credential revocation sequencing require live proof.
-- Drift inspection currently establishes primitives, not a complete fleet-wide orphan/missing/stuck-resource reconciler.
+- The connected live Supabase project stops at `0031_public_estimator.sql`; apply/review `0032`–`0038` in staging before deploying this source.
+- The branch contains shared/db/Manager typeproofs, boundary tests, and image assertions, but GitHub Actions did not report a run during this pass.
+- The model-gateway rate bucket remains process-local; spend-limit enforcement is not yet a transactional accumulated-usage budget.
+- Host idempotency-marker recovery and fresh compensated retry keys are source-wired but need crash/retry acceptance.
+- Credential rotation sequencing is source-wired but requires live checksum/new-token/old-token-rejection proof.
+- Fleet drift inspection/repair is source-wired but needs orphan/missing/stuck-resource acceptance across a deployed fleet.
+- Ambiguous irreversible provider effects deliberately dead-letter; the operator inspection/replay UX remains incomplete.
+- No provider-backed generated work object closes the product acceptance loop yet.
 
 ## Now-to-live checklist
 
-### P0
+### P0 source implementation
 
-- [x] Rebase `research` onto latest `main`.
-- [ ] Apply/review migrations `0031`–`0033` on a disposable production-shaped DB.
-- [ ] Run static TypeScript import/API review through typecheck.
-- [ ] Prove employee runtimes reach the loopback-bound host-private model gateway and public ingress cannot.
-- [ ] Prove model-gateway credential rotation updates token/checksum without full reprovision and revokes the prior credential safely.
-- [ ] Prove rendered profiles reject master-key names, configured secret values, unresolved tokens, and unsafe permissions.
-- [ ] Implement the DB-backed provisioning reconciler worker.
-- [ ] Implement fleet drift detection/repair for orphan containers/networks, stale Caddy, missing profile/checksum, expired credentials, and stuck jobs.
-- [ ] Ensure Twilio/provider binding and welcome effects occur only after runtime + route acceptance.
+- [x] Rebase working base through `research`; keep `main` untouched.
+- [x] Add shared exports, Hono entrypoint, Supabase row-shape, `ProvisionerResult`, and image-inclusion checks.
+- [x] Bind Model Gateway credentials/routes to employees and keep public ingress absent.
+- [x] Enforce rendered-profile secret/token/checksum integrity.
+- [x] Implement the DB-backed provisioning reconciler worker.
+- [x] Implement failed-marker recovery, fresh compensated retry keys, reboot reconstruction, and fleet drift commands.
+- [x] Enforce runtime -> routing -> provider binding -> welcome ordering.
 
-### P1
+### P0 acceptance still required
 
-- [ ] Migrate Twilio/Gmail/Stripe/provider ingress to `ambient_event_inbox` with leased workers, retries, dead letters, and replay.
-- [ ] Route admin suspend/reprovision/rotate/repair through `provisioning_commands` and the reconciler.
+- [ ] Obtain a clean shared/db/Manager typecheck, boundary-test, and production-image build run.
+- [ ] Apply/review migrations `0032`–`0038` on a disposable production-shaped database.
+- [ ] Prove two employee runtimes reach only their employee-bound host-private Model Gateway route and public ingress cannot.
+- [ ] Prove malformed, expired, revoked, and cross-employee credentials fail through real HTTP.
+- [ ] Prove credential rotation updates live token/checksum, recreates a healthy runtime, and rejects the prior credential.
+- [ ] Prove reboot reconstruction, fleet drift repair, failed-marker recovery, compensation, and fresh retry keys.
+
+### P1 source implementation
+
+- [x] Migrate Twilio, Gmail, Stripe, and QuickBooks ingress to verified inbox-first leased processing with retries, dead letters, effect receipts, and replay.
+- [x] Route suspend, reprovision, restore/rotate, teardown, inspect, and repair through `provisioning_commands` and the reconciler.
+
+### P1 acceptance still required
+
+- [ ] Exercise real duplicate ingress, waiting-for-binding, retry, dead-letter, and replay paths for each provider.
 - [ ] Provision a fresh normal employee through public onboarding and capture real provider/runtime/tool proof IDs.
+- [ ] Produce one provider-backed generated work object and validate its owner-facing UI/actions/proof.
 
 ## Layout
 
@@ -178,6 +238,6 @@ memory/                    durable session handoffs
 second-half-plan/          active forward-plan family
 ```
 
-## Validation state for the 2026-07-17 reconciliation
+## Validation state for the 2026-07-17 employee-work pass
 
-No full build, typecheck, unit suite, migration application, Compose run, browser flow, provider call, hostile-runtime probe, or proof artifact was run. Documentation and static reasoning only.
+Read-only live Supabase catalog inspection ran and confirmed the migration frontier stops at `0031`. Source, migrations, tests, typeproofs, a CI workflow, and production-image assertions were added. No successful Actions run, local build/typecheck/test suite, migration application, Compose run, browser flow, provider call, hostile-runtime probe, or runtime/provider proof artifact is claimed.
