@@ -133,6 +133,9 @@ export interface ProvisionerResult {
   workspace_dir?: string;
   network_name?: string;
   container_name?: string;
+  sms_number_e164?: string | null;
+  twilio_webhook_url?: string | null;
+  first_sms_sid?: string | null;
   webchat_api_url?: string;
   api_base_url?: string;
   api_key_ref?: string;
