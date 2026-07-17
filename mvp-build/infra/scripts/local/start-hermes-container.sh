@@ -33,8 +33,9 @@ esac
 docker image inspect "$image" >/dev/null
 docker rm -f "$container" >/dev/null 2>&1 || true
 docker network rm "$network" >/dev/null 2>&1 || true
-# Internal bridge prevents direct internet egress and peer/control-plane reachability.
-# Controlled Manager/model egress is added later through explicit host-private gateways.
+# Internal bridge prevents peer/control-plane reachability. Explicit host-gateway
+# routing below is the narrow escape hatch for host-private Manager/model gateway
+# endpoints that require employee-scoped credentials.
 docker network create --driver bridge --internal \
   --label="com.amtech.kind=employee-network" \
   --label="com.amtech.employee_id=${employee_id}" \
@@ -59,6 +60,7 @@ security_args=(
   --label="com.amtech.account_id=${ACCOUNT_ID:-unknown}"
   --label="com.amtech.employee_id=${employee_id}"
   --label="com.amtech.profile_id=client_${employee_id}"
+  --label="com.amtech.model_gateway_credential_version=${MODEL_GATEWAY_CREDENTIAL_VERSION:-unknown}"
   --log-driver=local
   --log-opt=max-size=10m
   --log-opt=max-file=5
@@ -68,6 +70,7 @@ docker run -d \
   --name "$container" \
   "${security_args[@]}" \
   --network "$network" \
+  --add-host=host.docker.internal:host-gateway \
   --env-file "$profile_dir/.env" \
   -e "HERMES_UID=$(id -u)" \
   -e "HERMES_GID=$(id -g)" \
