@@ -22,7 +22,7 @@ This repository is the AMTECH company brain and the implementation home for the 
 - `mvp-build/`: product code, runtime, provisioning, owner surfaces, connectors, security, tests, runbooks, and active forward plans.
 - `wiki/`: durable product, market, architecture, research, and implementation-record context.
 - `docs/`: root-level product/design strategy, including the public website rewrite brief.
-- `GTM-RESEARCH/WEBSITE/`: staging index for the next public website implementation session.
+- `GTM-RESEARCH/website-framework/`: research, validation, and implementation authority for the holographic hyper-targeting website framework and its v0.1 Request Mirror Lab.
 
 ## Canonical product truth
 
@@ -62,7 +62,7 @@ The public estimator is outdated and non-canonical. It may remain as an acquisit
 
 ## Current implementation state
 
-**Overall: source-wired, not live-accepted after the WS1/WS2 boundary pass.**
+**Overall: source-wired, not live-accepted after the WS1/WS2 production-boundary pass.**
 
 - Owner product: Home / Talk / Proof / Connected, persisted conversation, approvals, signed review resources, owner-safe materialization, and connected-capability surfaces are source-wired.
 - WS1: model-gateway credential custody and rendered-profile integrity are source-wired.
@@ -84,7 +84,9 @@ Detailed status: `mvp-build/CODEGRAPH.md`.
 | What are the security/runtime boundaries? | `mvp-build/docs/security/host-private-runtime-hardening-plan.md` |
 | What is the GTM/pricing strategy? | `mvp-build/docs/gtm/free-infrastructure-managed-workforce-strategy.md` |
 | What remains now-to-live? | `mvp-build/CODEGRAPH.md`, runbook, wiki current/future state |
-| How should the public website be rebuilt? | `docs/amtech-website-rewrite-brief.md` |
+| What is the public website product/copy brief? | `docs/amtech-website-rewrite-brief.md` |
+| How is the holographic website framework researched and validated? | `GTM-RESEARCH/website-framework/README.md` and its numbered specification files |
+| What is v0.1? | `GTM-RESEARCH/website-framework/07-v0.1-request-mirror-lab.md` |
 
 ## Non-negotiable invariants
 
@@ -97,15 +99,19 @@ Detailed status: `mvp-build/CODEGRAPH.md`.
 7. `mvp-build/second-half-plan/` is the active forward-plan family; older plan packets are historical context unless explicitly revived.
 8. Every major session updates durable memory and keeps current docs contradiction-free.
 9. Engineering docs stay factual; public copy leads with owner pain, work, proof, control, and value rather than architecture or generic AI language.
+10. Holographic website materialization is research until the explicit algebra, relevance, performance, SEO, privacy, security, experiment, and truth gates pass.
+11. The website framework may use ephemeral request/session context, but it must not silently become a named customer profile, covert fingerprint, or sensitive-trait inference engine.
 
 ## Next major product frontier
 
-The public AMTECH website should be rewritten from first principles around the new category:
+The public AMTECH website should ultimately be rewritten from first principles around the category:
 
 > Your business gets an employee that lives in the software.
 
-The implementation brief lives at `docs/amtech-website-rewrite-brief.md`. It uses the emerging AMTECH design system and recent owner-product patterns to teach the category through concrete work examples, proof cards, approval gates, connected tools, and the free + $400 managed offer.
+The product/copy brief is `docs/amtech-website-rewrite-brief.md`.
+
+Before applying the holographic resolver to that site, implement the plain Web-1 Request Mirror Lab in `GTM-RESEARCH/website-framework/`. It should display direct, explicit, and safely inferred request/browser facts with provenance, construct a temporary HRR context shape, score finite page slices, expose latency and fallback, and remain `noindex`/private/no-store. Google indexing is a later, separate canonical-shell validation—not the first resolver test.
 
 ## Validation state for this reconciliation
 
-The branch was rebased through GitHub rebase PR #14. No full build, typecheck, test suite, migration application, production Compose run, browser onboarding, provider call, or hostile-runtime proof was run.
+The branch was rebased through GitHub rebase PR #14. Documentation and research specifications were updated through GitHub. No full build, typecheck, test suite, migration application, production Compose run, Cloudflare deployment, Next.js build, Zig/WASM compile, browser matrix, Google URL Inspection, provider call, or hostile-runtime proof was run.
