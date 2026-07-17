@@ -1,0 +1,45 @@
+name: Employee Work Production Boundary
+
+on:
+  push:
+    branches:
+      - employee-work
+  pull_request:
+    branches:
+      - research
+    paths:
+      - "mvp-build/**"
+      - ".github/workflows/employee-work-production-boundary.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: employee-work-production-boundary-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Shared contracts
+        run: npm run typecheck --workspace @amtech/shared
+      - name: Database contracts
+        run: npm run typecheck --workspace @amtech/db
+      - name: Manager and Hono contracts
+        run: npm run typecheck --workspace @amtech/manager
+      - name: Model and profile isolation proofs
+        run: npx vitest run tests/unit/model-profile-isolation.test.ts
+      - name: Production image inclusion
+        run: docker build -f infra/deploy/manager.Dockerfile .
