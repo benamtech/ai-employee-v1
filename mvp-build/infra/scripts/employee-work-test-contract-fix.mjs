@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 
+// One-shot TDD correction pass. Delete this script after the bot commit lands.
 async function replaceExactly(path, before, after, expected = 1) {
   const source = await readFile(path, "utf8");
   const matches = source.split(before).length - 1;
