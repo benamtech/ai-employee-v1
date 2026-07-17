@@ -80,16 +80,13 @@ export interface ProfileBuildParams {
   api_server_key?: string;
   profile_context: ProfileContext;
   direct_mcp_connectors?: import("./connector-registry.js").DirectMcpConnectorSpec[];
-
-  /**
-   * WS1 model custody boundary. Production profiles render this host-private
-   * gateway policy plus the scoped render secret below; they never render provider
-   * master keys or provider-specific env vars.
-   */
   model_gateway: ModelGatewayPolicy;
 }
 
 export type ProvisionerOperation =
+  | "render_profile"
+  | "start_runtime"
+  | "activate_routing"
   | "ensure_runtime"
   | "remove_runtime"
   | "inspect_runtime"
@@ -101,10 +98,6 @@ export type ProvisionerOperation =
   | "replace_runtime"
   | "restore_runtime";
 
-/**
- * Declarative host-private lifecycle request. Manager may omit envelope fields when
- * calling its local proxy; the proxy mints them before signing the Unix-socket request.
- */
 export interface ProvisionerRequest {
   request_id?: string;
   operation?: ProvisionerOperation;
