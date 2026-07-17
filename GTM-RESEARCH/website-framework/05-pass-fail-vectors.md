@@ -1,8 +1,15 @@
 # 05 — Pass/Fail Vectors
 
-Status: release gates
+Status: release gates; academically reviewed 2026-07-17
 
-These thresholds are initial engineering gates. They are intentionally falsifiable and may be tightened after baseline measurement. A failed critical gate blocks production materialization even if other metrics look strong.
+These gates combine four evidence classes:
+
+- **T — mathematical/theoretical:** derived from algebra, probability, numerical analysis, or information-retrieval definitions.
+- **A — academic empirical:** supported by peer-reviewed research, but not necessarily with the exact AMTECH threshold.
+- **N — normative/platform:** required by web standards, Google Search documentation/policies, or target-runtime contracts.
+- **E — AMTECH engineering:** a falsifiable product/risk budget chosen for this system. It must be tuned from data and must never be described as a published scientific constant.
+
+The source IDs are defined in `13-academic-and-normative-basis-for-validation-vectors.md`. A source can justify the metric or failure mode without justifying the exact numeric threshold.
 
 ## Gate classes
 
@@ -12,37 +19,41 @@ These thresholds are initial engineering gates. They are intentionally falsifiab
 
 ## Algebra correctness
 
-| ID | Priority | Pass | Fail |
-|---|---|---|---|
-| PF-HRR-01 | P0 | Same seed/version/symbol produces byte-identical f32 fixture output in repeated TypeScript builds. | Any nondeterminism. |
-| PF-HRR-02 | P0 | Zig/WASM and TypeScript vectors/scores agree within `1e-5` absolute or documented ULP tolerance for golden fixtures. | Ranking or value exceeds tolerance. |
-| PF-HRR-03 | P0 | `norm(normalize(x))` is `1 ± 1e-5`; zero/NaN/inf input returns explicit error. | Silent NaN/inf or invalid memory. |
-| PF-HRR-04 | P1 | Median absolute cosine among 10,000 random distinct symbols <= `0.04` at selected D; p99 <= `0.12`. | Orthogonality threshold exceeded. |
-| PF-HRR-05 | P1 | Single role/filler unbind ranks target top-1 in a 10,000-item cleanup dictionary >= `99.5%`. | Below threshold. |
-| PF-HRR-06 | P1 | For declared maximum bundle size, target Recall@1 >= `95%` and Recall@5 >= `99%` on held-out synthetic fixtures. | Below either threshold. |
-| PF-HRR-07 | P0 | Pre-bound and request-bound implementations produce identical top-k ordering in >= `99.99%` of golden scenarios and cosine >= `0.9999` between shapes. | Lower agreement. |
+| ID | Priority | Basis | Pass | Fail |
+|---|---|---|---|---|
+| PF-HRR-01 | P0 | T/A/E: HRR-PLATE, HDC-KANERVA, VSA-SURVEY | Deterministic symbol generation is byte-identical for the same pinned seed/version/namespace/symbol. A pinned reference build emits identical artifact checksums on repeat. Floating-point algebra across different engines is tolerance-tested rather than assumed byte-identical. | Any symbol nondeterminism or unexplained checksum drift in the pinned build. |
+| PF-HRR-02 | P0 | T/A/E: HRR-PLATE, HRR-STABILITY | TypeScript and Zig/WASM produce identical candidate ordering on all golden fixtures and values within `1e-5` absolute **or** a documented operation-specific ULP tolerance. Near-ties within tolerance are labeled ties and resolved deterministically. | Ranking changes outside the tie policy or values exceed tolerance. |
+| PF-HRR-03 | P0 | T/E | `norm(normalize(x)) = 1 ± 1e-5` for valid nonzero inputs. Zero, NaN, infinity, overflow, invalid length, and out-of-bounds input return explicit errors and baseline fallback. | Silent NaN/inf, invalid memory access, or normalization of invalid input. |
+| PF-HRR-04 | P1 | T/A: HDC-KANERVA, VSA-SURVEY, JL-ACHLIOPTAS | For random unit symbols at dimension `D`, the empirical absolute-cosine distribution is consistent with the random-vector reference: median `<= 1.25 * sqrt(2/(πD))` and p99 `<= 1.25 * 2.576/sqrt(D)`, with confidence intervals and seed count reported. | Distribution materially exceeds either dimension-aware bound or shows systematic correlation. |
+| PF-HRR-05 | P1 | A/E: HRR-PLATE, VSA-SURVEY | For a single clean role/filler binding across the declared production cleanup-dictionary sizes, top-1 retrieval is `>= 99.5%`, and the Wilson 95% lower bound is `>= 99.0%`. Report failure by role, value frequency, and D. | Point estimate or lower bound misses threshold. |
+| PF-HRR-06 | P1 | T/A/E: SUPERPOSITION-CAPACITY, VSA-SURVEY | The declared maximum bundle size is the largest tested size whose held-out Wilson 95% lower bounds meet Recall@1 `>= 95%` and Recall@5 `>= 99%`, under declared noise/dropout. Capacity curves are published; hard cases are retained. | Claimed bundle size exceeds measured capacity or misses either lower-bound threshold. |
+| PF-HRR-07 | P0 | T/E | Pre-bound and request-bound implementations have cosine `>= 0.9999` and identical top-k ordering on every golden fixture; on at least 100,000 randomized scenarios, agreement is `>= 99.99%` after excluding declared numerical ties. | Any golden mismatch or randomized agreement below threshold. |
 
-The bundle-size limit is set by experiment; do not hide capacity failure by removing hard examples.
+The literature establishes compositional binding, noisy cleanup, high-dimensional near-orthogonality, and interference-limited capacity. It does **not** prescribe AMTECH's `99.5%`, `95%`, `99%`, or tolerance budgets; those are risk-based engineering gates.
 
 ## Retrieval quality
 
-| ID | Priority | Pass | Fail |
-|---|---|---|---|
-| PF-REL-01 | P1 | At least 200 blinded labeled scenarios with reviewer agreement statistics recorded. | Tiny/self-labeled evaluation. |
-| PF-REL-02 | P1 | Selected resolver NDCG@5 >= `0.80`. | Below `0.80`. |
-| PF-REL-03 | P1 | Selected resolver improves NDCG@5 by >= `0.05` absolute over deterministic-rules baseline and does not lose to dense-embedding baseline beyond `0.01`. | No meaningful improvement. |
-| PF-REL-04 | P1 | Top-1 reviewer acceptability >= `85%`; baseline >= measured separately. | Below `85%`. |
-| PF-REL-05 | P1 | Under 20% random noncritical feature dropout, top-3 acceptable candidate retention >= `95%`. | Lower robustness. |
-| PF-REL-06 | P0 | Prohibited/ineligible candidate selection rate = `0` across exhaustive policy fixtures. | Any violation. |
-| PF-REL-07 | P1 | Confidence gate precision >= `95%` on selected variants; uncertain cases fall back. | Resolver acts confidently on low-quality matches. |
+| ID | Priority | Basis | Pass | Fail |
+|---|---|---|---|---|
+| PF-REL-01 | P1 | A/E: REL-VOORHEES, NDCG-JARVELIN | At least `200` blinded scenarios, at least `3` independent assessors per scenario where feasible, graded relevance labels, assessor-agreement statistics, adjudication rules, and a documented sample/power rationale. Report system rankings under each assessor set as a stability check. | Tiny/self-labeled evaluation, no disagreement record, or no sampling rationale. |
+| PF-REL-02 | P1 | A/E: NDCG-JARVELIN | Report NDCG@5 with paired bootstrap 95% confidence intervals. Initial graduation target: point estimate `>= 0.80` and lower bound `>= 0.75`; if label density or task structure makes this inappropriate, preregister a different absolute floor before test-set review. | Misses the preregistered absolute floor. |
+| PF-REL-03 | P1 | A/E: NDCG-JARVELIN, REL-VOORHEES | Against deterministic rules, bag-of-facets, dense embeddings, and hybrid-no-HRR baselines, selected resolver improves NDCG@5 by `>= 0.05` absolute over deterministic rules with a paired 95% CI excluding zero, and does not trail the best simpler baseline by more than `0.01`. | No practically meaningful supported improvement, or a simpler baseline wins beyond tolerance. |
+| PF-REL-04 | P1 | A/E: REL-VOORHEES | Top-1 reviewer acceptability point estimate `>= 85%` with Wilson 95% lower bound `>= 80%`. Baseline acceptability and disagreement are reported separately. | Point estimate or lower bound misses threshold. |
+| PF-REL-05 | P1 | A/E: SUPERPOSITION-CAPACITY | Under preregistered `20%` random noncritical feature dropout and structured missing-feature tests, acceptable candidate retention in top 3 is `>= 95%` with 95% CI; prohibited features are never substituted. | Robustness below threshold or hidden feature substitution. |
+| PF-REL-06 | P0 | N/E | Prohibited or hard-ineligible candidate selection rate is exactly `0` across exhaustive generated policy fixtures and fuzzed combinations. | Any violation. |
+| PF-REL-07 | P1 | A/E: CALIBRATION-GUO | The confidence gate is evaluated as a selective prediction system: selected-variant precision `>= 95%`, Wilson lower bound `>= 92%`, expected calibration error `<= 0.05`, Brier score and coverage reported, and uncertain cases fall back. | Overconfident low-quality selection, unreported coverage, or calibration threshold missed. |
+
+NDCG is appropriate because labels are graded and rank position matters. Absolute score floors are AMTECH targets; comparative paired evaluation and uncertainty reporting are the academically grounded requirements.
 
 ## Dimension/representation choice
 
-| ID | Priority | Pass | Fail |
-|---|---|---|---|
-| PF-DIM-01 | P1 | Chosen D is on measured quality/latency/memory Pareto frontier. | Chosen by aesthetic preference. |
-| PF-DIM-02 | P1 | Quantized representation changes top-1 on <= `0.5%` and NDCG@5 by <= `0.01` versus f32. | Larger quality loss. |
-| PF-DIM-03 | P2 | Total bundled hot vector/manifest payload <= `2 MB` compressed for initial corpus, or chunking proves equal latency. | Unbounded artifact growth. |
+| ID | Priority | Basis | Pass | Fail |
+|---|---|---|---|---|
+| PF-DIM-01 | P1 | T/A/E: JL-ACHLIOPTAS, VSA-SURVEY, SUPERPOSITION-CAPACITY | Chosen D lies on the measured relevance/robustness/latency/memory Pareto frontier across at least `512, 1024, 2048, 4096`, and no lower D satisfies every P0/P1 quality gate with materially better cost. | D selected by convention, aesthetics, or a single metric. |
+| PF-DIM-02 | P1 | A/E: PQ-JEGOU | Versus f32, any f16/i8/PQ representation changes top-1 on `<= 0.5%`, reduces NDCG@5 by `<= 0.01`, preserves PF-REL-06, and reports per-query ranking inversions and confidence intervals. | Larger quality loss, policy inversion, or unmeasured quantization error. |
+| PF-DIM-03 | P2 | E | Initial compressed hot vector/manifest payload target is `<= 2 MB`. A larger payload passes only if measured chunking/cache behavior meets cold-start and total-latency gates on every target runtime. | Unbounded artifact growth or platform-cost regression without a measured alternative. |
+
+The Johnson–Lindenstrauss literature supports dimension as a distortion/cost tradeoff, and product-quantization research supports explicit accuracy-versus-compression measurement. Neither establishes `2 MB`, `0.5%`, or `0.01` as universal constants.
 
 ## Edge performance
 
@@ -71,17 +82,19 @@ The bundle-size limit is set by experiment; do not hide capacity failure by remo
 
 ## SEO/indexing
 
-| ID | Priority | Pass | Fail |
-|---|---|---|---|
-| PF-SEO-01 | P0 | Every indexable URL returns `200`, self-canonical, unique title/H1, and meaningful initial HTML. | Any broken canonical page. |
-| PF-SEO-02 | P0 | Ephemeral variant/session/query URLs in sitemap = `0`. | Any included. |
-| PF-SEO-03 | P0 | Crawler/human parity test finds zero crawler-only text/links/claims and zero evidence upgrades. | Any cloaking-like difference. |
-| PF-SEO-04 | P0 | Baseline and all variants preserve 100% of canonical product facts, offer truth, trust boundary, and limitations. | Any contradiction/omission that misleads. |
-| PF-SEO-05 | P1 | Every proposed specialized page passes distinct-intent + original-information review; thin/doorway pages published = `0`. | Any thin page. |
-| PF-SEO-06 | P0 | Structured data validation has zero critical errors and matches visible content/evidence. | Error or misleading schema. |
-| PF-SEO-07 | P1 | Internal graph has zero orphan indexable pages and no redirect/canonical cycles. | Any orphan/cycle. |
-| PF-SEO-08 | P1 | Pairwise near-duplicate detector flags are manually resolved; no neighboring page exceeds chosen similarity threshold without documented reason. | Unresolved duplication. |
-| PF-SEO-09 | P1 | Search Console URL inspection confirms rendered/indexable canonical content on launch routes. | Google sees missing/blocked/different content. |
+| ID | Priority | Basis | Pass | Fail |
+|---|---|---|---|---|
+| PF-SEO-01 | P0 | N: GOOGLE-CANONICAL, GOOGLE-INDEXING | Every indexable URL returns `200`, is crawlable/indexable, emits a valid self-canonical, has a unique useful title and H1, and contains the meaningful primary answer in initial HTML. Validate redirect and soft-404 behavior separately. | Any broken, blocked, contradictory, noncanonical, or content-empty launch URL. |
+| PF-SEO-02 | P0 | N: GOOGLE-SITEMAPS, GOOGLE-NOINDEX | Ephemeral variant, session, experiment, fixture, preview, and query-derived URLs in XML/RSS/text sitemaps = `0`. Sitemaps contain only absolute preferred canonical URLs. | Any ephemeral or noncanonical URL included. |
+| PF-SEO-03 | P0 | N/A: GOOGLE-SPAM, CLOAKING-INVERNIZZI | Repeated crawler/human parity captures find zero crawler-only text, links, claims, schema, redirects, or evidence upgrades. Expected device/locale layout differences are documented and preserve equivalent primary content. | Any deceptive split view or unexplained material difference. |
+| PF-SEO-04 | P0 | N/E | Baseline and every variant preserve `100%` of canonical product facts, current offer/pricing, evidence level, approval/trust boundaries, privacy limitations, and material caveats. | Any misleading contradiction or omission. |
+| PF-SEO-05 | P1 | N/E: GOOGLE-SPAM | Every specialized indexable page has a distinct owner question/intent, original information-gain object, independent internal-link role, and human editorial sign-off. Thin or doorway pages published = `0`. | Any thin, funnel-only, scaled low-value, or swap-only page. |
+| PF-SEO-06 | P0 | N: GOOGLE-STRUCTURED | Structured data parses with zero critical errors, uses eligible types/properties, matches visible content and evidence exactly, and passes build-time graph/reference checks plus sampled Rich Results/URL Inspection after deployment. | Invalid, invisible, fabricated, or evidence-upgraded schema. |
+| PF-SEO-07 | P1 | N/A: GOOGLE-SITEMAPS, ORPHAN-ARORA | Every indexable page has at least one contextual crawlable inbound link from an indexable page or approved hub; graph analysis finds zero orphan pages and zero redirect/canonical cycles. | Any orphan, dead end that violates policy, or cycle. |
+| PF-SEO-08 | P1 | A/E: DUP-BRODER, SIMHASH-CHARIKAR | Near-duplicate detection uses at least two complementary signals (for example shingle MinHash/containment plus semantic or SimHash similarity). Thresholds are calibrated on labeled duplicate/nonduplicate pairs. Seeded duplicate recall `>= 95%`, precision `>= 80%`, and every flagged neighboring page is manually resolved or documented. | Uncalibrated universal threshold, seeded duplicates missed beyond tolerance, or unresolved flag. |
+| PF-SEO-09 | P1 | N: GOOGLE-INSPECTION | Search Console URL Inspection confirms rendered/indexable canonical content on launch routes after deployment; sitemap and canonical selections match the build. | Google sees missing, blocked, different, or unexpected canonical content. |
+
+Google's current documentation is normative for Google-specific behavior. Academic web-spam, near-duplicate, and orphan-content research supports the detection methods and failure modes; it cannot guarantee indexing or ranking.
 
 ## Privacy
 
@@ -141,11 +154,11 @@ The bundle-size limit is set by experiment; do not hide capacity failure by remo
 
 ### Stage 0 — specification
 
-Pass: schemas, fixtures, baselines, and test harness designed.
+Pass: schemas, fixtures, baselines, evidence map, and test harness designed.
 
 ### Stage 1 — local reference
 
-Pass: HRR algebra, deterministic artifacts, relevance benchmark, canonical Next pages.
+Pass: HRR algebra, deterministic artifacts, academically grounded relevance benchmark, canonical pages, and compiler checks.
 
 ### Stage 2 — edge shadow
 
@@ -153,7 +166,7 @@ Pass: resolver scores requests but always serves baseline; performance/privacy/s
 
 ### Stage 3 — internal materialization
 
-Pass: finite variants enabled for internal/test traffic; SEO parity and no-flicker gates pass.
+Pass: finite variants enabled for internal/test traffic; SEO parity, accessibility, and no-flicker gates pass.
 
 ### Stage 4 — public A/Z experiment
 
@@ -161,6 +174,6 @@ Pass: small randomized Z traffic, kill switch, causal plan, all P0 gates green.
 
 ### Stage 5 — production default
 
-Pass: reliable practical conversion lift, no guardrail regression, operational history, and all P0/P1 gates green.
+Pass: reliable practical lift, no guardrail regression, operational history, and all P0/P1 gates green.
 
 No stage may be skipped by declaring the design “production-ready.”
