@@ -19,6 +19,7 @@ for (const artifact of compiled.site.pages) {
 writeFileSync(resolve(destination, "sitemap.xml"), compiled.site.sitemapXml);
 writeFileSync(resolve(destination, "vector-space.json"), JSON.stringify({
   namespace: compiled.vectorSpace.namespace,
+  symbolVersion: compiled.vectorSpace.symbolVersion,
   dimensions: compiled.vectorSpace.dimensions,
   axes: compiled.vectorSpace.axes,
   featureVocabulary: compiled.vectorSpace.featureVocabulary,
@@ -27,6 +28,12 @@ writeFileSync(resolve(destination, "vector-space.json"), JSON.stringify({
     profileIds: page.profileIds,
     prototypes: page.prototypes.map((prototype) => ({ id: prototype.id, featureAtoms: prototype.featureAtoms })),
   })),
+  packed: {
+    prototypeOffsets: Array.from(compiled.site.packed.prototypeOffsets),
+    prototypeIds: compiled.site.packed.prototypeIds,
+    prototypeCount: compiled.site.packed.prototypeIds.length,
+    prototypeVectorFloats: compiled.site.packed.prototypeVectors.length,
+  },
   spaceHash: compiled.vectorSpace.spaceHash,
 }, null, 2));
 writeFileSync(resolve(destination, "ui-scaffold.json"), JSON.stringify(deriveUiScaffoldPlan(compiled), null, 2));
@@ -37,7 +44,10 @@ writeFileSync(resolve(destination, "build.json"), JSON.stringify({
   productionReady: compiled.manifest.production_ready,
   pages: compiled.site.pages.length,
   indexablePages: compiled.site.pages.filter((page) => page.page.indexable).length,
+  prototypeCount: compiled.site.packed.prototypeIds.length,
+  vectorIdentity: compiled.site.packed.vectorIdentity,
+  coveragePolicy: compiled.manifest.agent_harness.coverage_policy,
   buildHash: compiled.site.buildHash,
   vectorSpaceHash: compiled.vectorSpace.spaceHash,
 }, null, 2));
-console.log(`Emitted ${compiled.site.pages.length} unified-manifest pages to ${destination}`);
+console.log(`Emitted ${compiled.site.pages.length} unified-manifest pages and ${compiled.site.packed.prototypeIds.length} prototypes to ${destination}`);
