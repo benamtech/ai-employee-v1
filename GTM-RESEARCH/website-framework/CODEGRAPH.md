@@ -1,64 +1,115 @@
-# CODEGRAPH.md — Unified Hyper-Vector Publishing Framework
+# CODEGRAPH.md — Vector Node-Path Publishing Framework
 
-Status: source-wired research reference; UI renderer and field acceptance pending
+Status: deterministic research/UI scaffold; deep review blocks first real proposal cohort
 Updated: 2026-07-17
 Scope: `GTM-RESEARCH/website-framework/`
 
 ## Reality
 
-This subtree is not yet a production web framework. It is an executable research package plus specifications.
+This subtree is not yet a production web framework. It is an executable research package, a static semantic/UI compiler, and a validation corpus.
 
 Source-wired:
 
-- TypeScript HRR/VSA algebra and comparison fixtures;
-- corpus optimizers;
-- typed semantic compiler and packed artifacts;
-- synthetic scale and deterministic emission tests;
-- source scaffolds for resolver, Zig/Wasm, Worker distribution, search cohorts, and conversion attribution;
-- unified manifest composer, hyper-aware agent contract, and UI-scaffold plan.
+- TypeScript HRR/VSA algebra and synthetic comparison fixtures;
+- corpus optimizer controls;
+- unified manifest and noindex agent proposal schema;
+- typed evidence/content/page IR;
+- compiled page prototype sidecar;
+- one packed vector and CSR page-ID graph per page;
+- deterministic neutral and AMTECH static emissions;
+- browser/CSS/UI source checks;
+- optional noncanonical R3F visualization;
+- resolver, Zig/Wasm, Worker, search-cohort, and conversion scaffolds.
 
-Not accepted:
+Not accepted or fully implemented:
 
-- production renderer/application;
-- live public corpus;
-- search indexing/ranking/citation lift;
-- conversion/revenue lift;
-- Zig/Wasm parity/performance;
-- Cloudflare deployment, browser, accessibility, Core Web Vitals, and load behavior.
+- namespace/version-correct vector identity;
+- canonical broad vector-space hashing;
+- multi-prototype preservation through packed IR;
+- measured marginal-coverage proposal admission;
+- typed semantic prospect paths;
+- first-class public AI Employee task surfaces;
+- external relevance/search-distribution validation;
+- browser/accessibility/Core Web Vitals acceptance;
+- Zig/Wasm, Cloudflare, production corpus, conversion, or revenue proof.
 
 ## Authority graph
 
 ```text
+product and interaction truth
+  mvp-build/docs/gtm/free-infrastructure-managed-workforce-strategy.md
+  mvp-build/docs/public-interaction-standard.md
+  mvp-build/docs/ux/05-generative-ui-frontier.md
+          |
+          v
 site-manifest.yaml
-  |
-  +-> vector-space axes + prototype sets
-  +-> agent harness + publication gates
+  +-> vector axes + page prototype sets
   +-> evidence + claims + information objects
   +-> semantic modules + page definitions
-  +-> profiles: request-mirror / UI / geometry / field
-  |
-  v
+  +-> agent rules + profiles + publication gates
+          |
+          v
 reference/src/manifest.ts
-  |
-  +-> compiled hyper-vector space
-  +-> vector-derived nearest neighbors/internal edges
-  +-> SiteSource
-  |
-  v
+  +-> CompiledHyperVectorSpace sidecar
+  +-> primary-prototype SiteSource features
+  +-> untyped vector-neighbor page IDs
+          |
+          v
 reference/src/framework.ts
-  |
   +-> PageIR
-  +-> packed vectors + CSR graph
-  +-> HTML + schema + sitemap + instructions
-  |
-  +-> reference/src/agent-harness.ts -> agent-context.json
-  +-> reference/src/ui-scaffold.ts  -> ui-scaffold.json
-  +-> reference/src/resolver.ts     -> finite resolver fixtures
-  +-> reference/worker/             -> asset-first Worker scaffold
-  +-> reference/zig/                -> scalar/SIMD source scaffold
+  +-> one packed page vector
+  +-> CSR page-ID graph
+  +-> neutral HTML/schema/sitemap/instructions
+          |
+          +-> agent-harness.ts -> agent-context.json
+          +-> ui-scaffold.ts -> ui-scaffold.json
+          +-> ui-metaprogramming.ts -> deterministic component plan
+          +-> ui-renderer.ts -> AMTECH HTML/CSS
+          +-> resolver.ts -> finite variant fixture
+          +-> worker/ and zig/ -> source scaffolds
 ```
 
-There is no longer a separate five-slice architecture. The old Request Mirror candidates are manifest pages in the `request-mirror-lab` profile and pass through the same compiler.
+## Correct three-plane model
+
+See `18-vector-node-path-web-framework-model.md`.
+
+```text
+publication plane
+  vector chunks -> candidate canonical nodes -> reviewed corpus -> emissions
+
+navigation plane
+  typed semantic edges -> useful prospect/agent path between stable nodes
+
+interaction plane
+  canonical page -> explicit task -> secure controls -> streamed employee work
+  -> typed artifact -> approval/proof -> Start Free or managed transition
+```
+
+Current code fully implements none of these planes end to end. It partially implements the publication plane, stores untyped similarity links for the navigation plane, and does not yet model the public employee interaction plane.
+
+## Vector/node/path definitions
+
+- **feature atom:** one typed, sourced context/page property;
+- **vector chunk:** one coherent reusable situation represented by role-bound atoms;
+- **prototype:** one vector realization of a chunk/entry region;
+- **canonical node:** one stable URL, question, evidence boundary, information/utility object, and graph role;
+- **node path:** a useful typed transition between nodes or from a node into a bounded task;
+- **public employee surface:** explicit-session work attached to a canonical node, never a visitor-specific indexable URL.
+
+## Current critical review findings
+
+Full report: `validation/reports/2026-07-17-vector-node-path-deep-code-review.md`.
+
+1. Symbol generation ignores manifest namespace/version.
+2. Broad `spaceHash` remains source-order-sensitive.
+3. Secondary prototypes are dropped at `SiteSource/PageIR/PackedSiteIR`.
+4. Proposal marginal coverage is a string, not an optimizer result.
+5. Auto-links are untyped raw-cosine neighbors.
+6. Agent context exposes only the primary prototype.
+7. Synthetic relevance/zero-match metrics are largely true by construction.
+8. UI layout is semantic-module-driven with geometry retained as metadata.
+9. Public streaming employee work has no website-IR contract.
+10. Distribution aggregation does not enforce experiment/window boundaries.
 
 ## Current read order
 
@@ -67,39 +118,15 @@ There is no longer a separate five-slice architecture. The old Request Mirror ca
 3. `../../CODEGRAPH.md`
 4. `AGENTS.md`
 5. `README.md`
-6. `16-unified-hypervector-manifest-agent-harness.md`
-7. `site-manifest.yaml`
-8. `reference/README.md`
-9. `reference/UI-DESIGN-SYSTEM-HANDOFF.md`
-10. `RESEARCH-NOTES-CURRENT.md`
-11. newest file under `memory/`
-12. historical numbered specifications when changing their domain
-
-## First-class state
-
-The durable state is:
-
-```text
-source/evidence
-+ feature atoms
-+ page prototype sets
-+ compatibility-space vocabulary
-+ semantic modules
-+ graph/dependencies
-+ profile/publication policy
-```
-
-HTML, instruction Markdown, sitemaps, UI scaffolds, and resolver artifacts are deterministic emissions.
-
-## Agent-first rule
-
-Agents receive the compiled space, current page neighborhoods, evidence inventory, uncovered-region hypothesis, design capabilities, and publication rules. They propose typed page additions. They do not write production HTML or create indexable routes directly.
-
-## UI pass boundary
-
-The first UI pass consumes the `ui-scaffold` profile. Its inputs are module kinds, layout roles, capability vectors, vector prototype IDs, variant axes, semantic content, and fixture routes.
-
-The design system must be a satisfactory superset of these requirements. The renderer cannot alter vector geometry, evidence, page intent, graph edges, or publication state.
+6. `18-vector-node-path-web-framework-model.md`
+7. `validation/reports/2026-07-17-vector-node-path-deep-code-review.md`
+8. `16-unified-hypervector-manifest-agent-harness.md`
+9. `17-agentic-ui-metaprogramming-standard.md`
+10. `site-manifest.yaml`
+11. `reference/README.md` and UI handoff
+12. `RESEARCH-NOTES-CURRENT.md`
+13. newest file under `memory/`
+14. historical numbered specifications when changing their domain
 
 ## Validation authority
 
@@ -109,19 +136,30 @@ The design system must be a satisfactory superset of these requirements. The ren
 - `13-academic-and-normative-basis-for-validation-vectors.md`
 - `15-hyper-targeted-search-distribution-workstreams.md`
 - `16-unified-hypervector-manifest-agent-harness.md`
+- `17-agentic-ui-metaprogramming-standard.md`
+- `18-vector-node-path-web-framework-model.md`
 - `validation/reports/2026-07-17-hyper-targeted-production-pass.md`
 - `validation/reports/2026-07-17-unified-manifest-ui-readiness.md`
+- `validation/reports/2026-07-17-ui-metaprogramming-pass-1.md`
+- `validation/reports/2026-07-17-vector-node-path-deep-code-review.md`
 - CI workflow `.github/workflows/website-framework-reference.yml`
 
-## Immediate next code path
+The newest review report controls interpretation of older pass reports without erasing their test evidence.
+
+## Immediate next path
 
 ```text
-unified manifest + CI pass
--> ingest supplied design system
--> derive and implement semantic renderer superset
+unified manifest + passing UI source CI
+-> disposition F-01 through F-10
+-> correct or explicitly manual-gate vector identity, prototype preservation,
+   coverage admission, link semantics, and experiment boundaries
+-> define the public employee task-surface boundary against mvp-build standards
 -> browser/accessibility/metadata/JS-disabled validation
--> generate first hyper-aware agent page proposals
--> review 20–40 field candidates
--> publish matched cohorts only after explicit gate
--> measure indexing, compatible discovery, qualified pipeline, gross profit, and lifecycle return
+-> generate first noindex hyper-aware proposals
+-> human review of 20–40 field candidates
+-> matched field publication only after explicit gate
+-> indexing, compatible discovery, qualified pipeline, gross profit,
+   and lifecycle-return measurement
 ```
+
+Green source CI is necessary but insufficient for proposal generation or publication.
