@@ -1,453 +1,302 @@
-version: "0.1.0"
-status: research_only
-updated_at: "2026-07-17"
-
-runtime:
-  canonical_stack:
-    application: "Next.js 16+ App Router with Cache Components"
-    edge_resolver: "Cloudflare Worker"
-    language: "TypeScript"
-    math_core: "Zig -> precompiled WASM with TypeScript reference fallback"
-    content: "typed MDX/content compiler; Contentlayer requires compatibility proof"
-  v0_1:
-    application: "Cloudflare Worker native diagnostic HTML"
-    index_policy: "noindex,nofollow"
-    cache_policy: "private,no-store"
-    remote_match_calls: 0
-
-vector:
-  candidate_dimensions: [512, 1024, 2048, 4096]
-  initial_dimension: 2048
-  storage: f32
-  request_time_fft: false
-  normalization: l2
-  deterministic_seed_namespace: "amtech-holo-v0.1"
-  similarity: cosine
-  candidate_search: flat_exact
-
-score:
-  initial_experiment_weights:
-    hrr: 0.50
-    graph: 0.30
-    business_prior: 0.20
-  note: "Experimental priors, not scientifically established constants."
-  hard_gates:
-    - route_eligible
-    - evidence_eligible
-    - privacy_eligible
-    - claim_eligible
-    - fixture_valid
-  confidence:
-    minimum_score: 0.45
-    minimum_top_two_margin: 0.05
-    minimum_feature_count: 1
-    fallback_candidate: generic-baseline
-
-feature_sources:
-  request:
-    consent_tier: 0
-    ttl_seconds: 0
-  cloudflare:
-    consent_tier: 0
-    ttl_seconds: 0
-  browser_opt_in:
-    consent_tier: 1
-    ttl_seconds: 0
-  explicit_input:
-    consent_tier: 1
-    ttl_seconds: 86400
-  session_opt_in:
-    consent_tier: 2
-    ttl_seconds: 86400
-
-features:
-  - id: route.lab
-    role: route
-    value: lab
-    source: request
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 0
-    default_weight: 1.0
-    affects: [ranking]
-
-  - id: source.direct
-    role: source
-    value: direct
-    source: request
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 0
-    default_weight: 0.20
-    affects: [ranking]
-
-  - id: source.organic_search
-    role: source
-    value: organic_search
-    source: request
-    direct_or_inferred: inferred
-    entropy: low
-    sensitive: false
-    consent_tier: 0
-    default_weight: 0.50
-    affects: [ranking]
-
-  - id: region.us_west
-    role: region
-    value: us_west
-    source: cloudflare
-    direct_or_inferred: inferred
-    entropy: low
-    sensitive: false
-    consent_tier: 0
-    default_weight: 0.30
-    affects: [ranking]
-
-  - id: region.us_northeast
-    role: region
-    value: us_northeast
-    source: cloudflare
-    direct_or_inferred: inferred
-    entropy: low
-    sensitive: false
-    consent_tier: 0
-    default_weight: 0.30
-    affects: [ranking]
-
-  - id: device.mobile
-    role: device_class
-    value: mobile
-    source: browser_opt_in
-    direct_or_inferred: inferred
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 0.20
-    affects: [ordering, example]
-
-  - id: device.desktop
-    role: device_class
-    value: desktop
-    source: browser_opt_in
-    direct_or_inferred: inferred
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 0.20
-    affects: [ordering, example]
-
-  - id: daypart.evening
-    role: daypart
-    value: evening
-    source: cloudflare
-    direct_or_inferred: inferred
-    entropy: low
-    sensitive: false
-    consent_tier: 0
-    default_weight: 0.20
-    affects: [example]
-
-  - id: explicit.homeowner
-    role: audience
-    value: homeowner
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, ordering, example]
-
-  - id: explicit.family_household
-    role: household_context
-    value: family_household
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: medium
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, example]
-
-  - id: explicit.dog_owner
-    role: pet_context
-    value: dog_owner
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: medium
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, example]
-
-  - id: explicit.business_owner
-    role: audience
-    value: business_owner
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, ordering, example, cta]
-
-  - id: explicit.painting_contractor
-    role: industry
-    value: painting_contractor
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, ordering, example, cta]
-
-  - id: explicit.commercial_fleet_operator
-    role: industry
-    value: commercial_fleet_operator
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, ordering, example, cta]
-
-  - id: intent.residential_painting
-    role: intent
-    value: residential_painting
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, example, cta]
-
-  - id: intent.commercial_fleet_service
-    role: intent
-    value: commercial_fleet_service
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, example, cta]
-
-  - id: intent.contractor_estimate_followup
-    role: intent
-    value: contractor_estimate_followup
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, ordering, example, cta]
-
-  - id: trust.security_first
-    role: trust_concern
-    value: security_first
-    source: explicit_input
-    direct_or_inferred: direct
-    entropy: low
-    sensitive: false
-    consent_tier: 1
-    default_weight: 1.0
-    affects: [ranking, ordering, example]
-
-prohibited_features:
-  - raw_ip
-  - device_fingerprint
-  - canvas_fingerprint
-  - audio_fingerprint
-  - webgl_renderer
-  - font_enumeration
-  - installed_plugins
-  - exact_location_persistence
-  - email
-  - phone
-  - crm_identity
-  - customer_identity
-  - cross_site_history
-  - purchased_enrichment
-  - race_or_ethnicity
-  - religion
-  - political_affiliation
-  - health_or_disability
-  - sexual_orientation
-  - union_membership
-  - creditworthiness
-  - inferred_income
-  - vulnerability_score
-
-candidates:
-  - id: generic-baseline
-    title: "Generic request mirror"
-    evidence_level: product_demonstration
-    route_ids: [lab]
-    facets:
-      route: [lab]
-      audience: [general]
-      intent: [inspect_request]
-      proof_type: [diagnostic]
-      trust_concern: [transparency]
-    business_prior: 0.60
-    graph_prior: 0.80
-    content_file: "content/slices/generic-baseline.mdx"
-
-  - id: residential-family-dog
-    title: "Residential family and dog-owner slice"
-    evidence_level: product_demonstration
-    route_ids: [lab]
-    required_features:
-      any: [explicit.homeowner, intent.residential_painting]
-    facets:
-      route: [lab]
-      audience: [homeowner, family_household, dog_owner]
-      intent: [residential_painting]
-      proof_type: [residential_example]
-      trust_concern: [home_reputation]
-    business_prior: 0.50
-    graph_prior: 0.62
-    content_file: "content/slices/residential-family-dog.mdx"
-
-  - id: commercial-fleet-ny
-    title: "New York commercial fleet slice"
-    evidence_level: product_demonstration
-    route_ids: [lab]
-    required_features:
-      all: [explicit.commercial_fleet_operator, intent.commercial_fleet_service]
-    facets:
-      route: [lab]
-      audience: [business_owner]
-      industry: [commercial_fleet_operator]
-      intent: [commercial_fleet_service]
-      region: [us_northeast]
-      proof_type: [commercial_example]
-    business_prior: 0.55
-    graph_prior: 0.60
-    content_file: "content/slices/commercial-fleet-ny.mdx"
-
-  - id: contractor-estimate-evening
-    title: "Contractor estimate and follow-up slice"
-    evidence_level: source_wired_preview
-    route_ids: [lab]
-    required_features:
-      any: [explicit.painting_contractor, intent.contractor_estimate_followup]
-    facets:
-      route: [lab]
-      audience: [business_owner, contractor]
-      industry: [painting_contractor]
-      intent: [contractor_estimate_followup]
-      job_stage: [estimating, followup]
-      proof_type: [work_card]
-      trust_concern: [owner_approval]
-      daypart: [evening]
-    business_prior: 0.70
-    graph_prior: 0.55
-    content_file: "content/slices/contractor-estimate-evening.mdx"
-
-  - id: technical-security-first
-    title: "Technical security-first slice"
-    evidence_level: source_wired_preview
-    route_ids: [lab]
-    required_features:
-      any: [trust.security_first]
-    facets:
-      route: [lab]
-      audience: [technical_buyer]
-      intent: [evaluate_architecture]
-      proof_type: [boundary_diagram]
-      trust_concern: [security_first, credential_custody, owner_approval]
-    business_prior: 0.45
-    graph_prior: 0.70
-    content_file: "content/slices/technical-security-first.mdx"
-
-fixtures:
-  - id: generic-baseline
-    description: "No optional context. Must fall back to generic."
-    features:
-      route.lab: 1.0
-      source.direct: 0.2
-    expected_top: generic-baseline
-
-  - id: homeowner-family-dog-residential
-    description: "Explicit synthetic residential test; none of these traits are inferred."
-    features:
-      route.lab: 1.0
-      explicit.homeowner: 1.0
-      explicit.family_household: 1.0
-      explicit.dog_owner: 1.0
-      intent.residential_painting: 1.0
-      region.us_west: 0.3
-    expected_top: residential-family-dog
-
-  - id: ny-commercial-fleet
-    description: "Explicit commercial fleet test with Northeast region."
-    features:
-      route.lab: 1.0
-      explicit.business_owner: 1.0
-      explicit.commercial_fleet_operator: 1.0
-      intent.commercial_fleet_service: 1.0
-      region.us_northeast: 0.3
-      device.desktop: 0.2
-    expected_top: commercial-fleet-ny
-
-  - id: contractor-estimate-evening
-    description: "Painting contractor with estimate/follow-up need in evening context."
-    features:
-      route.lab: 1.0
-      explicit.business_owner: 1.0
-      explicit.painting_contractor: 1.0
-      intent.contractor_estimate_followup: 1.0
-      daypart.evening: 0.2
-      device.mobile: 0.2
-    expected_top: contractor-estimate-evening
-
-  - id: technical-security-first
-    description: "Explicit technical evaluator prioritizing security boundaries."
-    features:
-      route.lab: 1.0
-      trust.security_first: 1.0
-      device.desktop: 0.2
-    expected_top: technical-security-first
-
-experiments:
-  v0_1_engine:
-    arms:
-      - id: js-reference
-        weight: 0.50
-      - id: zig-wasm
-        weight: 0.50
-    assignment_scope: request
-    conversion_metrics: []
-    purpose: "Correctness and latency comparison only."
-
-headers:
-  response:
-    X-Robots-Tag: "noindex, nofollow"
-    Cache-Control: "private, no-store"
-    Referrer-Policy: "strict-origin-when-cross-origin"
-    X-Content-Type-Options: "nosniff"
-    Content-Security-Policy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
-    Permissions-Policy: "camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=(), run-ad-auction=(), join-ad-interest-group=()"
-
-performance_budgets:
-  resolver_compute_p95_ms: 10
-  resolver_total_overhead_p95_ms: 50
-  resolver_total_overhead_hard_p95_ms: 80
-  remote_match_calls: 0
-  wasm_must_beat_js_p95_percent: 20
-
-validation:
-  required_documents:
-    - "04-feature-validation-vectors.md"
-    - "05-pass-fail-vectors.md"
-    - "07-v0.1-request-mirror-lab.md"
-    - "RESEARCH-NOTES-2026-07-17.md"
-  production_ready: false
-  graduation_stage: 0
+{
+  "version": "1.0.0",
+  "status": "source_wired_research",
+  "production_ready": false,
+  "updated_at": "2026-07-17",
+  "base_url": "https://amtechai.com",
+  "framework": {
+    "authority": "unified_manifest",
+    "compiler_entrypoint": "reference/src/manifest.ts",
+    "agent_first": true,
+    "default_profile": "ui-scaffold"
+  },
+  "vector_space": {
+    "first_class": true,
+    "namespace": "amtech-hyper-site-v1",
+    "vector_dimensions": 512,
+    "axes": {
+      "industry": { "description": "The market, trade, or operating domain served by the page." },
+      "problem": { "description": "The concrete failure, bottleneck, or unmet need." },
+      "use_case": { "description": "The action or workflow the user is trying to complete." },
+      "location": { "description": "Geographic applicability when it materially changes the answer." },
+      "audience": { "description": "The operator, buyer, owner, or agent role." },
+      "stage": { "description": "The diagnostic, comparison, implementation, operation, or recovery stage." },
+      "proof": { "description": "The evidence form needed to make the answer credible." },
+      "constraint": { "description": "A requirement that changes the correct solution." },
+      "surface": { "description": "Canonical page, lab fixture, instruction pointer, or other emission." },
+      "agent_instruction": { "description": "The bounded machine-action or reading instruction exposed by the page." },
+      "design_capability": { "description": "A semantic UI capability required to render the page correctly." }
+    },
+    "link_policy": {
+      "mode": "hybrid",
+      "nearest_neighbors": 2,
+      "minimum_cosine": 0.12,
+      "require_profile_overlap": true
+    }
+  },
+  "agent_harness": {
+    "mode": "propose_validate_compile",
+    "publication_default": "noindex",
+    "required_stages": [
+      "research-demand-and-problem-space",
+      "declare-target-vector-region",
+      "propose-distinct-information-object",
+      "bind-claims-to-evidence",
+      "compose-semantic-modules",
+      "estimate-marginal-coverage",
+      "validate-neighbors-cannibalization-and-graph-role",
+      "compile-and-render-fixtures"
+    ],
+    "required_outputs": [
+      "feature-atoms",
+      "canonical-question",
+      "marginal-coverage-hypothesis",
+      "information-object",
+      "claim-evidence-bindings",
+      "semantic-module-plan",
+      "internal-edge-rationale",
+      "design-capability-vector",
+      "validation-not-run"
+    ],
+    "prohibited_outputs": [
+      "direct-production-html",
+      "indexable-page-without-publication-gate",
+      "claim-without-evidence",
+      "page-without-positive-marginal-coverage",
+      "thin-cartesian-product-copy",
+      "unbounded-runtime-generation"
+    ]
+  },
+  "profiles": {
+    "request-mirror-lab": {
+      "purpose": "Legacy five-slice request-mirror behavior represented inside the unified compiler.",
+      "index_policy": "noindex,nofollow",
+      "page_ids": [
+        "page:lab-generic",
+        "page:residential-family-dog",
+        "page:commercial-fleet-ny",
+        "page:contractor-estimate-followup",
+        "page:technical-security"
+      ]
+    },
+    "ui-scaffold": {
+      "purpose": "First metaprogrammed UI pass covering every semantic module and layout role.",
+      "index_policy": "noindex,nofollow",
+      "page_ids": ["page:contractor-estimate-followup", "page:technical-security"]
+    },
+    "geometry-fixtures": {
+      "purpose": "Domain-neutral n-dimensional intersection fixture.",
+      "index_policy": "noindex,nofollow",
+      "page_ids": ["page:fixture-pest-control-cockroach-manhattan-apartment"]
+    },
+    "field-candidate": {
+      "purpose": "Empty until reviewed pages pass relevance, evidence, UI, crawl, and publication gates.",
+      "index_policy": "gated",
+      "page_ids": []
+    }
+  },
+  "evidence": [
+    { "id": "evidence:framework-state", "level": 4, "summary": "Repository state: source-wired research reference, not a deployed or indexed web framework." },
+    { "id": "evidence:offer", "level": 4, "summary": "Canonical AMTECH offer: Start Free, Managed AI Employee from $400, Workforce custom." },
+    { "id": "evidence:approval", "level": 3, "summary": "Owner approval is required at customer, money, reputation, and destructive-action boundaries." },
+    { "id": "evidence:synthetic-workflow", "level": 2, "summary": "Synthetic workflow fixture for compiler and UI validation only." },
+    { "id": "evidence:context-ranking-paper", "level": 3, "summary": "Kong et al. 2023 supports measuring document-context compatibility in ranking; it does not validate public SEO corpus generation.", "url": "https://arxiv.org/abs/2309.05113" },
+    { "id": "evidence:hdc-vsa-survey", "level": 3, "summary": "Kleyko et al. survey HDC/VSA applications and cognitive architectures; it does not establish SEO lift.", "url": "https://arxiv.org/abs/2112.15424" }
+  ],
+  "claims": [
+    { "id": "claim:research-state", "text": "This framework is a source-wired research reference, not a production-accepted website platform.", "evidenceIds": ["evidence:framework-state"], "requiredLevel": 4 },
+    { "id": "claim:offer", "text": "Start free. Managed AI Employee from $400.", "evidenceIds": ["evidence:offer"], "requiredLevel": 4 },
+    { "id": "claim:approval", "text": "The employee asks before customer, money, reputation, or destructive actions.", "evidenceIds": ["evidence:approval"], "requiredLevel": 3 }
+  ],
+  "information_objects": [
+    { "id": "info:vector-geometry", "kind": "diagram", "title": "Page compatibility geometry", "body": "Industry, problem, use case, location, proof, and constraints compile into a deterministic page prototype rather than a loose keyword list.", "evidenceIds": ["evidence:context-ranking-paper", "evidence:hdc-vsa-survey"] },
+    { "id": "info:estimate-workflow", "kind": "workflow", "title": "Estimate follow-up operating path", "body": "Job notes become a draft estimate, the owner reviews it, the customer receives it, and follow-up proceeds with proof and recovery states.", "evidenceIds": ["evidence:synthetic-workflow", "evidence:approval"] },
+    { "id": "info:security-boundary", "kind": "diagram", "title": "Owner-control boundary", "body": "Credentials and automation remain bounded by explicit approval, evidence, fallback, and recovery contracts.", "evidenceIds": ["evidence:approval"] },
+    { "id": "info:comparison", "kind": "comparison", "title": "Generic automation versus a bounded AI Employee", "body": "The comparison separates generic chat, disconnected automation, and a persistent employee that performs defined office work with owner gates.", "evidenceIds": ["evidence:offer", "evidence:approval"] },
+    { "id": "info:residential-fixture", "kind": "field-note", "title": "Residential fixture", "body": "A synthetic homeowner scenario retained only to test profile compatibility and UI rendering.", "evidenceIds": ["evidence:synthetic-workflow"] },
+    { "id": "info:fleet-fixture", "kind": "field-note", "title": "Commercial fleet fixture", "body": "A synthetic fleet scenario retained only to test multi-axis compatibility and profile isolation.", "evidenceIds": ["evidence:synthetic-workflow"] },
+    { "id": "info:pest-control-intersection", "kind": "calculation", "title": "Four-axis intersection fixture", "body": "Pest control plus cockroach infestation plus Manhattan plus apartment property management forms one precise research coordinate; the page remains noindex until real demand, information gain, and business value are proven.", "evidenceIds": ["evidence:framework-state"] }
+  ],
+  "modules": [
+    { "id": "module:hero", "kind": "hero", "layout_role": "lead", "heading": "A page is a compiled coordinate, not a keyword template", "body": "The framework starts from a target vector region and emits a complete page only after evidence, information gain, graph role, and UI requirements are satisfied.", "claim_ids": ["claim:research-state"], "information_object_ids": [], "required_capabilities": ["semantic-hierarchy", "responsive-grid", "mobile-priority"], "source_ids": ["source:framework-reality"] },
+    { "id": "module:answer-geometry", "kind": "answer", "layout_role": "lead", "heading": "How the hyper-vector space controls the site", "body": "Feature atoms are compiled before page plans. Their geometry drives corpus coverage, nearest neighbors, agent context, design requirements, and final emissions.", "claim_ids": [], "information_object_ids": ["info:vector-geometry"], "required_capabilities": ["semantic-hierarchy", "long-form-reading", "structured-data-visible"], "source_ids": ["source:vector-space"] },
+    { "id": "module:workflow-estimate", "kind": "workflow", "layout_role": "support", "heading": "Estimate follow-up workflow", "claim_ids": ["claim:approval"], "information_object_ids": ["info:estimate-workflow"], "required_capabilities": ["workflow-steps", "responsive-grid", "mobile-priority"], "source_ids": ["source:estimate-fixture"] },
+    { "id": "module:proof-security", "kind": "proof", "layout_role": "proof", "heading": "Proof and control", "claim_ids": ["claim:approval"], "information_object_ids": ["info:security-boundary"], "required_capabilities": ["evidence-dense", "progressive-disclosure", "structured-data-visible"], "source_ids": ["source:security-boundary"] },
+    { "id": "module:comparison", "kind": "comparison", "layout_role": "decision", "heading": "What the buyer is actually comparing", "claim_ids": [], "information_object_ids": ["info:comparison"], "required_capabilities": ["comparison-table", "responsive-grid"], "source_ids": ["source:comparison"] },
+    { "id": "module:faq", "kind": "faq", "layout_role": "support", "heading": "Framework questions", "body": "Synthetic scale proves deterministic compilation only. It does not prove indexing, rankings, conversion, or production readiness.", "claim_ids": ["claim:research-state"], "information_object_ids": [], "required_capabilities": ["progressive-disclosure", "long-form-reading"], "source_ids": ["source:framework-reality"] },
+    { "id": "module:cta", "kind": "cta", "layout_role": "conversion", "heading": "Build one useful AI Employee", "body": "The UI pass must preserve the canonical offer while the framework remains noindex and research-only.", "claim_ids": ["claim:offer"], "information_object_ids": [], "required_capabilities": ["conversion-panel", "responsive-grid", "mobile-priority"], "source_ids": ["source:offer"] },
+    { "id": "module:instruction", "kind": "instruction", "layout_role": "support", "heading": "Agent reading pointer", "body": "Agents receive the same canonical facts plus a compact, bounded instruction projection derived from the page IR.", "claim_ids": [], "information_object_ids": [], "required_capabilities": ["instruction-pointer", "semantic-hierarchy"], "source_ids": ["source:agent-harness"] },
+    { "id": "module:residential", "kind": "answer", "layout_role": "lead", "heading": "Residential family fixture", "claim_ids": [], "information_object_ids": ["info:residential-fixture"], "required_capabilities": ["semantic-hierarchy", "mobile-priority"], "source_ids": ["source:legacy-lab"] },
+    { "id": "module:fleet", "kind": "answer", "layout_role": "lead", "heading": "Commercial fleet fixture", "claim_ids": [], "information_object_ids": ["info:fleet-fixture"], "required_capabilities": ["semantic-hierarchy", "responsive-grid"], "source_ids": ["source:legacy-lab"] },
+    { "id": "module:pest-control", "kind": "answer", "layout_role": "lead", "heading": "Cockroach control for Manhattan apartment operations", "claim_ids": ["claim:research-state"], "information_object_ids": ["info:pest-control-intersection"], "required_capabilities": ["semantic-hierarchy", "long-form-reading", "mobile-priority", "structured-data-visible"], "source_ids": ["source:geometry-fixture"] }
+  ],
+  "pages": [
+    {
+      "id": "page:lab-generic",
+      "route": "/lab/request-mirror",
+      "canonical_question": "What can the research framework actually observe and compile?",
+      "title": "Request Mirror Research Fixture | AMTECH",
+      "description": "A noindex fixture that exposes the current research boundary.",
+      "profile_ids": ["request-mirror-lab"],
+      "feature_atoms": [
+        { "dimension": "industry", "value": "general", "source_id": "source:legacy-lab", "provenance": "authored" },
+        { "dimension": "problem", "value": "inspect-request-context", "source_id": "source:legacy-lab", "provenance": "authored" },
+        { "dimension": "use_case", "value": "framework-diagnostics", "source_id": "source:legacy-lab", "provenance": "authored" },
+        { "dimension": "surface", "value": "lab", "source_id": "source:legacy-lab", "provenance": "authored" }
+      ],
+      "module_ids": ["module:hero", "module:answer-geometry", "module:instruction"],
+      "internal_page_ids": [],
+      "auto_link": true,
+      "required_capabilities": ["semantic-hierarchy", "responsive-grid", "instruction-pointer"],
+      "instruction_pointers": ["/lab/request-mirror/use.md"],
+      "variant_axes": ["density"],
+      "publication_gate": "research",
+      "indexable": false
+    },
+    {
+      "id": "page:contractor-estimate-followup",
+      "route": "/lab/painting-contractors/estimate-followup",
+      "canonical_question": "How can a painting contractor prepare, approve, send, and follow up on estimates?",
+      "title": "Painting Contractor Estimate Follow-Up AI Employee | AMTECH",
+      "description": "A complete noindex UI and compiler fixture for estimate preparation, approval, delivery, and follow-up.",
+      "profile_ids": ["request-mirror-lab", "ui-scaffold"],
+      "feature_atoms": [
+        { "dimension": "industry", "value": "painting-contractor", "source_id": "source:estimate-fixture", "provenance": "researched" },
+        { "dimension": "problem", "value": "estimate-backlog", "source_id": "source:estimate-fixture", "provenance": "researched" },
+        { "dimension": "use_case", "value": "estimate-followup", "source_id": "source:estimate-fixture", "provenance": "researched" },
+        { "dimension": "location", "value": "us-general", "source_id": "source:estimate-fixture", "provenance": "authored" },
+        { "dimension": "audience", "value": "owner-operator", "source_id": "source:estimate-fixture", "provenance": "researched" },
+        { "dimension": "stage", "value": "evaluate", "source_id": "source:estimate-fixture", "provenance": "authored" },
+        { "dimension": "proof", "value": "workflow", "source_id": "source:estimate-fixture", "provenance": "authored" },
+        { "dimension": "constraint", "value": "owner-approval", "source_id": "source:estimate-fixture", "provenance": "authored" },
+        { "dimension": "surface", "value": "canonical-page", "source_id": "source:estimate-fixture", "provenance": "authored" }
+      ],
+      "prototypes": [
+        { "id": "owner-evaluation", "feature_atoms": [
+          { "dimension": "industry", "value": "painting-contractor", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "problem", "value": "estimate-backlog", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "use_case", "value": "estimate-followup", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "audience", "value": "owner-operator", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "stage", "value": "evaluate", "source_id": "source:estimate-fixture", "provenance": "authored" },
+          { "dimension": "proof", "value": "workflow", "source_id": "source:estimate-fixture", "provenance": "authored" },
+          { "dimension": "constraint", "value": "owner-approval", "source_id": "source:estimate-fixture", "provenance": "authored" },
+          { "dimension": "surface", "value": "canonical-page", "source_id": "source:estimate-fixture", "provenance": "authored" }
+        ] },
+        { "id": "evening-backlog", "feature_atoms": [
+          { "dimension": "industry", "value": "painting-contractor", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "problem", "value": "evening-office-work", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "use_case", "value": "estimate-followup", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "audience", "value": "owner-operator", "source_id": "source:estimate-fixture", "provenance": "researched" },
+          { "dimension": "stage", "value": "diagnose", "source_id": "source:estimate-fixture", "provenance": "authored" },
+          { "dimension": "proof", "value": "workflow", "source_id": "source:estimate-fixture", "provenance": "authored" },
+          { "dimension": "surface", "value": "canonical-page", "source_id": "source:estimate-fixture", "provenance": "authored" }
+        ] }
+      ],
+      "module_ids": ["module:hero", "module:answer-geometry", "module:workflow-estimate", "module:proof-security", "module:comparison", "module:faq", "module:cta", "module:instruction"],
+      "internal_page_ids": ["page:technical-security"],
+      "auto_link": true,
+      "required_capabilities": ["semantic-hierarchy", "responsive-grid", "workflow-steps", "evidence-dense", "comparison-table", "progressive-disclosure", "conversion-panel", "mobile-priority", "structured-data-visible", "instruction-pointer"],
+      "instruction_pointers": ["/lab/painting-contractors/estimate-followup/use.md"],
+      "variant_axes": ["density", "proof-emphasis", "module-order"],
+      "publication_gate": "research",
+      "indexable": false
+    },
+    {
+      "id": "page:technical-security",
+      "route": "/lab/technical/security-and-control",
+      "canonical_question": "How does an AI Employee preserve credential custody, owner approval, proof, and recovery?",
+      "title": "AI Employee Security and Owner Control | AMTECH",
+      "description": "A noindex technical fixture for security, proof, approval, and recovery presentation.",
+      "profile_ids": ["request-mirror-lab", "ui-scaffold"],
+      "feature_atoms": [
+        { "dimension": "industry", "value": "software-operations", "source_id": "source:security-boundary", "provenance": "researched" },
+        { "dimension": "problem", "value": "credential-risk", "source_id": "source:security-boundary", "provenance": "researched" },
+        { "dimension": "use_case", "value": "architecture-evaluation", "source_id": "source:security-boundary", "provenance": "researched" },
+        { "dimension": "audience", "value": "technical-buyer", "source_id": "source:security-boundary", "provenance": "researched" },
+        { "dimension": "stage", "value": "compare", "source_id": "source:security-boundary", "provenance": "authored" },
+        { "dimension": "proof", "value": "security-boundary", "source_id": "source:security-boundary", "provenance": "authored" },
+        { "dimension": "constraint", "value": "owner-approval", "source_id": "source:security-boundary", "provenance": "authored" },
+        { "dimension": "surface", "value": "canonical-page", "source_id": "source:security-boundary", "provenance": "authored" }
+      ],
+      "module_ids": ["module:hero", "module:proof-security", "module:comparison", "module:faq", "module:cta", "module:instruction"],
+      "internal_page_ids": ["page:contractor-estimate-followup"],
+      "auto_link": true,
+      "required_capabilities": ["semantic-hierarchy", "responsive-grid", "evidence-dense", "comparison-table", "progressive-disclosure", "conversion-panel", "structured-data-visible", "instruction-pointer"],
+      "instruction_pointers": ["/lab/technical/security-and-control/use.md"],
+      "variant_axes": ["density", "proof-emphasis"],
+      "publication_gate": "research",
+      "indexable": false
+    },
+    {
+      "id": "page:residential-family-dog",
+      "route": "/lab/residential-family-dog",
+      "canonical_question": "How does the compiler represent an explicitly supplied residential household fixture?",
+      "title": "Residential Household Compatibility Fixture | AMTECH",
+      "description": "A synthetic noindex fixture retained from the Request Mirror research.",
+      "profile_ids": ["request-mirror-lab"],
+      "feature_atoms": [
+        { "dimension": "industry", "value": "residential-services", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "problem", "value": "home-service-coordination", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "use_case", "value": "residential-fixture", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "audience", "value": "explicit-homeowner", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "surface", "value": "lab", "source_id": "source:legacy-lab", "provenance": "authored" }
+      ],
+      "module_ids": ["module:residential", "module:instruction"],
+      "internal_page_ids": [],
+      "auto_link": true,
+      "required_capabilities": ["semantic-hierarchy", "mobile-priority", "instruction-pointer"],
+      "instruction_pointers": ["/lab/residential-family-dog/use.md"],
+      "variant_axes": ["density"],
+      "publication_gate": "research",
+      "indexable": false
+    },
+    {
+      "id": "page:commercial-fleet-ny",
+      "route": "/lab/commercial-fleet-new-york",
+      "canonical_question": "How does the compiler represent an explicitly supplied commercial fleet and location fixture?",
+      "title": "Commercial Fleet New York Compatibility Fixture | AMTECH",
+      "description": "A synthetic noindex fixture retained from the Request Mirror research.",
+      "profile_ids": ["request-mirror-lab"],
+      "feature_atoms": [
+        { "dimension": "industry", "value": "commercial-fleet", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "problem", "value": "fleet-service-coordination", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "use_case", "value": "commercial-fixture", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "location", "value": "new-york", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "audience", "value": "fleet-operator", "source_id": "source:legacy-lab", "provenance": "synthetic" },
+        { "dimension": "surface", "value": "lab", "source_id": "source:legacy-lab", "provenance": "authored" }
+      ],
+      "module_ids": ["module:fleet", "module:instruction"],
+      "internal_page_ids": [],
+      "auto_link": true,
+      "required_capabilities": ["semantic-hierarchy", "responsive-grid", "instruction-pointer"],
+      "instruction_pointers": ["/lab/commercial-fleet-new-york/use.md"],
+      "variant_axes": ["density"],
+      "publication_gate": "research",
+      "indexable": false
+    },
+    {
+      "id": "page:fixture-pest-control-cockroach-manhattan-apartment",
+      "route": "/fixtures/pest-control/cockroaches/manhattan-apartments",
+      "canonical_question": "What would a four-axis hyper-specific page coordinate look like before publication?",
+      "title": "Pest Control for Cockroaches in Manhattan Apartments — Geometry Fixture",
+      "description": "A noindex domain-neutral fixture demonstrating industry, problem, location, and use-case intersection.",
+      "profile_ids": ["geometry-fixtures"],
+      "feature_atoms": [
+        { "dimension": "industry", "value": "pest-control", "source_id": "source:geometry-fixture", "provenance": "synthetic" },
+        { "dimension": "problem", "value": "cockroach-infestation", "source_id": "source:geometry-fixture", "provenance": "synthetic" },
+        { "dimension": "use_case", "value": "apartment-property-management", "source_id": "source:geometry-fixture", "provenance": "synthetic" },
+        { "dimension": "location", "value": "manhattan", "source_id": "source:geometry-fixture", "provenance": "synthetic" },
+        { "dimension": "stage", "value": "diagnose", "source_id": "source:geometry-fixture", "provenance": "synthetic" },
+        { "dimension": "surface", "value": "geometry-fixture", "source_id": "source:geometry-fixture", "provenance": "authored" }
+      ],
+      "module_ids": ["module:pest-control", "module:instruction"],
+      "internal_page_ids": [],
+      "auto_link": true,
+      "required_capabilities": ["semantic-hierarchy", "long-form-reading", "mobile-priority", "structured-data-visible", "instruction-pointer"],
+      "instruction_pointers": ["/fixtures/pest-control/cockroaches/manhattan-apartments/use.md"],
+      "variant_axes": ["density", "information-object-treatment"],
+      "publication_gate": "research",
+      "indexable": false
+    }
+  ]
+}
