@@ -1,120 +1,111 @@
 # AGENTS.md — AI Employee MVP build home
 
-> Tool-agnostic agent guide. This **mirrors [`CLAUDE.md`](CLAUDE.md)** — keep the two in sync; edit
-> both when this changes.
+> Tool-agnostic agent guide. This mirrors `CLAUDE.md`; keep both files in sync.
 
-This is **`mvp-build/`**, the build home for the AMTECH AI Employee MVP. The owner only ever talks to
-one employee; the Manager is the invisible backend control plane.
+This is `mvp-build/`, the implementation home for AMTECH's AI Employee. The owner talks to one employee; Manager is invisible backend infrastructure.
 
-## Read order (a fresh agent orients from these)
+## Read order
 
-1. [`../identity.md`](../identity.md) — operating self-image (required, every session).
-2. [`../CODEGRAPH.md`](../CODEGRAPH.md) — workspace map + canonical facts.
-3. For live normal employee deploy/testing, read [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md) and the newest live-run handoff in [`memory/MEMORY.md`](memory/MEMORY.md) before any script docs. The launch proof path is public DNS/Cloudflare Tunnel -> Caddy -> real `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee -> live owner web client -> provider-backed reply + useful tool connections; `local:*`, `live:*`, fixture mode, `/api/dev/login`, and `prod-like:public-estimator:*` are not launch proof.
-4. [`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/) — the reconciled plan; the
-   **forward roadmap is [`../wiki/MVP/build-plan-current/phases/`](../wiki/MVP/build-plan-current/phases/)**
-   (Phase 0 baseline + Phases 1–13, dependency-ordered modular phases).
-5. [`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/) — factual code-state ledger.
-6. [`memory/`](memory/) — in-repo durable dev handoffs + the memory writing protocol (read the newest).
-7. The relevant source under `apps/`, `packages/`, `infra/` before changing code.
+1. `../identity.md`
+2. `CODEGRAPH.md`
+3. `memory/MEMORY.md`, then the newest relevant handoff
+4. this file / `CLAUDE.md`
+5. `docs/production-normal-employee-live-deploy-runbook.md` for live/deploy work
+6. `../wiki/MVP/second-half-current-and-future-state.md`
+7. `../wiki/MVP/implementation-records/README.md`
+8. relevant source, migrations, scripts, and proofs
 
-`../wiki/MVP/old-build-plan/` is the preserved original mechanics packet — do **not** rewrite it.
+Source, migrations, scripts, proof artifacts, and newest memory outrank stale docs.
 
 ## Current status
 
-- **Phase 0 baseline loop** (signup/claim → estimate PDF → approved Gmail send → real reply → Stripe
-  test-mode deposit → reminder): `source-wired`.
-- **Phase 1 acceptance harness** (preflight + 8 run-verifiers + report + ops scripts + forged-request
-  tests): `source-wired`, locally verified; the **live gate** is `pending` (needs `.env` + host; no
-  provider proof captured yet).
-- **Phase 2 runtime/scheduler productionization:** `source-wired` (Docker-default backend policy,
-  Manager scheduler runner, `hermes_job_runs` proof writes, `runtime_health_checks` snapshots);
-  live `runtime-accepted` gate is still `pending` real Docker/Hermes Jobs proof.
-- **Phase 3 / 3A / 4:** `source-wired` locally, **TDD-hardened (2026-07-03)**. Real Hermes Sessions
-  client, DB-backed turn queue, generic ingress, channel router, and Gmail reply wake descriptors are wired
-  and now have direct deterministic unit coverage + env-gated Postgres integration proof (turn serialization,
-  new-table RLS). A `drain_employee_turns` scheduler lane handles straggler owner turns and persists routed
-  replies. Live runtime/provider proof remains `pending`.
-- **Phase 5 triage/batching + live Work Surface + MCP-UI:** `source-wired` (2026-07-04). Rules-first
-  triage with priority + provider-burst batching → digest (`event-triage.ts`/`event-batching.ts`,
-  `flush_event_batches` lane, migration `0016`); live Manager SSE stream (`server.ts` `employeeStream`
-  + `employee-stream.ts`) woken by `progress-bus.ts` (the testable Realtime/NOTIFY stand-in) with cursor
-  catch-up + poll fallback; Hermes `/v1/runs/{id}/events` streaming → owner-safe work-verbs
-  (`work-verbs.ts`); **generative UI via MCP-UI** — agent `view` → Manager-compiled `ui://` `rawHtml`
-  `UIResource` (`ui-resources.ts`, `@mcp-ui/server`) rendered in a sandboxed iframe whose `postMessage`
-  intents route through the approval gate (`McpUiResource.tsx`). Live Hermes SSE + Supabase `0016` RLS
-  proof pending. See `../wiki/MVP/implementation-records/2026-07-04-phase-05-record.md`.
-- **Phase 6 metering foundation:** `source-wired`. Migration `0013` (six Manager-only ledgers +
-  additive `run_id` columns), migration `0014` (turn-claim RPC `run_id` propagation), `lib/metering.ts`
-  best-effort helpers, and `run_id` threaded through ingress → deliver → wake → turn-queue → router →
-  owner-turn.
-- **Phases 7–13:** `planned`. See `phases/README.md` for the dependency graph.
+- Branch: `research`, rebased onto latest `main` through GitHub rebase PR #14.
+- Overall: `source-wired_not_accepted` after WS1/WS2.
+- WS1 model gateway custody + profile integrity: source-wired.
+- WS2 resource graph/state-machine/retry/drift/rotation/compensation foundations: source-wired; true reconciler worker pending.
+- WS3 ambient inbox: schema groundwork only; provider ingress migration pending.
+- Owner surfaces and existing product systems: source-wired; current live acceptance must be established by fresh proof, not inferred from code or historical runs.
 
-## Layout
+## Canonical launch path
 
-```
-apps/web/        Next.js — front door, owner Work Surface, signed artifact route
-apps/manager/    Node/TS control plane — tool registry, security libs, webhooks, server, orchestrator, provisioner
-packages/shared/ typed contracts (tool-contracts, work-events, routes, ids, profile-package, ...)
-packages/db/     migrations 0001–0016 + runner + service/anon clients
-packages/agent-template/  Hermes employee template (agent-as-files)
-infra/           caddy/, hermes/ (RUNBOOK), scripts/ (ops + acceptance/ harness)
-tests/           unit/ (mocks ok) · integration/ (real creds, env-gated) · golden-path/ (manual runbooks)
-docs/            production admin + metering architecture/implementation plans
-memory/          in-repo durable dev handoffs + writing protocol
+```text
+public DNS / Cloudflare Tunnel
+-> Caddy
+-> production Web + Manager
+-> real /create-ai-employee
+-> Twilio Verify
+-> account creation
+-> Start Employee
+-> isolated Hermes runtime
+-> owner web client
+-> provider-backed reply
+-> useful connected-tool proof
 ```
 
-## How to work
+Use `docs/production-normal-employee-live-deploy-runbook.md`.
 
-**Baseline checks — run before and after changes:**
+The public estimator, `prod-like:public-estimator:*`, fixtures, `/api/dev/login`, host `live:*`, and manually injected provider events are diagnostics/regression aids only. They are not normal-employee launch proof.
+
+## Acceptance vocabulary
+
+- `source-wired`: code/schema/config exists; name the static/local checks actually run.
+- `provider-accepted`: real provider IDs exist.
+- `runtime-accepted`: real host/runtime proof artifacts exist.
+- `planned`: designed, not implemented.
+- `pending`: blocked, unattempted, or missing proof.
+
+Never upgrade status from architecture, mocks, fixtures, old containers, or confidence.
+
+## Non-negotiables
+
+1. No faked proof. Real acceptance needs real IDs/artifacts.
+2. Provider master credentials never enter employee profiles or containers. Employee runtimes receive only scoped Manager MCP and Model Gateway credentials.
+3. Customer-, money-, and reputation-affecting actions cross owner approval policy.
+4. Webhooks verify provider authenticity before durable insertion; asynchronous workers own processing/retry/dead-letter behavior.
+5. Manager public/API authority and host Docker authority remain separated by the signed Unix-socket provisioner boundary.
+6. Every employee runtime is isolated; peer/control-service access is denied except explicitly scoped routes.
+7. Rendered profiles fail closed on forbidden secret slots/values, unresolved tokens, unsafe permissions, and checksum drift.
+8. Twilio/provider bindings and welcome effects happen only after runtime and route acceptance.
+9. No new browser-readable Supabase table/view without reviewing Data API exposure, RLS, and grants.
+10. The public estimator remains non-canonical.
+
+## Working rules
+
+- Inspect source before editing docs that describe it.
+- Prefer docs-only changes for reconciliation sessions. Make source changes only for an obvious, bounded defect in scope.
+- Do not run the full build/test suite unless requested. Use targeted static inspection and state exactly what was not run.
+- For code sessions, the normal baseline remains:
+
+```bash
+npm run typecheck
+npm run test:unit
+npm run build
+npm run lint
+npm run test:integration   # env-gated
 ```
-npm run typecheck && npm run test:unit && npm run build && npm run lint
-npm run test:integration   # env-gated; skips cleanly without live Supabase creds
-```
-Current local truth: typecheck/build/lint pass; **44 unit files / 254 tests** pass; integration skips clean
-(9 env-gated checks without live Supabase creds).
 
-**Acceptance (Phase 1):**
-```
-npm run acceptance:preflight   # runnable/blocked matrix per run (no secrets printed)
-npm run acceptance:report      # runs all 8 verifiers; writes infra/acceptance/reports/ (gitignored)
-npm run ops:number-pool | ops:healthcheck | ops:repair
-npm run scheduler:tick         # dev/manual fallback; writes scheduler_tick job-run rows
-npm run scheduler:hermes-jobs  # production-oriented Hermes Jobs entrypoint
-```
+Do not repeat old pass counts as current proof unless rerun.
 
-## Non-negotiables (Realness Rules + security)
+## Active now-to-live priorities
 
-- **Normal employee launch proof uses the production runbook.** Use
-  [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md)
-  by default. Local live toolkit, browser fixtures, dev-login cookies, and public-estimator scripts are
-  diagnostics/development only.
-- **No faked proof.** A capability is accepted only with real provider/runtime proof ids (Twilio SID,
-  Gmail/Stripe ids, Pub/Sub message id, Supabase storage/migration evidence, Hermes job proof).
-  Manually injected provider results, mocks, or stubbed successes are **never** acceptance. Records
-  must never claim a live external test that didn't run. Mocks are allowed only in `tests/unit/`.
-- **Acceptance vocabulary:** `source-wired` / `provider-accepted` / `runtime-accepted` / `planned` /
-  `pending`. Don't upgrade a status without the proof.
-- **Secrets by reference only.** No raw tokens, signatures, email/webhook bodies, or secret values in
-  logs, `audit_log.details`, admin payloads, or reports. Don't pass provider tokens to models/browser.
-- **Security boundaries are real:** Twilio `X-Twilio-Signature`, Stripe `Stripe-Signature` (raw body),
-  Pub/Sub OIDC JWT, owner web session, signed artifact tokens, Manager tool auth. RLS protects the
-  owner/anon path; the service-role client (Manager only) is the control-plane authority — never
-  authorize off `user_metadata`.
-- **Approval gates** before money/customer-facing actions. Provider test mode is allowed for Stripe.
-- **No new browser-readable Supabase table/view without reviewing Data API exposure + RLS + grants.**
+- Apply/review migrations `0031`–`0033` on a disposable production-shaped DB.
+- Typecheck shared exports, Hono gateway entry, Supabase row shapes, and provisioner result contracts.
+- Prove host-private model-gateway reachability from employee containers and non-reachability from public ingress.
+- Prove profile integrity and credential rotation/revocation.
+- Implement the DB-backed reconciler worker and fleet drift repair.
+- Move provider ingress to `ambient_event_inbox` leased workers.
+- Route admin lifecycle actions through `provisioning_commands` + reconciler.
+- Run a fresh canonical public onboarding with real provider/runtime/tool proof IDs.
 
-## Memory protocol (standing requirement)
+## Memory protocol
 
-Maintain in-repo durable memory in [`memory/`](memory/) per [`memory/MEMORY.md`](memory/MEMORY.md).
-Write/update a dated handoff: **(1)** mid-session after substantial multi-feature or architectural
-work, **(2)** after a full phase implementation, **(3)** after an architectural decision/plan change.
-Keep the `memory/MEMORY.md` index current. Use `wiki/MVP/implementation-records/` for factual
-code-state; `memory/` for the agentic-dev narrative + decisions + pointers.
+After substantial multi-file work, phase completion, production incident, or architectural/product-direction change:
+
+1. create/update a dated handoff in `memory/`;
+2. update `memory/MEMORY.md` newest-first;
+3. record exact validation run or explicitly not run;
+4. keep factual code/proof state in `../wiki/MVP/implementation-records/`.
 
 ## Git
 
-`mvp-build/` is tracked inside the root **`GTM-RESEARCH`** git repo (branch `main`), which has a GitHub
-remote (`origin` → `benamtech/ai-employee-v1`). Commit only when asked; **branch off `main` first** for
-feature work and **do not push without an explicit ask**. End commit messages with the Co-Authored-By
-trailer.
+Work only on the explicitly requested branch. Preserve `main`. Do not silently merge or push to another branch. End with exact changed files, unresolved risks, and validation not run.
