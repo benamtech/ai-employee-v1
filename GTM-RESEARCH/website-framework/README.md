@@ -1,172 +1,142 @@
 # Hyper-Targeted Search-Distribution Framework
 
-Status: vector-native research compiler and deterministic UI scaffold; field acceptance pending
+Status: vector-native research compiler and deterministic UI scaffold; proposal relevance and field acceptance pending
 Updated: 2026-07-17
 
 ## Current reality
 
-The repository now contains a TypeScript research package for:
+Implemented and source-tested:
 
-- deterministic HDC/VSA/HRR feature composition;
-- namespaced and symbol-versioned vector identity;
 - one unified declarative manifest;
+- namespaced and symbol-versioned HRR/VSA symbols;
 - typed evidence, claims, information objects, semantic modules, pages, and prototype sets;
-- preservation of every declared page prototype through `CompiledHyperVectorSpace`, `SiteSource`, `PageIR`, and packed prototype vectors;
-- one explicit primary-vector alias per page for compatibility with current resolver interfaces;
-- deterministic broad vector-space and site hashes under source collection reordering;
-- computed facility-location-style marginal coverage for agent proposal admission;
-- duplicate/cannibalization rejection using existing-page prototype similarity;
-- Complement Submodular Information facility-location controls for batch balance and outlier rejection;
+- every declared prototype preserved through `CompiledHyperVectorSpace`, `SiteSource`, `PageIR`, packed offsets/IDs/vectors, and agent context;
+- deterministic broad vector-space/site hashes under source collection reordering;
+- mechanically computed current-versus-proposed context coverage;
+- duplicate-similarity rejection;
+- Facility Location Complement Information as a batch/split research arm;
 - deterministic neutral and AMTECH static HTML/CSS emissions;
-- source-level browser/CSS/UI validation;
-- optional noncanonical R3F visualization;
-- synthetic scale tests through 2,000 fixtures;
-- scaffolds for Zig/Wasm, Cloudflare, search cohorts, and conversion metrics.
+- Tier-2 browser/CSS source checks and optional noncanonical R3F build;
+- synthetic scale fixtures through 2,000 pages;
+- scaffolds for Zig/Wasm, Cloudflare, resolver, field cohorts, and conversion metrics.
 
-It does not yet contain or prove:
+Not implemented or accepted:
 
+- explicit primary-prototype semantics in the manifest;
+- calibrated/independently judged proposal relevance;
 - typed semantic prospect-path edges;
-- an independently judged external context-relevance benchmark;
-- a first-class public AI Employee task-surface contract;
-- production browser/accessibility/Core Web Vitals acceptance;
-- a live indexed 200–2,000-page corpus;
-- production Cloudflare or Zig/Wasm proof;
-- real search-distribution, conversion, or revenue lift.
+- public AI Employee task-surface IR;
+- production-safe resolver/Worker/Wasm/distribution paths;
+- browser visual/accessibility/Core Web Vitals acceptance;
+- a reviewed indexed 200–2,000-page corpus;
+- real search, citation, conversion, gross-profit, or revenue lift.
 
-Synthetic scale and source tests prove compiler behavior only. They do not prove that candidate pages deserve canonical URLs or will populate useful search results.
+Synthetic scale and green source CI prove compiler behavior only.
 
 ## Single authority
 
-`site-manifest.yaml` is the unified declarative corpus authority.
+`site-manifest.yaml` controls:
 
-It contains:
+- vector namespace, symbol version, dimensions, axes, and link policy;
+- proposal coverage policy and publication gates;
+- evidence, claims, information objects, modules, pages, and prototypes;
+- Request Mirror, UI, geometry, and field profiles;
+- current noindex state.
 
-- vector-space namespace, symbol version, dimensions, axes, and link policy;
-- agent-generation rules, computed-coverage thresholds, and publication gates;
-- evidence, claims, information objects, and semantic modules;
-- page feature atoms and prototype sets;
-- Request Mirror, UI-scaffold, geometry-fixture, and field-candidate profiles;
-- current noindex publication state.
+HTML, schema, sitemaps, instruction projections, UI plans, agent context, and packed artifacts are emissions.
 
-The old five-slice Request Mirror is a noindex profile inside the same compiler.
+## Framework model
 
-## Correct architecture model
-
-Read `18-vector-node-path-web-framework-model.md` before creating pages.
-
-The framework has three separate planes:
+Read `18-vector-node-path-web-framework-model.md`.
 
 ```text
-1. publication plane
-   approved source + demand evidence
-   -> explicit context cases and vector chunks
-   -> candidate canonical nodes
-   -> computed coverage/distinctness gate
-   -> reviewed stable pages
+publication plane
+  independent context/demand cases + vector chunks
+  -> candidate stable nodes
+  -> coverage/distinctness/evidence review
+  -> canonical page emissions
 
-2. navigation plane
-   canonical node + typed graph relationships
-   -> next useful question, workflow, proof, integration, or offer node
+navigation plane
+  stable nodes + typed semantic edges
+  -> useful prospect/agent paths
 
-3. interaction plane
-   complete canonical page
-   -> explicit user task
-   -> secure controls + streamed employee work
-   -> typed artifact + approval/proof
+interaction plane
+  complete canonical page + explicit task
+  -> secure controls + streamed employee work
+  -> typed artifact + approval/proof
 ```
 
-A vector chunk represents a reusable situation, not a hidden individual profile. A node is a stable canonical URL. A node path is a useful semantic transition. A public AI Employee is an explicit-session task surface attached to a node, not a dynamically generated SEO URL.
+A vector chunk is a reusable situation, not a hidden person profile. A public employee surface is explicit-session work attached to a stable node, not a visitor-specific indexable URL.
 
-## Current compiled pipeline
+## Current compiler path
 
 ```text
-approved source and research
--> manifest feature atoms and page prototype sets
--> namespace/version-bound HRR symbols
--> CompiledHyperVectorSpace
--> vector-neighbor suggestions
--> evidence-bounded semantic modules
+site-manifest.yaml
+-> namespace/version-bound symbols
+-> all-prototype CompiledHyperVectorSpace
+-> untyped vector-neighbor suggestions
+-> evidence-bounded modules
 -> SiteSource with all prototypes
 -> PageIR with all prototypes
--> packed prototype offsets/IDs/vectors + primary-vector alias + CSR page IDs
--> neutral/UI HTML, schema, sitemap, instruction, scaffold, and agent-context emissions
+-> packed prototype offsets/IDs/vectors + primary alias + CSR page IDs
+-> static/UI/agent emissions
 ```
 
-All declared prototypes are retained. The current compatibility alias still chooses one canonicalized prototype as the primary page vector. Explicit primary-prototype declaration is a remaining schema clarification before field publication; multi-prototype retrieval must use the packed prototype arrays rather than the alias.
+### Primary alias limitation
 
-## Agent boundary
+All prototypes survive. The legacy `pageVectors` alias still uses one ordered prototype. The manifest does not yet declare `primary_prototype_id`; authoritative multi-region retrieval must use packed prototype arrays.
 
-Agents submit noindex `AgentPageProposal` objects with:
+### Proposal coverage limitation
 
-- target atoms and page geometry;
-- explicit sourced coverage contexts;
-- canonical question;
-- marginal-coverage hypothesis;
-- distinct information object;
-- evidence and claim bindings;
-- semantic modules;
-- graph/link rationale;
-- design capabilities;
-- generation provenance.
+Admission computes baseline and proposed weighted context coverage, improving contexts, and existing-page similarity. This closes the prose-only defect mechanically.
 
-Admission now computes:
+It is not yet a valid external relevance gate because:
 
-- baseline weighted context coverage by the current corpus;
-- proposed weighted context coverage;
-- normalized marginal gain;
-- count of improved context cases;
-- maximum similarity to an existing page;
-- CSI singleton information as a diagnostic only.
+- proposal agents can supply their own context cases;
+- `relevance_label` is not yet used;
+- the validated implementation maps cosine from `[-1,1]` to `[0,1]`, giving orthogonal vectors about `0.5` coverage;
+- thresholds are uncalibrated;
+- no independent graded train/validation/test collection exists.
 
-The proposal fails when computed marginal gain or improving-context count is below policy, or when an existing page is too similar. CSI is not used as the single-page gate; it is a batch-selection and validation-split comparison arm.
+Therefore no real content cohort should be generated from this gate alone.
+
+### CSI boundary
+
+CSI is a batch-selection and train/validation/test splitting arm for preserving coherent head/tail structure while suppressing isolated noise. It is not the single-page admission oracle and remains based on a new 2026 preprint.
 
 ## Public AI Employee relationship
 
-Canonical product and interaction authority lives in:
+Product/interaction authority:
 
 - `../../mvp-build/docs/gtm/free-infrastructure-managed-workforce-strategy.md`
 - `../../mvp-build/docs/public-interaction-standard.md`
 - `../../mvp-build/docs/ux/05-generative-ui-frontier.md`
 
-Pages such as “how to create an estimate with AI” or “how to use AI with QuickBooks” should eventually combine:
+A future “create an estimate with AI” or “use AI with QuickBooks” page should combine complete static content with a bounded task, secure controls, session streaming, typed artifact, approval/proof, fallback, and Start Free transition. That contract is not yet in the website IR.
 
-- complete static search-safe content;
-- a bounded public task;
-- secure deterministic controls for secrets or risky data;
-- session-level streaming states;
-- a typed artifact;
-- approval and proof where needed;
-- a natural Start Free transition.
+## Exact source proof
 
-That task-surface contract is not implemented in this package yet.
+Validated code head: `9ef48b97308e09d5a97f4978820255e3c8b53c7e`
 
-## Validation proof
-
-Exact validated head before this documentation sync: `9ef48b97308e09d5a97f4978820255e3c8b53c7e`.
-
-GitHub Actions run `29576487817` passed:
-
-- clean install and strict TypeScript build;
-- `22/22` Node tests;
-- unified manifest emission;
-- deterministic UI emission;
-- browser target resolution;
-- pinned React/R3F/Three.js build;
-- diagnostic and emission artifact upload.
-
-Current emitted manifest facts:
+Workflow run: `29576487817`
 
 ```text
+strict TypeScript build: pass
+Node tests: 22/22
+manifest emission: pass
+UI emission: pass
+browser resolution: pass
+R3F build: pass
 pages: 6
 indexable pages: 0
-prototypes: 7
-vector namespace: amtech-hyper-site-v1
+packed prototypes: 7
+namespace: amtech-hyper-site-v1
 symbol version: 1
 build hash: ae16957209827c1fbbc295992ab0aceeaf648b250521b03695b4f663cf6d241a
-vector-space hash: 934ac02b434b0d583c131a15bbff79492ea8e27ca13a5ea2d07367b4fa8b6978
+space hash: 934ac02b434b0d583c131a15bbff79492ea8e27ca13a5ea2d07367b4fa8b6978
 ```
 
-The proof covers source behavior, not browser visual/accessibility or field search outcomes.
+This does not include browser/accessibility, Zig/Wasm, Cloudflare, search, or commercial proof.
 
 ## Commands
 
@@ -183,47 +153,39 @@ npm run benchmark:scale
 
 ## Read order
 
-1. root and scoped `identity.md`, `AGENTS.md`, and `CODEGRAPH.md`;
+1. root/scoped `identity.md`, `AGENTS.md`, and `CODEGRAPH.md`;
 2. this README;
 3. `memory/MEMORY.md`;
-4. `18-vector-node-path-web-framework-model.md`;
-5. `19-vector-native-corrections-and-csi-validation.md`;
-6. newest report under `validation/reports/`;
-7. `16-unified-hypervector-manifest-agent-harness.md`;
-8. `site-manifest.yaml`;
-9. `17-agentic-ui-metaprogramming-standard.md`;
+4. newest immutable memory handoff;
+5. `18-vector-node-path-web-framework-model.md`;
+6. `19-vector-native-corrections-and-csi-validation.md`;
+7. `validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md`;
+8. newest correction/UI report;
+9. `site-manifest.yaml`;
 10. `reference/README.md` and UI handoff;
-11. historical numbered specifications for their domains.
+11. older numbered specifications for their domain.
 
-## External research floor
+## Research floor
 
-Context-document compatibility baseline:
+- Context relevance: https://arxiv.org/abs/2309.05113
+- HDC/VSA applications: https://arxiv.org/abs/2112.15424
+- Complement-aware batch selection: https://arxiv.org/abs/2605.24779
 
-https://arxiv.org/abs/2309.05113
+These justify evaluation designs and research arms, not SEO or commercial claims.
 
-HDC/VSA applications survey:
-
-https://arxiv.org/abs/2112.15424
-
-Complement-aware batch selection preprint:
-
-https://arxiv.org/abs/2605.24779
-
-The first paper supports separately evaluating query-document and explicit context-document relevance with graded labels. The HDC/VSA literature supports compositional distributed representations. CSI supports a research arm for balanced batch selection across latent head/tail structure while suppressing isolated outliers. None validates SEO lift, automatic corpus quality, UI quality, or revenue.
-
-## Immediate next path
+## Immediate path
 
 ```text
-passing vector-native source/compiler gate
--> formalize explicit primary-prototype schema and typed graph-edge semantics
--> build independently judged train/validation/test context collections
--> compare lexical, learned semantic, facets, graph, HRR, hybrid, facility-location, and CSI arms
--> define the public task-surface boundary against existing product standards
--> browser/accessibility/metadata/JS-disabled validation
--> generate the first noindex hyper-aware proposals
--> review 20–40 field candidates
--> publish matched cohorts through explicit gate
--> measure indexing, compatible discovery, qualified pipeline, gross profit, and lifecycle return
+P0 primary-prototype semantics
+-> P0 calibrated compatibility + independent graded context corpus
+-> P0 typed graph edges/node paths
+-> lexical + learned semantic + facets + graph + HRR + hybrid evaluation
+-> facility-location + CSI split/batch comparison
+-> public employee task-surface contract
+-> resolver/Wasm/distribution hardening
+-> browser/accessibility validation
+-> first 20–40 noindex proposals
+-> separate matched field publication
 ```
 
-Green source CI is necessary but insufficient for proposal publication.
+Green source CI is necessary but insufficient for proposal generation or publication.
