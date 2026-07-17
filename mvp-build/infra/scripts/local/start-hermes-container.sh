@@ -21,6 +21,8 @@ container="amtech-hermes-${employee_id}"
 network="amtech-employee-${employee_id}"
 port="${API_SERVER_PORT:?API_SERVER_PORT missing from profile .env}"
 workspace="${WORKSPACE_DIR:?WORKSPACE_DIR missing from profile .env}"
+model_gateway_url="${MODEL_GATEWAY_URL:?MODEL_GATEWAY_URL missing from profile .env}"
+model_gateway_health_url="${model_gateway_url%%/v1*}/health"
 
 case "$image" in
   hermes-agent:*|ghcr.io/nousresearch/hermes-agent:*) ;;
@@ -29,6 +31,10 @@ esac
 
 [[ "$employee_id" =~ ^emp_[A-Za-z0-9_-]+$ ]] || { echo "invalid employee id" >&2; exit 1; }
 [[ "$port" =~ ^[0-9]{4,5}$ ]] || { echo "invalid gateway port" >&2; exit 1; }
+[[ "$model_gateway_health_url" == "http://host.docker.internal:"*"/health" ]] || {
+  echo "employee model gateway must use the host-private host-gateway route" >&2
+  exit 1
+}
 
 docker image inspect "$image" >/dev/null
 docker rm -f "$container" >/dev/null 2>&1 || true
@@ -85,4 +91,24 @@ docker run -d \
   -p "127.0.0.1:${port}:${port}" \
   "$image" gateway run --no-supervise --replace -q
 
-echo "container:$container network:$network loopback_port:$port"
+# Runtime acceptance is fail-closed: the actual employee container must reach the
+# host-private gateway over its explicit host-gateway mapping before provisioning
+# can advance to runtime health or public routing.
+model_gateway_reachable=0
+for _ in $(seq 1 "${MODEL_GATEWAY_REACHABILITY_ATTEMPTS:-30}"); do
+  if docker exec "$container" python3 -c \
+    'import os, urllib.request; u=os.environ["MODEL_GATEWAY_URL"].split("/v1",1)[0]+"/health"; r=urllib.request.urlopen(u, timeout=3); print(r.status); raise SystemExit(0 if r.status < 500 else 1)' \
+    >/dev/null 2>&1; then
+    model_gateway_reachable=1
+    break
+  fi
+  sleep 1
+done
+
+if [[ "$model_gateway_reachable" != "1" ]]; then
+  echo "employee runtime cannot reach host-private model gateway: $model_gateway_health_url" >&2
+  docker logs --tail 100 "$container" >&2 || true
+  exit 1
+fi
+
+echo "container:$container network:$network loopback_port:$port model_gateway_reachable:$model_gateway_health_url"
