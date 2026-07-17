@@ -34,9 +34,13 @@ jobs:
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
       - name: Shared contracts
-        run: npm run typecheck --workspace @amtech/shared
+        run: |
+          npm run typecheck --workspace @amtech/shared
+          npm run build --workspace @amtech/shared
       - name: Database contracts
-        run: npm run typecheck --workspace @amtech/db
+        run: |
+          npm run typecheck --workspace @amtech/db
+          npm run build --workspace @amtech/db
       - name: Manager and Hono contracts
         shell: bash
         run: |
