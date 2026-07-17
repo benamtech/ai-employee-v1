@@ -1,39 +1,34 @@
 # Hyperperformant Holographic Website Framework
 
-Status: Phase 1 research/specification complete; Phase 2 local reference implementation pending
+Status: Phase 1 specification complete; Phase 2 reference implementation started
 Created: 2026-07-17
 Implementation root: `GTM-RESEARCH/website-framework/`
 
 ## Software category
 
-This is an **adaptive experience compiler and edge decisioning runtime**, commercially describable as an **Experience Materialization Platform**.
+This is a **hyper-targeted search-distribution compiler and vector information server**, with an adaptive experience compiler and edge decisioning runtime around it.
 
-It compiles a company’s approved knowledge, offers, proof, design grammar, routes, and experiment policy into:
+Its primary commercial emission is a corpus of `200–2,000+` stable canonical pages that fit valuable search/query/context regions unusually well and can be compiled, validated, distributed, invalidated, and re-emitted at negligible marginal cost.
 
-- a complete canonical website;
+It compiles approved company knowledge, offers, proof, information objects, page-shape geometry, routes, design grammar, and experiment policy into:
+
+- complete canonical websites;
+- optimized hyper-targeted page corpora;
 - finite context-resolved landing experiences;
-- structured data and agent-readable resources;
-- channel-specific campaign artifacts;
-- explainable A/Z experiments;
-- safe agentic and generative UI surfaces.
+- structured data and compact instruction-pointer projections;
+- channel artifacts and explainable experiments.
 
-It is not a covert customer-profile system, fingerprinting product, arbitrary AI page generator, doorway-page factory, or replacement for human brand judgment.
+It is not a covert profile system, fingerprinting product, arbitrary AI page generator, doorway-page factory, cloaking system, or substitute for human evidence and brand judgment.
 
-## Mission
+## Governing priority
 
-Build a hyperperformant, hyper-specialized, agentic-search-ready public website whose static knowledge graph is indexable and whose presentation can be resolved into the most relevant bounded content slice for the current request/session context.
+```text
+1. maximize valuable compatibility-space coverage and page distinctness;
+2. maximize deterministic compilation, validation, emission, and global delivery performance;
+3. add bounded runtime variant selection only where it increases measured value.
+```
 
-The matching input is an ephemeral, non-identifying **context hypervector** assembled from allowlisted request, route, campaign, language, coarse region, device class, explicit choices, and consented in-session interaction features.
-
-The framework applies Holographic Reduced Representations / Vector Symbolic Architectures to:
-
-- encode compositional intent and content structures in fixed-width vectors;
-- retrieve resonant content and component candidates;
-- augment similarity with a precomputed topic/entity graph and bounded priors;
-- materialize finite policy-safe variants without sacrificing the canonical SEO shell;
-- compare a stable baseline against continuous finite resolution through an A/Z suite.
-
-The mathematics is classical HRR/VSA, not quantum computing. The framework remains experimental until scientific, relevance, compiler, latency, privacy, security, accessibility, SEO, autonomy, operator-effort, and conversion gates pass.
+HTML is a reproducible delivery emission. Canonical source truth is the typed information model, compatibility geometry, evidence graph, dependency graph, and page plan.
 
 ## Read order
 
@@ -42,189 +37,155 @@ The mathematics is classical HRR/VSA, not quantum computing. The framework remai
 3. `../../CODEGRAPH.md`
 4. `CODEGRAPH.md`
 5. `AGENTS.md`
-6. `../../mvp-build/CODEGRAPH.md`
-7. `../../mvp-build/memory/MEMORY.md`
-8. `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`
-9. `../../docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`
-10. `../../docs/amtech-website-rewrite-brief.md`
-11. `00-scientific-and-feasibility-validation.md`
-12. `01-system-architecture.md`
-13. `02-shape-model-and-hrr-core.md`
-14. `03-agentic-seo-system.md`
-15. `04-feature-validation-vectors.md`
-16. `05-pass-fail-vectors.md`
-17. `06-experimentation-privacy-operations.md`
-18. `07-v0.1-request-mirror-lab.md`
-19. `08-implementation-plan.md`
-20. `09-phase-1-synthesis-competitive-and-systems-positioning.md`
-21. `10-software-category-and-commercial-use-cases.md`
-22. `11-hyper-distributed-content-generative-ui-and-design-collaboration.md`
-23. `12-compiler-design-and-autonomy-validation-addendum.md`
-24. `13-academic-and-normative-basis-for-validation-vectors.md`
-25. `14-phase-2-experience-materialization-engine-plan.md`
-26. `site-manifest.yaml`
-27. `HANDOFF-LANDING-PAGES.md`
+6. numbered specifications `00` through `15`
+7. `15-hyper-targeted-search-distribution-workstreams.md`
+8. `reference/README.md`
+9. `site-manifest.yaml`
+10. `HANDOFF-LANDING-PAGES.md`
+11. `../../docs/amtech-website-rewrite-brief.md`
+12. `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`
+13. `../../docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`
 
-## Canonical stack hypothesis
+`15` is the current execution authority. `14` remains the broader Phase 2 boundary and supporting workstream inventory.
 
-- **Application:** Next.js 16+ App Router with Cache Components / Partial Prerendering.
-- **Orchestration/compiler:** strict TypeScript with owned typed intermediate representations.
-- **Math core:** TypeScript reference first; Zig compiled to pre-imported WebAssembly only after correctness and runtime performance gates pass.
-- **Content:** typed source objects and MDX/components. Prefer an owned Zod-based compiler or a validated package; do not assume Contentlayer compatibility.
-- **Edge resolver:** dedicated Cloudflare Worker or equivalent in front of the origin.
-- **State/cache:** immutable build artifacts; Redis/Postgres/pgvector only where measured operational value justifies network cost.
-- **Deployment:** Vercel and/or Cloudflare selected through real build and runtime validation.
+## Mathematical thesis
 
-## Fundamental architecture
+A search context and a page expose partially compatible connector structures. Approved role/value features are encoded through classical Holographic Reduced Representations / Vector Symbolic Architectures:
+
+```text
+context = normalize(sum(weight * bind(role, value)))
+page_fit = max approved prototype cosine + facets + graph + lexical/semantic fit
+```
+
+The contextual-ranking result in arXiv `2309.05113` is a baseline, not the destination. The framework must go beyond ranking an existing corpus by constructing the corpus itself.
+
+The selected page set is a constrained coverage problem:
+
+```text
+F_cover(S) = sum_i demand_weight_i * phi(max_{page in S} compatibility(i,page))
+```
+
+Weighted facility location is the exact first control. Log-determinant/DPP diversity, complement-aware rare-tail selection, clustering, and optimal transport remain measured research arms.
+
+Every published page must have positive marginal coverage, distinct visible information gain, evidence, a stable canonical question, graph utility, and lifecycle value.
+
+## Architecture
 
 ```text
 COMPANY SOURCE
-knowledge + offer + evidence + entities + design grammar + route policy
--> typed content/design IR
--> canonical compiler + finite variant compiler
--> pages + structured data + vectors + graph priors + channel artifacts
-
-REQUEST
-allowlisted ephemeral context
--> coverage/candidate retrieval
--> exact HRR/facet score
--> graph/business prior
--> eligibility/evidence/privacy gate
--> finite variant ID or baseline
-
-EXPERIMENT
-A = complete canonical baseline
-Z = algorithmically selected finite experience
--> relevance + effort + conversion + performance + accessibility + privacy + SEO
--> offline reviewed update
+knowledge + offers + claims + evidence + information objects + design grammar
+        |
+        v
+TYPED INFORMATION / EXPERIENCE IR
+context prototypes + page shapes + modules + routes + graph + dependencies
+        |
+        +----------------------+----------------------+
+        v                      v                      v
+CORPUS OPTIMIZER          VECTOR COMPILER       EMISSION COMPILER
+coverage + distinctness   HRR + facets + CSR    HTML + schema + pointers
+        |                      |                      |
+        +----------------------+----------------------+
+                               v
+COMPILED INFORMATION SERVER
+packed vectors + indexes + page plans + fragments + hashes
+                               |
+                 +-------------+-------------+
+                 v                           v
+STATIC CANONICAL ASSETS             FINITE EDGE RESOLVER
+complete server HTML                bounded variant ID or baseline
+                 |                           |
+                 +-------------+-------------+
+                               v
+SEARCH / HUMAN / AGENT OBSERVATION
+indexing + query fit + qualified leads + revenue + experiment evidence
 ```
 
-## Key performance and complexity insight
+## Canonical stack hypothesis
 
-Do not perform circular convolution for every feature on every request.
+- **Reference/compiler:** strict TypeScript with owned IR and deterministic tests.
+- **Performance kernel:** Zig `0.15.2` native and `wasm32-freestanding`; SIMD only after parity and end-to-end gain.
+- **Representation:** packed structure-of-arrays vectors/facets, CSR graph, page plans, fragments, dependency indexes, hashes.
+- **Emission:** complete canonical static HTML plus benchmarked fragments/compact IR where total cost improves.
+- **Distribution:** Cloudflare Workers Static Assets with static bypass preferred; Worker resolver optional and baseline-safe.
+- **Application renderer:** neutral semantic renderer first; AMTECH renderer later through mappings and tokens.
+- **Experiments:** vendor-neutral boundary; external analytics/control planes cannot become page-availability dependencies.
 
-At build time, precompute each allowed `role ⊗ value` vector. At request time, construct the context hypervector through weighted superposition, normalize it, retrieve a bounded candidate set, and run exact similarity.
+## Compiler invariants
 
-Candidate clustering is a coverage/replication problem. Smaller candidate groups can increase feature/candidate replication and artifact communication; larger groups increase exact-scoring work. Flat exact scan is the required baseline, and every eligible output must remain covered.
+- deterministic builds, IDs, ordering, checksums, and tie policy;
+- source/evidence/design contradictions fail before output;
+- generated output is never authoritative source;
+- one source change invalidates only its dependency closure;
+- no unbounded runtime copy, route, symbol, component, or cache-key creation;
+- exact controls remain available beside optimized paths;
+- every page explains why it exists and what it uniquely covers.
 
-## Content and design model
+## Search-distribution invariants
 
-The website is a typed program:
+1. Every indexable URL has stable, useful, server-readable canonical content.
+2. Crawlers and humans receive the same primary topic, claims, price, evidence, limitations, and links.
+3. Finite presentation variants are not separate canonical intents by default.
+4. No page exists solely because a Cartesian-product row can be generated.
+5. Every page contains a distinct information object or synthesis visible in the body.
+6. The system measures real query/page fit, qualified discovery, cannibalization, lifecycle cost, and revenue per page.
+7. Scale advances through `20–40`, `200`, `500`, `1,000`, then `2,000+` only when the previous cohort passes.
 
-```text
-source objects
--> experience AST/IR
--> canonical pages
--> landing-page families
--> visual/interaction variants
--> channel outputs
--> validation and checksums
-```
+## Privacy and truth invariants
 
-The graphic designer defines the expressive visual grammar. The compiler makes tokens, component states, responsive constraints, accessibility, evidence, performance, variant eligibility, and regression fixtures executable.
-
-Generative UI is bounded:
-
-- static authored UI for canonical and critical paths;
-- finite materialized UI for default adaptation;
-- schema-constrained generated UI only after task-specific validation;
-- no arbitrary promotional DOM/copy generation at the edge.
-
-## SEO invariants
-
-1. Every indexable URL has stable, useful, server-rendered canonical content.
-2. Crawlers and humans receive the same primary topic, claims, price, evidence, and limitations.
-3. Ephemeral variants are not separately indexable URLs.
-4. Long-tail pages exist only for distinct questions with original information.
-5. Structured data describes visible content and never upgrades evidence.
-6. No thin permutations, scaled-content abuse, cloaking, fake reviews/FAQ, or AI-answer manipulation.
-
-## Privacy invariants
-
-- no browser fingerprinting;
-- no persistent identity inferred from device characteristics;
-- no raw IP storage in resolver/analytics paths;
-- coarse geography only where operationally necessary;
-- no sensitive, financial, family, pet, vehicle, or lifestyle inference;
-- no cross-session shape ID without explicit consent;
-- short-lived allowlisted context only;
-- complete baseline when personalization is disabled.
-
-Synthetic persona matrices test representation and retrieval. They are not runtime inference targets.
-
-Consented owner research may import user-controlled account exports only through the isolated, reviewable, deletable adapters defined in `14-phase-2-experience-materialization-engine-plan.md`. It does not authorize covert cross-site identity resolution, fingerprinting, OSINT enrichment of arbitrary visitors, or runtime ingestion of raw search/place/history data.
+- no browser fingerprinting, named-person dossiers, identity stitching, or sensitive-trait inference;
+- no raw IP or private Google/Bing/Reddit history in vectors or persistent analytics;
+- synthetic dimensions remain benchmark labels, not runtime inference targets;
+- claims cannot exceed evidence;
+- canonical pages remain complete without resolver, JavaScript, consent, databases, vectors, or experiments.
 
 ## Performance targets
 
-Resolver:
+Compiler and corpus:
 
-- edge compute p95 <= 10 ms after initialization;
-- total resolver overhead p95 <= 80 ms;
-- zero remote database call on the default hot path;
-- deterministic baseline fallback on timeout/error;
-- Zig/WASM ships only with material end-to-end benefit.
+- byte-identical clean builds;
+- dependency-bounded incremental builds;
+- approximately linear or better scaling through `2,000` page plans;
+- no requirement to retain expanded DOM trees for the whole corpus;
+- packed/binary representations retained only when total build+storage+runtime cost improves.
+
+Resolver and delivery:
+
+- cached canonical requests invoke no model, database, dynamic renderer, or scorer;
+- static assets remain available when the Worker is disabled;
+- default dynamic path performs zero remote data calls;
+- edge compute p95 target `<=10 ms` after initialization;
+- total resolver overhead p95 target `<=80 ms`;
+- Zig/Wasm ships only with material end-to-end benefit.
 
 Website:
 
-- cached lab LCP <= 1.0 s on defined test profiles;
-- field p75 LCP <= 1.8 s target and <= 2.5 s hard gate;
-- field p75 INP <= 100 ms target and <= 200 ms hard gate;
-- CLS <= 0.05 target and <= 0.1 hard gate;
-- no contradictory-content flash;
-- no third-party script on the critical rendering path.
+- field p75 LCP target `<=1.8 s`, hard gate `<=2.5 s`;
+- field p75 INP target `<=100 ms`, hard gate `<=200 ms`;
+- CLS target `<=0.05`, hard gate `<=0.1`;
+- no contradictory flash or third-party critical-render dependency.
 
-## AMTECH product mission
+## Current implementation state
 
-> **Your business gets an employee that lives in the software.**
+Complete:
 
-```text
-owner asks or a business event arrives
--> AI Employee works
--> proof appears
--> owner approves when required
--> action happens
--> proof and memory remain
-```
+- Phase 1 scientific, architecture, privacy, SEO, compiler, design, and experiment specifications;
+- deterministic 100-slice generator and validation record;
+- current two-workstream execution plan in `15`;
+- TypeScript reference package in `reference/`;
+- deterministic HRR symbols, FFT binding/unbinding, superposition, cosine, and multi-prototype scoring;
+- exact weighted facility-location greedy control;
+- deterministic neutral HTML emission and dependency-bounded invalidation;
+- four passing local reference tests and validation report.
 
-Primary CTA: **Build my AI Employee**
+Not complete:
 
-Offer: **Start free. Managed AI Employee from $400.**
-
-The default experience requires no API keys, CLI, local runtime, or agent marketplace. Technical architecture, model, runtime, and orchestration depth remains available for power users without becoming mandatory.
-
-The public estimator remains outdated and non-canonical.
-
-## Phase state
-
-Phase 1 completed:
-
-- scientific and feasibility review;
-- architecture and feature ontology;
-- privacy/SEO/security boundaries;
-- academically and normatively grounded validation/pass-fail gates;
-- v0.1 Request Mirror definition;
-- A/Z causal and operational model;
-- Orkas competitive positioning and commitment-elasticity thesis;
-- coverage/replication complexity model;
-- deterministic synthetic 100-slice generator plus local execution/hash/constraint report;
-- software category, multi-channel content, design, agentic/generative UI, and landing-page operating model.
-
-Phase 2 first-pass authority:
-
-- `14-phase-2-experience-materialization-engine-plan.md` makes the deterministic compiler/resolver and real landing-page materialization engine the first integrated priority;
-- it defines exactly five two-part workstreams with explicit validation, pass, and fail vectors;
-- it keeps flat exact scan, the canonical baseline, and consented context provenance as mandatory controls;
-- it treats Zig/WASM and third-party experimentation platforms as optional measured optimizations.
-
-Not completed:
-
-- TypeScript HRR/compiler implementation;
-- Worker/Next/Zig code;
-- Cloudflare deployment;
-- real landing-page compilation;
-- browser/accessibility/load/SEO tests;
-- conversion, autonomy, provider, or runtime acceptance.
+- 500-case reviewed search-context benchmark;
+- lexical/semantic/facet/graph/HRR comparison suite, calibration, NDCG, and zero-match validation;
+- lazy greedy, exhaustive optimum controls, logdet/DPP, complement-aware, clustering, and OT arms;
+- packed IR, CSR graph, streaming compiler, and `200–2,000` page benchmarks;
+- Zig native, scalar Wasm, SIMD, Cloudflare deployment, browser/load/accessibility tests;
+- real matched search-result field cohort, qualified pipeline, conversion, or revenue evidence.
 
 ## Production decision rule
 
-No component graduates because it sounds mathematically elegant or visually advanced. It must pass the explicit validation vectors on the actual target runtime with an auditable baseline, reversible artifact, and safe fallback.
+The framework advances because it produces more appropriate real search-result coverage and commercial value per lifecycle dollar—not because it contains HRR, Zig, Wasm, clustering, optimal transport, or thousands of files.
