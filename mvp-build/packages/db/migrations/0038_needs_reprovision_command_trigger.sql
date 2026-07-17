@@ -53,4 +53,40 @@ for each row execute function enqueue_employee_reprovision_command();
 revoke all on function enqueue_employee_reprovision_command() from public, anon, authenticated;
 grant execute on function enqueue_employee_reprovision_command() to service_role;
 
+-- A provider can redeliver the same verified event because its acknowledgement was
+-- lost or delayed. Preserve one inbox row while recording atomic redelivery evidence
+-- so production acceptance can prove deduplication rather than infer it.
+alter table ambient_event_inbox
+  add column if not exists duplicate_count integer not null default 0,
+  add column if not exists last_duplicate_at timestamptz;
+
+create or replace function record_ambient_event_duplicate(
+  p_source_type text,
+  p_provider text,
+  p_external_event_id text,
+  p_dedupe_key text
+)
+returns table(inbox_id text, duplicate_count integer, last_duplicate_at timestamptz)
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  return query
+  update ambient_event_inbox as inbox
+     set duplicate_count = inbox.duplicate_count + 1,
+         last_duplicate_at = now()
+   where inbox.dedupe_key = p_dedupe_key
+      or (
+        inbox.source_type = p_source_type
+        and inbox.provider = p_provider
+        and inbox.external_event_id = p_external_event_id
+      )
+   returning inbox.inbox_id, inbox.duplicate_count, inbox.last_duplicate_at;
+end;
+$$;
+
+revoke all on function record_ambient_event_duplicate(text, text, text, text) from public, anon, authenticated;
+grant execute on function record_ambient_event_duplicate(text, text, text, text) to service_role;
+
 commit;
