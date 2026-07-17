@@ -2,17 +2,23 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { appendFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
+import type { ProvisionerOperation, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import {
   failureResult,
   renderProfilePackage,
   runRuntimeStart,
   writeAndActivateCaddySnippet,
 } from "./lib/profile-renderer.js";
+import { runCommandString } from "./lib/command-runner.js";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const MAX_TTL_MS = 60_000;
-const ALLOWED_OPERATIONS = new Set(["ensure_runtime", "remove_runtime", "inspect_runtime"]);
+const ALLOWED_OPERATIONS = new Set<ProvisionerOperation>(["ensure_runtime", "remove_runtime", "inspect_runtime"]);
+
+type HostProvisionerRequest = ProvisionerRequest & Required<Pick<
+  ProvisionerRequest,
+  "request_id" | "operation" | "issued_at" | "expires_at" | "nonce" | "idempotency_key"
+>>;
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -32,8 +38,10 @@ function stateRoot(): string {
   return process.env.PROVISIONER_STATE_DIR ?? "/var/lib/amtech/provisioner";
 }
 
-function safeId(value: string): string {
-  if (!/^[A-Za-z0-9:_-]{8,200}$/.test(value)) throw new Error("invalid identifier");
+function safeId(value: unknown): string {
+  if (typeof value !== "string" || !/^[A-Za-z0-9:_-]{8,200}$/.test(value)) {
+    throw new Error("invalid_identifier");
+  }
   return value;
 }
 
@@ -58,15 +66,16 @@ function verifySignature(raw: Buffer, signature: string | undefined): void {
   if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("signature_invalid");
 }
 
-function validateRequest(input: unknown): ProvisionerRequest {
+function validateRequest(input: unknown): HostProvisionerRequest {
   const req = input as ProvisionerRequest;
-  if (!req || typeof req !== "object") throw new Error("request_invalid");
-  if (!ALLOWED_OPERATIONS.has(req.operation)) throw new Error("operation_not_allowed");
-  safeId(req.request_id);
-  safeId(req.nonce);
-  safeId(req.idempotency_key);
+  if (!req || typeof req !== "object" || !req.params) throw new Error("request_invalid");
+  if (!req.operation || !ALLOWED_OPERATIONS.has(req.operation)) throw new Error("operation_not_allowed");
+  const request_id = safeId(req.request_id);
+  const nonce = safeId(req.nonce);
+  const idempotency_key = safeId(req.idempotency_key);
   safeId(req.account_id);
   safeId(req.employee_id);
+  if (typeof req.issued_at !== "string" || typeof req.expires_at !== "string") throw new Error("request_time_invalid");
   const issued = Date.parse(req.issued_at);
   const expires = Date.parse(req.expires_at);
   const now = Date.now();
@@ -74,7 +83,7 @@ function validateRequest(input: unknown): ProvisionerRequest {
   if (issued > now + 5_000 || expires <= now || expires - issued > MAX_TTL_MS) throw new Error("request_expired");
   if (req.params.account_id !== req.account_id || req.params.employee_id !== req.employee_id) throw new Error("binding_mismatch");
   if (req.params.runtime_backend !== "docker") throw new Error("runtime_backend_not_allowed");
-  return req;
+  return { ...req, request_id, nonce, idempotency_key } as HostProvisionerRequest;
 }
 
 async function claimOnce(kind: "nonce" | "idempotency", key: string): Promise<boolean> {
@@ -110,7 +119,7 @@ async function audit(entry: Record<string, unknown>): Promise<void> {
   await appendFile(path, JSON.stringify({ at: new Date().toISOString(), ...entry }) + "\n", { mode: 0o600 });
 }
 
-async function execute(req: ProvisionerRequest): Promise<ProvisionerResult> {
+async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> {
   if (req.operation === "inspect_runtime") {
     return {
       status: "ok",
@@ -124,7 +133,6 @@ async function execute(req: ProvisionerRequest): Promise<ProvisionerResult> {
   if (req.operation === "remove_runtime") {
     const container = `amtech-hermes-${req.employee_id}`;
     const network = `amtech-employee-${req.employee_id}`;
-    const { runCommandString } = await import("./lib/command-runner.js");
     await runCommandString(`docker rm -f ${container} >/dev/null 2>&1 || true`, process.cwd(), "remove runtime");
     await runCommandString(`docker network rm ${network} >/dev/null 2>&1 || true`, process.cwd(), "remove runtime network");
     return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, network_name: network };
@@ -163,7 +171,7 @@ function send(res: ServerResponse, status: number, body: unknown): void {
 async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
   if (req.method === "GET" && req.url === "/health") return send(res, 200, { status: "ok" });
   if (req.method !== "POST" || req.url !== "/v1/runtime") return send(res, 404, { error: "not_found" });
-  let parsed: ProvisionerRequest | null = null;
+  let parsed: HostProvisionerRequest | null = null;
   try {
     const raw = await readBody(req);
     verifySignature(raw, req.headers["x-amtech-signature"] as string | undefined);
