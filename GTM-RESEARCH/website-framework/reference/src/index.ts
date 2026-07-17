@@ -6,3 +6,6 @@ export * from "./distribution.js";
 export * from "./generator.js";
 export * from "./wasm.js";
 export * from "./resolver.js";
+export * from "./manifest.js";
+export * from "./agent-harness.js";
+export * from "./ui-scaffold.js";
