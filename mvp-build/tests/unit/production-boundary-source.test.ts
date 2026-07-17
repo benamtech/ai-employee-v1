@@ -10,6 +10,8 @@ describe("production image inclusion", () => {
     const dockerfile = await source("infra/deploy/manager.Dockerfile");
     for (const artifact of [
       "apps/manager/dist/model-gateway-server.js",
+      "apps/manager/dist/lib/model-gateway-http.js",
+      "apps/manager/dist/lib/provisioner-idempotency.js",
       "apps/manager/dist/lib/provisioning-reconciler.js",
       "apps/manager/dist/lib/ambient-inbox.js",
       "apps/manager/dist/typeproofs/production-boundary.js",
@@ -44,6 +46,7 @@ describe("employee model-gateway network boundary", () => {
 describe("rotation sequencing", () => {
   it("recreates the runtime from the rotated profile before old-token revocation", async () => {
     const renderer = await source("apps/manager/src/lib/profile-renderer.ts");
+    const host = await source("apps/manager/src/provisioner-host.ts");
     const reconciler = await source("apps/manager/src/lib/provisioning-reconciler.ts");
     const rewrite = renderer.indexOf("writeFile(configPath, nextConfig");
     const checksum = renderer.indexOf("assertProfileTreeIntegrity(generated_path)", rewrite);
@@ -51,6 +54,8 @@ describe("rotation sequencing", () => {
     expect(rewrite).toBeGreaterThan(-1);
     expect(checksum).toBeGreaterThan(rewrite);
     expect(reload).toBeGreaterThan(checksum);
+    expect(host).toContain("rotated.runtime_reload_output");
+    expect(host).not.toContain("restart runtime after credential rotation");
 
     const verifyNew = reconciler.indexOf("new_model_gateway_credential_not_live");
     const revokeOld = reconciler.indexOf("revokeModelGatewayCredential(db, oldCredentialId)", verifyNew);
@@ -72,6 +77,8 @@ describe("durable worker contracts", () => {
     expect(leases).toContain("ambient_event_dead_letters");
     expect(receipts).toContain("ambient_effect_receipts");
     expect(receipts).toContain("completed_at is null");
+    expect(leases).not.toContain("security definer");
+    expect(receipts).not.toContain("security definer");
   });
 
   it("grants the backend role explicitly while preserving browser-role revocations", async () => {
@@ -79,6 +86,15 @@ describe("durable worker contracts", () => {
     expect(grants).toContain("to service_role");
     expect(grants).toContain("from anon, authenticated");
     expect(grants).toContain("grant execute on function claim_next_provisioning_job");
+  });
+
+  it("records verified duplicate provider deliveries atomically", async () => {
+    const migration = await source("packages/db/migrations/0038_needs_reprovision_command_trigger.sql");
+    const inbox = await source("apps/manager/src/lib/ambient-inbox.ts");
+    expect(migration).toContain("duplicate_count");
+    expect(migration).toContain("record_ambient_event_duplicate");
+    expect(migration).toContain("security invoker");
+    expect(inbox).toContain('db.rpc("record_ambient_event_duplicate"');
   });
 
   it("gates ready on a processed owner-facing welcome effect", async () => {
@@ -110,5 +126,14 @@ describe("durable worker contracts", () => {
     expect(binding).toBeGreaterThan(route);
     expect(welcome).toBeGreaterThan(binding);
     expect(ready).toBeGreaterThan(welcome);
+  });
+
+  it("routes operator lifecycle mutations through provisioning commands", async () => {
+    const lifecycle = await source("infra/scripts/employee-lifecycle.mjs");
+    expect(lifecycle).toContain("/manager/provisioning/commands");
+    expect(lifecycle).toContain('restart: "restore"');
+    expect(lifecycle).toContain('stop: "suspend"');
+    expect(lifecycle).not.toContain('docker(["restart"');
+    expect(lifecycle).not.toContain('docker(["stop"');
   });
 });
