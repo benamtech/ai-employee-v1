@@ -1,5 +1,6 @@
-# Per-profile env (template). Rendered per client. Secrets are injected BY REFERENCE
-# at provision time, never committed. SMS signature must never be disabled in prod.
+# Per-profile env (template). Rendered per client. Production profiles contain
+# only employee-scoped gateway credentials and Manager-scoped credentials, never
+# provider master keys. SMS signature must never be disabled in prod.
 
 CLIENT_ID={{CLIENT_ID}}
 ACCOUNT_ID={{ACCOUNT_ID}}
@@ -16,28 +17,22 @@ SMS_INSECURE_NO_SIGNATURE=false
 
 # Hermes API server. The api_server platform reads config.yaml (e.g.
 # platform_toolsets.api_server, mcp_servers) — these keys are NOT ignored; env
-# and config.yaml both apply. Secrets stay in env; capability wiring is in config.
-# Bind 0.0.0.0 (all container interfaces) so the Manager can reach the runtime
-# through Docker's port publish, which forwards to the container's eth0 — a
-# 127.0.0.1 bind is only reachable from the container's own loopback and yields
-# runtime_unreachable. Host exposure is already limited: the port is published on
-# 127.0.0.1 only and every request requires the API_SERVER_KEY bearer.
+# and config.yaml both apply. Capability wiring is in config.
 API_SERVER_ENABLED=true
 API_SERVER_KEY={{API_SERVER_KEY}}
 API_SERVER_PORT={{GATEWAY_PORT}}
 API_SERVER_HOST=0.0.0.0
 
-# Model + connector provider secrets are provided as secret references by the Manager.
-# Manager tool access is rendered into config.yaml as a scoped per-employee MCP
-# credential, never the global Manager internal bearer.
-#
-# Local no-key model bridge (you-are-the-LLM): when HERMES_MODEL_PROVIDER is set the
-# renderer fills these with a dummy key + the bridge base_url so the custom provider
-# reaches the parked-request bridge; both are empty in production (real key is a
-# Manager-injected secret ref, and the shipped model is claude-opus-4-8 on Anthropic).
-OPENAI_API_KEY={{MODEL_BRIDGE_API_KEY}}
-OPENAI_BASE_URL={{MODEL_BRIDGE_BASE_URL}}
-ANTHROPIC_API_KEY={{ANTHROPIC_API_KEY}}
+# Model Gateway custody. The employee uses a scoped gateway credential bound to
+# account_id, employee_id, allowed aliases/providers, limits, expiry, and
+# credential_version. Provider selection and provider master secrets live only in
+# the host-private gateway, not this profile.
+MODEL_GATEWAY_URL={{MODEL_GATEWAY_URL}}
+MODEL_GATEWAY_TOKEN={{MODEL_GATEWAY_TOKEN}}
+MODEL_GATEWAY_MODEL_ALIAS={{MODEL_GATEWAY_MODEL_ALIAS}}
+MODEL_GATEWAY_CREDENTIAL_VERSION={{MODEL_GATEWAY_CREDENTIAL_VERSION}}
+MODEL_GATEWAY_POLICY_JSON={{MODEL_GATEWAY_POLICY_JSON}}
+
 MANAGER_API_ORIGIN={{MANAGER_API_ORIGIN}}
 HERMES_DOCKER_NETWORK={{HERMES_DOCKER_NETWORK}}
 
