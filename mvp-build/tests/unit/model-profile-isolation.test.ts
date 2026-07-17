@@ -55,7 +55,7 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
   }
 
   is(column: string, value: unknown): this {
-    this.filters.push((row) => row[column] === value);
+    this.filters.push((row) => value === null ? row[column] == null : row[column] === value);
     return this;
   }
 
