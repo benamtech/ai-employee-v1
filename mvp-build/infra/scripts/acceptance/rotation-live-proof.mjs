@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { createClient } from "@supabase/supabase-js";
 import { openSecret } from "../../../apps/manager/dist/lib/secrets.js";
-import { assert, fetchJson, requireArg, requireEnv, run, waitFor, writeProof } from "./production-proof-lib.mjs";
+import { assert, fetchJson, requireArg, requireDestructiveApproval, requireEnv, run, waitFor, writeProof } from "./production-proof-lib.mjs";
 
 requireEnv(
   "SUPABASE_URL",
@@ -11,6 +11,7 @@ requireEnv(
   "MANAGER_INTERNAL_TOKEN",
 );
 const employeeId = requireArg("--employee");
+requireDestructiveApproval(employeeId);
 const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 const managerOrigin = process.env.MANAGER_API_ORIGIN.replace(/\/$/, "");
 
