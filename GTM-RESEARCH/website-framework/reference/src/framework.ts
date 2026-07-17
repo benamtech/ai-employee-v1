@@ -1,4 +1,11 @@
-import { compileHrrFeatures, DESIGN_CAPABILITIES, type DesignCapability, type FeatureMap } from "./benchmark.js";
+import {
+  compileHrrFeatures,
+  DEFAULT_VECTOR_SPACE_IDENTITY,
+  DESIGN_CAPABILITIES,
+  type DesignCapability,
+  type FeatureMap,
+  type VectorSpaceIdentity,
+} from "./benchmark.js";
 import { sha256 } from "./core.js";
 
 export type EvidenceLevel = 0 | 1 | 2 | 3 | 4;
@@ -19,6 +26,7 @@ export interface ModuleSource {
   requiredCapabilities: DesignCapability[];
   sourceIds: string[];
 }
+export interface VectorPrototypeSource { id: string; features: FeatureMap; }
 export interface PageSource {
   id: string;
   route: string;
@@ -26,6 +34,7 @@ export interface PageSource {
   title: string;
   description: string;
   features: FeatureMap;
+  vectorPrototypes?: VectorPrototypeSource[];
   moduleIds: string[];
   internalPageIds: string[];
   requiredCapabilities: DesignCapability[];
@@ -34,6 +43,7 @@ export interface PageSource {
 }
 export interface SiteSource {
   baseUrl: string;
+  vectorIdentity?: VectorSpaceIdentity;
   evidence: EvidenceSource[];
   claims: ClaimSource[];
   informationObjects: InformationObjectSource[];
@@ -52,6 +62,7 @@ export interface SemanticModuleIR {
   requiredCapabilities: DesignCapability[];
   sourceIds: string[];
 }
+export interface VectorPrototypeIR { id: string; features: FeatureMap; }
 export interface PageIR {
   id: string;
   route: string;
@@ -61,6 +72,7 @@ export interface PageIR {
   description: string;
   indexable: boolean;
   features: FeatureMap;
+  vectorPrototypes: VectorPrototypeIR[];
   modules: SemanticModuleIR[];
   internalPageIds: string[];
   requiredCapabilities: DesignCapability[];
@@ -71,7 +83,11 @@ export interface PackedSiteIR {
   pageIds: string[];
   routes: string[];
   dimensions: number;
+  vectorIdentity: VectorSpaceIdentity;
   pageVectors: Float32Array;
+  prototypeOffsets: Uint32Array;
+  prototypeIds: string[];
+  prototypeVectors: Float32Array;
   graphOffsets: Uint32Array;
   graphTargets: Uint32Array;
   capabilityOffsets: Uint32Array;
@@ -103,6 +119,7 @@ export interface DesignSatisfiabilityResult { ok: boolean; missingCapabilities: 
 
 export function compileSite(source: SiteSource, dimensions = 512): CompiledSite {
   validateSiteSource(source);
+  const vectorIdentity = source.vectorIdentity ?? DEFAULT_VECTOR_SPACE_IDENTITY;
   const evidenceById = new Map(source.evidence.map((item) => [item.id, item]));
   const claimById = new Map(source.claims.map((item) => [item.id, item]));
   const infoById = new Map(source.informationObjects.map((item) => [item.id, item]));
@@ -141,6 +158,7 @@ export function compileSite(source: SiteSource, dimensions = 512): CompiledSite 
     });
     for (const internalPageId of page.internalPageIds) required(pageById, internalPageId, `page ${page.id}`);
     const dependencies = uniqueSorted([page.id, ...page.moduleIds, ...modules.flatMap((module) => module.sourceIds)]);
+    const vectorPrototypes = normalizePrototypes(page);
     return {
       id: page.id,
       route: normalizeRoute(page.route),
@@ -149,7 +167,8 @@ export function compileSite(source: SiteSource, dimensions = 512): CompiledSite 
       title: page.title,
       description: page.description,
       indexable: page.indexable,
-      features: stableRecord(page.features),
+      features: stableRecord(vectorPrototypes[0].features),
+      vectorPrototypes,
       modules,
       internalPageIds: uniqueSorted(page.internalPageIds),
       requiredCapabilities: uniqueSorted([...page.requiredCapabilities, ...modules.flatMap((module) => module.requiredCapabilities)]),
@@ -163,23 +182,48 @@ export function compileSite(source: SiteSource, dimensions = 512): CompiledSite 
     const instructionMarkdown = page.instructionPointers.length > 0 ? renderInstructionProjection(page) : null;
     return { page, html, instructionMarkdown, sha256: sha256(`${html}\n${instructionMarkdown ?? ""}`) };
   });
-  const packed = packSite(pages, dimensions);
+  const packed = packSite(pages, dimensions, vectorIdentity);
   const sitemapXml = renderSitemap(pages);
   const dependencyIndex = buildDependencyIndex(pages);
-  const buildHash = sha256(JSON.stringify({ pageHashes: artifacts.map((item) => [item.page.id, item.sha256]), sitemapXml,
-    vectors: Array.from(packed.pageVectors), graphOffsets: Array.from(packed.graphOffsets), graphTargets: Array.from(packed.graphTargets) }));
+  const buildHash = sha256(JSON.stringify({
+    vectorIdentity,
+    pageHashes: artifacts.map((item) => [item.page.id, item.sha256]),
+    sitemapXml,
+    pageVectors: Array.from(packed.pageVectors),
+    prototypeOffsets: Array.from(packed.prototypeOffsets),
+    prototypeIds: packed.prototypeIds,
+    prototypeVectors: Array.from(packed.prototypeVectors),
+    graphOffsets: Array.from(packed.graphOffsets),
+    graphTargets: Array.from(packed.graphTargets),
+  }));
   return { pages: artifacts, packed, sitemapXml, dependencyIndex, buildHash };
 }
 
-export function packSite(pages: readonly PageIR[], dimensions = 512): PackedSiteIR {
+export function packSite(
+  pages: readonly PageIR[],
+  dimensions = 512,
+  vectorIdentity: VectorSpaceIdentity = DEFAULT_VECTOR_SPACE_IDENTITY,
+): PackedSiteIR {
   const pageIds = pages.map((page) => page.id);
   const pageIndex = new Map(pageIds.map((id, index) => [id, index]));
   const routes = pages.map((page) => page.route);
   const pageVectors = new Float32Array(pages.length * dimensions);
+  const prototypeOffsets = new Uint32Array(pages.length + 1);
+  const prototypeIds: string[] = [];
+  const prototypeVectorValues: number[] = [];
+
   pages.forEach((page, pageNumber) => {
-    const vector = compileHrrFeatures(page.features, dimensions);
-    for (let dimension = 0; dimension < dimensions; dimension += 1) pageVectors[pageNumber * dimensions + dimension] = vector[dimension];
+    prototypeOffsets[pageNumber] = prototypeIds.length;
+    page.vectorPrototypes.forEach((prototype, prototypeIndex) => {
+      const vector = compileHrrFeatures(prototype.features, dimensions, vectorIdentity);
+      prototypeIds.push(`${page.id}\0${prototype.id}`);
+      for (let dimension = 0; dimension < dimensions; dimension += 1) {
+        prototypeVectorValues.push(vector[dimension]);
+        if (prototypeIndex === 0) pageVectors[pageNumber * dimensions + dimension] = vector[dimension];
+      }
+    });
   });
+  prototypeOffsets[pages.length] = prototypeIds.length;
 
   const graphOffsets = new Uint32Array(pages.length + 1);
   const graphTargetsList: number[] = [];
@@ -198,9 +242,21 @@ export function packSite(pages: readonly PageIR[], dimensions = 512): PackedSite
   });
   capabilityOffsets[pages.length] = capabilityTargetsList.length;
 
-  return { pageIds, routes, dimensions, pageVectors, graphOffsets, graphTargets: Uint32Array.from(graphTargetsList),
-    capabilityOffsets, capabilityTargets: Uint16Array.from(capabilityTargetsList),
-    stringTable: uniqueSorted([...pageIds, ...routes, ...pages.flatMap((page) => page.dependencyIds)]) };
+  return {
+    pageIds,
+    routes,
+    dimensions,
+    vectorIdentity: { ...vectorIdentity },
+    pageVectors,
+    prototypeOffsets,
+    prototypeIds,
+    prototypeVectors: Float32Array.from(prototypeVectorValues),
+    graphOffsets,
+    graphTargets: Uint32Array.from(graphTargetsList),
+    capabilityOffsets,
+    capabilityTargets: Uint16Array.from(capabilityTargetsList),
+    stringTable: uniqueSorted([...pageIds, ...routes, ...prototypeIds, ...pages.flatMap((page) => page.dependencyIds)]),
+  };
 }
 
 export function validateDesignSystemSuperset(site: CompiledSite, design: DesignSystemContract): DesignSatisfiabilityResult {
@@ -232,8 +288,26 @@ export function createReferenceDesignContract(): DesignSystemContract {
   };
 }
 
+function normalizePrototypes(page: PageSource): VectorPrototypeIR[] {
+  const declared = page.vectorPrototypes?.length
+    ? page.vectorPrototypes
+    : [{ id: "primary", features: page.features }];
+  const seen = new Set<string>();
+  return [...declared].sort((left, right) => left.id.localeCompare(right.id)).map((prototype) => {
+    if (!prototype.id.trim()) throw new Error(`page ${page.id} has empty prototype id`);
+    if (seen.has(prototype.id)) throw new Error(`page ${page.id} has duplicate prototype ${prototype.id}`);
+    seen.add(prototype.id);
+    const features = stableRecord(prototype.features);
+    if (Object.keys(features).length === 0) throw new Error(`page ${page.id}/${prototype.id} has no vector features`);
+    return { id: prototype.id, features };
+  });
+}
+
 function validateSiteSource(source: SiteSource): void {
   if (!/^https:\/\//.test(source.baseUrl)) throw new Error("baseUrl must be https");
+  if (source.vectorIdentity && (!source.vectorIdentity.namespace.trim() || !source.vectorIdentity.symbolVersion.trim())) {
+    throw new Error("vector identity requires namespace and symbolVersion");
+  }
   assertUnique(source.evidence, "evidence"); assertUnique(source.claims, "claim"); assertUnique(source.informationObjects, "information object");
   assertUnique(source.modules, "module"); assertUnique(source.pages, "page");
   const routes = new Set<string>();
@@ -243,6 +317,7 @@ function validateSiteSource(source: SiteSource): void {
     routes.add(route);
     if (!page.canonicalQuestion.trim()) throw new Error(`page ${page.id} lacks canonical question`);
     if (page.moduleIds.length === 0) throw new Error(`page ${page.id} has no modules`);
+    normalizePrototypes(page);
   }
 }
 function renderNeutralHtml(page: PageIR, pageById: Map<string, PageSource>): string {
