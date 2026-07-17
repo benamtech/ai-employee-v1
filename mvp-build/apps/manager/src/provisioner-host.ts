@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { appendFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { appendFile, mkdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import type { ProvisionerOperation, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import {
@@ -23,6 +23,7 @@ const ALLOWED_OPERATIONS = new Set<ProvisionerOperation>([
   "repair_drift",
   "rotate_model_gateway_credential",
   "suspend_runtime",
+  "restart_runtime",
   "replace_runtime",
   "restore_runtime",
 ]);
@@ -96,31 +97,58 @@ function validateRequest(input: unknown): HostProvisionerRequest {
   return { ...req, request_id, nonce, idempotency_key } as HostProvisionerRequest;
 }
 
-async function claimOnce(kind: "nonce" | "idempotency", key: string): Promise<boolean> {
-  const dir = join(stateRoot(), kind);
-  await mkdir(dir, { recursive: true, mode: 0o700 });
-  const path = join(dir, encodeURIComponent(key));
-  try {
-    await writeFile(path, new Date().toISOString(), { flag: "wx", mode: 0o600 });
-    return true;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "EEXIST") return false;
-    throw err;
-  }
+function markerPath(kind: "nonce" | "idempotency", key: string): string {
+  return join(stateRoot(), kind, encodeURIComponent(key));
+}
+
+function resultPath(key: string): string {
+  return join(stateRoot(), "results", encodeURIComponent(key) + ".json");
 }
 
 async function cachedResult(key: string): Promise<ProvisionerResult | null> {
   try {
-    return JSON.parse(await readFile(join(stateRoot(), "results", encodeURIComponent(key) + ".json"), "utf8"));
+    return JSON.parse(await readFile(resultPath(key), "utf8")) as ProvisionerResult;
   } catch {
     return null;
   }
 }
 
+async function claimOnce(kind: "nonce" | "idempotency", key: string): Promise<boolean> {
+  const dir = join(stateRoot(), kind);
+  await mkdir(dir, { recursive: true, mode: 0o700 });
+  const path = markerPath(kind, key);
+  try {
+    await writeFile(path, new Date().toISOString(), { flag: "wx", mode: 0o600 });
+    return true;
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
+    if (kind !== "idempotency" || await cachedResult(key)) return false;
+
+    // A process crash can leave a marker without a result. Reclaim only after a
+    // bounded stale window, so concurrent in-flight requests still converge.
+    const staleMs = Math.max(30_000, Number(process.env.PROVISIONER_IDEMPOTENCY_STALE_MS ?? 10 * 60_000));
+    try {
+      const info = await stat(path);
+      if (Date.now() - info.mtimeMs <= staleMs) return false;
+      await rm(path, { force: true });
+      await writeFile(path, new Date().toISOString(), { flag: "wx", mode: 0o600 });
+      return true;
+    } catch (reclaimErr) {
+      if ((reclaimErr as NodeJS.ErrnoException).code === "EEXIST") return false;
+      throw reclaimErr;
+    }
+  }
+}
+
+async function releaseFailedIdempotencyClaim(key: string): Promise<void> {
+  if (await cachedResult(key)) return;
+  await rm(markerPath("idempotency", key), { force: true });
+}
+
 async function storeResult(key: string, result: ProvisionerResult): Promise<void> {
   const dir = join(stateRoot(), "results");
   await mkdir(dir, { recursive: true, mode: 0o700 });
-  await writeFile(join(dir, encodeURIComponent(key) + ".json"), JSON.stringify(result), { mode: 0o600 });
+  await writeFile(resultPath(key), JSON.stringify(result), { mode: 0o600 });
 }
 
 async function audit(entry: Record<string, unknown>): Promise<void> {
@@ -200,9 +228,30 @@ async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> 
     const stopped = await bestEffortCommand(`docker stop ${container}`, "suspend runtime");
     return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, logs: [`stop:${stopped}`] };
   }
+  if (req.operation === "restart_runtime") {
+    const container = `amtech-hermes-${req.employee_id}`;
+    const restarted = await bestEffortCommand(`docker restart ${container}`, "restart runtime");
+    if (restarted.startsWith("failed:")) throw new Error(restarted);
+    return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, drift: await inspectRuntime(req), smoke_output: restarted, logs: [`restart:${restarted}`] };
+  }
   if (req.operation === "rotate_model_gateway_credential") {
     const rotated = await rotateRenderedModelGatewayCredential(req);
-    return { status: "ok", request_id: req.request_id, operation: req.operation, profile_id: rotated.profile_id, generated_path: rotated.generated_path, profile_checksum: rotated.profile_checksum, model_gateway_credential_version: req.params.model_gateway.credential_version, logs: [`rotated_model_gateway_credential:${req.params.model_gateway.credential_version}`] };
+    const container = `amtech-hermes-${req.employee_id}`;
+    const restarted = await bestEffortCommand(`docker restart ${container}`, "restart runtime after credential rotation");
+    if (restarted.startsWith("failed:")) throw new Error(restarted);
+    return {
+      status: "ok",
+      request_id: req.request_id,
+      operation: req.operation,
+      profile_id: rotated.profile_id,
+      generated_path: rotated.generated_path,
+      profile_checksum: rotated.profile_checksum,
+      container_name: container,
+      model_gateway_credential_version: req.params.model_gateway.credential_version,
+      smoke_output: restarted,
+      drift: await inspectRuntime(req),
+      logs: [`rotated_model_gateway_credential:${req.params.model_gateway.credential_version}`, `restart:${restarted}`],
+    };
   }
   if (req.operation === "repair_drift") {
     const before = await inspectRuntime(req);
@@ -240,6 +289,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     await audit({ request_id: parsed.request_id, idempotency_key: parsed.idempotency_key, nonce: parsed.nonce, account_id: parsed.account_id, employee_id: parsed.employee_id, operation: parsed.operation, result: result.status, evidence: { profile_checksum: result.profile_checksum ?? null, drift: result.drift ?? null } });
     return send(res, 200, result);
   } catch (err) {
+    if (parsed?.idempotency_key) await releaseFailedIdempotencyClaim(parsed.idempotency_key).catch(() => {});
     const result = failureResult("host_provisioner_failed", err);
     await audit({ request_id: parsed?.request_id ?? null, account_id: parsed?.account_id ?? null, employee_id: parsed?.employee_id ?? null, operation: parsed?.operation ?? null, result: "failed", error: String((err as Error).message ?? err) });
     return send(res, 400, result);
