@@ -53,7 +53,7 @@ jobs:
           cache: npm
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
-      - name: Bootstrap Supabase-compatible database roles
+      - name: Bootstrap Supabase-compatible database roles and schemas
         run: |
           psql -h 127.0.0.1 -U postgres -d amtech_boundary -v ON_ERROR_STOP=1 <<'SQL'
           do $$ begin
@@ -66,6 +66,29 @@ jobs:
           create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
           create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
           create or replace function auth.role() returns text language sql stable as $$ select current_user::text $$;
+
+          create schema if not exists storage;
+          create table if not exists storage.buckets (
+            id text primary key,
+            name text not null unique,
+            owner uuid,
+            public boolean not null default false,
+            file_size_limit bigint,
+            allowed_mime_types text[],
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          create table if not exists storage.objects (
+            id uuid primary key default gen_random_uuid(),
+            bucket_id text references storage.buckets(id),
+            name text not null,
+            owner uuid,
+            metadata jsonb,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now(),
+            last_accessed_at timestamptz not null default now(),
+            unique(bucket_id, name)
+          );
           SQL
       - name: Shared contracts
         run: |
@@ -111,7 +134,7 @@ jobs:
         with:
           name: manager-typecheck-${{ github.run_id }}
           path: mvp-build/manager-typecheck.log
-          if-no-files-found: error
+          if-no-files-found: warn
       - name: Validate acceptance script syntax
         run: find infra/scripts/acceptance -name '*.mjs' -print0 | xargs -0 -n1 node --check
       - name: Production boundary unit and source proofs
