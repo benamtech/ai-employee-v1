@@ -2,181 +2,113 @@
 
 Date: 2026-07-17
 Branch: `agent/ui-metaprogramming-pass-1`
-Status: source-level pass; external relevance, browser, runtime, and field acceptance pending
+Status: vector identity/prototype source pass; proposal coverage mechanics pass; external relevance pending
 
 ## Scope
 
-Correct and validate the highest-impact findings from `2026-07-17-vector-node-path-deep-code-review.md` without claiming production SEO value.
+Correct the three highest-impact compiler defects without claiming production SEO value.
 
-## Finding disposition
+## Disposition
 
-| Finding | Prior state | Current state |
-|---|---|---|
-| F-01 vector namespace/version ignored by symbols | blocker | corrected and tested |
-| F-02 broad `spaceHash` source-order-sensitive | blocker | corrected and tested |
-| F-03 secondary prototypes lost after geometry | blocker | corrected and packed/tested |
-| F-04 proposal marginal coverage was prose | blocker | corrected with computed gate |
-| F-05 links untyped similarity neighbors | blocker | open |
-| F-06 agent context exposed only primary prototype | blocker | corrected and tested |
-| F-07 synthetic relevance true by construction | blocker | open; fixture-only wording retained |
-| F-08 UI primarily module-driven | limitation | open; source UI proof remains valid |
-| F-09 public employee task surface absent | blocker | open |
-| F-10 experiment aggregation boundaries | blocker | open |
-| F-11 business event idempotency | blocker | open |
-| F-12 ontology values open | risk | open |
-| F-13 evidence semantics coarse | risk | open |
+| Finding | State |
+|---|---|
+| F-01 namespace/version ignored by symbols | corrected and tested |
+| F-02 broad `spaceHash` order-sensitive | corrected and tested |
+| F-03 secondary prototypes lost | corrected and packed/tested |
+| F-04 proposal coverage was prose only | mechanical computation corrected; calibration/independence still P0 |
+| F-06 agent context primary-only | corrected and tested |
+| F-05/F-07–F-13 | open |
 
-## Source changes
+## Implemented source changes
 
 ### Vector identity
 
-- `reference/src/benchmark.ts`
-  - `VectorSpaceIdentity`
-  - namespace/version-prefixed role, value, and empty-context symbols
-- `site-manifest.yaml`
-  - `vector_space.symbol_version`
-- `reference/scripts/emit-manifest.mjs`
-  - vector identity emitted in artifacts
+- `reference/src/benchmark.ts`: `VectorSpaceIdentity`; namespace/version-prefixed symbols.
+- `site-manifest.yaml`: `vector_space.symbol_version`.
+- `reference/scripts/emit-manifest.mjs`: identity emitted.
 
 ### Prototype preservation
 
-- `reference/src/framework.ts`
-  - `VectorPrototypeSource` and `VectorPrototypeIR`
-  - all prototypes in `PageIR`
-  - packed prototype offsets, IDs, and vectors
-  - build hash includes prototype state
-- `reference/src/manifest.ts`
-  - all geometry prototypes passed into `SiteSource`
-  - every packed prototype checked against the reference geometry
-- `reference/src/agent-harness.ts`
-  - every page prototype and atom set emitted to generation agents
+- `reference/src/framework.ts`: all prototypes in `PageIR`; packed offsets/IDs/vectors; prototype state in build hash.
+- `reference/src/manifest.ts`: all prototypes sent into `SiteSource`; every packed float checked against geometry.
+- `reference/src/agent-harness.ts`: all page regions exposed.
 
-### Computed proposal coverage
+### Proposal mechanics
 
-- `site-manifest.yaml`
-  - explicit coverage policy
-  - coverage-context and computed-report requirements
-- `reference/src/manifest.ts`
-  - sourced weighted context cases
-  - baseline/current-corpus coverage
-  - proposed-corpus coverage
-  - normalized marginal gain
-  - improving-context count
-  - existing-page similarity ceiling
-  - noindex structural recompilation after the numeric gate
+- `site-manifest.yaml`: coverage policy and context/report requirements.
+- `reference/src/manifest.ts`: baseline/proposed weighted coverage, normalized gain, improved contexts, duplicate ceiling, noindex recompilation.
+
+Qualification:
+
+- contexts can be supplied by the proposing agent;
+- graded labels are not used;
+- validated code shifts cosine from `[-1,1]` to `[0,1]`, giving orthogonal vectors about `0.5` coverage;
+- thresholds are not externally calibrated.
+
+Therefore this is a structural admission mechanism, not accepted relevance authority.
 
 ### CSI control
 
-- `reference/src/csi.ts`
-  - Facility Location Complement Information
-  - deterministic positive-marginal greedy batch selector
-- `reference/test/vector-native.test.mjs`
-  - coherent head/tail selection and isolated-noise rejection fixture
+- `reference/src/csi.ts`: Facility Location Complement Information and positive-marginal greedy batch selection.
+- `reference/test/vector-native.test.mjs`: coherent head/tail fixture rejects isolated noise.
 
-## Exact validation
-
-Validated head: `9ef48b97308e09d5a97f4978820255e3c8b53c7e`
-
-Workflow: `Website Framework Reference`
-
-Run: `29576487817`
-
-Conclusion: success
-
-Stages:
+## Exact source validation
 
 ```text
-npm install --no-audit --no-fund
-npm test
-npm run manifest:emit
-npm run ui:emit
-npm run browser:check
-npm run ui:r3f:build
-artifact upload
-```
-
-Tests:
-
-```text
-22 tests
-22 pass
-0 fail
-```
-
-Emitted facts:
-
-```text
-manifest version: 1.1.0
+validated head: 9ef48b97308e09d5a97f4978820255e3c8b53c7e
+workflow: Website Framework Reference
+run: 29576487817
+conclusion: success
+Node tests: 22/22
+manifest/UI/browser/R3F source stages: pass
 pages: 6
 indexable pages: 0
 prototype count: 7
-vector namespace: amtech-hyper-site-v1
+namespace: amtech-hyper-site-v1
 symbol version: 1
 build hash: ae16957209827c1fbbc295992ab0aceeaf648b250521b03695b4f663cf6d241a
-vector-space hash: 934ac02b434b0d583c131a15bbff79492ea8e27ca13a5ea2d07367b4fa8b6978
+space hash: 934ac02b434b0d583c131a15bbff79492ea8e27ca13a5ea2d07367b4fa8b6978
+artifact: sha256:3dce480b18b10020ab6607440e256d085abf62a8d79b6d127c6a102c26c0a94d
 ```
 
-Artifact digest:
+## Passed invariants
 
-```text
-website-framework-emissions
-sha256:3dce480b18b10020ab6607440e256d085abf62a8d79b6d127c6a102c26c0a94d
-```
+- identical vector identity produces identical vectors;
+- namespace/version rotation changes vectors;
+- broad source collection reorder preserves build/space hashes;
+- every declared estimate-page prototype survives geometry, `PageIR`, packed arrays, agent context, and UI inputs;
+- a distinct synthetic proposal passes the mechanical gate;
+- an exact synthetic duplicate fails;
+- CSI controlled selection covers coherent head/tail slices and rejects isolated noise;
+- all current pages remain noindex.
 
-## Tests added or strengthened
+## Not passed
 
-1. identical vector identity produces byte-identical vectors;
-2. namespace rotation changes the symbol space;
-3. symbol-version rotation changes the symbol space;
-4. broad vector-space and site hashes survive source collection reordering;
-5. all estimate-page prototypes survive geometry, `PageIR`, packed arrays, agent context, and UI inputs;
-6. a distinct landscaping missed-call proposal produces positive computed coverage and enters noindex;
-7. a duplicate estimate proposal receives near-zero gain and fails;
-8. Facility Location Complement Information is zero for empty/full sets;
-9. CSI greedy selection covers coherent head and tail slices while excluding isolated noise.
-
-## Validation vector result
-
-### Pass
-
-- vector identity affects actual symbols;
-- all declared prototypes reach packed IR;
-- packed/reference prototype parity is enforced;
-- broad source-order determinism is restored;
-- proposal admission no longer relies on prose alone;
-- duplicate proposal rejection is executable;
-- CSI is implemented only as a bounded research/batch control;
-- current corpus remains fully noindex.
-
-### Not passed
-
-- independent human graded query/context/document collection;
+- explicit primary-prototype semantics;
+- calibrated compatibility transform;
+- independently sourced/adjudicated contexts;
 - learned semantic baseline;
-- out-of-domain context relevance;
-- typed internal-link/path semantics;
-- browser screenshot/accessibility acceptance;
+- held-out/out-of-domain relevance;
+- typed graph paths;
 - public employee task runtime;
-- production Zig/Wasm/Cloudflare;
-- real indexing, ranking, conversion, gross profit, or lifecycle return.
+- browser accessibility/CWV;
+- Zig/Wasm/Cloudflare runtime;
+- field indexing/search/conversion/revenue.
 
-## Important residual issue
+## Academic boundary
 
-The manifest does not yet declare `primary_prototype_id`. The compiler preserves every prototype, but the legacy `pageVectors` compatibility alias uses the canonicalized first prototype. Retrieval that claims multi-region behavior must use packed prototype arrays. Add an explicit primary-prototype schema before field publication or remove the alias from authoritative scoring.
+Kong et al. 2023 supports separate query-document and context-document relevance with human graded labels. The current synthetic proposal fixture does not reproduce that evaluation.
 
-## Academic interpretation
-
-The contextual-ranking paper supports separate evaluation of query-document and explicit context-document relevance with graded labels. It does not validate our HRR representation or corpus construction.
-
-The CSI paper supports a new complement-aware batch-selection research arm. It is a 2026 preprint, its guarantees depend on assumptions not yet diagnosed here, and it is not the single-proposal gate.
+Iyer 2026 supports CSI as a complement-aware batch/split research arm. It is a new preprint and not a single-page admission gate.
 
 ## Next gate
 
 ```text
-explicit primary-prototype semantics
--> typed graph edges and path validation
--> independent graded context-document benchmark
--> learned semantic and simpler baseline comparison
+primary prototype semantics
+-> independent graded context corpus
+-> calibrated lexical/semantic/facet/graph/HRR compatibility
+-> typed graph paths
 -> public task-surface contract
--> browser/accessibility validation
--> first noindex 20–40-page proposal cohort
+-> browser/accessibility
+-> first noindex 20–40-page cohort
 ```
