@@ -34,6 +34,10 @@ The owner web client renders those resources in a sandboxed iframe and routes in
 the same host approval/respond handlers. This is source-wired and locally unit-tested, but live
 LLM-driven exercise is pending funded provider/Hermes tool-loop proof.
 
+Generative UI is not raw model HTML. Manager owns the templates, action grammar, sandbox, approval
+binding, fallback, and proof path. The model may propose typed work; Manager compiles the safe owner
+surface.
+
 ## Fixture UI
 
 `NEXT_PUBLIC_AMTECH_UI_FIXTURES=1` runs the same route/component tree with representative local data.
@@ -42,9 +46,13 @@ enable it.
 
 ## Surfaces Needing Alignment
 
-- Public front door and create/claim/login flows.
+- Public front door and real create/claim/login/account flows.
 - Customer estimate portal.
 - Billing and connected-account setup pages.
 - Admin visual language.
 - Artifact/output HTML.
-- Website estimator and future marketing/customer surfaces.
+- Public marketing site and clearly labeled product demonstrations.
+
+The public estimator is outdated and non-canonical. Preserve it only as a clearly separated
+regression/acquisition harness where still useful; do not treat it as a product surface, flagship UX,
+pricing authority, profile authority, or launch-acceptance path.
