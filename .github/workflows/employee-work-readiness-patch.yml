@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: employee-work-readiness-patch
+  cancel-in-progress: false
+
 jobs:
   patch:
     runs-on: ubuntu-latest
@@ -31,6 +35,8 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add mvp-build/apps/manager/src/provisioner-host.ts
-          git commit -m "Wire provisioner idempotency store and rotation recreate"
+          git add mvp-build/apps/manager/src/lib/ambient-inbox.ts \
+                  mvp-build/packages/db/migrations/0034_reconciler_workers_and_ambient_replay.sql \
+                  mvp-build/packages/db/migrations/0035_worker_terminal_claim_and_effect_receipts.sql
+          git commit -m "Apply ambient inbox and worker privilege contracts"
           git push origin HEAD:employee-work
