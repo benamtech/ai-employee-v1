@@ -1,0 +1,2 @@
+Employee-work production-boundary validation marker.
+Source under test is the employee-work branch at the parent commit.
