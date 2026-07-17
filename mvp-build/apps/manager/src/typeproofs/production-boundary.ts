@@ -20,7 +20,7 @@ type _GatewayEntrypointIsHono = Expect<Equal<ReturnType<typeof buildModelGateway
 type _ReconcilerCycleAcceptsDb = Expect<Equal<Parameters<typeof runProvisioningReconcilerCycle>[0], SupabaseClient | undefined>>;
 type _AmbientCycleAcceptsDb = Expect<Equal<Parameters<typeof runAmbientInboxCycle>[0], SupabaseClient | undefined>>;
 type _ProvisionerStatusClosed = Expect<Equal<ProvisionerResult["status"], "ok" | "failed">>;
-type _GatewayPrefixExported = Expect<Equal<typeof MODEL_GATEWAY_TOKEN_PREFIX, "amtech_mgw_v1_">>;
+type _GatewayPrefixExported = Expect<Equal<typeof MODEL_GATEWAY_TOKEN_PREFIX, "mgw_">>;
 
 const boundedOperations: ProvisionerOperation[] = [
   "render_profile",
