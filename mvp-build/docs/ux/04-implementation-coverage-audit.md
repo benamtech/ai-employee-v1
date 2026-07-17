@@ -18,6 +18,10 @@ Purpose: state what is implemented, partial, or still missing
 ## Partial
 
 - Aqua-inspired visual system: present in owner route, not all product surfaces.
+- Generated MCP-UI template: action grammar, escaping, approval binding, sandbox, and fallback exist,
+  but `apps/manager/src/lib/ui-resources.ts` still carries an independent legacy dark-mode media query
+  and blue primary action. It must be aligned to the light Avery system and AMTECH red without moving
+  trust decisions into model-authored HTML.
 - Feedback/progress: basic message/status feedback exists; durable progress for long-running work needs design.
 - Proof refinding: Proof surface exists, but search/filter and proof-by-job are immature.
 - Connected account capability: owner-readable cards exist; setup/repair flows need expansion.
@@ -27,6 +31,8 @@ Purpose: state what is implemented, partial, or still missing
 ## Not Implemented Or Not Live-Proven
 
 - Live LLM-generated generative UI driven by provider-backed Hermes tool loops.
+- Provider-backed proof that a generated surface maps to the intended approval/action and resulting external proof.
+- Human-readable explanation of why the generated surface appeared and what Avery will do next.
 - Direct manipulation of work objects.
 - Broad undo/revert/forgiveness beyond approval gates.
 - Persistent user layout/stability preferences.
@@ -38,4 +44,6 @@ Purpose: state what is implemented, partial, or still missing
 
 Do not mark a UX idea accepted because fixture UI looks right. Acceptance needs either local source proof
 for UI-only behavior or real provider/runtime proof ids for live employee behavior. Generative UI remains
-frontier until a live model produces and resolves real work objects through Manager.
+frontier until a provider-backed Hermes run receives real or production-like business context, emits a
+typed work view through Manager, renders without fixture data, routes the owner action through the same
+approval/proof path, and leaves auditable proof ids.
