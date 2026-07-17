@@ -9,7 +9,14 @@ import { deliverOwnerTurnToRuntime } from "../lib/runtime.js";
 import { resolveEmployeeSmsSender } from "../lib/sms-sender.js";
 import { stampChannelPresence } from "../lib/channel-router.js";
 import { mustWrite } from "../lib/db.js";
-import { enqueueAmbientEvent, type AmbientInboxRow } from "../lib/ambient-inbox.js";
+import {
+  AmbientEffectAmbiguousError,
+  claimAmbientEffect,
+  completeAmbientEffect,
+  enqueueAmbientEvent,
+  failAmbientEffect,
+  type AmbientInboxRow,
+} from "../lib/ambient-inbox.js";
 
 function authToken(): string {
   const t = process.env.TWILIO_AUTH_TOKEN;
@@ -34,6 +41,38 @@ function paramsFromEvent(event: AmbientInboxRow): Record<string, string> {
   const value = event.payload?.params;
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("twilio_ambient_payload_invalid");
   return Object.fromEntries(Object.entries(value as Record<string, unknown>).map(([key, item]) => [key, String(item ?? "")]));
+}
+
+async function sendSmsWithReceipt(db: SupabaseClient, event: AmbientInboxRow, input: {
+  effect_key: string;
+  to: string;
+  from: string;
+  body: string;
+  evidence?: Record<string, unknown>;
+}): Promise<{ sid: string; status: string; idempotent_replay: boolean }> {
+  const claimed = await claimAmbientEffect(db, {
+    inbox_id: event.inbox_id,
+    effect_key: input.effect_key,
+    provider: "twilio",
+    evidence: { to_suffix: input.to.slice(-4), from_suffix: input.from.slice(-4), body_chars: input.body.length, ...(input.evidence ?? {}) },
+  });
+  if (!claimed.claimed) {
+    if (claimed.receipt.state === "applied" && claimed.receipt.provider_id) {
+      return { sid: claimed.receipt.provider_id, status: "recorded", idempotent_replay: true };
+    }
+    throw new AmbientEffectAmbiguousError(`twilio_effect_${claimed.receipt.state}:${input.effect_key}`);
+  }
+  try {
+    const sent = await sendSms({ to: input.to, from: input.from, body: input.body, forceFrom: true });
+    await completeAmbientEffect(db, claimed.receipt.id, {
+      provider_id: sent.sid,
+      evidence: { status: sent.status, to_suffix: input.to.slice(-4), from_suffix: input.from.slice(-4), ...(input.evidence ?? {}) },
+    });
+    return { sid: sent.sid, status: sent.status, idempotent_replay: false };
+  } catch (err) {
+    await failAmbientEffect(db, claimed.receipt.id, err).catch(() => {});
+    throw err;
+  }
 }
 
 async function processFrontDoor(db: SupabaseClient, event: AmbientInboxRow, params: Record<string, string>): Promise<Record<string, unknown>> {
@@ -75,31 +114,33 @@ async function processFrontDoor(db: SupabaseClient, event: AmbientInboxRow, para
   let reply = String(out.assistant_message ?? "I can help set up your AI employee. Tell me what kind of business you run.");
   if (out.ready_for_phone_verification) {
     const token = mintSignedToken("claim_link", from, 30 * 60, { session_id: sessionId });
-    await mustWrite(
-      db.from("claim_tokens").insert({
-        id: newId(ID_PREFIX.claimToken),
-        token_hash: tokenHash(token),
-        phone_e164: from,
-        onboarding_session_id: sessionId,
-        twilio_proof: { message_sid: params.MessageSid, ambient_inbox_id: event.inbox_id },
-        expires_at: new Date(Date.now() + 30 * 60_000).toISOString(),
-      }),
-      "claim_tokens.insert",
-    );
-    reply += `\n\nFinish account setup here: ${(process.env.PUBLIC_WEB_ORIGIN ?? "https://amtechai.com")}/claim?t=${encodeURIComponent(token)}`;
+    const existingClaim = await db.from("claim_tokens").select("id").eq("onboarding_session_id", sessionId).eq("phone_e164", from).gt("expires_at", new Date().toISOString()).limit(1).maybeSingle();
+    if (existingClaim.error) throw existingClaim.error;
+    if (!existingClaim.data) {
+      await mustWrite(
+        db.from("claim_tokens").insert({
+          id: newId(ID_PREFIX.claimToken),
+          token_hash: tokenHash(token),
+          phone_e164: from,
+          onboarding_session_id: sessionId,
+          twilio_proof: { message_sid: params.MessageSid, ambient_inbox_id: event.inbox_id },
+          expires_at: new Date(Date.now() + 30 * 60_000).toISOString(),
+        }),
+        "claim_tokens.insert",
+      );
+      reply += `\n\nFinish account setup here: ${(process.env.PUBLIC_WEB_ORIGIN ?? "https://amtechai.com")}/claim?t=${encodeURIComponent(token)}`;
+    } else {
+      reply += "\n\nYour account setup link is already active. Use the most recent link I sent.";
+    }
   }
-  const alreadySent = await db.from("employee_messages").select("id,provider_id,status").eq("source", `ambient:${event.inbox_id}`).maybeSingle();
-  if (alreadySent.error) throw alreadySent.error;
-  if (alreadySent.data?.provider_id) return { session_id: sessionId, outbound_message_id: alreadySent.data.provider_id, idempotent_replay: true };
-  const messageRowId = alreadySent.data?.id ? String(alreadySent.data.id) : newId(ID_PREFIX.message);
-  if (!alreadySent.data) {
-    const pending = await db.from("employee_messages").insert({ id: messageRowId, employee_id: null, direction: "to_owner", source: `ambient:${event.inbox_id}`, channel: "sms", body: reply, provider_id: null, status: "sending" });
-    if (pending.error) throw pending.error;
-  }
-  const sent = await sendSms({ to: from, from: to, body: reply, forceFrom: true });
-  const updated = await db.from("employee_messages").update({ provider_id: sent.sid, status: sent.status }).eq("id", messageRowId);
-  if (updated.error) throw updated.error;
-  return { session_id: sessionId, outbound_message_id: sent.sid, ready_for_phone_verification: Boolean(out.ready_for_phone_verification) };
+  const sent = await sendSmsWithReceipt(db, event, {
+    effect_key: `twilio:frontdoor-reply:${event.inbox_id}`,
+    to: from,
+    from: to,
+    body: reply,
+    evidence: { session_id: sessionId, ready_for_phone_verification: Boolean(out.ready_for_phone_verification) },
+  });
+  return { session_id: sessionId, outbound_message_id: sent.sid, idempotent_replay: sent.idempotent_replay, ready_for_phone_verification: Boolean(out.ready_for_phone_verification) };
 }
 
 async function processStatus(db: SupabaseClient, params: Record<string, string>): Promise<Record<string, unknown>> {
@@ -138,11 +179,6 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
     await stampChannelPresence(db, { account_id: employee.account_id, employee_id: employeeId, channel: "sms", session_info: { message_sid: inboundProviderId } });
   }
 
-  const outboundSource = `ambient:${event.inbox_id}`;
-  const existingOutbound = await db.from("employee_messages").select("id,provider_id,status,body").eq("employee_id", employeeId).eq("source", outboundSource).maybeSingle();
-  if (existingOutbound.error) throw existingOutbound.error;
-  if (existingOutbound.data?.provider_id) return { inbound_message_id: inboundProviderId, outbound_message_id: existingOutbound.data.provider_id, idempotent_replay: true };
-
   const turn = await deliverOwnerTurnToRuntime(db, {
     account_id: employee.account_id,
     employee_id: employeeId,
@@ -151,25 +187,32 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
     idempotency_key: `twilio:${inboundProviderId}`,
   });
   const response = turn.reply || (turn.status === "queued" ? "I got it. I'm working on that now." : "I hit a snag. I saved your message and will pick it back up.");
-  const rowId = existingOutbound.data?.id ? String(existingOutbound.data.id) : newId(ID_PREFIX.message);
+  const fromNumber = await resolveEmployeeSmsSender(db, employeeId);
+  const sent = await sendSmsWithReceipt(db, event, {
+    effect_key: `twilio:employee-reply:${event.inbox_id}`,
+    to: ownerFrom,
+    from: fromNumber,
+    body: response,
+    evidence: { employee_id: employeeId, inbound_message_id: inboundProviderId, runtime_turn_status: turn.status },
+  });
+
+  const outboundSource = `ambient:${event.inbox_id}`;
+  const existingOutbound = await db.from("employee_messages").select("id").eq("employee_id", employeeId).eq("source", outboundSource).maybeSingle();
+  if (existingOutbound.error) throw existingOutbound.error;
   if (!existingOutbound.data) {
-    const pending = await db.from("employee_messages").insert({
-      id: rowId,
+    const stored = await db.from("employee_messages").insert({
+      id: newId(ID_PREFIX.message),
       employee_id: employeeId,
       direction: "to_owner",
       source: outboundSource,
       channel: "sms",
       body: response,
-      provider_id: null,
-      status: "sending",
+      provider_id: sent.sid,
+      status: sent.status,
     });
-    if (pending.error) throw pending.error;
+    if (stored.error) throw stored.error;
   }
-  const fromNumber = await resolveEmployeeSmsSender(db, employeeId);
-  const sent = await sendSms({ to: ownerFrom, from: fromNumber, body: response, forceFrom: true });
-  const updated = await db.from("employee_messages").update({ body: response, provider_id: sent.sid, status: sent.status }).eq("id", rowId);
-  if (updated.error) throw updated.error;
-  return { inbound_message_id: inboundProviderId, outbound_message_id: sent.sid, runtime_turn_status: turn.status };
+  return { inbound_message_id: inboundProviderId, outbound_message_id: sent.sid, idempotent_replay: sent.idempotent_replay, runtime_turn_status: turn.status };
 }
 
 export async function processTwilioAmbientEvent(db: SupabaseClient, event: AmbientInboxRow): Promise<Record<string, unknown>> {
