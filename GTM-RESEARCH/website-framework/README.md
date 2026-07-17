@@ -61,8 +61,9 @@ The mathematics is classical HRR/VSA, not quantum computing. The framework remai
 22. `11-hyper-distributed-content-generative-ui-and-design-collaboration.md`
 23. `12-compiler-design-and-autonomy-validation-addendum.md`
 24. `13-academic-and-normative-basis-for-validation-vectors.md`
-25. `site-manifest.yaml`
-26. `HANDOFF-LANDING-PAGES.md`
+25. `14-phase-2-experience-materialization-engine-plan.md`
+26. `site-manifest.yaml`
+27. `HANDOFF-LANDING-PAGES.md`
 
 ## Canonical stack hypothesis
 
@@ -151,6 +152,8 @@ Generative UI is bounded:
 
 Synthetic persona matrices test representation and retrieval. They are not runtime inference targets.
 
+Consented owner research may import user-controlled account exports only through the isolated, reviewable, deletable adapters defined in `14-phase-2-experience-materialization-engine-plan.md`. It does not authorize covert cross-site identity resolution, fingerprinting, OSINT enrichment of arbitrary visitors, or runtime ingestion of raw search/place/history data.
+
 ## Performance targets
 
 Resolver:
@@ -205,6 +208,13 @@ Phase 1 completed:
 - coverage/replication complexity model;
 - deterministic synthetic 100-slice generator plus local execution/hash/constraint report;
 - software category, multi-channel content, design, agentic/generative UI, and landing-page operating model.
+
+Phase 2 first-pass authority:
+
+- `14-phase-2-experience-materialization-engine-plan.md` makes the deterministic compiler/resolver and real landing-page materialization engine the first integrated priority;
+- it defines exactly five two-part workstreams with explicit validation, pass, and fail vectors;
+- it keeps flat exact scan, the canonical baseline, and consented context provenance as mandatory controls;
+- it treats Zig/WASM and third-party experimentation platforms as optional measured optimizations.
 
 Not completed:
 
