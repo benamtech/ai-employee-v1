@@ -52,7 +52,7 @@ create or replace function claim_next_provisioning_job(
 )
 returns setof provisioning_jobs
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 begin
@@ -85,7 +85,7 @@ create or replace function claim_next_provisioning_command(
 )
 returns setof provisioning_commands
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 begin
@@ -119,7 +119,7 @@ create or replace function claim_next_ambient_event(
 )
 returns setof ambient_event_inbox
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 begin

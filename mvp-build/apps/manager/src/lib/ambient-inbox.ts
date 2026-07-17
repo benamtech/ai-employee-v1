@@ -107,9 +107,16 @@ export async function enqueueAmbientEvent(db: SupabaseClient, input: AmbientEven
   }).select("inbox_id").maybeSingle();
   if (!inserted.error) return { inbox_id: String(inserted.data?.inbox_id ?? inboxId), duplicate: false };
   if ((inserted.error as { code?: string }).code !== "23505") throw inserted.error;
-  const existing = await db.from("ambient_event_inbox").select("inbox_id").eq("dedupe_key", dedupeKey).maybeSingle();
-  if (existing.error || !existing.data) throw existing.error ?? new Error("ambient_event_dedupe_lookup_failed");
-  return { inbox_id: String(existing.data.inbox_id), duplicate: true };
+  const duplicate = await db.rpc("record_ambient_event_duplicate", {
+    p_source_type: input.source_type,
+    p_provider: input.provider,
+    p_external_event_id: input.external_event_id,
+    p_dedupe_key: dedupeKey,
+  });
+  if (duplicate.error) throw duplicate.error;
+  const existing = Array.isArray(duplicate.data) ? duplicate.data[0] : duplicate.data;
+  if (!existing?.inbox_id) throw new Error("ambient_event_dedupe_lookup_failed");
+  return { inbox_id: String(existing.inbox_id), duplicate: true };
 }
 
 export async function claimAmbientEffect(db: SupabaseClient, input: { inbox_id: string; effect_key: string; provider: string; evidence?: Record<string, unknown> }): Promise<{ claimed: boolean; receipt: AmbientEffectReceipt }> {
