@@ -1,16 +1,21 @@
 # Hyper-targeted framework reference
 
-Executable TypeScript oracle for the first slices of the two priority workstreams:
+Executable production-oriented reference for the two priority workstreams:
 
-- deterministic HRR symbols, FFT circular binding/unbinding, superposition, cosine, and multi-prototype page scoring;
-- exact weighted facility-location corpus selection under a budget;
-- deterministic neutral HTML emission and dependency-bounded invalidation.
+- deterministic HDC/VSA/HRR algebra, contextual scoring benchmarks, and corpus optimization;
+- typed packed IR, dependency compilation, static emissions, field-distribution metrics, Zig/Wasm kernels, asset-first Cloudflare delivery, and a future design-system satisfiability contract.
 
-The package is deliberately small and dependency-light. It is the correctness control for later lazy-greedy, DPP/log-determinant, complement-aware selection, clustering, Zig native, WebAssembly SIMD, packed IR, and Cloudflare emission arms.
+## Commands
 
 ```bash
 npm install
 npm test
+npm run benchmark:scale
+node scripts/emit-site.mjs 2000 generated
+ZIG=/path/to/zig-0.15.2 ./zig/build.sh
+node scripts/verify-wasm.mjs
 ```
 
-No SEO, search-distribution, conversion, Zig/Wasm, browser, Cloudflare, accessibility, or production acceptance is claimed by these unit tests.
+The neutral renderer and design capability vectors are deliberately UI-agnostic. A later design system must satisfy the semantic module kinds, responsive/accessibility requirements, layout roles, and capability vectors without changing knowledge, evidence, page geometry, or search-distribution logic.
+
+Passing local reference tests do not establish live SEO lift, indexing, conversion, Cloudflare deployment, Zig compilation, browser performance, or production acceptance unless a separate proof report records those runs.

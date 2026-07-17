@@ -1,6 +1,6 @@
-# CODEGRAPH.md — Adaptive Experience Compiler Map
+# CODEGRAPH.md — Hyper-Targeted Search Distribution Framework Map
 
-Status: Phase 1 specification complete; Phase 2 implementation pending
+Status: Phase 1 complete; Phase 2 production-oriented reference implementation started
 Updated: 2026-07-17
 Scope: `GTM-RESEARCH/website-framework/`
 
@@ -11,222 +11,99 @@ Scope: `GTM-RESEARCH/website-framework/`
 3. `../../CODEGRAPH.md`
 4. `AGENTS.md`
 5. `README.md`
-6. numbered specifications in order, including the canonical Phase 2 first-pass plan in `14-phase-2-experience-materialization-engine-plan.md`
-7. `../../docs/amtech-website-rewrite-brief.md`
-8. `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`
-9. `../../docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`
+6. numbered specifications `00` through `15`
+7. `15-hyper-targeted-search-distribution-workstreams.md`
+8. `reference/README.md`
+9. `reference/UI-DESIGN-SYSTEM-HANDOFF.md`
+10. validation reports
 
-## What this software is
+`15` controls the current two-workstream, three-part execution order. `14` remains the broader Phase 2 boundary and supporting workstream inventory.
 
-Primary category: **adaptive experience compiler and edge decisioning runtime**.
+## Primary category
 
-It compiles approved company knowledge, offers, proof, design grammar, routes, and experiment policy into a stable canonical website plus finite context-resolved experiences and channel artifacts.
+**Hyper-targeted search-distribution compiler and vector information server.**
 
-It combines parts of:
+The primary commercial emission is a corpus of `200–2,000+` stable canonical pages selected to maximize valuable query/context compatibility, page distinctness, information gain, graph utility, and lifecycle value.
 
-- typed/headless content infrastructure;
-- static-site and landing-page generation;
-- adaptive hypermedia;
-- feature-flag and experimentation systems;
-- recommendation/decisioning engines;
-- edge middleware/runtime;
-- agentic and generative UI infrastructure;
-- SEO knowledge graphs and structured-data compilers.
-
-It is not a covert CDP, fingerprinting product, arbitrary AI page generator, ad cloaking system, OSINT identity-resolution pipeline, or replacement for human brand judgment.
-
-## System graph
+HTML is an emission. The durable system is:
 
 ```text
-COMPANY SOURCE LAYER
-knowledge + offers + claims + evidence + entities + brand/design tokens
-                     |
-                     v
-TYPED CONTENT IR
-routes + questions + audiences + modules + CTAs + proof + visual grammar
-                     |
-          +----------+-----------+
-          |                      |
-          v                      v
-CANONICAL COMPILER          VARIANT COMPILER
-pages + metadata            finite slices + eligibility
-schema + links              context facets + experiment IDs
-          |                      |
-          +----------+-----------+
-                     v
-BUILD ARTIFACTS
-manifest + vectors + graph priors + checksums + structured data + channel outputs
-                     |
-                     v
-EDGE RESOLVER / REQUEST MIRROR
-allowlisted ephemeral context -> candidate coverage -> exact score -> policy gate
-                     |
-          +----------+-----------+
-          |                      |
-          v                      v
-BASELINE A                 MATERIALIZED Z
-complete canonical page    approved slice/layout/component selection
-          |                      |
-          +----------+-----------+
-                     v
-A/Z VALIDATION SUITE
-relevance + effort + conversion + latency + privacy + SEO + accessibility + truth
+approved source + evidence + information objects
+-> context/page geometry
+-> corpus optimizer
+-> typed ExperienceIR
+-> packed vectors + CSR graph + dependencies + page plans
+-> canonical HTML + instruction pointers + sitemap + manifests
+-> asset-first global distribution
+-> search/query/conversion/revenue observations
 ```
 
-## File map
+## Current executable implementation
 
-### Orientation and authority
+`reference/` now contains:
 
-- `README.md`: mission, stack hypothesis, invariants, targets, phase state, and Phase 2 authority.
-- `identity.md`: scoped mathematical, metaprogramming, quantum-boundary, and interaction-design operating identity.
-- `AGENTS.md`: implementation and editing rules.
-- `CODEGRAPH.md`: this structural map.
+- deterministic HDC/VSA/HRR symbols, FFT and naive circular convolution, bind/unbind, superposition, cosine, and multi-prototype scoring;
+- deterministic `500`-case context benchmark generator with lexical, hashed-semantic, facet, graph, HRR, and hybrid arms;
+- NDCG, top-one, zero-match, bad-fit, and reciprocal-rank metrics;
+- exact greedy, exhaustive small-instance, lazy-greedy, information-saturation, coherent rare-tail, and log-determinant diversity controls;
+- typed evidence/claim/information/module/page source contracts;
+- semantic renderer-independent `PageIR` and packed structure-of-arrays vectors;
+- CSR internal-link graph and design-capability indexes;
+- deterministic neutral HTML, structured data, sitemap, and instruction-pointer emissions;
+- dependency-bounded invalidation and content-addressed build hashes;
+- deterministic field cohort, conversion event, deduplication, and revenue-per-page metrics;
+- finite variant resolver with hard eligibility, confidence fallback, and deterministic holdout;
+- Zig scalar/SIMD kernel source, Wasm ABI adapter, and TypeScript fallback;
+- Cloudflare Workers Static Assets asset-first configuration and bounded resolver endpoints;
+- `200/500/1000/2000` page scale runner and a `2,000`-page static emission script;
+- design-system capability vectors and a superset satisfiability validator for the next UI pass.
 
-### Scientific and architecture foundation
+## Validated locally
 
-- `00-scientific-and-feasibility-validation.md`: validated foundation, unsupported hypotheses, math, runtime/tool corrections.
-- `01-system-architecture.md`: build-time/request-time/experiment-time architecture.
-- `02-shape-model-and-hrr-core.md`: feature ontology, deterministic vectors, HRR core, candidate retrieval, graph and ABI.
-- `03-agentic-seo-system.md`: canonical knowledge graph, specialized page policy, AI-answer/search constraints.
+- strict TypeScript compilation;
+- `12/12` Node tests passed;
+- FFT circular convolution matched the naive oracle within `1e-10` on the declared fixture;
+- exact greedy matched exhaustive optimum on the small facility-location control;
+- lazy greedy matched exact greedy on the declared control;
+- coherent rare-page selection rejected isolated noise in the declared composite fixture;
+- `500` context / `240` page benchmark was deterministic; hybrid did not regress lexical NDCG/bad-fit and zero-match accuracy was `1.0` on the synthetic fixture;
+- source reordering produced the same build hash;
+- the reference design contract satisfied every emitted page capability;
+- `2,000` canonical pages plus `6,000` finite variant plans compiled deterministically;
+- `2,000` HTML files and `2,000` compact `use.md` projections were emitted locally.
 
-### Test, evidence, and release authority
+Authority: `validation/reports/2026-07-17-hyper-targeted-production-pass.md`.
 
-- `04-feature-validation-vectors.md`: scenario-based validation matrix.
-- `05-pass-fail-vectors.md`: quantitative P0/P1/P2 gates and graduation stages, with theory/academic/normative/engineering basis labels.
-- `06-experimentation-privacy-operations.md`: A/Z causal design, privacy, telemetry, rollback, and operations.
-- `12-compiler-design-and-autonomy-validation-addendum.md`: compiler, design, distributed-content, effort, autonomy, and coverage/replication gates.
-- `13-academic-and-normative-basis-for-validation-vectors.md`: source ledger and threshold-evidence boundary.
-- `validation/reports/2026-07-17-synthetic-persona-matrix.md`: generator execution, constraints, and output hash.
+## Not validated
 
-### v0.1 and execution
+- Zig `0.15.2` compilation, native execution, scalar Wasm, or Wasm SIMD parity because Zig was unavailable and outbound DNS blocked toolchain download;
+- Wrangler/Cloudflare preview or deployment;
+- browser, crawler, accessibility, Core Web Vitals, load, cache-hit, or Worker CPU tests;
+- real Search Console/Bing data ingestion;
+- indexing, ranking, query coverage, conversion lift, closed revenue, or production acceptance;
+- learned embeddings, calibrated human relevance labels, optimal transport, Gromov-Wasserstein, or field superiority over simpler controls.
 
-- `07-v0.1-request-mirror-lab.md`: transparent noindex diagnostic product.
-- `08-implementation-plan.md`: original v0.1 Request Mirror build sequence and detailed component scaffold.
-- `14-phase-2-experience-materialization-engine-plan.md`: canonical Phase 2 first-pass plan; prioritizes the deterministic materialization engine and defines five two-part workstreams with explicit validation/pass/fail vectors.
-- `site-manifest.yaml`: machine-readable initial feature/candidate/fixture/headers/budget contract.
-- `scripts/generate-synthetic-persona-matrix.mjs`: deterministic 100-entry synthetic benchmark generator.
-- `fixtures/synthetic-persona-matrix.toon`: reproducible generated output when materialized; never hand-edit and do not require committing it while the validation report records its hash.
+## Governing invariants
 
-### Phase synthesis and product definition
-
-- `09-phase-1-synthesis-competitive-and-systems-positioning.md`: scientific synthesis, Orkas positioning, commitment elasticity, autonomous-company hypothesis, and Phase 1 exit.
-- `10-software-category-and-commercial-use-cases.md`: product category, modules, buyers, and real company workflows.
-- `11-hyper-distributed-content-generative-ui-and-design-collaboration.md`: multi-channel content fabric, compiler IR, graphic-design contract, and agentic/generative UI rules.
-- `HANDOFF-LANDING-PAGES.md`: minimal next-session prompt for producing page families.
-- `RESEARCH-NOTES-2026-07-17.md`: evidence ledger, narrowed assumptions, open questions, and negative results.
-
-### External design/product authority
-
-- `../../docs/amtech-website-rewrite-brief.md`: AMTECH website offer, category, narrative, page and copy strategy.
-- `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`: canonical visual system.
-- `../../docs/AMTECH_WEB_DESIGN_SYSTEM_IMPLEMENTATION.md`: surface status and implementation tracking.
-- `../../docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`: agentic interaction, generative UI, designer/compiler handshake, and landing-page grammar.
-
-## Intermediate representation
-
-The compiler IR should eventually expose at least:
-
-```ts
-interface ExperienceModule {
-  id: string;
-  type: "hero" | "proof" | "workflow" | "objection" | "comparison" | "cta" | "agentic_action";
-  routeIds: string[];
-  audienceFacets: string[];
-  intentFacets: string[];
-  offerIds: string[];
-  claims: ClaimRef[];
-  evidenceCeiling: EvidenceLevel;
-  visualVariantIds: string[];
-  interactionVariantIds: string[];
-  allowedChannels: ChannelId[];
-  eligibility: EligibilityRule;
-  fallbackId?: string;
-}
-```
-
-The IR, not any vendor package, is the durable contract.
-
-The Phase 2 materialization plan extends the runtime shape contract into five explicit views:
-
-```text
-HRR hypervector
-+ low-dimensional auditable facet point
-+ graph/hypergraph relationship state
-+ hard eligibility state
-+ provenance/confidence state
-```
-
-High-dimensional convex hulls, graph transport, spectral partitions, and point-set distances are offline benchmark arms until they beat the exact simpler controls.
-
-## Runtime invariants
-
-- no arbitrary copy generation in the default edge path;
-- no dynamic symbol creation;
-- no remote database call in the default hot path;
-- no browser fingerprint or named-person profile;
-- no covert cross-site identity resolution or OSINT enrichment of arbitrary visitors;
-- raw Google/Bing/Reddit/search/place/history data cannot enter request-time artifacts;
-- canonical baseline always available;
-- signed/bounded variant IDs only;
-- evidence and CTA eligibility are hard gates;
-- failure returns baseline;
-- exact scan remains the first benchmark;
-- candidate clustering must measure coverage versus replication;
-- external experimentation platforms cannot become a page-availability dependency.
-
-## Phase state
-
-### Complete
-
-- research/specification packet;
-- privacy and SEO boundary;
-- TypeScript-first/Zig-second architecture;
-- v0.1 Request Mirror definition;
-- finite-slice and deterministic-artifact model;
-- A/Z causal framework;
-- deterministic synthetic benchmark generator;
-- local generator execution and independent constraint/hash validation record;
-- software category and design/content operating model;
-- academic/normative evidence map and revised pass/fail gates;
-- canonical Phase 2 first-pass execution plan.
-
-### Not complete
-
-- TypeScript HRR reference implementation;
-- compiler/content IR implementation;
-- two real compiled AMTECH landing-page families;
-- flat exact resolver benchmark;
-- candidate coverage/replication benchmark;
-- consented context observability implementation;
-- Worker Request Mirror app;
-- Zig/WASM implementation;
-- Cloudflare deployment;
-- Next.js integration;
-- browser/accessibility/load/SEO testing;
-- conversion or autonomy evidence.
-
-## Editing map
-
-- Change math or feature encoding -> update `00`, `02`, `04`, `05`, `13`, `14`, `site-manifest.yaml`, fixtures, and research notes.
-- Change architecture/runtime -> update `01`, `07`, `08`, `14`, `CODEGRAPH.md`, validation vectors, and notes.
-- Change privacy/experiments -> update `06`, `04`, `05`, `14`, manifest, and notes.
-- Change page/content/design model -> update `03`, `10`, `11`, `12`, `14`, design addendum, and handoff.
-- Change canonical AMTECH offer/product truth -> update root CODEGRAPH, rewrite brief, GTM authority, manifest candidates, truth gates, and compiled page fixtures.
-- Add implementation -> update phase state, scripts/tests, research notes, and record the exact validation run.
+- every published page has a stable canonical question, visible information object, evidence, internal graph role, and positive measured marginal value;
+- hard eligibility executes before weighted scoring;
+- zero-match and uncertainty return the canonical baseline;
+- canonical static assets require no resolver, model, database, or client JavaScript;
+- runtime cannot generate arbitrary prose, routes, symbols, components, or visitor-specific cache keys;
+- crawlers and humans receive the same primary topic, claims, price, evidence, limitations, and links;
+- no fingerprinting, named-person dossier, identity stitching, private-history ingestion, or sensitive-trait inference;
+- TypeScript remains the semantic oracle; Zig/Wasm ships only after parity and end-to-end benefit;
+- design systems map semantic requirements to components and tokens without changing source truth or page geometry.
 
 ## Next code path
 
 ```text
-1A materialize fixture + implement deterministic TypeScript kernel
--> 1B formalize typed multi-view shape + benchmark correspondence arms
--> 2A implement owned content/design IR and deterministic compiler
--> 2B compile two real AMTECH landing-page families
--> 3A implement flat exact resolver and hard policy/confidence gate
--> 3B quantify candidate coverage/replication frontier
--> 5A implement consented context mirror and source ablation fixtures
--> 4A deploy noindex Worker in shadow/baseline-only mode
--> 4B compare Zig scalar/SIMD and integrate signed finite variants with Next.js
--> 5B add OpenFeature boundary and optional GrowthBook adapter
+1. replace synthetic benchmark labels with reviewed real query/context/page tuples;
+2. add calibrated human relevance, no-match, held-out-domain, and ablation reports;
+3. run Zig native/scalar/SIMD parity once Zig 0.15.2 is available;
+4. deploy generated assets to a noindex Cloudflare preview and measure asset-first vs Worker-first behavior;
+5. ingest the supplied AMTECH design system and prove it satisfies the UI superset contract;
+6. compile the first real matched 20–40 page field cohort;
+7. publish only after canonical, accessibility, browser, crawl, and evidence gates pass;
+8. measure real search distribution and commercial value before scaling to 200+ pages.
 ```
-
-The older v0.1 scaffold in `08-implementation-plan.md` remains useful implementation detail, but `14-phase-2-experience-materialization-engine-plan.md` controls first-pass priority and acceptance boundaries.

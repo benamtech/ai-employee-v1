@@ -1,11 +1,13 @@
 {
   "name": "@amtech/hyper-targeted-framework-reference",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "npm run build && node --test test/*.test.mjs"
+    "test": "npm run build && node --test test/*.test.mjs",
+    "benchmark:scale": "npm run build && node scripts/run-scale.mjs",
+    "generate:field": "npm run build && node scripts/generate-field-cohort.mjs"
   },
   "devDependencies": {
     "typescript": "5.8.3"
