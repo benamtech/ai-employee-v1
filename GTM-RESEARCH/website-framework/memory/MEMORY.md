@@ -3,7 +3,7 @@
 format: TOON-oriented Markdown
 status: active
 scope: GTM-RESEARCH/website-framework
-updated_at: 2026-07-17T08:15:00-04:00
+updated_at: 2026-07-17T08:20:00-04:00
 
 ## protocol
 
@@ -22,8 +22,11 @@ rules[8]:
 
 ## current
 
-state{branch,pr,status,documentation_head,validated_code_head,workflow_run}:
-  agent/ui-metaprogramming-pass-1,17,"draft; source-level-pass; relevance/runtime/field blocked",b3148c82d29d5dfcf82d9c9b1534a36878656cf5,9ef48b97308e09d5a97f4978820255e3c8b53c7e,29576487817
+state{branch,pr,status,latest_validated_authority_head,validated_code_head,workflow_run}:
+  agent/ui-metaprogramming-pass-1,17,"draft; source-level-pass; relevance/runtime/field blocked",a15327cf99cbd628b96e936b1043523bbdf9d152,9ef48b97308e09d5a97f4978820255e3c8b53c7e,29577907501
+
+note:
+  "latest_validated_authority_head includes source, review, documentation, and append-only memory through the prior MEMORY update; this index does not attempt impossible self-hash recording"
 
 compiled{manifest_version,pages,indexable,prototypes,namespace,symbol_version,tests}:
   1.1.0,6,0,7,amtech-hyper-site-v1,1,"22/22"
