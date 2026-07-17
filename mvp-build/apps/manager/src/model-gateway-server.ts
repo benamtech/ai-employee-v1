@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { serviceClient } from "@amtech/db";
@@ -38,7 +39,7 @@ function redactError(err: unknown): string {
 async function proxyOpenAiCompatible(c: any, upstreamPath: string) {
   const db = serviceClient();
   const started = Date.now();
-  const requestId = `mgwr_${crypto.randomUUID()}`;
+  const requestId = `mgwr_${randomUUID()}`;
   const correlationId = c.req.header("X-Amtech-Correlation-Id") ?? requestId;
   const claims = await verifyModelGatewayCredential(db, c.req.header("Authorization"));
   if (!claims) {
@@ -72,7 +73,7 @@ async function proxyOpenAiCompatible(c: any, upstreamPath: string) {
       error_code: policy.code,
       correlation_id: correlationId,
     });
-    return c.json({ error: { code: policy.code, message: "Model gateway policy denied this request." } }, policy.status);
+    return c.json({ error: { code: policy.code, message: "Model gateway policy denied this request." } }, policy.status as any);
   }
 
   let route: { provider: string; model: string };
