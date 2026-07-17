@@ -18,7 +18,10 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
   insert(payload: Row | Row[]): this { this.operation = "insert"; this.payload = payload; return this; }
   update(payload: Row): this { this.operation = "update"; this.payload = payload; return this; }
   eq(column: string, value: unknown): this { this.filters.push((row) => row[column] === value); return this; }
-  is(column: string, value: unknown): this { this.filters.push((row) => row[column] === value); return this; }
+  is(column: string, value: unknown): this {
+    this.filters.push((row) => value === null ? row[column] == null : row[column] === value);
+    return this;
+  }
 
   async maybeSingle(): Promise<QueryResult<Row | null>> {
     const result = await this.execute();
