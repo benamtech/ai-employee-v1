@@ -78,29 +78,22 @@ export interface ProfileBuildParams {
   seed_skills: string[];
   api_server_key?: string;
   profile_context: ProfileContext;
-  /**
-   * CE-4: read-only connectors to wire directly into config.yaml `mcp_servers`.
-   * Enforced default-deny at render time (`renderableDirectMcpConnectors`) — a
-   * write/money/customer-facing connector here is refused a direct path and stays
-   * Manager-mediated. Empty/absent today (no read-only connector ships yet).
-   */
   direct_mcp_connectors?: import("./connector-registry.js").DirectMcpConnectorSpec[];
 }
 
 export type ProvisionerOperation = "ensure_runtime" | "remove_runtime" | "inspect_runtime";
 
 /**
- * Declarative host-private lifecycle request. Callers cannot select images, commands,
- * mounts, networks, capabilities, or arbitrary environment values. Those are fixed by
- * the host provisioner's deployment policy and allowlists.
+ * Declarative host-private lifecycle request. Manager may omit envelope fields when
+ * calling its local proxy; the proxy mints them before signing the Unix-socket request.
  */
 export interface ProvisionerRequest {
-  request_id: string;
-  operation: ProvisionerOperation;
-  issued_at: string;
-  expires_at: string;
-  nonce: string;
-  idempotency_key: string;
+  request_id?: string;
+  operation?: ProvisionerOperation;
+  issued_at?: string;
+  expires_at?: string;
+  nonce?: string;
+  idempotency_key?: string;
   account_id: string;
   employee_id: string;
   manifest_id: string;
