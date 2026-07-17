@@ -60,8 +60,9 @@ The mathematics is classical HRR/VSA, not quantum computing. The framework remai
 21. `10-software-category-and-commercial-use-cases.md`
 22. `11-hyper-distributed-content-generative-ui-and-design-collaboration.md`
 23. `12-compiler-design-and-autonomy-validation-addendum.md`
-24. `site-manifest.yaml`
-25. `HANDOFF-LANDING-PAGES.md`
+24. `13-academic-and-normative-basis-for-validation-vectors.md`
+25. `site-manifest.yaml`
+26. `HANDOFF-LANDING-PAGES.md`
 
 ## Canonical stack hypothesis
 
@@ -197,17 +198,16 @@ Phase 1 completed:
 - scientific and feasibility review;
 - architecture and feature ontology;
 - privacy/SEO/security boundaries;
-- validation and pass/fail gates;
+- academically and normatively grounded validation/pass-fail gates;
 - v0.1 Request Mirror definition;
 - A/Z causal and operational model;
 - Orkas competitive positioning and commitment-elasticity thesis;
 - coverage/replication complexity model;
-- synthetic 100-slice generator;
+- deterministic synthetic 100-slice generator plus local execution/hash/constraint report;
 - software category, multi-channel content, design, agentic/generative UI, and landing-page operating model.
 
 Not completed:
 
-- verified generated fixture artifact;
 - TypeScript HRR/compiler implementation;
 - Worker/Next/Zig code;
 - Cloudflare deployment;
