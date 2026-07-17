@@ -78,40 +78,44 @@ export interface ProfileBuildParams {
   seed_skills: string[];
   api_server_key?: string;
   profile_context: ProfileContext;
-  /**
-   * CE-4: read-only connectors to wire directly into config.yaml `mcp_servers`.
-   * Enforced default-deny at render time (`renderableDirectMcpConnectors`) — a
-   * write/money/customer-facing connector here is refused a direct path and stays
-   * Manager-mediated. Empty/absent today (no read-only connector ships yet).
-   */
   direct_mcp_connectors?: import("./connector-registry.js").DirectMcpConnectorSpec[];
 }
 
+export type ProvisionerOperation = "ensure_runtime" | "remove_runtime" | "inspect_runtime";
+
+/**
+ * Declarative host-private lifecycle request. Manager may omit envelope fields when
+ * calling its local proxy; the proxy mints them before signing the Unix-socket request.
+ */
 export interface ProvisionerRequest {
+  request_id?: string;
+  operation?: ProvisionerOperation;
+  issued_at?: string;
+  expires_at?: string;
+  nonce?: string;
+  idempotency_key?: string;
   account_id: string;
   employee_id: string;
   manifest_id: string;
   profile_package_key: string;
   params: ProfileBuildParams;
-  options?: {
-    sms?: {
-      enabled?: boolean;
-      configure_webhook?: boolean;
-      send_first_message?: boolean;
-    };
-  };
   render_secrets?: {
     manager_mcp_token?: string;
+    model_gateway_token?: string;
   };
 }
 
 export interface ProvisionerResult {
   status: "ok" | "failed";
+  request_id?: string;
+  operation?: ProvisionerOperation;
+  idempotent_replay?: boolean;
   profile_id?: string;
+  profile_checksum?: string;
   generated_path?: string;
   workspace_dir?: string;
-  sms_number_e164?: string;
-  twilio_webhook_url?: string;
+  network_name?: string;
+  container_name?: string;
   webchat_api_url?: string;
   api_base_url?: string;
   api_key_ref?: string;
@@ -121,7 +125,6 @@ export interface ProvisionerResult {
   validation_status?: "passed" | "failed";
   validation_output?: string;
   smoke_output?: string;
-  first_sms_sid?: string;
   failure_state?: string;
   logs?: string[];
 }

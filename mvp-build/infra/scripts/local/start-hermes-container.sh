@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Invoked by Manager's provisioner with cwd = generated Hermes profile dir.
+# Host-provisioner-only runtime launcher. All image, command, network, mount,
+# capability, and environment choices are fixed here; callers supply no Docker args.
 profile_dir="${1:-$PWD}"
 if [[ ! -f "$profile_dir/.env" ]]; then
   echo "profile .env not found: $profile_dir" >&2
@@ -15,67 +16,70 @@ set +a
 
 version="${HERMES_VERSION:-0.18.0}"
 image="${HERMES_DOCKER_IMAGE:-hermes-agent:${version}}"
-container="amtech-hermes-${EMPLOYEE_ID:-$(basename "$profile_dir")}"
+employee_id="${EMPLOYEE_ID:?EMPLOYEE_ID missing from profile .env}"
+container="amtech-hermes-${employee_id}"
+network="amtech-employee-${employee_id}"
 port="${API_SERVER_PORT:?API_SERVER_PORT missing from profile .env}"
-workspace="${WORKSPACE_DIR:-}"
-network="${HERMES_DOCKER_NETWORK:-bridge}"
+workspace="${WORKSPACE_DIR:?WORKSPACE_DIR missing from profile .env}"
+
+case "$image" in
+  hermes-agent:*|ghcr.io/nousresearch/hermes-agent:*) ;;
+  *) echo "Hermes image is not allowlisted: $image" >&2; exit 1 ;;
+esac
+
+[[ "$employee_id" =~ ^emp_[A-Za-z0-9_-]+$ ]] || { echo "invalid employee id" >&2; exit 1; }
+[[ "$port" =~ ^[0-9]{4,5}$ ]] || { echo "invalid gateway port" >&2; exit 1; }
 
 docker image inspect "$image" >/dev/null
 docker rm -f "$container" >/dev/null 2>&1 || true
-if [[ "$network" != "bridge" ]]; then
-  docker network inspect "$network" >/dev/null 2>&1 || docker network create "$network" >/dev/null
-fi
+docker network rm "$network" >/dev/null 2>&1 || true
+# Internal bridge prevents direct internet egress and peer/control-plane reachability.
+# Controlled Manager/model egress is added later through explicit host-private gateways.
+docker network create --driver bridge --internal \
+  --label="com.amtech.kind=employee-network" \
+  --label="com.amtech.employee_id=${employee_id}" \
+  "$network" >/dev/null
 
-network_args=(--network "$network")
-if [[ "$network" != "bridge" ]]; then
-  network_args+=(--network-alias "$container")
-fi
-
-mount_args=(-v "$profile_dir:/opt/data")
-if [[ -n "$workspace" ]]; then
-  mkdir -p "$workspace"
-  mount_args+=(-v "$workspace:$workspace")
-fi
+mkdir -p "$workspace"
 
 security_args=(
   --cap-drop=ALL
+  --cap-add=CHOWN
+  --cap-add=SETUID
+  --cap-add=SETGID
+  --cap-add=FOWNER
+  --cap-add=DAC_OVERRIDE
   --security-opt=no-new-privileges
-  --pids-limit="${HERMES_CONTAINER_PIDS_LIMIT:-256}"
-  --restart="${HERMES_CONTAINER_RESTART:-unless-stopped}"
+  --pids-limit=256
+  --memory="${HERMES_CONTAINER_MEMORY:-1g}"
+  --cpus="${HERMES_CONTAINER_CPUS:-1}"
+  --restart=unless-stopped
+  --read-only
   --label="com.amtech.kind=employee-runtime"
   --label="com.amtech.account_id=${ACCOUNT_ID:-unknown}"
-  --label="com.amtech.employee_id=${EMPLOYEE_ID:-unknown}"
-  --label="com.amtech.profile_id=client_${EMPLOYEE_ID:-unknown}"
-  --log-driver="${HERMES_LOG_DRIVER:-local}"
-  --log-opt="max-size=${HERMES_LOG_MAX_SIZE:-10m}"
-  --log-opt="max-file=${HERMES_LOG_MAX_FILE:-5}"
+  --label="com.amtech.employee_id=${employee_id}"
+  --label="com.amtech.profile_id=client_${employee_id}"
+  --log-driver=local
+  --log-opt=max-size=10m
+  --log-opt=max-file=5
 )
-IFS=',' read -r -a cap_adds <<< "${HERMES_CONTAINER_CAP_ADD:-CHOWN,SETUID,SETGID,FOWNER,DAC_OVERRIDE}"
-for cap in "${cap_adds[@]}"; do
-  if [[ -n "$cap" ]]; then
-    security_args+=(--cap-add="$cap")
-  fi
-done
-if [[ -n "${HERMES_CONTAINER_MEMORY:-1g}" ]]; then
-  security_args+=(--memory="${HERMES_CONTAINER_MEMORY:-1g}")
-fi
-if [[ -n "${HERMES_CONTAINER_CPUS:-1}" ]]; then
-  security_args+=(--cpus="${HERMES_CONTAINER_CPUS:-1}")
-fi
 
 docker run -d \
   --name "$container" \
   "${security_args[@]}" \
-  "${network_args[@]}" \
-  --add-host=host.docker.internal:host-gateway \
+  --network "$network" \
   --env-file "$profile_dir/.env" \
   -e "HERMES_UID=$(id -u)" \
   -e "HERMES_GID=$(id -g)" \
   -e "API_SERVER_HOST=0.0.0.0" \
-  -e "MANAGER_API_ORIGIN=${DOCKER_MANAGER_API_ORIGIN:-http://host.docker.internal:8080}" \
-  -e "MANAGER_BASE_URL=${DOCKER_MANAGER_BASE_URL:-http://host.docker.internal:8080}" \
+  -e "WORKSPACE_DIR=/workspace" \
+  -v "$profile_dir:/opt/data:ro" \
+  -v "$profile_dir:/opt/amtech/profile:ro" \
+  -v "$workspace:/workspace" \
+  --tmpfs /opt/amtech/secrets:rw,nosuid,nodev,noexec,size=16m,mode=0700 \
+  --tmpfs /run/amtech:rw,nosuid,nodev,noexec,size=32m,mode=0750 \
+  --tmpfs /tmp:rw,nosuid,nodev,size=256m,mode=1777 \
   -p "127.0.0.1:${port}:${port}" \
-  "${mount_args[@]}" \
   "$image" gateway run --no-supervise --replace -q
 
-echo "container:$container port:$port"
+echo "container:$container network:$network loopback_port:$port"

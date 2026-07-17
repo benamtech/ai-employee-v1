@@ -19,7 +19,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends bash ca-certificates \
+  && apt-get install -y --no-install-recommends bash ca-certificates docker.io \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/package*.json ./
@@ -28,5 +28,4 @@ COPY --from=build /app/apps/manager ./apps/manager
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/infra ./infra
 
-EXPOSE 8080
-CMD ["node", "apps/manager/dist/server.js"]
+CMD ["node", "apps/manager/dist/provisioner-host.js"]

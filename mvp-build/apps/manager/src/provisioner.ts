@@ -1,128 +1,103 @@
-/**
- * Production-shaped host provisioner.
- *
- * This route may run in the same Node process for the MVP, but it is deliberately
- * modeled as a protected HTTP boundary so a VPS or tunnel-exposed local host
- * follows the same contract as production.
- */
+import { createHmac, randomBytes, randomUUID } from "node:crypto";
+import { request as httpRequest } from "node:http";
 import type { Hono } from "hono";
 import type { ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
-import {
-  failureResult,
-  renderProfilePackage,
-  runRuntimeStart,
-  writeAndActivateCaddySnippet,
-} from "./lib/profile-renderer.js";
-import { sendSms, setIncomingSmsWebhook } from "./lib/twilio.js";
+
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`${name} missing.`);
+  return value;
+}
 
 function expectedToken(): string {
-  const token = process.env.PROVISIONER_TOKEN;
-  if (!token) throw new Error("PROVISIONER_TOKEN missing.");
-  return token;
+  return requiredEnv("PROVISIONER_TOKEN");
 }
 
 function authorized(header: string | undefined | null): boolean {
   return header === `Bearer ${expectedToken()}`;
 }
 
-function employeeNumber(): string {
-  const number = process.env.TWILIO_EMPLOYEE_NUMBER ?? process.env.TWILIO_TEST_NUMBER;
-  if (!number) throw new Error("TWILIO_EMPLOYEE_NUMBER or TWILIO_TEST_NUMBER missing.");
-  return number;
+function socketPath(): string {
+  return process.env.PROVISIONER_SOCKET_PATH ?? "/run/amtech-provisioner/provisioner.sock";
 }
 
-function skipSmsProvisioning(): boolean {
-  const skip = process.env.PROVISIONER_SKIP_SMS === "1" || process.env.PROVISIONER_SKIP_SMS === "true";
-  if (skip && process.env.NODE_ENV === "production") {
-    throw new Error("PROVISIONER_SKIP_SMS cannot be enabled in production.");
-  }
-  return skip;
-}
-
-export function smsPlan(req: ProvisionerRequest): {
-  enabled: boolean;
-  configure_webhook: boolean;
-  send_first_message: boolean;
-} {
-  const sms = req.options?.sms;
-  const enabled = sms?.enabled ?? true;
+function signedEnvelope(req: ProvisionerRequest): ProvisionerRequest {
+  const issued = new Date();
+  const expires = new Date(issued.getTime() + 30_000);
   return {
-    enabled,
-    configure_webhook: enabled && (sms?.configure_webhook ?? true),
-    send_first_message: enabled && (sms?.send_first_message ?? true),
+    ...req,
+    request_id: req.request_id ?? randomUUID(),
+    operation: req.operation ?? "ensure_runtime",
+    issued_at: issued.toISOString(),
+    expires_at: expires.toISOString(),
+    nonce: randomBytes(24).toString("base64url"),
+    idempotency_key: req.idempotency_key ?? `runtime:${req.employee_id}:${req.manifest_id}`,
   };
 }
 
-export function runtimeApiBaseUrl(req: ProvisionerRequest): string {
-  if (req.params.runtime_backend === "docker") {
-    return `http://amtech-hermes-${req.employee_id}:${req.params.gateway_port}`;
-  }
-  return `http://localhost:${req.params.gateway_port}`;
+async function callHostProvisioner(input: ProvisionerRequest): Promise<{ status: number; body: ProvisionerResult }> {
+  const envelope = signedEnvelope(input);
+  const raw = Buffer.from(JSON.stringify(envelope));
+  const signature = createHmac("sha256", requiredEnv("PROVISIONER_SIGNING_SECRET")).update(raw).digest("hex");
+
+  return await new Promise((resolve, reject) => {
+    const req = httpRequest({
+      socketPath: socketPath(),
+      path: "/v1/runtime",
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "content-length": String(raw.length),
+        "x-amtech-signature": `sha256=${signature}`,
+      },
+      timeout: Number(process.env.PROVISIONER_REQUEST_TIMEOUT_MS ?? 120_000),
+    }, (res) => {
+      const chunks: Buffer[] = [];
+      res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+      res.on("end", () => {
+        const text = Buffer.concat(chunks).toString("utf8");
+        const body = JSON.parse(text || "{}") as ProvisionerResult;
+        resolve({ status: res.statusCode ?? 500, body });
+      });
+    });
+    req.on("timeout", () => req.destroy(new Error("host_provisioner_timeout")));
+    req.on("error", reject);
+    req.end(raw);
+  });
 }
 
 export function registerProvisionerRoutes(app: Hono): void {
-  app.get("/provision/health", (c) => c.json({ status: "ok" }));
+  app.get("/provision/health", async (c) => {
+    try {
+      const probe = await new Promise<boolean>((resolve) => {
+        const req = httpRequest({ socketPath: socketPath(), path: "/health", method: "GET", timeout: 2_000 }, (res) => {
+          res.resume();
+          resolve((res.statusCode ?? 500) < 500);
+        });
+        req.on("error", () => resolve(false));
+        req.on("timeout", () => { req.destroy(); resolve(false); });
+        req.end();
+      });
+      return c.json({ status: probe ? "ok" : "unavailable", boundary: "unix-socket" }, probe ? 200 : 503);
+    } catch {
+      return c.json({ status: "unavailable", boundary: "unix-socket" }, 503);
+    }
+  });
 
   app.post("/provision", async (c) => {
-    if (!authorized(c.req.header("Authorization"))) return c.json({ status: "failed", failure_state: "unauthorized" }, 401);
-    const req = (await c.req.json()) as ProvisionerRequest;
-    const logs: string[] = [];
+    if (!authorized(c.req.header("Authorization"))) {
+      return c.json({ status: "failed", failure_state: "unauthorized" }, 401);
+    }
     try {
-      const rendered = await renderProfilePackage(req);
-      logs.push(`rendered:${rendered.generated_path}`);
-      if (rendered.deployed_plugins.length) logs.push(`plugins:${rendered.deployed_plugins.join(",")}`);
-
-      const caddy = await writeAndActivateCaddySnippet(req.params);
-      logs.push(`caddy:${caddy}`);
-
-      const skipSms = skipSmsProvisioning();
-      const plan = skipSms ? { enabled: false, configure_webhook: false, send_first_message: false } : smsPlan(req);
-      const smsNumber = plan.enabled ? employeeNumber() : null;
-      if (smsNumber && plan.configure_webhook) {
-        const webhook = await setIncomingSmsWebhook(smsNumber, req.params.webhook_url);
-        logs.push(`twilio_webhook:${webhook.phone_number_sid}`);
-      } else if (smsNumber) {
-        logs.push("twilio_webhook:skipped");
-      } else {
-        logs.push("sms:skipped");
-      }
-
-      const runtime = await runRuntimeStart(rendered.generated_path);
-      logs.push(`runtime:${runtime}`);
-
-      const first = smsNumber && plan.send_first_message
-        ? await sendSms({
-          to: req.params.owner_phone_e164,
-          from: smsNumber,
-          body: "I'm live. Text me the job you just walked, an estimate you need, or the office work you want off your plate.",
-        })
-        : null;
-      if (first) logs.push(`first_sms:${first.sid}`);
-      else if (smsNumber) logs.push("first_sms:skipped");
-
-      const result: ProvisionerResult = {
-        status: "ok",
-        profile_id: rendered.profile_id,
-        generated_path: rendered.generated_path,
-        workspace_dir: rendered.workspace_dir,
-        sms_number_e164: smsNumber ?? undefined,
-        twilio_webhook_url: smsNumber ? req.params.webhook_url : undefined,
-        webchat_api_url: runtimeApiBaseUrl(req),
-        api_base_url: runtimeApiBaseUrl(req),
-        api_session_id: "amtech-owner-thread",
-        public_web_route: `/agent/${req.employee_id}`,
-        gateway_port: req.params.gateway_port,
-        validation_status: "passed",
-        validation_output: rendered.validation_output,
-        smoke_output: runtime,
-        first_sms_sid: first?.sid,
-        logs,
-      };
-      return c.json(result);
+      const req = (await c.req.json()) as ProvisionerRequest;
+      const result = await callHostProvisioner(req);
+      return c.json(result.body, result.status as 200 | 400 | 500);
     } catch (err) {
-      const result = failureResult("provisioner_failed", err);
-      result.logs = [...logs, ...(result.logs ?? [])];
-      return c.json(result, 500);
+      return c.json({
+        status: "failed",
+        failure_state: "host_provisioner_unavailable",
+        logs: [String((err as Error).message ?? err)],
+      }, 503);
     }
   });
 }
