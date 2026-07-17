@@ -76,14 +76,31 @@ jobs:
           npm run typecheck --workspace @amtech/db
           npm run build --workspace @amtech/db
       - name: Apply and verify migration ledger
+        shell: bash
         run: |
-          npm run db:migrate
-          npm run db:verify:worker-migrations
-          npm run test:worker-migrations
+          set +e
+          {
+            npm run db:migrate
+            migrate_status=$?
+            if [ "$migrate_status" -eq 0 ]; then npm run db:verify:worker-migrations; verify_status=$?; else verify_status=0; fi
+            if [ "$migrate_status" -eq 0 ] && [ "$verify_status" -eq 0 ]; then npm run test:worker-migrations; test_status=$?; else test_status=0; fi
+            status=$((migrate_status || verify_status || test_status))
+            echo "migration_status=$migrate_status verify_status=$verify_status test_status=$test_status"
+            exit "$status"
+          } 2>&1 | tee migration-verification.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload migration diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-verification-${{ github.run_id }}
+          path: mvp-build/migration-verification.log
+          if-no-files-found: error
       - name: Manager and Hono contracts
         shell: bash
         run: |
           set +e
+          touch manager-typecheck.log
           npm run typecheck --workspace @amtech/manager 2>&1 | tee manager-typecheck.log
           status=${PIPESTATUS[0]}
           if [ "$status" -eq 0 ]; then npm run build --workspace @amtech/manager; fi
@@ -95,6 +112,8 @@ jobs:
           name: manager-typecheck-${{ github.run_id }}
           path: mvp-build/manager-typecheck.log
           if-no-files-found: error
+      - name: Validate acceptance script syntax
+        run: find infra/scripts/acceptance -name '*.mjs' -print0 | xargs -0 -n1 node --check
       - name: Production boundary unit and source proofs
         env:
           HERMES_RUNTIME_COMMAND: node -e "process.exit(0)"
