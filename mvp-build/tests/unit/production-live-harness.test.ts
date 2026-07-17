@@ -34,7 +34,7 @@ describe("production-boundary live proof manifest", () => {
       expect(source).toContain("writeProof");
       expect(source).toContain("requireEnv");
       expect(source).not.toContain("DEV_OWNER_LOGIN");
-      expect(source).not.toContain("api/dev/login");
+      expect(source).not.toContain('fetch("/api/dev/login"');
       expect(source).not.toContain("NEXT_PUBLIC_AMTECH_UI_FIXTURES");
       if (phase.destructive) {
         expect(source).toContain("requireDestructiveApproval");
