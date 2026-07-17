@@ -1,5 +1,12 @@
 import { parse } from "yaml";
-import { compileHrrFeatures, DESIGN_CAPABILITIES, type DesignCapability, type FeatureMap } from "./benchmark.js";
+import {
+  compileHrrFeatures,
+  DESIGN_CAPABILITIES,
+  type DesignCapability,
+  type FeatureMap,
+  type VectorSpaceIdentity,
+} from "./benchmark.js";
+import { facilityLocationComplementInformation } from "./csi.js";
 import { cosine, sha256, type Vector } from "./core.js";
 import {
   compileSite,
@@ -68,12 +75,28 @@ export interface ManifestPage {
   indexable: boolean;
 }
 
+export interface AgentCoverageContext {
+  id: string;
+  weight: number;
+  feature_atoms: ManifestFeatureAtom[];
+  source_ids: string[];
+  relevance_label?: "perfect" | "good" | "fair" | "bad";
+}
+
+export interface AgentCoveragePolicy {
+  minimum_contexts: number;
+  minimum_normalized_marginal_gain: number;
+  minimum_improving_contexts: number;
+  maximum_existing_similarity: number;
+}
+
 export interface AgentHarnessConfig {
   mode: "propose_validate_compile";
   publication_default: "noindex";
   required_stages: string[];
   required_outputs: string[];
   prohibited_outputs: string[];
+  coverage_policy: AgentCoveragePolicy;
 }
 
 export interface FrameworkManifest {
@@ -91,6 +114,7 @@ export interface FrameworkManifest {
   vector_space: {
     first_class: true;
     namespace: string;
+    symbol_version: string;
     vector_dimensions: number;
     axes: Record<string, ManifestAxis>;
     link_policy: {
@@ -125,6 +149,7 @@ export interface HyperVectorPageIR {
 export interface CompiledHyperVectorSpace {
   firstClass: true;
   namespace: string;
+  symbolVersion: string;
   dimensions: number;
   axes: Record<string, ManifestAxis>;
   featureVocabulary: string[];
@@ -148,12 +173,28 @@ export interface AgentPageProposal {
     prompt_hash: string;
     source_ids: string[];
     marginal_coverage_hypothesis: string;
+    coverage_contexts: AgentCoverageContext[];
   };
   evidence: EvidenceSource[];
   claims: ClaimSource[];
   information_objects: InformationObjectSource[];
   modules: ManifestModule[];
   page: ManifestPage;
+}
+
+export interface ProposalCoverageReport {
+  proposalPageId: string;
+  contextCount: number;
+  totalContextWeight: number;
+  baselineObjective: number;
+  proposedObjective: number;
+  marginalGain: number;
+  normalizedMarginalGain: number;
+  maximumExistingSimilarity: number;
+  improvingContextIds: string[];
+  csiSingletonInformation: number;
+  passes: boolean;
+  reasons: string[];
 }
 
 export function parseFrameworkManifest(text: string): FrameworkManifest {
@@ -167,13 +208,14 @@ export function parseFrameworkManifest(text: string): FrameworkManifest {
 export function compileFrameworkManifest(textOrManifest: string | FrameworkManifest): CompiledFrameworkManifest {
   const manifest = typeof textOrManifest === "string" ? parseFrameworkManifest(textOrManifest) : validateAndReturn(textOrManifest);
   const dimensions = manifest.vector_space.vector_dimensions;
-  const geometries = manifest.pages.map((page) => compilePageGeometry(manifest, page, dimensions));
+  const geometries = [...manifest.pages]
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .map((page) => compilePageGeometry(manifest, page, dimensions));
   const geometryById = new Map(geometries.map((geometry) => [geometry.pageId, geometry]));
   const pageById = new Map(manifest.pages.map((page) => [page.id, page]));
 
   const sourcePages: PageSource[] = [...manifest.pages].sort((a, b) => a.id.localeCompare(b.id)).map((page) => {
     const geometry = required(geometryById, page.id, "vector geometry");
-    const primaryAtoms = geometry.prototypes[0].featureAtoms;
     const explicitLinks = new Set(page.internal_page_ids);
     const autoLinks = deriveNearestPages(manifest, page, geometry, geometries);
     geometry.nearestPageIds = [...autoLinks];
@@ -188,7 +230,11 @@ export function compileFrameworkManifest(textOrManifest: string | FrameworkManif
       canonicalQuestion: page.canonical_question,
       title: page.title,
       description: page.description,
-      features: atomsToFeatureMap(manifest, primaryAtoms),
+      features: atomsToFeatureMap(manifest, geometry.prototypes[0].featureAtoms),
+      vectorPrototypes: geometry.prototypes.map((prototype) => ({
+        id: prototype.id,
+        features: atomsToFeatureMap(manifest, prototype.featureAtoms),
+      })),
       moduleIds: [...page.module_ids],
       internalPageIds: [...explicitLinks].sort(),
       requiredCapabilities: uniqueSorted(page.required_capabilities),
@@ -200,6 +246,7 @@ export function compileFrameworkManifest(textOrManifest: string | FrameworkManif
   for (const page of sourcePages) for (const link of page.internalPageIds) required(pageById, link, `internal links for ${page.id}`);
   const source: SiteSource = {
     baseUrl: manifestBaseUrl(manifest),
+    vectorIdentity: vectorIdentity(manifest),
     evidence: [...manifest.evidence],
     claims: [...manifest.claims],
     informationObjects: [...manifest.information_objects],
@@ -207,17 +254,86 @@ export function compileFrameworkManifest(textOrManifest: string | FrameworkManif
     pages: sourcePages,
   };
   const site = compileSite(source, dimensions);
-  assertPrimaryVectorParity(site, geometries);
+  assertAllPrototypeParity(site, geometries);
   const vectorSpace = finalizeVectorSpace(manifest, geometries);
   return { manifest, source, vectorSpace, site, profiles: manifest.profiles, defaultProfile: manifest.framework.default_profile };
 }
 
-export function validateAgentPageProposal(manifest: FrameworkManifest, proposal: AgentPageProposal): void {
+export function evaluateAgentPageProposalCoverage(
+  manifest: FrameworkManifest,
+  proposal: AgentPageProposal,
+): ProposalCoverageReport {
+  const policy = manifest.agent_harness.coverage_policy;
+  const identity = vectorIdentity(manifest);
+  const dimensions = manifest.vector_space.vector_dimensions;
+  const contexts = [...proposal.generation.coverage_contexts].sort((left, right) => left.id.localeCompare(right.id));
+  const contextVectors = contexts.map((context) => compileHrrFeatures(
+    atomsToFeatureMap(manifest, normalizedAtoms(manifest, context.feature_atoms, `coverage context ${context.id}`)),
+    dimensions,
+    identity,
+  ));
+  const existingGeometries = [...manifest.pages]
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .map((page) => compilePageGeometry(manifest, page, dimensions));
+  const proposedGeometry = compilePageGeometry(manifest, proposal.page, dimensions);
+  const totalContextWeight = contexts.reduce((sum, context) => sum + context.weight, 0);
+
+  let baselineObjective = 0;
+  let proposedObjective = 0;
+  const improvingContextIds: string[] = [];
+  for (let index = 0; index < contexts.length; index += 1) {
+    const currentBest = bestContextPageSimilarity(contextVectors[index], existingGeometries);
+    const proposedFit = bestContextPageSimilarity(contextVectors[index], [proposedGeometry]);
+    baselineObjective += contexts[index].weight * currentBest;
+    proposedObjective += contexts[index].weight * Math.max(currentBest, proposedFit);
+    if (proposedFit > currentBest + 1e-9) improvingContextIds.push(contexts[index].id);
+  }
+  const marginalGain = proposedObjective - baselineObjective;
+  const normalizedMarginalGain = totalContextWeight > 0 ? marginalGain / totalContextWeight : 0;
+  const maximumExistingSimilarity = existingGeometries.length === 0
+    ? 0
+    : Math.max(...existingGeometries.map((geometry) => maxPrototypeCosine(proposedGeometry, geometry)));
+
+  const allGeometries = [...existingGeometries, proposedGeometry];
+  const kernel = allGeometries.map((left) => allGeometries.map((right) => boundedCosine(maxPrototypeCosine(left, right))));
+  const csiSingletonInformation = facilityLocationComplementInformation(kernel, [allGeometries.length - 1]);
+
+  const reasons: string[] = [];
+  if (contexts.length < policy.minimum_contexts) reasons.push(`requires at least ${policy.minimum_contexts} coverage contexts`);
+  if (totalContextWeight <= 0) reasons.push("coverage context weight must be positive");
+  if (normalizedMarginalGain < policy.minimum_normalized_marginal_gain) {
+    reasons.push(`normalized marginal gain ${normalizedMarginalGain.toFixed(6)} is below ${policy.minimum_normalized_marginal_gain}`);
+  }
+  if (improvingContextIds.length < policy.minimum_improving_contexts) {
+    reasons.push(`improves ${improvingContextIds.length} contexts; requires ${policy.minimum_improving_contexts}`);
+  }
+  if (maximumExistingSimilarity > policy.maximum_existing_similarity) {
+    reasons.push(`maximum existing-page similarity ${maximumExistingSimilarity.toFixed(6)} exceeds ${policy.maximum_existing_similarity}`);
+  }
+
+  return {
+    proposalPageId: proposal.page.id,
+    contextCount: contexts.length,
+    totalContextWeight,
+    baselineObjective,
+    proposedObjective,
+    marginalGain,
+    normalizedMarginalGain,
+    maximumExistingSimilarity,
+    improvingContextIds,
+    csiSingletonInformation,
+    passes: reasons.length === 0,
+    reasons,
+  };
+}
+
+export function validateAgentPageProposal(manifest: FrameworkManifest, proposal: AgentPageProposal): ProposalCoverageReport {
   if (!proposal.generation.agent_id.trim() || !proposal.generation.model.trim() || !proposal.generation.prompt_hash.trim()) {
     throw new Error("agent proposal requires agent, model, and prompt hash");
   }
   if (proposal.generation.source_ids.length === 0) throw new Error("agent proposal requires source IDs");
   if (!proposal.generation.marginal_coverage_hypothesis.trim()) throw new Error("agent proposal requires a marginal coverage hypothesis");
+  if (proposal.generation.coverage_contexts.length === 0) throw new Error("agent proposal requires explicit coverage contexts");
   if (proposal.information_objects.length === 0) throw new Error("agent proposal requires at least one distinct information object");
   if (proposal.page.feature_atoms.length === 0) throw new Error("agent proposal requires a target hyper-vector region");
   if (proposal.page.indexable) throw new Error("agent proposals enter as noindex until separate publication approval");
@@ -239,9 +355,19 @@ export function validateAgentPageProposal(manifest: FrameworkManifest, proposal:
       throw new Error(`agent source ${sourceId} is not attached to a proposed module`);
     }
   }
+  for (const context of proposal.generation.coverage_contexts) {
+    if (!context.id.trim() || !Number.isFinite(context.weight) || context.weight <= 0) throw new Error("coverage contexts require ID and positive finite weight");
+    if (context.source_ids.length === 0) throw new Error(`coverage context ${context.id} requires source IDs`);
+    normalizedAtoms(manifest, context.feature_atoms, `coverage context ${context.id}`);
+  }
+
+  const coverage = evaluateAgentPageProposalCoverage(manifest, proposal);
+  if (!coverage.passes) throw new Error(`agent proposal failed computed coverage gate: ${coverage.reasons.join("; ")}`);
+
   const trial = applyAgentPageProposalUnchecked(manifest, proposal);
   validateManifest(trial);
   compileFrameworkManifest(trial);
+  return coverage;
 }
 
 export function applyAgentPageProposal(manifest: FrameworkManifest, proposal: AgentPageProposal): FrameworkManifest {
@@ -271,12 +397,17 @@ function applyAgentPageProposalUnchecked(manifest: FrameworkManifest, proposal: 
 }
 
 function compilePageGeometry(manifest: FrameworkManifest, page: ManifestPage, dimensions: number): HyperVectorPageIR {
+  const identity = vectorIdentity(manifest);
   const prototypes = (page.prototypes?.length ? page.prototypes : [{ id: "primary", feature_atoms: page.feature_atoms }])
-    .map((prototype) => ({
-      id: prototype.id,
-      featureAtoms: normalizedAtoms(manifest, prototype.feature_atoms, page.id),
-      vector: compileHrrFeatures(atomsToFeatureMap(manifest, prototype.feature_atoms), dimensions),
-    }));
+    .map((prototype) => {
+      const featureAtoms = normalizedAtoms(manifest, prototype.feature_atoms, `${page.id}/${prototype.id}`);
+      return {
+        id: prototype.id,
+        featureAtoms,
+        vector: compileHrrFeatures(atomsToFeatureMap(manifest, featureAtoms), dimensions, identity),
+      };
+    })
+    .sort((left, right) => left.id.localeCompare(right.id));
   return { pageId: page.id, profileIds: uniqueSorted(page.profile_ids), prototypes, nearestPageIds: [] };
 }
 
@@ -298,6 +429,12 @@ function deriveNearestPages(
     .map((candidate) => candidate.pageId);
 }
 
+function bestContextPageSimilarity(context: Vector, pages: readonly HyperVectorPageIR[]): number {
+  let best = 0;
+  for (const page of pages) for (const prototype of page.prototypes) best = Math.max(best, boundedCosine(cosine(context, prototype.vector)));
+  return best;
+}
+
 function maxPrototypeCosine(left: HyperVectorPageIR, right: HyperVectorPageIR): number {
   let best = Number.NEGATIVE_INFINITY;
   for (const a of left.prototypes) for (const b of right.prototypes) best = Math.max(best, cosine(a.vector, b.vector));
@@ -305,16 +442,38 @@ function maxPrototypeCosine(left: HyperVectorPageIR, right: HyperVectorPageIR): 
 }
 
 function finalizeVectorSpace(manifest: FrameworkManifest, pages: HyperVectorPageIR[]): CompiledHyperVectorSpace {
-  const featureVocabulary = uniqueSorted(pages.flatMap((page) => page.prototypes.flatMap((prototype) =>
+  const sortedPages = [...pages].sort((left, right) => left.pageId.localeCompare(right.pageId));
+  const featureVocabulary = uniqueSorted(sortedPages.flatMap((page) => page.prototypes.flatMap((prototype) =>
     prototype.featureAtoms.map((atom) => `${atom.dimension}:${atom.value}`))));
-  const pageSummary = pages.map((page) => ({
+  const pageSummary = sortedPages.map((page) => ({
     pageId: page.pageId,
-    profileIds: page.profileIds,
-    prototypes: page.prototypes.map((prototype) => ({ id: prototype.id, atoms: prototype.featureAtoms, vector: Array.from(prototype.vector) })),
+    profileIds: [...page.profileIds].sort(),
+    prototypes: [...page.prototypes].sort((left, right) => left.id.localeCompare(right.id)).map((prototype) => ({
+      id: prototype.id,
+      atoms: [...prototype.featureAtoms].sort(compareAtoms),
+      vector: Array.from(prototype.vector),
+    })),
+    nearestPageIds: [...page.nearestPageIds].sort(),
   }));
-  const spaceHash = sha256(JSON.stringify({ namespace: manifest.vector_space.namespace, dimensions: manifest.vector_space.vector_dimensions, featureVocabulary, pageSummary }));
-  return { firstClass: true, namespace: manifest.vector_space.namespace, dimensions: manifest.vector_space.vector_dimensions,
-    axes: manifest.vector_space.axes, featureVocabulary, pages, spaceHash };
+  const axes = Object.fromEntries(Object.entries(manifest.vector_space.axes).sort(([left], [right]) => left.localeCompare(right)));
+  const spaceHash = sha256(JSON.stringify({
+    namespace: manifest.vector_space.namespace,
+    symbolVersion: manifest.vector_space.symbol_version,
+    dimensions: manifest.vector_space.vector_dimensions,
+    axes,
+    featureVocabulary,
+    pageSummary,
+  }));
+  return {
+    firstClass: true,
+    namespace: manifest.vector_space.namespace,
+    symbolVersion: manifest.vector_space.symbol_version,
+    dimensions: manifest.vector_space.vector_dimensions,
+    axes,
+    featureVocabulary,
+    pages: sortedPages,
+    spaceHash,
+  };
 }
 
 function atomsToFeatureMap(manifest: FrameworkManifest, atoms: ManifestFeatureAtom[]): FeatureMap {
@@ -338,18 +497,29 @@ function normalizedAtoms(manifest: FrameworkManifest, atoms: ManifestFeatureAtom
       throw new Error(`${context} uses undeclared value ${atom.dimension}:${atom.value}`);
     }
     return { ...atom };
-  }).sort((left, right) => left.dimension.localeCompare(right.dimension) || left.value.localeCompare(right.value));
+  }).sort(compareAtoms);
 }
 
-function assertPrimaryVectorParity(site: CompiledSite, geometries: HyperVectorPageIR[]): void {
+function assertAllPrototypeParity(site: CompiledSite, geometries: HyperVectorPageIR[]): void {
   const geometryById = new Map(geometries.map((geometry) => [geometry.pageId, geometry]));
   const dimensions = site.packed.dimensions;
   site.packed.pageIds.forEach((pageId, pageIndex) => {
-    const expected = required(geometryById, pageId, "packed vector parity").prototypes[0].vector;
-    for (let dimension = 0; dimension < dimensions; dimension += 1) {
-      const actual = site.packed.pageVectors[pageIndex * dimensions + dimension];
-      if (Math.abs(actual - expected[dimension]) > 1e-6) throw new Error(`packed vector drift for ${pageId} at ${dimension}`);
-    }
+    const expectedPrototypes = required(geometryById, pageId, "packed vector parity").prototypes;
+    const start = site.packed.prototypeOffsets[pageIndex];
+    const end = site.packed.prototypeOffsets[pageIndex + 1];
+    if (end - start !== expectedPrototypes.length) throw new Error(`packed prototype count drift for ${pageId}`);
+    expectedPrototypes.forEach((prototype, prototypeIndex) => {
+      const packedIndex = start + prototypeIndex;
+      if (site.packed.prototypeIds[packedIndex] !== `${pageId}\0${prototype.id}`) throw new Error(`packed prototype ID drift for ${pageId}/${prototype.id}`);
+      for (let dimension = 0; dimension < dimensions; dimension += 1) {
+        const actual = site.packed.prototypeVectors[packedIndex * dimensions + dimension];
+        if (Math.abs(actual - prototype.vector[dimension]) > 1e-6) throw new Error(`packed prototype drift for ${pageId}/${prototype.id} at ${dimension}`);
+        if (prototypeIndex === 0) {
+          const primaryActual = site.packed.pageVectors[pageIndex * dimensions + dimension];
+          if (Math.abs(primaryActual - prototype.vector[dimension]) > 1e-6) throw new Error(`packed primary vector drift for ${pageId} at ${dimension}`);
+        }
+      }
+    });
   });
 }
 
@@ -374,6 +544,7 @@ function validateManifest(manifest: FrameworkManifest): void {
   if (!manifest.version || !manifest.updated_at) throw new Error("manifest version and updated_at are required");
   if (manifest.framework.authority !== "unified_manifest") throw new Error("site manifest must be the unified framework authority");
   if (!manifest.framework.agent_first || !manifest.vector_space.first_class) throw new Error("agent-first and first-class vector-space flags are required");
+  if (!manifest.vector_space.namespace.trim() || !manifest.vector_space.symbol_version.trim()) throw new Error("vector namespace and symbol_version are required");
   if (!Number.isInteger(manifest.vector_space.vector_dimensions) || manifest.vector_space.vector_dimensions < 8 ||
       (manifest.vector_space.vector_dimensions & (manifest.vector_space.vector_dimensions - 1)) !== 0) {
     throw new Error("vector_dimensions must be a power of two >= 8");
@@ -383,6 +554,7 @@ function validateManifest(manifest: FrameworkManifest): void {
   if (manifest.agent_harness.mode !== "propose_validate_compile" || manifest.agent_harness.publication_default !== "noindex") {
     throw new Error("agent harness must use propose/validate/compile with noindex default");
   }
+  validateCoveragePolicy(manifest.agent_harness.coverage_policy);
   if (manifest.pages.length === 0 || manifest.modules.length === 0) throw new Error("manifest requires pages and modules");
   assertUnique(manifest.evidence, "evidence"); assertUnique(manifest.claims, "claim"); assertUnique(manifest.information_objects, "information object");
   assertUnique(manifest.modules, "module"); assertUnique(manifest.pages, "page");
@@ -398,7 +570,14 @@ function validateManifest(manifest: FrameworkManifest): void {
       if (!profile.page_ids.includes(page.id)) throw new Error(`profile ${profileId} does not include declared page ${page.id}`);
     }
     normalizedAtoms(manifest, page.feature_atoms, page.id);
-    if (page.prototypes) for (const prototype of page.prototypes) normalizedAtoms(manifest, prototype.feature_atoms, `${page.id}/${prototype.id}`);
+    if (page.prototypes) {
+      const prototypeIds = new Set<string>();
+      for (const prototype of page.prototypes) {
+        if (!prototype.id.trim() || prototypeIds.has(prototype.id)) throw new Error(`page ${page.id} has invalid or duplicate prototype ${prototype.id}`);
+        prototypeIds.add(prototype.id);
+        normalizedAtoms(manifest, prototype.feature_atoms, `${page.id}/${prototype.id}`);
+      }
+    }
     for (const capability of page.required_capabilities) if (!DESIGN_CAPABILITIES.includes(capability)) throw new Error(`unknown capability ${capability} in ${page.id}`);
     if (page.indexable && (!manifest.production_ready || page.publication_gate !== "approved")) {
       throw new Error(`page ${page.id} cannot be indexable before production approval`);
@@ -406,6 +585,27 @@ function validateManifest(manifest: FrameworkManifest): void {
   }
 }
 
+function validateCoveragePolicy(policy: AgentCoveragePolicy): void {
+  if (!Number.isInteger(policy.minimum_contexts) || policy.minimum_contexts < 1) throw new Error("coverage policy minimum_contexts must be >= 1");
+  if (!Number.isFinite(policy.minimum_normalized_marginal_gain) || policy.minimum_normalized_marginal_gain < 0 || policy.minimum_normalized_marginal_gain > 1) {
+    throw new Error("coverage policy marginal threshold must be in [0,1]");
+  }
+  if (!Number.isInteger(policy.minimum_improving_contexts) || policy.minimum_improving_contexts < 1) throw new Error("coverage policy minimum_improving_contexts must be >= 1");
+  if (!Number.isFinite(policy.maximum_existing_similarity) || policy.maximum_existing_similarity < -1 || policy.maximum_existing_similarity > 1) {
+    throw new Error("coverage policy maximum_existing_similarity must be in [-1,1]");
+  }
+}
+
+function vectorIdentity(manifest: FrameworkManifest): VectorSpaceIdentity {
+  return { namespace: manifest.vector_space.namespace, symbolVersion: manifest.vector_space.symbol_version };
+}
+function boundedCosine(value: number): number { return Math.max(0, Math.min(1, (value + 1) / 2)); }
+function compareAtoms(left: ManifestFeatureAtom, right: ManifestFeatureAtom): number {
+  return left.dimension.localeCompare(right.dimension)
+    || left.value.localeCompare(right.value)
+    || left.source_id.localeCompare(right.source_id)
+    || left.provenance.localeCompare(right.provenance);
+}
 function validateAndReturn(manifest: FrameworkManifest): FrameworkManifest { validateManifest(manifest); return manifest; }
 function manifestBaseUrl(manifest: FrameworkManifest): string {
   const value = manifest.base_url;
