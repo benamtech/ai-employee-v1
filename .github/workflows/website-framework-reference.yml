@@ -39,7 +39,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: website-framework-test-diagnostics
-          path: GTM-RESEARCH/website-framework/reference/ci-test.log
+          path: |
+            GTM-RESEARCH/website-framework/reference/ci-test.log
+            GTM-RESEARCH/website-framework/reference/src/manifest.ts
           retention-days: 7
       - run: npm run manifest:emit
       - run: npm run ui:emit
