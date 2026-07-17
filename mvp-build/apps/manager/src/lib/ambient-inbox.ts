@@ -31,10 +31,29 @@ export interface AmbientInboxRow extends AmbientEventInput {
   replay_count?: number | null;
 }
 
+export interface AmbientEffectReceipt {
+  id: string;
+  inbox_id: string;
+  effect_key: string;
+  provider: string;
+  state: "claimed" | "applied" | "failed" | "ambiguous";
+  provider_id?: string | null;
+  evidence?: Record<string, unknown>;
+  claimed_at?: string | null;
+  applied_at?: string | null;
+}
+
 export class AmbientWaitingForBindingError extends Error {
   constructor(message = "ambient_event_waiting_for_binding") {
     super(message);
     this.name = "AmbientWaitingForBindingError";
+  }
+}
+
+export class AmbientEffectAmbiguousError extends Error {
+  constructor(message = "ambient_provider_effect_ambiguous") {
+    super(message);
+    this.name = "AmbientEffectAmbiguousError";
   }
 }
 
@@ -93,6 +112,59 @@ export async function enqueueAmbientEvent(db: SupabaseClient, input: AmbientEven
   return { inbox_id: String(existing.data.inbox_id), duplicate: true };
 }
 
+export async function claimAmbientEffect(db: SupabaseClient, input: { inbox_id: string; effect_key: string; provider: string; evidence?: Record<string, unknown> }): Promise<{ claimed: boolean; receipt: AmbientEffectReceipt }> {
+  const id = `aer_${randomUUID()}`;
+  const inserted = await db.from("ambient_effect_receipts").insert({
+    id,
+    inbox_id: input.inbox_id,
+    effect_key: input.effect_key,
+    provider: input.provider,
+    state: "claimed",
+    evidence: input.evidence ?? {},
+  }).select("*").maybeSingle();
+  if (!inserted.error && inserted.data) return { claimed: true, receipt: inserted.data as AmbientEffectReceipt };
+  if ((inserted.error as { code?: string } | null)?.code !== "23505") throw inserted.error;
+  const existing = await db.from("ambient_effect_receipts").select("*").eq("effect_key", input.effect_key).maybeSingle();
+  if (existing.error || !existing.data) throw existing.error ?? new Error("ambient_effect_receipt_lookup_failed");
+  const receipt = existing.data as AmbientEffectReceipt;
+  if (receipt.state === "failed") {
+    const reclaimed = await db.from("ambient_effect_receipts").update({
+      state: "claimed",
+      claimed_at: nowIso(),
+      updated_at: nowIso(),
+      evidence: { ...(receipt.evidence ?? {}), ...(input.evidence ?? {}), retry_claimed_at: nowIso() },
+    }).eq("id", receipt.id).eq("state", "failed").select("*").maybeSingle();
+    if (reclaimed.error) throw reclaimed.error;
+    if (reclaimed.data) return { claimed: true, receipt: reclaimed.data as AmbientEffectReceipt };
+  }
+  return { claimed: false, receipt };
+}
+
+export async function completeAmbientEffect(db: SupabaseClient, receiptId: string, input: { provider_id?: string | null; evidence?: Record<string, unknown> }): Promise<void> {
+  const updated = await db.from("ambient_effect_receipts").update({
+    state: "applied",
+    provider_id: input.provider_id ?? null,
+    evidence: input.evidence ?? {},
+    applied_at: nowIso(),
+    updated_at: nowIso(),
+  }).eq("id", receiptId).eq("state", "claimed");
+  if (updated.error) throw updated.error;
+}
+
+export async function failAmbientEffect(db: SupabaseClient, receiptId: string, err: unknown): Promise<void> {
+  const updated = await db.from("ambient_effect_receipts").update({
+    state: "failed",
+    evidence: { error: safeError(err) },
+    updated_at: nowIso(),
+  }).eq("id", receiptId).eq("state", "claimed");
+  if (updated.error) throw updated.error;
+}
+
+export async function markAmbientEffectAmbiguous(db: SupabaseClient, receiptId: string, evidence: Record<string, unknown>): Promise<void> {
+  const updated = await db.from("ambient_effect_receipts").update({ state: "ambiguous", evidence, updated_at: nowIso() }).eq("id", receiptId).eq("state", "claimed");
+  if (updated.error) throw updated.error;
+}
+
 async function claimNextAmbientEvent(db: SupabaseClient): Promise<AmbientInboxRow | null> {
   const claimed = await db.rpc("claim_next_ambient_event", { p_lease_token: `ael_${randomUUID()}`, p_lease_seconds: 120 });
   if (claimed.error) throw claimed.error;
@@ -129,9 +201,6 @@ async function dispatchAmbientEvent(db: SupabaseClient, event: AmbientInboxRow):
     return await module.processQuickbooksAmbientEvent(db, event);
   }
   if (event.provider === "amtech" && event.event_type === "employee.welcome.requested") {
-    // Provisioning has already accepted runtime, route, and channel binding. The
-    // existing idempotent welcome-delivery path may consume this durable event;
-    // this worker records that the effect is eligible without inventing provider proof.
     return { welcome_ready: true, delivery_deferred_to_provider_path: true };
   }
   throw new Error(`ambient_provider_not_supported:${event.provider}`);
@@ -153,7 +222,7 @@ async function markRetry(db: SupabaseClient, event: AmbientInboxRow, err: unknow
   const waiting = err instanceof AmbientWaitingForBindingError;
   const attempts = Number(event.attempt_count ?? 1);
   const maxAttempts = Number(event.max_attempts ?? 12);
-  if (attempts >= maxAttempts) {
+  if (attempts >= maxAttempts || err instanceof AmbientEffectAmbiguousError) {
     const failure = safeError(err);
     const deadLetterId = `adl_${randomUUID()}`;
     const dead = await db.from("ambient_event_dead_letters").upsert({
