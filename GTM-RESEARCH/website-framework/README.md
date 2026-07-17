@@ -1,23 +1,24 @@
-# AMTECH Next-Generation Website Framework
+# Hyperperformant Holographic Hyper-Targeting Website Framework
 
-Status: canonical implementation workspace
+Status: research-grounded implementation specification
 Created: 2026-07-17
 Implementation root: `GTM-RESEARCH/website-framework/`
 
 ## Mission
 
-Build a hyper-performant, hyper-specialized, agentic-search-ready public website from first principles.
+Build a hyperperformant, hyper-specialized, agentic-search-ready public website whose static knowledge graph is indexable and whose presentation can be resolved into the most relevant bounded content slice for the current request/session context.
 
-The website is not a skin over the old site and not a generic SaaS template. It is a purpose-built category engine for AMTECH's AI Employee:
+This is **not** a customer-profile system. It must not create or maintain a hidden dossier about a named person, business, lead, or customer. The matching input is an ephemeral, non-identifying **context shape** assembled from allowed request, route, campaign, language, coarse region, device-class, and consented in-session interaction features.
 
-> **Your business gets an employee that lives in the software.**
+The framework applies Holographic Reduced Representations / Vector Symbolic Architecture concepts to:
 
-The site must simultaneously do four jobs:
+- encode compositional intent and content structures in fixed-width vectors;
+- retrieve resonant content and component candidates;
+- augment vector similarity with a precomputed topic/entity graph and business priors;
+- materialize a finite, policy-safe variant without sacrificing the canonical SEO shell;
+- compare a stable baseline against continuous algorithmic resolution through A/Z experiments.
 
-1. make a contractor recognize the office work stealing their evenings;
-2. teach the new AI Employee category through concrete work;
-3. establish trust through owner gates, credential custody, proof, and honest evidence labels;
-4. publish a machine-legible, deeply linked body of original answers that search engines and answer systems can retrieve, cite, and fan out across.
+The framework is an experimental application of established HRR/VSA mathematics. It is not considered production-ready until the scientific, latency, privacy, SEO, and conversion validation vectors in this folder pass.
 
 ## Read order
 
@@ -28,141 +29,127 @@ The site must simultaneously do four jobs:
 5. `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`
 6. `../../docs/amtech-website-rewrite-brief.md`
 7. `../../mvp-build/docs/gtm/free-infrastructure-managed-workforce-strategy.md`
-8. `01-performance-architecture.md`
-9. `02-agentic-seo-system.md`
-10. `03-specialized-page-system.md`
-11. `04-implementation-and-acceptance.md`
-12. `site-manifest.yaml`
+8. `00-scientific-and-feasibility-validation.md`
+9. `01-system-architecture.md`
+10. `02-shape-model-and-hrr-core.md`
+11. `03-agentic-seo-system.md`
+12. `04-feature-validation-vectors.md`
+13. `05-pass-fail-vectors.md`
+14. `06-experimentation-privacy-operations.md`
+15. `site-manifest.yaml`
 
-## First-principles decisions
+## Canonical stack hypothesis
 
-### The site is content-first, not application-first
+- **Application:** Next.js 16+ App Router with Cache Components / Partial Prerendering.
+- **Orchestration:** strict TypeScript.
+- **Math core:** Zig compiled to pre-imported WebAssembly, only after the JS reference implementation and runtime compatibility gates pass.
+- **Content:** typed MDX/content objects. Prefer Velite or a small Zod-based compiler; do not assume Contentlayer compatibility without a package-health/build proof.
+- **Edge resolver:** a dedicated Cloudflare Worker or equivalent edge function in front of the Next origin. Do not assume Next.js 16 `proxy.ts` is an edge runtime.
+- **State/cache:** build artifacts plus edge KV/config for immutable vectors and priors; Redis/Postgres/pgvector only where measured network cost and operational value justify them.
+- **Deployment:** Vercel and/or Cloudflare, selected by the platform validation matrix rather than preference.
 
-The public website should ship semantic HTML, readable copy, links, metadata, and structured data in the initial response. JavaScript is reserved for the living-worker demonstration, forms, analytics, and genuinely interactive state.
-
-### Zero JavaScript is the default
-
-Every component starts as static/server-rendered HTML and CSS. Add an island only when the user gains a meaningful interaction that cannot be achieved otherwise.
-
-### The category is taught through work
-
-Every major page should show:
+## Fundamental architecture
 
 ```text
-owner situation or business event
--> employee interprets context
--> concrete work appears
--> owner gate when consequential
--> external action
--> proof receipt
+BUILD TIME
+content + entities + route policy
+-> deterministic basis vectors
+-> pre-bound role/value vectors
+-> content/component hypervectors
+-> graph centrality + adjacency priors
+-> cluster centroids + compact search index
+-> typed manifest + static SEO pages
+
+REQUEST TIME
+allowed request/session context
+-> ephemeral context shape
+-> coarse cluster retrieval
+-> exact HRR/cosine score
+-> precomputed graph pull + business prior
+-> eligibility/claim/privacy guards
+-> finite variant ID
+-> rewrite/header/cookie to Next route
+-> static shell + bounded personalized island
+
+EXPERIMENT TIME
+A = canonical baseline
+Z = algorithmically selected bounded variant
+-> randomized holdout
+-> conversion + performance + SEO + privacy telemetry
+-> offline Bayesian prior/weight update
 ```
 
-### Search architecture follows the product graph
+## Key performance insight
 
-Do not generate pages from keyword permutations. Build a graph of useful answers around:
+Do **not** perform circular convolution for every feature on every request.
 
-- the AI Employee category;
-- contractor office work;
-- specific tasks and job-lifecycle moments;
-- owner control and security;
-- connected business systems;
-- proof and implementation questions;
-- pricing and buying decisions.
+At build time, precompute each allowed `role ⊗ value` vector. At request time, construct the context shape by weighted superposition of those pre-bound vectors, normalize it, retrieve a small candidate set, and run exact similarity. This moves FFT work off the critical path and makes the edge core mostly vector addition, dot products, and top-k selection.
 
-A page exists only when it resolves a distinct owner question or decision with original information.
+FFT binding/unbinding remains available for the build compiler, diagnostics, explainability, and experiments. It is not assumed necessary in the hot path.
 
-### Evidence is data
+## SEO invariants
 
-Every proof object carries one required evidence level:
+1. Every indexable URL has stable, useful, server-rendered canonical content.
+2. Search crawlers and humans receive the same primary topic, claims, and evidence. Resolver variants may reorder or specialize examples and CTAs; they must not become cloaking.
+3. Ephemeral variants are not separate indexable URLs.
+4. Stable long-tail pages exist only when they answer a distinct question with original information and a crawlable place in the topic graph.
+5. Structured data describes visible content and never upgrades evidence.
+6. No thin permutations, scaled-content abuse, hidden prompt injection, fake FAQ/review schema, or “AI Overview manipulation.”
 
-- `live_production_proof`
-- `product_demonstration`
-- `source_wired_preview`
-- `concept`
+## Privacy invariants
 
-The rendering system must not silently promote a lower evidence level into a stronger claim.
+- no browser fingerprinting;
+- no persistent identity inferred from device characteristics;
+- no raw IP storage in the resolver/analytics path;
+- coarse geography only where operationally necessary;
+- no sensitive-trait inference or targeting;
+- no cross-session shape ID without explicit consent;
+- anonymous context shapes expire quickly and degrade to baseline;
+- every feature is allowlisted, documented, and removable;
+- the baseline experience remains complete when personalization is disabled.
 
-## Canonical routes
+## Performance targets
 
-Initial launch routes:
+Resolver targets:
 
-- `/`
-- `/ai-employee`
-- `/contractors`
-- `/how-it-works`
-- `/security`
-- `/pricing`
-- `/proof`
-- `/about`
+- edge compute p95 <= 10 ms after initialization;
+- total resolver overhead p95 <= 80 ms;
+- zero network database call on the default hot path;
+- deterministic baseline fallback on any timeout/error;
+- compact WASM and vector assets with measured cold-start cost.
 
-The content graph may later add task, comparison, implementation, and vertical nodes only when each page has enough unique evidence and information gain to deserve indexing.
+Website targets:
 
-## Architecture default
+- cached lab LCP <= 1.0 s on primary landing pages;
+- field p75 LCP <= 1.8 s target and <= 2.5 s hard gate;
+- field p75 INP <= 100 ms target and <= 200 ms hard gate;
+- CLS <= 0.05 target and <= 0.1 hard gate;
+- no visual flicker between static shell and resolved island;
+- no third-party script on the critical rendering path.
 
-Use a static-first architecture with TypeScript, content collections, componentized semantic HTML, and selective islands. Astro is the default candidate for a standalone public site because it makes zero-JavaScript output and content collections the normal path. Preserve an existing framework only if it can meet the same budgets without turning the marketing site into a hydrated application shell.
+## Product/content mission
 
-The real `/create-ai-employee` onboarding remains the product destination. The website can link or proxy to it, but must not replace it with a fake front-end demo.
+The first AMTECH implementation still has one product job:
 
-## Performance contract
+> **Your business gets an employee that lives in the software.**
 
-Minimum field targets at the 75th percentile, mobile and desktop:
+The framework must make the right proof slice salient without changing the underlying truth:
 
-- LCP <= 2.5 seconds;
-- INP <= 200 milliseconds;
-- CLS <= 0.1.
-
-Internal launch targets should be stricter:
-
-- LCP <= 1.8 seconds on the primary landing pages;
-- INP <= 150 milliseconds;
-- CLS <= 0.05;
-- initial JavaScript <= 75 KB gzip on the homepage, with a zero-JS path for non-interactive pages;
-- initial CSS <= 30 KB gzip;
-- no third-party script on the critical rendering path;
-- no render-blocking web font dependency;
-- no hero video or image that becomes the performance bottleneck;
-- no layout shift from media, fonts, cookie banners, or late personalization.
-
-Budgets are enforced in CI, not treated as cleanup goals.
-
-## Agentic SEO contract
-
-“Agentic SEO” does not mean special markup that guarantees inclusion in AI answers. It means producing the strongest retrievable answer system:
-
-- crawlable server-rendered content;
-- distinct pages with clear intent;
-- original, specific, people-first information;
-- explicit entities and relationships;
-- concise answer blocks plus deeper evidence;
-- logical crawlable internal links;
-- accurate visible structured data;
-- stable canonical URLs and metadata;
-- proof labels and revision dates;
-- no thin permutations, hidden text, fake FAQs, or schema spam.
-
-Google's current guidance states that AI Overviews and AI Mode use the same foundational SEO requirements as Search and may fan queries out across related subtopics. The site therefore needs a coherent evidence-backed topic graph, not an “AI Overview hack.”
-
-## Conversion contract
-
-The website should cause a qualified owner to think:
-
-- this is not generic AI;
-- this does the computer and paperwork jobs I hate;
-- I can text it like an employee;
-- it asks before anything risky;
-- I can start without a platform rollout;
-- an evening back or one more job could make this worthwhile.
+```text
+owner asks or a business event arrives
+-> AI Employee works
+-> proof appears
+-> owner approves when required
+-> customer/provider action happens
+-> proof and memory remain
+```
 
 Primary CTA: **Build my AI Employee**
 
 Offer: **Start free. Managed AI Employee from $400.**
 
-## Public estimator rule
+The public estimator remains outdated and non-canonical.
 
-The public estimator is an outdated acquisition/regression experiment. It is not the site's category model, flagship experience, pricing model, or launch proof.
+## Production decision rule
 
-## Implementation posture
-
-This folder is the implementation authority for the public website. During the implementation session, place the site source here or create an explicitly documented app subdirectory here. Do not scatter the new public site across unrelated root folders.
-
-Before code is written, inspect the current public-site source, deployment/DNS arrangement, onboarding destination, analytics, forms, routes, redirects, and canonical metadata. Preserve only what is still useful and true.
+No component is marked production-ready because it sounds mathematically elegant. It must pass the feature-validation and pass/fail vectors in this folder on the actual deployment runtime, with an auditable baseline and fallback.
