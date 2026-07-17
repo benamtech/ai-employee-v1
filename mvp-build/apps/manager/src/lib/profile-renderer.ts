@@ -4,15 +4,8 @@ import type { ProfileBuildParams, ProvisionerRequest, ProvisionerResult } from "
 import { computeApiServerToolsets, modelGatewayPolicySummary, renderableDirectMcpConnectors, toYamlFlowList } from "@amtech/shared";
 import { activateCaddySnippet, writeCaddySnippetFile } from "./caddy-activation.js";
 import { runCommandString } from "./command-runner.js";
-import {
-  assertProfileTreeIntegrity,
-  computeProfileChecksum,
-} from "./runtime-profile-integrity.js";
-import {
-  buildNativeMemoryFiles,
-  renderProfileContextMarkdown,
-  renderSlotMarkdown,
-} from "./memory-seed.js";
+import { assertProfileTreeIntegrity, computeProfileChecksum } from "./runtime-profile-integrity.js";
+import { buildNativeMemoryFiles, renderProfileContextMarkdown, renderSlotMarkdown } from "./memory-seed.js";
 
 const TEXT_EXTENSIONS = new Set([".md", ".yaml", ".yml", ".json", ".tpl", ".txt", ".example"]);
 
@@ -33,14 +26,9 @@ function localDirectModelModeAllowed(params: ProfileBuildParams): boolean {
 
 function requireModelGatewayToken(params: ProfileBuildParams, renderSecrets: ProvisionerRequest["render_secrets"] = {}): string {
   const token = renderSecrets.model_gateway_token;
-  if (!token) {
-    if (localDirectModelModeAllowed(params)) return "";
-    throw new Error("model_gateway_token missing; production provisioning must use an employee-scoped model gateway credential.");
-  }
-  if (params.model_gateway.account_id && params.model_gateway.employee_id) {
-    // Kept for forward compatibility if ModelGatewayPolicy grows explicit ids.
-  }
-  return token;
+  if (token) return token;
+  if (localDirectModelModeAllowed(params)) return "";
+  throw new Error("model_gateway_token missing; production provisioning must use an employee-scoped model gateway credential.");
 }
 
 function gatewayModelConfigBlock(params: ProfileBuildParams, renderSecrets: ProvisionerRequest["render_secrets"] = {}): string {
@@ -72,9 +60,6 @@ function gatewayModelConfigBlock(params: ProfileBuildParams, renderSecrets: Prov
   ].join("\n");
 }
 
-/**
- * CE-2 compression block (safety net; CE-3 rotation trips first).
- */
 function compressionConfigBlock(): string {
   return [
     "compression:",
@@ -107,8 +92,7 @@ function hooksBlock(): string {
 }
 
 function connectorMcpServersBlock(params: ProfileBuildParams): string {
-  const allowed = renderableDirectMcpConnectors(params.direct_mcp_connectors ?? []);
-  return allowed
+  return renderableDirectMcpConnectors(params.direct_mcp_connectors ?? [])
     .map((c) => [`  ${c.name}:`, `    url: \"${c.url}\"`].join("\n"))
     .join("\n");
 }
@@ -131,8 +115,7 @@ function packageRoot(packageKey: string): string {
 export function profileTokenMap(params: ProfileBuildParams, renderSecrets: ProvisionerRequest["render_secrets"] = {}): Record<string, string> {
   const runtimeBackend = params.runtime_backend ?? "docker";
   const managerOrigin = employeeManagerOrigin(runtimeBackend);
-  const context = params.profile_context;
-  const memories = buildNativeMemoryFiles(context);
+  const memories = buildNativeMemoryFiles(params.profile_context);
   const gatewayToken = requireModelGatewayToken(params, renderSecrets);
   return {
     CLIENT_ID: params.client_id,
@@ -155,14 +138,14 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     TOP_WORKFLOWS: params.top_workflows.join(", "),
     TOOLS_MENTIONED: params.tools_mentioned.join(", "),
     SEED_SKILLS: params.seed_skills.join(", "),
-    PROFILE_CONTEXT_MARKDOWN: renderProfileContextMarkdown(context),
-    BUSINESS_IDENTITY_CONTEXT: renderSlotMarkdown(context, "business_identity"),
-    OWNER_IDENTITY_CONTEXT: renderSlotMarkdown(context, "owner_identity"),
-    WORKFLOW_CONTEXT: renderSlotMarkdown(context, "workflows"),
-    TOOL_CONTEXT: renderSlotMarkdown(context, "tools"),
-    DURABLE_FACTS_CONTEXT: renderSlotMarkdown(context, "durable_facts"),
-    STANDING_PREFERENCES_CONTEXT: renderSlotMarkdown(context, "standing_preferences"),
-    LIVE_STATE_POINTERS_CONTEXT: renderSlotMarkdown(context, "live_state_pointers"),
+    PROFILE_CONTEXT_MARKDOWN: renderProfileContextMarkdown(params.profile_context),
+    BUSINESS_IDENTITY_CONTEXT: renderSlotMarkdown(params.profile_context, "business_identity"),
+    OWNER_IDENTITY_CONTEXT: renderSlotMarkdown(params.profile_context, "owner_identity"),
+    WORKFLOW_CONTEXT: renderSlotMarkdown(params.profile_context, "workflows"),
+    TOOL_CONTEXT: renderSlotMarkdown(params.profile_context, "tools"),
+    DURABLE_FACTS_CONTEXT: renderSlotMarkdown(params.profile_context, "durable_facts"),
+    STANDING_PREFERENCES_CONTEXT: renderSlotMarkdown(params.profile_context, "standing_preferences"),
+    LIVE_STATE_POINTERS_CONTEXT: renderSlotMarkdown(params.profile_context, "live_state_pointers"),
     MEMORY_SEED: memories.memory_md,
     USER_SEED: memories.user_md,
     MANAGER_API_ORIGIN: managerOrigin,
@@ -177,15 +160,13 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
     COMPRESSION_CONFIG: compressionConfigBlock(),
     DELEGATION_CONFIG: delegationConfigBlock(),
     HOOKS: hooksBlock(),
-    PLATFORM_TOOLSETS: toYamlFlowList(
-      computeApiServerToolsets({
-        runtimeBackend: params.runtime_backend ?? "docker",
-        hasBrowserbaseKey: Boolean(process.env.BROWSERBASE_API_KEY),
-        hasVisionKey: Boolean(process.env.OPENROUTER_API_KEY),
-        hasImageGenKey: Boolean(process.env.FAL_KEY),
-        hasTtsKey: Boolean(process.env.ELEVENLABS_API_KEY),
-      }),
-    ),
+    PLATFORM_TOOLSETS: toYamlFlowList(computeApiServerToolsets({
+      runtimeBackend,
+      hasBrowserbaseKey: Boolean(process.env.BROWSERBASE_API_KEY),
+      hasVisionKey: Boolean(process.env.OPENROUTER_API_KEY),
+      hasImageGenKey: Boolean(process.env.FAL_KEY),
+      hasTtsKey: Boolean(process.env.ELEVENLABS_API_KEY),
+    })),
     MANAGER_MCP_URL: process.env.MANAGER_MCP_URL ?? `${managerOrigin}/manager/mcp`,
     CONNECTOR_MCP_SERVERS: connectorMcpServersBlock(params),
   };
@@ -193,9 +174,7 @@ export function profileTokenMap(params: ProfileBuildParams, renderSecrets: Provi
 
 function render(content: string, params: ProfileBuildParams, renderSecrets?: ProvisionerRequest["render_secrets"]): string {
   let out = content;
-  for (const [key, value] of Object.entries(profileTokenMap(params, renderSecrets))) {
-    out = out.replaceAll(`{{${key}}}`, value);
-  }
+  for (const [key, value] of Object.entries(profileTokenMap(params, renderSecrets))) out = out.replaceAll(`{{${key}}}`, value);
   return out;
 }
 
@@ -208,8 +187,7 @@ async function copyRendered(src: string, dst: string, params: ProfileBuildParams
   if (s.isDirectory()) {
     await mkdir(dst, { recursive: true });
     for (const entry of await readdir(src)) {
-      if (entry === "node_modules" || entry === "dist" || entry === ".next") continue;
-      if (entry === "plugins") continue;
+      if (["node_modules", "dist", ".next", "plugins"].includes(entry)) continue;
       await copyRendered(join(src, entry), join(dst, entry === ".env.tpl" ? ".env" : entry), params, renderSecrets);
     }
     return;
@@ -274,14 +252,8 @@ export async function renderProfilePackage(req: ProvisionerRequest): Promise<{
   await copyRendered(packageRoot(req.profile_package_key), generated_path, params, req.render_secrets);
   await mkdir(params.workspace_dir, { recursive: true });
   await mkdir(join(params.workspace_dir, "output"), { recursive: true });
-  await writeFile(
-    join(generated_path, "profile-build-params.json"),
-    JSON.stringify({ ...params, model_gateway: modelGatewayPolicySummary(params.model_gateway) }, null, 2),
-    "utf8",
-  );
-  const validationCommand =
-    process.env.PROFILE_VALIDATION_COMMAND ??
-    `node ${join(workspaceRoot(), "infra", "scripts", "profile-validate.mjs")} .`;
+  await writeFile(join(generated_path, "profile-build-params.json"), JSON.stringify({ ...params, model_gateway: modelGatewayPolicySummary(params.model_gateway) }, null, 2), "utf8");
+  const validationCommand = process.env.PROFILE_VALIDATION_COMMAND ?? `node ${join(workspaceRoot(), "infra", "scripts", "profile-validate.mjs")} .`;
   const validation_output = (await runCommandString(validationCommand, generated_path, "profile validation")).output;
   const deployed_plugins = await deployPlugins(req.profile_package_key, hermesHome);
   const integrity = await assertProfileTreeIntegrity(generated_path);
@@ -304,9 +276,8 @@ export async function rotateRenderedModelGatewayCredential(req: ProvisionerReque
   await writeFile(configPath, nextConfig, "utf8");
   try {
     const env = await readFile(envPath, "utf8");
-    const nextEnv = env.replace(/^MODEL_GATEWAY_TOKEN=.*$/m, `MODEL_GATEWAY_TOKEN=${token}`);
     await chmod(envPath, 0o640);
-    await writeFile(envPath, nextEnv, "utf8");
+    await writeFile(envPath, env.replace(/^MODEL_GATEWAY_TOKEN=.*$/m, `MODEL_GATEWAY_TOKEN=${token}`), "utf8");
   } catch {
     // config.yaml is authoritative for Hermes; .env token is diagnostic and best-effort.
   }
@@ -341,9 +312,5 @@ export async function writeAndActivateCaddySnippet(params: ProfileBuildParams): 
 }
 
 export function failureResult(failureState: string, err: unknown): ProvisionerResult {
-  return {
-    status: "failed",
-    failure_state: failureState,
-    logs: [String((err as Error).message ?? err)],
-  };
+  return { status: "failed", failure_state: failureState, logs: [String((err as Error).message ?? err)] };
 }
