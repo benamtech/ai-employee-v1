@@ -107,10 +107,10 @@ export function compileAgenticUiSitePlan(
       pageId: page.id,
       route: page.route,
       canonicalQuestion: page.canonicalQuestion,
-      profileIds: [...geometry.profileIds],
+      profileIds: [...geometry.profileIds].sort(),
       matrixCoordinate: coordinateFor(manifestPage.feature_atoms),
-      vectorPrototypeIds: geometry.prototypes.map((prototype) => prototype.id),
-      vectorNeighborIds: [...geometry.nearestPageIds],
+      vectorPrototypeIds: geometry.prototypes.map((prototype) => prototype.id).sort(),
+      vectorNeighborIds: [...geometry.nearestPageIds].sort(),
       archetype,
       density,
       moduleOrder: page.modules.map((module) => module.id),
@@ -145,7 +145,7 @@ export function compileAgenticUiSitePlan(
   const stable = {
     standard,
     scaffoldProfileId: profileId,
-    vectorSpaceHash: compiled.vectorSpace.spaceHash,
+    vectorSpaceHash: canonicalUiVectorSpaceHash(compiled),
     browserReportId: browser.reportId,
     pages,
     moduleCoverage,
@@ -219,6 +219,35 @@ function coordinateFor(atoms: readonly ManifestFeatureAtom[]): Record<string, st
     coordinate[atom.dimension] = values;
   }
   return coordinate;
+}
+
+function canonicalUiVectorSpaceHash(compiled: CompiledFrameworkManifest): string {
+  const axes = Object.fromEntries(Object.entries(compiled.vectorSpace.axes).sort(([left], [right]) => left.localeCompare(right)));
+  const pages = [...compiled.vectorSpace.pages]
+    .sort((left, right) => left.pageId.localeCompare(right.pageId))
+    .map((page) => ({
+      pageId: page.pageId,
+      profileIds: [...page.profileIds].sort(),
+      prototypes: [...page.prototypes]
+        .sort((left, right) => left.id.localeCompare(right.id))
+        .map((prototype) => ({
+          id: prototype.id,
+          atoms: [...prototype.featureAtoms]
+            .sort((left, right) => left.dimension.localeCompare(right.dimension)
+              || left.value.localeCompare(right.value)
+              || left.source_id.localeCompare(right.source_id)
+              || left.provenance.localeCompare(right.provenance)),
+          vector: Array.from(prototype.vector),
+        })),
+      nearestPageIds: [...page.nearestPageIds].sort(),
+    }));
+  return sha256(JSON.stringify({
+    namespace: compiled.vectorSpace.namespace,
+    dimensions: compiled.vectorSpace.dimensions,
+    axes,
+    featureVocabulary: [...compiled.vectorSpace.featureVocabulary].sort(),
+    pages,
+  }));
 }
 
 function validatePagePlan(page: UiPageMetaprogram): string[] {
