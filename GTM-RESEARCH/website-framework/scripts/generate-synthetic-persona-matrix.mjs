@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
 
 const metros = ["Portland OR","Austin TX","Denver CO","Charlotte NC","Phoenix AZ","Nashville TN","Sacramento CA","Pittsburgh PA","Tampa FL","Minneapolis MN","Salt Lake City UT","Raleigh NC","Kansas City MO","Richmond VA","Boise ID","Columbus OH","San Diego CA","Milwaukee WI","Boston MA","Atlanta GA"];
 const roles = [
@@ -75,13 +75,21 @@ for (let i = 0; i < 100; i += 1) {
 }
 
 if (matrix.length !== 101) throw new Error(`Expected header + 100 entries, got ${matrix.length}`);
+const ids = new Set();
+const slugs = new Set();
 for (const row of matrix.slice(1)) {
   if (row[1].age < 30 || row[1].age > 60) throw new Error(`Age out of range: ${row[0]}`);
   if (row[1].nw < 550000 || row[1].nw > 2000000) throw new Error(`Net worth out of range: ${row[0]}`);
   if (row[1].homes >= 2) throw new Error(`Home count out of range: ${row[0]}`);
+  if (row[2].activation !== "plain-text<2m" || row[2].api_keys_required !== false) throw new Error(`Activation constraint failed: ${row[0]}`);
+  if (ids.has(row[0])) throw new Error(`Duplicate slice ID: ${row[0]}`);
+  if (slugs.has(row[6])) throw new Error(`Duplicate target slug: ${row[6]}`);
+  ids.add(row[0]);
+  slugs.add(row[6]);
 }
 
 const output = `toon${JSON.stringify(matrix)}\n`;
 const destination = resolve(process.argv[2] ?? new URL("../fixtures/synthetic-persona-matrix.toon", import.meta.url).pathname);
+mkdirSync(dirname(destination), { recursive: true });
 writeFileSync(destination, output, "utf8");
 console.log(`Wrote 100 deterministic synthetic entries to ${destination}`);
