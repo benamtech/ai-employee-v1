@@ -1,6 +1,6 @@
 {
   "name": "@amtech/hyper-targeted-framework-reference",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,12 +9,16 @@
     "benchmark:scale": "npm run build && node scripts/run-scale.mjs",
     "generate:field": "npm run build && node scripts/generate-field-cohort.mjs",
     "manifest:emit": "npm run build && node scripts/emit-manifest.mjs ../site-manifest.yaml generated-manifest",
-    "manifest:check": "npm run test && npm run manifest:emit"
+    "ui:emit": "npm run build && node scripts/emit-ui.mjs ../site-manifest.yaml generated-ui ../.browserslistrc",
+    "browser:check": "browserslist",
+    "ui:r3f:build": "npm --prefix ui-r3f install --no-audit --no-fund && npm --prefix ui-r3f test",
+    "manifest:check": "npm run test && npm run manifest:emit && npm run ui:emit && npm run browser:check"
   },
   "dependencies": {
     "yaml": "2.9.0"
   },
   "devDependencies": {
+    "browserslist": "4.28.6",
     "typescript": "5.8.3"
   }
 }
