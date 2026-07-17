@@ -5,10 +5,11 @@ profile:
   id: "client_{{CLIENT_ID}}"
   name: "{{EMPLOYEE_NAME}}"
 
-# Model — rendered per employee by profile-renderer. Production ships
-# claude-opus-4-8; local no-key testing (HERMES_MODEL_PROVIDER=custom) points this
-# at the agent-in-the-loop bridge so the warm Haiku worker is the LLM. See
-# infra/local/agent-model-bridge.md.
+# Model — production renders ONLY the host-private AMTECH Model Gateway URL,
+# employee-scoped gateway token, model alias, and non-secret policy. Provider
+# selection, retries, circuit breaking, usage capture, cost attribution, and
+# provider master credentials live behind the gateway. Local direct-provider mode
+# is limited to the explicit non-production bridge path.
 {{MODEL_CONFIG}}
 
 terminal:
