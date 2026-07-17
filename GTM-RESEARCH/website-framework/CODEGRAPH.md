@@ -89,12 +89,14 @@ relevance + effort + conversion + latency + privacy + SEO + accessibility + trut
 - `02-shape-model-and-hrr-core.md`: feature ontology, deterministic vectors, HRR core, candidate retrieval, graph and ABI.
 - `03-agentic-seo-system.md`: canonical knowledge graph, specialized page policy, AI-answer/search constraints.
 
-### Test and release authority
+### Test, evidence, and release authority
 
 - `04-feature-validation-vectors.md`: scenario-based validation matrix.
-- `05-pass-fail-vectors.md`: quantitative P0/P1/P2 gates and graduation stages.
+- `05-pass-fail-vectors.md`: quantitative P0/P1/P2 gates and graduation stages, with theory/academic/normative/engineering basis labels.
 - `06-experimentation-privacy-operations.md`: A/Z causal design, privacy, telemetry, rollback, and operations.
 - `12-compiler-design-and-autonomy-validation-addendum.md`: compiler, design, distributed-content, effort, autonomy, and coverage/replication gates.
+- `13-academic-and-normative-basis-for-validation-vectors.md`: source ledger and threshold-evidence boundary.
+- `validation/reports/2026-07-17-synthetic-persona-matrix.md`: generator execution, constraints, and output hash.
 
 ### v0.1 and execution
 
@@ -102,7 +104,7 @@ relevance + effort + conversion + latency + privacy + SEO + accessibility + trut
 - `08-implementation-plan.md`: Phase 2 build sequence.
 - `site-manifest.yaml`: machine-readable initial feature/candidate/fixture/headers/budget contract.
 - `scripts/generate-synthetic-persona-matrix.mjs`: deterministic 100-entry synthetic benchmark generator.
-- `fixtures/synthetic-persona-matrix.toon`: generated benchmark output when materialized; never hand-edit.
+- `fixtures/synthetic-persona-matrix.toon`: reproducible generated output when materialized; never hand-edit and do not require committing it while the validation report records its hash.
 
 ### Phase synthesis and product definition
 
@@ -166,12 +168,13 @@ The IR, not any vendor package, is the durable contract.
 - v0.1 Request Mirror definition;
 - finite-slice and deterministic-artifact model;
 - A/Z causal framework;
-- synthetic benchmark generator;
-- software category and design/content operating model.
+- deterministic synthetic benchmark generator;
+- local generator execution and independent constraint/hash validation record;
+- software category and design/content operating model;
+- academic/normative evidence map and revised pass/fail gates.
 
 ### Not complete
 
-- generated fixture committed from a verified run;
 - TypeScript HRR reference implementation;
 - compiler/content IR implementation;
 - Worker Request Mirror app;
@@ -184,7 +187,7 @@ The IR, not any vendor package, is the durable contract.
 
 ## Editing map
 
-- Change math or feature encoding -> update `00`, `02`, `04`, `05`, `site-manifest.yaml`, fixtures, and research notes.
+- Change math or feature encoding -> update `00`, `02`, `04`, `05`, `13`, `site-manifest.yaml`, fixtures, and research notes.
 - Change architecture/runtime -> update `01`, `07`, `08`, `CODEGRAPH.md`, validation vectors, and notes.
 - Change privacy/experiments -> update `06`, `04`, `05`, manifest, and notes.
 - Change page/content/design model -> update `03`, `10`, `11`, design addendum, compiler validation addendum, and handoff.
@@ -194,10 +197,9 @@ The IR, not any vendor package, is the durable contract.
 ## Next code path
 
 ```text
-run 100-slice generator
--> validate output and constraints
--> implement TypeScript deterministic vectors/HRR
+implement TypeScript deterministic vectors/HRR
 -> build typed content IR/compiler skeleton
+-> compile two real AMTECH landing-page families
 -> benchmark flat rules/facets/HRR
 -> quantify candidate coverage/replication
 -> implement noindex Worker baseline
