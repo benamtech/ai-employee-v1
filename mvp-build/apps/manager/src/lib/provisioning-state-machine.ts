@@ -6,12 +6,11 @@ export const PROVISIONING_STATES = [
   "resources_reserved",
   "credentials_minted",
   "profile_rendered",
-  "employee_network_ready",
   "runtime_started",
-  "gateway_routing_ready",
+  "runtime_healthy",
+  "routing_activated",
   "channel_configured",
-  "health_accepted",
-  "welcome_ready",
+  "welcome_sent",
   "ready",
   "failed",
   "compensating",
@@ -101,30 +100,16 @@ export function classifyProvisioningError(err: unknown): RetryClass {
   return "permanent";
 }
 
-export async function transitionProvisioning(
-  db: SupabaseClient,
-  input: ProvisioningTransitionInput,
-): Promise<{ applied: boolean; transition_version?: number }> {
-  const current = await db
-    .from("provisioning_jobs")
-    .select("state,transition_version")
-    .eq("id", input.provisioning_job_id)
-    .maybeSingle();
+export async function transitionProvisioning(db: SupabaseClient, input: ProvisioningTransitionInput): Promise<{ applied: boolean; transition_version?: number }> {
+  const current = await db.from("provisioning_jobs").select("state,transition_version").eq("id", input.provisioning_job_id).maybeSingle();
   if (current.error) throw current.error;
   if (!current.data || current.data.state !== input.expected_state) return { applied: false };
-
   const previousVersion = Number(current.data.transition_version ?? 0);
   const nextVersion = previousVersion + 1;
   const now = new Date().toISOString();
   const updated = await db
     .from("provisioning_jobs")
-    .update({
-      state: input.to_state,
-      transition_version: nextVersion,
-      last_transition_at: now,
-      attempt_count: input.attempt ?? undefined,
-      retry_class: input.retry_class ?? undefined,
-    })
+    .update({ state: input.to_state, transition_version: nextVersion, last_transition_at: now, retry_class: input.retry_class ?? undefined })
     .eq("id", input.provisioning_job_id)
     .eq("state", input.expected_state)
     .eq("transition_version", previousVersion)
@@ -132,7 +117,6 @@ export async function transitionProvisioning(
     .maybeSingle();
   if (updated.error) throw updated.error;
   if (!updated.data) return { applied: false };
-
   const inserted = await db.from("provisioning_transitions").insert({
     id: `ptr_${randomUUID()}`,
     provisioning_job_id: input.provisioning_job_id,
@@ -152,23 +136,17 @@ export async function transitionProvisioning(
   return { applied: true, transition_version: nextVersion };
 }
 
-export async function beginCompensation(
-  db: SupabaseClient,
-  input: Omit<ProvisioningTransitionInput, "to_state">,
-): Promise<{ applied: boolean; transition_version?: number }> {
+export async function beginCompensation(db: SupabaseClient, input: Omit<ProvisioningTransitionInput, "to_state">): Promise<{ applied: boolean; transition_version?: number }> {
   return transitionProvisioning(db, { ...input, to_state: "compensating" });
 }
 
-export async function claimProvisioningLease(db: SupabaseClient, input: {
-  provisioning_job_id: string;
-  lease_ms?: number;
-}): Promise<ProvisioningLease | null> {
+export async function claimProvisioningLease(db: SupabaseClient, input: { provisioning_job_id: string; lease_ms?: number }): Promise<ProvisioningLease | null> {
   const lease_token = `lease_${randomUUID()}`;
   const lease_expires_at = new Date(Date.now() + (input.lease_ms ?? 120_000)).toISOString();
   const now = new Date().toISOString();
   const claimed = await db
     .from("provisioning_jobs")
-    .update({ lease_token, lease_expires_at, attempt_count: 1 })
+    .update({ lease_token, lease_expires_at })
     .eq("id", input.provisioning_job_id)
     .or(`lease_expires_at.is.null,lease_expires_at.lt.${now}`)
     .select("id,attempt_count")
@@ -178,12 +156,7 @@ export async function claimProvisioningLease(db: SupabaseClient, input: {
   return { job_id: String(claimed.data.id), lease_token, lease_expires_at, attempt_count: Number(claimed.data.attempt_count ?? 1) };
 }
 
-export async function persistProvisioningResourceGraph(db: SupabaseClient, input: {
-  provisioning_job_id: string;
-  account_id: string;
-  employee_id: string;
-  resources: ProvisioningResourceSpec[];
-}): Promise<void> {
+export async function persistProvisioningResourceGraph(db: SupabaseClient, input: { provisioning_job_id: string; account_id: string; employee_id: string; resources: ProvisioningResourceSpec[] }): Promise<void> {
   const rows = input.resources.map((resource) => ({
     id: `prs_${randomUUID()}`,
     provisioning_job_id: input.provisioning_job_id,
@@ -199,26 +172,11 @@ export async function persistProvisioningResourceGraph(db: SupabaseClient, input
   if (upserted.error) throw upserted.error;
 }
 
-export async function recordProvisioningResource(db: SupabaseClient, input: {
-  provisioning_job_id: string;
-  resource_key: string;
-  observed_state: string;
-  evidence?: Record<string, unknown>;
-  error?: Record<string, unknown> | null;
-  retry_class?: RetryClass | null;
-}): Promise<void> {
+export async function recordProvisioningResource(db: SupabaseClient, input: { provisioning_job_id: string; resource_key: string; observed_state: string; evidence?: Record<string, unknown>; error?: Record<string, unknown> | null; retry_class?: RetryClass | null }): Promise<void> {
   const now = new Date().toISOString();
   const updated = await db
     .from("provisioning_resource_states")
-    .update({
-      observed_state: input.observed_state,
-      evidence: input.evidence ?? {},
-      error: input.error ?? null,
-      retry_class: input.retry_class ?? null,
-      last_verified_at: input.observed_state.includes("verified") || input.observed_state.includes("ready") || input.observed_state.includes("accepted") ? now : undefined,
-      last_inspected_at: now,
-      updated_at: now,
-    })
+    .update({ observed_state: input.observed_state, evidence: input.evidence ?? {}, error: input.error ?? null, retry_class: input.retry_class ?? null, last_inspected_at: now, updated_at: now })
     .eq("provisioning_job_id", input.provisioning_job_id)
     .eq("resource_key", input.resource_key);
   if (updated.error) throw updated.error;
