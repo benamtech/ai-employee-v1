@@ -25,8 +25,8 @@ export async function processGmailAmbientEvent(db: SupabaseClient, event: Ambien
   if (!handler) throw new Error("gmail_handler_unavailable");
   const ctx: ToolContext = { db, actor: "manager", account_id: event.account_id ?? null, employee_id: event.employee_id ?? null };
   const envelope = await handler(ctx, { email_address: emailAddress, history_id: historyId, pubsub_message_id: pubsubMessageId });
-  if (envelope.status === "failed") throw new Error(`gmail_handler_failed:${String(envelope.failure_code ?? "unknown")}`);
-  return { handler_status: envelope.status, pubsub_message_id: pubsubMessageId };
+  if (envelope.status === "failed") throw new Error("gmail_handler_failed");
+  return { handler_status: envelope.status, pubsub_message_id: pubsubMessageId, proof: envelope.proof ?? {} };
 }
 
 export function registerGmailWebhooks(app: Hono): void {
