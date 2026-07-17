@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 
+// One-shot canonical patch. Delete this script after the commit lands.
 async function replaceExactly(path, before, after) {
   const source = await readFile(path, "utf8");
   const matches = source.split(before).length - 1;
