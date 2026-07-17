@@ -10,10 +10,11 @@ Use the three layers correctly:
 - `../../wiki/MVP/implementation-records/`: factual source/proof ledger.
 - `../second-half-plan/`: active forward-plan family.
 
-**Current branch note (2026-07-17):** active coordinated work is on `research`, rebased onto latest `main`. The earlier `prod-ux` branch work has already been merged and is historical context, not the current branch instruction.
+**Current branch note (2026-07-17):** active coordinated work is on `research`, based on current `main`. The earlier `prod-ux` branch work has already been merged and is historical context, not the current branch instruction.
 
 ## Index — newest first
 
+- [2026-07-17 — website framework Phase 1 closure](2026-07-17-website-framework-phase-1-closure.md) — Closed the adaptive experience compiler research/specification phase: scoped identity/instructions/codegraph, software category, distributed content/design/generative UI model, competitor and complexity synthesis, synthetic benchmark generator, and new compiler/autonomy validation gates. Implementation and runtime validation pending.
 - [2026-07-17 — holographic website framework and v0.1 Request Mirror Lab](2026-07-17-holographic-website-framework-v0.1.md) — Established the research-grounded HRR/VSA + graph materialization framework, explicit feature/pass-fail vectors, privacy/SEO boundaries, and the plain noindex Cloudflare Request Mirror Lab as v0.1. No build/deploy run.
 - [2026-07-17 — WS1/WS2 documentation reconciliation and website frontier](2026-07-17-ws1-ws2-doc-reconciliation-and-website-frontier.md) — Rebased `research` onto latest `main`, reconciled canonical docs to the source-wired production-boundary state, recorded static risks and validation not run, and staged the first-principles AMTECH website rewrite.
 - [2026-07-16 — WS1/WS2 production boundary pass](2026-07-16-ws1-ws2-production-boundary-pass.md) — Model gateway credential custody, profile integrity, durable provisioning/reconciler foundations, credential rotation, drift operations, and WS3 ambient inbox schema groundwork. Source-wired only; no live acceptance.
