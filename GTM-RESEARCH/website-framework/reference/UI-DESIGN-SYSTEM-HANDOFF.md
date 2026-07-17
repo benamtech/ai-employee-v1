@@ -1,8 +1,24 @@
-# UI design-system handoff
+# First UI metaprogramming pass handoff
 
-The next design pass must implement a clean professional renderer as a **satisfactory superset** of the framework's semantic contract. It must not change knowledge, evidence, query/page geometry, canonical intent, or corpus optimization.
+The UI pass starts from the compiled `ui-scaffold` profile, not from hand-authored HTML and not from the synthetic 2,000-page scale output.
 
-## Required semantic module kinds
+## Generate the input
+
+```bash
+cd GTM-RESEARCH/website-framework/reference
+npm install
+npm run manifest:emit
+```
+
+Primary inputs:
+
+- `generated-manifest/ui-scaffold.json`
+- `generated-manifest/vector-space.json`
+- `generated-manifest/agent-context.json`
+- emitted noindex fixture HTML
+- the supplied AMTECH design system
+
+## Required semantic constructors
 
 - `hero`
 - `answer`
@@ -13,7 +29,7 @@ The next design pass must implement a clean professional renderer as a **satisfa
 - `cta`
 - `instruction`
 
-## Required layout roles
+Required layout roles:
 
 - `lead`
 - `support`
@@ -21,33 +37,52 @@ The next design pass must implement a clean professional renderer as a **satisfa
 - `decision`
 - `conversion`
 
-## Design capability vector
+Required capability superset:
 
-The current feature space records whether a page or variant requires:
+- semantic hierarchy;
+- responsive grids and mobile priority;
+- evidence-dense proof;
+- workflow steps;
+- comparison tables;
+- progressive disclosure;
+- conversion panels;
+- long-form reading;
+- visible structured data;
+- instruction pointers;
+- reduced-motion compatibility where motion is introduced.
+
+## Metaprogramming contract
+
+The renderer receives:
 
 ```text
-semantic-hierarchy
-responsive-grid
-evidence-dense
-comparison-table
-workflow-steps
-progressive-disclosure
-conversion-panel
-media-slot
-reduced-motion
-long-form-reading
-mobile-priority
-structured-data-visible
-instruction-pointer
+page vector prototype IDs
++ semantic module sequence
++ layout roles
++ capability requirements
++ variant axes
++ canonical content/evidence
 ```
 
-The supplied design system will be translated into:
+It returns deterministic component trees and HTML.
 
-- token scales: spacing, typography, radii, content widths, color semantics;
-- component constructors for every required module kind;
-- supported layout roles and responsive constraints;
-- accessibility, reduced-motion, evidence, table, workflow, media, and conversion capabilities;
-- forbidden component/layout combinations;
-- renderer golden fixtures.
+The renderer may derive a light, clean, professional standard that is a satisfactory superset of the supplied design system. It may not change:
 
-`validateDesignSystemSuperset()` must pass before the renderer can emit production pages. The reference contract is intentionally light: it establishes semantic sufficiency, consistency, and professional hierarchy without forcing AMTECH's eventual visual identity into the framework core.
+- target feature atoms or prototype sets;
+- canonical questions;
+- claims or evidence;
+- information objects;
+- internal graph edges;
+- profile membership;
+- indexability/publication gates.
+
+## Required first-pass proof
+
+- every `ui-scaffold` page renders;
+- all module kinds have constructors;
+- all layout roles are represented;
+- desktop/mobile and reduced-motion fixtures pass;
+- HTML meaning, metadata, JSON-LD, links, and noindex state match the neutral renderer;
+- JS-disabled output remains complete;
+- the supplied design system passes `validateDesignSystemSuperset()`;
+- renderer output is deterministic under source reordering.
