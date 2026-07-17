@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { ModelGatewayPolicy } from "./model-gateway.js";
 
 export const ProfilePackage = z.object({
   key: z.string().min(1),
@@ -79,9 +80,25 @@ export interface ProfileBuildParams {
   api_server_key?: string;
   profile_context: ProfileContext;
   direct_mcp_connectors?: import("./connector-registry.js").DirectMcpConnectorSpec[];
+
+  /**
+   * WS1 model custody boundary. Production profiles render this host-private
+   * gateway policy plus the scoped render secret below; they never render provider
+   * master keys or provider-specific env vars.
+   */
+  model_gateway: ModelGatewayPolicy;
 }
 
-export type ProvisionerOperation = "ensure_runtime" | "remove_runtime" | "inspect_runtime";
+export type ProvisionerOperation =
+  | "ensure_runtime"
+  | "remove_runtime"
+  | "inspect_runtime"
+  | "inspect_drift"
+  | "repair_drift"
+  | "rotate_model_gateway_credential"
+  | "suspend_runtime"
+  | "replace_runtime"
+  | "restore_runtime";
 
 /**
  * Declarative host-private lifecycle request. Manager may omit envelope fields when
@@ -116,6 +133,9 @@ export interface ProvisionerResult {
   workspace_dir?: string;
   network_name?: string;
   container_name?: string;
+  sms_number_e164?: string | null;
+  twilio_webhook_url?: string | null;
+  first_sms_sid?: string | null;
   webchat_api_url?: string;
   api_base_url?: string;
   api_key_ref?: string;
@@ -127,4 +147,6 @@ export interface ProvisionerResult {
   smoke_output?: string;
   failure_state?: string;
   logs?: string[];
+  drift?: Record<string, unknown>;
+  model_gateway_credential_version?: number;
 }

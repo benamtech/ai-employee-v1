@@ -1,228 +1,226 @@
 # Production Normal Employee Live Deploy Runbook
 
-Status: active runbook for first launch-level normal employee proof
+Status: canonical launch-level runbook
+Updated: 2026-07-17
+Current boundary status: source-wired; fresh live acceptance pending
 
-This runbook is for a launch-level proof of the normal AMTECH AI Employee path:
+## Launch path
+
+This is the only canonical normal-employee launch path:
 
 ```text
-public DNS / Cloudflare
-  -> Caddy origin
-  -> Web + Manager production containers
-  -> real /create-ai-employee onboarding
-  -> real phone verification
-  -> real account creation
-  -> provisioned amtech-hermes-<employee_id> runtime
-  -> live owner web client
-  -> provider-backed employee reply
+public DNS / Cloudflare Tunnel
+-> Caddy
+-> production Web + Manager
+-> real /create-ai-employee
+-> real Twilio Verify
+-> real account creation
+-> Start Employee
+-> host-private provisioning
+-> isolated Hermes runtime
+-> owner web client
+-> provider-backed employee reply
+-> useful connected-tool proof
 ```
 
-It is not the public estimator path and not the local fixture path.
+The public estimator is outdated and non-canonical. `prod-like:public-estimator:*`, fixture onboarding, `/api/dev/login`, host `live:*`, Quick Tunnels, and manually injected provider events may support diagnostics but must not be reported as launch proof.
 
-## Current production topology
-
-The system is a fixed core plus a dynamic employee fleet.
+## Production topology
 
 Fixed core:
 
-- `manager`: Hono control plane on `127.0.0.1:8080`, mounted Docker socket, launches employees.
-- `web`: Next.js app on `127.0.0.1:3000`, serves front door and owner Work Surface.
-- `caddy`: public origin router on host `:80/:443`.
-- `amtech_runtime`: external Docker network shared by the fixed core and every employee runtime.
+- `manager`: public/control-plane API behind Caddy; no public arbitrary Docker authority.
+- `model-gateway`: host-private OpenAI-compatible gateway, loopback-bound on host port `8092`; owns provider master credentials.
+- `host-provisioner`: signed Unix-socket lifecycle authority with the Docker socket.
+- `web`: public onboarding and owner surfaces.
+- `caddy`: public origin router.
 
 Dynamic fleet:
 
-- Employees are not Compose services.
-- Each employee runs as `amtech-hermes-<employee_id>`.
-- Manager/provisioner renders the profile, scoped MCP credential, runtime env, and Caddy routing, then starts the container.
-- First VPS target is 0-30 employees. Treat this as one pod, not a distributed system.
+- each employee runs as `amtech-hermes-<employee_id>`;
+- each employee receives a private bridge `amtech-employee-<employee_id>`;
+- Hermes gateway ports publish to host loopback only;
+- employee profiles are rendered read-only and checksummed;
+- profiles receive only scoped Manager MCP and Model Gateway credentials;
+- employee containers reach host-private routes through the explicit host-gateway mapping.
 
-## Local production-like vs VPS
+Employees are not static Compose services. The reconciler is responsible for desired fleet state; the current source still requires a true DB-backed worker before unattended production claims.
 
-The local production-like run and the first VPS run should be nearly identical if containerization is correct.
+## Required configuration
 
-Same in both:
+Production env must include, by reference and without printing values:
 
-- Same Compose core: `infra/deploy/docker-compose.yml`.
-- Same external network: `amtech_runtime`.
-- Same employee launcher: `infra/scripts/deploy/start-hermes-container.sh` delegates to `infra/scripts/local/start-hermes-container.sh`.
-- Same dynamic employee container names and labels.
-- Same Caddy role as origin router.
-- Same `/create-ai-employee` flow and Manager onboarding/provisioning endpoints.
-- Same proof vocabulary: core healthy, ingress proven, onboarding proven, provider-backed reply proven.
+- Supabase service/control-plane configuration;
+- Cloudflare/DNS/tunnel configuration;
+- Twilio Verify and messaging configuration;
+- Manager/owner session secrets;
+- provisioner signing/proxy configuration;
+- `MODEL_GATEWAY_SIGNING_SECRET`;
+- `MODEL_GATEWAY_PROVIDER_API_KEY`;
+- `MODEL_GATEWAY_UPSTREAM_BASE_URL`;
+- model alias/provider/upstream-model policy;
+- employee-facing gateway URL, normally `http://host.docker.internal:8092/v1`;
+- profile/runtime roots and Hermes image/runtime command;
+- Caddy and public API origins.
 
-Different on local production-like:
+Provider master keys must exist only in host-private services. They must not be rendered into employee files/env.
 
-- Cloudflare Tunnel is the public ingress because the local machine has no reliable inbound public IP.
-- Caddy uses `infra/caddy/tunnel.Caddyfile`.
-- Cloudflare terminates HTTPS and forwards HTTP to local Caddy.
-- `agent.amtechai.com` should route to `http://localhost:80` through the tunnel.
+## Preflight — source and database
 
-Different on a VPS/direct DNS deployment:
+Before a fresh live run:
 
-- DNS points to the VPS public IP.
-- Caddy can use `infra/caddy/production.Caddyfile`.
-- Caddy terminates TLS directly, including wildcard DNS-01 for `*.agents.amtechai.com` if enabled.
-- Host firewall must allow only SSH, `80`, and `443` publicly.
-- Reboot recovery, backups, logs, disk pressure, and capacity become live ops concerns.
+1. confirm `research` contains migrations `0031`, `0032`, and `0033` in order;
+2. apply them to the target DB and retain migration evidence;
+3. verify RLS is enabled and anon/authenticated grants are revoked on the new control-plane tables;
+4. inspect `provisioning_jobs` compatibility, active operation-key uniqueness, retry semantics, and existing rows;
+5. run typecheck/build/targeted tests if the environment permits and record exact results;
+6. verify the production image includes `apps/manager/dist/model-gateway-server.js`;
+7. verify shared exports and `ProvisionerResult`/Supabase row shapes compile.
 
-## Required commands
+Do not mark this preflight passed from static inspection alone.
 
-Clean start:
+## Start the production-shaped stack
+
+Repository scripts may evolve; inspect `package.json` and `infra/scripts/` before running. The established local production-like entrypoints are:
 
 ```bash
 npm run prod-like:normal:down -- --employees
-docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'
-```
-
-Build/start the production-like core and require tunnel proof:
-
-```bash
 npm run prod-like:normal:up -- --down-first --require-tunnel
 ```
 
-If source has not changed and only env/tunnel routing changed, avoid a rebuild:
+Use `--no-build` only when source/images are known current:
 
 ```bash
 npm run prod-like:normal:up -- --no-build --require-tunnel
 ```
 
-If `CLOUDFLARE_TUNNEL_TOKEN` is not stored in env, the production-like up script derives a fresh named-tunnel token from:
+The production Compose target is `infra/deploy/docker-compose.production.yml`. Confirm healthy Manager, Model Gateway, host provisioner socket, Web, and Caddy. Do not expose Model Gateway or host provisioner through Caddy/Cloudflare.
 
-```text
-infra/.local/cloudflared/cert.pem
-```
+## Core readiness checks
 
-That cert is intentionally local and private. The script runs the token derivation container as root so the read-only mounted `0600` cert can be read without weakening file permissions, then starts the connector as `amtech-tunnel`.
-
-Equivalent manual path:
-
-```bash
-docker rm -f amtech-tunnel || true
-TOKEN=$(docker run --rm --user 0 --network host \
-  -v "$PWD/infra/.local/cloudflared/cert.pem:/cert.pem:ro" \
-  cloudflare/cloudflared:latest tunnel --origincert /cert.pem token amtech-tunnel)
-test -n "$TOKEN"
-docker run -d --name amtech-tunnel --network host --restart unless-stopped \
-  cloudflare/cloudflared:latest tunnel --no-autoupdate run --token "$TOKEN"
-```
-
-Use `--network host` so cloudflared can reach Caddy on `localhost:80`.
-
-The named tunnel must expose both public hostnames to the same local Caddy origin:
-
-- `agent.amtechai.com` for owner web onboarding, dashboard, and `/agent/*`.
-- `api.amtechai.com` for Manager health and provider callbacks such as Twilio SMS webhooks.
-
-Both Cloudflare pieces must exist: a DNS route/CNAME to the named tunnel, and a tunnel public-hostname
-ingress rule pointing the hostname to `http://localhost:80`. If `api.amtechai.com` returns a Cloudflare
-404 without `via: 1.1 Caddy`, DNS may exist but the tunnel ingress config is missing the API hostname.
-
-## Health checks
-
-Core:
+Host/core:
 
 ```bash
 docker ps -a --format '{{.Names}}\t{{.Status}}\t{{.Ports}}'
 curl -sS http://127.0.0.1:8080/health
+curl -sS http://127.0.0.1:8092/health
 curl -I http://127.0.0.1:3000/create-ai-employee
 ```
 
-Caddy origin:
+Caddy/public ingress:
 
 ```bash
 curl -I http://127.0.0.1/create-ai-employee -H 'Host: agent.amtechai.com'
 curl -sS http://127.0.0.1/health -H 'Host: api.amtechai.com'
-```
-
-Public ingress:
-
-```bash
 curl -I -L https://agent.amtechai.com/create-ai-employee
 curl -sS https://api.amtechai.com/health
 ```
 
-Expected public proof includes:
+Expected public proof includes successful status plus evidence traffic reached Caddy. A request to any public Model Gateway or provisioner path must fail because no such route exists.
 
-- HTTP `200`.
-- `server: cloudflare`.
-- `via: 1.1 Caddy`.
+## Gateway and profile readiness checks
 
-## Onboarding proof path
+Before onboarding a customer employee:
 
-Open the real public page:
+- prove the Model Gateway health endpoint is reachable from a disposable employee-network container through `host.docker.internal:8092`;
+- prove it is not publicly reachable;
+- prove a missing, malformed, expired, revoked, or cross-employee token fails closed;
+- verify the configured alias routes to the intended upstream model without exposing the upstream key;
+- verify audit rows contain identity/usage/error metadata but no request body or token;
+- render a disposable profile and scan it for provider master-key names, configured secret values, unresolved `{{TOKENS}}`, world-readable auth files, and writable canonical files;
+- record the profile checksum and credential version.
+
+## Canonical browser onboarding proof
+
+Open:
 
 ```text
 https://agent.amtechai.com/create-ai-employee
 ```
 
-Use a headed browser and complete the real UI:
+Complete the real UI:
 
-1. Chat-first business intake.
-2. Real phone number.
-3. Real Twilio Verify SMS code.
-4. Real owner email/password account creation.
-5. Start Employee.
-6. Continue to owner web client.
-7. Send one real message to the employee.
-8. Confirm a real provider-backed employee reply.
+1. business intake;
+2. real phone number;
+3. real Twilio Verify code;
+4. real owner email/password account creation;
+5. Start Employee;
+6. continue to the real owner web client;
+7. send a real owner message;
+8. receive a provider-backed employee reply;
+9. connect or exercise at least one useful business capability and capture proof.
 
-Capture:
+No fixture/session injection is permitted.
 
-- `session_id`.
-- Twilio Verify SID/status.
-- `account_id`.
-- owner email.
-- `employee_id`.
-- `amtech-hermes-<employee_id>` container id/status.
-- production stack proof JSON path.
-- Cloudflare tunnel id/container id.
-- final provider result.
+## Provisioning acceptance sequence
 
-## Do not count as launch proof
+Capture evidence for:
 
-Do not count:
+1. account and employee records;
+2. scoped Manager MCP credential;
+3. scoped Model Gateway credential and version;
+4. rendered profile checksum and integrity pass;
+5. private employee network;
+6. running employee container and loopback gateway port;
+7. runtime health;
+8. Caddy/runtime route activation;
+9. Twilio/provider binding after runtime + route acceptance;
+10. employee ready state;
+11. welcome/customer-facing effect through the idempotent business-effect path.
 
-- `prod-like:public-estimator:*`.
-- `local:acceptance:browser-onboard`.
-- `ONBOARD_FIXTURE`.
-- `/api/dev/login`.
-- `npm run live:login`.
-- Quick Tunnel `trycloudflare.com`.
-- host `live:*` toolkit.
+The current inline provisioning code is not proof of a production reconciler. Separately prove the worker/command path once implemented.
 
-Those are useful development tools, but launch proof must use the public production path and real account/session creation.
+## Required negative and recovery proofs
 
-## Onboarding logging expectations
+- cross-employee Model Gateway token substitution fails;
+- revoked/expired credential fails;
+- credential rotation changes token/checksum, live traffic uses the new token, and the old token fails;
+- runtime/profile mutation is detected or replaced from canonical desired state;
+- duplicate provisioning converges;
+- a failed provision can retry without permanent filesystem/DB idempotency blockage;
+- compensated jobs can start a fresh retry safely;
+- orphan container/network, stale Caddy, missing profile/checksum, expired credential, and stuck job are detected and repaired;
+- employee cannot reach peers, Docker, database, Web/Caddy internals, metadata endpoints, or unrelated host services;
+- host restart reconstructs desired `ready` employees;
+- Twilio/Gmail/Stripe duplicate ingress produces one durable event once WS3 migration is complete.
 
-The Manager should log onboarding model turns as structured JSON with:
+## Proof artifacts and IDs
 
-- `scope: "onboarding"`.
-- event name: `model_call_start`, `model_call_succeeded`, or `model_call_failed`.
-- `session_id`.
-- state/surface.
-- provider/model/base URL.
-- response format.
-- transcript turn count.
-- message character count.
-- elapsed milliseconds.
-- provider HTTP status and coarse error kind on failure.
+Capture at minimum:
 
-The Manager must not log:
+- rebase/deploy commit SHA;
+- production stack proof JSON path;
+- Cloudflare tunnel/ingress evidence;
+- onboarding `session_id`;
+- Twilio Verify SID/status;
+- `account_id`, `employee_id`, provisioning job/command IDs;
+- Model Gateway credential ID/version and gateway request audit ID;
+- profile ID/checksum;
+- container/network IDs and runtime health evidence;
+- provider response/request ID;
+- useful connector/tool proof IDs;
+- approval/artifact/work-resource IDs where applicable.
 
-- owner message body;
-- phone verification code;
-- password;
-- owner session token/cookie;
-- provider API key;
-- raw provider response body if it may contain sensitive text.
+Redact secrets and owner/customer content.
 
-Provider credit/auth failures should be recorded as `provider_auth_or_credit_gated`, not runtime/Hermes outage.
+## Now-to-live gate
 
-## Known hardening items before pilots
+### P0
 
-- Account creation is currently a multi-write sequence: Supabase Auth user, `accounts`, `users`, `account_memberships`, `verified_phones`, onboarding session update, and owner session. Before paid pilots, move this behind a DB RPC or compensating cleanup path so partial writes cannot strand an auth user or phone claim.
-- The production-like Manager mounts the Docker socket. Treat Manager compromise as host compromise; keep public access through Caddy/Web only and continue reducing model-controlled surfaces.
-- Add a proof writer for normal browser onboarding that records IDs from the real public browser flow without requiring a fixture.
-- Add public-ingress proof JSON for the named tunnel route, separate from `prod-like-normal-up`.
-- Add log shipping/retention on the VPS before a 0-30 employee fleet is left unattended.
-- Back up `/var/lib/amtech`, Caddy data/config volumes, and any generated profile/workspace state.
+- [ ] migrations `0031`–`0033` applied and reviewed;
+- [ ] type/API drift clean;
+- [ ] host-private gateway reachable only from intended runtime path;
+- [ ] rotation/profile integrity proofs pass;
+- [ ] DB-backed reconciler worker operational;
+- [ ] drift scan/repair operational;
+- [ ] no Twilio/provider/welcome effect before runtime + route acceptance.
+
+### P1
+
+- [ ] provider ingress migrated to `ambient_event_inbox` workers;
+- [ ] admin lifecycle actions unified through commands/reconciler;
+- [ ] fresh canonical browser onboarding produces real provider/runtime/tool proof IDs.
+
+## Validation state of this document update
+
+No build, typecheck, migration apply, production stack run, browser onboarding, provider call, runtime probe, or proof artifact was generated in the 2026-07-17 reconciliation session.
