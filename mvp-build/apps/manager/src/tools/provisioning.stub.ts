@@ -252,7 +252,7 @@ const getProvisioningStatus: ToolHandler = async (ctx, raw) => {
   const { data } = await ctx.db.from("provisioning_jobs").select("*").eq("account_id", input.account_id).or(`id.eq.${input.employee_id_or_job_id},employee_id.eq.${input.employee_id_or_job_id}`).order("created_at", { ascending: false }).limit(1).maybeSingle();
   if (!data) return failed("validation_failed", "Provisioning job not found.", { account_id: input.account_id });
   const resources = await ctx.db.from("provisioning_resource_states").select("resource_key,resource_type,desired_state,observed_state,retry_class,evidence,error,updated_at").eq("provisioning_job_id", data.id).order("created_at", { ascending: true });
-  return ok({ account_id: input.account_id, employee_id: data.employee_id ?? null, proof: { provisioning_job_id: data.id, state: data.state, failure_state: data.failure_state ?? null, retry_class: data.retry_class ?? null, next_attempt_at: data.next_attempt_at ?? null, attempt_count: data.attempt_count ?? 0, resources: resources.data ?? [] }, user_facing_summary_hint: `Provisioning is ${data.state}.` });
+  return ok({ account_id: input.account_id, employee_id: data.employee_id ?? null, proof: { provisioning_job_id: data.id, state: data.state, failure_state: data.failure_state ?? null, retry_class: data.retry_class ?? null, next_attempt_at: data.next_attempt_at ?? null, attempt_count: data.attempt_count ?? 0, resources_json: JSON.stringify(resources.data ?? []) }, user_facing_summary_hint: `Provisioning is ${data.state}.` });
 };
 
 export const provisioningTools: Partial<Record<ToolName, ToolHandler>> = {

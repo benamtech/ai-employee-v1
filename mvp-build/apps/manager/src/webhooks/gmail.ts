@@ -66,6 +66,7 @@ export function registerGmailWebhooks(app: Hono): void {
     } catch {
       return c.newResponse(null, 204);
     }
+    if (!push.history_id) return c.newResponse(null, 204);
     await enqueueAmbientEvent(serviceClient(), {
       source_type: "provider_webhook",
       provider: "gmail",

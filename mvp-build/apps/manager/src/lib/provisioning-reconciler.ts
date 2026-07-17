@@ -623,7 +623,7 @@ async function processDriftCommand(db: SupabaseClient, job: ProvisioningJobRow):
     const key = await effectKey(db, job, "inspect_drift_after");
     const result = await requireHostProvisioner({ ...inputs.request, operation: "inspect_drift", idempotency_key: key });
     assertRuntimeAccepted(result);
-    await finishCommandJob(db, job, { drift_before: inspectionEvidence(asObject(context.drift_before) as ProvisionerResult), drift_after: inspectionEvidence(result), repaired: true });
+    await finishCommandJob(db, job, { drift_before: inspectionEvidence(asObject(context.drift_before) as unknown as ProvisionerResult), drift_after: inspectionEvidence(result), repaired: true });
   }
 }
 
@@ -738,7 +738,7 @@ async function handleJobFailure(db: SupabaseClient, job: ProvisioningJobRow, err
     expected_state: job.state as ProvisioningState,
     to_state: "compensating",
     attempt,
-    retry_class,
+    retry_class: retryClass,
     error: { message },
   });
   if (!transition.applied) throw new Error("begin_compensation_transition_conflict");
