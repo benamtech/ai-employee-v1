@@ -9,8 +9,6 @@ import {
   verifyModelGatewayCredential,
 } from "./lib/model-gateway.js";
 
-const app = new Hono();
-
 function upstreamBaseUrl(): string {
   const value = process.env.MODEL_GATEWAY_UPSTREAM_BASE_URL;
   if (!value) throw new Error("MODEL_GATEWAY_UPSTREAM_BASE_URL missing.");
@@ -36,14 +34,16 @@ function redactError(err: unknown): string {
   return message.replace(/[A-Za-z0-9_=-]{24,}/g, "[REDACTED]").slice(0, 180);
 }
 
-async function proxyOpenAiCompatible(c: any, upstreamPath: string) {
+async function proxyOpenAiCompatible(c: any, upstreamPath: string, expectedEmployeeId: string) {
   const db = serviceClient();
   const started = Date.now();
   const requestId = `mgwr_${randomUUID()}`;
   const correlationId = c.req.header("X-Amtech-Correlation-Id") ?? requestId;
-  const claims = await verifyModelGatewayCredential(db, c.req.header("Authorization"));
+  const claims = await verifyModelGatewayCredential(db, c.req.header("Authorization"), {
+    employee_id: expectedEmployeeId,
+  });
   if (!claims) {
-    return c.json({ error: { code: "model_gateway_unauthorized", message: "Model gateway credential is invalid, expired, revoked, or not bound to this employee." } }, 401);
+    return c.json({ error: { code: "model_gateway_unauthorized", message: "Model gateway credential is invalid, expired, revoked, or not bound to this employee route." } }, 401);
   }
 
   let body: Record<string, any>;
@@ -106,7 +106,12 @@ async function proxyOpenAiCompatible(c: any, upstreamPath: string) {
       });
       clearTimeout(timeout);
       const text = await res.text();
-      const json = text ? JSON.parse(text) : {};
+      let json: Record<string, any> = {};
+      try {
+        json = text ? JSON.parse(text) as Record<string, any> : {};
+      } catch {
+        json = {};
+      }
       const usage = (json.usage ?? {}) as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
       await recordModelGatewayUsage(db, {
         request_id: requestId,
@@ -157,11 +162,40 @@ async function proxyOpenAiCompatible(c: any, upstreamPath: string) {
   return c.json({ error: { code: "model_gateway_provider_unavailable", message: "The model gateway could not reach the provider after bounded retries. The employee should surface this as a temporary provider outage, not hang." } }, 503);
 }
 
-app.get("/health", (c) => c.json({ status: "ok", boundary: "host-private-model-gateway" }));
-app.post("/v1/chat/completions", (c) => proxyOpenAiCompatible(c, "/chat/completions"));
-app.post("/v1/responses", (c) => proxyOpenAiCompatible(c, "/responses"));
+export function buildModelGatewayApp(): Hono {
+  const app = new Hono();
+  app.get("/health", (c) => c.json({ status: "ok", boundary: "host-private-model-gateway" }));
+  app.post("/v1/employees/:employeeId/chat/completions", (c) => proxyOpenAiCompatible(c, "/chat/completions", c.req.param("employeeId")));
+  app.post("/v1/employees/:employeeId/responses", (c) => proxyOpenAiCompatible(c, "/responses", c.req.param("employeeId")));
 
-const port = Number(process.env.MODEL_GATEWAY_PORT ?? 8092);
-serve({ fetch: app.fetch, port, hostname: process.env.MODEL_GATEWAY_HOST ?? "0.0.0.0" });
-// eslint-disable-next-line no-console
-console.log(`[model-gateway] listening on ${process.env.MODEL_GATEWAY_HOST ?? "0.0.0.0"}:${port}`);
+  // The unbound route is only a local migration escape hatch. Production must
+  // always use the employee-bound URL rendered into the profile.
+  app.post("/v1/chat/completions", (c) => {
+    if (process.env.NODE_ENV === "production" || process.env.MODEL_GATEWAY_ALLOW_LEGACY_UNBOUND_ROUTE !== "1") {
+      return c.json({ error: { code: "employee_route_required" } }, 404);
+    }
+    const employeeId = c.req.header("X-Amtech-Employee-Id");
+    if (!employeeId) return c.json({ error: { code: "employee_route_required" } }, 400);
+    return proxyOpenAiCompatible(c, "/chat/completions", employeeId);
+  });
+  app.post("/v1/responses", (c) => {
+    if (process.env.NODE_ENV === "production" || process.env.MODEL_GATEWAY_ALLOW_LEGACY_UNBOUND_ROUTE !== "1") {
+      return c.json({ error: { code: "employee_route_required" } }, 404);
+    }
+    const employeeId = c.req.header("X-Amtech-Employee-Id");
+    if (!employeeId) return c.json({ error: { code: "employee_route_required" } }, 400);
+    return proxyOpenAiCompatible(c, "/responses", employeeId);
+  });
+  return app;
+}
+
+export function startModelGateway(): void {
+  const app = buildModelGatewayApp();
+  const port = Number(process.env.MODEL_GATEWAY_PORT ?? 8092);
+  const hostname = process.env.MODEL_GATEWAY_HOST ?? "0.0.0.0";
+  serve({ fetch: app.fetch, port, hostname });
+  // eslint-disable-next-line no-console
+  console.log(`[model-gateway] listening on ${hostname}:${port}`);
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) startModelGateway();
