@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "policy": {
+    "unknown_is_failure": true,
+    "p0_waivers_allowed": false,
+    "required_states": ["source-wired", "provider-accepted", "runtime-accepted"]
+  },
+  "vectors": [
+    {"id":"MG-SEC-001","workstream":"model_gateway","class":"security","acceptance_state":"runtime-accepted","required":true,"positive":"employee requests succeed through gateway","forbidden":["provider key assignment in runtime artifact","configured provider secret value in runtime artifact","direct employee-to-provider request"]},
+    {"id":"MG-AUTH-002","workstream":"model_gateway","class":"security","acceptance_state":"provider-accepted","required":true,"positive":"cross-employee token rejected before dispatch","forbidden":["provider request id","billable usage"]},
+    {"id":"MG-REVOKE-003","workstream":"model_gateway","class":"integration","acceptance_state":"runtime-accepted","required":true,"positive":"revocation and rotation take effect without profile rebuild","forbidden":["revoked token accepted after ttl"]},
+    {"id":"MG-BUDGET-004","workstream":"model_gateway","class":"concurrency","acceptance_state":"runtime-accepted","required":true,"positive":"atomic budget policy enforced","forbidden":["race-driven unbounded overspend"]},
+    {"id":"MG-FAULT-005","workstream":"model_gateway","class":"fault","acceptance_state":"provider-accepted","required":true,"positive":"provider failures classified with bounded retries","forbidden":["infinite retry","secret leakage","false success"]},
+    {"id":"PV-IDEM-001","workstream":"provisioning","class":"concurrency","acceptance_state":"runtime-accepted","required":true,"positive":"one logical result for duplicate commands","forbidden":["duplicate runtime","duplicate route","duplicate provider resource","duplicate welcome"]},
+    {"id":"PV-LEASE-002","workstream":"provisioning","class":"fault","acceptance_state":"runtime-accepted","required":true,"positive":"expired lease takeover resumes safely","forbidden":["duplicate external effect","unalerted stuck job"]},
+    {"id":"PV-CAS-003","workstream":"provisioning","class":"concurrency","acceptance_state":"source-wired","required":true,"positive":"illegal transitions rejected atomically","forbidden":["multiple authoritative states"]},
+    {"id":"PV-COMP-004","workstream":"provisioning","class":"rollback","acceptance_state":"runtime-accepted","required":true,"positive":"reverse compensation proves cleanup or retention","forbidden":["orphaned public route","active provider resource for failed employee"]},
+    {"id":"PV-RECON-005","workstream":"provisioning","class":"integration","acceptance_state":"runtime-accepted","required":true,"positive":"existing resources reconciled","forbidden":["destructive recreation without need"]},
+    {"id":"WH-DUR-001","workstream":"webhook_inbox","class":"fault","acceptance_state":"provider-accepted","required":true,"positive":"acknowledgment only after durable insert","forbidden":["2xx without inbox row"]},
+    {"id":"WH-IDEM-002","workstream":"webhook_inbox","class":"concurrency","acceptance_state":"provider-accepted","required":true,"positive":"duplicates and reordering converge to one logical effect","forbidden":["duplicate money or communication effect"]},
+    {"id":"WH-CRASH-003","workstream":"webhook_inbox","class":"fault","acceptance_state":"runtime-accepted","required":true,"positive":"lease recovery after crash matrix","forbidden":["duplicate domain effect"]},
+    {"id":"WH-AUTH-004","workstream":"webhook_inbox","class":"security","acceptance_state":"provider-accepted","required":true,"positive":"invalid signatures and stale replay rejected","forbidden":["unauthenticated domain dispatch"]},
+    {"id":"WH-DLQ-005","workstream":"webhook_inbox","class":"observability","acceptance_state":"runtime-accepted","required":true,"positive":"poison events dead-letter and replay safely","forbidden":["infinite hot loop","silent drop"]},
+    {"id":"WH-CONF-006","workstream":"webhook_inbox","class":"contract","acceptance_state":"source-wired","required":true,"positive":"every provider adapter passes shared suite","forbidden":["provider-specific bypass"]},
+    {"id":"ISO-NET-001","workstream":"host_isolation","class":"isolation","acceptance_state":"runtime-accepted","required":true,"positive":"no lateral employee network access","forbidden":["shared fleet dns discovery","direct lateral connection"]},
+    {"id":"ISO-FS-002","workstream":"host_isolation","class":"isolation","acceptance_state":"runtime-accepted","required":true,"positive":"profile immutable and workspaces separated","forbidden":["cross-employee file access","host path access"]},
+    {"id":"ISO-AUTH-003","workstream":"host_isolation","class":"security","acceptance_state":"runtime-accepted","required":true,"positive":"swapped credentials rejected","forbidden":["cross-account action","misattributed usage"]},
+    {"id":"ISO-ROUTE-004","workstream":"host_isolation","class":"isolation","acceptance_state":"runtime-accepted","required":true,"positive":"routes map exclusively to intended employee","forbidden":["route confusion","public loopback port"]},
+    {"id":"ISO-EGRESS-005","workstream":"host_isolation","class":"security","acceptance_state":"runtime-accepted","required":true,"positive":"required capabilities work through controlled egress","forbidden":["unrestricted direct egress","metadata access"]},
+    {"id":"ISO-HOST-006","workstream":"host_isolation","class":"security","acceptance_state":"runtime-accepted","required":true,"positive":"manager privileged operations and forged provisioner calls fail","forbidden":["docker socket access","host mutation"]},
+    {"id":"ISO-FAULT-007","workstream":"host_isolation","class":"fault","acceptance_state":"runtime-accepted","required":true,"positive":"employee B remains healthy during employee A exhaustion and restart","forbidden":["fleet-wide outage","shared corruption"]}
+  ]
+}
