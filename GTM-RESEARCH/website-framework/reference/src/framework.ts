@@ -35,6 +35,7 @@ export interface PageSource {
   description: string;
   features: FeatureMap;
   vectorPrototypes?: VectorPrototypeSource[];
+  primaryPrototypeId?: string;
   moduleIds: string[];
   internalPageIds: string[];
   requiredCapabilities: DesignCapability[];
@@ -72,6 +73,7 @@ export interface PageIR {
   description: string;
   indexable: boolean;
   features: FeatureMap;
+  primaryPrototypeId: string;
   vectorPrototypes: VectorPrototypeIR[];
   modules: SemanticModuleIR[];
   internalPageIds: string[];
@@ -168,6 +170,7 @@ export function compileSite(source: SiteSource, dimensions = 512): CompiledSite 
       description: page.description,
       indexable: page.indexable,
       features: stableRecord(vectorPrototypes[0].features),
+      primaryPrototypeId: vectorPrototypes[0].id,
       vectorPrototypes,
       modules,
       internalPageIds: uniqueSorted(page.internalPageIds),
@@ -293,7 +296,7 @@ function normalizePrototypes(page: PageSource): VectorPrototypeIR[] {
     ? page.vectorPrototypes
     : [{ id: "primary", features: page.features }];
   const seen = new Set<string>();
-  return [...declared].sort((left, right) => left.id.localeCompare(right.id)).map((prototype) => {
+  const normalized = declared.map((prototype) => {
     if (!prototype.id.trim()) throw new Error(`page ${page.id} has empty prototype id`);
     if (seen.has(prototype.id)) throw new Error(`page ${page.id} has duplicate prototype ${prototype.id}`);
     seen.add(prototype.id);
@@ -301,6 +304,10 @@ function normalizePrototypes(page: PageSource): VectorPrototypeIR[] {
     if (Object.keys(features).length === 0) throw new Error(`page ${page.id}/${prototype.id} has no vector features`);
     return { id: prototype.id, features };
   });
+  const primaryId = page.primaryPrototypeId ?? normalized[0].id;
+  const primary = normalized.find((prototype) => prototype.id === primaryId);
+  if (!primary) throw new Error(`page ${page.id} primary prototype ${primaryId} does not exist`);
+  return [primary, ...normalized.filter((prototype) => prototype.id !== primaryId).sort((left, right) => left.id.localeCompare(right.id))];
 }
 
 function validateSiteSource(source: SiteSource): void {
