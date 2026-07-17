@@ -37,7 +37,7 @@ describe("employee model-gateway network boundary", () => {
     const compose = await source("infra/deploy/docker-compose.production.yml");
     const caddy = await source("infra/caddy/production.Caddyfile");
     expect(compose).toContain('"127.0.0.1:8092:8092"');
-    expect(compose).toContain("node apps/manager/dist/model-gateway-server.js");
+    expect(compose).toContain('command: ["node", "apps/manager/dist/model-gateway-server.js"]');
     expect(caddy).not.toContain("8092");
     expect(caddy.toLowerCase()).not.toContain("model-gateway");
   });
