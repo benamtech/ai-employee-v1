@@ -38,7 +38,18 @@ jobs:
       - name: Database contracts
         run: npm run typecheck --workspace @amtech/db
       - name: Manager and Hono contracts
-        run: npm run typecheck --workspace @amtech/manager
+        shell: bash
+        run: |
+          set +e
+          npm run typecheck --workspace @amtech/manager 2>&1 | tee manager-typecheck.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload Manager typecheck diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-typecheck-${{ github.run_id }}
+          path: mvp-build/manager-typecheck.log
+          if-no-files-found: error
       - name: Production boundary unit and source proofs
         env:
           HERMES_RUNTIME_COMMAND: node -e "process.exit(0)"
