@@ -50,7 +50,7 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
         if (this.table === "ambient_effect_receipts" && rows.some((row) => row.effect_key === value.effect_key)) {
           return { data: null, error: { code: "23505", message: "duplicate effect" } };
         }
-        rows.push({ created_at: new Date().toISOString(), ...value });
+        rows.push({ created_at: new Date().toISOString(), duplicate_count: 0, ...value });
       }
       return { data: values, error: null };
     }
@@ -71,10 +71,24 @@ class FakeSupabase {
     this.tables.set(table, rows);
     return rows;
   }
+  async rpc(name: string, params: Row): Promise<QueryResult<Row[]>> {
+    if (name !== "record_ambient_event_duplicate") return { data: [], error: { message: `unsupported rpc:${name}` } };
+    const row = this.rows("ambient_event_inbox").find((candidate) =>
+      candidate.dedupe_key === params.p_dedupe_key || (
+        candidate.source_type === params.p_source_type &&
+        candidate.provider === params.p_provider &&
+        candidate.external_event_id === params.p_external_event_id
+      ),
+    );
+    if (!row) return { data: [], error: null };
+    row.duplicate_count = Number(row.duplicate_count ?? 0) + 1;
+    row.last_duplicate_at = new Date().toISOString();
+    return { data: [{ inbox_id: row.inbox_id, duplicate_count: row.duplicate_count, last_duplicate_at: row.last_duplicate_at }], error: null };
+  }
 }
 
 describe("ambient event durability", () => {
-  it("deduplicates on provider identity even when callers change their custom dedupe key", async () => {
+  it("deduplicates on provider identity and atomically records the redelivery", async () => {
     const fake = new FakeSupabase();
     const db = fake as unknown as SupabaseClient;
     const first = await enqueueAmbientEvent(db, {
@@ -93,6 +107,8 @@ describe("ambient event durability", () => {
     });
     expect(duplicate).toEqual({ inbox_id: first.inbox_id, duplicate: true });
     expect(fake.rows("ambient_event_inbox")).toHaveLength(1);
+    expect(fake.rows("ambient_event_inbox")[0]).toMatchObject({ duplicate_count: 1 });
+    expect(fake.rows("ambient_event_inbox")[0].last_duplicate_at).toBeTruthy();
   });
 
   it("reclaims known failed effects, but replays completed effects without applying them twice", async () => {
