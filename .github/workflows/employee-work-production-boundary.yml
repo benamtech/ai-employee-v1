@@ -39,7 +39,9 @@ jobs:
         run: npm run typecheck --workspace @amtech/db
       - name: Manager and Hono contracts
         run: npm run typecheck --workspace @amtech/manager
-      - name: Model and profile isolation proofs
-        run: npx vitest run tests/unit/model-profile-isolation.test.ts
+      - name: Production boundary unit and source proofs
+        env:
+          HERMES_RUNTIME_COMMAND: node -e "process.exit(0)"
+        run: npx vitest run tests/unit/model-profile-isolation.test.ts tests/unit/production-boundary-source.test.ts
       - name: Production image inclusion
         run: docker build -f infra/deploy/manager.Dockerfile .
