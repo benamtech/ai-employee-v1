@@ -2,7 +2,7 @@
 
 Status: active
 Updated: 2026-07-17
-Active branch: `employee-work` (based on `research`; draft PR `#18` targets `research`)
+Active branch: `employee-work` (based on `research`; draft PR `#19` targets `research`; closed PR `#18` is superseded)
 
 ## Cold-session read order
 
@@ -56,7 +56,7 @@ The public estimator and `prod-like:public-estimator:*` scripts are outdated acq
 | `planned` | Designed, not implemented. |
 | `pending` | Unattempted, blocked, or missing proof. |
 
-**Current overall status: `source-wired_not_accepted`.** The worker, ingress, and isolation boundaries now exist in source, but migrations `0032`–`0038` are unapplied and no build-, runtime-, provider-, or browser-acceptance packet was produced in this pass.
+**Current overall status: `source-wired_not_accepted`.** The worker, ingress, and isolation boundaries now exist in source, but migrations `0032`–`0038` are unapplied and no build-, runtime-, provider-, or browser-acceptance packet has completed for the patched branch head.
 
 ## Current production state
 
@@ -183,7 +183,7 @@ provider request
 ## Static review findings requiring proof or repair
 
 - The connected live Supabase project stops at `0031_public_estimator.sql`; apply/review `0032`–`0038` in staging before deploying this source.
-- The branch contains shared/db/Manager typeproofs, boundary tests, and image assertions, but GitHub Actions did not report a run during this pass.
+- CI runs `24`–`26` validated shared/db setup and exposed Manager contract failures. The exact four remaining Manager errors were repaired on the branch, but a clean end-to-end run for the patched head is still pending.
 - The model-gateway rate bucket remains process-local; spend-limit enforcement is not yet a transactional accumulated-usage budget.
 - Host idempotency-marker recovery and fresh compensated retry keys are source-wired but need crash/retry acceptance.
 - Credential rotation sequencing is source-wired but requires live checksum/new-token/old-token-rejection proof.
@@ -240,4 +240,4 @@ second-half-plan/          active forward-plan family
 
 ## Validation state for the 2026-07-17 employee-work pass
 
-Read-only live Supabase catalog inspection ran and confirmed the migration frontier stops at `0031`. Source, migrations, tests, typeproofs, a CI workflow, and production-image assertions were added. No successful Actions run, local build/typecheck/test suite, migration application, Compose run, browser flow, provider call, hostile-runtime probe, or runtime/provider proof artifact is claimed.
+Read-only live Supabase catalog inspection ran and confirmed the migration frontier stops at `0031`. Source, migrations, tests, typeproofs, a CI workflow, and production-image assertions were added. CI runs `24`–`26` passed the shared/db stages and surfaced/focused the Manager contract errors; those four errors are fixed on the current branch. No clean patched-head Actions run, migration application, Compose run, browser flow, provider call, hostile-runtime probe, or runtime/provider proof artifact is claimed.
