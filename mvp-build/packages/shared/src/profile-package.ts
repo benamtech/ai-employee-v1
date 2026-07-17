@@ -97,6 +97,7 @@ export type ProvisionerOperation =
   | "repair_drift"
   | "rotate_model_gateway_credential"
   | "suspend_runtime"
+  | "restart_runtime"
   | "replace_runtime"
   | "restore_runtime";
 
