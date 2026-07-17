@@ -1,6 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises";
 
-// One-shot TDD correction pass. Delete this script after the bot commit lands.
+// One-shot remaining TDD corrections. Delete after the bot commit lands.
 async function replaceExactly(path, before, after, expected = 1) {
   const source = await readFile(path, "utf8");
   const matches = source.split(before).length - 1;
@@ -8,16 +8,11 @@ async function replaceExactly(path, before, after, expected = 1) {
   await writeFile(path, source.split(before).join(after), "utf8");
 }
 
-for (const path of [
+await replaceExactly(
   "mvp-build/tests/unit/model-profile-isolation.test.ts",
-  "mvp-build/tests/unit/model-gateway-http-isolation.test.ts",
-]) {
-  await replaceExactly(
-    path,
-    '    this.filters.push((row) => row[column] === value);',
-    '    this.filters.push((row) => value === null ? row[column] == null : row[column] === value);',
-  );
-}
+  '    this.filters.push((row) => row[column] === value);',
+  '    this.filters.push((row) => value === null ? row[column] == null : row[column] === value);',
+);
 
 await replaceExactly(
   "mvp-build/tests/unit/production-boundary-source.test.ts",
