@@ -1,0 +1,8 @@
+# AMTECH public UI baseline: explicit modern Tier 2.
+Chrome >= 111
+Edge >= 111
+Firefox >= 113
+Safari >= 16.4
+ios_saf >= 16.4
+not dead
+not op_mini all
