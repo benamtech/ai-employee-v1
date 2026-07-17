@@ -1,109 +1,127 @@
-# CODEGRAPH.md — Hyper-Targeted Search Distribution Framework Map
+# CODEGRAPH.md — Unified Hyper-Vector Publishing Framework
 
-Status: Phase 1 complete; Phase 2 production-oriented reference implementation started
+Status: source-wired research reference; UI renderer and field acceptance pending
 Updated: 2026-07-17
 Scope: `GTM-RESEARCH/website-framework/`
 
-## Read order
+## Reality
+
+This subtree is not yet a production web framework. It is an executable research package plus specifications.
+
+Source-wired:
+
+- TypeScript HRR/VSA algebra and comparison fixtures;
+- corpus optimizers;
+- typed semantic compiler and packed artifacts;
+- synthetic scale and deterministic emission tests;
+- source scaffolds for resolver, Zig/Wasm, Worker distribution, search cohorts, and conversion attribution;
+- unified manifest composer, hyper-aware agent contract, and UI-scaffold plan.
+
+Not accepted:
+
+- production renderer/application;
+- live public corpus;
+- search indexing/ranking/citation lift;
+- conversion/revenue lift;
+- Zig/Wasm parity/performance;
+- Cloudflare deployment, browser, accessibility, Core Web Vitals, and load behavior.
+
+## Authority graph
+
+```text
+site-manifest.yaml
+  |
+  +-> vector-space axes + prototype sets
+  +-> agent harness + publication gates
+  +-> evidence + claims + information objects
+  +-> semantic modules + page definitions
+  +-> profiles: request-mirror / UI / geometry / field
+  |
+  v
+reference/src/manifest.ts
+  |
+  +-> compiled hyper-vector space
+  +-> vector-derived nearest neighbors/internal edges
+  +-> SiteSource
+  |
+  v
+reference/src/framework.ts
+  |
+  +-> PageIR
+  +-> packed vectors + CSR graph
+  +-> HTML + schema + sitemap + instructions
+  |
+  +-> reference/src/agent-harness.ts -> agent-context.json
+  +-> reference/src/ui-scaffold.ts  -> ui-scaffold.json
+  +-> reference/src/resolver.ts     -> finite resolver fixtures
+  +-> reference/worker/             -> asset-first Worker scaffold
+  +-> reference/zig/                -> scalar/SIMD source scaffold
+```
+
+There is no longer a separate five-slice architecture. The old Request Mirror candidates are manifest pages in the `request-mirror-lab` profile and pass through the same compiler.
+
+## Current read order
 
 1. `../../identity.md`
 2. `identity.md`
 3. `../../CODEGRAPH.md`
 4. `AGENTS.md`
 5. `README.md`
-6. numbered specifications `00` through `15`
-7. `15-hyper-targeted-search-distribution-workstreams.md`
+6. `16-unified-hypervector-manifest-agent-harness.md`
+7. `site-manifest.yaml`
 8. `reference/README.md`
 9. `reference/UI-DESIGN-SYSTEM-HANDOFF.md`
-10. validation reports
+10. `RESEARCH-NOTES-CURRENT.md`
+11. newest file under `memory/`
+12. historical numbered specifications when changing their domain
 
-`15` controls the current two-workstream, three-part execution order. `14` remains the broader Phase 2 boundary and supporting workstream inventory.
+## First-class state
 
-## Primary category
-
-**Hyper-targeted search-distribution compiler and vector information server.**
-
-The primary commercial emission is a corpus of `200–2,000+` stable canonical pages selected to maximize valuable query/context compatibility, page distinctness, information gain, graph utility, and lifecycle value.
-
-HTML is an emission. The durable system is:
+The durable state is:
 
 ```text
-approved source + evidence + information objects
--> context/page geometry
--> corpus optimizer
--> typed ExperienceIR
--> packed vectors + CSR graph + dependencies + page plans
--> canonical HTML + instruction pointers + sitemap + manifests
--> asset-first global distribution
--> search/query/conversion/revenue observations
+source/evidence
++ feature atoms
++ page prototype sets
++ compatibility-space vocabulary
++ semantic modules
++ graph/dependencies
++ profile/publication policy
 ```
 
-## Current executable implementation
+HTML, instruction Markdown, sitemaps, UI scaffolds, and resolver artifacts are deterministic emissions.
 
-`reference/` now contains:
+## Agent-first rule
 
-- deterministic HDC/VSA/HRR symbols, FFT and naive circular convolution, bind/unbind, superposition, cosine, and multi-prototype scoring;
-- deterministic `500`-case context benchmark generator with lexical, hashed-semantic, facet, graph, HRR, and hybrid arms;
-- NDCG, top-one, zero-match, bad-fit, and reciprocal-rank metrics;
-- exact greedy, exhaustive small-instance, lazy-greedy, information-saturation, coherent rare-tail, and log-determinant diversity controls;
-- typed evidence/claim/information/module/page source contracts;
-- semantic renderer-independent `PageIR` and packed structure-of-arrays vectors;
-- CSR internal-link graph and design-capability indexes;
-- deterministic neutral HTML, structured data, sitemap, and instruction-pointer emissions;
-- dependency-bounded invalidation and content-addressed build hashes;
-- deterministic field cohort, conversion event, deduplication, and revenue-per-page metrics;
-- finite variant resolver with hard eligibility, confidence fallback, and deterministic holdout;
-- Zig scalar/SIMD kernel source, Wasm ABI adapter, and TypeScript fallback;
-- Cloudflare Workers Static Assets asset-first configuration and bounded resolver endpoints;
-- `200/500/1000/2000` page scale runner and a `2,000`-page static emission script;
-- design-system capability vectors and a superset satisfiability validator for the next UI pass.
+Agents receive the compiled space, current page neighborhoods, evidence inventory, uncovered-region hypothesis, design capabilities, and publication rules. They propose typed page additions. They do not write production HTML or create indexable routes directly.
 
-## Validated locally
+## UI pass boundary
 
-- strict TypeScript compilation;
-- `12/12` Node tests passed;
-- FFT circular convolution matched the naive oracle within `1e-10` on the declared fixture;
-- exact greedy matched exhaustive optimum on the small facility-location control;
-- lazy greedy matched exact greedy on the declared control;
-- coherent rare-page selection rejected isolated noise in the declared composite fixture;
-- `500` context / `240` page benchmark was deterministic; hybrid did not regress lexical NDCG/bad-fit and zero-match accuracy was `1.0` on the synthetic fixture;
-- source reordering produced the same build hash;
-- the reference design contract satisfied every emitted page capability;
-- `2,000` canonical pages plus `6,000` finite variant plans compiled deterministically;
-- `2,000` HTML files and `2,000` compact `use.md` projections were emitted locally.
+The first UI pass consumes the `ui-scaffold` profile. Its inputs are module kinds, layout roles, capability vectors, vector prototype IDs, variant axes, semantic content, and fixture routes.
 
-Authority: `validation/reports/2026-07-17-hyper-targeted-production-pass.md`.
+The design system must be a satisfactory superset of these requirements. The renderer cannot alter vector geometry, evidence, page intent, graph edges, or publication state.
 
-## Not validated
+## Validation authority
 
-- Zig `0.15.2` compilation, native execution, scalar Wasm, or Wasm SIMD parity because Zig was unavailable and outbound DNS blocked toolchain download;
-- Wrangler/Cloudflare preview or deployment;
-- browser, crawler, accessibility, Core Web Vitals, load, cache-hit, or Worker CPU tests;
-- real Search Console/Bing data ingestion;
-- indexing, ranking, query coverage, conversion lift, closed revenue, or production acceptance;
-- learned embeddings, calibrated human relevance labels, optimal transport, Gromov-Wasserstein, or field superiority over simpler controls.
+- `04-feature-validation-vectors.md`
+- `05-pass-fail-vectors.md`
+- `12-compiler-design-and-autonomy-validation-addendum.md`
+- `13-academic-and-normative-basis-for-validation-vectors.md`
+- `15-hyper-targeted-search-distribution-workstreams.md`
+- `16-unified-hypervector-manifest-agent-harness.md`
+- `validation/reports/2026-07-17-hyper-targeted-production-pass.md`
+- `validation/reports/2026-07-17-unified-manifest-ui-readiness.md`
+- CI workflow `.github/workflows/website-framework-reference.yml`
 
-## Governing invariants
-
-- every published page has a stable canonical question, visible information object, evidence, internal graph role, and positive measured marginal value;
-- hard eligibility executes before weighted scoring;
-- zero-match and uncertainty return the canonical baseline;
-- canonical static assets require no resolver, model, database, or client JavaScript;
-- runtime cannot generate arbitrary prose, routes, symbols, components, or visitor-specific cache keys;
-- crawlers and humans receive the same primary topic, claims, price, evidence, limitations, and links;
-- no fingerprinting, named-person dossier, identity stitching, private-history ingestion, or sensitive-trait inference;
-- TypeScript remains the semantic oracle; Zig/Wasm ships only after parity and end-to-end benefit;
-- design systems map semantic requirements to components and tokens without changing source truth or page geometry.
-
-## Next code path
+## Immediate next code path
 
 ```text
-1. replace synthetic benchmark labels with reviewed real query/context/page tuples;
-2. add calibrated human relevance, no-match, held-out-domain, and ablation reports;
-3. run Zig native/scalar/SIMD parity once Zig 0.15.2 is available;
-4. deploy generated assets to a noindex Cloudflare preview and measure asset-first vs Worker-first behavior;
-5. ingest the supplied AMTECH design system and prove it satisfies the UI superset contract;
-6. compile the first real matched 20–40 page field cohort;
-7. publish only after canonical, accessibility, browser, crawl, and evidence gates pass;
-8. measure real search distribution and commercial value before scaling to 200+ pages.
+unified manifest + CI pass
+-> ingest supplied design system
+-> derive and implement semantic renderer superset
+-> browser/accessibility/metadata/JS-disabled validation
+-> generate first hyper-aware agent page proposals
+-> review 20–40 field candidates
+-> publish matched cohorts only after explicit gate
+-> measure indexing, compatible discovery, qualified pipeline, gross profit, and lifecycle return
 ```
