@@ -34,8 +34,12 @@ function safeEqual(a: string, b: string): boolean {
   return ab.length === bb.length && timingSafeEqual(ab, bb);
 }
 
-function gatewayUrl(): string {
+export function modelGatewayBaseUrl(): string {
   return (process.env.MODEL_GATEWAY_EMPLOYEE_BASE_URL ?? "http://host.docker.internal:8092/v1").replace(/\/$/, "");
+}
+
+export function employeeModelGatewayUrl(employeeId: string): string {
+  return `${modelGatewayBaseUrl()}/employees/${encodeURIComponent(employeeId)}`;
 }
 
 function defaultAllowedProviders(): string[] {
@@ -55,7 +59,7 @@ function defaultAllowedModels(): string[] {
 export function buildModelGatewayPolicy(overrides: Partial<ModelGatewayPolicy> = {}): ModelGatewayPolicy {
   const ttlMs = Number(process.env.MODEL_GATEWAY_CREDENTIAL_TTL_MS ?? 1000 * 60 * 60 * 24 * 30);
   return {
-    gateway_url: overrides.gateway_url ?? gatewayUrl(),
+    gateway_url: overrides.gateway_url ?? modelGatewayBaseUrl(),
     model_alias: overrides.model_alias ?? process.env.MODEL_GATEWAY_MODEL_ALIAS ?? "amtech-primary",
     allowed_providers: overrides.allowed_providers ?? defaultAllowedProviders(),
     allowed_models: overrides.allowed_models ?? defaultAllowedModels(),
@@ -72,7 +76,12 @@ export async function mintModelGatewayCredential(db: SupabaseClient, input: {
   policy?: Partial<ModelGatewayPolicy>;
   rotated_from_credential_id?: string | null;
 }): Promise<{ credential_id: string; token: string; token_hash: string; token_prefix: string; policy: ModelGatewayPolicy }> {
-  const policy = buildModelGatewayPolicy(input.policy);
+  // The employee id is part of the OpenAI-compatible base URL. A valid token for
+  // another employee therefore fails before any provider request is attempted.
+  const policy = buildModelGatewayPolicy({
+    ...input.policy,
+    gateway_url: employeeModelGatewayUrl(input.employee_id),
+  });
   const credential_id = `mgwc_${randomUUID()}`;
   const issued_at = new Date().toISOString();
   const claims: ModelGatewayTokenClaims = {
@@ -116,7 +125,11 @@ export async function revokeModelGatewayCredential(db: SupabaseClient, credentia
   if (updated.error) throw updated.error;
 }
 
-export async function verifyModelGatewayCredential(db: SupabaseClient, authorization: string | null | undefined): Promise<ModelGatewayTokenClaims | null> {
+export async function verifyModelGatewayCredential(
+  db: SupabaseClient,
+  authorization: string | null | undefined,
+  expected?: { account_id?: string | null; employee_id?: string | null },
+): Promise<ModelGatewayTokenClaims | null> {
   const token = authorization?.startsWith("Bearer ") ? authorization.slice("Bearer ".length) : "";
   if (!token.startsWith(MODEL_GATEWAY_TOKEN_PREFIX)) return null;
   const body = token.slice(MODEL_GATEWAY_TOKEN_PREFIX.length);
@@ -134,17 +147,21 @@ export async function verifyModelGatewayCredential(db: SupabaseClient, authoriza
   }
   if (claims.token_type !== "model_gateway") return null;
   if (!claims.account_id || !claims.employee_id || !claims.credential_id) return null;
+  if (expected?.account_id && claims.account_id !== expected.account_id) return null;
+  if (expected?.employee_id && claims.employee_id !== expected.employee_id) return null;
+  if (claims.gateway_url !== employeeModelGatewayUrl(claims.employee_id)) return null;
   if (Date.parse(claims.expires_at) <= Date.now()) return null;
 
   const row = await db
     .from("model_gateway_credentials")
-    .select("id,account_id,employee_id,credential_version,token_hash,revoked_at,expires_at")
+    .select("id,account_id,employee_id,credential_version,token_hash,revoked_at,expires_at,gateway_url")
     .eq("id", claims.credential_id)
     .eq("account_id", claims.account_id)
     .eq("employee_id", claims.employee_id)
     .maybeSingle();
   if (row.error || !row.data) return null;
   if (row.data.revoked_at) return null;
+  if (String(row.data.gateway_url) !== claims.gateway_url) return null;
   if (Number(row.data.credential_version) !== Number(claims.credential_version)) return null;
   if (Date.parse(String(row.data.expires_at)) <= Date.now()) return null;
   if (row.data.token_hash !== tokenHash(token)) return null;
@@ -195,8 +212,6 @@ export async function recordModelGatewayUsage(db: SupabaseClient, usage: ModelGa
     correlation_id: usage.correlation_id ?? null,
   });
   if (inserted.error) {
-    // Do not leak request bodies or token material. A failed audit write is still
-    // visible in process logs; the gateway request itself should already be bounded.
     // eslint-disable-next-line no-console
     console.warn("[model-gateway] usage audit write failed", inserted.error.message);
   }
