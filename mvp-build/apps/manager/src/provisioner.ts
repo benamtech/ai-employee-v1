@@ -21,7 +21,7 @@ function socketPath(): string {
   return process.env.PROVISIONER_SOCKET_PATH ?? "/run/amtech-provisioner/provisioner.sock";
 }
 
-function signedEnvelope(req: ProvisionerRequest): ProvisionerRequest {
+export function signedProvisionerEnvelope(req: ProvisionerRequest): ProvisionerRequest {
   const issued = new Date();
   const expires = new Date(issued.getTime() + 30_000);
   return {
@@ -35,8 +35,8 @@ function signedEnvelope(req: ProvisionerRequest): ProvisionerRequest {
   };
 }
 
-async function callHostProvisioner(input: ProvisionerRequest): Promise<{ status: number; body: ProvisionerResult }> {
-  const envelope = signedEnvelope(input);
+export async function callHostProvisioner(input: ProvisionerRequest): Promise<{ status: number; body: ProvisionerResult }> {
+  const envelope = signedProvisionerEnvelope(input);
   const raw = Buffer.from(JSON.stringify(envelope));
   const signature = createHmac("sha256", requiredEnv("PROVISIONER_SIGNING_SECRET")).update(raw).digest("hex");
 
@@ -56,7 +56,12 @@ async function callHostProvisioner(input: ProvisionerRequest): Promise<{ status:
       res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
       res.on("end", () => {
         const text = Buffer.concat(chunks).toString("utf8");
-        const body = JSON.parse(text || "{}") as ProvisionerResult;
+        let body: ProvisionerResult;
+        try {
+          body = JSON.parse(text || "{}") as ProvisionerResult;
+        } catch {
+          body = { status: "failed", failure_state: "host_provisioner_invalid_json", logs: [text.slice(0, 500)] };
+        }
         resolve({ status: res.statusCode ?? 500, body });
       });
     });
@@ -64,6 +69,16 @@ async function callHostProvisioner(input: ProvisionerRequest): Promise<{ status:
     req.on("error", reject);
     req.end(raw);
   });
+}
+
+export async function requireHostProvisioner(input: ProvisionerRequest): Promise<ProvisionerResult> {
+  const result = await callHostProvisioner(input);
+  if (result.status >= 400 || result.body.status !== "ok") {
+    const err = new Error(result.body.failure_state ?? `host_provisioner_${result.status}`);
+    Object.assign(err, { provisioner_result: result.body, http_status: result.status });
+    throw err;
+  }
+  return result.body;
 }
 
 export function registerProvisionerRoutes(app: Hono): void {
