@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "phases": [
+    {
+      "id": "migration-staging",
+      "script": "infra/scripts/acceptance/migration-staging-live-proof.mjs",
+      "required_evidence": ["database_ref", "migrations", "verifier_tail"]
+    },
+    {
+      "id": "gateway-two-employee-isolation",
+      "script": "infra/scripts/acceptance/model-gateway-live-proof.mjs",
+      "required_evidence": ["employees", "public_ingress"]
+    },
+    {
+      "id": "gateway-credential-http-matrix",
+      "script": "infra/scripts/acceptance/model-gateway-live-proof.mjs",
+      "required_evidence": ["http_matrix", "temporary_credentials_deleted"]
+    },
+    {
+      "id": "credential-rotation",
+      "script": "infra/scripts/acceptance/rotation-live-proof.mjs",
+      "destructive": true,
+      "required_evidence": ["command_id", "old_credential_id", "new_credential_id", "old_checksum", "new_checksum", "old_container_id", "new_container_id", "old_request_status"]
+    },
+    {
+      "id": "reboot-and-drift-repair",
+      "script": "infra/scripts/acceptance/reconciler-recovery-live-proof.mjs",
+      "destructive": true,
+      "required_evidence": ["reboot", "drift_repair"]
+    },
+    {
+      "id": "compensation-and-marker-recovery",
+      "script": "infra/scripts/acceptance/reconciler-recovery-live-proof.mjs",
+      "destructive": true,
+      "required_evidence": ["compensation", "failed_marker_recovery"]
+    },
+    {
+      "id": "provider-inbox-reliability",
+      "script": "infra/scripts/acceptance/ambient-ingress-live-proof.mjs",
+      "required_evidence": ["provider", "original_event", "dead_letter", "replay"]
+    },
+    {
+      "id": "canonical-browser-onboarding",
+      "script": "infra/scripts/acceptance/canonical-browser-live-proof.mjs",
+      "required_evidence": ["source_proof", "public_origin", "account_ids", "employee_ids"]
+    },
+    {
+      "id": "provider-backed-work-object",
+      "script": "infra/scripts/acceptance/generated-work-object-live-proof.mjs",
+      "required_evidence": ["provider_backed", "owner_turn", "gateway_request", "envelope", "materialization"]
+    }
+  ]
+}
