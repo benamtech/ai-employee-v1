@@ -5,6 +5,7 @@ export interface HyperAwareAgentContext {
   profileId: string;
   vectorSpace: {
     namespace: string;
+    symbolVersion: string;
     dimensions: number;
     axes: string[];
     spaceHash: string;
@@ -12,7 +13,10 @@ export interface HyperAwareAgentContext {
   currentPages: {
     pageId: string;
     canonicalQuestion: string;
-    targetAtoms: ManifestFeatureAtom[];
+    prototypes: {
+      id: string;
+      targetAtoms: ManifestFeatureAtom[];
+    }[];
     nearestPages: { pageId: string; cosine: number }[];
     informationObjectIds: string[];
     requiredDesignCapabilities: string[];
@@ -22,6 +26,12 @@ export interface HyperAwareAgentContext {
     requiredOutputs: string[];
     prohibitedOutputs: string[];
     publicationDefault: "noindex";
+    coveragePolicy: {
+      minimumContexts: number;
+      minimumNormalizedMarginalGain: number;
+      minimumImprovingContexts: number;
+      maximumExistingSimilarity: number;
+    };
   };
 }
 
@@ -36,23 +46,27 @@ export function buildHyperAwareAgentContext(compiled: CompiledFrameworkManifest,
     const source = sourcePageById.get(page.pageId);
     const artifact = artifactById.get(page.pageId);
     if (!source || !artifact) throw new Error(`agent context missing page ${page.pageId}`);
-    const primary = page.prototypes[0];
     const nearestPages = compiled.vectorSpace.pages.filter((candidate) => candidate.pageId !== page.pageId)
-      .map((candidate) => ({ pageId: candidate.pageId, cosine: maxCosine(primary.vector, candidate.prototypes.map((prototype) => prototype.vector)) }))
+      .map((candidate) => ({ pageId: candidate.pageId, cosine: maxPageCosine(page, candidate) }))
       .sort((left, right) => right.cosine - left.cosine || left.pageId.localeCompare(right.pageId)).slice(0, 5);
     return {
       pageId: page.pageId,
       canonicalQuestion: source.canonical_question,
-      targetAtoms: [...primary.featureAtoms],
+      prototypes: [...page.prototypes].sort((left, right) => left.id.localeCompare(right.id)).map((prototype) => ({
+        id: prototype.id,
+        targetAtoms: [...prototype.featureAtoms],
+      })),
       nearestPages,
       informationObjectIds: uniqueSorted(artifact.page.modules.flatMap((module) => module.informationObjects.map((item) => item.id))),
       requiredDesignCapabilities: [...artifact.page.requiredCapabilities],
     };
   }).sort((a, b) => a.pageId.localeCompare(b.pageId));
+  const coverage = compiled.manifest.agent_harness.coverage_policy;
   return {
     profileId,
     vectorSpace: {
       namespace: compiled.vectorSpace.namespace,
+      symbolVersion: compiled.vectorSpace.symbolVersion,
       dimensions: compiled.vectorSpace.dimensions,
       axes: Object.keys(compiled.vectorSpace.axes).sort(),
       spaceHash: compiled.vectorSpace.spaceHash,
@@ -63,11 +77,24 @@ export function buildHyperAwareAgentContext(compiled: CompiledFrameworkManifest,
       requiredOutputs: [...compiled.manifest.agent_harness.required_outputs],
       prohibitedOutputs: [...compiled.manifest.agent_harness.prohibited_outputs],
       publicationDefault: "noindex",
+      coveragePolicy: {
+        minimumContexts: coverage.minimum_contexts,
+        minimumNormalizedMarginalGain: coverage.minimum_normalized_marginal_gain,
+        minimumImprovingContexts: coverage.minimum_improving_contexts,
+        maximumExistingSimilarity: coverage.maximum_existing_similarity,
+      },
     },
   };
 }
 
-function maxCosine(vector: Float64Array, candidates: Float64Array[]): number {
-  return candidates.reduce((best, candidate) => Math.max(best, cosine(vector, candidate)), Number.NEGATIVE_INFINITY);
+function maxPageCosine(
+  left: CompiledFrameworkManifest["vectorSpace"]["pages"][number],
+  right: CompiledFrameworkManifest["vectorSpace"]["pages"][number],
+): number {
+  let best = Number.NEGATIVE_INFINITY;
+  for (const leftPrototype of left.prototypes) {
+    for (const rightPrototype of right.prototypes) best = Math.max(best, cosine(leftPrototype.vector, rightPrototype.vector));
+  }
+  return best;
 }
 function uniqueSorted(values: readonly string[]): string[] { return [...new Set(values)].sort(); }
