@@ -16,6 +16,9 @@ import { runCommandString } from "./lib/command-runner.js";
 const MAX_BODY_BYTES = 1024 * 1024;
 const MAX_TTL_MS = 60_000;
 const ALLOWED_OPERATIONS = new Set<ProvisionerOperation>([
+  "render_profile",
+  "start_runtime",
+  "activate_routing",
   "ensure_runtime",
   "remove_runtime",
   "inspect_runtime",
@@ -91,7 +94,7 @@ function validateRequest(input: unknown): HostProvisionerRequest {
   if (issued > now + 5_000 || expires <= now || expires - issued > MAX_TTL_MS) throw new Error("request_expired");
   if (req.params.account_id !== req.account_id || req.params.employee_id !== req.employee_id) throw new Error("binding_mismatch");
   if (req.params.runtime_backend !== "docker") throw new Error("runtime_backend_not_allowed");
-  if (["ensure_runtime", "replace_runtime", "restore_runtime", "rotate_model_gateway_credential"].includes(req.operation) && !req.render_secrets?.model_gateway_token) {
+  if (["render_profile", "ensure_runtime", "replace_runtime", "restore_runtime", "rotate_model_gateway_credential"].includes(req.operation) && !req.render_secrets?.model_gateway_token) {
     throw new Error("model_gateway_token_required");
   }
   return { ...req, request_id, nonce, idempotency_key } as HostProvisionerRequest;
@@ -123,9 +126,6 @@ async function claimOnce(kind: "nonce" | "idempotency", key: string): Promise<bo
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code !== "EEXIST") throw err;
     if (kind !== "idempotency" || await cachedResult(key)) return false;
-
-    // A process crash can leave a marker without a result. Reclaim only after a
-    // bounded stale window, so concurrent in-flight requests still converge.
     const staleMs = Math.max(30_000, Number(process.env.PROVISIONER_IDEMPOTENCY_STALE_MS ?? 10 * 60_000));
     try {
       const info = await stat(path);
@@ -182,6 +182,57 @@ async function inspectRuntime(req: HostProvisionerRequest): Promise<Record<strin
   };
 }
 
+async function renderProfile(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  const rendered = await renderProfilePackage(req);
+  return {
+    status: "ok",
+    request_id: req.request_id,
+    operation: req.operation,
+    profile_id: rendered.profile_id,
+    profile_checksum: rendered.profile_checksum,
+    generated_path: rendered.generated_path,
+    workspace_dir: rendered.workspace_dir,
+    validation_status: "passed",
+    validation_output: rendered.validation_output,
+    model_gateway_credential_version: req.params.model_gateway.credential_version,
+    logs: [`profile_checksum:${rendered.profile_checksum}`],
+  };
+}
+
+async function startRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  const profile = await inspectRenderedProfile(req.params);
+  if (!profile.exists) throw new Error("rendered_profile_missing");
+  const runtime = await runRuntimeStart(profile.generated_path);
+  return {
+    status: "ok",
+    request_id: req.request_id,
+    operation: req.operation,
+    profile_id: profile.profile_id,
+    profile_checksum: profile.profile_checksum ?? undefined,
+    generated_path: profile.generated_path,
+    network_name: `amtech-employee-${req.employee_id}`,
+    container_name: `amtech-hermes-${req.employee_id}`,
+    gateway_port: req.params.gateway_port,
+    smoke_output: runtime,
+    logs: [`runtime:${runtime}`],
+  };
+}
+
+async function activateRouting(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  const caddy = await writeAndActivateCaddySnippet(req.params);
+  return {
+    status: "ok",
+    request_id: req.request_id,
+    operation: req.operation,
+    webchat_api_url: `http://127.0.0.1:${req.params.gateway_port}`,
+    api_base_url: `http://127.0.0.1:${req.params.gateway_port}`,
+    api_session_id: "amtech-owner-thread",
+    public_web_route: `/agent/${req.employee_id}`,
+    gateway_port: req.params.gateway_port,
+    logs: [`caddy:${caddy}`],
+  };
+}
+
 async function removeRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
   const container = `amtech-hermes-${req.employee_id}`;
   const network = `amtech-employee-${req.employee_id}`;
@@ -191,33 +242,22 @@ async function removeRuntime(req: HostProvisionerRequest): Promise<ProvisionerRe
 }
 
 async function ensureRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
-  const rendered = await renderProfilePackage(req);
-  const runtime = await runRuntimeStart(rendered.generated_path);
-  const caddy = await writeAndActivateCaddySnippet(req.params);
+  const rendered = await renderProfile(req);
+  const runtime = await startRuntime(req);
+  const routing = await activateRouting(req);
   return {
-    status: "ok",
-    request_id: req.request_id,
+    ...rendered,
+    ...runtime,
+    ...routing,
     operation: req.operation,
-    profile_id: rendered.profile_id,
-    profile_checksum: rendered.profile_checksum,
-    generated_path: rendered.generated_path,
-    workspace_dir: rendered.workspace_dir,
-    network_name: `amtech-employee-${req.employee_id}`,
-    container_name: `amtech-hermes-${req.employee_id}`,
-    webchat_api_url: `http://127.0.0.1:${req.params.gateway_port}`,
-    api_base_url: `http://127.0.0.1:${req.params.gateway_port}`,
-    api_session_id: "amtech-owner-thread",
-    public_web_route: `/agent/${req.employee_id}`,
-    gateway_port: req.params.gateway_port,
-    validation_status: "passed",
-    validation_output: rendered.validation_output,
-    smoke_output: runtime,
-    model_gateway_credential_version: req.params.model_gateway.credential_version,
-    logs: [`profile_checksum:${rendered.profile_checksum}`, `runtime:${runtime}`, `caddy:${caddy}`],
+    logs: [...(rendered.logs ?? []), ...(runtime.logs ?? []), ...(routing.logs ?? [])],
   };
 }
 
 async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  if (req.operation === "render_profile") return renderProfile(req);
+  if (req.operation === "start_runtime") return startRuntime(req);
+  if (req.operation === "activate_routing") return activateRouting(req);
   if (req.operation === "inspect_runtime" || req.operation === "inspect_drift") {
     const drift = await inspectRuntime(req);
     return { status: "ok", request_id: req.request_id, operation: req.operation, gateway_port: req.params.gateway_port, api_base_url: `http://127.0.0.1:${req.params.gateway_port}`, drift, logs: ["inspect_runtime_completed"] };
