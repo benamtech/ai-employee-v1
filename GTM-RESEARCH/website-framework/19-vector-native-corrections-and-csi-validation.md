@@ -1,96 +1,89 @@
 # 19 — Vector-Native Corrections, Context Relevance, and CSI Validation
 
-Status: controlling implementation/validation addendum
+Status: controlling academic/validation addendum; proposal relevance gate remains partial
 Updated: 2026-07-17
-Scope: vector identity, multi-prototype compilation, proposal coverage, and batch subset selection
 
-## Purpose
+## Scope
 
-Close the three highest-impact defects found in the deep review:
+Three deep-review defects were corrected at the compiler-mechanics level:
 
-1. vector symbols were not namespaced or versioned;
-2. secondary page prototypes were lost after the geometry sidecar;
-3. agent proposals asserted marginal coverage in prose rather than proving it computationally.
+1. namespace/version now affect actual vector symbols;
+2. all page prototypes survive into packed IR and agent context;
+3. proposal coverage is numerically computed against the current corpus instead of accepted from prose alone.
 
-This addendum also defines the correct role of Complement Submodular Information (CSI): a batch-selection and train/validation/test construction arm, not a universal single-page novelty score.
+The comprehensive review found that item 3 is not yet externally valid: contexts can self-confirm the proposal and the validated code uses shifted cosine, giving orthogonal vectors about `0.5` coverage. Treat the coverage gate as a structural research gate only.
 
-## Research floor
+## Academic floor
 
-### Contextual neural relevance ranking
+### Context-document relevance
 
 Deguang Kong, Daniel Zhou, Zhiheng Huang, and Steph Sigalas, “Personalized Search Via Neural Contextual Semantic Relevance Ranking,” arXiv:2309.05113:
 
 https://arxiv.org/abs/2309.05113
 
-Applicable model:
+The paper defines:
 
 ```text
 query q
 candidate documents D
 explicit context C
-human graded relevance labels Y = {Perfect, Good, Fair, Bad}
-```
+human relevance labels Y = {Perfect, Good, Fair, Bad}
 
-The paper separates:
-
-```text
 Pr(D | q, C) ∝ Pr(D | C) · Pr(D | q) · Pr(q, C)
 ```
 
-where:
+Applicable findings:
 
-- `Pr(D | q)` is ordinary query-document relevance;
-- `Pr(D | C)` is document-context compatibility;
-- `Pr(q, C)` is a query-context prior.
-
-The paper combines lexical and semantic document-context signals and evaluates contextual ablations and out-of-domain generalization.
+- query-document relevance and context-document compatibility are distinct;
+- explicit cohort-level context can reduce ambiguity;
+- lexical and semantic context-document signals should be compared;
+- context ablation and out-of-domain tests are appropriate;
+- human graded labels are required for a credible test collection.
 
 Framework consequence:
 
-- an AMTECH page opportunity cannot be represented only by a keyword or page vector;
-- proposal validation requires explicit context cases distinct from the proposed document;
-- query-document relevance, context-document compatibility, evidence, utility, and commercial value remain separate measurable terms;
-- future external test collections require independent graded judgments rather than generated expected IDs.
+- page proposals require context cases independent of the candidate document;
+- query fit, context fit, evidence, utility, and commercial value remain separate terms;
+- expected page IDs generated from the same fixture factors are not relevance evidence.
 
-Not established by this paper:
+Not established:
 
 - HRR/HDC/VSA as the correct representation;
-- construction of a public web corpus;
-- Google/Bing indexing or ranking lift;
-- agent-generated page quality;
-- zero-volume commercial value;
-- AMTECH conversion or revenue lift.
+- public corpus construction;
+- Google/Bing lift;
+- zero-volume strategy;
+- agent-generated quality;
+- conversion or revenue.
 
-### HDC/VSA identity and compositional representation
+### HDC/VSA identity and prototypes
 
-Primary references remain Plate 1995, Kanerva 2009, and the Kleyko et al. surveys listed in `13-academic-and-normative-basis-for-validation-vectors.md`.
+Primary authority remains Plate 1995, Kanerva 2009, and the Kleyko et al. surveys in `13-academic-and-normative-basis-for-validation-vectors.md`.
 
 Framework consequence:
 
-- role and filler symbols are part of a declared vector-space identity;
-- changing namespace or symbol version must change the actual vectors, not only a metadata hash;
-- all artifacts must declare the namespace, symbol version, dimensions, compiler version, and source hash needed to reproduce the space;
-- multiple prototypes are legitimate when one canonical node serves several coherent, non-convex context regions.
+- namespace, symbol version, dimensions, role weights, and compiler version define a reproducible space;
+- namespace/version rotation must change underlying symbols;
+- multiple prototypes are required when one stable page serves several coherent non-convex context regions;
+- no downstream compiler stage may silently collapse those regions while claiming multi-prototype behavior.
 
-### Facility location and marginal coverage
+### Facility-location marginal coverage
 
-Classical monotone facility-location objectives model representative coverage using diminishing returns. The current proposal gate uses the equivalent incremental idea:
+The intended proposal objective is:
 
 ```text
 coverage(S) = Σ_c w_c · max_{p ∈ S} sim(c, p)
 
-marginal(proposal | S) = coverage(S ∪ {proposal}) - coverage(S)
+marginal(x | S) = coverage(S ∪ {x}) - coverage(S)
 ```
 
-where contexts `c` are explicit sourced demand/context cases, pages `p` expose one or more prototypes, and similarity is the best compatible prototype fit.
+This is appropriate only when:
 
-Framework consequence:
+- contexts `c` are independently sourced;
+- weights are meaningful;
+- similarity is calibrated against graded relevance;
+- hard eligibility and evidence rules are applied before scoring.
 
-- a proposal must improve at least one declared context;
-- gain is measured against the current corpus, not against an empty space;
-- a duplicate page receives near-zero marginal gain;
-- a separate maximum-existing-page-similarity gate catches near-copy geometry;
-- thresholds remain AMTECH engineering policy, not academic constants.
+The current implementation computes this form, but its context provenance and similarity transform are not accepted.
 
 ### Complement Submodular Information
 
@@ -98,285 +91,223 @@ Rishabh Iyer, “Complement Submodular Information Measures for Balanced and Rob
 
 https://arxiv.org/abs/2605.24779
 
-CSI defines complement information for a normalized monotone submodular function `f`:
+CSI defines:
 
 ```text
 I_f(A ; V \ A) = f(A) + f(V \ A) - f(V)
 ```
 
-The paper introduces complement-aware variants of Facility Location, Graph Cut, LogDet, coverage, and feature-based functions. Its intended applications include balanced train/validation/test splitting and robust subset selection, especially when latent coherent tail slices should be preserved while isolated outliers should be suppressed.
+Applicable use:
 
-Framework consequence:
+- train/validation/test splitting;
+- benchmark/review cohort construction;
+- batch page-opportunity selection;
+- preserving coherent rare/tail regions while suppressing isolated outliers.
 
-- CSI is a strong comparison arm for selecting a batch of page opportunities, benchmark cases, review cohorts, or train/validation/test contexts;
-- CSI can help prevent facility-location selection from concentrating only on dominant head regions;
-- CSI can help prevent pure diversity objectives from selecting isolated noise merely because it is dissimilar;
-- CSI must not be treated as peer-reviewed production authority: arXiv:2605.24779 is a new 2026 preprint;
-- its approximation claims depend on curvature/approximate-monotonicity assumptions that must be separately diagnosed;
-- CSI is not the single-page admission gate because a legitimate first node in a new coherent slice can have low complement information when evaluated alone.
+Boundaries:
 
-## Corrected architecture
+- it is a new 2026 preprint;
+- approximation claims depend on curvature/approximate-monotonicity assumptions;
+- CSI is not a single-page novelty oracle;
+- the current implementation is a naive Facility Location Complement Information control, not a production optimizer.
 
-```text
-manifest.vector_space {
-  namespace,
-  symbol_version,
-  dimensions,
-  axes
-}
-        |
-        v
-namespaced role/filler symbols
-        |
-        v
-all page prototypes
-        |
-        +-> CompiledHyperVectorSpace
-        +-> SiteSource.vectorPrototypes
-        +-> PageIR.vectorPrototypes
-        +-> PackedSiteIR.prototypeOffsets
-        +-> PackedSiteIR.prototypeIds
-        +-> PackedSiteIR.prototypeVectors
-        +-> primary page-vector compatibility alias
-        |
-        v
-explicit sourced proposal contexts
-        |
-        v
-computed baseline coverage vs proposed coverage
-        |
-        +-> marginal gain
-        +-> improving contexts
-        +-> maximum existing similarity
-        +-> CSI diagnostic/batch arm
-        |
-        v
-noindex proposal admission or rejection
-```
+## Implemented mechanics
 
-## Implemented corrections
+### Vector identity
 
-### C-01 — Vector identity
+Files:
 
-`reference/src/benchmark.ts`
+- `reference/src/benchmark.ts`
+- `site-manifest.yaml`
+- `reference/scripts/emit-manifest.mjs`
 
-- added `VectorSpaceIdentity`;
-- symbol seeds now include namespace and symbol version;
-- empty-context symbols use the same identity;
-- rotating namespace or symbol version produces a new deterministic space.
+Implemented:
 
-`site-manifest.yaml`
+- `VectorSpaceIdentity { namespace, symbolVersion }`;
+- namespace/version-prefixed role, value, and empty-context symbols;
+- emitted vector identity metadata;
+- tests for deterministic repeat and namespace/version rotation.
 
-- declares `namespace: amtech-hyper-site-v1`;
-- declares `symbol_version: "1"`.
+### Multi-prototype preservation
 
-### C-02 — Multi-prototype preservation
+Files:
 
-`reference/src/framework.ts`
+- `reference/src/framework.ts`
+- `reference/src/manifest.ts`
+- `reference/src/agent-harness.ts`
 
-- added `VectorPrototypeSource` and `VectorPrototypeIR`;
-- `PageIR` retains all page prototypes;
-- `PackedSiteIR` now contains `prototypeOffsets`, `prototypeIds`, and `prototypeVectors`;
-- build hashes include all packed prototype artifacts;
-- the legacy one-vector-per-page array remains only as a primary compatibility alias.
+Implemented:
 
-`reference/src/manifest.ts`
+- all prototypes in `SiteSource` and `PageIR`;
+- `PackedSiteIR.prototypeOffsets`, `prototypeIds`, `prototypeVectors`;
+- every packed float checked against reference geometry;
+- all prototype atoms supplied to generation agents;
+- build hashes include packed prototype state.
 
-- sends all compiled prototypes through `SiteSource`;
-- validates every packed prototype against the canonical geometry;
-- agent context exposes every prototype and its atoms.
+Residual:
 
-### C-03 — Canonical vector-space hashing
+- one legacy page-vector alias remains;
+- primary prototype is not explicitly declared in the manifest;
+- prototype ordering can affect that alias.
 
-`reference/src/manifest.ts`
+### Computed proposal mechanics
 
-- sorts pages, profiles, prototypes, atoms, neighbors, axes, and vocabulary before hashing;
-- semantically identical source collection order produces the same broad `spaceHash`;
-- UI-specific and compiler-wide determinism now agree on the source-order invariant.
+Files:
 
-### C-04 — Computed proposal coverage
+- `reference/src/manifest.ts`
+- `site-manifest.yaml`
+- `reference/test/manifest.test.mjs`
 
-`reference/src/manifest.ts`
+Implemented:
 
-- proposals require sourced `coverage_contexts`;
-- computes current-corpus coverage and proposed-corpus coverage;
-- reports normalized marginal gain and improved context IDs;
-- rejects proposals below manifest policy;
-- rejects proposals over the existing-page-similarity ceiling;
-- retains the human hypothesis as rationale, not evidence.
+- sourced weighted context objects;
+- baseline and proposed weighted coverage;
+- normalized marginal gain;
+- improving-context count;
+- maximum existing-page similarity;
+- duplicate fixture rejection;
+- noindex recompilation.
 
-### C-05 — CSI research arm
+Residual P0 issues:
 
-`reference/src/csi.ts`
+- contexts can be proposed by the same agent;
+- `relevance_label` is not used;
+- validated source maps cosine using `(cos + 1) / 2`;
+- orthogonal vectors therefore receive approximately `0.5` compatibility;
+- thresholds are not calibrated to human labels.
 
-- implements Facility Location Complement Information;
-- implements deterministic positive-marginal greedy selection under a budget;
-- explicitly avoids claiming the paper’s curvature-dependent approximation guarantee without a curvature diagnostic;
-- current tests use a coherent head slice, coherent tail slice, and isolated noise point.
+### CSI control
+
+Files:
+
+- `reference/src/csi.ts`
+- `reference/test/vector-native.test.mjs`
+
+Implemented:
+
+- Facility Location Complement Information;
+- symmetric kernel validation;
+- deterministic positive-marginal greedy selection;
+- coherent head/tail fixture with isolated-noise rejection;
+- no unsupported approximation guarantee.
 
 ## Validation vector
 
 ### Vector identity
 
-Run identical features under:
-
-- identical namespace/version;
-- changed namespace;
-- changed symbol version;
-- changed dimensions;
-- source reordering.
+Run identical features under identical and rotated namespace/version/dimension/role-policy inputs.
 
 Measure:
 
-- byte equality under identical identity;
-- cosine separation after identity rotation;
-- deterministic hashes;
+- byte identity under pinned inputs;
+- cosine separation after rotation;
 - artifact invalidation;
-- parity across TypeScript and future Zig/Wasm.
+- TypeScript/Zig/Wasm parity.
 
 ### Prototype preservation
 
-For every page:
+For every page compare:
 
-- enumerate manifest prototypes;
-- enumerate compiled geometry prototypes;
-- enumerate `PageIR` prototypes;
-- inspect packed offset range;
-- compare every packed float with the reference vector;
-- run best-prototype scoring through both unpacked and packed paths.
+```text
+manifest prototypes
+CompiledHyperVectorSpace
+SiteSource
+PageIR
+packed offsets/IDs/vectors
+agent context
+resolver/retrieval candidates
+```
 
-Measure:
+Measure count, ID, order/primary semantics, numeric drift, and ranking parity.
 
-- missing/extra prototype count;
-- ID/order drift;
-- maximum absolute numeric drift;
-- ranking parity;
-- primary-alias consistency.
+### External proposal relevance
 
-### Proposal marginal coverage
-
-Construct:
-
-- an independently sourced context set;
-- a clearly distinct page proposal;
-- an exact/near duplicate;
-- a plausible but unsupported outlier;
-- a coherent rare-slice proposal;
-- contexts with graded `Perfect/Good/Fair/Bad` judgments.
+Freeze independent query/context cases before page generation. Use at least two assessors and Perfect/Good/Fair/Bad labels.
 
 Compare:
 
-- lexical query-document relevance;
-- learned semantic relevance;
-- typed facet fit;
-- graph relationship fit;
-- HRR prototype fit;
-- hybrid scoring;
-- facility-location marginal gain;
+- BM25/lexical;
+- learned semantic embeddings;
+- typed facets;
+- graph;
+- HRR;
+- hybrid;
 - human review.
 
 Measure:
 
-- weighted baseline coverage;
-- proposed coverage;
-- normalized gain;
-- improving context count;
-- duplicate rejection;
-- calibration against human grades;
-- head/tail performance;
-- out-of-domain performance.
+- NDCG@5/10;
+- top-fit and bad-fit rates;
+- calibration;
+- context-poor fallback;
+- assessor disagreement;
+- head/tail and out-of-domain performance.
 
-### CSI batch selection
+### Batch/split selection
 
-Create latent and labeled head/tail/outlier fixtures. Compare:
-
-- random selection;
-- stratified random when labels exist;
-- facility location;
-- graph cut;
-- LogDet/DPP-style diversity;
-- saturated coverage;
-- CSI counterparts;
-- human-curated selection.
+Compare random, stratified random, facility location, graph cut, LogDet/diversity, CSI variants, and human selection.
 
 Measure:
 
 - head coverage;
 - coherent-tail coverage;
-- isolated-outlier selection rate;
-- train/validation/test distribution distance;
+- isolated-outlier rate;
+- split distribution distance;
 - downstream ranking stability;
-- reviewer actionability;
-- selection runtime and memory.
+- runtime/memory.
 
 ## Pass vector
 
-The vector-native source gate passes when:
+Source identity/prototype gate:
 
-- identical namespace/version/input produces identical vectors;
-- namespace or symbol-version rotation changes the underlying symbol space;
-- every declared prototype survives through geometry, `SiteSource`, `PageIR`, packed IR, agent context, and emissions metadata;
-- packed floats match the TypeScript reference within declared tolerance;
-- broad hashes do not change under source collection reordering;
-- a distinct proposal has positive measured marginal coverage;
-- an exact or near duplicate fails the coverage/similarity gate;
-- proposal contexts carry source provenance and positive finite weights;
-- all proposals remain noindex;
-- CSI batch selection preserves coherent head and tail regions and rejects isolated noise on the controlled fixture;
-- every result remains explicitly labeled synthetic until independently judged or field-observed.
+- namespace/version changes actual symbols;
+- all prototypes survive every claimed stage;
+- packed parity and broad hash determinism pass;
+- all current pages remain noindex.
 
-The external relevance gate passes only when:
+External relevance gate:
 
-- query/context/document tuples are independently assembled;
-- at least two assessors use graded labels;
-- assessor disagreement is retained;
-- contextual methods beat the strongest simpler baseline on held-out and out-of-domain cases;
-- context-poor queries safely fall back;
-- results are not created by encoding the expected page ID into the fixture.
+- independent contexts and graded labels;
+- calibrated compatibility;
+- strongest simpler baseline comparison;
+- held-out and out-of-domain improvement;
+- no expected-ID leakage;
+- safe context-poor fallback.
+
+CSI batch gate:
+
+- coherent head and tail regions retained;
+- isolated noise suppressed;
+- improvement over random, stratified, facility, and diversity controls;
+- assumptions and optimization behavior reported.
 
 ## Fail vector
 
-- namespace/version changes hashes but not vectors;
-- secondary prototypes disappear after manifest compilation;
-- packed retrieval scores only a centroid or arbitrary first prototype while claiming non-convex support;
-- prototype order silently changes the primary alias;
-- a proposal passes because its hypothesis sounds persuasive;
-- demand/context cases are generated from the proposed page rather than independently sourced;
-- negative cosine is shifted into a misleading positive “coverage” score without calibration;
-- a duplicate passes due to weak thresholds;
-- CSI is used as a single-item novelty oracle;
-- CSI theory is cited without checking the assumptions used for the guarantee;
-- tail preservation selects isolated noise;
-- synthetic expected IDs or forced incompatibility rules are reported as real ranking evidence;
-- any source-level result is described as Google/Bing, conversion, or revenue validation.
+- namespace/version changes metadata only;
+- secondary prototypes disappear;
+- primary alias changes accidentally;
+- proposal contexts are generated from the page they evaluate;
+- shifted/positive cosine is selected without calibration;
+- duplicate rejection is the only relevance evidence;
+- token hashing is called neural semantic relevance;
+- CSI is used as a single-item admission gate;
+- CSI guarantees are claimed without assumptions;
+- synthetic labels are reported as search lift;
+- source tests are reported as indexing, conversion, or revenue proof.
 
-## Current proof
+## Current proof and boundary
 
-Validated source head: `9ef48b97308e09d5a97f4978820255e3c8b53c7e`
+Validated code head: `9ef48b97308e09d5a97f4978820255e3c8b53c7e`
 
-GitHub Actions run: `29576487817`
-
-Result:
+Workflow run: `29576487817`
 
 ```text
 strict TypeScript build: pass
-Node tests: 22/22 pass
-manifest emission: pass
-UI emission: pass
-browser target resolution: pass
-R3F source build: pass
+Node tests: 22/22
+manifest/UI/browser/R3F source stages: pass
 pages: 6
-indexable pages: 0
+indexable: 0
 packed prototypes: 7
 ```
 
-This proof closes the original namespace/version, prototype-loss, broad-hash, primary-only-agent-context, and prose-only-coverage defects at source level.
-
-## Remaining limitations
-
-- explicit primary-prototype declaration is not yet part of the manifest schema; the primary page-vector alias uses the canonicalized first prototype;
-- typed semantic edge/path contracts remain absent;
-- proposal contexts are structurally sourced but not yet independently adjudicated external search cases;
-- current “semantic” synthetic benchmark is token hashing, not a learned embedding model;
-- public AI Employee streaming/task surfaces remain outside the website IR;
-- field search and commercial acceptance remain entirely pending.
+This closes vector identity, prototype loss, and prose-only mechanics. It does not close external proposal relevance.
