@@ -2,6 +2,10 @@ import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { request as httpRequest } from "node:http";
 import type { Hono } from "hono";
 import type { ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
+import { serviceClient } from "@amtech/db";
+import { queueProvisioningCommand, PROVISIONING_COMMAND_TYPES, type ProvisioningCommandType } from "./lib/provisioning-state-machine.js";
+import { startProvisioningReconciler } from "./lib/provisioning-reconciler.js";
+import { replayAmbientDeadLetter, startAmbientInboxWorker } from "./lib/ambient-inbox.js";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -15,6 +19,11 @@ function expectedToken(): string {
 
 function authorized(header: string | undefined | null): boolean {
   return header === `Bearer ${expectedToken()}`;
+}
+
+function managerAuthorized(header: string | undefined | null): boolean {
+  const token = process.env.MANAGER_INTERNAL_TOKEN;
+  return Boolean(token && header === `Bearer ${token}`);
 }
 
 function socketPath(): string {
@@ -81,7 +90,15 @@ export async function requireHostProvisioner(input: ProvisionerRequest): Promise
   return result.body;
 }
 
+function startWorkersWhenServing(): void {
+  if (process.env.NODE_ENV === "test" || process.env.START_MANAGER_WORKERS === "0") return;
+  startProvisioningReconciler();
+  startAmbientInboxWorker();
+}
+
 export function registerProvisionerRoutes(app: Hono): void {
+  startWorkersWhenServing();
+
   app.get("/provision/health", async (c) => {
     try {
       const probe = await new Promise<boolean>((resolve) => {
@@ -114,5 +131,35 @@ export function registerProvisionerRoutes(app: Hono): void {
         logs: [String((err as Error).message ?? err)],
       }, 503);
     }
+  });
+
+  app.post("/manager/provisioning/commands", async (c) => {
+    if (!managerAuthorized(c.req.header("Authorization"))) return c.json({ error: "unauthorized" }, 401);
+    const input = await c.req.json().catch(() => ({})) as {
+      account_id?: string;
+      employee_id?: string;
+      command_type?: ProvisioningCommandType;
+      idempotency_key?: string;
+      requested_by?: string;
+      payload?: Record<string, unknown>;
+    };
+    if (!input.account_id || !input.employee_id || !input.command_type || !PROVISIONING_COMMAND_TYPES.includes(input.command_type)) {
+      return c.json({ error: "account_id_employee_id_command_type_required" }, 400);
+    }
+    const queued = await queueProvisioningCommand(serviceClient(), {
+      account_id: input.account_id,
+      employee_id: input.employee_id,
+      command_type: input.command_type,
+      requested_by: input.requested_by ?? "manager-api",
+      idempotency_key: input.idempotency_key,
+      payload: input.payload ?? {},
+    });
+    return c.json({ status: "queued", ...queued }, queued.duplicate ? 200 : 202);
+  });
+
+  app.post("/manager/ambient-events/:inboxId/replay", async (c) => {
+    if (!managerAuthorized(c.req.header("Authorization"))) return c.json({ error: "unauthorized" }, 401);
+    await replayAmbientDeadLetter(serviceClient(), c.req.param("inboxId"));
+    return c.json({ status: "queued_for_replay", inbox_id: c.req.param("inboxId") }, 202);
   });
 }
