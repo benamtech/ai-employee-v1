@@ -49,7 +49,7 @@ const ambient = "mvp-build/apps/manager/src/lib/ambient-inbox.ts";
 await replaceExactly(
   ambient,
   `  const existing = await db.from("ambient_event_inbox").select("inbox_id").eq("dedupe_key", dedupeKey).maybeSingle();\n  if (existing.error || !existing.data) throw existing.error ?? new Error("ambient_event_dedupe_lookup_failed");\n  return { inbox_id: String(existing.data.inbox_id), duplicate: true };`,
-  `  let existing = await db.from("ambient_event_inbox").select("inbox_id").eq("dedupe_key", dedupeKey).maybeSingle();\n  if (existing.error) throw existing.error;\n  if (!existing.data) {\n    existing = await db.from("ambient_event_inbox")\n      .select("inbox_id")\n      .eq("source_type", input.source_type)\n      .eq("provider", input.provider)\n      .eq("external_event_id", input.external_event_id)\n      .maybeSingle();\n  }\n  if (existing.error || !existing.data) throw existing.error ?? new Error("ambient_event_dedupe_lookup_failed");\n  return { inbox_id: String(existing.data.inbox_id), duplicate: true };`,
+  `  const duplicate = await db.rpc("record_ambient_event_duplicate", {\n    p_source_type: input.source_type,\n    p_provider: input.provider,\n    p_external_event_id: input.external_event_id,\n    p_dedupe_key: dedupeKey,\n  });\n  if (duplicate.error) throw duplicate.error;\n  const existing = Array.isArray(duplicate.data) ? duplicate.data[0] : duplicate.data;\n  if (!existing?.inbox_id) throw new Error("ambient_event_dedupe_lookup_failed");\n  return { inbox_id: String(existing.inbox_id), duplicate: true };`,
 );
 
 await replaceAllExactly(
