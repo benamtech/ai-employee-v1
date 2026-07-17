@@ -22,7 +22,7 @@ This repository is the AMTECH company brain and implementation home for the flag
 - `mvp-build/`: product code, runtime, provisioning, owner surfaces, connectors, security, tests, runbooks, and active forward plans.
 - `wiki/`: durable product, market, architecture, research, and implementation records.
 - `docs/`: root product, design, website, and interaction strategy.
-- `GTM-RESEARCH/website-framework/`: adaptive experience compiler, edge resolver, content/design graph, A/Z suite, Request Mirror Lab, and landing-page generation research/specification.
+- `GTM-RESEARCH/website-framework/`: hyper-targeted publishing compiler, first-class hyper-vector space, corpus optimizer, agent generation harness, semantic UI contract, edge resolver research, and field-distribution validation.
 
 ## Canonical product truth
 
@@ -75,18 +75,26 @@ Detailed authority: `mvp-build/CODEGRAPH.md`.
 
 ## Website-framework state
 
-Primary category: **adaptive experience compiler and edge decisioning runtime**; commercial shorthand: **Experience Materialization Platform**.
+Primary category: **agent-first hyper-targeted search-distribution compiler and vector information server**.
 
-The framework compiles approved knowledge, offers, proof, design grammar, routes, and experiment policy into:
+Current reality:
 
-- complete canonical websites;
-- finite context-resolved landing experiences;
-- structured data and agent resources;
-- multi-channel campaign artifacts;
-- agentic/generative UI components;
-- explainable A/Z experiments.
+- Phase 1 specifications exist.
+- A TypeScript research package implements HRR/VSA controls, corpus optimizers, semantic IR, packed vectors/CSR graph, deterministic neutral emissions, synthetic scale fixtures, and runtime scaffolds.
+- `GTM-RESEARCH/website-framework/site-manifest.yaml` is now the single declarative corpus authority.
+- `reference/src/manifest.ts` compiles feature atoms and prototype sets before page emissions, derives vector neighbors/links, and feeds `SiteSource -> PageIR`.
+- The old five-slice Request Mirror is a noindex profile inside the same compiler, not a separate framework.
+- The hyper-aware agent harness and UI-scaffold plan are source-wired.
 
-Phase 1 research/specification is complete. Phase 2 code is pending. No Cloudflare, Next.js, Zig/WASM, browser, SEO, conversion, autonomy, or production acceptance is claimed.
+Not accepted:
+
+- production UI renderer or functioning public website framework;
+- deployed/indexed 200–2,000-page corpus;
+- search ranking/citation or conversion/revenue lift;
+- Zig/Wasm or Cloudflare runtime performance;
+- browser, accessibility, Core Web Vitals, or load acceptance.
+
+The prior 2,000-page result is a synthetic compiler benchmark, not a deployed SEO corpus.
 
 Framework authority:
 
@@ -94,7 +102,9 @@ Framework authority:
 - `GTM-RESEARCH/website-framework/AGENTS.md`
 - `GTM-RESEARCH/website-framework/CODEGRAPH.md`
 - `GTM-RESEARCH/website-framework/README.md`
-- numbered framework specifications
+- `GTM-RESEARCH/website-framework/16-unified-hypervector-manifest-agent-harness.md`
+- `GTM-RESEARCH/website-framework/site-manifest.yaml`
+- newest scoped research and memory notes
 
 ## Source-of-truth map
 
@@ -111,11 +121,10 @@ Framework authority:
 | What is the public website product/copy brief? | `docs/amtech-website-rewrite-brief.md` |
 | What is the visual system? | `docs/AMTECH_WEB_DESIGN_SYSTEM.md` |
 | How do agentic/generative web interfaces work? | `docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md` |
-| What is the website software category and architecture? | `GTM-RESEARCH/website-framework/CODEGRAPH.md`, `10-software-category-and-commercial-use-cases.md` |
-| How are content/design distributed? | `11-hyper-distributed-content-generative-ui-and-design-collaboration.md` |
-| What are the additional compiler/autonomy gates? | `12-compiler-design-and-autonomy-validation-addendum.md` |
-| What is v0.1? | `07-v0.1-request-mirror-lab.md` |
-| How does a new session create landing pages? | `HANDOFF-LANDING-PAGES.md` |
+| What controls the website corpus and vector space? | `GTM-RESEARCH/website-framework/site-manifest.yaml`, scoped CODEGRAPH, file `16` |
+| What feeds the first UI pass? | `reference/src/ui-scaffold.ts`, `reference/UI-DESIGN-SYSTEM-HANDOFF.md` |
+| How do agents propose pages? | `reference/src/agent-harness.ts`, `reference/src/manifest.ts` |
+| How is search/commercial evidence measured? | `reference/src/distribution.ts`, files `15` and `16` |
 
 ## Non-negotiable invariants
 
@@ -133,6 +142,8 @@ Framework authority:
 12. Canonical pages remain complete without resolver, JavaScript, consent, vectors, databases, or experiments.
 13. HRR/VSA is classical computation. Quantum language must remain technically bounded.
 14. Generated content and design are typed, deterministic, versioned, reversible, and evidence-bounded.
+15. Feature atoms and prototype geometry precede page emissions; HTML is never canonical source truth.
+16. Agent-generated pages enter noindex research state and cannot bypass the unified manifest or publication gate.
 
 ## Next major frontiers
 
@@ -142,22 +153,17 @@ Close the normal-employee P0 now-to-live checklist and produce real provider/run
 
 ### Public experience
 
-Begin Phase 2 of the website framework:
-
 ```text
-generate and validate the 100-slice synthetic fixture
--> implement TypeScript HRR/compiler reference
--> compile at least two real AMTECH landing-page families
--> benchmark rules/facets/HRR and flat/cluster retrieval
--> implement the noindex Worker Request Mirror baseline
--> add shadow-only diagnostics
--> consider Zig/WASM after evidence
+unified manifest + passing CI
+-> ingest supplied design system
+-> derive and implement semantic renderer superset
+-> browser/accessibility/metadata/JS-disabled validation
+-> generate first hyper-aware agent page proposals
+-> review 20–40 field candidates
+-> publish matched cohorts only after explicit gate
+-> measure indexing, compatible discovery, qualified pipeline, gross profit, and lifecycle return
 ```
-
-The AMTECH website category remains:
-
-> Your business gets an employee that lives in the software.
 
 ## Validation state
 
-The branch was rebased through GitHub PR #14 and the coordinated work is in PR #15. Documentation and research specifications were updated through GitHub. Environment-dependent product/runtime and website implementation validation remains pending unless explicitly recorded by a later commit and proof artifact.
+The coordinated website-framework implementation is in PR #16 on `agent/phase-2-materialization-engine-plan`. Local TypeScript reference tests and synthetic scale evidence exist. The unified manifest/composer, CI, and UI-readiness update require a passing branch workflow before merge. Environment-dependent product/runtime and public-search acceptance remain pending unless explicitly recorded by a later proof artifact.

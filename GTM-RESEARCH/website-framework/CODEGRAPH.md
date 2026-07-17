@@ -1,208 +1,127 @@
-# CODEGRAPH.md — Adaptive Experience Compiler Map
+# CODEGRAPH.md — Unified Hyper-Vector Publishing Framework
 
-Status: Phase 1 specification complete; Phase 2 implementation pending
+Status: source-wired research reference; UI renderer and field acceptance pending
 Updated: 2026-07-17
 Scope: `GTM-RESEARCH/website-framework/`
 
-## Read order
+## Reality
+
+This subtree is not yet a production web framework. It is an executable research package plus specifications.
+
+Source-wired:
+
+- TypeScript HRR/VSA algebra and comparison fixtures;
+- corpus optimizers;
+- typed semantic compiler and packed artifacts;
+- synthetic scale and deterministic emission tests;
+- source scaffolds for resolver, Zig/Wasm, Worker distribution, search cohorts, and conversion attribution;
+- unified manifest composer, hyper-aware agent contract, and UI-scaffold plan.
+
+Not accepted:
+
+- production renderer/application;
+- live public corpus;
+- search indexing/ranking/citation lift;
+- conversion/revenue lift;
+- Zig/Wasm parity/performance;
+- Cloudflare deployment, browser, accessibility, Core Web Vitals, and load behavior.
+
+## Authority graph
+
+```text
+site-manifest.yaml
+  |
+  +-> vector-space axes + prototype sets
+  +-> agent harness + publication gates
+  +-> evidence + claims + information objects
+  +-> semantic modules + page definitions
+  +-> profiles: request-mirror / UI / geometry / field
+  |
+  v
+reference/src/manifest.ts
+  |
+  +-> compiled hyper-vector space
+  +-> vector-derived nearest neighbors/internal edges
+  +-> SiteSource
+  |
+  v
+reference/src/framework.ts
+  |
+  +-> PageIR
+  +-> packed vectors + CSR graph
+  +-> HTML + schema + sitemap + instructions
+  |
+  +-> reference/src/agent-harness.ts -> agent-context.json
+  +-> reference/src/ui-scaffold.ts  -> ui-scaffold.json
+  +-> reference/src/resolver.ts     -> finite resolver fixtures
+  +-> reference/worker/             -> asset-first Worker scaffold
+  +-> reference/zig/                -> scalar/SIMD source scaffold
+```
+
+There is no longer a separate five-slice architecture. The old Request Mirror candidates are manifest pages in the `request-mirror-lab` profile and pass through the same compiler.
+
+## Current read order
 
 1. `../../identity.md`
 2. `identity.md`
 3. `../../CODEGRAPH.md`
 4. `AGENTS.md`
 5. `README.md`
-6. numbered specifications in order
-7. `../../docs/amtech-website-rewrite-brief.md`
-8. `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`
-9. `../../docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`
+6. `16-unified-hypervector-manifest-agent-harness.md`
+7. `site-manifest.yaml`
+8. `reference/README.md`
+9. `reference/UI-DESIGN-SYSTEM-HANDOFF.md`
+10. `RESEARCH-NOTES-CURRENT.md`
+11. newest file under `memory/`
+12. historical numbered specifications when changing their domain
 
-## What this software is
+## First-class state
 
-Primary category: **adaptive experience compiler and edge decisioning runtime**.
-
-It compiles approved company knowledge, offers, proof, design grammar, routes, and experiment policy into a stable canonical website plus finite context-resolved experiences and channel artifacts.
-
-It combines parts of:
-
-- typed/headless content infrastructure;
-- static-site and landing-page generation;
-- adaptive hypermedia;
-- feature-flag and experimentation systems;
-- recommendation/decisioning engines;
-- edge middleware/runtime;
-- agentic and generative UI infrastructure;
-- SEO knowledge graphs and structured-data compilers.
-
-It is not a covert CDP, fingerprinting product, arbitrary AI page generator, ad cloaking system, or replacement for human brand judgment.
-
-## System graph
+The durable state is:
 
 ```text
-COMPANY SOURCE LAYER
-knowledge + offers + claims + evidence + entities + brand/design tokens
-                     |
-                     v
-TYPED CONTENT IR
-routes + questions + audiences + modules + CTAs + proof + visual grammar
-                     |
-          +----------+-----------+
-          |                      |
-          v                      v
-CANONICAL COMPILER          VARIANT COMPILER
-pages + metadata            finite slices + eligibility
-schema + links              context facets + experiment IDs
-          |                      |
-          +----------+-----------+
-                     v
-BUILD ARTIFACTS
-manifest + vectors + graph priors + checksums + structured data + channel outputs
-                     |
-                     v
-EDGE RESOLVER / REQUEST MIRROR
-allowlisted ephemeral context -> candidate coverage -> exact score -> policy gate
-                     |
-          +----------+-----------+
-          |                      |
-          v                      v
-BASELINE A                 MATERIALIZED Z
-complete canonical page    approved slice/layout/component selection
-          |                      |
-          +----------+-----------+
-                     v
-A/Z VALIDATION SUITE
-relevance + effort + conversion + latency + privacy + SEO + accessibility + truth
+source/evidence
++ feature atoms
++ page prototype sets
++ compatibility-space vocabulary
++ semantic modules
++ graph/dependencies
++ profile/publication policy
 ```
 
-## File map
+HTML, instruction Markdown, sitemaps, UI scaffolds, and resolver artifacts are deterministic emissions.
 
-### Orientation and authority
+## Agent-first rule
 
-- `README.md`: mission, stack hypothesis, invariants, targets, and phase state.
-- `identity.md`: scoped mathematical, metaprogramming, quantum-boundary, and interaction-design operating identity.
-- `AGENTS.md`: implementation and editing rules.
-- `CODEGRAPH.md`: this structural map.
+Agents receive the compiled space, current page neighborhoods, evidence inventory, uncovered-region hypothesis, design capabilities, and publication rules. They propose typed page additions. They do not write production HTML or create indexable routes directly.
 
-### Scientific and architecture foundation
+## UI pass boundary
 
-- `00-scientific-and-feasibility-validation.md`: validated foundation, unsupported hypotheses, math, runtime/tool corrections.
-- `01-system-architecture.md`: build-time/request-time/experiment-time architecture.
-- `02-shape-model-and-hrr-core.md`: feature ontology, deterministic vectors, HRR core, candidate retrieval, graph and ABI.
-- `03-agentic-seo-system.md`: canonical knowledge graph, specialized page policy, AI-answer/search constraints.
+The first UI pass consumes the `ui-scaffold` profile. Its inputs are module kinds, layout roles, capability vectors, vector prototype IDs, variant axes, semantic content, and fixture routes.
 
-### Test, evidence, and release authority
+The design system must be a satisfactory superset of these requirements. The renderer cannot alter vector geometry, evidence, page intent, graph edges, or publication state.
 
-- `04-feature-validation-vectors.md`: scenario-based validation matrix.
-- `05-pass-fail-vectors.md`: quantitative P0/P1/P2 gates and graduation stages, with theory/academic/normative/engineering basis labels.
-- `06-experimentation-privacy-operations.md`: A/Z causal design, privacy, telemetry, rollback, and operations.
-- `12-compiler-design-and-autonomy-validation-addendum.md`: compiler, design, distributed-content, effort, autonomy, and coverage/replication gates.
-- `13-academic-and-normative-basis-for-validation-vectors.md`: source ledger and threshold-evidence boundary.
-- `validation/reports/2026-07-17-synthetic-persona-matrix.md`: generator execution, constraints, and output hash.
+## Validation authority
 
-### v0.1 and execution
+- `04-feature-validation-vectors.md`
+- `05-pass-fail-vectors.md`
+- `12-compiler-design-and-autonomy-validation-addendum.md`
+- `13-academic-and-normative-basis-for-validation-vectors.md`
+- `15-hyper-targeted-search-distribution-workstreams.md`
+- `16-unified-hypervector-manifest-agent-harness.md`
+- `validation/reports/2026-07-17-hyper-targeted-production-pass.md`
+- `validation/reports/2026-07-17-unified-manifest-ui-readiness.md`
+- CI workflow `.github/workflows/website-framework-reference.yml`
 
-- `07-v0.1-request-mirror-lab.md`: transparent noindex diagnostic product.
-- `08-implementation-plan.md`: Phase 2 build sequence.
-- `site-manifest.yaml`: machine-readable initial feature/candidate/fixture/headers/budget contract.
-- `scripts/generate-synthetic-persona-matrix.mjs`: deterministic 100-entry synthetic benchmark generator.
-- `fixtures/synthetic-persona-matrix.toon`: reproducible generated output when materialized; never hand-edit and do not require committing it while the validation report records its hash.
-
-### Phase synthesis and product definition
-
-- `09-phase-1-synthesis-competitive-and-systems-positioning.md`: scientific synthesis, Orkas positioning, commitment elasticity, autonomous-company hypothesis, and Phase 1 exit.
-- `10-software-category-and-commercial-use-cases.md`: product category, modules, buyers, and real company workflows.
-- `11-hyper-distributed-content-generative-ui-and-design-collaboration.md`: multi-channel content fabric, compiler IR, graphic-design contract, and agentic/generative UI rules.
-- `HANDOFF-LANDING-PAGES.md`: minimal next-session prompt for producing page families.
-- `RESEARCH-NOTES-2026-07-17.md`: evidence ledger, narrowed assumptions, open questions, and negative results.
-
-### External design/product authority
-
-- `../../docs/amtech-website-rewrite-brief.md`: AMTECH website offer, category, narrative, page and copy strategy.
-- `../../docs/AMTECH_WEB_DESIGN_SYSTEM.md`: canonical visual system.
-- `../../docs/AMTECH_WEB_DESIGN_SYSTEM_IMPLEMENTATION.md`: surface status and implementation tracking.
-- `../../docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`: agentic interaction, generative UI, designer/compiler handshake, and landing-page grammar.
-
-## Intermediate representation
-
-The compiler IR should eventually expose at least:
-
-```ts
-interface ExperienceModule {
-  id: string;
-  type: "hero" | "proof" | "workflow" | "objection" | "comparison" | "cta" | "agentic_action";
-  routeIds: string[];
-  audienceFacets: string[];
-  intentFacets: string[];
-  offerIds: string[];
-  claims: ClaimRef[];
-  evidenceCeiling: EvidenceLevel;
-  visualVariantIds: string[];
-  interactionVariantIds: string[];
-  allowedChannels: ChannelId[];
-  eligibility: EligibilityRule;
-  fallbackId?: string;
-}
-```
-
-The IR, not any vendor package, is the durable contract.
-
-## Runtime invariants
-
-- no arbitrary copy generation in the default edge path;
-- no dynamic symbol creation;
-- no remote database call in the default hot path;
-- no browser fingerprint or named-person profile;
-- canonical baseline always available;
-- signed/bounded variant IDs only;
-- evidence and CTA eligibility are hard gates;
-- failure returns baseline;
-- exact scan remains the first benchmark;
-- candidate clustering must measure coverage versus replication.
-
-## Phase state
-
-### Complete
-
-- research/specification packet;
-- privacy and SEO boundary;
-- TypeScript-first/Zig-second architecture;
-- v0.1 Request Mirror definition;
-- finite-slice and deterministic-artifact model;
-- A/Z causal framework;
-- deterministic synthetic benchmark generator;
-- local generator execution and independent constraint/hash validation record;
-- software category and design/content operating model;
-- academic/normative evidence map and revised pass/fail gates.
-
-### Not complete
-
-- TypeScript HRR reference implementation;
-- compiler/content IR implementation;
-- Worker Request Mirror app;
-- Zig/WASM implementation;
-- Cloudflare deployment;
-- Next.js integration;
-- actual landing-page compiler;
-- browser/accessibility/load/SEO testing;
-- conversion or autonomy evidence.
-
-## Editing map
-
-- Change math or feature encoding -> update `00`, `02`, `04`, `05`, `13`, `site-manifest.yaml`, fixtures, and research notes.
-- Change architecture/runtime -> update `01`, `07`, `08`, `CODEGRAPH.md`, validation vectors, and notes.
-- Change privacy/experiments -> update `06`, `04`, `05`, manifest, and notes.
-- Change page/content/design model -> update `03`, `10`, `11`, design addendum, compiler validation addendum, and handoff.
-- Change canonical AMTECH offer/product truth -> update root CODEGRAPH, rewrite brief, GTM authority, manifest candidates, and truth gates.
-- Add implementation -> update phase state, scripts/tests, research notes, and record exact validation run.
-
-## Next code path
+## Immediate next code path
 
 ```text
-implement TypeScript deterministic vectors/HRR
--> build typed content IR/compiler skeleton
--> compile two real AMTECH landing-page families
--> benchmark flat rules/facets/HRR
--> quantify candidate coverage/replication
--> implement noindex Worker baseline
--> add shadow-only resolver diagnostics
--> consider Zig/WASM after correctness and performance evidence
+unified manifest + CI pass
+-> ingest supplied design system
+-> derive and implement semantic renderer superset
+-> browser/accessibility/metadata/JS-disabled validation
+-> generate first hyper-aware agent page proposals
+-> review 20–40 field candidates
+-> publish matched cohorts only after explicit gate
+-> measure indexing, compatible discovery, qualified pipeline, gross profit, and lifecycle return
 ```

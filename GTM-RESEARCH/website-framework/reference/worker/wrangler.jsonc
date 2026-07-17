@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "amtech-hyper-targeted-reference",
+  "compatibility_date": "2026-07-17",
+  "main": "src/index.ts",
+  "assets": {
+    "directory": "../generated",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/__resolve/*", "/__experiment/*"]
+  }
+}

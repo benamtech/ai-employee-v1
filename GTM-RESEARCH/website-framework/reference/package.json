@@ -1,0 +1,20 @@
+{
+  "name": "@amtech/hyper-targeted-framework-reference",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "benchmark:scale": "npm run build && node scripts/run-scale.mjs",
+    "generate:field": "npm run build && node scripts/generate-field-cohort.mjs",
+    "manifest:emit": "npm run build && node scripts/emit-manifest.mjs ../site-manifest.yaml generated-manifest",
+    "manifest:check": "npm run test && npm run manifest:emit"
+  },
+  "dependencies": {
+    "yaml": "2.9.0"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}
