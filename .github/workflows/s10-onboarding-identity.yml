@@ -1,3 +1,4 @@
+# One-time trigger for the already-defined fixture publisher.
 name: S10.1 Fixture Compatibility Publisher
 
 on:
