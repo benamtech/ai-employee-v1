@@ -1,111 +1,118 @@
-# AGENTS.md — AI Employee MVP build home
+# AGENTS.md — AI Employee implementation rules
 
-> Tool-agnostic agent guide. This mirrors `CLAUDE.md`; keep both files in sync.
+Status: active
+Updated: 2026-07-18
 
-This is `mvp-build/`, the implementation home for AMTECH's AI Employee. The owner talks to one employee; Manager is invisible backend infrastructure.
+> Tool-agnostic mirror of `CLAUDE.md`. Keep both files synchronized except for the heading note.
+
+This is `mvp-build/`, the implementation home for AMTECH's AI Employee. The owner experiences one employee; Manager is invisible control-plane infrastructure and Hermes is the agent substrate.
 
 ## Read order
 
 1. `../identity.md`
 2. `CODEGRAPH.md`
 3. `memory/MEMORY.md`, then the newest relevant handoff
-4. this file / `CLAUDE.md`
-5. `docs/production-normal-employee-live-deploy-runbook.md` for live/deploy work
-6. `../wiki/MVP/second-half-current-and-future-state.md`
-7. `../wiki/MVP/implementation-records/README.md`
-8. relevant source, migrations, scripts, and proofs
+4. `STANDARD.md`
+5. `second-half-plan/phase-2-standard-remediation-execution.md`
+6. this file or `CLAUDE.md`
+7. `docs/production-normal-employee-live-deploy-runbook.md` for deployment/live work
+8. relevant source, migrations, scripts, tests, proofs, and release records
 
-Source, migrations, scripts, proof artifacts, and newest memory outrank stale docs.
+Source, migrations, executable proof, and newest memory outrank stale prose.
 
 ## Current status
 
-- Branch: `research`, rebased onto latest `main` through GitHub rebase PR #14.
-- Overall: `source-wired_not_accepted` after WS1/WS2.
-- WS1 model gateway custody + profile integrity: source-wired.
-- WS2 resource graph/state-machine/retry/drift/rotation/compensation foundations: source-wired; true reconciler worker pending.
-- WS3 ambient inbox: schema groundwork only; provider ingress migration pending.
-- Owner surfaces and existing product systems: source-wired; current live acceptance must be established by fresh proof, not inferred from code or historical runs.
+- Integration branch: `employee-production-tuesday`, based on `research`.
+- Integration PR: draft `#23`.
+- Overall: `standard-remediation_in-progress_source-and-ci-evidence_not-live-accepted_not-launch-cleared`.
+- Lane 1 relationship/authorization checkpoint is integrated.
+- Lane 3 durable command/effect kernel is CI-green on draft PR `#26` and awaits integration.
+- Real Supabase, provider, browser/SMS, commercial, capacity, recovery, rollback, attestation, and production acceptance remain pending.
 
-## Canonical launch path
+## Canonical product boundary
+
+Current governed launch surfaces are web, SMS, signed review, and connected-system events. Voice is a future extension and not a launch gate.
 
 ```text
-public DNS / Cloudflare Tunnel
--> Caddy
--> production Web + Manager
--> real /create-ai-employee
--> Twilio Verify
--> account creation
--> Start Employee
--> isolated Hermes runtime
--> owner web client
--> provider-backed reply
--> useful connected-tool proof
+trigger
+-> authenticated principal
+-> assignment and grant resolution
+-> durable intent
+-> atomic command claim
+-> Hermes or deterministic work
+-> approval when required
+-> bounded external effect
+-> durable accepted, failed, or ambiguous receipt
+-> role-safe surface
+-> audit, metering, repair, and release proof
 ```
 
-Use `docs/production-normal-employee-live-deploy-runbook.md`.
-
-The public estimator, `prod-like:public-estimator:*`, fixtures, `/api/dev/login`, host `live:*`, and manually injected provider events are diagnostics/regression aids only. They are not normal-employee launch proof.
+The public estimator, fixtures, `/api/dev/login`, local `live:*`, and manually injected provider results are diagnostics only.
 
 ## Acceptance vocabulary
 
-- `source-wired`: code/schema/config exists; name the static/local checks actually run.
-- `provider-accepted`: real provider IDs exist.
-- `runtime-accepted`: real host/runtime proof artifacts exist.
-- `planned`: designed, not implemented.
-- `pending`: blocked, unattempted, or missing proof.
-
-Never upgrade status from architecture, mocks, fixtures, old containers, or confidence.
+- `source-wired`: code/schema/config exists; name checks actually run.
+- `ci-accepted`: the named CI gate passed on the named SHA.
+- `real-supabase-accepted`: the actual database target passed migration and behavior checks.
+- `runtime-accepted`: real host/runtime proof exists.
+- `provider-accepted`: real external-provider IDs exist.
+- `browser/channel-accepted`: fixture-free web/SMS proof exists.
+- `commercial-accepted`: usage, payer/beneficiary, provider cost, and invoice reconciliation passed.
+- `production-ready`: every non-waivable Standard gate passes on the exact deployed SHA.
 
 ## Non-negotiables
 
-1. No faked proof. Real acceptance needs real IDs/artifacts.
-2. Provider master credentials never enter employee profiles or containers. Employee runtimes receive only scoped Manager MCP and Model Gateway credentials.
-3. Customer-, money-, and reputation-affecting actions cross owner approval policy.
-4. Webhooks verify provider authenticity before durable insertion; asynchronous workers own processing/retry/dead-letter behavior.
-5. Manager public/API authority and host Docker authority remain separated by the signed Unix-socket provisioner boundary.
-6. Every employee runtime is isolated; peer/control-service access is denied except explicitly scoped routes.
-7. Rendered profiles fail closed on forbidden secret slots/values, unresolved tokens, unsafe permissions, and checksum drift.
-8. Twilio/provider bindings and welcome effects happen only after runtime and route acceptance.
-9. No new browser-readable Supabase table/view without reviewing Data API exposure, RLS, and grants.
-10. The public estimator remains non-canonical.
+1. Every consequential path resolves an authenticated principal and explicit assignment or approved platform/system context.
+2. Account membership, bearer possession, caller-selected IDs, mutable headers, and phone ownership are not complete authority.
+3. Stable retries cannot create conflicting commands or duplicate irreversible effects.
+4. Consequential success requires a matching durable accepted receipt; ambiguity remains durable and repairable.
+5. Provider master credentials never enter employee profiles or employee runtimes.
+6. Customer-, money-, reputation-, credential-, and destructive actions use assignment-aware approval.
+7. Webhooks verify provider authenticity before durable insertion and asynchronous processing.
+8. Manager API authority and host lifecycle authority remain separated by the signed host-private provisioner boundary.
+9. No browser-readable database surface is added without Data API, RLS, grant, and cross-assignment review.
+10. Public claims and release state never exceed evidence bound to the exact SHA.
+
+## Dependency order
+
+1. Lane 3 durable command/effect kernel.
+2. Complete Lane 1 assignment and authorization scope.
+3. Lane 10 full CI and release evidence spine.
+4. Sessions, approvals, admin/support, and onboarding identity saga.
+5. Commercial gateway, connector custody, channel envelope, and worker adaptation.
+6. Product surfaces, 100–700 agent capacity, recovery, and public-service limits.
+7. Real Supabase, live web/SMS/provider proof, commercial reconciliation, attestation, deployment, acceptance, and rollback proof.
+
+Do not jump to downstream consumers that would invent feature-local authority or effect semantics.
 
 ## Working rules
 
-- Inspect source before editing docs that describe it.
-- Prefer docs-only changes for reconciliation sessions. Make source changes only for an obvious, bounded defect in scope.
-- Do not run the full build/test suite unless requested. Use targeted static inspection and state exactly what was not run.
-- For code sessions, the normal baseline remains:
+- Inspect source and the applicable contract before editing.
+- Correct flawed tests or acceptance vectors before implementation.
+- Prefer the smallest coherent change that closes an invariant without hiding a failed gate.
+- Adapt existing reconciler, inbox, gateway, provider, provisioning, and owner-surface machinery to shared contracts rather than replacing it.
+- Use targeted checks during lane work, then run required integrated and release gates at the declared checkpoint.
+- Do not repeat old pass counts as current proof unless rerun.
+
+Normal local baseline:
 
 ```bash
 npm run typecheck
 npm run test:unit
 npm run build
 npm run lint
-npm run test:integration   # env-gated
+npm run test:integration   # environment-gated
 ```
-
-Do not repeat old pass counts as current proof unless rerun.
-
-## Active now-to-live priorities
-
-- Apply/review migrations `0031`–`0033` on a disposable production-shaped DB.
-- Typecheck shared exports, Hono gateway entry, Supabase row shapes, and provisioner result contracts.
-- Prove host-private model-gateway reachability from employee containers and non-reachability from public ingress.
-- Prove profile integrity and credential rotation/revocation.
-- Implement the DB-backed reconciler worker and fleet drift repair.
-- Move provider ingress to `ambient_event_inbox` leased workers.
-- Route admin lifecycle actions through `provisioning_commands` + reconciler.
-- Run a fresh canonical public onboarding with real provider/runtime/tool proof IDs.
 
 ## Memory protocol
 
-After substantial multi-file work, phase completion, production incident, or architectural/product-direction change:
+After substantial multi-file work, a phase checkpoint, incident, or architectural/product-direction change:
 
-1. create/update a dated handoff in `memory/`;
+1. write a dated handoff in `memory/`;
 2. update `memory/MEMORY.md` newest-first;
-3. record exact validation run or explicitly not run;
-4. keep factual code/proof state in `../wiki/MVP/implementation-records/`.
+3. record exact validation and SHA, or explicitly state what was not run;
+4. keep factual implementation/proof state synchronized with CODEGRAPH and release records.
 
 ## Git
 
-Work only on the explicitly requested branch. Preserve `main`. Do not silently merge or push to another branch. End with exact changed files, unresolved risks, and validation not run.
+Work only on the explicitly selected branch. Keep specialist lanes narrow, preserve `main`, and merge through `employee-production-tuesday` only after required checks pass and documentation/proof is synchronized.
