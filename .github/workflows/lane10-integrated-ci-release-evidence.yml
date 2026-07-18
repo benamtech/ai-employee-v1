@@ -1,0 +1,163 @@
+name: Lane 10 Integrated CI and Release Evidence
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - employee-production-tuesday
+    paths:
+      - "mvp-build/packages/shared/src/**"
+      - "mvp-build/packages/db/migrations/**"
+      - "mvp-build/tests/**"
+      - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/lane10-integrated-ci-release-evidence.yml"
+  pull_request:
+    branches:
+      - research
+    paths:
+      - "mvp-build/packages/shared/src/**"
+      - "mvp-build/packages/db/migrations/**"
+      - "mvp-build/tests/**"
+      - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/lane10-integrated-ci-release-evidence.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lane10-integrated-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Typecheck all active workspaces
+        run: npm run typecheck
+      - name: Build all active workspaces
+        run: npm run build
+      - name: Run source contract and plan gates
+        run: |
+          npx vitest run \
+            tests/unit/relationship-contract.test.ts \
+            tests/unit/authorization-scope-registry.test.ts \
+            tests/unit/command-effect-contract.test.ts \
+            tests/unit/release-evidence-contract.test.ts \
+            tests/unit/remediation-plan-integrity.test.ts
+
+  postgres-boundary:
+    needs: source-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: amtech_integrated_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d amtech_integrated_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_integrated_ci
+      STAGING_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_integrated_ci
+      PGPASSWORD: postgres
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Bootstrap Supabase-compatible roles and schemas
+        run: |
+          psql -h 127.0.0.1 -U postgres -d amtech_integrated_ci -v ON_ERROR_STOP=1 <<'SQL'
+          do $$ begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+          end $$;
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create or replace function auth.role() returns text language sql stable as $$ select current_user::text $$;
+          create schema if not exists storage;
+          create table if not exists storage.buckets (
+            id text primary key,
+            name text not null unique,
+            owner uuid,
+            public boolean not null default false,
+            file_size_limit bigint,
+            allowed_mime_types text[],
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          create table if not exists storage.objects (
+            id uuid primary key default gen_random_uuid(),
+            bucket_id text references storage.buckets(id),
+            name text not null,
+            owner uuid,
+            metadata jsonb,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now(),
+            last_accessed_at timestamptz not null default now(),
+            unique(bucket_id, name)
+          );
+          SQL
+      - name: Apply complete migration set on blank PostgreSQL 17
+        run: npm run db:migrate
+      - name: Run Lane 1 relationship and authorization matrix
+        run: npx vitest run --config vitest.integration.config.ts tests/integration/relationship-authorization-matrix.test.ts
+      - name: Run Lane 3 durable command and effect matrix
+        run: npx vitest run --config vitest.integration.config.ts tests/integration/command-effect-kernel.test.ts
+
+  release-evidence:
+    needs:
+      - source-contracts
+      - postgres-boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Generate source-and-CI release evidence manifest
+        run: npm run release:evidence:spine -- --out release-evidence-manifest.json
+      - name: Upload release evidence manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-${{ github.sha }}
+          path: mvp-build/release-evidence-manifest.json
+          if-no-files-found: error
