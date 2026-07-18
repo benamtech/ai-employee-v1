@@ -3,7 +3,7 @@
 format: TOON-oriented Markdown  
 status: active  
 scope: GTM-RESEARCH/website-framework  
-updated_at: 2026-07-18T01:05:00-04:00
+updated_at: 2026-07-18T01:15:00-04:00
 
 ## protocol
 
@@ -22,11 +22,11 @@ rules[8]:
 
 ## current
 
-state{branch,pr,status,latest_validated_code_head,workflow_run,tests}:
-  agent/ui-metaprogramming-pass-1,17,"draft; agent ontology + 10k site-program + academic/graph-method crosswalk source-pass; real ingestion/providers/content/browser/search/field pending",8fc397a38381474734cfe6e411d1f0bf81b31349,29631422126,"46/46"
+state{branch,pr,status,latest_validated_head,workflow_run,tests}:
+  agent/ui-metaprogramming-pass-1,17,"draft; two-stage agent ontology/site compiler + 10k planning + academic/graph-method crosswalk pass; real ingestion/providers/content/browser/search/field pending",9cf5e449280c21debb7b908fd35ac2a950126910,29631800270,"46/46"
 
 note:
-  "latest validated head passed exact-head CI; graph-learning triage documentation commits require normal final-head CI confirmation"
+  "validated head includes graph-paper triage docs and prior memory reconciliation; this memory-index-only commit follows that proof and changes no source or research decision"
 
 job_boundary:
   "one job is one finite full-site creation run with the declared minimum page-region jobs and batched agent/API work; it is not request-time serving or an always-on VPS"
@@ -42,8 +42,9 @@ research_boundary:
 
 ## handoffs
 
-handoffs[13]{at,file,status,scope}:
-  2026-07-18T01:05:00-04:00,2026-07-18-0105-graph-learning-paper-triage.md,current,"verified WWW 2026 graph papers; learned-method promotion gates; no model promotion"
+handoffs[14]{at,file,status,scope}:
+  2026-07-18T01:15:00-04:00,2026-07-18-0115-graph-triage-ci-closure.md,current,"exact-head CI closure for graph-paper triage and memory"
+  2026-07-18T01:05:00-04:00,2026-07-18-0105-graph-learning-paper-triage.md,current-foundation,"verified WWW 2026 graph papers; learned-method promotion gates; no model promotion"
   2026-07-18T00:55:00-04:00,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,current-foundation,"verified research; external harness; structured generation; Wasm boundary"
   2026-07-17T23:40:00-04:00,2026-07-17-agent-ontology-10k-site-program.md,current-foundation,"agent-discovered ontology; sparse 10k planning; Wasm decision"
   2026-07-17T21:20:00-04:00,2026-07-17-2120-groundwork-orchestration-implementation.md,current-foundation,"implemented orchestration spine; preview/operator UX"
@@ -59,7 +60,7 @@ handoffs[13]{at,file,status,scope}:
 
 ## authority
 
-read_order[21]{order,file,role}:
+read_order[22]{order,file,role}:
   1,../../identity.md,"root identity"
   2,../identity.md,"scope identity"
   3,../../CODEGRAPH.md,"root map"
@@ -67,20 +68,21 @@ read_order[21]{order,file,role}:
   5,../CODEGRAPH.md,"current source graph"
   6,../README.md,"current reality"
   7,MEMORY.md,"durable current state"
-  8,2026-07-18-0105-graph-learning-paper-triage.md,"latest immutable handoff"
-  9,../26-graph-learning-paper-triage-and-promotion-gates.md,"learned graph method research authority"
-  10,../validation/reports/2026-07-18-graph-learning-paper-triage.md,"graph-method validation report"
-  11,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,"academic/harness/acceleration handoff"
-  12,../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md,"verified research crosswalk"
-  13,../validation/reports/2026-07-18-academic-crosswalk-harness-and-acceleration.md,"research validation report"
-  14,../validation/reports/2026-07-18-comprehensive-framework-code-seo-performance-review.md,"deep current code/SEO/performance review"
-  15,../24-agent-discovered-ontology-and-10k-site-program.md,"current implementation/research authority"
-  16,../validation/reports/2026-07-17-agent-ontology-10k-site-program.md,"exact source proof and boundaries"
-  17,../23-groundwork-orchestration-implementation.md,"groundwork implementation authority"
-  18,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
-  19,../21-vector-to-generation-job-compiler.md,"generation-job model"
-  20,../20-agent-operated-vector-site-generation-and-wasm.md,"historical product/Wasm model"
-  21,../site-manifest.yaml,"downstream compiled corpus authority"
+  8,2026-07-18-0115-graph-triage-ci-closure.md,"latest immutable CI handoff"
+  9,2026-07-18-0105-graph-learning-paper-triage.md,"graph-paper research handoff"
+  10,../26-graph-learning-paper-triage-and-promotion-gates.md,"learned graph method research authority"
+  11,../validation/reports/2026-07-18-graph-learning-paper-triage.md,"graph-method validation report"
+  12,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,"academic/harness/acceleration handoff"
+  13,../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md,"verified research crosswalk"
+  14,../validation/reports/2026-07-18-academic-crosswalk-harness-and-acceleration.md,"research validation report"
+  15,../validation/reports/2026-07-18-comprehensive-framework-code-seo-performance-review.md,"deep current code/SEO/performance review"
+  16,../24-agent-discovered-ontology-and-10k-site-program.md,"current implementation/research authority"
+  17,../validation/reports/2026-07-17-agent-ontology-10k-site-program.md,"exact source proof and boundaries"
+  18,../23-groundwork-orchestration-implementation.md,"groundwork implementation authority"
+  19,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
+  20,../21-vector-to-generation-job-compiler.md,"generation-job model"
+  21,../20-agent-operated-vector-site-generation-and-wasm.md,"historical product/Wasm model"
+  22,../site-manifest.yaml,"downstream compiled corpus authority"
 
 ## source
 
@@ -156,8 +158,8 @@ graph_research_decisions[10]{id,decision,ref}:
 
 ## proof
 
-proof{source_head,source_run,latest_exact_head,latest_run,tests,stages}:
-  dcc8beded51290f8084a421996c51c18b2afed83,29628832989,8fc397a38381474734cfe6e411d1f0bf81b31349,29631422126,"46/46","TypeScript; manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
+proof{source_head,source_run,validated_docs_head,validated_docs_run,tests,stages}:
+  dcc8beded51290f8084a421996c51c18b2afed83,29628832989,9cf5e449280c21debb7b908fd35ac2a950126910,29631800270,"46/46","TypeScript; manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
 
 scale{candidates,selected,batches,packed_bytes,total_ms}:
   15000,10000,400,2560000,5284.510
