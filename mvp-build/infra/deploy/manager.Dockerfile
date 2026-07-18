@@ -1,4 +1,6 @@
+ARG AMTECH_GIT_SHA=unknown
 FROM node:22-bookworm-slim AS build
+ARG AMTECH_GIT_SHA
 WORKDIR /app
 
 COPY package*.json ./
@@ -22,8 +24,13 @@ RUN npm run build --workspace @amtech/shared \
   && test -f apps/manager/dist/typeproofs/production-boundary.js
 
 FROM node:22-bookworm-slim AS runtime
+ARG AMTECH_GIT_SHA
+LABEL org.opencontainers.image.title="AMTECH Manager" \
+      org.opencontainers.image.revision="${AMTECH_GIT_SHA}" \
+      ai.amtech.runtime="manager"
 WORKDIR /app
 ENV NODE_ENV=production
+ENV AMTECH_GIT_SHA=${AMTECH_GIT_SHA}
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends bash ca-certificates \
