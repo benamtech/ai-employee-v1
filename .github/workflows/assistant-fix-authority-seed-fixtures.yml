@@ -1,0 +1,143 @@
+name: Assistant Fix Authority Seed Fixtures
+
+on:
+  pull_request:
+    branches:
+      - research
+    paths:
+      - ".github/workflows/assistant-fix-authority-seed-fixtures.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch-fixtures:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'employee-production-tuesday'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: employee-production-tuesday
+          fetch-depth: 0
+      - name: Seed authority for test-only principal id rewrites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          root = Path('mvp-build/tests/integration')
+
+          object_files = {
+            'authority-revocation-boundary.test.ts': """    await client.query(`
+              insert into authority_versions(scope_type, scope_id, current_version, revoked_at, reason)
+              values('human_principal',$1,1,null,'test_fixture')
+              on conflict (scope_type, scope_id) do update set
+                current_version = excluded.current_version,
+                revoked_at = null,
+                reason = excluded.reason,
+                updated_at = now()
+            `, [ids.human]);
+          """,
+            'ambiguous-command-reconciliation.test.ts': """    await client.query(`
+              insert into authority_versions(scope_type, scope_id, current_version, revoked_at, reason)
+              values('human_principal',$1,1,null,'test_fixture')
+              on conflict (scope_type, scope_id) do update set
+                current_version = excluded.current_version,
+                revoked_at = null,
+                reason = excluded.reason,
+                updated_at = now()
+            `, [ids.human]);
+          """,
+            'signed-resource-revocation-boundary.test.ts': """    await client.query(`
+              insert into authority_versions(scope_type, scope_id, current_version, revoked_at, reason)
+              values('human_principal',$1,1,null,'test_fixture')
+              on conflict (scope_type, scope_id) do update set
+                current_version = excluded.current_version,
+                revoked_at = null,
+                reason = excluded.reason,
+                updated_at = now()
+            `, [ids.human]);
+          """,
+            'approval-authority-boundary.test.ts': """    await client.query(`
+              insert into authority_versions(scope_type, scope_id, current_version, revoked_at, reason)
+              values('human_principal',$1,1,null,'test_fixture')
+              on conflict (scope_type, scope_id) do update set
+                current_version = excluded.current_version,
+                revoked_at = null,
+                reason = excluded.reason,
+                updated_at = now()
+            `, [ids.human]);
+          """,
+          }
+          for name, insertion in object_files.items():
+              path = root / name
+              text = path.read_text()
+              marker = "    await client.query(`\n      insert into employee_principals"
+              if marker not in text:
+                  raise SystemExit(f'missing employee principal marker: {name}')
+              text = text.replace(marker, insertion + marker, 1)
+              path.write_text(text)
+
+          relationship = root / 'relationship-authorization-matrix.test.ts'
+          text = relationship.read_text()
+          marker = """      insert into employee_principals (id, employee_id, status) values
+          """
+          insertion = """      insert into authority_versions(scope_type, scope_id, current_version, revoked_at, reason) values
+                ('human_principal', 'hpr_matrix_owner', 1, null, 'test_fixture'),
+                ('human_principal', 'hpr_matrix_operator', 1, null, 'test_fixture'),
+                ('human_principal', 'hpr_matrix_multi', 1, null, 'test_fixture')
+              on conflict (scope_type, scope_id) do update set
+                current_version = excluded.current_version,
+                revoked_at = null,
+                reason = excluded.reason,
+                updated_at = now();
+
+          """
+          if marker not in text:
+              raise SystemExit('missing relationship employee principal marker')
+          relationship.write_text(text.replace(marker, insertion + marker, 1))
+
+          command = root / 'command-effect-kernel.test.ts'
+          text = command.read_text()
+          marker = """      insert into employee_principals (id, employee_id, status) values
+          """
+          insertion = """      insert into authority_versions(scope_type, scope_id, current_version, revoked_at, reason)
+              values ('human_principal', 'hpr_kernel', 1, null, 'test_fixture')
+              on conflict (scope_type, scope_id) do update set
+                current_version = excluded.current_version,
+                revoked_at = null,
+                reason = excluded.reason,
+                updated_at = now();
+
+          """
+          if marker not in text:
+              raise SystemExit('missing command employee principal marker')
+          command.write_text(text.replace(marker, insertion + marker, 1))
+
+          onboarding = root / 'onboarding-identity-boundary.test.ts'
+          text = onboarding.read_text()
+          marker = """    expect(proof.rows[0].employee_principal_id).toBe(row.employee_principal_id);
+
+          """
+          insertion = """    expect(proof.rows[0].employee_principal_id).toBe(row.employee_principal_id);
+    const versions = await db!.query(`
+      select
+        amtech_current_authority_version('human_principal', $1) as owner_version,
+        amtech_current_authority_version('employee_assignment', $2) as assignment_version
+    `, [owner.humanId, row.assignment_id]);
+    expect(Number(versions.rows[0].owner_version)).toBeGreaterThanOrEqual(1);
+    expect(Number(versions.rows[0].assignment_version)).toBeGreaterThanOrEqual(1);
+
+          """
+          if marker not in text:
+              raise SystemExit('missing onboarding authority assertion marker')
+          onboarding.write_text(text.replace(marker, insertion, 1))
+          PY
+          git add mvp-build/tests/integration
+          test "$(git diff --cached --name-only | wc -l)" -eq 7
+          test -z "$(git diff --cached --name-only | grep -v '^mvp-build/tests/integration/' || true)"
+          git config user.name "AMTECH Production Agent"
+          git config user.email "automation@amtechai.com"
+          git commit -m "test: verify insert-time authority seeding"
+          git push origin HEAD:employee-production-tuesday
