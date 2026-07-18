@@ -1,6 +1,6 @@
 # CODEGRAPH.md — Agent-Operated Vector-Native Website Generation Compiler
 
-Status: groundwork orchestration, deterministic compiler, and UI scaffold source-wired; real provider, external relevance, browser, runtime, and field acceptance pending  
+Status: agent-discovered ontology front end, sparse 10,000-page site-program planner, existing deterministic compiler, and UI scaffold are source-wired; real providers, content transaction, browser scale, and field acceptance remain pending  
 Updated: 2026-07-17  
 Scope: `GTM-RESEARCH/website-framework/`
 
@@ -10,92 +10,218 @@ Scope: `GTM-RESEARCH/website-framework/`
 user business + brand + assets + sources + goals
         |
         v
-ProjectInput + ledgers
+ProjectInput + ledgers + one-shot site bounds
   reference/src/project-input.ts
         |
         v
-independent ContextCorpus + frozen splits
-  reference/src/context-corpus.ts
+Stage 1 AgentOntologyProposal
+  attributes + dimensions + typed relations + observations
         |
-        +-> train-only isotonic calibration
         v
-candidate PageCoordinates
+ApprovedOntology
+  reference/src/ontology-discovery.ts
+  provenance + materiality + targeting safety
+  TF-IDF/BM25 duplicate baseline
+  rejected attribute/relation/observation ledgers
+        |
+        v
+CompiledOntologyGraph
+  reference/src/ontology-graph.ts
+  explicit + co-occurrence + lexical channels
+  requires/excludes + k-core + connected macro-regions
+        |
+        v
+ProductionOpportunitySpace
+  reference/src/opportunity-generation-optimized.ts
+  reference/src/opportunity-space-optimized.ts
+  reference/src/opportunity-space-production.ts
+  observed closed sets -> constrained expansion
+  -> eligibility -> sparse concave coverage
+  -> packed HRR vectors
+        |
+        v
+SiteGenerationPlan
+  reference/src/site-program-optimized.ts
+  one PageConceptJob per selected region
+  bounded local neighbor context + deterministic batches
+        |
+        v
+Stage 2 PageConceptProposal
+  reference/src/site-program.ts
+  question + intent + route + information/utility
+  graph role + conversion + modules/layout/UI capabilities
+        |
+        v
+validated CandidatePageSeed
+        |
+        v
+existing vector/compiler path
   reference/src/page-coordinate.ts
-  explicit primary + multi-prototypes
-  typed eligibility -> calibrated compatibility
-        |
-        v
-SelectedCorpusPlan
   reference/src/corpus-plan.ts
-  facility coverage + information + rare-tail + diversity controls
-        |
-        +-> typed page graph
-        |   reference/src/typed-graph.ts
-        v
-PageGenerationJobs
+  reference/src/typed-graph.ts
   reference/src/page-generation.ts
         |
         v
-specialized agent runner
-  research -> concept -> content -> utility/task
-  -> SEO/graph -> UI -> critic -> bounded repair/reject
-        |
-        v
-framework preview/validation UX
-  reference/src/framework-preview.ts
-  reference/scripts/framework-cli.mjs
-        |
-        v
-existing unified manifest and compiler
+existing unified manifest and semantic compiler
   site-manifest.yaml
   reference/src/manifest.ts
   reference/src/framework.ts
         |
         +-> static HTML/schema/sitemap/instructions
         +-> packed prototype vectors + CSR graph
-        +-> UI scaffold/AMTECH renderer
+        +-> static UI scaffold/AMTECH renderer
         +-> optional noncanonical R3F
 ```
 
-`reference/src/framework-orchestrator.ts` is the single source-wired orchestration entrypoint. `reference/src/validation-contracts.ts` supplies the cross-layer validation/pass/fail report model.
+`reference/src/agent-site-orchestrator.ts` is the source-wired two-stage front end. `reference/src/framework-orchestrator.ts` remains the existing independent-context/calibration/corpus/job reference path. Both converge on the existing coordinate, job, manifest, PageIR, and UI authorities rather than creating a second publication system.
+
+`reference/src/validation-contracts.ts` supplies the cross-layer validation/pass/fail report model.
+
+## Workload boundary
+
+```text
+one job = one finite site-creation run
+one run = one project + one selected site corpus + all batched agent work
+current minimum scale fixture = 10,000 page-region jobs
+```
+
+This source graph does not require request-time generation, live personalization, a vector database, or an always-on serving process.
 
 ## Source-wired now
 
-- deterministic `ProjectInput`, business/brand/technical/goals, and source/evidence/asset ledgers;
-- independent context provenance and generation-agent separation;
-- multiple assessors and Perfect/Good/Fair/Bad judgments;
-- deterministic frozen train/validation/test splits and hashes;
-- train-only isotonic compatibility calibration with validation/test metrics;
-- ineligible compatibility fixed at zero;
-- explicit primary prototype semantics for generated coordinates;
-- typed semantic graph edges and path queries;
-- candidate coordinate compiler;
-- budgeted composite selected-corpus plan;
-- typed noindex generation-job compiler;
-- provider-neutral ordered agent runner, source restrictions, checkpoint hashes, bounded repair, and rejection;
-- static selected/rejected preview with validation reports;
-- doctor/plan/validate/preview operator commands;
-- 22 code-level validation attributes across the new layers;
-- existing versioned HDC/VSA compiler, all-prototype packed IR, static renderer, browser policy, and R3F source build.
+- deterministic `ProjectInput`, source/evidence/asset ledgers, and minimum/maximum page bounds;
+- Stage-1 agent ontology proposal contract;
+- confidence, provenance, page-materiality, targeting-safety, and reviewer gates;
+- strongest-supported exact duplicate retention and label-gated lexical duplicate rejection;
+- rejected attribute, relation, and observation ledgers;
+- deterministic TF-IDF/BM25 baseline;
+- sparse ontology graph with explicit, co-occurrence, and lexical channels;
+- separate hard requires/excludes constraints;
+- k-core pruning with business-anchor retention;
+- deterministic connected macro-regions;
+- bounded frequent closed itemsets and graph-constrained opportunity expansion;
+- cached production candidate generator with exact ordered-hash parity against the baseline fixture;
+- incremental sparse concave-over-modular selector;
+- local nonredundancy and packed HRR vectors;
+- bounded sparse page-neighbor planning and deterministic Stage-2 batches;
+- Stage-2 page-concept expression/distinctness compiler;
+- deterministic `CandidatePageSeed` output with explicit primary prototypes;
+- existing independent ContextCorpus, frozen splits, calibration, PageCoordinates, finite corpus optimizer, typed graph, jobs, bounded agent runner, manifest/PageIR compiler, and static UI;
+- evidence-gated TypeScript/Wasm acceleration decision contract.
 
 ## Critical code paths
 
 | Path | Role | Current boundary |
 |---|---|---|
-| `reference/src/validation-contracts.ts` | Stable validation attributes/findings/reports | Report quality depends on supplied measurements |
-| `reference/src/project-input.ts` | Project and ledgers | No arbitrary repository scanner yet |
-| `reference/src/context-corpus.ts` | Independent contexts, splits, calibration | Current proof corpus is synthetic |
-| `reference/src/page-coordinate.ts` | Explicit-primary candidate compiler | No BM25/learned-semantic prefilter yet |
-| `reference/src/corpus-plan.ts` | Finite corpus optimizer | Current selection study is small fixture proof |
-| `reference/src/typed-graph.ts` | Typed navigation graph | Legacy manifest links remain untyped |
-| `reference/src/page-generation.ts` | Job compiler and runner | No real model-provider adapter yet |
-| `reference/src/framework-preview.ts` | Static review UX | Not a full interactive corpus editor |
-| `reference/src/framework-orchestrator.ts` | Groundwork pipeline | Successful agent output is not yet transacted into manifest modules/pages |
-| `reference/scripts/framework-cli.mjs` | Operator UX | Real projects must provide a project module |
-| `reference/src/manifest.ts` | Existing manifest compiler | Legacy proposal path retains older relevance mechanics |
-| `reference/src/framework.ts` | Semantic/persisted output compiler | Legacy hand-authored pages need explicit-primary migration |
-| `reference/src/wasm.ts`, `reference/zig/` | Vector-kernel research | No full-loop native/Wasm acceptance |
-| `reference/src/ui-*` | Static UI | Browser/accessibility field proof pending |
+| `reference/src/validation-contracts.ts` | Stable validation attributes/findings/reports | Measurements still depend on supplied fixtures and field data |
+| `reference/src/project-input.ts` | Project truth and one-shot page bounds | No arbitrary repository/business scanner yet |
+| `reference/src/sparse-lexical.ts` | TF-IDF/BM25 oracle | No learned-semantic acceptance yet |
+| `reference/src/ontology-discovery.ts` | Stage-1 proposal approval | No real provider or reviewer workflow adapter yet |
+| `reference/src/ontology-graph.ts` | Evidence graph, constraints, pruning, macro-regions | Connected components are descriptive, not semantic truth |
+| `reference/src/opportunity-space.ts` | Transparent reference implementation | Retained as correctness baseline, not production performance path |
+| `reference/src/opportunity-generation-optimized.ts` | Cached constrained candidate generator | Scale proof is synthetic |
+| `reference/src/opportunity-space-optimized.ts` | Sparse selector and packed HRR vectors | No external usefulness/relevance labels at 10k |
+| `reference/src/opportunity-space-production.ts` | Production opportunity composition | No Leiden/clustering/embedding comparison accepted |
+| `reference/src/site-program.ts` | Stage-2 contracts and seed compiler | No real model-provider output transaction yet |
+| `reference/src/site-program-optimized.ts` | Bounded local context and batching | Neighbor context is advisory, not publication authority |
+| `reference/src/agent-site-orchestrator.ts` | Two-stage hard-gated front end | Real ingestion/providers pending |
+| `reference/src/context-corpus.ts` | Independent contexts, splits, calibration | Current proof corpus remains synthetic |
+| `reference/src/page-coordinate.ts` | Explicit-primary coordinates | Real candidate labels/calibration pending |
+| `reference/src/corpus-plan.ts` | Existing finite corpus optimizer | Current real-world selection evidence is absent |
+| `reference/src/page-generation.ts` | Jobs and bounded agent runner | No real Codex/Claude/Pi adapter yet |
+| `reference/src/manifest.ts`, `reference/src/framework.ts` | Canonical semantic/static output | Legacy hand-authored pages need migration |
+| `reference/src/acceleration-decision.ts` | Wasm/native promotion gate | No compiled bridge-inclusive Wasm benchmark yet |
+| `reference/src/wasm.ts`, `reference/zig/` | Numeric-kernel research | Not production accepted |
+| `reference/src/ui-*` | Static UI compiler | Browser/accessibility field proof pending |
+
+## Research disposition
+
+### Retained
+
+```text
+TF-IDF/BM25
++ typed graph and hard constraints
++ weighted observations
++ bounded closed conjunctions
++ k-core pruning
++ deterministic connected macro-regions
++ constrained best-first expansion
++ sparse concave coverage
++ HRR after eligibility
++ two compiler-bounded agent stages
+```
+
+### Comparison-only
+
+```text
+Leiden community detection
+sparse K-means / DBI-SC / HDBSCAN
+learned embeddings
+HNSW/ANN
+GNN / ontology completion / GraphRAG
+Blackwell or other local inference providers
+Zig/Wasm numeric kernels
+```
+
+### Rejected as authority
+
+```text
+Cartesian page matrices
+community membership as page truth
+protected/private/inferred-sensitive targeting
+hidden visitor profiling
+dense clustering before typed eligibility
+runtime canonical prose generation
+mandatory Rust/Wasm/GPU/ANN
+unverified cost/TPS/crate claims
+```
+
+## Exact source proof
+
+Validated source head before documentation: `dcc8beded51290f8084a421996c51c18b2afed83`  
+Workflow run: `29628832989`
+
+```text
+46/46 tests pass
+strict TypeScript build: pass
+manifest/UI/orchestration emissions: pass
+framework validate/preview: pass
+browser resolution: pass
+R3F build: pass
+artifact upload: pass
+```
+
+Final recorded 10,000-page planning fixture:
+
+```text
+15,000 candidate regions
+10,000 selected page regions
+400 Stage-2 batches
+2,560,000 packed-vector bytes
+5,284.510 ms total recorded CI time
+```
+
+Stage profile:
+
+```text
+project                         0.126 ms
+ontology                       20.363 ms
+graph                          36.644 ms
+closed itemsets               202.478 ms
+candidate generation        2,218.216 ms
+sparse selection            1,784.044 ms
+site-program planning         973.168 ms
+```
+
+The transparent pre-optimization path recorded approximately 29 seconds on the same workflow class. Exact ordered candidate-region hash parity is tested on the adversarial fixture.
+
+These are synthetic one-shot compiler results, not content, browser, search, conversion, or revenue proof.
+
+## Wasm boundary
+
+Current disposition: keep TypeScript as semantic and production oracle.
+
+The measured dense HRR share is too small to pass the current Wasm promotion gate. Promotion requires an isolated contiguous numeric kernel, 20 or more repeated bridge-inclusive measurements, exact selection-hash parity, cosine parity of at least 0.999999, at least 1.25 times speedup, at least 500 ms absolute full-build savings, and a complete TypeScript fallback.
 
 ## Validation authorities
 
@@ -103,64 +229,39 @@ Read in this order:
 
 1. `README.md`
 2. `memory/MEMORY.md` and newest immutable handoff
-3. `23-groundwork-orchestration-implementation.md`
-4. `22-agent-operated-framework-workflow-validation-matrix.md`
-5. `21-vector-to-generation-job-compiler.md`
-6. `20-agent-operated-vector-site-generation-and-wasm.md`
-7. `18-vector-node-path-web-framework-model.md`
-8. `19-vector-native-corrections-and-csi-validation.md`
-9. `validation/reports/2026-07-17-groundwork-orchestration-implementation.md`
-10. `site-manifest.yaml`
-
-Historical validation remains in `04`, `05`, `12`, `13`, `15`, `16`, and `17`.
-
-## Exact source proof
-
-```text
-validated source head before documentation: ad3c81cfc202ba94f63f08b54649cfaaf71b00d7
-workflow run: 29624909676
-tests: 30/30
-manifest emission: pass
-UI emission: pass
-orchestration emission: pass
-framework validate/preview: pass
-browser resolution: pass
-R3F build: pass
-```
-
-Fixture result:
-
-```text
-6 contexts: 2 train / 2 validation / 2 test
-3 candidates
-2 selected
-1 exact duplicate rejected with reason
-2/2 generation jobs completed after bounded repair
-validation/test fixture coverage: 1.0 / 1.0
-```
+3. `24-agent-discovered-ontology-and-10k-site-program.md`
+4. `validation/reports/2026-07-17-agent-ontology-10k-site-program.md`
+5. `23-groundwork-orchestration-implementation.md`
+6. `22-agent-operated-framework-workflow-validation-matrix.md`
+7. `21-vector-to-generation-job-compiler.md`
+8. `20-agent-operated-vector-site-generation-and-wasm.md`
+9. `18-vector-node-path-web-framework-model.md`
+10. `19-vector-native-corrections-and-csi-validation.md`
+11. `site-manifest.yaml`
 
 ## Not accepted
 
-- real repository/source extraction;
-- real independent search/customer context corpus;
-- learned-semantic/BM25/facet/graph ranking comparison;
-- real Codex/Claude/Pi executor;
-- agent-output transaction into canonical manifest state;
-- public AI Employee task IR/runtime;
-- legacy manifest explicit-primary and typed-edge migration;
-- browser/accessibility/Core Web Vitals;
-- Zig-native/Wasm end-to-end benefit;
-- indexed corpus, search lift, conversion, gross profit, or revenue.
+- arbitrary repository/source extraction;
+- real Stage-1 or Stage-2 provider adapters;
+- real reviewed ontology and object-attribute observations;
+- independent search/customer context corpus at meaningful scale;
+- agent-output transaction into canonical evidence/modules/tasks/pages;
+- 10,000 generated page bodies and UIs;
+- browser screenshot/accessibility/Core Web Vitals/crawler proof at 10k;
+- native Zig or Wasm compilation, parity, and end-to-end benefit;
+- Leiden/sparse-clustering/embedding/HNSW/GPU superiority;
+- indexing, ranking, AI citation, conversion, gross profit, revenue, or customer outcomes.
 
 ## Next path
 
 ```text
 repository/source ingestion adapters
--> independent context collection + assessor workflow
--> lexical/learned-semantic/facet/graph prefilter comparison
--> provider-neutral agent adapter
--> generated output transaction into unified manifest
--> first 20–40 real noindex jobs/pages
+-> Stage-1 provider + reviewer workflow
+-> reviewed real ontology and observations
+-> 100–500 real noindex PageConceptJobs
+-> Stage-2 provider and canonical output transaction
+-> information-gain/cannibalization/content evaluation
 -> browser/accessibility/performance validation
--> separate matched field publication
+-> 10,000 complete static page emissions
+-> separate matched field publication and commercial measurement
 ```
