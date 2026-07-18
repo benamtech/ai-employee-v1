@@ -11,6 +11,7 @@ import {
   enqueueVerifiedConnectorEvent,
   upsertAssignmentConnectorBinding,
 } from "../lib/connector-custody.js";
+import { executeDurableCommandEffect } from "../lib/durable-command-runtime.js";
 
 function resultPage(message: string, success: boolean): string {
   return `<!doctype html><html><head><meta charset="utf-8"><title>AMTECH</title></head>` +
@@ -36,29 +37,53 @@ export async function processGmailAmbientEvent(db: SupabaseClient, event: Ambien
   const historyId = String(payload.history_id ?? "");
   const pubsubMessageId = String(payload.pubsub_message_id ?? event.external_event_id);
   if (!emailAddress || !historyId || !pubsubMessageId) throw new Error("gmail_ambient_payload_invalid");
-  const handler = TOOL_REGISTRY.get("handle_gmail_pubsub");
-  if (!handler) throw new Error("gmail_handler_unavailable");
-  const ctx: ToolContext = {
-    db,
-    actor: "manager",
-    account_id: event.account_id ?? null,
-    employee_id: event.employee_id ?? null,
+
+  const execution = await executeDurableCommandEffect<Record<string, unknown>>(db, {
     assignment_id: scoped.assignment_id,
-  };
-  const envelope = await handler(ctx, {
-    email_address: emailAddress,
-    history_id: historyId,
-    pubsub_message_id: pubsubMessageId,
-  });
-  if (envelope.status === "failed") throw new Error("gmail_handler_failed");
-  return {
-    handler_status: envelope.status,
-    pubsub_message_id: pubsubMessageId,
-    assignment_id: scoped.assignment_id,
-    connector_binding_id: scoped.connector_binding_id,
     command_id: scoped.command_id,
-    proof: envelope.proof ?? {},
-  };
+    effect_key: `gmail:process:${event.inbox_id}`,
+    provider: "manager",
+    operation: "gmail.history.process",
+    capability_class: "consumer_dedupe",
+    request: {
+      inbox_id: event.inbox_id,
+      connector_binding_id: scoped.connector_binding_id,
+      email_address: emailAddress,
+      history_id: historyId,
+      pubsub_message_id: pubsubMessageId,
+    },
+    apply: async () => {
+      const handler = TOOL_REGISTRY.get("handle_gmail_pubsub");
+      if (!handler) throw new Error("gmail_handler_unavailable");
+      const ctx: ToolContext = {
+        db,
+        actor: "manager",
+        account_id: event.account_id ?? null,
+        employee_id: event.employee_id ?? null,
+        assignment_id: scoped.assignment_id,
+      };
+      const envelope = await handler(ctx, {
+        email_address: emailAddress,
+        history_id: historyId,
+        pubsub_message_id: pubsubMessageId,
+      });
+      if (envelope.status === "failed") throw new Error("gmail_handler_failed");
+      const result = {
+        handler_status: envelope.status,
+        pubsub_message_id: pubsubMessageId,
+        assignment_id: scoped.assignment_id,
+        connector_binding_id: scoped.connector_binding_id,
+        command_id: scoped.command_id,
+        proof: envelope.proof ?? {},
+      };
+      return {
+        result,
+        provider_receipt_id: `ambient:${event.inbox_id}`,
+        evidence: { inbox_id: event.inbox_id, pubsub_message_id: pubsubMessageId },
+      };
+    },
+  });
+  return { ...execution.result, c3_replayed: execution.replayed, effect_receipt_id: execution.receipt_id };
 }
 
 export function registerGmailWebhooks(app: Hono): void {
@@ -139,7 +164,7 @@ export function registerGmailWebhooks(app: Hono): void {
       },
       verification_metadata: {
         pubsub_jwt_verified: true,
-        verification_subject: verification.subject ?? null,
+        verification_skipped: Boolean(verification.skipped),
       },
     });
     if (result.status === "denied" || result.status === "revoked") {
