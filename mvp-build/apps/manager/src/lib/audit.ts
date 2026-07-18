@@ -10,6 +10,7 @@ import type { SupabaseClient } from "@amtech/db";
 export interface AuditInput {
   account_id?: string | null;
   employee_id?: string | null;
+  assignment_id?: string | null;
   actor: "front_door" | "employee" | "manager" | "owner" | "scheduler";
   action: string;
   resource?: string;
@@ -38,15 +39,17 @@ export function sanitizeAuditDetails(details: Record<string, unknown> | undefine
 
 export async function writeAudit(db: SupabaseClient, input: AuditInput): Promise<string> {
   const id = newId(ID_PREFIX.audit);
-  await db.from("audit_log").insert({
+  const inserted = await db.from("audit_log").insert({
     id,
     account_id: input.account_id ?? null,
     employee_id: input.employee_id ?? null,
+    assignment_id: input.assignment_id ?? null,
     actor: input.actor,
     action: input.action,
     resource: input.resource ?? null,
     result: input.result,
     details: sanitizeAuditDetails(input.details),
   });
+  if (inserted.error) throw inserted.error;
   return id;
 }
