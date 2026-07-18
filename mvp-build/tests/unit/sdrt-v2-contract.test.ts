@@ -24,12 +24,22 @@ describe("SDRT-v2 formal validator", () => {
     expect(JSON.parse(roundTrip.stdout)).toMatchObject({ status: "pass", round_trip: true });
   });
 
+  it("preserves escaped colons, pipes, and backslashes through canonical emission", () => {
+    const dir = mkdtempSync(join(tmpdir(), "sdrt-v2-escaped-"));
+    const escaped = join(dir, "escaped.sdrt");
+    writeFileSync(escaped, String.raw`@E|escaped|v2|type:gap|mitigation:path\:C\:\\repo\|fallback\\safe` + "\n");
+    const roundTrip = python(validator, [escaped, "--closed", "--round-trip", "--json"]);
+    expect(roundTrip.status, roundTrip.stderr).toBe(0);
+    const body = JSON.parse(roundTrip.stdout);
+    expect(body.nodes[0].fields).toContainEqual(["mitigation", "path:C:\\repo|fallback\\safe"]);
+  });
+
   it("returns typed query subgraphs", () => {
     const queried = python(validator, [example, "--closed", "--query=type:gap", "--json"]);
     expect(queried.status, queried.stderr).toBe(0);
     const body = JSON.parse(queried.stdout);
     expect(body.nodes).toHaveLength(1);
-    expect(body.nodes[0]).toMatchObject({ marker: "E", identifier: "finding_s8_authority" });
+    expect(body.nodes[0]).toMatchObject({ marker: "E", identifier: "finding_local_proof" });
   });
 
   it("rejects unknown closed-schema keys, mixed versions, and oversized documents", () => {
@@ -64,13 +74,13 @@ describe("SDRT-v2 MCP extension", () => {
       { jsonrpc: "2.0", id: 1, method: "initialize", params: {} },
       { jsonrpc: "2.0", id: 2, method: "resources/list", params: {} },
       { jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "query_sdrt", arguments: { query: "type:gap" } } },
-      { jsonrpc: "2.0", id: 4, method: "resources/write", params: { uri: "sdrt://document/E/finding_s8_authority" } },
+      { jsonrpc: "2.0", id: 4, method: "resources/write", params: { uri: "sdrt://document/E/finding_local_proof" } },
     ].map((request) => JSON.stringify(request)).join("\n") + "\n";
     const server = python(mcp, [example], requests);
     expect(server.status, server.stderr).toBe(0);
     const responses = server.stdout.trim().split("\n").map((line) => JSON.parse(line));
     expect(responses.find((row) => row.id === 2)?.result.resources).toHaveLength(5);
-    expect(responses.find((row) => row.id === 3)?.result.content[0].text).toContain("finding_s8_authority");
+    expect(responses.find((row) => row.id === 3)?.result.content[0].text).toContain("finding_local_proof");
     expect(responses.find((row) => row.id === 4)?.error).toMatchObject({ code: -32601 });
   });
 });
