@@ -9,6 +9,7 @@ import {
   compileOntologyGraph,
   compileSparseSiteGenerationPlan,
   generateOpportunityRegions,
+  generateOpportunityRegionsOptimized,
   mineFrequentClosedItemsets,
   normalizeProjectInput,
   prepareAgentSiteProgram,
@@ -52,6 +53,17 @@ test("ontology graph keeps constraints separate and produces deterministic macro
   assert.ok(graph.constraints.some((edge) => edge.type === "excludes"));
   assert.ok(graph.communities.length >= 1);
   assert.equal(graph.activeNodeIds.includes("attr:service:estimate-ai"), true);
+});
+
+test("optimized opportunity generator preserves baseline ordered region hashes", () => {
+  const fixture = createAgentSiteFixture();
+  const project = normalizeProjectInput(fixture.project);
+  const ontology = compileApprovedOntology(project, fixture.ontologyProposal);
+  const graph = compileOntologyGraph(ontology);
+  const closedItemsets = mineFrequentClosedItemsets(ontology, fixture.opportunityPolicy.minimumSupportWeight, fixture.opportunityPolicy.maximumRegionWidth);
+  const baseline = generateOpportunityRegions(ontology, graph, closedItemsets, fixture.opportunityPolicy);
+  const optimized = generateOpportunityRegionsOptimized(ontology, graph, closedItemsets, fixture.opportunityPolicy);
+  assert.deepEqual(optimized.map((item) => item.regionHash), baseline.map((item) => item.regionHash));
 });
 
 test("agent-discovered ontology becomes vector regions and one site generation plan", () => {
@@ -103,7 +115,7 @@ test("one-shot optimized sparse planner produces a 10,000-page site program with
   const closedItemsets = mineFrequentClosedItemsets(ontology, fixture.opportunityPolicy.minimumSupportWeight, fixture.opportunityPolicy.maximumRegionWidth);
   const itemsetMilliseconds = performance.now() - itemsetStarted;
   const candidateStarted = performance.now();
-  const candidates = generateOpportunityRegions(ontology, graph, closedItemsets, fixture.opportunityPolicy);
+  const candidates = generateOpportunityRegionsOptimized(ontology, graph, closedItemsets, fixture.opportunityPolicy);
   const candidateMilliseconds = performance.now() - candidateStarted;
   const selectionStarted = performance.now();
   const selected = selectOpportunityRegionsIncremental(project, ontology, candidates, fixture.vectorIdentity, fixture.opportunityPolicy);
@@ -142,7 +154,7 @@ test("one-shot optimized sparse planner produces a 10,000-page site program with
     packedVectorBytes: selected.packedVectors.byteLength,
     batches: siteGenerationPlan.batches.length,
   };
-  console.log(`10k-site-profile-optimized-split ${JSON.stringify(profile)}`);
+  console.log(`10k-site-profile-production ${JSON.stringify(profile)}`);
   assert.equal(siteGenerationPlan.pageConceptJobs.length, 10_000);
   assert.equal(siteGenerationPlan.batches.length, 400);
   assert.equal(selected.packedVectors.byteLength, 10_000 * 64 * 4);
