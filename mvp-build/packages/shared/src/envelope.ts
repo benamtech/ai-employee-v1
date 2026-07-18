@@ -37,6 +37,8 @@ export interface ToolEnvelope {
   status: ToolStatus;
   account_id: string | null;
   employee_id: string | null;
+  /** Canonical execution scope. Account and employee remain compatibility projections. */
+  assignment_id: string | null;
   /** Resources created/changed, e.g. ["employee:emp_123", "runtime_endpoint:..."]. */
   changed_resources: string[];
   /** Provider proof ids. Empty object only when no provider action occurred. */
@@ -66,6 +68,7 @@ export type ToolFailureCode =
 export interface ToolEnvelopeMeta {
   account_id?: string | null;
   employee_id?: string | null;
+  assignment_id?: string | null;
   changed_resources?: string[];
   proof?: ToolProof;
   user_facing_summary_hint?: string;
@@ -79,6 +82,7 @@ function base(meta: ToolEnvelopeMeta): ToolEnvelope {
     status: "ok",
     account_id: meta.account_id ?? null,
     employee_id: meta.employee_id ?? null,
+    assignment_id: meta.assignment_id ?? null,
     changed_resources: meta.changed_resources ?? [],
     proof: meta.proof ?? {},
     user_facing_summary_hint: meta.user_facing_summary_hint ?? "",
