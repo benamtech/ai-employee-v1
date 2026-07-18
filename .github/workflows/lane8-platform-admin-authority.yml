@@ -1,0 +1,140 @@
+name: Lane 8 Platform Admin Authority
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact 40-character commit SHA already verified locally
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lane8-platform-admin-authority-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce exact requested SHA
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          test "$GITHUB_SHA" = "$EXPECTED_SHA"
+          test "$(printf '%s' "$EXPECTED_SHA" | wc -c)" -eq 40
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Shared and Manager type contracts
+        run: |
+          npm run typecheck --workspace @amtech/shared
+          npm run typecheck --workspace @amtech/manager
+      - name: S8 authority and local-production source contracts
+        run: >-
+          npx vitest run
+          tests/unit/platform-admin-authority-groundwork.test.ts
+          tests/unit/s8-local-production-contract.test.ts
+          tests/unit/sdrt-v2-contract.test.ts
+
+  postgres-authority-matrix:
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: amtech_lane8
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d amtech_lane8"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_lane8
+      STAGING_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_lane8
+      PGPASSWORD: postgres
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enforce exact requested SHA
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: test "$GITHUB_SHA" = "$EXPECTED_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Bootstrap Supabase-compatible roles and schemas
+        run: |
+          psql -h 127.0.0.1 -U postgres -d amtech_lane8 -v ON_ERROR_STOP=1 <<'SQL'
+          do $$ begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+          end $$;
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create or replace function auth.role() returns text language sql stable as $$ select current_user::text $$;
+          create schema if not exists storage;
+          create table if not exists storage.buckets (
+            id text primary key,
+            name text not null unique,
+            owner uuid,
+            public boolean not null default false,
+            file_size_limit bigint,
+            allowed_mime_types text[],
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          create table if not exists storage.objects (
+            id uuid primary key default gen_random_uuid(),
+            bucket_id text references storage.buckets(id),
+            name text not null,
+            owner uuid,
+            metadata jsonb,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now(),
+            last_accessed_at timestamptz not null default now(),
+            unique(bucket_id, name)
+          );
+          SQL
+      - name: Apply all forward migrations
+        run: npm run db:migrate
+      - name: Execute S8 platform authority and C3 matrix
+        shell: bash
+        run: |
+          set +e
+          npx vitest run --config vitest.integration.config.ts \
+            tests/integration/platform-admin-authority-boundary.test.ts \
+            tests/integration/command-effect-kernel.test.ts \
+            2>&1 | tee lane8-platform-admin.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload Lane 8 diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lane8-platform-admin-${{ github.run_id }}
+          path: mvp-build/lane8-platform-admin.log
+          if-no-files-found: warn
