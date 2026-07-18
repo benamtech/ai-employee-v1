@@ -26,71 +26,69 @@ async function seed(client: Client): Promise<void> {
     await client.query(`
       insert into accounts(id, display_name, slug)
       values($1, 'Signed S9', 'signed-s9')
-      on conflict (id) do update set display_name = excluded.display_name;
-
+      on conflict (id) do update set display_name = excluded.display_name
+    `, [ids.account]);
+    await client.query(`
       insert into users(id, email, full_name)
-      values($2, 'signed-s9@example.invalid', 'Signed S9 Owner')
-      on conflict (id) do update set email = excluded.email;
-
+      values($1, 'signed-s9@example.invalid', 'Signed S9 Owner')
+      on conflict (id) do update set email = excluded.email
+    `, [ids.user]);
+    await client.query(`
       insert into employees(id, account_id, name, status)
-      values($3, $1, 'Signed S9 Employee', 'live')
-      on conflict (id) do update set account_id = excluded.account_id, status = 'live';
-
+      values($1, $2, 'Signed S9 Employee', 'live')
+      on conflict (id) do update set account_id = excluded.account_id, status = 'live'
+    `, [ids.employee, ids.account]);
+    await client.query(`
       insert into organizations(id, display_name, status)
-      values($4, 'Signed S9 Organization', 'active')
-      on conflict (id) do update set status = 'active';
-
+      values($1, 'Signed S9 Organization', 'active')
+      on conflict (id) do update set status = 'active'
+    `, [ids.organization]);
+    await client.query(`
       insert into organization_accounts(id, organization_id, account_id, status, starts_at, provenance)
-      values($5, $4, $1, 'active', now() - interval '1 day', '{"source":"test"}'::jsonb)
-      on conflict (id) do update set status = 'active', ends_at = null;
-
+      values($1, $2, $3, 'active', now() - interval '1 day', '{"source":"test"}'::jsonb)
+      on conflict (id) do update set status = 'active', ends_at = null
+    `, [ids.orgAccount, ids.organization, ids.account]);
+    await client.query(`
       insert into human_principals(id, user_id, status)
-      values($6, $2, 'active')
-      on conflict (id) do update set status = 'active', credentials_revoked_at = null;
-
+      values($1, $2, 'active')
+      on conflict (id) do update set status = 'active', credentials_revoked_at = null
+    `, [ids.human, ids.user]);
+    await client.query(`
       insert into employee_principals(id, employee_id, status)
-      values($7, $3, 'active')
-      on conflict (id) do update set status = 'active';
-
+      values($1, $2, 'active')
+      on conflict (id) do update set status = 'active'
+    `, [ids.employeePrincipal, ids.employee]);
+    await client.query(`
       insert into employee_assignments(
         id, organization_id, account_id, employee_principal_id, status,
         starts_at, policy_version, provenance
       ) values(
-        $8,$4,$1,$7,'active',now() - interval '1 day',
+        $1,$2,$3,$4,'active',now() - interval '1 day',
         'authorization-v1','{"source":"test"}'::jsonb
       )
-      on conflict (id) do update set status = 'active', ends_at = null, policy_version = 'authorization-v1';
-
+      on conflict (id) do update set status = 'active', ends_at = null, policy_version = 'authorization-v1'
+    `, [ids.assignment, ids.organization, ids.account, ids.employeePrincipal]);
+    await client.query(`
       insert into labor_relationships(
         id, relationship_type, subject_principal_id, subject_principal_class,
         organization_id, account_id, assignment_id, role, status,
         starts_at, policy_version, provenance
       ) values(
-        $9,'employment',$7,'employee',$4,$1,$8,'employee','active',
+        $1,'employment',$2,'employee',$3,$4,$5,'employee','active',
         now() - interval '1 day','authorization-v1','{"source":"test"}'::jsonb
       )
-      on conflict (id) do update set status = 'active', ends_at = null;
-
+      on conflict (id) do update set status = 'active', ends_at = null
+    `, [ids.employment, ids.employeePrincipal, ids.organization, ids.account, ids.assignment]);
+    await client.query(`
       insert into assignment_principals(
         id, assignment_id, principal_id, principal_class, role, status,
         starts_at, policy_version, provenance
       ) values(
-        $10,$8,$6,'human','owner','active',now() - interval '1 day',
+        $1,$2,$3,'human','owner','active',now() - interval '1 day',
         'authorization-v1','{"source":"test"}'::jsonb
       )
-      on conflict (id) do update set role = 'owner', status = 'active', ends_at = null;
-    `, [
-      ids.account,
-      ids.user,
-      ids.employee,
-      ids.organization,
-      ids.orgAccount,
-      ids.human,
-      ids.employeePrincipal,
-      ids.assignment,
-      ids.employment,
-      ids.ownerPrincipal,
-    ]);
+      on conflict (id) do update set role = 'owner', status = 'active', ends_at = null
+    `, [ids.ownerPrincipal, ids.assignment, ids.human]);
 
     await client.query(`delete from preview_links where id = $1`, [ids.preview]);
     await client.query(`delete from artifact_links where id = $1`, [ids.artifactLink]);
