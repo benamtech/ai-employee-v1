@@ -2,19 +2,7 @@ export type AssignmentPrincipalRole = "owner" | "operator" | "employee" | "suppo
 
 export type AssignmentPrincipalStatus = "current" | "active" | "pending" | "revoked" | "expired" | "disabled";
 
-export type AssignmentAction =
-  | "*"
-  | "read"
-  | "write"
-  | "message:create"
-  | "stream:read"
-  | "artifact:read"
-  | "preview:resolve"
-  | "preview:action"
-  | "sms:ingest"
-  | "sms:reply"
-  | "materialize"
-  | string;
+export type AssignmentAction = string;
 
 export type AssignmentDenialReason =
   | "missing_principal"
@@ -108,7 +96,7 @@ export type AssignmentScopeDecision =
       evidence: AssignmentScopeEvidence;
     };
 
-const currentAssignmentStatuses = new Set(["current", "active"]);
+const currentAssignmentStatuses = new Set<string>(["current", "active"]);
 
 function timestampIsPast(value: string | null | undefined, now: Date): boolean {
   if (!value) return false;
@@ -131,6 +119,31 @@ function actionAllowed(actions: readonly AssignmentAction[], action: AssignmentA
   return actions.includes("*") || actions.includes(action);
 }
 
+function evidenceFor(input: {
+  principal: HumanPrincipal;
+  assignment?: AssignmentPrincipalRecord;
+  resource_class?: string | null;
+  resource_id?: string | null;
+  action?: AssignmentAction | null;
+  grant_checked?: boolean;
+  command_effect_checked?: boolean;
+}): AssignmentScopeEvidence {
+  const evidence: AssignmentScopeEvidence = {
+    principal_id: input.principal?.principal_id ?? "",
+    grant_checked: Boolean(input.grant_checked),
+    command_effect_checked: Boolean(input.command_effect_checked),
+  };
+  if (input.assignment) {
+    evidence.assignment_id = input.assignment.assignment_id;
+    evidence.account_id = input.assignment.account_id;
+    evidence.employee_id = input.assignment.employee_id;
+  }
+  if (input.resource_class) evidence.resource_class = input.resource_class;
+  if (input.resource_id !== undefined) evidence.resource_id = input.resource_id;
+  if (input.action !== undefined) evidence.action = input.action;
+  return evidence;
+}
+
 function deny(
   input: Pick<AssignmentScopeRequest, "principal" | "resource_class" | "resource_id" | "action" | "require_command_effect">,
   reason: AssignmentDenialReason,
@@ -140,14 +153,14 @@ function deny(
     ok: false,
     status,
     reason,
-    evidence: {
-      principal_id: input.principal?.principal_id ?? "",
-      resource_class: input.resource_class ?? undefined,
-      resource_id: input.resource_id ?? undefined,
+    evidence: evidenceFor({
+      principal: input.principal,
+      resource_class: input.resource_class,
+      resource_id: input.resource_id,
       action: input.action,
       grant_checked: Boolean(input.resource_class || input.action),
       command_effect_checked: Boolean(input.require_command_effect),
-    },
+    }),
   };
 }
 
@@ -224,23 +237,22 @@ export function resolveAssignmentScope(input: AssignmentScopeRequest): Assignmen
     return deny(input, "missing_command_effect_intent", 403);
   }
 
-  return {
+  const accepted: Extract<AssignmentScopeDecision, { ok: true }> = {
     ok: true,
     status: 200,
     assignment,
-    grant,
-    evidence: {
-      principal_id: input.principal.principal_id,
-      assignment_id: assignment.assignment_id,
-      account_id: assignment.account_id,
-      employee_id: assignment.employee_id,
-      resource_class: input.resource_class ?? undefined,
-      resource_id: input.resource_id ?? undefined,
+    evidence: evidenceFor({
+      principal: input.principal,
+      assignment,
+      resource_class: input.resource_class,
+      resource_id: input.resource_id,
       action: input.action,
       grant_checked: Boolean(input.resource_class || input.action),
       command_effect_checked: Boolean(input.require_command_effect),
-    },
+    }),
   };
+  if (grant) accepted.grant = grant;
+  return accepted;
 }
 
 export interface SignedResourcePossession {
@@ -332,25 +344,31 @@ export function resolveSmsChannelAssignment(params: {
   command_effect_intent_id?: string | null;
 }): AssignmentScopeDecision {
   const now = params.now ?? new Date();
-  const principal: HumanPrincipal = { principal_id: params.phone_binding?.principal_id ?? "", phone_e164: params.phone_binding?.phone_e164, kind: "human" };
+  const principal: HumanPrincipal = {
+    principal_id: params.phone_binding?.principal_id ?? "",
+    kind: "human",
+  };
+  if (params.phone_binding?.phone_e164) principal.phone_e164 = params.phone_binding.phone_e164;
   if (!params.twilio_signature_verified) return deny({ principal, action: params.action }, "invalid_signature", 403);
   if (!params.phone_binding) return deny({ principal, action: params.action }, "missing_phone_binding", 403);
   if (params.phone_binding.revoked_at || timestampIsPast(params.phone_binding.expires_at, now) || params.phone_binding.status === "revoked" || params.phone_binding.status === "expired") {
     return deny({ principal, action: params.action }, "revoked_or_expired_channel", 410);
   }
-  return resolveAssignmentScope({
+
+  const request: AssignmentScopeRequest = {
     principal,
     assignments: params.assignments,
-    grants: params.grants,
     account_id: params.phone_binding.account_id,
     employee_id: params.employee_id,
-    assignment_id: params.phone_binding.assignment_id ?? undefined,
     allowed_roles: ["owner", "operator"],
     resource_class: "channel:sms",
     resource_id: params.phone_binding.phone_e164,
     action: params.action ?? "sms:ingest",
-    require_command_effect: params.require_command_effect,
-    command_effect_intent_id: params.command_effect_intent_id,
     now,
-  });
+  };
+  if (params.grants) request.grants = params.grants;
+  if (params.phone_binding.assignment_id) request.assignment_id = params.phone_binding.assignment_id;
+  if (params.require_command_effect !== undefined) request.require_command_effect = params.require_command_effect;
+  if (params.command_effect_intent_id !== undefined) request.command_effect_intent_id = params.command_effect_intent_id;
+  return resolveAssignmentScope(request);
 }
