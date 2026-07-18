@@ -11,6 +11,7 @@ export interface EmployeeMcpIdentity {
   assignment_id: string;
   principal_id: string;
   policy_version: string;
+  authority_version: number;
   credential_id: string;
 }
 
@@ -49,13 +50,21 @@ async function resolveEmployeeAssignment(db: SupabaseClient, input: { account_id
         : String(result.data ?? "");
   }
   if (!assignmentId) throw new Error("mcp_assignment_not_unique");
-  const assignment = await db.from("employee_assignments")
-    .select("id,account_id,status,starts_at,ends_at,policy_version,employee_principals!inner(id,employee_id,status)")
-    .eq("id", assignmentId)
-    .eq("account_id", input.account_id)
-    .eq("employee_principals.employee_id", input.employee_id)
-    .maybeSingle();
+  const [assignment, authority] = await Promise.all([
+    db.from("employee_assignments")
+      .select("id,account_id,status,starts_at,ends_at,policy_version,employee_principals!inner(id,employee_id,status)")
+      .eq("id", assignmentId)
+      .eq("account_id", input.account_id)
+      .eq("employee_principals.employee_id", input.employee_id)
+      .maybeSingle(),
+    db.from("authority_versions")
+      .select("current_version,revoked_at")
+      .eq("scope_type", "employee_assignment")
+      .eq("scope_id", assignmentId)
+      .maybeSingle(),
+  ]);
   if (assignment.error) throw assignment.error;
+  if (authority.error) throw authority.error;
   const principalJoin = assignment.data?.employee_principals as unknown as
     | { id?: string; employee_id?: string; status?: string }
     | Array<{ id?: string; employee_id?: string; status?: string }>
@@ -65,10 +74,14 @@ async function resolveEmployeeAssignment(db: SupabaseClient, input: { account_id
   if (!assignment.data?.id || assignment.data.status !== "active" || expired || !principal?.id || principal.status !== "active") {
     throw new Error("mcp_assignment_not_current");
   }
+  if (!authority.data?.current_version || authority.data.revoked_at) {
+    throw new Error("mcp_assignment_authority_not_current");
+  }
   return {
     assignment_id: String(assignment.data.id),
     principal_id: String(principal.id),
     policy_version: String(assignment.data.policy_version),
+    authority_version: Number(authority.data.current_version),
   };
 }
 
@@ -91,6 +104,7 @@ export async function mintEmployeeMcpCredential(
     assignment_id: authority.assignment_id,
     principal_id: authority.principal_id,
     policy_version: authority.policy_version,
+    assignment_authority_version: authority.authority_version,
     token_hash: tokenHash,
     token_prefix: tokenPrefix,
     token_secret_ref: sealSecret(token),
@@ -118,7 +132,7 @@ export async function verifyEmployeeMcpCredential(
   const tokenHash = hashToken(token);
   const { data } = await db
     .from("employee_mcp_credentials")
-    .select("id,account_id,employee_id,assignment_id,principal_id,policy_version,token_hash,expires_at,revoked_at,status")
+    .select("id,account_id,employee_id,assignment_id,principal_id,policy_version,assignment_authority_version,token_hash,expires_at,revoked_at,status")
     .eq("token_hash", tokenHash)
     .eq("audience", AUDIENCE)
     .eq("status", "active")
@@ -130,26 +144,37 @@ export async function verifyEmployeeMcpCredential(
     assignment_id?: string | null;
     principal_id?: string | null;
     policy_version?: string | null;
+    assignment_authority_version?: number | null;
     token_hash: string;
     expires_at?: string | null;
     revoked_at?: string | null;
   } | null;
-  if (!row || !row.assignment_id || !row.principal_id || !row.policy_version || row.revoked_at || !safeEqualHex(row.token_hash, tokenHash)) return null;
+  if (!row || !row.assignment_id || !row.principal_id || !row.policy_version || !row.assignment_authority_version || row.revoked_at || !safeEqualHex(row.token_hash, tokenHash)) return null;
   if (row.expires_at && Date.parse(row.expires_at) <= Date.now()) return null;
 
-  const assignment = await db.from("employee_assignments")
-    .select("id,account_id,status,ends_at,policy_version,employee_principals!inner(id,employee_id,status)")
-    .eq("id", row.assignment_id)
-    .eq("account_id", row.account_id)
-    .eq("policy_version", row.policy_version)
-    .eq("employee_principals.id", row.principal_id)
-    .eq("employee_principals.employee_id", row.employee_id)
-    .maybeSingle();
+  const [assignment, authority] = await Promise.all([
+    db.from("employee_assignments")
+      .select("id,account_id,status,ends_at,policy_version,employee_principals!inner(id,employee_id,status)")
+      .eq("id", row.assignment_id)
+      .eq("account_id", row.account_id)
+      .eq("policy_version", row.policy_version)
+      .eq("employee_principals.id", row.principal_id)
+      .eq("employee_principals.employee_id", row.employee_id)
+      .maybeSingle(),
+    db.from("authority_versions")
+      .select("current_version,revoked_at")
+      .eq("scope_type", "employee_assignment")
+      .eq("scope_id", row.assignment_id)
+      .maybeSingle(),
+  ]);
   if (assignment.error) throw assignment.error;
+  if (authority.error) throw authority.error;
   const principalJoin = assignment.data?.employee_principals as unknown as { status?: string } | Array<{ status?: string }> | null;
   const principal = Array.isArray(principalJoin) ? principalJoin[0] : principalJoin;
   if (!assignment.data?.id || assignment.data.status !== "active" || principal?.status !== "active") return null;
   if (assignment.data.ends_at && Date.parse(String(assignment.data.ends_at)) <= Date.now()) return null;
+  if (!authority.data?.current_version || authority.data.revoked_at) return null;
+  if (Number(authority.data.current_version) !== Number(row.assignment_authority_version)) return null;
 
   await db.from("employee_mcp_credentials").update({ last_used_at: new Date().toISOString() }).eq("id", row.id);
   return {
@@ -158,6 +183,7 @@ export async function verifyEmployeeMcpCredential(
     assignment_id: row.assignment_id,
     principal_id: row.principal_id,
     policy_version: row.policy_version,
+    authority_version: Number(row.assignment_authority_version),
     credential_id: row.id,
   };
 }
