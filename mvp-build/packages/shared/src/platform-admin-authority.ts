@@ -41,6 +41,7 @@ export interface PlatformAdminSessionRecord {
   session_version: number;
   authenticated_at: string;
   step_up_at?: string | null;
+  step_up_expires_at?: string | null;
   expires_at: string;
   revoked_at?: string | null;
 }
@@ -183,8 +184,9 @@ export function evaluatePlatformAdminAuthority(input: {
   if (stepUpRequired) {
     const maxAge = Math.max(60, input.step_up_max_age_seconds ?? 900) * 1000;
     const stepUpAt = parsedTimestamp(input.session.step_up_at);
+    const stepUpExpiry = parsedTimestamp(input.session.step_up_expires_at);
     const stepUpAge = stepUpAt === null ? Number.POSITIVE_INFINITY : now.getTime() - stepUpAt;
-    if (stepUpAt === null || stepUpAge < 0 || stepUpAge > maxAge) {
+    if (stepUpAt === null || stepUpExpiry === null || stepUpExpiry <= now.getTime() || stepUpAge < 0 || stepUpAge > maxAge) {
       return deny("platform_step_up_required", 403, {
         ...evidence,
         durable_identity_checked: true,

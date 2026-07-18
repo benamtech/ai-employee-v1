@@ -220,6 +220,7 @@ export async function authorizePlatformAdminRequest(db: SupabaseClient, input: {
     session_version: Number(sessionRow.session_version),
     authenticated_at: String(sessionRow.authenticated_at),
     step_up_at: sessionRow.step_up_at ? String(sessionRow.step_up_at) : null,
+    step_up_expires_at: sessionRow.step_up_expires_at ? String(sessionRow.step_up_expires_at) : null,
     expires_at: String(sessionRow.expires_at),
     revoked_at: sessionRow.revoked_at ? String(sessionRow.revoked_at) : null,
   } : null;
@@ -419,13 +420,14 @@ export async function executePlatformAdminSupportAction(db: SupabaseClient, inpu
       if (result.status !== "ok" || !result.audit_id) {
         throw new Error(`platform_admin_action_${result.status}`);
       }
-      await db.from("admin_action_events").update({
+      const linked = await db.from("admin_action_events").update({
         assignment_id: assignmentId,
         platform_principal_id: auth.actor.platform_principal_id,
         platform_session_id: auth.actor.platform_session_id,
         support_lease_id: auth.actor.support_lease_id ?? null,
         command_id: durableCommandId,
       }).eq("id", result.audit_id);
+      if (linked.error) throw linked.error;
       return {
         result,
         provider_receipt_id: `admin-action:${result.audit_id}`,
@@ -440,10 +442,11 @@ export async function executePlatformAdminSupportAction(db: SupabaseClient, inpu
   });
 
   if (execution.result.audit_id) {
-    await db.from("admin_action_events")
+    const receiptLinked = await db.from("admin_action_events")
       .update({ effect_receipt_id: execution.receipt_id })
       .eq("id", execution.result.audit_id)
       .eq("command_id", durableCommandId);
+    if (receiptLinked.error) throw receiptLinked.error;
   }
   return { status: 200, body: execution.result };
 }
