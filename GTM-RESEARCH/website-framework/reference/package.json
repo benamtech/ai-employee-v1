@@ -11,9 +11,13 @@
     "manifest:emit": "npm run build && node scripts/emit-manifest.mjs ../site-manifest.yaml generated-manifest",
     "ui:emit": "npm run build && node scripts/emit-ui.mjs ../site-manifest.yaml generated-ui ../.browserslistrc",
     "orchestration:check": "npm run build && node scripts/run-orchestration.mjs ../site-manifest.yaml generated-orchestration",
+    "framework:doctor": "npm run build && node scripts/framework-cli.mjs doctor ../site-manifest.yaml fixtures/orchestration-fixture.mjs",
+    "framework:plan": "npm run build && node scripts/framework-cli.mjs plan ../site-manifest.yaml fixtures/orchestration-fixture.mjs",
+    "framework:validate": "npm run build && node scripts/framework-cli.mjs validate ../site-manifest.yaml fixtures/orchestration-fixture.mjs",
+    "framework:preview": "npm run build && node scripts/framework-cli.mjs preview ../site-manifest.yaml fixtures/orchestration-fixture.mjs generated-framework-preview",
     "browser:check": "browserslist",
     "ui:r3f:build": "npm --prefix ui-r3f install --no-audit --no-fund && npm --prefix ui-r3f test",
-    "manifest:check": "npm run test && npm run manifest:emit && npm run ui:emit && npm run orchestration:check && npm run browser:check"
+    "manifest:check": "npm run test && npm run manifest:emit && npm run ui:emit && npm run orchestration:check && npm run framework:validate && npm run browser:check"
   },
   "dependencies": { "yaml": "2.9.0" },
   "devDependencies": { "browserslist": "4.28.6", "typescript": "5.8.3" }
