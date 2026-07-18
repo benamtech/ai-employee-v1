@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-import { existsSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { cpus, totalmem } from "node:os";
 import { join } from "node:path";
-import { ROOT, commandAvailable, parseEnvFile, placeholder, writeProof, writeSdrt } from "./lib.mjs";
+import { ROOT, commandAvailable, gitSha, parseEnvFile, placeholder, writeProof, writeSdrt } from "./lib.mjs";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
-  console.log("Usage: pnpm preflight [--deploy] [--strict]\nChecks tools, lock authority, environment, images, hardware, and production topology without building or starting services.");
+  console.log("Usage: pnpm preflight [--deploy] [--strict]\nChecks tools, lock authority, environment, exact-SHA images, hardware, and production topology without building or starting services.");
   process.exit(0);
 }
 
@@ -22,16 +23,29 @@ const nodeMajor = Number(process.versions.node.split(".")[0]);
 add("node_22", nodeMajor >= 22, `node ${process.versions.node}`, "critical", "runtime_drift", "Install Node 22+ using mise.", "all scripts");
 for (const [name, args] of [["npm", ["--version"]], ["pnpm", ["--version"]], ["python3", ["--version"]], ["git", ["--version"]], ["docker", ["--version"]], ["curl", ["--version"]]]) {
   const result = commandAvailable(name, args);
-  add(`tool_${name}`, result.ok, result.output || `${name} unavailable`, name === "docker" && !deploy ? "medium" : "high", "toolchain", `Install ${name} and ensure it is on PATH.`, name === "docker" ? "local integration/deploy" : "all scripts");
+  add(`tool_${name}`, result.ok, result.output || `${name} unavailable`, name === "docker" && !deploy ? "medium" : "critical", "toolchain", `Install ${name} and ensure it is on PATH.`, name === "docker" ? "local integration/deploy" : "all scripts");
 }
+const dockerInfo = spawnSync("docker", ["info", "--format", "{{.ServerVersion}}"], { cwd: ROOT, encoding: "utf8", timeout: 5000 });
+add("docker_engine", dockerInfo.status === 0, dockerInfo.status === 0 ? `Docker engine ${dockerInfo.stdout.trim()}` : "Docker engine unreachable", deploy ? "critical" : "medium", "runtime_dependency", "Start the Docker engine and verify the operator has only the required socket permissions.", "integration/deploy");
 
 add("root_package", existsSync(join(ROOT, "package.json")), "root pnpm orchestration exists", "critical", "entrypoint_drift", "Restore root package.json.", "all scripts");
 add("npm_lock_authority", existsSync(join(ROOT, "mvp-build", "package-lock.json")), "mvp-build/package-lock.json is canonical", "critical", "supply_chain", "Use npm ci inside mvp-build; do not generate a second application lock.", "dependency install");
 add("no_pnpm_app_lock", !existsSync(join(ROOT, "mvp-build", "pnpm-lock.yaml")), "mvp-build has no competing pnpm lock", "critical", "supply_chain", "Remove competing mvp-build pnpm lock and retain package-lock.json.", "dependency install");
 add("compose", existsSync(join(ROOT, "mvp-build", "infra", "deploy", "docker-compose.yml")), "production compose present", "critical", "topology", "Restore production compose.", "local deploy");
 add("env_example", existsSync(join(ROOT, ".env.example")), "root .env.example present", "high", "configuration", "Restore documented environment template.", "operator setup");
+add("mise", existsSync(join(ROOT, "mise.toml")), "mise local toolchain manifest present", "medium", "runtime_drift", "Restore mise.toml or document an equivalent reproducible environment.", "operator setup");
 
-const env = { ...parseEnvFile(join(ROOT, ".env")), ...process.env };
+const gitStatus = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], { cwd: ROOT, encoding: "utf8" });
+add("clean_tracked_tree", gitStatus.status === 0 && !gitStatus.stdout.trim(), gitStatus.stdout.trim() || "tracked tree clean", "critical", "artifact_identity", "Commit or revert tracked changes before building an exact-SHA production artifact.", "build/deploy identity");
+const sha = gitSha();
+add("git_sha", sha !== "unknown", sha, "critical", "artifact_identity", "Run inside a Git checkout with a resolvable HEAD.", "build/deploy identity");
+
+const env = {
+  ...parseEnvFile(join(ROOT, "mvp-build", "infra", "deploy", ".env.production")),
+  ...parseEnvFile(join(ROOT, "mvp-build", ".env")),
+  ...parseEnvFile(join(ROOT, ".env")),
+  ...process.env,
+};
 const required = [
   "DATABASE_URL", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "MANAGER_INTERNAL_TOKEN",
   "SIGNING_SECRET", "SECRET_REF_MASTER_KEY", "MODEL_GATEWAY_SIGNING_SECRET",
@@ -46,10 +60,16 @@ add("hardware_cpu", cores >= 8, `${cores} logical CPUs; production target >=8`, 
 add("hardware_memory", memoryGb >= 16, `${memoryGb} GB RAM; local minimum 16 GB, target 64 GB`, "medium", "capacity", "Use >=16 GB RAM; 64 GB is the fleet target.", "build/runtime fleet");
 
 if (deploy) {
-  const images = ["amtech-manager", "amtech-web", "hermes-agent"];
-  for (const image of images) {
-    const result = commandAvailable("docker", ["image", "inspect", image]);
-    add(`image_${image}`, result.ok, result.ok ? `${image} present` : `${image} absent; building is intentionally not automatic`, "critical", "artifact_freshness", `Run pnpm build on this exact SHA before pnpm dev.`, "cold start");
+  const imageNames = [
+    `amtech-ai-employee-manager:${sha}`,
+    `amtech-ai-employee-web:${sha}`,
+    `amtech-ai-employee-caddy:${sha}`,
+  ];
+  for (const image of imageNames) {
+    const result = spawnSync("docker", ["image", "inspect", image, "--format", "{{index .Config.Labels \"org.opencontainers.image.revision\"}}"], { cwd: ROOT, encoding: "utf8" });
+    const revision = result.stdout?.trim();
+    const ok = result.status === 0 && revision === sha;
+    add(`image_${image.split(":")[0].replaceAll(/[^a-z0-9]+/gi, "_").toLowerCase()}`, ok, ok ? `${image} revision ${revision}` : `${image} absent or revision mismatch (${revision || "none"})`, "critical", "artifact_freshness", "Run pnpm build on this exact clean SHA before pnpm dev.", "cold start");
   }
   add("production_env", existsSync(join(ROOT, "mvp-build", "infra", "deploy", ".env.production")), "mvp-build/infra/deploy/.env.production present", "critical", "deployment_config", "Generate and review .env.production without printing secrets.", "local deploy");
 }
