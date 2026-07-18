@@ -7,6 +7,7 @@ import { ingestEvent } from "../events/ingress.js";
 import { insertDedup } from "../lib/db.js";
 import { AmbientWaitingForBindingError, type AmbientInboxRow } from "../lib/ambient-inbox.js";
 import { enqueueVerifiedConnectorEvent } from "../lib/connector-custody.js";
+import { executeDurableCommandEffect } from "../lib/durable-command-runtime.js";
 
 export interface StripeEvent {
   id: string;
@@ -135,19 +136,44 @@ export async function processStripeAmbientEvent(db: SupabaseClient, inbox: Ambie
   if (!connectorId || String(binding.data?.external_subject ?? "") !== String(event.account ?? "")) {
     throw new AmbientWaitingForBindingError("stripe_connection_waiting_for_binding");
   }
-  const result = await recordAndProcessStripeEvent(db, event, {
-    connector_id: connectorId,
+
+  const execution = await executeDurableCommandEffect<Record<string, unknown>>(db, {
     assignment_id: scoped.assignment_id,
-    account_id: inbox.account_id,
-    employee_id: inbox.employee_id,
-  });
-  if (result.processed === false) throw new AmbientWaitingForBindingError("stripe_invoice_waiting_for_binding");
-  return {
-    ...result,
-    assignment_id: scoped.assignment_id,
-    connector_binding_id: scoped.connector_binding_id,
     command_id: scoped.command_id,
-  };
+    effect_key: `stripe:process:${inbox.inbox_id}`,
+    provider: "manager",
+    operation: "stripe.event.process",
+    capability_class: "consumer_dedupe",
+    request: {
+      inbox_id: inbox.inbox_id,
+      connector_binding_id: scoped.connector_binding_id,
+      connector_id: connectorId,
+      stripe_event_id: event.id,
+      stripe_event_type: event.type,
+      stripe_account: event.account ?? null,
+    },
+    apply: async () => {
+      const result = await recordAndProcessStripeEvent(db, event, {
+        connector_id: connectorId,
+        assignment_id: scoped.assignment_id!,
+        account_id: inbox.account_id!,
+        employee_id: inbox.employee_id!,
+      });
+      if (result.processed === false) throw new AmbientWaitingForBindingError("stripe_invoice_waiting_for_binding");
+      const response = {
+        ...result,
+        assignment_id: scoped.assignment_id,
+        connector_binding_id: scoped.connector_binding_id,
+        command_id: scoped.command_id,
+      };
+      return {
+        result: response,
+        provider_receipt_id: `ambient:${inbox.inbox_id}`,
+        evidence: { inbox_id: inbox.inbox_id, stripe_event_id: event.id, connector_id: connectorId },
+      };
+    },
+  });
+  return { ...execution.result, c3_replayed: execution.replayed, effect_receipt_id: execution.receipt_id };
 }
 
 export function registerStripeWebhooks(app: Hono): void {
