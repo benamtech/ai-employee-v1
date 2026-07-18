@@ -25,10 +25,18 @@ export type RunToolOutcome =
   | { kind: "invalid_input"; envelope: ToolEnvelope }
   | { kind: "ok"; envelope: ToolEnvelope };
 
+export interface RunManagerToolOptions {
+  actor?: ToolContext["actor"];
+  assignment_id?: string | null;
+  principal_id?: string | null;
+  principal_class?: ToolContext["principal_class"];
+  authenticated_by?: string | null;
+}
+
 export async function runManagerTool(
   name: ToolName,
   rawInput: unknown,
-  opts: { actor?: ToolContext["actor"] } = {},
+  opts: RunManagerToolOptions = {},
 ): Promise<RunToolOutcome> {
   if (SCHEDULER_ONLY_TOOLS.has(name)) return { kind: "scheduler_only" };
   const handler = TOOL_REGISTRY.get(name);
@@ -45,6 +53,7 @@ export async function runManagerTool(
       envelope: failed("validation_failed", detail || "invalid input", {
         account_id: raw.account_id ?? null,
         employee_id: raw.employee_id ?? null,
+        assignment_id: opts.assignment_id ?? null,
       }),
     };
   }
@@ -54,6 +63,10 @@ export async function runManagerTool(
     db: serviceClient(),
     account_id: (input.account_id as string) ?? null,
     employee_id: (input.employee_id as string) ?? null,
+    assignment_id: opts.assignment_id ?? null,
+    principal_id: opts.principal_id ?? null,
+    principal_class: opts.principal_class ?? null,
+    authenticated_by: opts.authenticated_by ?? null,
     actor: opts.actor ?? "manager",
   };
   const envelope = await handler(ctx, input);
