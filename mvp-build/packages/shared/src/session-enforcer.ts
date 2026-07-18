@@ -5,6 +5,7 @@ import {
   type AssignmentPrincipalRecord,
   type AssignmentResourceGrantRecord,
   type AssignmentScopeDecision,
+  type AssignmentScopeRequest,
   type HumanPrincipal,
 } from "./assignment-resolver.js";
 
@@ -33,7 +34,7 @@ export interface OwnerSessionAssignmentRequest {
 }
 
 export function ownerSessionPrincipalAliases(session: OwnerSessionRecord): readonly string[] {
-  return Array.from(new Set([
+  return Array.from(new Set<string>([
     session.human_principal_id,
     session.user_id,
     `user:${session.user_id}`,
@@ -71,28 +72,31 @@ export function enforceOwnerSessionAssignment(input: OwnerSessionAssignmentReque
   }
 
   const aliases = ownerSessionPrincipalAliases(input.session);
-  const scopedAssignments = input.assignments.filter((assignment) => aliases.includes(assignment.principal_id));
   const principal: HumanPrincipal = {
     principal_id: input.session.human_principal_id ?? input.session.user_id,
     user_id: input.session.user_id,
     kind: "human",
   };
+  const scopedAssignments = input.assignments
+    .filter((assignment) => aliases.includes(assignment.principal_id))
+    .map((assignment) => ({ ...assignment, principal_id: principal.principal_id }));
 
-  return resolveAssignmentScope({
+  const request: AssignmentScopeRequest = {
     principal,
-    assignments: scopedAssignments.map((assignment) => ({ ...assignment, principal_id: principal.principal_id })),
-    grants: input.grants,
+    assignments: scopedAssignments,
     account_id: input.session.account_id,
-    employee_id: input.employee_id,
-    assignment_id: input.assignment_id,
     allowed_roles: input.allowed_roles ?? ["owner", "operator"],
-    resource_class: input.resource_class,
-    resource_id: input.resource_id,
-    action: input.action,
-    require_command_effect: input.require_command_effect,
-    command_effect_intent_id: input.command_effect_intent_id,
     now,
-  });
+  };
+  if (input.grants) request.grants = input.grants;
+  if (input.employee_id !== undefined) request.employee_id = input.employee_id;
+  if (input.assignment_id !== undefined) request.assignment_id = input.assignment_id;
+  if (input.resource_class !== undefined) request.resource_class = input.resource_class;
+  if (input.resource_id !== undefined) request.resource_id = input.resource_id;
+  if (input.action !== undefined) request.action = input.action;
+  if (input.require_command_effect !== undefined) request.require_command_effect = input.require_command_effect;
+  if (input.command_effect_intent_id !== undefined) request.command_effect_intent_id = input.command_effect_intent_id;
+  return resolveAssignmentScope(request);
 }
 
 export function listOwnerSessionAssignments(params: {
@@ -100,13 +104,14 @@ export function listOwnerSessionAssignments(params: {
   assignments: readonly AssignmentPrincipalRecord[];
   now?: Date;
 }): readonly AssignmentPrincipalRecord[] {
-  if (!params.session || params.session.revoked_at || isExpired(params.session.expires_at, params.now ?? new Date())) return [];
-  const aliases = ownerSessionPrincipalAliases(params.session);
+  const session = params.session;
+  if (!session || session.revoked_at || isExpired(session.expires_at, params.now ?? new Date())) return [];
+  const aliases = ownerSessionPrincipalAliases(session);
   return aliases.flatMap((principal_id) =>
     authorizedAssignmentsForPrincipal({
-      principal: { principal_id, user_id: params.session?.user_id, kind: "human" },
+      principal: { principal_id, user_id: session.user_id, kind: "human" },
       assignments: params.assignments,
-      account_id: params.session?.account_id,
+      account_id: session.account_id,
       now: params.now,
     }),
   );
