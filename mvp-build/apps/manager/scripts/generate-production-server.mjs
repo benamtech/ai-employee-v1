@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, fileURLToPath } from "node:path";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const templatePath = fileURLToPath(new URL("../src/server.template.ts", import.meta.url));
 const outputPath = fileURLToPath(new URL("../src/server.generated.ts", import.meta.url));
