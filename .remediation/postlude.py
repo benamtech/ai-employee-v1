@@ -22,6 +22,7 @@ write("mvp-build/infra/scripts/acceptance/export-phase2-remediation.mjs", export
 pkg_path = ROOT / "mvp-build/package.json"
 pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
 pkg["scripts"].pop("preinstall", None)
+pkg["scripts"]["db:migrate"] = "node packages/db/migrate.mjs"
 pkg["scripts"]["db:verify:worker-migrations"] = "node infra/scripts/acceptance/verify-worker-migrations.mjs && node infra/scripts/acceptance/verify-phase2-remediation.mjs && node infra/scripts/acceptance/export-phase2-remediation.mjs"
 pkg["scripts"]["test:worker-migrations"] = "vitest run --config vitest.integration.config.ts tests/integration/worker-migrations.test.ts tests/integration/phase2-remediation.test.ts"
 pkg_path.write_text(json.dumps(pkg, indent=2) + "\n", encoding="utf-8")
