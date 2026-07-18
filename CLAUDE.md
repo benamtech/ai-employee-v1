@@ -44,18 +44,37 @@ Source, migrations, executable proof, and newest memory outrank stale prose.
 - Base: `research`
 - Integration PR: draft `#23`
 - `main` is not the integration or release shortcut
-- Lane 1 relationship/authorization checkpoint is integrated
-- Lane 3 durable command/effect kernel is integrated at `c94be46137b8c87b610ba0c4b48302bb2e944564` with green contract, migration, command/effect matrix, and relationship-regression CI
-- Production, real Supabase, provider, browser/channel, commercial, capacity, recovery, rollback, and release acceptance remain pending until exact proof exists
+- Current implementation proof anchor: `a9184be1af68ed6c5372d642928db46b51eb0506`
+- Branch-level status: `standard-remediation_s2-s9-branch-ci-postgres-image-accepted_not-live-accepted_not-launch-cleared`
+- Lane 1 relationship/authorization and Lane 3 durable command/effect foundations are integrated
+- S5 connector custody, S6 commercial attribution, S7 approval authority, source-wired S8 platform-admin authority, and S9 authority-version revocation are present on the integration branch
+- Owner web turns use C3 around the existing Hermes runtime path; ambiguous Hermes turn jobs are repairable without a second effect
+- New signed preview/action credentials require one exact assignment and carry current authority versions
+- Generated Manager routing and the production Manager image build are green at the implementation proof anchor
+- Real Supabase, live runtime, provider, fixture-free browser/SMS, commercial reconciliation, capacity, recovery, rollback, deployment, and production acceptance remain pending
+
+Exact implementation-head Actions:
+
+- Phase 2 Remediation Plan Integrity `29662757178`: success
+- Lane 1 Relationships and Authorization `29662757194`: success
+- S2 S7 S9 Production Boundary `29662757252`: success
+- Lane 10 Integrated CI and Release Evidence `29662757197`: success
+- Employee Work Production Boundary `29662757204`: success
+
+The detailed branch checkpoint is `mvp-build/memory/2026-07-18-s2-s9-authority-runtime-checkpoint.md`.
+
+## Runtime architecture rule
+
+Stay as close to Hermes runtime as possible. Hermes remains the agent substrate for execution, transcript/session continuity, streaming, recovery, rotation, materialization, and memory behavior. Manager adds authority, durable command/effect semantics, credential custody, approval, revocation, accounting provenance, repair, and release proof. Do not build a parallel agent runtime when an existing Hermes capability can be constrained or adapted.
 
 ## Working rules
 
 - Inspect before editing.
 - Correct a flawed acceptance contract before implementing against it.
 - Keep specialist lanes narrow and dependency-ordered.
-- Preserve existing production-like Manager, Hermes, reconciler, inbox, provider, and owner-surface machinery; adapt it to shared contracts rather than rebuilding parallel platforms.
+- Preserve existing production-like Manager, Hermes, reconciler, inbox, provider, owner-surface, materialization, session, recovery, and deployment machinery; adapt it to shared contracts rather than rebuilding parallel platforms.
 - Every consequential path resolves principal, assignment or approved platform/system context, policy, bounded effect, durable receipt, and audit/commercial provenance.
-- Never claim acceptance from source wiring, fixtures, old runs, or confidence.
+- Never claim acceptance from source wiring, fixtures, old runs, confidence, or documentation-only SHAs.
 - Update the nearest CODEGRAPH and durable memory after substantial architectural or implementation work.
 - Keep public claims synchronized with the exact deployed and proven SHA.
 
