@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "AMTECH AI Employee MVP — build home. Current plan: ../wiki/MVP/build-plan-current/.",
+  "description": "AMTECH AI Employee MVP \u2014 build home. Current plan: ../wiki/MVP/build-plan-current/.",
   "engines": {
     "node": ">=20"
   },
@@ -24,6 +24,7 @@
     "test:lane1-scope": "vitest run tests/unit/authorization-scope-registry.test.ts tests/unit/assignment-enforcement-contract.test.ts",
     "test:assignment-enforcement": "vitest run tests/unit/assignment-enforcement-contract.test.ts",
     "test:lane10-evidence": "vitest run tests/unit/release-evidence-contract.test.ts",
+    "test:s10-onboarding": "npm run generate:production-sources && vitest run tests/unit/onboarding-identity-contract.test.ts",
     "test:production-boundary": "npm run generate:production-sources && vitest run tests/unit/model-profile-isolation.test.ts tests/unit/model-gateway-http-isolation.test.ts tests/unit/provisioner-idempotency.test.ts tests/unit/ambient-inbox-contract.test.ts tests/unit/production-boundary-source.test.ts tests/unit/production-live-harness.test.ts tests/unit/s8-local-production-contract.test.ts tests/unit/sdrt-v2-contract.test.ts",
     "test:worker-migrations": "vitest run --config vitest.integration.config.ts tests/integration/worker-migrations.test.ts",
     "test:watch": "vitest",

@@ -36,15 +36,14 @@ export async function mintOwnerSession(
   if (!authority.data?.current_version || authority.data.revoked_at) {
     throw new Error("owner_human_authority_not_current");
   }
-  const assignment = await db.from("assignment_principals")
-    .select("assignment_id,status,employee_assignments!inner(account_id,status)")
-    .eq("principal_id", principal.data.id)
-    .eq("principal_class", "human")
-    .eq("employee_assignments.account_id", accountId)
-    .eq("status", "active")
-    .limit(1);
-  if (assignment.error) throw assignment.error;
-  if (!assignment.data?.length) throw new Error("owner_assignment_not_active");
+  const membership = await db.from("account_memberships")
+    .select("id,role")
+    .eq("account_id", accountId)
+    .eq("user_id", userId)
+    .in("role", ["owner", "admin"])
+    .maybeSingle();
+  if (membership.error) throw membership.error;
+  if (!membership.data?.id) throw new Error("owner_account_membership_not_active");
 
   const token = `ow_${randomBytes(32).toString("base64url")}`;
   const expires_at = new Date(Date.now() + ttlMs).toISOString();

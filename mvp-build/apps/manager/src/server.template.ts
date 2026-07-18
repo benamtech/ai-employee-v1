@@ -29,6 +29,7 @@ import { registerQuickbooksWebhooks } from "./webhooks/quickbooks.js";
 import { registerProvisionerRoutes } from "./provisioner.js";
 import { registerOrchestratorRoutes } from "./orchestrator.js";
 import { registerPublicEstimatorRoutes } from "./public-estimator.js";
+import { registerOnboardingIdentityRoutes } from "./lib/onboarding-identity-routes.js";
 import { decodeSignedToken, tokenHash, verifySignedToken } from "./lib/signed-links.js";
 import { requireOwnerSession, mintOwnerSession } from "./lib/owner-session.js";
 import { authorizeOwnerAssignment, listOwnerAssignments } from "./lib/owner-assignment-authority.js";
@@ -222,12 +223,17 @@ export function buildApp(): Hono {
       session_id?: string;
       account_id?: string;
       idempotency_key?: string;
+      owner_session_token?: string;
     };
-    if (!input.session_id || !input.account_id || !input.idempotency_key) {
+    if (!input.session_id || !input.account_id || !input.idempotency_key || !input.owner_session_token) {
       return c.json(failed("validation_failed", "Finish the account setup before starting the employee."), 400);
     }
 
     const db = serviceClient();
+    const ownerSession = await requireOwnerSession(db, input.owner_session_token);
+    if (!ownerSession?.human_principal_id || ownerSession.account_id !== input.account_id) {
+      return c.json(failed("unauthorized", "A current owner session is required before employee activation."), 401);
+    }
     const { data: session } = await db
       .from("onboarding_sessions")
       .select("*")
@@ -254,7 +260,12 @@ export function buildApp(): Hono {
       manifest: compiled.manifest,
       transcript_ref: input.session_id,
       idempotency_key: input.idempotency_key,
-    }, { actor: "manager" });
+    }, {
+      actor: "owner",
+      principal_id: ownerSession.human_principal_id,
+      principal_class: "human",
+      authenticated_by: `owner_web_session:${ownerSession.session_id}`,
+    });
     if (outcome.kind === "invalid_input") return c.json(outcome.envelope, 400);
     if (outcome.kind !== "ok") {
       const envelope: ToolEnvelope | null = "envelope" in outcome ? outcome.envelope as ToolEnvelope : null;
@@ -1172,6 +1183,7 @@ export function buildApp(): Hono {
     });
   });
 
+  registerOnboardingIdentityRoutes(app, denyInternal);
   registerTwilioWebhooks(app);
   registerGmailWebhooks(app);
   registerStripeWebhooks(app);

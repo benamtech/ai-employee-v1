@@ -7,7 +7,7 @@ import { productionAdminBlock } from "./production-admin-block.mjs";
 
 const templatePath = fileURLToPath(new URL("../src/server.template.ts", import.meta.url));
 const outputPath = fileURLToPath(new URL("../src/server.generated.ts", import.meta.url));
-const expectedTemplateBlob = "bd60a15384e8efd2db8b2fe8e92b1bedddaf9911";
+const expectedTemplateBlob = "c1ba7ef5b3f26a4511cd639f70b926605e7d834c";
 
 function gitBlobSha(content) {
   const bytes = Buffer.from(content, "utf8");
@@ -92,6 +92,9 @@ const toolRouteBlock = `  app.post("/manager/tools/:name", async (c) => {
     if (denied) return denied;
     const name = c.req.param("name") as ToolName;
     const input = await c.req.json().catch(() => ({})) as Record<string, unknown>;
+    if (name === "provision_employee") {
+      return c.json({ error: "canonical_onboarding_activation_route_required" }, 403);
+    }
     try {
       let options: RunManagerToolOptions = { actor: name === "resolve_approval" ? "owner" : "manager" };
       if (name === "resolve_approval") {

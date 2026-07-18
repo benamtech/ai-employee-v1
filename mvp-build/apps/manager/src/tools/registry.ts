@@ -7,6 +7,7 @@ import { TOOL_NAMES, type ToolName } from "@amtech/shared";
 import type { ToolHandler } from "./types.js";
 import { identityTools } from "./identity.stub.js";
 import { provisioningTools } from "./provisioning.stub.js";
+import { verifiedProvisioningTools } from "./verified-provisioning.stub.js";
 import { estimateTools } from "./estimate.stub.js";
 import { gmailTools } from "./gmail.stub.js";
 import { stripeTools } from "./stripe.stub.js";
@@ -21,6 +22,7 @@ import { assignmentArtifactTools } from "./assignment-artifacts.stub.js";
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
   ...provisioningTools,
+  ...verifiedProvisioningTools,
   ...estimateTools,
   ...gmailTools,
   ...stripeTools,

@@ -25,6 +25,7 @@ export * from "./relationship-contract.js";
 export * from "./labor-relationship-record.js";
 export * from "./authorization-scope-registry.js";
 export * from "./authority-version.js";
+export * from "./onboarding-identity.js";
 export {
   authorizedAssignmentsForPrincipal,
   resolveAssignmentScope,
