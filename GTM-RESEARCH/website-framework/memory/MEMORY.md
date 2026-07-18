@@ -3,7 +3,7 @@
 format: TOON-oriented Markdown
 status: active
 scope: GTM-RESEARCH/website-framework
-updated_at: 2026-07-17T20:30:00-04:00
+updated_at: 2026-07-17T20:45:00-04:00
 
 ## protocol
 
@@ -22,18 +22,22 @@ rules[8]:
 
 ## current
 
-state{branch,pr,status,latest_authority_head_before_memory_update,validated_code_head,workflow_run}:
-  agent/ui-metaprogramming-pass-1,17,"draft; architecture authority updated; executable orchestration/generation/relevance/runtime/field blocked",35d340f59b7c6176318bd906dbe8cb85d2109ae5,9ef48b97308e09d5a97f4978820255e3c8b53c7e,29577907501
+state{branch,pr,status,latest_validated_authority_head,validated_code_head,workflow_run}:
+  agent/ui-metaprogramming-pass-1,17,"draft; authority/source-level pass; executable orchestration/generation/relevance/runtime/field blocked",44e0a669096215ada26ce387a8db460a40dbc0a5,9ef48b97308e09d5a97f4978820255e3c8b53c7e,29623142884
+
+note:
+  "latest_validated_authority_head is the exact commit validated before this cumulative index update; MEMORY does not attempt impossible self-hash recording"
 
 compiled{manifest_version,pages,indexable,prototypes,namespace,symbol_version,tests}:
   1.1.0,6,0,7,amtech-hyper-site-v1,1,"22/22"
 
 product_boundary:
-  "user operates through coding agent; agent forms project/vector/corpus and executes vector-derived page-generation jobs; current executable package begins near manifest/compiler end of lifecycle"
+  "user operates through coding agent; agent forms project/vector/corpus and executes vector-derived PageGenerationJobs; current executable package begins near manifest/compiler end of lifecycle"
 
 ## handoffs
 
-handoffs[8]{at,file,status,scope}:
+handoffs[9]{at,file,status,scope}:
+  2026-07-17T20:45:00-04:00,2026-07-17-2045-agent-generation-workflow-ci-closure.md,current-proof,"authority head 44e0a66; workflow 29623142884 success"
   2026-07-17T20:30:00-04:00,2026-07-17-2030-agent-generation-jobs-workflow-validation.md,current,"agent at intake+generation; PageGenerationJobs; full workflow validation matrix"
   2026-07-17T20:05:00-04:00,2026-07-17-2005-agent-operated-generation-wasm-research.md,current-foundation,"agent-operated lifecycle; Wasm research; search-scale rejection boundary"
   2026-07-17T08:15:00-04:00,2026-07-17-0815-comprehensive-reorientation.md,current-code-review,"full codebase review; coverage qualification; runtime findings"
@@ -45,7 +49,7 @@ handoffs[8]{at,file,status,scope}:
 
 ## authority
 
-read_order[17]{order,file,role}:
+read_order[18]{order,file,role}:
   1,../../identity.md,"root identity"
   2,../identity.md,"scope identity"
   3,../../CODEGRAPH.md,"root map"
@@ -53,16 +57,17 @@ read_order[17]{order,file,role}:
   5,../CODEGRAPH.md,"current product/source graph"
   6,../README.md,"current reality + workflow"
   7,MEMORY.md,"current durable state"
-  8,2026-07-17-2030-agent-generation-jobs-workflow-validation.md,"current handoff"
-  9,../20-agent-operated-vector-site-generation-and-wasm.md,"product/use/Wasm model"
-  10,../21-vector-to-generation-job-compiler.md,"vector -> agent generation jobs"
-  11,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system validation/pass/fail matrix"
-  12,../18-vector-node-path-web-framework-model.md,"three planes"
-  13,../19-vector-native-corrections-and-csi-validation.md,"academic validation"
-  14,../validation/reports/2026-07-17-agent-operated-generation-workflow-reorientation.md,"current architecture report"
-  15,../validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md,"full findings"
-  16,../validation/reports/2026-07-17-vector-native-corrections.md,"exact source proof"
-  17,../site-manifest.yaml,"single compiled-project/corpus authority"
+  8,2026-07-17-2045-agent-generation-workflow-ci-closure.md,"latest proof handoff"
+  9,2026-07-17-2030-agent-generation-jobs-workflow-validation.md,"current architecture handoff"
+  10,../20-agent-operated-vector-site-generation-and-wasm.md,"product/use/Wasm model"
+  11,../21-vector-to-generation-job-compiler.md,"vector -> agent generation jobs"
+  12,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system validation/pass/fail matrix"
+  13,../18-vector-node-path-web-framework-model.md,"three planes"
+  14,../19-vector-native-corrections-and-csi-validation.md,"academic validation"
+  15,../validation/reports/2026-07-17-agent-operated-generation-workflow-reorientation.md,"current architecture report"
+  16,../validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md,"full findings"
+  17,../validation/reports/2026-07-17-vector-native-corrections.md,"exact compiler proof"
+  18,../site-manifest.yaml,"single compiled-project/corpus authority"
 
 ## architecture
 
@@ -116,8 +121,11 @@ decisions[23]{id,decision,ref}:
 
 ## proof
 
-proof{head,run,tests,pages,indexable,prototypes,artifact}:
+compiler_proof{head,run,tests,pages,indexable,prototypes,artifact}:
   9ef48b97308e09d5a97f4978820255e3c8b53c7e,29576487817,"22/22",6,0,7,sha256:3dce480b18b10020ab6607440e256d085abf62a8d79b6d127c6a102c26c0a94d
+
+authority_proof{head,run,result,stages}:
+  44e0a669096215ada26ce387a8db460a40dbc0a5,29623142884,success,"install; tests; manifest emit; UI emit; browser check; R3F build; artifacts"
 
 passed[5]:
   namespaced-versioned-symbols
