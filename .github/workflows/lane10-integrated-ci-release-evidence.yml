@@ -8,11 +8,18 @@ on:
     paths:
       - "mvp-build/packages/shared/src/**"
       - "mvp-build/packages/db/**"
+      - "mvp-build/apps/manager/src/lib/approval-authority.ts"
+      - "mvp-build/apps/manager/src/lib/approval-promotion.ts"
+      - "mvp-build/apps/manager/src/lib/preview-links.ts"
+      - "mvp-build/apps/manager/src/lib/signed-links.ts"
       - "mvp-build/apps/manager/src/lib/connector-custody.ts"
       - "mvp-build/apps/manager/src/lib/commercial-attribution.ts"
       - "mvp-build/apps/manager/src/lib/durable-command-runtime.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway-http.ts"
+      - "mvp-build/apps/manager/src/tools/approval-authority.stub.ts"
+      - "mvp-build/apps/manager/src/tools/approved-actions.stub.ts"
+      - "mvp-build/apps/manager/src/tools/qbo-approval-promotion.stub.ts"
       - "mvp-build/apps/manager/src/webhooks/**"
       - "mvp-build/tests/**"
       - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
@@ -26,11 +33,18 @@ on:
     paths:
       - "mvp-build/packages/shared/src/**"
       - "mvp-build/packages/db/**"
+      - "mvp-build/apps/manager/src/lib/approval-authority.ts"
+      - "mvp-build/apps/manager/src/lib/approval-promotion.ts"
+      - "mvp-build/apps/manager/src/lib/preview-links.ts"
+      - "mvp-build/apps/manager/src/lib/signed-links.ts"
       - "mvp-build/apps/manager/src/lib/connector-custody.ts"
       - "mvp-build/apps/manager/src/lib/commercial-attribution.ts"
       - "mvp-build/apps/manager/src/lib/durable-command-runtime.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway-http.ts"
+      - "mvp-build/apps/manager/src/tools/approval-authority.stub.ts"
+      - "mvp-build/apps/manager/src/tools/approved-actions.stub.ts"
+      - "mvp-build/apps/manager/src/tools/qbo-approval-promotion.stub.ts"
       - "mvp-build/apps/manager/src/webhooks/**"
       - "mvp-build/tests/**"
       - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
@@ -75,6 +89,7 @@ jobs:
             tests/unit/relationship-contract.test.ts \
             tests/unit/authorization-scope-registry.test.ts \
             tests/unit/assignment-enforcement-contract.test.ts \
+            tests/unit/approval-authority-contract.test.ts \
             tests/unit/connector-commercial-contract.test.ts \
             tests/unit/command-effect-contract.test.ts \
             tests/unit/release-evidence-contract.test.ts \
@@ -85,7 +100,7 @@ jobs:
   postgres-boundary:
     needs: source-contracts
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     services:
       postgres:
         image: postgres:17
@@ -155,6 +170,8 @@ jobs:
         run: npm run db:migrate
       - name: Run Lane 1 relationship and authorization matrix
         run: npx vitest run --config vitest.integration.config.ts tests/integration/relationship-authorization-matrix.test.ts
+      - name: Run S7 approval authority matrix
+        run: npx vitest run --config vitest.integration.config.ts tests/integration/approval-authority-boundary.test.ts
       - name: Run S5 connector and S6 commercial matrix
         run: npx vitest run --config vitest.integration.config.ts tests/integration/connector-commercial-boundary.test.ts
       - name: Run Lane 3 durable command and effect matrix
