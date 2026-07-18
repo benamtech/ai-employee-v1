@@ -10,10 +10,16 @@ on:
       - "mvp-build/packages/shared/src/relationship-contract.ts"
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
       - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
+      - "mvp-build/packages/shared/src/assignment-resolver.ts"
+      - "mvp-build/packages/shared/src/session-enforcer.ts"
+      - "mvp-build/packages/shared/src/materialization.ts"
+      - "mvp-build/packages/shared/src/preview-links.ts"
+      - "mvp-build/packages/shared/src/work-stream.ts"
       - "mvp-build/packages/shared/src/ids.ts"
       - "mvp-build/packages/shared/src/index.ts"
       - "mvp-build/tests/unit/relationship-contract.test.ts"
       - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
+      - "mvp-build/tests/unit/assignment-enforcement-contract.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
@@ -25,10 +31,16 @@ on:
       - "mvp-build/packages/shared/src/relationship-contract.ts"
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
       - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
+      - "mvp-build/packages/shared/src/assignment-resolver.ts"
+      - "mvp-build/packages/shared/src/session-enforcer.ts"
+      - "mvp-build/packages/shared/src/materialization.ts"
+      - "mvp-build/packages/shared/src/preview-links.ts"
+      - "mvp-build/packages/shared/src/work-stream.ts"
       - "mvp-build/packages/shared/src/ids.ts"
       - "mvp-build/packages/shared/src/index.ts"
       - "mvp-build/tests/unit/relationship-contract.test.ts"
       - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
+      - "mvp-build/tests/unit/assignment-enforcement-contract.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
@@ -60,7 +72,7 @@ jobs:
       - name: Build shared relationship contracts
         run: npm run build --workspace @amtech/shared
       - name: Run relationship and assignment-scope contract invariants
-        run: npx vitest run tests/unit/relationship-contract.test.ts tests/unit/authorization-scope-registry.test.ts
+        run: npx vitest run tests/unit/relationship-contract.test.ts tests/unit/authorization-scope-registry.test.ts tests/unit/assignment-enforcement-contract.test.ts
 
   relationship-matrix:
     needs: contract
