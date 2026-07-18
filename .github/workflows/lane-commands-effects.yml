@@ -1,0 +1,140 @@
+name: Lane 3 Durable Commands and Effects
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - lane/commands-effects
+    paths:
+      - "mvp-build/packages/shared/src/command-effect.ts"
+      - "mvp-build/packages/shared/src/ids.ts"
+      - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/tests/unit/command-effect-contract.test.ts"
+      - "mvp-build/tests/integration/command-effect-kernel.test.ts"
+      - "mvp-build/packages/db/migrations/**"
+      - ".github/workflows/lane-commands-effects.yml"
+  pull_request:
+    branches:
+      - employee-production-tuesday
+    paths:
+      - "mvp-build/packages/shared/src/command-effect.ts"
+      - "mvp-build/packages/shared/src/ids.ts"
+      - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/tests/unit/command-effect-contract.test.ts"
+      - "mvp-build/tests/integration/command-effect-kernel.test.ts"
+      - "mvp-build/packages/db/migrations/**"
+      - ".github/workflows/lane-commands-effects.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lane-commands-effects-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Typecheck shared command contracts
+        run: npm run typecheck --workspace @amtech/shared
+      - name: Build shared command contracts
+        run: npm run build --workspace @amtech/shared
+      - name: Run command and effect contract invariants
+        run: npx vitest run tests/unit/command-effect-contract.test.ts
+
+  command-effect-matrix:
+    needs: contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: amtech_commands
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d amtech_commands"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_commands
+      STAGING_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_commands
+      PGPASSWORD: postgres
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Bootstrap Supabase-compatible roles and schemas
+        run: |
+          psql -h 127.0.0.1 -U postgres -d amtech_commands -v ON_ERROR_STOP=1 <<'SQL'
+          do $$ begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+          end $$;
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create or replace function auth.role() returns text language sql stable as $$ select current_user::text $$;
+          create schema if not exists storage;
+          create table if not exists storage.buckets (
+            id text primary key,
+            name text not null unique,
+            owner uuid,
+            public boolean not null default false,
+            file_size_limit bigint,
+            allowed_mime_types text[],
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          create table if not exists storage.objects (
+            id uuid primary key default gen_random_uuid(),
+            bucket_id text references storage.buckets(id),
+            name text not null,
+            owner uuid,
+            metadata jsonb,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now(),
+            last_accessed_at timestamptz not null default now(),
+            unique(bucket_id, name)
+          );
+          SQL
+      - name: Apply integration migrations
+        run: npm run db:migrate
+      - name: Execute durable command and effect matrix
+        shell: bash
+        run: |
+          set +e
+          npx vitest run --config vitest.integration.config.ts tests/integration/command-effect-kernel.test.ts 2>&1 | tee command-effect-matrix.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload command and effect diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: command-effect-matrix-${{ github.run_id }}
+          path: mvp-build/command-effect-matrix.log
+          if-no-files-found: error
