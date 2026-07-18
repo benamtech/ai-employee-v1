@@ -8,16 +8,53 @@ const repoRoot = join(mvpRoot, "..");
 const source = (path: string) => readFile(join(mvpRoot, path), "utf8");
 const rootSource = (path: string) => readFile(join(repoRoot, path), "utf8");
 
+function generateProductionServer() {
+  return spawnSync(process.execPath, [join(mvpRoot, "apps", "manager", "scripts", "generate-production-server.mjs")], {
+    cwd: mvpRoot,
+    encoding: "utf8",
+    timeout: 5000,
+  });
+}
+
 describe("S8 production admin authority source boundary", () => {
-  it("routes admin reads through durable session and exact lease authority", async () => {
-    const server = await source("apps/manager/src/server.ts");
+  it("compiles the only runnable Manager server from an exact pinned template", async () => {
+    const wrapper = await source("apps/manager/src/server.ts");
+    const template = await source("apps/manager/src/server.template.ts");
+    const generator = await source("apps/manager/scripts/generate-production-server.mjs");
+    const managerPackage = JSON.parse(await source("apps/manager/package.json"));
+    const tsconfig = JSON.parse(await source("apps/manager/tsconfig.json"));
+
+    expect(wrapper).toBe([
+      "// Canonical import surface for tests and internal callers.",
+      "// Build/dev/start execute server.generated.ts directly after the pinned generator runs.",
+      'export * from "./server.generated.js";',
+      "",
+    ].join("\n"));
+    expect(template).toContain("async function adminActor(");
+    expect(generator).toContain('expectedTemplateBlob = "bd60a15384e8efd2db8b2fe8e92b1bedddaf9911"');
+    expect(generator).toContain("production_server_template_hash_mismatch");
+    expect(managerPackage).toMatchObject({
+      main: "./dist/server.generated.js",
+      scripts: {
+        "generate:production-server": expect.any(String),
+        dev: "tsx watch src/server.generated.ts",
+        start: "node dist/server.generated.js",
+      },
+    });
+    expect(tsconfig.exclude).toContain("src/server.template.ts");
+
+    const generated = generateProductionServer();
+    expect(generated.status, generated.stderr).toBe(0);
+    const server = await source("apps/manager/src/server.generated.ts");
     expect(server).toContain("authorizePlatformAdminRequest");
     expect(server).toContain('authorization: c.req.header("X-AMTECH-Admin-Authorization")');
     expect(server).toContain('support_lease_id: c.req.header("X-AMTECH-Support-Lease-Id")');
     expect(server).toContain("legacy_identity_header_present");
     expect(server).toContain("legacy_reason_header_present");
-    expect(server).not.toContain("const auth = await requirePlatformRole");
-    expect(server).not.toContain("const access = await recordSupportAccess");
+    expect(server).not.toContain("async function adminActor(");
+    expect(server).not.toContain("requirePlatformRole");
+    expect(server).not.toContain("recordSupportAccess");
+    expect(server).not.toContain("runAdminSupportAction");
   });
 
   it("registers every support write through C3 and links the accepted receipt", async () => {
@@ -57,7 +94,9 @@ describe("local machine production gate", () => {
     expect(rootPackage.packageManager).toMatch(/^pnpm@/);
     expect(rootPackage.scripts).toMatchObject({ build: expect.any(String), test: expect.any(String), dev: expect.any(String), verify: expect.any(String), "s9:go-no-go": expect.any(String) });
     expect(mvpPackage.workspaces).toEqual(["packages/*", "apps/*"]);
+    expect(mvpPackage.scripts.prepare).toContain("generate:production-sources");
     await expect(readFile(join(mvpRoot, "package-lock.json"), "utf8")).resolves.toContain('"lockfileVersion"');
+    await expect(readFile(join(repoRoot, "pnpm-lock.yaml"), "utf8")).resolves.toContain("importers:");
   });
 
   it("builds and starts only exact-SHA production images", async () => {
@@ -68,6 +107,8 @@ describe("local machine production gate", () => {
     for (const text of [compose, manager, web, caddy]) expect(text).toContain("AMTECH_GIT_SHA");
     expect(compose).toContain("AMTECH_GIT_SHA is required");
     expect(manager).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
+    expect(manager).toContain("apps/manager/dist/server.generated.js");
+    expect(manager).not.toContain('CMD ["node", "apps/manager/dist/server.js"]');
     expect(web).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
     expect(caddy).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
   });
