@@ -6,8 +6,8 @@ import {
   compileAgentSiteProgram,
   compileApprovedOntology,
   compileOntologyGraph,
-  compileOpportunitySpace,
-  compileSiteGenerationPlan,
+  compileOptimizedOpportunitySpace,
+  compileSparseSiteGenerationPlan,
   normalizeProjectInput,
   prepareAgentSiteProgram,
   tfIdfCosine,
@@ -84,7 +84,7 @@ test("page concept compiler rejects a proposal that does not express its selecte
   assert.throws(() => compileAgentSiteProgram(prepared, proposals, fixture.siteGenerationPolicy), /validation failed/);
 });
 
-test("one-shot sparse planner produces a 10,000-page site program without serving runtime", { timeout: 120_000 }, () => {
+test("one-shot optimized sparse planner produces a 10,000-page site program without serving runtime", { timeout: 120_000 }, () => {
   const fixture = createScaleAgentSiteFixture(10_000);
   const totalStarted = performance.now();
   const projectStarted = performance.now();
@@ -97,10 +97,10 @@ test("one-shot sparse planner produces a 10,000-page site program without servin
   const graph = compileOntologyGraph(ontology, fixture.graphPolicy);
   const graphMilliseconds = performance.now() - graphStarted;
   const opportunityStarted = performance.now();
-  const opportunitySpace = compileOpportunitySpace(project, ontology, graph, fixture.vectorIdentity, fixture.opportunityPolicy);
+  const opportunitySpace = compileOptimizedOpportunitySpace(project, ontology, graph, fixture.vectorIdentity, fixture.opportunityPolicy);
   const opportunityMilliseconds = performance.now() - opportunityStarted;
   const siteProgramStarted = performance.now();
-  const siteGenerationPlan = compileSiteGenerationPlan(project, ontology, opportunitySpace.selected, fixture.siteGenerationPolicy);
+  const siteGenerationPlan = compileSparseSiteGenerationPlan(project, ontology, opportunitySpace.selected, fixture.siteGenerationPolicy);
   const siteProgramMilliseconds = performance.now() - siteProgramStarted;
   const elapsedMilliseconds = performance.now() - totalStarted;
   const profile = {
@@ -115,7 +115,7 @@ test("one-shot sparse planner produces a 10,000-page site program without servin
     packedVectorBytes: opportunitySpace.selected.packedVectors.byteLength,
     batches: siteGenerationPlan.batches.length,
   };
-  console.log(`10k-site-profile ${JSON.stringify(profile)}`);
+  console.log(`10k-site-profile-optimized ${JSON.stringify(profile)}`);
   assert.equal(siteGenerationPlan.pageConceptJobs.length, 10_000);
   assert.equal(siteGenerationPlan.batches.length, 400);
   assert.equal(opportunitySpace.selected.packedVectors.byteLength, 10_000 * 64 * 4);
