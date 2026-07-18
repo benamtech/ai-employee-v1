@@ -28,7 +28,10 @@ describe("Lane 10 release evidence contract", () => {
     expect(result.staleGates).toEqual([]);
     expect(built.publicClaimState).toBe("source_and_ci_only");
     expect(built.gates.map((gate) => gate.gate).sort()).toEqual([...REQUIRED_RELEASE_GATES].sort());
+    expect(built.gates.find((gate) => gate.gate === "connector_custody_enforcement")?.status).toBe("ci_accepted");
+    expect(built.gates.find((gate) => gate.gate === "commercial_attribution_enforcement")?.status).toBe("ci_accepted");
     expect(built.gates.find((gate) => gate.gate === "real_supabase_matrix")?.status).toBe("pending");
+    expect(built.gates.find((gate) => gate.gate === "commercial_reconciliation")?.status).toBe("pending");
   });
 
   it("rejects stale cross-SHA evidence", () => {
