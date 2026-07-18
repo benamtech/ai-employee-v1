@@ -5,11 +5,14 @@ import {
   buildSparseLexicalIndex,
   compileAgentSiteProgram,
   compileApprovedOntology,
+  compileHrrFeatures,
   compileOntologyGraph,
-  compileOptimizedOpportunitySpace,
   compileSparseSiteGenerationPlan,
+  generateOpportunityRegions,
+  mineFrequentClosedItemsets,
   normalizeProjectInput,
   prepareAgentSiteProgram,
+  selectOpportunityRegionsIncremental,
   tfIdfCosine,
 } from "../dist/index.js";
 import { createAgentSiteFixture, createPageConceptProposals, createScaleAgentSiteFixture } from "../fixtures/agent-site-fixture.mjs";
@@ -96,30 +99,54 @@ test("one-shot optimized sparse planner produces a 10,000-page site program with
   const graphStarted = performance.now();
   const graph = compileOntologyGraph(ontology, fixture.graphPolicy);
   const graphMilliseconds = performance.now() - graphStarted;
-  const opportunityStarted = performance.now();
-  const opportunitySpace = compileOptimizedOpportunitySpace(project, ontology, graph, fixture.vectorIdentity, fixture.opportunityPolicy);
-  const opportunityMilliseconds = performance.now() - opportunityStarted;
+  const itemsetStarted = performance.now();
+  const closedItemsets = mineFrequentClosedItemsets(ontology, fixture.opportunityPolicy.minimumSupportWeight, fixture.opportunityPolicy.maximumRegionWidth);
+  const itemsetMilliseconds = performance.now() - itemsetStarted;
+  const candidateStarted = performance.now();
+  const candidates = generateOpportunityRegions(ontology, graph, closedItemsets, fixture.opportunityPolicy);
+  const candidateMilliseconds = performance.now() - candidateStarted;
+  const selectionStarted = performance.now();
+  const selected = selectOpportunityRegionsIncremental(project, ontology, candidates, fixture.vectorIdentity, fixture.opportunityPolicy);
+  const selectionMilliseconds = performance.now() - selectionStarted;
   const siteProgramStarted = performance.now();
-  const siteGenerationPlan = compileSparseSiteGenerationPlan(project, ontology, opportunitySpace.selected, fixture.siteGenerationPolicy);
+  const siteGenerationPlan = compileSparseSiteGenerationPlan(project, ontology, selected, fixture.siteGenerationPolicy);
   const siteProgramMilliseconds = performance.now() - siteProgramStarted;
+
+  const attributeById = new Map(ontology.attributes.map((item) => [item.id, item]));
+  const hrrSample = selected.selectedRegions.slice(0, 1_000);
+  const hrrStarted = performance.now();
+  for (const region of hrrSample) {
+    const features = {};
+    for (const id of region.attributeIds) {
+      const attribute = attributeById.get(id);
+      assert.ok(attribute);
+      features[attribute.dimension] = attribute.id;
+    }
+    compileHrrFeatures(features, fixture.opportunityPolicy.hrrDimensions, fixture.vectorIdentity);
+  }
+  const hrrSampleMilliseconds = performance.now() - hrrStarted;
   const elapsedMilliseconds = performance.now() - totalStarted;
   const profile = {
     projectMilliseconds,
     ontologyMilliseconds,
     graphMilliseconds,
-    opportunityMilliseconds,
+    itemsetMilliseconds,
+    candidateMilliseconds,
+    selectionMilliseconds,
     siteProgramMilliseconds,
+    hrrSampleCount: hrrSample.length,
+    hrrSampleMilliseconds,
     elapsedMilliseconds,
-    candidates: opportunitySpace.candidates.length,
+    candidates: candidates.length,
     selected: siteGenerationPlan.pageConceptJobs.length,
-    packedVectorBytes: opportunitySpace.selected.packedVectors.byteLength,
+    packedVectorBytes: selected.packedVectors.byteLength,
     batches: siteGenerationPlan.batches.length,
   };
-  console.log(`10k-site-profile-optimized ${JSON.stringify(profile)}`);
+  console.log(`10k-site-profile-optimized-split ${JSON.stringify(profile)}`);
   assert.equal(siteGenerationPlan.pageConceptJobs.length, 10_000);
   assert.equal(siteGenerationPlan.batches.length, 400);
-  assert.equal(opportunitySpace.selected.packedVectors.byteLength, 10_000 * 64 * 4);
-  assert.equal(opportunitySpace.selected.validation.passes, true);
-  assert.ok(opportunitySpace.candidates.length >= 10_000);
+  assert.equal(selected.packedVectors.byteLength, 10_000 * 64 * 4);
+  assert.equal(selected.validation.passes, true);
+  assert.ok(candidates.length >= 10_000);
   assert.ok(elapsedMilliseconds < fixture.project.technical.performanceBudgets.planningMilliseconds, `planning took ${elapsedMilliseconds.toFixed(1)}ms`);
 });
