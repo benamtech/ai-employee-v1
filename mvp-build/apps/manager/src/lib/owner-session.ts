@@ -27,6 +27,15 @@ export async function mintOwnerSession(
   if (!principal.data?.id || principal.data.status !== "active") {
     throw new Error("owner_human_principal_not_active");
   }
+  const authority = await db.from("authority_versions")
+    .select("current_version,revoked_at")
+    .eq("scope_type", "human_principal")
+    .eq("scope_id", principal.data.id)
+    .maybeSingle();
+  if (authority.error) throw authority.error;
+  if (!authority.data?.current_version || authority.data.revoked_at) {
+    throw new Error("owner_human_authority_not_current");
+  }
   const assignment = await db.from("assignment_principals")
     .select("assignment_id,status,employee_assignments!inner(account_id,status)")
     .eq("principal_id", principal.data.id)
@@ -46,6 +55,7 @@ export async function mintOwnerSession(
       user_id: userId,
       human_principal_id: principal.data.id,
       session_version: Number(principal.data.session_version ?? 1),
+      authority_version: Number(authority.data.current_version),
       token_hash: ownerSessionHash(token),
       expires_at,
       last_seen_at: new Date().toISOString(),
@@ -61,7 +71,7 @@ export async function requireOwnerSession(
 ): Promise<OwnerSessionRecord | null> {
   if (!token) return null;
   const sessionResult = await db.from("owner_web_sessions")
-    .select("id,account_id,user_id,human_principal_id,session_version,expires_at,revoked_at")
+    .select("id,account_id,user_id,human_principal_id,session_version,authority_version,expires_at,revoked_at")
     .eq("token_hash", ownerSessionHash(token))
     .maybeSingle();
   if (sessionResult.error) throw sessionResult.error;
@@ -69,15 +79,26 @@ export async function requireOwnerSession(
   if (!session?.id || !session.human_principal_id || session.revoked_at) return null;
   if (session.expires_at && new Date(String(session.expires_at)).getTime() <= Date.now()) return null;
 
-  const principalResult = await db.from("human_principals")
-    .select("id,user_id,status,session_version,credentials_revoked_at")
-    .eq("id", session.human_principal_id)
-    .maybeSingle();
+  const [principalResult, authorityResult] = await Promise.all([
+    db.from("human_principals")
+      .select("id,user_id,status,session_version,credentials_revoked_at")
+      .eq("id", session.human_principal_id)
+      .maybeSingle(),
+    db.from("authority_versions")
+      .select("current_version,revoked_at")
+      .eq("scope_type", "human_principal")
+      .eq("scope_id", session.human_principal_id)
+      .maybeSingle(),
+  ]);
   if (principalResult.error) throw principalResult.error;
+  if (authorityResult.error) throw authorityResult.error;
   const principal = principalResult.data;
+  const authority = authorityResult.data;
   if (!principal?.id || principal.status !== "active" || principal.user_id !== session.user_id) return null;
   if (Number(principal.session_version ?? 1) !== Number(session.session_version ?? 0)) return null;
   if (principal.credentials_revoked_at) return null;
+  if (!authority?.current_version || authority.revoked_at) return null;
+  if (Number(authority.current_version) !== Number(session.authority_version ?? 0)) return null;
 
   void db.from("owner_web_sessions").update({ last_seen_at: new Date().toISOString() }).eq("id", session.id).then(() => undefined, () => undefined);
   return {
