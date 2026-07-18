@@ -34,4 +34,5 @@ export * from "./opportunity-space-optimized.js";
 export * from "./opportunity-space-production.js";
 export * from "./site-program.js";
 export * from "./site-program-optimized.js";
+export * from "./acceleration-decision.js";
 export * from "./agent-site-orchestrator.js";
