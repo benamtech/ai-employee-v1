@@ -1,3 +1,4 @@
+# Exact-SHA production boundary for verified owner identity and employee activation.
 name: S10.1 Onboarding Identity Authority
 
 on:
