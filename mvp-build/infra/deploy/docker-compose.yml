@@ -2,14 +2,18 @@ name: amtech-ai-employee
 
 services:
   manager:
+    image: amtech-ai-employee-manager:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/manager.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     env_file:
       - ./.env.production
     environment:
       NODE_ENV: production
       PORT: "8080"
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     volumes:
       - /var/lib/amtech:/var/lib/amtech
       - /var/run/docker.sock:/var/run/docker.sock
@@ -31,15 +35,19 @@ services:
         max-file: "5"
 
   web:
+    image: amtech-ai-employee-web:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/web.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     env_file:
       - ./.env.production
     environment:
       NODE_ENV: production
       PORT: "3000"
       HOSTNAME: "0.0.0.0"
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     networks:
       - amtech_runtime
     ports:
@@ -61,14 +69,18 @@ services:
         max-file: "5"
 
   caddy:
+    image: amtech-ai-employee-caddy:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/caddy.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     env_file:
       - ./.env.production
     environment:
       WEB_UPSTREAM: ${WEB_UPSTREAM:-web:3000}
       MANAGER_UPSTREAM: ${MANAGER_UPSTREAM:-manager:8080}
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     volumes:
       - ../caddy/production.Caddyfile:/etc/caddy/Caddyfile:ro
       - /var/lib/amtech/caddy/clients:/etc/caddy/clients
@@ -98,10 +110,6 @@ services:
         max-file: "5"
 
 networks:
-  # Host-owned shared runtime network. Marked external so it outlives `compose down`
-  # and so provisioner-launched per-employee Hermes containers (amtech-hermes-<id>)
-  # join the SAME network the core services do — Docker DNS then routes Caddy to each
-  # employee by alias. Create once on the host: `docker network create amtech_runtime`.
   amtech_runtime:
     external: true
     name: amtech_runtime
