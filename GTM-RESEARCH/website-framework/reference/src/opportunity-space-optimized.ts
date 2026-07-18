@@ -13,7 +13,7 @@ import {
   type RejectedOpportunityRegion,
   type SelectedOpportunitySpace,
 } from "./opportunity-space.js";
-import { buildValidationReport, finding } from "./validation-contracts.js";
+import { buildValidationReport, finding, type ValidationState } from "./validation-contracts.js";
 
 /**
  * Production-oriented sparse selector.
@@ -98,13 +98,11 @@ export function selectOpportunityRegionsIncremental(
   const selectedFlags = new Uint8Array(candidates.length);
   const versions = new Uint32Array(candidates.length);
   const heap = new MaxHeap<HeapItem>((left, right) => left.gain - right.gain || right.regionId.localeCompare(left.regionId));
-  const candidateIndexById = new Map<string, number>();
   const exactDuplicateBySignature = new Map<string, number>();
   const fallbackBuckets = new Map<string, number[]>();
   const exactOnlyDuplicateScreen = policy.duplicateJaccardThreshold > (policy.maximumRegionWidth - 1) / policy.maximumRegionWidth;
 
   for (let index = 0; index < candidates.length; index += 1) {
-    candidateIndexById.set(candidates[index].id, index);
     heap.push({ index, regionId: candidates[index].id, gain: marginalGain(candidates[index]), version: 0 });
   }
 
@@ -142,8 +140,7 @@ export function selectOpportunityRegionsIncremental(
     for (const key of region.coverageKeys) if (featureWeights.has(key)) coverageCounts.set(key, (coverageCounts.get(key) ?? 0) + 1);
     const vector = compileRegionVector(region);
     selectedVectors.set(region.id, vector);
-    const signature = duplicateSignature(region);
-    exactDuplicateBySignature.set(signature, item.index);
+    exactDuplicateBySignature.set(duplicateSignature(region), item.index);
     const bucket = noveltyBucket(region);
     const bucketIndexes = fallbackBuckets.get(bucket) ?? [];
     bucketIndexes.push(item.index);
@@ -257,7 +254,7 @@ export function selectOpportunityRegionsIncremental(
   }
 }
 
-function findingState(space: SelectedOpportunitySpace, id: string): "pass" | "fail" | "pending" {
+function findingState(space: SelectedOpportunitySpace, id: string): ValidationState {
   return space.validation.findings.find((item) => item.attributeId === id)?.state ?? "fail";
 }
 function noveltyBucket(region: OpportunityRegion): string {
