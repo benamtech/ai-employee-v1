@@ -164,6 +164,12 @@ function deny(
   };
 }
 
+function smsDenyInput(principal: HumanPrincipal, action: AssignmentAction | undefined): Pick<AssignmentScopeRequest, "principal" | "action"> {
+  const input: Pick<AssignmentScopeRequest, "principal" | "action"> = { principal };
+  if (action !== undefined) input.action = action;
+  return input;
+}
+
 export function authorizedAssignmentsForPrincipal(params: {
   principal: HumanPrincipal;
   assignments: readonly AssignmentPrincipalRecord[];
@@ -349,10 +355,10 @@ export function resolveSmsChannelAssignment(params: {
     kind: "human",
   };
   if (params.phone_binding?.phone_e164) principal.phone_e164 = params.phone_binding.phone_e164;
-  if (!params.twilio_signature_verified) return deny({ principal, action: params.action }, "invalid_signature", 403);
-  if (!params.phone_binding) return deny({ principal, action: params.action }, "missing_phone_binding", 403);
+  if (!params.twilio_signature_verified) return deny(smsDenyInput(principal, params.action), "invalid_signature", 403);
+  if (!params.phone_binding) return deny(smsDenyInput(principal, params.action), "missing_phone_binding", 403);
   if (params.phone_binding.revoked_at || timestampIsPast(params.phone_binding.expires_at, now) || params.phone_binding.status === "revoked" || params.phone_binding.status === "expired") {
-    return deny({ principal, action: params.action }, "revoked_or_expired_channel", 410);
+    return deny(smsDenyInput(principal, params.action), "revoked_or_expired_channel", 410);
   }
 
   const request: AssignmentScopeRequest = {
