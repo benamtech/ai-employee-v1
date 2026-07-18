@@ -57,7 +57,7 @@ begin
      and consumed_at is null;
   if not found then raise exception 'approval_preview_link_consume_race'; end if;
   return new;
-end
+end;
 $$;
 
 drop trigger if exists approval_preview_link_atomic_consume on approvals;
