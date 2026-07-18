@@ -106,7 +106,7 @@ export const ONTOLOGY_VALIDATION: readonly ValidationAttribute[] = [
   { id: "ontology.dimensions", feature: "Discovered dimension normalization", workflowStep: "discover-ontology", algorithmChoice: "agent dimension hints normalized into governed dimensions", userEffect: "the framework discovers prospect and business dimensions from supplied truth rather than requiring the user to author a matrix", developerEffect: "later vector roles are deterministic and inspectable", validationVector: ["non-empty dimension", "one normalized label per dimension", "anchor coverage"], passVector: ["every approved attribute has one dimension", "at least one business anchor"], failVector: ["user must hand-author vector axes", "empty dimension", "duplicate value in one dimension"], simplerBaseline: "fixed global schema", severity: "hard" },
   { id: "ontology.materiality", feature: "Page-changing materiality", workflowStep: "discover-ontology", algorithmChoice: "explicit material-effect taxonomy", userEffect: "attributes survive only when they can change the answer, workflow, proof, utility, conversion, vocabulary, or UI", developerEffect: "page generation cannot use cosmetic demographics as filler", validationVector: ["material effects", "confidence", "anchor kind"], passVector: ["minimum material effect count", "business anchors retained"], failVector: ["stereotype-only attribute", "zero page effect", "confidence below floor"], simplerBaseline: "agent intuition only", severity: "hard" },
   { id: "ontology.safety", feature: "Targeting safety boundary", workflowStep: "discover-ontology", algorithmChoice: "sensitivity classes plus reviewer gate", userEffect: "private, protected, or covertly inferred traits do not become public targeting axes", developerEffect: "unsafe combinations fail before vector construction", validationVector: ["sensitivity", "public-targeting flag", "review approval", "material effects"], passVector: ["prohibited sensitivities rejected", "demographic/lifestyle attributes explicitly approved and materially justified"], failVector: ["protected/private targeting", "fingerprint-derived identity", "unreviewed demographic axis"], simplerBaseline: "allow every agent suggestion", severity: "hard" },
-  { id: "ontology.lexical", feature: "Sparse lexical baseline", workflowStep: "compile-ontology", algorithmChoice: "label-gated TF-IDF cosine plus BM25", userEffect: "obvious duplicate and related concepts are inspectable without relying on an opaque embedding model", developerEffect: "learned semantic and VSA arms have a deterministic baseline without collapsing distinct labels that share boilerplate descriptions", validationVector: ["tokenization", "label overlap", "IDF", "neighbor list", "source-order determinism"], passVector: ["stable lexical index", "near duplicates require label-level evidence"], failVector: ["embedding-only ontology", "description boilerplate collapses distinct industries", "order-dependent vocabulary"], simplerBaseline: "lowercased string equality", severity: "hard" },
+  { id: "ontology.lexical", feature: "Sparse lexical baseline", workflowStep: "compile-ontology", algorithmChoice: "label-gated TF-IDF cosine plus BM25", userEffect: "obvious duplicate and related concepts are inspectable without relying on an opaque embedding model", developerEffect: "learned semantic and VSA arms have a deterministic baseline without collapsing distinct labels that share boilerplate descriptions", validationVector: ["tokenization", "label overlap", "IDF", "neighbor list", "source-order determinism"], passVector: ["stable lexical index", "near duplicates require label-level evidence", "strongest-supported exact duplicate survives"], failVector: ["embedding-only ontology", "description boilerplate collapses distinct industries", "lexicographic ID decides truth", "order-dependent vocabulary"], simplerBaseline: "lowercased string equality", severity: "hard" },
   { id: "ontology.relations", feature: "Evidence-bound ontology relations", workflowStep: "compile-ontology", algorithmChoice: "typed relation graph with explicit rejected-edge ledger", userEffect: "compatibility, requirements, exclusions, hierarchy, and offer/topic/workflow relationships remain explainable", developerEffect: "candidate generation uses explicit edge semantics instead of model intuition alone", validationVector: ["known endpoints", "relation type", "weight", "rationale", "sources/evidence", "rejected relations"], passVector: ["all accepted edges resolve", "invalid edges are preserved as rejected findings"], failVector: ["unknown endpoint crashes the ontology", "untyped edge", "evidence-free compatibility"], simplerBaseline: "cosine-only graph", severity: "hard" },
   { id: "ontology.observations", feature: "Small object-attribute evidence table", workflowStep: "compile-ontology", algorithmChoice: "weighted observations for co-occurrence and closed-conjunction seeds with rejected-observation ledger", userEffect: "candidate combinations are grounded in observed or researched situations", developerEffect: "frequent/closed-itemset and graph controls have a deterministic input table", validationVector: ["known attributes", "source/evidence", "positive weight", "minimum width", "rejected observations"], passVector: ["all accepted observations resolve", "at least one observation"], failVector: ["combination space has no supporting objects", "unknown attribute silently removed", "zero-weight observation"], simplerBaseline: "unrestricted Cartesian product", severity: "hard" },
 ];
@@ -152,17 +152,19 @@ export function compileApprovedOntology(
     candidates.push({ ...item, dimension, normalizedLabel, sourceIds: sorted(item.sourceIds), evidenceIds: sorted(item.evidenceIds), materialEffects: [...new Set(item.materialEffects)].sort(), tokens: tokenizeLexical(`${item.label} ${item.description} ${dimension}`) });
   }
 
-  const exactKeys = new Map<string, string>();
-  const exactFiltered: ApprovedOntologyAttribute[] = [];
+  const exactGroups = new Map<string, ApprovedOntologyAttribute[]>();
   for (const item of candidates) {
     const key = `${item.dimension}:${item.normalizedLabel}`;
-    const existing = exactKeys.get(key);
-    if (existing) {
-      rejected.push({ id: item.id, reasons: [`exact duplicate of ${existing}`] });
-      continue;
-    }
-    exactKeys.set(key, item.id);
-    exactFiltered.push(item);
+    const group = exactGroups.get(key) ?? [];
+    group.push(item);
+    exactGroups.set(key, group);
+  }
+  const exactFiltered: ApprovedOntologyAttribute[] = [];
+  for (const group of [...exactGroups.values()].sort((left, right) => `${left[0].dimension}:${left[0].normalizedLabel}`.localeCompare(`${right[0].dimension}:${right[0].normalizedLabel}`))) {
+    const ranked = [...group].sort(compareAttributePreference);
+    const keep = ranked[0];
+    exactFiltered.push(keep);
+    for (const item of ranked.slice(1)) rejected.push({ id: item.id, reasons: [`exact duplicate of ${keep.id}; lower evidence/confidence preference`] });
   }
 
   const preliminaryIndex = buildSparseLexicalIndex(exactFiltered.map((item) => ({ id: item.id, text: `${item.label} ${item.dimension}` })));
@@ -276,9 +278,12 @@ function attributeRejectionReasons(item: OntologyAttributeProposal, policy: Onto
   return reasons;
 }
 
+function labelTokens(value: string): Set<string> {
+  return new Set(slug(value).split("-").filter(Boolean));
+}
 function hasLabelDuplicateEvidence(left: ApprovedOntologyAttribute, right: ApprovedOntologyAttribute): boolean {
-  const leftTokens = new Set(tokenizeLexical(left.label));
-  const rightTokens = new Set(tokenizeLexical(right.label));
+  const leftTokens = labelTokens(left.label);
+  const rightTokens = labelTokens(right.label);
   if (leftTokens.size === 0 || rightTokens.size === 0) return false;
   const intersection = [...leftTokens].filter((token) => rightTokens.has(token)).length;
   const union = new Set([...leftTokens, ...rightTokens]).size;
@@ -286,10 +291,14 @@ function hasLabelDuplicateEvidence(left: ApprovedOntologyAttribute, right: Appro
   const containment = intersection / Math.min(leftTokens.size, rightTokens.size);
   return jaccard >= 0.8 || (containment === 1 && Math.min(leftTokens.size, rightTokens.size) >= 2);
 }
+function compareAttributePreference(left: ApprovedOntologyAttribute, right: ApprovedOntologyAttribute): number {
+  if (left.confidence !== right.confidence) return right.confidence - left.confidence;
+  if (left.evidenceIds.length !== right.evidenceIds.length) return right.evidenceIds.length - left.evidenceIds.length;
+  if (left.sourceIds.length !== right.sourceIds.length) return right.sourceIds.length - left.sourceIds.length;
+  return left.id.localeCompare(right.id);
+}
 function chooseDuplicate(left: ApprovedOntologyAttribute, right: ApprovedOntologyAttribute): ApprovedOntologyAttribute {
-  if (left.confidence !== right.confidence) return left.confidence < right.confidence ? left : right;
-  if (left.evidenceIds.length !== right.evidenceIds.length) return left.evidenceIds.length < right.evidenceIds.length ? left : right;
-  return left.id.localeCompare(right.id) <= 0 ? right : left;
+  return compareAttributePreference(left, right) <= 0 ? right : left;
 }
 function validatePolicy(policy: OntologyCompilerPolicy): void {
   if (![policy.minimumConfidence, policy.lexicalDuplicateThreshold].every((value) => Number.isFinite(value) && value >= 0 && value <= 1)) throw new Error("ontology confidence and lexical thresholds must be within [0,1]");
