@@ -15,6 +15,7 @@ import { repairTools } from "./repair.stub.js";
 import { qboTools } from "./qbo.stub.js";
 import { approvalAuthorityTools } from "./approval-authority.stub.js";
 import { approvedActionTools } from "./approved-actions.stub.js";
+import { qboApprovalPromotionTools } from "./qbo-approval-promotion.stub.js";
 
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
@@ -27,6 +28,7 @@ const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...qboTools,
   // S7 canonical overrides. Legacy feature-local approval checks remain
   // unreachable compatibility code; every transport resolves through these.
+  ...qboApprovalPromotionTools,
   ...approvalAuthorityTools,
   ...approvedActionTools,
 };
