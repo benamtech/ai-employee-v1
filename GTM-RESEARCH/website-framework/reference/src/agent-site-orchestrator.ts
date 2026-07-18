@@ -2,7 +2,7 @@ import type { VectorSpaceIdentity } from "./benchmark.js";
 import { sha256 } from "./core.js";
 import { compileApprovedOntology, type AgentOntologyProposal, type ApprovedOntology, type OntologyCompilerPolicy } from "./ontology-discovery.js";
 import { compileOntologyGraph, type CompiledOntologyGraph, type OntologyGraphPolicy } from "./ontology-graph.js";
-import { compileOptimizedOpportunitySpace } from "./opportunity-space-optimized.js";
+import { compileProductionOpportunitySpace } from "./opportunity-space-production.js";
 import { DEFAULT_OPPORTUNITY_POLICY, type CompiledOpportunitySpace, type OpportunitySpacePolicy } from "./opportunity-space.js";
 import { normalizeProjectInput, type NormalizedProject, type ProjectInput } from "./project-input.js";
 import { compileSparseSiteGenerationPlan, type SparseSiteGenerationPolicy } from "./site-program-optimized.js";
@@ -42,7 +42,7 @@ export function prepareAgentSiteProgram(input: AgentSiteDiscoveryInput): Prepare
   assertValidationPass(ontology.validation);
   const graph = compileOntologyGraph(ontology, input.graphPolicy);
   assertValidationPass(graph.validation);
-  const opportunitySpace = compileOptimizedOpportunitySpace(
+  const opportunitySpace = compileProductionOpportunitySpace(
     project,
     ontology,
     graph,
