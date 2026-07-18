@@ -1,392 +1,249 @@
 # Hyper-Targeted Search-Distribution Framework
 
-Status: vector-native research compiler and deterministic UI scaffold; agent orchestration, generation-job compiler, proposal relevance, and field acceptance pending
+Status: agent-operated vector-native research framework with source-wired groundwork orchestration, deterministic compiler, and UI scaffold; real provider, relevance, browser, runtime, and field acceptance pending  
 Updated: 2026-07-17
 
 ## Product interface
 
-This framework is intended to be operated by a repository-aware coding agent such as Codex, Claude Code, Pi, or an equivalent agentic developer.
+The intended user interface is a repository-aware coding agent such as Codex, Claude Code, Pi, or an equivalent agentic developer.
 
 ```text
 user supplies
-  business/purpose + offers/services + audiences/locations + workflows/integrations
-  + proof/constraints + brand/assets/style + repository/deployment goals
+  business/purpose + offers/services + audiences/locations
+  + workflows/integrations + proof/constraints
+  + brand/assets/style + repository/deployment goals
         |
         v
-agentic developer
+coding agent
   inspect -> normalize -> research -> construct context/vector space
-  -> propose finite page corpus -> compile PageGenerationJobs
-  -> write content + build utilities/tasks + generate SEO/graph/UI state
-  -> compile -> validate -> repair -> preview -> emit -> measure
+  -> plan finite corpus -> compile PageGenerationJobs
+  -> research/write/build utility/SEO/graph/UI
+  -> validate -> repair -> preview -> emit -> measure
         |
         v
-complete website
-  hundreds or thousands of stable, evidence-bounded, hyper-targeted pages
-  + optional bounded public AI Employee utilities
+complete static-first website
+  stable hyper-targeted pages
+  + optional bounded public AI Employee task surfaces
 ```
 
-The coding agent is integral twice:
+The agent is integral at project formation and page generation. The vector system maps, scores, selects, constrains, and validates the page program; bounded agent passes write and build the accepted pages.
 
-1. **at project formation**, where it converts messy business/brand truth into governed source, context, ontology, vector, and corpus state; and
-2. **during page generation**, where it executes vector-derived generation jobs to research, write, build utilities, compose UI, create graph relationships, criticize, and repair every page.
+The user should not hand-author vectors, page matrices, jobs, packed IR, or renderer plans. `site-manifest.yaml` remains the compiled corpus authority downstream of the new orchestration layer.
 
-The vector system does not replace the agent. It gives the agent a mathematically mapped and validated page program.
-
-The user should not hand-author the manifest, page matrix, prototypes, semantic modules, generation jobs, or renderer plans. `site-manifest.yaml` is compiled project state and corpus authority generated and maintained by the agent under deterministic validation.
-
-Canonical operating documents:
-
-- `20-agent-operated-vector-site-generation-and-wasm.md` — product and execution model;
-- `21-vector-to-generation-job-compiler.md` — bridge from accepted vectors to actual page-writing/building agents;
-- `22-agent-operated-framework-workflow-validation-matrix.md` — feature-, workflow-, algorithm-, UX-, UI-, runtime-, and publication-level validation/pass/fail authority.
-
-## Expected user and developer workflow
-
-The internal system is complex, but operation must remain as legible as a modern framework lifecycle:
+## Current executable path
 
 ```text
-init -> inspect/doctor -> research -> plan -> generate -> dev/preview
--> validate -> build -> publish -> measure
-```
-
-The phases may be implemented as CLI commands, agent skills, scripts, or a combination. A user should always see current state, assumptions, candidate/accepted/rejected pages, evidence gaps, generation progress, validation failures, preview changes, publication scope, and rollback options.
-
-## Current reality
-
-Implemented and source-tested:
-
-- one unified declarative manifest;
-- namespaced and symbol-versioned HRR/VSA symbols;
-- typed evidence, claims, information objects, semantic modules, pages, and prototype sets;
-- every declared prototype preserved through `CompiledHyperVectorSpace`, `SiteSource`, `PageIR`, packed offsets/IDs/vectors, and agent context;
-- deterministic broad vector-space/site hashes under source collection reordering;
-- mechanically computed current-versus-proposed context coverage;
-- duplicate-similarity rejection;
-- Facility Location Complement Information as a batch/split research arm;
-- deterministic neutral and AMTECH static HTML/CSS emissions;
-- Tier-2 browser/CSS source checks and optional noncanonical R3F build;
-- synthetic scale fixtures through 2,000 pages;
-- scaffolds for Zig/Wasm, Cloudflare, resolver, field cohorts, and conversion metrics.
-
-Not implemented or accepted:
-
-- the agent-facing `ProjectInput -> generated manifest` orchestration layer;
-- source/evidence/asset intake and contradiction workflow;
-- independently governed context/demand corpus;
-- candidate coordinate compiler;
-- `PageGenerationJob` compiler and agent-pass runner;
-- preview/review UX expected of a framework;
-- explicit primary-prototype semantics in the manifest;
-- calibrated/independently judged proposal relevance;
-- typed semantic prospect-path edges;
-- public AI Employee task-surface IR;
-- production-safe resolver/Worker/Wasm/distribution paths;
-- browser visual/accessibility/Core Web Vitals acceptance;
-- a reviewed indexed 200–2,000-page corpus;
-- real search, citation, conversion, gross-profit, or revenue lift.
-
-Synthetic scale and green source CI prove compiler behavior only.
-
-## Why the vector system exists
-
-The possible combinations of prospect context, service, problem, role, stage, location, integration, constraint, proof requirement, topic, utility, and offer are much larger than the number of pages a site should publish.
-
-The vector information space is used to:
-
-1. represent coherent prospect situations and page compatibility regions;
-2. combine many attributes that conventional keyword maps keep separate;
-3. measure what the existing corpus already covers;
-4. identify uncovered but supported regions;
-5. reject redundant, noisy, stereotyped, thin, or prohibited combinations;
-6. select a finite maintainable page corpus;
-7. compile each accepted coordinate into a bounded page-generation job;
-8. provide page-specific context to content, utility, SEO, graph, and UI agents;
-9. preserve geometry through final emissions and measurement.
-
-The objective is not maximum page count. It is maximum useful context coverage per maintainable canonical node.
-
-A coordinate may contain attributes such as occupation, property status, household/life-stage constraints, pets, interests, location, schedule, software environment, task, risk, and desired outcome. An attribute belongs only when it materially changes useful content, utility, proof, workflow, interaction, or conversion. Protected/sensitive targeting, private history, named-person profiling, and unsupported stereotypes are prohibited.
-
-## How vectors become pages
-
-```text
-ProspectContextPrototypeSet
-× Intent
-× ServiceOrOffer
-× TopicOrProblem
-× WorkflowOrIntegration
-× InformationOrUtilityObject
-× EvidenceBoundary
-× DesiredOutcome
-× ConversionPath
-        |
-        v
-candidate PageCoordinate
-        |
-        v
-eligibility + relevance + distinctness + coverage + cost selection
-        |
-        v
-accepted PageGenerationJob
-        |
-        v
-agent research/content/utility/SEO/UI/critic/repair passes
-        |
-        v
-semantic project state -> SiteSource -> PageIR -> emissions
-```
-
-One page may serve multiple prototypes when the answer, utility, proof, and conversion path are materially the same. One prototype may create multiple pages when intent or information objects are genuinely different. The optimizer decides split versus consolidation; it must not emit the Cartesian product.
-
-## Why Wasm may exist
-
-Wasm is a candidate execution substrate for repeated data-parallel vector work across large agent generation and repair loops, not a requirement for serving pages.
-
-Strong candidate kernels:
-
-- binding, superposition, normalization, and dot products;
-- multi-prototype context/page scoring and top-k;
-- duplicate/cannibalization matrices;
-- facility-location and CSI marginal calculations;
-- clustering, validation sweeps, and packed-vector parity.
-
-Recommended controls:
-
-```text
-TypeScript typed-array oracle
-Zig native CLI
-Zig Wasm scalar
-Zig Wasm SIMD
-```
-
-Native Zig may be fastest inside a local coding-agent environment. Wasm's architectural value is a portable, sandboxed, deterministic kernel across CI, agent sandboxes, browsers, and compatible edge runtimes. It is retained only after realistic end-to-end benchmarks including startup, memory copying, serialization, binary size, and complete agent-loop wall time.
-
-Canonical pages remain complete static assets. Wasm must not be required for HTML delivery.
-
-## Single authority
-
-`site-manifest.yaml` controls the current compiled corpus state:
-
-- vector namespace, symbol version, dimensions, axes, and link policy;
-- proposal coverage policy and publication gates;
-- evidence, claims, information objects, modules, pages, and prototypes;
-- Request Mirror, UI, geometry, and field profiles;
-- current noindex state.
-
-It is generated/maintained by the agent from earlier-stage project authorities. It is not the product's manual entry form.
-
-HTML, schema, sitemaps, instruction projections, UI plans, agent context, generation prompts, and packed artifacts are emissions.
-
-## Framework model
-
-Read `18-vector-node-path-web-framework-model.md`.
-
-```text
-publication plane
-  independent contexts + vector chunks -> candidate stable nodes
-  -> coverage/distinctness/evidence review -> generation jobs -> canonical emissions
-
-navigation plane
-  stable nodes + typed semantic edges -> useful prospect/agent paths
-
-interaction plane
-  complete canonical page + explicit task
-  -> secure controls + streamed employee work
-  -> typed artifact + approval/proof
-```
-
-A vector chunk is a reusable situation, not a hidden person profile. Build-time cohort materialization is the core search-distribution mode. Optional visitor-time adaptation is finite, noncanonical, consented, low-risk, and may not change primary truth, evidence, pricing, limitations, or canonical intent.
-
-## Current compiler path
-
-```text
-site-manifest.yaml
--> namespace/version-bound symbols
--> all-prototype CompiledHyperVectorSpace
--> untyped vector-neighbor suggestions
--> evidence-bounded modules
--> SiteSource with all prototypes
--> PageIR with all prototypes
--> packed prototype offsets/IDs/vectors + primary alias + CSR page IDs
--> static/UI/agent emissions
-```
-
-The current compiler begins late in the intended product lifecycle. The missing orchestration spine is:
-
-```text
-ProjectInput + ledgers
+ProjectInput
+-> source/evidence/asset ledgers
 -> independent ContextCorpus
--> ontology/vector space
--> CandidatePageCoordinates
--> SelectedCorpusPlan
--> PageGenerationJobs
--> agent-generated semantic/utility/UI/task state
--> current manifest/compiler path
+-> frozen train/validation/test splits
+-> train-only isotonic compatibility calibration
+-> explicit-primary multi-prototype PageCoordinates
+-> typed eligibility before calibrated scoring
+-> budgeted composite SelectedCorpusPlan
+-> typed semantic page graph
+-> deterministic PageGenerationJobs
+-> ordered specialized-agent runner with bounded repair
+-> JavaScript-free framework preview
+-> existing manifest/SiteSource/PageIR/UI emissions
 ```
 
-### Primary alias limitation
+Controlling implementation authority: `23-groundwork-orchestration-implementation.md`.
 
-All prototypes survive. The legacy `pageVectors` alias still uses one ordered prototype. The manifest does not yet declare `primary_prototype_id`; authoritative multi-region retrieval must use packed prototype arrays.
+## Implemented and source-tested
 
-### Proposal coverage limitation
+- typed validation/pass/fail contracts with hard and soft severity;
+- deterministic business, brand, technical, goal, source, evidence, and asset ledgers;
+- independent-context provenance enforcement and assessor identities;
+- deterministic train/validation/test membership and split hashes;
+- Perfect/Good/Fair/Bad judgments with disagreement retention;
+- pool-adjacent-violators isotonic calibration with validation/test Brier, MAE, and ECE;
+- ineligible compatibility fixed at zero rather than shifted-cosine credit;
+- explicit primary prototype identity in the generated-coordinate path;
+- typed graph edges with rationale, provenance, eligibility, priority, and path queries;
+- candidate coordinates bound to intent, offer, topic, workflow, evidence, utility, outcome, and conversion;
+- calibrated facility-location corpus selection with inspectable information, rare-tail, and diversity components;
+- duplicate/cannibalization rejection reasons;
+- typed noindex `PageGenerationJob` objects;
+- provider-neutral agent executor, checkpoint hashes, source restrictions, bounded repair, and rejection;
+- static selected/rejected corpus preview with all validation reports;
+- operator commands for doctor, plan, validate, and preview;
+- existing namespaced/versioned HDC/VSA compiler, packed multi-prototype IR, neutral/AMTECH renderer, browser policy, and bounded R3F build.
 
-Admission computes baseline and proposed weighted context coverage, improving contexts, and existing-page similarity. This closes the prose-only defect mechanically.
+## Source map
 
-It is not yet an external relevance gate because:
+| Area | Primary source |
+|---|---|
+| Validation | `reference/src/validation-contracts.ts` |
+| Project intake and ledgers | `reference/src/project-input.ts` |
+| Context corpus and calibration | `reference/src/context-corpus.ts` |
+| Typed graph | `reference/src/typed-graph.ts` |
+| Candidate coordinates | `reference/src/page-coordinate.ts` |
+| Corpus selection | `reference/src/corpus-plan.ts` |
+| Generation jobs and runner | `reference/src/page-generation.ts` |
+| Preview UX | `reference/src/framework-preview.ts` |
+| Orchestration | `reference/src/framework-orchestrator.ts` |
+| Operator commands | `reference/scripts/framework-cli.mjs` |
+| End-to-end fixture | `reference/fixtures/orchestration-fixture.mjs` |
+| Tests | `reference/test/orchestration.test.mjs` |
+| Scientific/operational matrix | `22-agent-operated-framework-workflow-validation-matrix.md` |
 
-- proposal agents can supply their own context cases;
-- `relevance_label` is not yet used;
-- shifted cosine gives orthogonal vectors approximately `0.5` coverage;
-- thresholds are uncalibrated;
-- no independent graded train/validation/test collection exists.
+## Operator commands
 
-No real content cohort should be generated from this gate alone.
-
-### CSI boundary
-
-CSI is a batch-selection and train/validation/test splitting arm for preserving coherent head/tail structure while suppressing isolated noise. It is not the single-page admission oracle and remains based on a new 2026 preprint.
-
-## Public AI Employee relationship
-
-Product/interaction authority:
-
-- `../../mvp-build/docs/gtm/free-infrastructure-managed-workforce-strategy.md`
-- `../../mvp-build/docs/public-interaction-standard.md`
-- `../../mvp-build/docs/ux/05-generative-ui-frontier.md`
-
-A page such as “create a painting estimate with AI” should combine complete static content with a bounded task, secure controls, session streaming, typed output, approval/proof, fallback, and Start Free transition. The page-generation job may produce both the static page and the page-specific task contract. A shared generic chatbot with noun-swapped copy is not distinct page utility.
-
-## Validation model
-
-Every major feature and phase must expose:
-
-```text
-purpose/effect
-user-visible contract
-developer/agent contract
-simpler baseline
-validation vector
-pass vector
-fail vector
-current state and proof
-```
-
-`22-agent-operated-framework-workflow-validation-matrix.md` is the cross-cutting authority for:
-
-- agent interface and project intake;
-- independent context research;
-- ontology/vector identity and prototypes;
-- candidate generation, ranking, facility location, and CSI;
-- generation jobs and specialized agent passes;
-- content/evidence/graph/public-task/UI generation;
-- browser, R3F, Wasm, deterministic compilation, and preview;
-- developer/user experience;
-- publication, measurement, and memory.
-
-## Exact source proof
-
-Validated code head: `9ef48b97308e09d5a97f4978820255e3c8b53c7e`
-
-Workflow run: `29576487817`
-
-```text
-strict TypeScript build: pass
-Node tests: 22/22
-manifest emission: pass
-UI emission: pass
-browser resolution: pass
-R3F build: pass
-pages: 6
-indexable pages: 0
-packed prototypes: 7
-namespace: amtech-hyper-site-v1
-symbol version: 1
-build hash: ae16957209827c1fbbc295992ab0aceeaf648b250521b03695b4f663cf6d241a
-space hash: 934ac02b434b0d583c131a15bbff79492ea8e27ca13a5ea2d07367b4fa8b6978
-```
-
-This does not include agent orchestration, generation jobs, browser/accessibility, Zig/Wasm, Cloudflare, search, or commercial proof.
-
-## Current commands
+From `GTM-RESEARCH/website-framework/reference`:
 
 ```bash
-cd GTM-RESEARCH/website-framework/reference
 npm install
 npm test
+npm run framework:doctor
+npm run framework:plan
+npm run framework:validate
+npm run framework:preview
+npm run orchestration:check
 npm run manifest:emit
 npm run ui:emit
 npm run browser:check
 npm run ui:r3f:build
-npm run benchmark:scale
 ```
 
-These are research-package commands, not yet the target framework operator experience.
+The supplied fixture module proves the API. A real project module must supply approved `ProjectInput`, independent context cases, calibration observations, candidate seeds, selection policy, and an `AgentPassExecutor` adapter.
 
-## Target operator commands or equivalent agent skills
+## Validation model
+
+Every implemented feature records:
 
 ```text
-framework init
-framework doctor
-framework research
-framework plan
-framework generate
-framework dev
-framework validate
-framework build
-framework publish
-framework measure
+feature and workflow step
+algorithm choice
+user-visible effect
+developer/agent effect
+validation vector
+pass vector
+fail vector
+simpler baseline
+hard/soft severity
+measured findings and stable report hash
 ```
+
+New source-level attributes:
+
+```text
+ProjectInput and ledgers: 7
+Context and calibration: 4
+Typed graph: 3
+Coordinate, selection, job, runner, preview: 8
+Total: 22
+```
+
+These complement the broader 27-feature matrix in `22-agent-operated-framework-workflow-validation-matrix.md` and the existing compiler/UI validation authorities.
+
+## Exact source proof
+
+Validated source head before documentation: `ad3c81cfc202ba94f63f08b54649cfaaf71b00d7`  
+GitHub Actions run: `29624909676`
+
+```text
+30 tests
+30 pass
+0 fail
+
+manifest emission: pass
+UI emission: pass
+orchestration emission: pass
+framework validate: pass
+framework preview: pass
+browser policy: pass
+R3F build: pass
+artifact upload: pass
+```
+
+Groundwork fixture:
+
+```text
+contexts: 6 (2 train / 2 validation / 2 test)
+candidates: 3
+selected: 2
+rejected: 1 duplicate
+jobs completed: 2/2
+validation/test fixture coverage: 1.0 / 1.0
+preview hard failures: 0
+```
+
+The fixture proves deterministic wiring and rejection behavior. It does not prove real context relevance or SEO value.
+
+## Key pass/fail boundaries
+
+Pass:
+- project and source state is typed, provenance-bearing, and deterministic;
+- context acceptance is independent of the page-generation agent;
+- fitting uses train only and reports untouched validation/test metrics;
+- eligibility runs before similarity;
+- primary identity survives prototype ordering;
+- selected pages bind evidence and distinct utility;
+- redundant candidates are rejected with explicit reasons;
+- jobs are noindex, source-bound, reviewable, and repair-bounded;
+- preview exposes selected, rejected, failed, pending, and passed state;
+- canonical HTML remains static and runtime-independent.
+
+Fail:
+- an agent writes its own sole validation cases;
+- shifted cosine is treated as probability;
+- protected/private identity becomes a generation axis;
+- the Cartesian product becomes the page corpus;
+- a vector without evidence, utility, intent, or conversion becomes a page;
+- an untyped nearest-neighbor suggestion becomes a published link;
+- one unconstrained prompt publishes the site;
+- repair loops are unbounded;
+- rejected combinations disappear silently;
+- source tests are described as indexing, ranking, conversion, or revenue proof.
+
+## Research floor
+
+- Context-document compatibility and graded judgments: https://arxiv.org/abs/2309.05113
+- HDC/VSA structured representations: https://arxiv.org/abs/2112.15424
+- Complement Submodular Information: https://arxiv.org/abs/2605.24779
+- WebAssembly core/SIMD: https://www.w3.org/TR/wasm-core/
+- Cloudflare Wasm: https://developers.cloudflare.com/workers/runtime-apis/webassembly/
+- R3F performance: https://r3f.docs.pmnd.rs/advanced/scaling-performance
+
+These support evaluation and implementation arms. They do not prove search, writing, UI, or commercial superiority.
+
+## Still pending
+
+- arbitrary repository/site inspection and automatic `ProjectInput` generation;
+- real customer/search context collection and assessor tooling;
+- BM25, learned semantic, facets, and graph prefilter comparison inside orchestration;
+- provider adapters for Codex, Claude Code, Pi, or another agent;
+- transaction from successful agent outputs into canonical evidence/modules/pages/tasks;
+- migration of legacy manifest fixtures to explicit primary IDs and typed edges;
+- first-class public AI Employee task-surface IR;
+- browser screenshot/accessibility/Core Web Vitals acceptance;
+- native Zig versus Wasm scalar/SIMD full-loop benchmarks;
+- a reviewed indexed corpus and field search/commercial evidence.
 
 ## Read order
 
 1. root/scoped `identity.md`, `AGENTS.md`, and `CODEGRAPH.md`;
 2. this README;
-3. `memory/MEMORY.md`;
-4. newest immutable memory handoff;
-5. `20-agent-operated-vector-site-generation-and-wasm.md`;
+3. `memory/MEMORY.md` and newest immutable handoff;
+4. `23-groundwork-orchestration-implementation.md`;
+5. `22-agent-operated-framework-workflow-validation-matrix.md`;
 6. `21-vector-to-generation-job-compiler.md`;
-7. `22-agent-operated-framework-workflow-validation-matrix.md`;
+7. `20-agent-operated-vector-site-generation-and-wasm.md`;
 8. `18-vector-node-path-web-framework-model.md`;
 9. `19-vector-native-corrections-and-csi-validation.md`;
-10. comprehensive review and newest proof reports;
-11. `site-manifest.yaml`;
-12. `reference/README.md` and UI handoff;
-13. older numbered specifications for their domain.
+10. newest validation report;
+11. `site-manifest.yaml` and `reference/README.md`.
 
-## Research floor
-
-- Context relevance: https://arxiv.org/abs/2309.05113
-- HDC/VSA applications: https://arxiv.org/abs/2112.15424
-- Complement-aware batch selection: https://arxiv.org/abs/2605.24779
-- WebAssembly core/SIMD: https://www.w3.org/TR/wasm-core/
-- Cloudflare Wasm: https://developers.cloudflare.com/workers/runtime-apis/webassembly/
-- R3F scaling: https://r3f.docs.pmnd.rs/advanced/scaling-performance
-- Vite workflow: https://vite.dev/guide/
-- Next.js workflow: https://nextjs.org/docs/app/getting-started/installation
-- Astro workflow: https://docs.astro.build/en/install-and-setup/
-- Playwright user-facing testing: https://playwright.dev/docs/best-practices
-- Google AI content guidance: https://developers.google.com/search/docs/fundamentals/using-gen-ai-content
-- Google AI-search guidance: https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
-
-These justify evaluation designs, execution options, expected framework ergonomics, and external constraints—not ranking or commercial claims.
-
-## Immediate path
+## Next gate
 
 ```text
-ProjectInput/source/asset/evidence intake contracts
--> independent ContextCorpus and frozen split contracts
--> P0 primary-prototype semantics
--> P0 calibrated compatibility
--> P0 typed graph edges/node paths
--> candidate coordinate compiler and staged funnel
--> PageGenerationJob compiler
--> agent pass runner/checkpoints/repair loop
--> preview/review framework UX
--> TS vs Zig native vs Wasm scalar/SIMD benchmark harness
--> public employee task-surface contract
--> first 20–40 noindex agent-generated pages
+real repository/source ingestion adapters
+-> independent context collection and assessor workflow
+-> lexical + learned-semantic + facet + graph candidate prefilter
+-> provider-neutral agent adapter
+-> generated output -> unified manifest transaction
+-> first 20–40 real noindex pages
 -> browser/accessibility/performance validation
 -> separate matched field publication
 ```
-
-Green source CI is necessary but insufficient for page generation or publication.
