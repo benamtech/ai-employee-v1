@@ -13,6 +13,8 @@ import { stripeTools } from "./stripe.stub.js";
 import { eventTools } from "./events.stub.js";
 import { repairTools } from "./repair.stub.js";
 import { qboTools } from "./qbo.stub.js";
+import { approvalAuthorityTools } from "./approval-authority.stub.js";
+import { approvedActionTools } from "./approved-actions.stub.js";
 
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
@@ -23,6 +25,10 @@ const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...eventTools,
   ...repairTools,
   ...qboTools,
+  // S7 canonical overrides. Legacy feature-local approval checks remain
+  // unreachable compatibility code; every transport resolves through these.
+  ...approvalAuthorityTools,
+  ...approvedActionTools,
 };
 
 export function buildToolRegistry(): Map<ToolName, ToolHandler> {
