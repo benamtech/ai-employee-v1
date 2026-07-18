@@ -39,8 +39,9 @@ describe("S10.1 onboarding identity source contracts", () => {
   });
 
   it("binds employee activation to verified identity, canonical assignment, and accepted C3 receipt", async () => {
-    const [migration, registry, verifiedTool, ownerSession, template, generated] = await Promise.all([
+    const [migration, completionFix, registry, verifiedTool, ownerSession, template, generated] = await Promise.all([
       readFile(new URL("../../packages/db/migrations/0064_onboarding_identity_activation_authority.sql", import.meta.url), "utf8"),
+      readFile(new URL("../../packages/db/migrations/0065_onboarding_identity_completion_status_qualification.sql", import.meta.url), "utf8"),
       readFile(new URL("../../apps/manager/src/tools/registry.ts", import.meta.url), "utf8"),
       readFile(new URL("../../apps/manager/src/tools/verified-provisioning.stub.ts", import.meta.url), "utf8"),
       readFile(new URL("../../apps/manager/src/lib/owner-session.ts", import.meta.url), "utf8"),
@@ -54,6 +55,9 @@ describe("S10.1 onboarding identity source contracts", () => {
     expect(migration).toContain("complete_durable_command");
     expect(migration).toContain("employee_assignments");
     expect(migration).not.toMatch(/tax_id\s+text/i);
+    expect(completionFix).toContain("where oi.id = v_identity.id");
+    expect(completionFix).toContain("and oi.status = 'pending'");
+    expect(completionFix).toContain("oia_latest.status in ('requested','submitted')");
     expect(registry).toContain("...verifiedProvisioningTools");
     expect(verifiedTool).toContain("onboardingIdentityDecision");
     expect(verifiedTool).toContain('receipt_status: "accepted"');
