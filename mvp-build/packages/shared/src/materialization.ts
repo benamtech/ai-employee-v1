@@ -45,11 +45,15 @@ export interface ProofEnvelope {
   delivery_decision_id?: string | null;
   source_table?: string;
   source_id?: string;
+  /** S2/S3 receipt hook: every owner-facing consequential surface resolves through an assignment. */
+  assignment_id?: string | null;
 }
 
 export interface SurfaceEnvelope {
   id: string;
   account_id: string;
+  /** Authoritative assignment scope for owner/session/resource rendering. */
+  assignment_id?: string | null;
   employee_id?: string;
   kind:
     | "message"
@@ -77,6 +81,8 @@ export interface SurfaceEnvelope {
 export interface CapabilityGraphNode {
   id: string;
   account_id: string;
+  /** Assignment-scoped capability visibility; account_id is compatibility, not authority. */
+  assignment_id?: string | null;
   employee_id?: string;
   key: string;
   label: string;
@@ -94,6 +100,8 @@ export interface EmployeeEventStreamEvent {
   id: string;
   employee_id: string;
   account_id: string;
+  /** Stream cursor visibility is assignment-scoped; employee/account are not authorization. */
+  assignment_id?: string | null;
   created_at: string;
   event_name: string;
   cursor: { created_at: string; id: string };
