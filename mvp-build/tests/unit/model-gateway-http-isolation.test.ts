@@ -105,6 +105,11 @@ class FakeSupabase {
     const ensure = (table: string, row: Row) => {
       if (!this.rows(table).some((current) => current.id === row.id)) this.rows(table).push(row);
     };
+    ensure("employee_assignments", {
+      id: assignmentId,
+      account_id: accountId,
+      employee_principals: { employee_id: employeeId },
+    });
     ensure("commercial_relationships", {
       id: payerId,
       assignment_id: assignmentId,
