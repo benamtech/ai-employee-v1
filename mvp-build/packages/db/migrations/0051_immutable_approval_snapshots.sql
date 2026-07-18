@@ -87,7 +87,7 @@ begin
     raise exception 'approval_resource_not_found_or_wrong_assignment';
   end if;
   return v_snapshot;
-end
+end;
 $$;
 
 commit;
