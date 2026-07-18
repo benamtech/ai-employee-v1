@@ -1,0 +1,25 @@
+name: Export website framework
+
+on:
+  push:
+    branches:
+      - agent/export-website-framework-to-hyper-site
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package website framework
+        run: |
+          tar -C GTM-RESEARCH/website-framework -czf website-framework.tar.gz .
+      - name: Upload website framework
+        uses: actions/upload-artifact@v4
+        with:
+          name: website-framework-source
+          path: website-framework.tar.gz
+          if-no-files-found: error
+          retention-days: 1
