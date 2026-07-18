@@ -190,6 +190,7 @@ export function compilePageConceptProposals(
     for (const attribute of job.attributes) if (!expressed.has(attribute.id)) reasons.push(`missing required attribute ${attribute.id}`);
     const allowedEvidence = new Set(job.evidenceIds);
     const allowedSources = new Set(job.sourceIds);
+    if (proposal.evidenceIds.length === 0 || proposal.sourceIds.length === 0) reasons.push("evidence and source references are required");
     for (const id of proposal.evidenceIds) if (!allowedEvidence.has(id)) reasons.push(`undeclared evidence ${id}`);
     for (const id of proposal.sourceIds) if (!allowedSources.has(id)) reasons.push(`undeclared source ${id}`);
     if (!proposal.intent.trim() || !proposal.conversionPathId.trim()) reasons.push("intent and conversion path are required");
@@ -217,7 +218,7 @@ function proposalToSeed(job: PageConceptJob, proposal: PageConceptProposal, onto
   const attributeById = new Map(ontology.attributes.map((item) => [item.id, item]));
   const atoms: ManifestFeatureAtom[] = job.attributes.map((item) => {
     const attribute = required(attributeById, item.id);
-    return { dimension: attribute.dimension, value: attribute.id, source_id: proposal.sourceIds[0], provenance: "agent-page-concept-approved" };
+    return { dimension: attribute.dimension, value: attribute.id, source_id: proposal.sourceIds[0], provenance: "agent_proposed" };
   }).sort((left, right) => left.dimension.localeCompare(right.dimension) || left.value.localeCompare(right.value));
   const prototype: ManifestPrototype = { id: `${job.regionId}:primary`, feature_atoms: atoms };
   const anchorAttributes = job.attributes.filter((item) => item.anchorKind);
