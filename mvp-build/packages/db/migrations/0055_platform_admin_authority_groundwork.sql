@@ -79,8 +79,7 @@ create table if not exists platform_support_leases (
   revocation_reason text,
   approval_ref text,
   created_at timestamptz not null default now(),
-  check (expires_at > starts_at),
-  check (assignment_id is not null or employee_id is not null or account_id is not null)
+  check (expires_at > starts_at)
 );
 
 create index if not exists platform_support_leases_scope_idx
@@ -139,12 +138,15 @@ declare
   v_entry_hash text;
   v_row platform_admin_audit_chain%rowtype;
 begin
+  -- Serialize the chain head even when the table is empty; locking only the last
+  -- row cannot protect two concurrent first inserts.
+  perform pg_advisory_xact_lock(hashtext('platform_admin_audit_chain'));
+
   select chain.entry_hash
     into v_previous_hash
     from platform_admin_audit_chain chain
    order by chain.sequence_id desc
-   limit 1
-   for update;
+   limit 1;
 
   v_entry_hash := 'sha256:' || encode(digest(convert_to(
     concat_ws(E'\u001f',
@@ -197,6 +199,8 @@ revoke all on platform_principal_roles from anon, authenticated;
 revoke all on platform_admin_sessions from anon, authenticated;
 revoke all on platform_support_leases from anon, authenticated;
 revoke all on platform_admin_audit_chain from anon, authenticated;
+-- Even the service role must append the audit chain through the serializing RPC.
+revoke insert, update, delete on platform_admin_audit_chain from service_role;
 revoke all on function append_platform_admin_audit(text,text,text,text,text,text,text,text,text,text,text,text,text,jsonb)
   from public, anon, authenticated;
 grant execute on function append_platform_admin_audit(text,text,text,text,text,text,text,text,text,text,text,text,text,jsonb)
@@ -209,10 +213,10 @@ insert into assignment_scope_registry(
 )
 values (
   'platform:admin-support-groundwork',
-  'platform_admin',
+  'admin_support_action',
   'platform admin and scoped support authority',
   'Lane 8',
-  'platform_principal_session_lease',
+  'approved_platform_context',
   'C2',
   true,
   false,
