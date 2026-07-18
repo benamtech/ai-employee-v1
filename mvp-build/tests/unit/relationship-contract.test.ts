@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { LaborRelationshipSchema } from "../../packages/shared/src/labor-relationship-record.js";
 import {
   AssignmentPrincipalSchema,
   AuthorizationDecisionRequestSchema,
@@ -33,6 +34,64 @@ describe("labor relationship contract", () => {
     expect(EmployeeAssignmentSchema.parse(assignment)).toEqual(assignment);
     expect(assignment.employeePrincipalId).not.toBe(assignment.accountId);
     expect(assignment.id).not.toBe(assignment.employeePrincipalId);
+  });
+
+  it("represents employment, management, supervision, and assignment custody explicitly", () => {
+    for (const relationshipType of ["employment", "supervision"] as const) {
+      expect(
+        LaborRelationshipSchema.parse({
+          id: `rel_${relationshipType}`,
+          relationshipType,
+          subjectPrincipalId: "epr_alpha",
+          subjectPrincipalClass: "employee",
+          organizationId: "org_alpha",
+          accountId: "acct_alpha",
+          assignmentId: "asn_alpha",
+          role: relationshipType === "employment" ? "employee" : "supervised_employee",
+          status: "active",
+          startsAt: "2026-07-18T00:00:00.000Z",
+          endsAt: null,
+          policyVersion: "labor-v1",
+          provenance,
+        }).relationshipType,
+      ).toBe(relationshipType);
+    }
+
+    expect(
+      LaborRelationshipSchema.safeParse({
+        id: "rel_bademployment",
+        relationshipType: "employment",
+        subjectPrincipalId: "hpr_owner",
+        subjectPrincipalClass: "human",
+        organizationId: "org_alpha",
+        accountId: "acct_alpha",
+        assignmentId: null,
+        role: "employee",
+        status: "active",
+        startsAt: "2026-07-18T00:00:00.000Z",
+        endsAt: null,
+        policyVersion: "labor-v1",
+        provenance,
+      }).success,
+    ).toBe(false);
+
+    expect(
+      LaborRelationshipSchema.safeParse({
+        id: "rel_badcustody",
+        relationshipType: "custody",
+        subjectPrincipalId: "hpr_owner",
+        subjectPrincipalClass: "human",
+        organizationId: "org_alpha",
+        accountId: "acct_alpha",
+        assignmentId: null,
+        role: "connector_custodian",
+        status: "active",
+        startsAt: "2026-07-18T00:00:00.000Z",
+        endsAt: null,
+        policyVersion: "labor-v1",
+        provenance,
+      }).success,
+    ).toBe(false);
   });
 
   it("requires explicit assignment context for customer work", () => {
