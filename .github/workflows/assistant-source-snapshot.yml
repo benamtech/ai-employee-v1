@@ -6,6 +6,11 @@ on:
       - employee-production-tuesday
     paths:
       - ".github/workflows/assistant-source-snapshot.yml"
+  pull_request:
+    branches:
+      - research
+    paths:
+      - ".github/workflows/assistant-source-snapshot.yml"
 
 permissions:
   contents: read
