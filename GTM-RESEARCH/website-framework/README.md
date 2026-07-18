@@ -1,7 +1,32 @@
 # Hyper-Targeted Search-Distribution Framework
 
-Status: vector-native research compiler and deterministic UI scaffold; proposal relevance and field acceptance pending
+Status: vector-native research compiler and deterministic UI scaffold; agent orchestration, proposal relevance, and field acceptance pending
 Updated: 2026-07-17
+
+## Product interface
+
+This framework is intended to be operated by a repository-aware coding agent such as Codex, Claude Code, Pi, or an equivalent agentic developer.
+
+```text
+user supplies
+  business/purpose + offers/services + audiences/locations + workflows/integrations
+  + proof/constraints + brand/assets/style + repository/deployment goals
+        |
+        v
+agentic developer
+  inspect -> normalize -> research -> construct context/vector space
+  -> propose finite page corpus -> generate typed content/UI/task contracts
+  -> compile -> validate -> repair -> emit -> measure
+        |
+        v
+complete website
+  hundreds or thousands of stable, evidence-bounded, hyper-targeted pages
+  + optional bounded public AI Employee utilities
+```
+
+The user should not hand-author the manifest, page matrix, prototypes, semantic modules, or renderer plans. `site-manifest.yaml` is compiled project state and corpus authority generated and maintained by the agent under deterministic validation.
+
+Read `20-agent-operated-vector-site-generation-and-wasm.md` for the canonical usage and execution model.
 
 ## Current reality
 
@@ -22,6 +47,7 @@ Implemented and source-tested:
 
 Not implemented or accepted:
 
+- the agent-facing `ProjectInput -> generated manifest` orchestration layer;
 - explicit primary-prototype semantics in the manifest;
 - calibrated/independently judged proposal relevance;
 - typed semantic prospect-path edges;
@@ -32,6 +58,47 @@ Not implemented or accepted:
 - real search, citation, conversion, gross-profit, or revenue lift.
 
 Synthetic scale and green source CI prove compiler behavior only.
+
+## Why the vector system exists
+
+The possible combinations of service, problem, role, stage, location, integration, constraint, proof requirement, and offer are much larger than the number of pages a site should publish.
+
+The vector information space is used to:
+
+1. represent coherent prospect situations and page compatibility regions;
+2. measure what the existing corpus already covers;
+3. identify uncovered but supported regions;
+4. reject redundant, noisy, thin, or prohibited combinations;
+5. select a finite maintainable page corpus;
+6. generate bounded context packets for content and UI agents;
+7. preserve geometry through final emissions and measurement.
+
+The objective is not maximum page count. It is maximum useful context coverage per maintainable canonical node.
+
+## Why Wasm may exist
+
+Wasm is a candidate execution substrate for repeated data-parallel vector work, not a requirement for serving pages.
+
+Strong candidate kernels:
+
+- binding, superposition, normalization, and dot products;
+- multi-prototype context/page scoring and top-k;
+- duplicate/cannibalization matrices;
+- facility-location and CSI marginal calculations;
+- clustering, validation sweeps, and packed-vector parity.
+
+Recommended controls:
+
+```text
+TypeScript typed-array oracle
+Zig native CLI
+Zig Wasm scalar
+Zig Wasm SIMD
+```
+
+Native Zig may be fastest inside a local coding-agent environment. Wasm's architectural value is a portable, sandboxed, deterministic kernel across CI, agent sandboxes, browsers, and compatible edge runtimes. It is retained only after realistic end-to-end benchmarks.
+
+Canonical pages remain complete static assets. Wasm must not be required for HTML delivery.
 
 ## Single authority
 
@@ -51,14 +118,11 @@ Read `18-vector-node-path-web-framework-model.md`.
 
 ```text
 publication plane
-  independent context/demand cases + vector chunks
-  -> candidate stable nodes
-  -> coverage/distinctness/evidence review
-  -> canonical page emissions
+  independent contexts + vector chunks -> candidate stable nodes
+  -> coverage/distinctness/evidence review -> canonical page emissions
 
 navigation plane
-  stable nodes + typed semantic edges
-  -> useful prospect/agent paths
+  stable nodes + typed semantic edges -> useful prospect/agent paths
 
 interaction plane
   complete canonical page + explicit task
@@ -66,7 +130,7 @@ interaction plane
   -> typed artifact + approval/proof
 ```
 
-A vector chunk is a reusable situation, not a hidden person profile. A public employee surface is explicit-session work attached to a stable node, not a visitor-specific indexable URL.
+A vector chunk is a reusable situation, not a hidden person profile. Hyper-targeting should use non-sensitive prospect context such as industry, task, stage, integration, constraint, and location—not protected traits or covert identity inference.
 
 ## Current compiler path
 
@@ -90,15 +154,15 @@ All prototypes survive. The legacy `pageVectors` alias still uses one ordered pr
 
 Admission computes baseline and proposed weighted context coverage, improving contexts, and existing-page similarity. This closes the prose-only defect mechanically.
 
-It is not yet a valid external relevance gate because:
+It is not yet an external relevance gate because:
 
 - proposal agents can supply their own context cases;
 - `relevance_label` is not yet used;
-- the validated implementation maps cosine from `[-1,1]` to `[0,1]`, giving orthogonal vectors about `0.5` coverage;
+- shifted cosine gives orthogonal vectors approximately `0.5` coverage;
 - thresholds are uncalibrated;
 - no independent graded train/validation/test collection exists.
 
-Therefore no real content cohort should be generated from this gate alone.
+No real content cohort should be generated from this gate alone.
 
 ### CSI boundary
 
@@ -112,7 +176,7 @@ Product/interaction authority:
 - `../../mvp-build/docs/public-interaction-standard.md`
 - `../../mvp-build/docs/ux/05-generative-ui-frontier.md`
 
-A future “create an estimate with AI” or “use AI with QuickBooks” page should combine complete static content with a bounded task, secure controls, session streaming, typed artifact, approval/proof, fallback, and Start Free transition. That contract is not yet in the website IR.
+A page such as “create a painting estimate with AI” should combine complete static content with a bounded task, secure controls, session streaming, typed output, approval/proof, fallback, and Start Free transition. A shared generic chatbot with noun-swapped copy is not distinct page utility.
 
 ## Exact source proof
 
@@ -157,10 +221,10 @@ npm run benchmark:scale
 2. this README;
 3. `memory/MEMORY.md`;
 4. newest immutable memory handoff;
-5. `18-vector-node-path-web-framework-model.md`;
-6. `19-vector-native-corrections-and-csi-validation.md`;
-7. `validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md`;
-8. newest correction/UI report;
+5. `20-agent-operated-vector-site-generation-and-wasm.md`;
+6. `18-vector-node-path-web-framework-model.md`;
+7. `19-vector-native-corrections-and-csi-validation.md`;
+8. comprehensive review and newest proof reports;
 9. `site-manifest.yaml`;
 10. `reference/README.md` and UI handoff;
 11. older numbered specifications for their domain.
@@ -170,21 +234,27 @@ npm run benchmark:scale
 - Context relevance: https://arxiv.org/abs/2309.05113
 - HDC/VSA applications: https://arxiv.org/abs/2112.15424
 - Complement-aware batch selection: https://arxiv.org/abs/2605.24779
+- WebAssembly core/SIMD: https://www.w3.org/TR/wasm-core/
+- Cloudflare Wasm: https://developers.cloudflare.com/workers/runtime-apis/webassembly/
+- Google AI content guidance: https://developers.google.com/search/docs/fundamentals/using-gen-ai-content
+- Google AI-search guidance: https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
 
-These justify evaluation designs and research arms, not SEO or commercial claims.
+These justify evaluation designs, execution options, and external constraints—not ranking or commercial claims.
 
 ## Immediate path
 
 ```text
-P0 primary-prototype semantics
+ProjectInput/source/asset/evidence intake contracts
+-> agent orchestration and checkpoint lifecycle
+-> P0 primary-prototype semantics
 -> P0 calibrated compatibility + independent graded context corpus
 -> P0 typed graph edges/node paths
--> lexical + learned semantic + facets + graph + HRR + hybrid evaluation
--> facility-location + CSI split/batch comparison
+-> TS vs Zig native vs Wasm scalar/SIMD benchmark harness
+-> candidate funnel + facility-location/CSI corpus optimizer
+-> bounded content-generation and repair loop
 -> public employee task-surface contract
--> resolver/Wasm/distribution hardening
--> browser/accessibility validation
--> first 20–40 noindex proposals
+-> first 20–40 noindex agent-generated pages
+-> browser/accessibility/performance validation
 -> separate matched field publication
 ```
 
