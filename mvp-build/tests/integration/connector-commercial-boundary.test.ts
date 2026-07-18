@@ -39,64 +39,87 @@ async function seed(client: Client): Promise<void> {
       insert into accounts(id, display_name, slug) values
         ($1, 'S56 Matrix A', 's56-matrix-a'),
         ($2, 'S56 Matrix B', 's56-matrix-b')
-      on conflict (id) do update set display_name = excluded.display_name;
+      on conflict (id) do update set display_name = excluded.display_name
+    `, [ids.accountA, ids.accountB]);
 
+    await client.query(`
       insert into employees(id, account_id, name, status) values
-        ($3, $1, 'S56 Employee A', 'live'),
-        ($4, $2, 'S56 Employee B', 'live')
-      on conflict (id) do update set account_id = excluded.account_id, status = excluded.status;
+        ($1, $2, 'S56 Employee A', 'live'),
+        ($3, $4, 'S56 Employee B', 'live')
+      on conflict (id) do update set account_id = excluded.account_id, status = excluded.status
+    `, [ids.employeeA, ids.accountA, ids.employeeB, ids.accountB]);
 
+    await client.query(`
       insert into organizations(id, display_name, status) values
-        ($5, 'S56 Organization A', 'active'),
-        ($6, 'S56 Organization B', 'active')
-      on conflict (id) do update set status = excluded.status;
+        ($1, 'S56 Organization A', 'active'),
+        ($2, 'S56 Organization B', 'active')
+      on conflict (id) do update set status = excluded.status
+    `, [ids.organizationA, ids.organizationB]);
 
+    await client.query(`
       insert into organization_accounts(id, organization_id, account_id, status, starts_at, provenance) values
-        ('rel_s56_org_a', $5, $1, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb),
-        ('rel_s56_org_b', $6, $2, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb)
-      on conflict (id) do update set status = excluded.status;
+        ('rel_s56_org_a', $1, $2, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb),
+        ('rel_s56_org_b', $3, $4, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb)
+      on conflict (id) do update set status = excluded.status
+    `, [ids.organizationA, ids.accountA, ids.organizationB, ids.accountB]);
 
+    await client.query(`
       insert into employee_principals(id, employee_id, status) values
-        ($7, $3, 'active'),
-        ($8, $4, 'active')
-      on conflict (id) do update set status = excluded.status;
+        ($1, $2, 'active'),
+        ($3, $4, 'active')
+      on conflict (id) do update set status = excluded.status
+    `, [ids.principalA, ids.employeeA, ids.principalB, ids.employeeB]);
 
+    await client.query(`
       insert into employee_assignments(
         id, organization_id, account_id, employee_principal_id, status,
         starts_at, policy_version, provenance
       ) values
-        ($9, $5, $1, $7, 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb),
-        ($10, $6, $2, $8, 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb)
-      on conflict (id) do update set status = excluded.status, ends_at = null;
+        ($1, $2, $3, $4, 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb),
+        ($5, $6, $7, $8, 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb)
+      on conflict (id) do update set status = excluded.status, ends_at = null
+    `, [
+      ids.assignmentA, ids.organizationA, ids.accountA, ids.principalA,
+      ids.assignmentB, ids.organizationB, ids.accountB, ids.principalB,
+    ]);
 
+    await client.query(`
       insert into labor_relationships(
         id, relationship_type, subject_principal_id, subject_principal_class,
         organization_id, account_id, assignment_id, role, status,
         starts_at, policy_version, provenance
       ) values
-        ('rel_s56_employ_a', 'employment', $7, 'employee', $5, $1, $9, 'employee', 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb),
-        ('rel_s56_employ_b', 'employment', $8, 'employee', $6, $2, $10, 'employee', 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb)
-      on conflict (id) do update set status = excluded.status, ends_at = null;
+        ('rel_s56_employ_a', 'employment', $1, 'employee', $2, $3, $4, 'employee', 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb),
+        ('rel_s56_employ_b', 'employment', $5, 'employee', $6, $7, $8, 'employee', 'active', now() - interval '1 day', 'authorization-v1', '{"source":"explicit"}'::jsonb)
+      on conflict (id) do update set status = excluded.status, ends_at = null
+    `, [
+      ids.principalA, ids.organizationA, ids.accountA, ids.assignmentA,
+      ids.principalB, ids.organizationB, ids.accountB, ids.assignmentB,
+    ]);
 
+    await client.query(`
       insert into commercial_relationships(
         id, assignment_id, relationship_type, organization_id, account_id,
         status, starts_at, provenance
       ) values
-        ($11, $9, 'payer', $5, $1, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb),
-        ($12, $9, 'beneficiary', $6, $2, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb)
-      on conflict (id) do update set status = excluded.status, ends_at = null;
+        ($1, $2, 'payer', $3, $4, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb),
+        ($5, $2, 'beneficiary', $6, $7, 'active', now() - interval '1 day', '{"source":"explicit"}'::jsonb)
+      on conflict (id) do update set status = excluded.status, ends_at = null
+    `, [
+      ids.payer, ids.assignmentA, ids.organizationA, ids.accountA,
+      ids.beneficiary, ids.organizationB, ids.accountB,
+    ]);
 
+    await client.query(`
       insert into commercial_price_versions(
         id, assignment_id, policy_key, version, currency, unit,
         unit_price_minor, status, effective_at, provenance
-      ) values
-        ($13, $9, 'provider-cost-observation', 'test-1', 'USD', 'provider_request', 1, 'active', now() - interval '1 day', '{"source":"test"}'::jsonb)
-      on conflict (id) do update set status = excluded.status, expires_at = null;
-    `, [
-      ids.accountA, ids.accountB, ids.employeeA, ids.employeeB,
-      ids.organizationA, ids.organizationB, ids.principalA, ids.principalB,
-      ids.assignmentA, ids.assignmentB, ids.payer, ids.beneficiary, ids.price,
-    ]);
+      ) values(
+        $1, $2, 'provider-cost-observation', 'test-1', 'USD',
+        'provider_request', 1, 'active', now() - interval '1 day', '{"source":"test"}'::jsonb
+      )
+      on conflict (id) do update set status = excluded.status, expires_at = null
+    `, [ids.price, ids.assignmentA]);
 
     await client.query(`
       insert into model_gateway_credentials(
