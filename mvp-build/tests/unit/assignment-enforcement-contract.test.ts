@@ -264,7 +264,7 @@ describe("S4 SMS/channel resolver assignment enforcement", () => {
       now,
     });
     expect(wrongEmployee.ok).toBe(false);
-    if (!wrongEmployee.ok) expect(wrongEmployee.reason).toBe("wrong_assignment");
+    if (!wrongEmployee.ok) expect(wrongEmployee.reason).toBe("wrong_employee");
 
     const ok = resolveSmsChannelAssignment({
       twilio_signature_verified: true,
