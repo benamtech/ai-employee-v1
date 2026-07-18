@@ -11,6 +11,7 @@ on:
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
       - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
       - "mvp-build/packages/shared/src/assignment-resolver.ts"
+      - "mvp-build/packages/shared/src/approval-authority.ts"
       - "mvp-build/packages/shared/src/connector-custody.ts"
       - "mvp-build/packages/shared/src/commercial-attribution.ts"
       - "mvp-build/packages/shared/src/session-enforcer.ts"
@@ -19,11 +20,20 @@ on:
       - "mvp-build/packages/shared/src/work-stream.ts"
       - "mvp-build/packages/shared/src/ids.ts"
       - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/apps/manager/src/lib/approval-authority.ts"
+      - "mvp-build/apps/manager/src/lib/approval-promotion.ts"
+      - "mvp-build/apps/manager/src/lib/preview-links.ts"
+      - "mvp-build/apps/manager/src/lib/signed-links.ts"
+      - "mvp-build/apps/manager/src/tools/approval-authority.stub.ts"
+      - "mvp-build/apps/manager/src/tools/approved-actions.stub.ts"
+      - "mvp-build/apps/manager/src/tools/qbo-approval-promotion.stub.ts"
       - "mvp-build/tests/unit/relationship-contract.test.ts"
       - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
       - "mvp-build/tests/unit/assignment-enforcement-contract.test.ts"
+      - "mvp-build/tests/unit/approval-authority-contract.test.ts"
       - "mvp-build/tests/unit/connector-commercial-contract.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
+      - "mvp-build/tests/integration/approval-authority-boundary.test.ts"
       - "mvp-build/tests/integration/connector-commercial-boundary.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
@@ -36,6 +46,7 @@ on:
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
       - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
       - "mvp-build/packages/shared/src/assignment-resolver.ts"
+      - "mvp-build/packages/shared/src/approval-authority.ts"
       - "mvp-build/packages/shared/src/connector-custody.ts"
       - "mvp-build/packages/shared/src/commercial-attribution.ts"
       - "mvp-build/packages/shared/src/session-enforcer.ts"
@@ -44,11 +55,20 @@ on:
       - "mvp-build/packages/shared/src/work-stream.ts"
       - "mvp-build/packages/shared/src/ids.ts"
       - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/apps/manager/src/lib/approval-authority.ts"
+      - "mvp-build/apps/manager/src/lib/approval-promotion.ts"
+      - "mvp-build/apps/manager/src/lib/preview-links.ts"
+      - "mvp-build/apps/manager/src/lib/signed-links.ts"
+      - "mvp-build/apps/manager/src/tools/approval-authority.stub.ts"
+      - "mvp-build/apps/manager/src/tools/approved-actions.stub.ts"
+      - "mvp-build/apps/manager/src/tools/qbo-approval-promotion.stub.ts"
       - "mvp-build/tests/unit/relationship-contract.test.ts"
       - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
       - "mvp-build/tests/unit/assignment-enforcement-contract.test.ts"
+      - "mvp-build/tests/unit/approval-authority-contract.test.ts"
       - "mvp-build/tests/unit/connector-commercial-contract.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
+      - "mvp-build/tests/integration/approval-authority-boundary.test.ts"
       - "mvp-build/tests/integration/connector-commercial-boundary.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
@@ -85,6 +105,8 @@ jobs:
         run: npx vitest run tests/unit/authorization-scope-registry.test.ts
       - name: Assignment enforcement invariants
         run: npx vitest run tests/unit/assignment-enforcement-contract.test.ts
+      - name: S7 approval authority invariants
+        run: npx vitest run tests/unit/approval-authority-contract.test.ts
       - name: Connector and commercial contract invariants
         if: ${{ hashFiles('mvp-build/tests/unit/connector-commercial-contract.test.ts') != '' }}
         run: npx vitest run tests/unit/connector-commercial-contract.test.ts
@@ -92,7 +114,7 @@ jobs:
   relationship-matrix:
     needs: contract
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     services:
       postgres:
         image: postgres:17
@@ -166,6 +188,12 @@ jobs:
           set +e
           npx vitest run --config vitest.integration.config.ts tests/integration/relationship-authorization-matrix.test.ts 2>&1 | tee relationship-matrix.log
           exit ${PIPESTATUS[0]}
+      - name: Execute S7 approval authority PostgreSQL matrix
+        shell: bash
+        run: |
+          set +e
+          npx vitest run --config vitest.integration.config.ts tests/integration/approval-authority-boundary.test.ts 2>&1 | tee approval-authority-matrix.log
+          exit ${PIPESTATUS[0]}
       - name: Execute connector and commercial PostgreSQL matrix
         if: ${{ hashFiles('mvp-build/tests/integration/connector-commercial-boundary.test.ts') != '' }}
         shell: bash
@@ -180,5 +208,6 @@ jobs:
           name: relationship-matrix-${{ github.run_id }}
           path: |
             mvp-build/relationship-matrix.log
+            mvp-build/approval-authority-matrix.log
             mvp-build/connector-commercial-matrix.log
           if-no-files-found: warn
