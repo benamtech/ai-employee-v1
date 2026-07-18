@@ -34,17 +34,20 @@ export function bearerToken(value: string | null | undefined): string | null {
   return match?.[1]?.trim() || null;
 }
 
-async function resolveEmployeeAssignment(db: SupabaseClient, input: { account_id: string; employee_id: string }) {
-  const result = await db.rpc("amtech_default_assignment_for_employee_account", {
-    p_employee_id: input.employee_id,
-    p_account_id: input.account_id,
-  });
-  if (result.error) throw result.error;
-  const assignmentId = typeof result.data === "string"
-    ? result.data
-    : Array.isArray(result.data)
-      ? String(result.data[0] ?? "")
-      : String(result.data ?? "");
+async function resolveEmployeeAssignment(db: SupabaseClient, input: { account_id: string; employee_id: string; assignment_id?: string | null }) {
+  let assignmentId = String(input.assignment_id ?? "");
+  if (!assignmentId) {
+    const result = await db.rpc("amtech_default_assignment_for_employee_account", {
+      p_employee_id: input.employee_id,
+      p_account_id: input.account_id,
+    });
+    if (result.error) throw result.error;
+    assignmentId = typeof result.data === "string"
+      ? result.data
+      : Array.isArray(result.data)
+        ? String(result.data[0] ?? "")
+        : String(result.data ?? "");
+  }
   if (!assignmentId) throw new Error("mcp_assignment_not_unique");
   const assignment = await db.from("employee_assignments")
     .select("id,account_id,status,starts_at,ends_at,policy_version,employee_principals!inner(id,employee_id,status)")
@@ -71,7 +74,7 @@ async function resolveEmployeeAssignment(db: SupabaseClient, input: { account_id
 
 export async function mintEmployeeMcpCredential(
   db: SupabaseClient,
-  input: { account_id: string; employee_id: string; ttl_seconds?: number },
+  input: { account_id: string; employee_id: string; assignment_id?: string | null; ttl_seconds?: number },
 ): Promise<MintedEmployeeMcpCredential> {
   const authority = await resolveEmployeeAssignment(db, input);
   const token = `mcp_${randomBytes(32).toString("base64url")}`;
