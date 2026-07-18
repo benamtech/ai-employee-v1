@@ -13,6 +13,7 @@ import {
   enqueueVerifiedConnectorEvent,
   upsertAssignmentConnectorBinding,
 } from "../lib/connector-custody.js";
+import { executeDurableCommandEffect } from "../lib/durable-command-runtime.js";
 
 function resultPage(message: string, success: boolean): string {
   return `<!doctype html><html><head><meta charset="utf-8"><title>AMTECH</title></head>` +
@@ -156,22 +157,45 @@ export async function processQuickbooksAmbientEvent(db: SupabaseClient, inbox: A
   if (binding.error) throw binding.error;
   const connectorId = String(binding.data?.connector_account_id ?? "");
   if (!connectorId) throw new AmbientWaitingForBindingError("quickbooks_connector_account_missing");
-  const result = await recordAndDeliverQboEvent(db, change, {
-    connector_id: connectorId,
+
+  const execution = await executeDurableCommandEffect<Record<string, unknown>>(db, {
     assignment_id: scoped.assignment_id,
-    account_id: inbox.account_id,
-    employee_id: inbox.employee_id,
-  });
-  if (!result.matched) throw new AmbientWaitingForBindingError("quickbooks_realm_waiting_for_binding");
-  return {
-    ...result,
-    assignment_id: scoped.assignment_id,
-    connector_binding_id: scoped.connector_binding_id,
     command_id: scoped.command_id,
-    realm_id: change.realm_id,
-    entity_type: change.entity_type,
-    entity_id: change.entity_id,
-  };
+    effect_key: `quickbooks:process:${inbox.inbox_id}`,
+    provider: "manager",
+    operation: "quickbooks.entity.process",
+    capability_class: "consumer_dedupe",
+    request: {
+      inbox_id: inbox.inbox_id,
+      connector_binding_id: scoped.connector_binding_id,
+      connector_id: connectorId,
+      change,
+    },
+    apply: async () => {
+      const result = await recordAndDeliverQboEvent(db, change, {
+        connector_id: connectorId,
+        assignment_id: scoped.assignment_id!,
+        account_id: inbox.account_id!,
+        employee_id: inbox.employee_id!,
+      });
+      if (!result.matched) throw new AmbientWaitingForBindingError("quickbooks_realm_waiting_for_binding");
+      const response = {
+        ...result,
+        assignment_id: scoped.assignment_id,
+        connector_binding_id: scoped.connector_binding_id,
+        command_id: scoped.command_id,
+        realm_id: change.realm_id,
+        entity_type: change.entity_type,
+        entity_id: change.entity_id,
+      };
+      return {
+        result: response,
+        provider_receipt_id: `ambient:${inbox.inbox_id}`,
+        evidence: { inbox_id: inbox.inbox_id, connector_id: connectorId },
+      };
+    },
+  });
+  return { ...execution.result, c3_replayed: execution.replayed, effect_receipt_id: execution.receipt_id };
 }
 
 export function registerQuickbooksWebhooks(app: Hono): void {
