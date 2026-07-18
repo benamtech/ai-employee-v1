@@ -3,7 +3,7 @@
 format: TOON-oriented Markdown  
 status: active  
 scope: GTM-RESEARCH/website-framework  
-updated_at: 2026-07-18T00:55:00-04:00
+updated_at: 2026-07-18T01:05:00-04:00
 
 ## protocol
 
@@ -23,10 +23,10 @@ rules[8]:
 ## current
 
 state{branch,pr,status,latest_validated_code_head,workflow_run,tests}:
-  agent/ui-metaprogramming-pass-1,17,"draft; agent ontology + 10k site-program + academic crosswalk source-pass; real ingestion/providers/content/browser/search/field pending",f6d726d08491c63f8aac3e8de28ddb84edaa93a1,29629423243,"46/46"
+  agent/ui-metaprogramming-pass-1,17,"draft; agent ontology + 10k site-program + academic/graph-method crosswalk source-pass; real ingestion/providers/content/browser/search/field pending",8fc397a38381474734cfe6e411d1f0bf81b31349,29631422126,"46/46"
 
 note:
-  "latest_validated_code_head includes the comprehensive source/code/SEO review and passed exact-head CI; subsequent academic-crosswalk and memory-only commits require normal final-head CI confirmation"
+  "latest validated head passed exact-head CI; graph-learning triage documentation commits require normal final-head CI confirmation"
 
 job_boundary:
   "one job is one finite full-site creation run with the declared minimum page-region jobs and batched agent/API work; it is not request-time serving or an always-on VPS"
@@ -38,12 +38,13 @@ pipeline:
   "ProjectInput -> AgentOntologyProposal -> ApprovedOntology -> sparse ontology graph/constraints -> ProductionOpportunitySpace -> SiteGenerationPlan -> PageConceptProposals -> CandidatePageSeeds -> existing PageCoordinate/SelectedCorpusPlan/PageGenerationJob/manifest/PageIR/UI compiler"
 
 research_boundary:
-  "external/generated bibliography is a lead list; exact primary source, applicability, simpler baseline, validation vector, and measured result are required before a claim becomes framework authority"
+  "external/generated bibliography is a lead list; exact primary source, problem-class applicability, simpler baseline, validation vector, and measured result are required before a claim becomes framework authority"
 
 ## handoffs
 
-handoffs[12]{at,file,status,scope}:
-  2026-07-18T00:55:00-04:00,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,current,"verified research; external harness; structured generation; Wasm boundary"
+handoffs[13]{at,file,status,scope}:
+  2026-07-18T01:05:00-04:00,2026-07-18-0105-graph-learning-paper-triage.md,current,"verified WWW 2026 graph papers; learned-method promotion gates; no model promotion"
+  2026-07-18T00:55:00-04:00,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,current-foundation,"verified research; external harness; structured generation; Wasm boundary"
   2026-07-17T23:40:00-04:00,2026-07-17-agent-ontology-10k-site-program.md,current-foundation,"agent-discovered ontology; sparse 10k planning; Wasm decision"
   2026-07-17T21:20:00-04:00,2026-07-17-2120-groundwork-orchestration-implementation.md,current-foundation,"implemented orchestration spine; preview/operator UX"
   2026-07-17T20:45:00-04:00,2026-07-17-2045-agent-generation-workflow-ci-closure.md,historical-authority,"pre-implementation workflow authority"
@@ -58,7 +59,7 @@ handoffs[12]{at,file,status,scope}:
 
 ## authority
 
-read_order[18]{order,file,role}:
+read_order[21]{order,file,role}:
   1,../../identity.md,"root identity"
   2,../identity.md,"scope identity"
   3,../../CODEGRAPH.md,"root map"
@@ -66,17 +67,20 @@ read_order[18]{order,file,role}:
   5,../CODEGRAPH.md,"current source graph"
   6,../README.md,"current reality"
   7,MEMORY.md,"durable current state"
-  8,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,"latest immutable handoff"
-  9,../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md,"verified research crosswalk"
-  10,../validation/reports/2026-07-18-academic-crosswalk-harness-and-acceleration.md,"research validation report"
-  11,../validation/reports/2026-07-18-comprehensive-framework-code-seo-performance-review.md,"deep current code/SEO/performance review"
-  12,../24-agent-discovered-ontology-and-10k-site-program.md,"current implementation/research authority"
-  13,../validation/reports/2026-07-17-agent-ontology-10k-site-program.md,"exact source proof and boundaries"
-  14,../23-groundwork-orchestration-implementation.md,"groundwork implementation authority"
-  15,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
-  16,../21-vector-to-generation-job-compiler.md,"generation-job model"
-  17,../20-agent-operated-vector-site-generation-and-wasm.md,"historical product/Wasm model"
-  18,../site-manifest.yaml,"downstream compiled corpus authority"
+  8,2026-07-18-0105-graph-learning-paper-triage.md,"latest immutable handoff"
+  9,../26-graph-learning-paper-triage-and-promotion-gates.md,"learned graph method research authority"
+  10,../validation/reports/2026-07-18-graph-learning-paper-triage.md,"graph-method validation report"
+  11,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,"academic/harness/acceleration handoff"
+  12,../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md,"verified research crosswalk"
+  13,../validation/reports/2026-07-18-academic-crosswalk-harness-and-acceleration.md,"research validation report"
+  14,../validation/reports/2026-07-18-comprehensive-framework-code-seo-performance-review.md,"deep current code/SEO/performance review"
+  15,../24-agent-discovered-ontology-and-10k-site-program.md,"current implementation/research authority"
+  16,../validation/reports/2026-07-17-agent-ontology-10k-site-program.md,"exact source proof and boundaries"
+  17,../23-groundwork-orchestration-implementation.md,"groundwork implementation authority"
+  18,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
+  19,../21-vector-to-generation-job-compiler.md,"generation-job model"
+  20,../20-agent-operated-vector-site-generation-and-wasm.md,"historical product/Wasm model"
+  21,../site-manifest.yaml,"downstream compiled corpus authority"
 
 ## source
 
@@ -138,10 +142,22 @@ research_decisions[8]{id,decision,ref}:
   R07,"CSI waits for frozen real hidden-slice evaluation",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
   R08,"Wasm remains benchmark-gated after algorithm-first optimization",../reference/src/acceleration-decision.ts
 
+graph_research_decisions[10]{id,decision,ref}:
+  GL01,"graph-paper existence does not establish framework applicability",../26-graph-learning-paper-triage-and-promotion-gates.md
+  GL02,"learned graph methods require exact problem-class match",../26-graph-learning-paper-triage-and-promotion-gates.md
+  GL03,"learned clustering cannot define customer/page truth without external labels",../26-graph-learning-paper-triage-and-promotion-gates.md
+  GL04,"graph transformers/foundation models require many reviewed project graphs and held-out tasks",../26-graph-learning-paper-triage-and-promotion-gates.md
+  GL05,"positive-unlabeled learning requires accepted positives and genuinely unlabeled candidates",../26-graph-learning-paper-triage-and-promotion-gates.md
+  GL06,"temporal/anomaly models require versioned histories and independent drift labels",../26-graph-learning-paper-triage-and-promotion-gates.md
+  GL07,"VSAL is a possible operator-visualization lead only",../26-graph-learning-paper-triage-and-promotion-gates.md
+  GL08,"no graph-learning model promoted from the WWW 2026 paper set",../validation/reports/2026-07-18-graph-learning-paper-triage.md
+  GL09,"graph-model selection and Wasm target selection are independent",../reference/src/acceleration-decision.ts
+  GL10,"real ingestion/providers/context/content remain prerequisites to learned-model comparison",../26-graph-learning-paper-triage-and-promotion-gates.md
+
 ## proof
 
 proof{source_head,source_run,latest_exact_head,latest_run,tests,stages}:
-  dcc8beded51290f8084a421996c51c18b2afed83,29628832989,f6d726d08491c63f8aac3e8de28ddb84edaa93a1,29629423243,"46/46","TypeScript; manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
+  dcc8beded51290f8084a421996c51c18b2afed83,29628832989,8fc397a38381474734cfe6e411d1f0bf81b31349,29631422126,"46/46","TypeScript; manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
 
 scale{candidates,selected,batches,packed_bytes,total_ms}:
   15000,10000,400,2560000,5284.510
@@ -190,7 +206,7 @@ p1[9]{id,item}:
   zig-wasm-bridge-inclusive-kernel-benchmark
   matched-field-publication
 
-not_claimed[14]:
+not_claimed[18]:
   external-relevance
   production-agent-generation
   reviewed-10000-page-corpus
@@ -200,6 +216,10 @@ not_claimed[14]:
   conversion-or-revenue-lift
   wasm-performance-win
   leiden-clustering-embedding-ann-superiority
+  graph-transformer-or-foundation-model-superiority
+  learned-clustering-equals-market-segments
+  positive-unlabeled-page-eligibility
+  anomaly-model-drift-value
   blackwell-cost-throughput
   browser-beauty-acceptance
   sglang-provider-superiority
@@ -216,5 +236,5 @@ next[9]{order,task,gate}:
   5,"canonical transaction","atomic successful output -> evidence/modules/tasks/pages"
   6,"first cohort","100-500 real noindex pages with information-gain/cannibalization review"
   7,"scale emissions","10000 complete static pages + browser/accessibility/performance acceptance"
-  8,"50k/100k profile","measured need before ANN/native/Wasm/GPU"
+  8,"50k/100k profile and learned-graph comparisons","measured need before ANN/native/Wasm/GPU/model promotion"
   9,"field gates","matched publication then search/commercial measurement"
