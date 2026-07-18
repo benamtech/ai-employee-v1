@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { ID_PREFIX, newId } from "@amtech/shared";
 import type { SupabaseClient } from "@amtech/db";
+import { sealSecret } from "./secrets.js";
 
 const AUDIENCE = "/manager/mcp";
 
@@ -47,6 +48,7 @@ export async function mintEmployeeMcpCredential(
     employee_id: input.employee_id,
     token_hash: tokenHash,
     token_prefix: tokenPrefix,
+    token_secret_ref: sealSecret(token),
     audience: AUDIENCE,
     status: "active",
     expires_at: expiresAt,
