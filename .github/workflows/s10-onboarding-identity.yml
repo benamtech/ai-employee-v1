@@ -1,0 +1,151 @@
+name: S10.1 Onboarding Identity Authority
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - employee-production-tuesday
+    paths:
+      - "mvp-build/packages/shared/src/onboarding-identity.ts"
+      - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/packages/db/migrations/0064_onboarding_identity_activation_authority.sql"
+      - "mvp-build/apps/manager/src/lib/onboarding-identity*.ts"
+      - "mvp-build/apps/manager/src/lib/owner-session.ts"
+      - "mvp-build/apps/manager/src/tools/verified-provisioning.stub.ts"
+      - "mvp-build/apps/manager/src/tools/registry.ts"
+      - "mvp-build/apps/manager/src/server.template.ts"
+      - "mvp-build/apps/manager/src/server.generated.ts"
+      - "mvp-build/apps/manager/scripts/generate-production-server.mjs"
+      - "mvp-build/tests/unit/onboarding-identity-contract.test.ts"
+      - "mvp-build/tests/integration/onboarding-identity-boundary.test.ts"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/s10-onboarding-identity.yml"
+  pull_request:
+    branches:
+      - research
+    paths:
+      - "mvp-build/packages/shared/src/onboarding-identity.ts"
+      - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/packages/db/migrations/0064_onboarding_identity_activation_authority.sql"
+      - "mvp-build/apps/manager/src/lib/onboarding-identity*.ts"
+      - "mvp-build/apps/manager/src/lib/owner-session.ts"
+      - "mvp-build/apps/manager/src/tools/verified-provisioning.stub.ts"
+      - "mvp-build/apps/manager/src/tools/registry.ts"
+      - "mvp-build/apps/manager/src/server.template.ts"
+      - "mvp-build/apps/manager/src/server.generated.ts"
+      - "mvp-build/apps/manager/scripts/generate-production-server.mjs"
+      - "mvp-build/tests/unit/onboarding-identity-contract.test.ts"
+      - "mvp-build/tests/integration/onboarding-identity-boundary.test.ts"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/s10-onboarding-identity.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: s10-onboarding-identity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Generate canonical Manager source
+        run: npm run generate:production-sources
+      - name: Typecheck and build shared/database contracts
+        run: |
+          npm run typecheck --workspace @amtech/shared
+          npm run build --workspace @amtech/shared
+          npm run typecheck --workspace @amtech/db
+          npm run build --workspace @amtech/db
+      - name: Typecheck Manager control-plane boundary
+        run: npm run typecheck --workspace @amtech/manager
+      - name: Run S10.1 source contracts
+        run: npm run test:s10-onboarding
+
+  postgres-boundary:
+    needs: source-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: amtech_s10_onboarding
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d amtech_s10_onboarding"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_s10_onboarding
+      STAGING_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_s10_onboarding
+      PGPASSWORD: postgres
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Bootstrap Supabase-compatible roles and schemas
+        run: |
+          psql -h 127.0.0.1 -U postgres -d amtech_s10_onboarding -v ON_ERROR_STOP=1 <<'SQL'
+          do $$ begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+          end $$;
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create or replace function auth.role() returns text language sql stable as $$ select current_user::text $$;
+          create schema if not exists storage;
+          create table if not exists storage.buckets (
+            id text primary key,
+            name text not null unique,
+            owner uuid,
+            public boolean not null default false,
+            file_size_limit bigint,
+            allowed_mime_types text[],
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          create table if not exists storage.objects (
+            id uuid primary key default gen_random_uuid(),
+            bucket_id text references storage.buckets(id),
+            name text not null,
+            owner uuid,
+            metadata jsonb,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now(),
+            last_accessed_at timestamptz not null default now(),
+            unique(bucket_id, name)
+          );
+          SQL
+      - name: Apply full forward migration ledger
+        run: npm run db:migrate
+      - name: Run S10.1 onboarding identity and activation matrix
+        run: npx vitest run --config vitest.integration.config.ts tests/integration/onboarding-identity-boundary.test.ts
