@@ -74,6 +74,16 @@ export interface RejectedOntologyAttribute {
   reasons: readonly string[];
 }
 
+export interface RejectedOntologyRelation {
+  id: string;
+  reasons: readonly string[];
+}
+
+export interface RejectedOntologyObservation {
+  id: string;
+  reasons: readonly string[];
+}
+
 export interface ApprovedOntology {
   id: string;
   version: string;
@@ -82,7 +92,9 @@ export interface ApprovedOntology {
   attributes: readonly ApprovedOntologyAttribute[];
   rejectedAttributes: readonly RejectedOntologyAttribute[];
   relations: readonly OntologyRelationProposal[];
+  rejectedRelations: readonly RejectedOntologyRelation[];
   observations: readonly OntologyObservationProposal[];
+  rejectedObservations: readonly RejectedOntologyObservation[];
   dimensions: Readonly<Record<string, readonly string[]>>;
   lexicalIndex: SparseLexicalIndex;
   ontologyHash: string;
@@ -94,9 +106,9 @@ export const ONTOLOGY_VALIDATION: readonly ValidationAttribute[] = [
   { id: "ontology.dimensions", feature: "Discovered dimension normalization", workflowStep: "discover-ontology", algorithmChoice: "agent dimension hints normalized into governed dimensions", userEffect: "the framework discovers prospect and business dimensions from supplied truth rather than requiring the user to author a matrix", developerEffect: "later vector roles are deterministic and inspectable", validationVector: ["non-empty dimension", "one normalized label per dimension", "anchor coverage"], passVector: ["every approved attribute has one dimension", "at least one business anchor"], failVector: ["user must hand-author vector axes", "empty dimension", "duplicate value in one dimension"], simplerBaseline: "fixed global schema", severity: "hard" },
   { id: "ontology.materiality", feature: "Page-changing materiality", workflowStep: "discover-ontology", algorithmChoice: "explicit material-effect taxonomy", userEffect: "attributes survive only when they can change the answer, workflow, proof, utility, conversion, vocabulary, or UI", developerEffect: "page generation cannot use cosmetic demographics as filler", validationVector: ["material effects", "confidence", "anchor kind"], passVector: ["minimum material effect count", "business anchors retained"], failVector: ["stereotype-only attribute", "zero page effect", "confidence below floor"], simplerBaseline: "agent intuition only", severity: "hard" },
   { id: "ontology.safety", feature: "Targeting safety boundary", workflowStep: "discover-ontology", algorithmChoice: "sensitivity classes plus reviewer gate", userEffect: "private, protected, or covertly inferred traits do not become public targeting axes", developerEffect: "unsafe combinations fail before vector construction", validationVector: ["sensitivity", "public-targeting flag", "review approval", "material effects"], passVector: ["prohibited sensitivities rejected", "demographic/lifestyle attributes explicitly approved and materially justified"], failVector: ["protected/private targeting", "fingerprint-derived identity", "unreviewed demographic axis"], simplerBaseline: "allow every agent suggestion", severity: "hard" },
-  { id: "ontology.lexical", feature: "Sparse lexical baseline", workflowStep: "compile-ontology", algorithmChoice: "tokenization + TF-IDF cosine + BM25", userEffect: "obvious duplicate and related concepts are inspectable without relying on an opaque embedding model", developerEffect: "learned semantic and VSA arms have a deterministic baseline", validationVector: ["tokenization", "IDF", "neighbor list", "source-order determinism"], passVector: ["stable lexical index", "near duplicates flagged within dimension"], failVector: ["embedding-only ontology", "duplicate labels survive", "order-dependent vocabulary"], simplerBaseline: "lowercased string equality", severity: "hard" },
-  { id: "ontology.relations", feature: "Evidence-bound ontology relations", workflowStep: "compile-ontology", algorithmChoice: "typed relation graph", userEffect: "compatibility, requirements, exclusions, hierarchy, and offer/topic/workflow relationships remain explainable", developerEffect: "candidate generation uses explicit edge semantics instead of model intuition alone", validationVector: ["known endpoints", "relation type", "weight", "rationale", "sources/evidence"], passVector: ["all edges resolve", "exclusion and requirement state is explicit"], failVector: ["unknown endpoint", "untyped edge", "evidence-free compatibility"], simplerBaseline: "cosine-only graph", severity: "hard" },
-  { id: "ontology.observations", feature: "Small object-attribute evidence table", workflowStep: "compile-ontology", algorithmChoice: "weighted observations for co-occurrence and closed-conjunction seeds", userEffect: "candidate combinations are grounded in observed or researched situations", developerEffect: "frequent/closed-itemset and graph controls have a deterministic input table", validationVector: ["known attributes", "source/evidence", "positive weight", "minimum width"], passVector: ["all observations resolve", "at least one observation"], failVector: ["combination space has no supporting objects", "unknown attribute", "zero-weight observation"], simplerBaseline: "unrestricted Cartesian product", severity: "hard" },
+  { id: "ontology.lexical", feature: "Sparse lexical baseline", workflowStep: "compile-ontology", algorithmChoice: "label-gated TF-IDF cosine plus BM25", userEffect: "obvious duplicate and related concepts are inspectable without relying on an opaque embedding model", developerEffect: "learned semantic and VSA arms have a deterministic baseline without collapsing distinct labels that share boilerplate descriptions", validationVector: ["tokenization", "label overlap", "IDF", "neighbor list", "source-order determinism"], passVector: ["stable lexical index", "near duplicates require label-level evidence"], failVector: ["embedding-only ontology", "description boilerplate collapses distinct industries", "order-dependent vocabulary"], simplerBaseline: "lowercased string equality", severity: "hard" },
+  { id: "ontology.relations", feature: "Evidence-bound ontology relations", workflowStep: "compile-ontology", algorithmChoice: "typed relation graph with explicit rejected-edge ledger", userEffect: "compatibility, requirements, exclusions, hierarchy, and offer/topic/workflow relationships remain explainable", developerEffect: "candidate generation uses explicit edge semantics instead of model intuition alone", validationVector: ["known endpoints", "relation type", "weight", "rationale", "sources/evidence", "rejected relations"], passVector: ["all accepted edges resolve", "invalid edges are preserved as rejected findings"], failVector: ["unknown endpoint crashes the ontology", "untyped edge", "evidence-free compatibility"], simplerBaseline: "cosine-only graph", severity: "hard" },
+  { id: "ontology.observations", feature: "Small object-attribute evidence table", workflowStep: "compile-ontology", algorithmChoice: "weighted observations for co-occurrence and closed-conjunction seeds with rejected-observation ledger", userEffect: "candidate combinations are grounded in observed or researched situations", developerEffect: "frequent/closed-itemset and graph controls have a deterministic input table", validationVector: ["known attributes", "source/evidence", "positive weight", "minimum width", "rejected observations"], passVector: ["all accepted observations resolve", "at least one observation"], failVector: ["combination space has no supporting objects", "unknown attribute silently removed", "zero-weight observation"], simplerBaseline: "unrestricted Cartesian product", severity: "hard" },
 ];
 
 export const DEFAULT_ONTOLOGY_POLICY: OntologyCompilerPolicy = {
@@ -153,18 +165,18 @@ export function compileApprovedOntology(
     exactFiltered.push(item);
   }
 
-  const preliminaryIndex = buildSparseLexicalIndex(exactFiltered.map((item) => ({ id: item.id, text: `${item.label} ${item.description} ${item.dimension} ${item.materialEffects.join(" ")}` })));
+  const preliminaryIndex = buildSparseLexicalIndex(exactFiltered.map((item) => ({ id: item.id, text: `${item.label} ${item.dimension}` })));
   const lexicalRejected = new Set<string>();
   for (const item of exactFiltered) {
     if (lexicalRejected.has(item.id)) continue;
     for (const neighbor of lexicalNeighbors(preliminaryIndex, item.id, policy.lexicalNeighborLimit)) {
       if (neighbor.cosine < policy.lexicalDuplicateThreshold) continue;
       const other = exactFiltered.find((candidate) => candidate.id === neighbor.documentId);
-      if (!other || other.dimension !== item.dimension || lexicalRejected.has(other.id)) continue;
+      if (!other || other.dimension !== item.dimension || lexicalRejected.has(other.id) || !hasLabelDuplicateEvidence(item, other)) continue;
       const reject = chooseDuplicate(item, other);
       const keep = reject.id === item.id ? other : item;
       lexicalRejected.add(reject.id);
-      rejected.push({ id: reject.id, reasons: [`lexical near-duplicate of ${keep.id} (${neighbor.cosine.toFixed(4)})`] });
+      rejected.push({ id: reject.id, reasons: [`label-gated lexical near-duplicate of ${keep.id} (${neighbor.cosine.toFixed(4)})`] });
     }
   }
   const attributes = exactFiltered.filter((item) => !lexicalRejected.has(item.id)).sort((left, right) => left.id.localeCompare(right.id));
@@ -172,32 +184,47 @@ export function compileApprovedOntology(
   const approvedIds = new Set(attributes.map((item) => item.id));
 
   const relationIds = new Set<string>();
-  const relations = [...proposal.relations].map((relation) => {
+  const rejectedRelations: RejectedOntologyRelation[] = [];
+  const relations: OntologyRelationProposal[] = [];
+  for (const relation of [...proposal.relations].sort(compareRelations)) {
     if (!relation.id.trim() || relationIds.has(relation.id)) throw new Error(`invalid or duplicate ontology relation ${relation.id}`);
     relationIds.add(relation.id);
-    if (!approvedIds.has(relation.fromAttributeId) || !approvedIds.has(relation.toAttributeId)) throw new Error(`relation ${relation.id} references rejected or unknown attribute`);
-    if (relation.fromAttributeId === relation.toAttributeId) throw new Error(`relation ${relation.id} is a self-loop`);
-    if (!Number.isFinite(relation.weight) || relation.weight <= 0 || relation.weight > 1) throw new Error(`relation ${relation.id} has invalid weight`);
-    if (!relation.rationale.trim()) throw new Error(`relation ${relation.id} requires rationale`);
+    const reasons: string[] = [];
+    if (!approvedIds.has(relation.fromAttributeId)) reasons.push(`from endpoint ${relation.fromAttributeId} is rejected or unknown`);
+    if (!approvedIds.has(relation.toAttributeId)) reasons.push(`to endpoint ${relation.toAttributeId} is rejected or unknown`);
+    if (relation.fromAttributeId === relation.toAttributeId) reasons.push("self-loop");
+    if (!Number.isFinite(relation.weight) || relation.weight <= 0 || relation.weight > 1) reasons.push("invalid weight");
+    if (!relation.rationale.trim()) reasons.push("missing rationale");
     validateReferences(relation.sourceIds, projectSources, `relation ${relation.id} source`);
     validateReferences(relation.evidenceIds, projectEvidence, `relation ${relation.id} evidence`);
-    return { ...relation, sourceIds: sorted(relation.sourceIds), evidenceIds: sorted(relation.evidenceIds) };
-  }).sort(compareRelations);
+    if (reasons.length > 0) {
+      rejectedRelations.push({ id: relation.id, reasons: [...new Set(reasons)].sort() });
+      continue;
+    }
+    relations.push({ ...relation, sourceIds: sorted(relation.sourceIds), evidenceIds: sorted(relation.evidenceIds) });
+  }
 
   const observationIds = new Set<string>();
-  const observations = [...proposal.observations].map((observation) => {
+  const rejectedObservations: RejectedOntologyObservation[] = [];
+  const observations: OntologyObservationProposal[] = [];
+  for (const observation of [...proposal.observations].sort((left, right) => left.id.localeCompare(right.id))) {
     if (!observation.id.trim() || observationIds.has(observation.id)) throw new Error(`invalid or duplicate ontology observation ${observation.id}`);
     observationIds.add(observation.id);
     const attributeIds = sorted(observation.attributeIds);
-    if (attributeIds.length < 2) throw new Error(`observation ${observation.id} requires at least two attributes`);
-    for (const id of attributeIds) if (!approvedIds.has(id)) throw new Error(`observation ${observation.id} references rejected or unknown attribute ${id}`);
-    if (!Number.isFinite(observation.weight) || observation.weight <= 0) throw new Error(`observation ${observation.id} requires positive weight`);
-    if (!observation.description.trim()) throw new Error(`observation ${observation.id} requires description`);
+    const reasons: string[] = [];
+    if (attributeIds.length < 2) reasons.push("requires at least two attributes");
+    for (const id of attributeIds) if (!approvedIds.has(id)) reasons.push(`attribute ${id} is rejected or unknown`);
+    if (!Number.isFinite(observation.weight) || observation.weight <= 0) reasons.push("requires positive weight");
+    if (!observation.description.trim()) reasons.push("requires description");
     validateReferences(observation.sourceIds, projectSources, `observation ${observation.id} source`);
     validateReferences(observation.evidenceIds, projectEvidence, `observation ${observation.id} evidence`);
-    return { ...observation, attributeIds, sourceIds: sorted(observation.sourceIds), evidenceIds: sorted(observation.evidenceIds) };
-  }).sort((left, right) => left.id.localeCompare(right.id));
-  if (observations.length === 0) throw new Error("ontology proposal requires at least one object-attribute observation");
+    if (reasons.length > 0) {
+      rejectedObservations.push({ id: observation.id, reasons: [...new Set(reasons)].sort() });
+      continue;
+    }
+    observations.push({ ...observation, attributeIds, sourceIds: sorted(observation.sourceIds), evidenceIds: sorted(observation.evidenceIds) });
+  }
+  if (observations.length === 0) throw new Error("ontology proposal requires at least one accepted object-attribute observation");
 
   const dimensionsMutable = new Map<string, string[]>();
   for (const attribute of attributes) {
@@ -213,11 +240,24 @@ export function compileApprovedOntology(
     finding("ontology.dimensions", hasAnchor ? "pass" : "fail", `${Object.keys(dimensions).length} discovered dimensions; anchors=${attributes.filter((item) => item.anchorKind).length}`),
     finding("ontology.materiality", attributes.every((item) => item.materialEffects.length >= (isDemographic(item.sensitivity) ? policy.demographicMinimumMaterialEffects : policy.minimumMaterialEffects)) ? "pass" : "fail", "all approved attributes satisfy materiality floors"),
     finding("ontology.safety", attributes.every((item) => !policy.prohibitedSensitivities.includes(item.sensitivity)) ? "pass" : "fail", `${rejected.filter((item) => item.reasons.some((reason) => reason.includes("sensitivity"))).length} unsafe attributes rejected`),
-    finding("ontology.lexical", "pass", `${lexicalIndex.documents.length} sparse lexical documents; ${lexicalRejected.size} near duplicates rejected`),
-    finding("ontology.relations", relations.length > 0 ? "pass" : "fail", `${relations.length} typed evidence-bound relations compiled`),
-    finding("ontology.observations", observations.length > 0 ? "pass" : "fail", `${observations.length} weighted object-attribute observations compiled`),
+    finding("ontology.lexical", "pass", `${lexicalIndex.documents.length} sparse lexical documents; ${lexicalRejected.size} label-gated near duplicates rejected`),
+    finding("ontology.relations", relations.length > 0 ? "pass" : "fail", `${relations.length} accepted typed relations; ${rejectedRelations.length} rejected relations preserved`),
+    finding("ontology.observations", observations.length > 0 ? "pass" : "fail", `${observations.length} accepted observations; ${rejectedObservations.length} rejected observations preserved`),
   ];
-  const canonical = { id: proposal.id, version: proposal.version, generatedBy: proposal.generatedBy, sourceIds: sorted(proposal.sourceIds), attributes, rejectedAttributes: [...rejected].sort((left, right) => left.id.localeCompare(right.id)), relations, observations, dimensions, lexicalIndexHash: lexicalIndex.indexHash };
+  const canonical = {
+    id: proposal.id,
+    version: proposal.version,
+    generatedBy: proposal.generatedBy,
+    sourceIds: sorted(proposal.sourceIds),
+    attributes,
+    rejectedAttributes: [...rejected].sort((left, right) => left.id.localeCompare(right.id)),
+    relations,
+    rejectedRelations,
+    observations,
+    rejectedObservations,
+    dimensions,
+    lexicalIndexHash: lexicalIndex.indexHash,
+  };
   return { ...canonical, lexicalIndex, ontologyHash: sha256(JSON.stringify(canonical)), validation: buildValidationReport(`ontology:${proposal.id}`, ONTOLOGY_VALIDATION, findings) };
 }
 
@@ -234,6 +274,17 @@ function attributeRejectionReasons(item: OntologyAttributeProposal, policy: Onto
     if (policy.requireReviewerApprovalForDemographic && !item.reviewerApproved) reasons.push("demographic/lifestyle attribute requires reviewer approval");
   }
   return reasons;
+}
+
+function hasLabelDuplicateEvidence(left: ApprovedOntologyAttribute, right: ApprovedOntologyAttribute): boolean {
+  const leftTokens = new Set(tokenizeLexical(left.label));
+  const rightTokens = new Set(tokenizeLexical(right.label));
+  if (leftTokens.size === 0 || rightTokens.size === 0) return false;
+  const intersection = [...leftTokens].filter((token) => rightTokens.has(token)).length;
+  const union = new Set([...leftTokens, ...rightTokens]).size;
+  const jaccard = intersection / union;
+  const containment = intersection / Math.min(leftTokens.size, rightTokens.size);
+  return jaccard >= 0.8 || (containment === 1 && Math.min(leftTokens.size, rightTokens.size) >= 2);
 }
 function chooseDuplicate(left: ApprovedOntologyAttribute, right: ApprovedOntologyAttribute): ApprovedOntologyAttribute {
   if (left.confidence !== right.confidence) return left.confidence < right.confidence ? left : right;
