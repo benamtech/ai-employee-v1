@@ -30,6 +30,7 @@ describe("Lane 10 release evidence contract", () => {
     expect(built.gates.map((gate) => gate.gate).sort()).toEqual([...REQUIRED_RELEASE_GATES].sort());
     expect(built.gates.find((gate) => gate.gate === "connector_custody_enforcement")?.status).toBe("ci_accepted");
     expect(built.gates.find((gate) => gate.gate === "commercial_attribution_enforcement")?.status).toBe("ci_accepted");
+    expect(built.gates.find((gate) => gate.gate === "approval_authority_enforcement")?.status).toBe("ci_accepted");
     expect(built.gates.find((gate) => gate.gate === "real_supabase_matrix")?.status).toBe("pending");
     expect(built.gates.find((gate) => gate.gate === "commercial_reconciliation")?.status).toBe("pending");
   });
@@ -39,7 +40,7 @@ describe("Lane 10 release evidence contract", () => {
     const stale = {
       ...built,
       gates: built.gates.map((gate) =>
-        gate.gate === "command_effect_matrix"
+        gate.gate === "approval_authority_enforcement"
           ? { ...gate, sha: "b".repeat(40) }
           : gate,
       ),
@@ -47,7 +48,7 @@ describe("Lane 10 release evidence contract", () => {
 
     const result = validateReleaseEvidenceManifest(stale, sha);
     expect(result.ok).toBe(false);
-    expect(result.staleGates).toContain("command_effect_matrix");
+    expect(result.staleGates).toContain("approval_authority_enforcement");
   });
 
   it("rejects production-ready claims without accepted hard gates", () => {
