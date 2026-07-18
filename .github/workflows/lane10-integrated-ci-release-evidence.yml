@@ -15,8 +15,13 @@ on:
       - "mvp-build/apps/manager/src/lib/connector-custody.ts"
       - "mvp-build/apps/manager/src/lib/commercial-attribution.ts"
       - "mvp-build/apps/manager/src/lib/durable-command-runtime.ts"
+      - "mvp-build/apps/manager/src/lib/owner-session.ts"
+      - "mvp-build/apps/manager/src/lib/owner-assignment-authority.ts"
+      - "mvp-build/apps/manager/src/lib/owner-turn-command.ts"
+      - "mvp-build/apps/manager/src/lib/mcp-auth.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway-http.ts"
+      - "mvp-build/apps/manager/scripts/generate-production-server.mjs"
       - "mvp-build/apps/manager/src/tools/approval-authority.stub.ts"
       - "mvp-build/apps/manager/src/tools/approved-actions.stub.ts"
       - "mvp-build/apps/manager/src/tools/qbo-approval-promotion.stub.ts"
@@ -40,8 +45,13 @@ on:
       - "mvp-build/apps/manager/src/lib/connector-custody.ts"
       - "mvp-build/apps/manager/src/lib/commercial-attribution.ts"
       - "mvp-build/apps/manager/src/lib/durable-command-runtime.ts"
+      - "mvp-build/apps/manager/src/lib/owner-session.ts"
+      - "mvp-build/apps/manager/src/lib/owner-assignment-authority.ts"
+      - "mvp-build/apps/manager/src/lib/owner-turn-command.ts"
+      - "mvp-build/apps/manager/src/lib/mcp-auth.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway.ts"
       - "mvp-build/apps/manager/src/lib/model-gateway-http.ts"
+      - "mvp-build/apps/manager/scripts/generate-production-server.mjs"
       - "mvp-build/apps/manager/src/tools/approval-authority.stub.ts"
       - "mvp-build/apps/manager/src/tools/approved-actions.stub.ts"
       - "mvp-build/apps/manager/src/tools/qbo-approval-promotion.stub.ts"
@@ -83,13 +93,17 @@ jobs:
         run: npm run typecheck --workspace @amtech/db
       - name: Build release-bound database package
         run: npm run build --workspace @amtech/db
+      - name: Typecheck generated Manager production surface
+        run: npm run typecheck --workspace @amtech/manager
       - name: Run source contract and plan gates
         run: |
           npx vitest run \
             tests/unit/relationship-contract.test.ts \
             tests/unit/authorization-scope-registry.test.ts \
             tests/unit/assignment-enforcement-contract.test.ts \
+            tests/unit/owner-turn-command-contract.test.ts \
             tests/unit/approval-authority-contract.test.ts \
+            tests/unit/authority-version-contract.test.ts \
             tests/unit/connector-commercial-contract.test.ts \
             tests/unit/command-effect-contract.test.ts \
             tests/unit/release-evidence-contract.test.ts \
@@ -172,6 +186,8 @@ jobs:
         run: npx vitest run --config vitest.integration.config.ts tests/integration/relationship-authorization-matrix.test.ts
       - name: Run S7 approval authority matrix
         run: npx vitest run --config vitest.integration.config.ts tests/integration/approval-authority-boundary.test.ts
+      - name: Run S9 authority revocation matrix
+        run: npx vitest run --config vitest.integration.config.ts tests/integration/authority-revocation-boundary.test.ts
       - name: Run S5 connector and S6 commercial matrix
         run: npx vitest run --config vitest.integration.config.ts tests/integration/connector-commercial-boundary.test.ts
       - name: Run Lane 3 durable command and effect matrix
