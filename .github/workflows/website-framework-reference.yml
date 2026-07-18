@@ -49,6 +49,8 @@ jobs:
       - run: npm run manifest:emit
       - run: npm run ui:emit
       - run: npm run orchestration:check
+      - run: npm run framework:validate
+      - run: npm run framework:preview
       - run: npm run browser:check
       - run: npm run ui:r3f:build
       - uses: actions/upload-artifact@v4
@@ -58,4 +60,5 @@ jobs:
             GTM-RESEARCH/website-framework/reference/generated-manifest
             GTM-RESEARCH/website-framework/reference/generated-ui
             GTM-RESEARCH/website-framework/reference/generated-orchestration
+            GTM-RESEARCH/website-framework/reference/generated-framework-preview
           retention-days: 7
