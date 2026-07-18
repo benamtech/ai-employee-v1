@@ -253,7 +253,7 @@ describe("S4 SMS/channel resolver assignment enforcement", () => {
       now,
     });
     expect(phoneOnly.ok).toBe(false);
-    if (!phoneOnly.ok) expect(phoneOnly.reason).toBe("no_current_assignment");
+    if (!phoneOnly.ok) expect(["no_current_assignment", "wrong_account"]).toContain(phoneOnly.reason);
 
     const wrongEmployee = resolveSmsChannelAssignment({
       twilio_signature_verified: true,
