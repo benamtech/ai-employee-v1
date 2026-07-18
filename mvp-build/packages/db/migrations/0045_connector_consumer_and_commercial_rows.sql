@@ -16,215 +16,200 @@ create unique index if not exists connector_bindings_active_subject_unique
   on connector_bindings(provider, external_subject)
   where status = 'active' and revoked_at is null;
 
--- Deterministic compatibility bindings for already-connected Gmail rows.
-do $$
-begin
-  if to_regclass('public.connector_accounts') is not null
-     and exists (
-       select 1 from information_schema.columns
-        where table_schema = 'public' and table_name = 'connector_accounts' and column_name = 'external_email'
-     ) then
-    execute $sql$
-      insert into connector_bindings (
-        id, assignment_id, connector_account_id, principal_id, provider,
-        external_subject, account_id, employee_id, resource_class, resource_id,
-        capability_class, policy_version, status, provider_verification_ref,
-        provider_verified_at, provenance
-      )
-      select
-        'cb_' || substr(md5('gmail:' || ca.id || ':' || ca.external_email), 1, 29),
-        ea.id,
-        ca.id,
-        ep.id,
-        'gmail',
-        ca.external_email,
-        ca.account_id,
-        ca.employee_id,
-        'connector:gmail',
-        ca.external_email,
-        'consumer_dedupe',
-        ea.policy_version,
-        'active',
-        'compatibility:connector_accounts:' || ca.id,
-        coalesce(ca.updated_at, ca.created_at, now()),
-        jsonb_build_object(
-          'source', 'compatibility_backfill',
-          'sourceRef', 'connector_accounts',
-          'account_id', ca.account_id,
-          'employee_id', ca.employee_id,
-          'recordedAt', now()
-        )
-      from connector_accounts ca
-      join employee_principals ep on ep.employee_id = ca.employee_id
-      join employee_assignments ea
-        on ea.employee_principal_id = ep.id
-       and ea.account_id = ca.account_id
-       and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
-      where ca.provider = 'gmail'
-        and ca.external_email is not null
-        and ca.external_email <> ''
-        and ca.status in ('connected','working','active')
-      on conflict do nothing
-    $sql$;
-  end if;
-end
-$$;
+-- Existing connector rows are compatibility inputs only. Backfill a binding
+-- only when account + employee resolve to exactly one current assignment.
+insert into connector_bindings (
+  id, assignment_id, connector_account_id, principal_id, provider,
+  external_subject, account_id, employee_id, resource_class, resource_id,
+  capability_class, policy_version, status, provider_verification_ref,
+  provider_verified_at, provenance
+)
+select
+  'cb_' || substr(md5('gmail:' || ca.id || ':' || ca.external_email), 1, 29),
+  ea.id,
+  ca.id,
+  ep.id,
+  'gmail',
+  ca.external_email,
+  ca.account_id,
+  ca.employee_id,
+  'connector:gmail',
+  ca.external_email,
+  'consumer_dedupe',
+  ea.policy_version,
+  'active',
+  'compatibility:connector_accounts:' || ca.id,
+  coalesce(ca.updated_at, ca.created_at, now()),
+  jsonb_build_object(
+    'source', 'compatibility_backfill',
+    'sourceRef', 'connector_accounts.external_email',
+    'account_id', ca.account_id,
+    'employee_id', ca.employee_id,
+    'recordedAt', now()
+  )
+from connector_accounts ca
+join employee_principals ep on ep.employee_id = ca.employee_id
+join employee_assignments ea
+  on ea.employee_principal_id = ep.id
+ and ea.account_id = ca.account_id
+ and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
+where ca.provider = 'gmail'
+  and ca.external_email is not null
+  and ca.external_email <> ''
+  and ca.status in ('connected','working','active')
+  and 1 = (
+    select count(*)
+      from employee_assignments ea2
+     where ea2.employee_principal_id = ep.id
+       and ea2.account_id = ca.account_id
+       and amtech_relationship_current(ea2.status, ea2.starts_at, ea2.ends_at)
+  )
+on conflict do nothing;
 
--- Deterministic compatibility bindings for QuickBooks realms.
-do $$
-begin
-  if to_regclass('public.connector_accounts') is not null
-     and exists (
-       select 1 from information_schema.columns
-        where table_schema = 'public' and table_name = 'connector_accounts' and column_name = 'realm_id'
-     ) then
-    execute $sql$
-      insert into connector_bindings (
-        id, assignment_id, connector_account_id, principal_id, provider,
-        external_subject, account_id, employee_id, resource_class, resource_id,
-        capability_class, policy_version, status, provider_verification_ref,
-        provider_verified_at, provenance
-      )
-      select
-        'cb_' || substr(md5('quickbooks:' || ca.id || ':' || ca.realm_id), 1, 29),
-        ea.id,
-        ca.id,
-        ep.id,
-        'quickbooks',
-        ca.realm_id,
-        ca.account_id,
-        ca.employee_id,
-        'connector:quickbooks',
-        ca.realm_id,
-        'consumer_dedupe',
-        ea.policy_version,
-        'active',
-        'compatibility:connector_accounts:' || ca.id,
-        coalesce(ca.updated_at, ca.created_at, now()),
-        jsonb_build_object(
-          'source', 'compatibility_backfill',
-          'sourceRef', 'connector_accounts.realm_id',
-          'account_id', ca.account_id,
-          'employee_id', ca.employee_id,
-          'recordedAt', now()
-        )
-      from connector_accounts ca
-      join employee_principals ep on ep.employee_id = ca.employee_id
-      join employee_assignments ea
-        on ea.employee_principal_id = ep.id
-       and ea.account_id = ca.account_id
-       and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
-      where ca.provider = 'quickbooks'
-        and ca.realm_id is not null
-        and ca.realm_id <> ''
-        and ca.status in ('connected','working','active')
-      on conflict do nothing
-    $sql$;
-  end if;
-end
-$$;
+insert into connector_bindings (
+  id, assignment_id, connector_account_id, principal_id, provider,
+  external_subject, account_id, employee_id, resource_class, resource_id,
+  capability_class, policy_version, status, provider_verification_ref,
+  provider_verified_at, provenance
+)
+select
+  'cb_' || substr(md5('quickbooks:' || ca.id || ':' || ca.realm_id), 1, 29),
+  ea.id,
+  ca.id,
+  ep.id,
+  'quickbooks',
+  ca.realm_id,
+  ca.account_id,
+  ca.employee_id,
+  'connector:quickbooks',
+  ca.realm_id,
+  'consumer_dedupe',
+  ea.policy_version,
+  'active',
+  'compatibility:connector_accounts:' || ca.id,
+  coalesce(ca.updated_at, ca.created_at, now()),
+  jsonb_build_object(
+    'source', 'compatibility_backfill',
+    'sourceRef', 'connector_accounts.realm_id',
+    'account_id', ca.account_id,
+    'employee_id', ca.employee_id,
+    'recordedAt', now()
+  )
+from connector_accounts ca
+join employee_principals ep on ep.employee_id = ca.employee_id
+join employee_assignments ea
+  on ea.employee_principal_id = ep.id
+ and ea.account_id = ca.account_id
+ and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
+where ca.provider = 'quickbooks'
+  and ca.realm_id is not null
+  and ca.realm_id <> ''
+  and ca.status in ('connected','working','active')
+  and 1 = (
+    select count(*)
+      from employee_assignments ea2
+     where ea2.employee_principal_id = ep.id
+       and ea2.account_id = ca.account_id
+       and amtech_relationship_current(ea2.status, ea2.starts_at, ea2.ends_at)
+  )
+on conflict do nothing;
 
--- Stripe webhook custody resolves through the connected Stripe account, not an
--- invoice ID or account-wide employee lookup.
-do $$
-begin
-  if to_regclass('public.stripe_connections') is not null then
-    insert into connector_bindings (
-      id, assignment_id, connector_account_id, principal_id, provider,
-      external_subject, account_id, employee_id, resource_class, resource_id,
-      capability_class, policy_version, status, provider_verification_ref,
-      provider_verified_at, provenance
-    )
-    select
-      'cb_' || substr(md5('stripe:' || sc.id || ':' || sc.connected_account_id), 1, 29),
-      ea.id,
-      sc.id,
-      ep.id,
-      'stripe',
-      sc.connected_account_id,
-      sc.account_id,
-      sc.employee_id,
-      'connector:stripe',
-      sc.connected_account_id,
-      'consumer_dedupe',
-      ea.policy_version,
-      'active',
-      'compatibility:stripe_connections:' || sc.id,
-      coalesce(sc.updated_at, sc.created_at, now()),
-      jsonb_build_object(
-        'source', 'compatibility_backfill',
-        'sourceRef', 'stripe_connections.connected_account_id',
-        'account_id', sc.account_id,
-        'employee_id', sc.employee_id,
-        'recordedAt', now()
-      )
-    from stripe_connections sc
-    join employee_principals ep on ep.employee_id = sc.employee_id
-    join employee_assignments ea
-      on ea.employee_principal_id = ep.id
-     and ea.account_id = sc.account_id
-     and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
-    where sc.connected_account_id is not null
-      and sc.connected_account_id <> ''
-    on conflict do nothing;
-  end if;
-end
-$$;
+insert into connector_bindings (
+  id, assignment_id, connector_account_id, principal_id, provider,
+  external_subject, account_id, employee_id, resource_class, resource_id,
+  capability_class, policy_version, status, provider_verification_ref,
+  provider_verified_at, provenance
+)
+select
+  'cb_' || substr(md5('stripe:' || sc.id || ':' || sc.connected_account_id), 1, 29),
+  ea.id,
+  sc.id,
+  ep.id,
+  'stripe',
+  sc.connected_account_id,
+  sc.account_id,
+  sc.employee_id,
+  'connector:stripe',
+  sc.connected_account_id,
+  'consumer_dedupe',
+  ea.policy_version,
+  'active',
+  'compatibility:stripe_connections:' || sc.id,
+  coalesce(sc.updated_at, sc.created_at, now()),
+  jsonb_build_object(
+    'source', 'compatibility_backfill',
+    'sourceRef', 'stripe_connections.connected_account_id',
+    'account_id', sc.account_id,
+    'employee_id', sc.employee_id,
+    'recordedAt', now()
+  )
+from stripe_connections sc
+join employee_principals ep on ep.employee_id = sc.employee_id
+join employee_assignments ea
+  on ea.employee_principal_id = ep.id
+ and ea.account_id = sc.account_id
+ and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
+where sc.connected_account_id is not null
+  and sc.connected_account_id <> ''
+  and 1 = (
+    select count(*)
+      from employee_assignments ea2
+     where ea2.employee_principal_id = ep.id
+       and ea2.account_id = sc.account_id
+       and amtech_relationship_current(ea2.status, ea2.starts_at, ea2.ends_at)
+  )
+on conflict do nothing;
 
--- Twilio owner turns bind the provider destination and verified sender pair to
--- exactly one employee assignment.
-do $$
-begin
-  if to_regclass('public.runtime_endpoints') is not null
-     and to_regclass('public.verified_phones') is not null then
-    insert into connector_bindings (
-      id, assignment_id, connector_account_id, principal_id, provider,
-      external_subject, account_id, employee_id, resource_class, resource_id,
-      capability_class, policy_version, status, provider_verification_ref,
-      provider_verified_at, provenance
-    )
-    select
-      'cb_' || substr(md5('twilio:' || re.employee_id || ':' || re.sms_number_e164 || ':' || vp.phone_e164), 1, 29),
-      ea.id,
-      re.id,
-      ep.id,
-      'twilio',
-      re.sms_number_e164 || '|' || vp.phone_e164,
-      ea.account_id,
-      re.employee_id,
-      'channel:sms',
-      vp.phone_e164,
-      'consumer_dedupe',
-      ea.policy_version,
-      'active',
-      'compatibility:verified_phones:' || vp.id,
-      coalesce(vp.verified_at, vp.created_at, now()),
-      jsonb_build_object(
-        'source', 'compatibility_backfill',
-        'sourceRef', 'runtime_endpoints+verified_phones',
-        'account_id', ea.account_id,
-        'employee_id', re.employee_id,
-        'destination_phone', re.sms_number_e164,
-        'sender_phone', vp.phone_e164,
-        'recordedAt', now()
-      )
-    from runtime_endpoints re
-    join employee_principals ep on ep.employee_id = re.employee_id
-    join employee_assignments ea
-      on ea.employee_principal_id = ep.id
-     and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
-    join verified_phones vp on vp.account_id = ea.account_id
-    where re.sms_number_e164 is not null
-      and re.sms_number_e164 <> ''
-      and vp.phone_e164 is not null
-      and vp.phone_e164 <> ''
-    on conflict do nothing;
-  end if;
-end
-$$;
+insert into connector_bindings (
+  id, assignment_id, connector_account_id, principal_id, provider,
+  external_subject, account_id, employee_id, resource_class, resource_id,
+  capability_class, policy_version, status, provider_verification_ref,
+  provider_verified_at, provenance
+)
+select
+  'cb_' || substr(md5('twilio:' || re.employee_id || ':' || re.sms_number_e164 || ':' || vp.phone_e164), 1, 29),
+  ea.id,
+  re.id,
+  ep.id,
+  'twilio',
+  re.sms_number_e164 || '|' || vp.phone_e164,
+  ea.account_id,
+  re.employee_id,
+  'channel:sms',
+  vp.phone_e164,
+  'consumer_dedupe',
+  ea.policy_version,
+  'active',
+  'compatibility:verified_phones:' || vp.id,
+  coalesce(vp.verified_at, vp.created_at, now()),
+  jsonb_build_object(
+    'source', 'compatibility_backfill',
+    'sourceRef', 'runtime_endpoints+verified_phones',
+    'account_id', ea.account_id,
+    'employee_id', re.employee_id,
+    'destination_phone', re.sms_number_e164,
+    'sender_phone', vp.phone_e164,
+    'recordedAt', now()
+  )
+from runtime_endpoints re
+join employee_principals ep on ep.employee_id = re.employee_id
+join employee_assignments ea
+  on ea.employee_principal_id = ep.id
+ and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
+join verified_phones vp on vp.account_id = ea.account_id
+where re.sms_number_e164 is not null
+  and re.sms_number_e164 <> ''
+  and vp.phone_e164 is not null
+  and vp.phone_e164 <> ''
+  and 1 = (
+    select count(*)
+      from employee_assignments ea2
+     where ea2.employee_principal_id = ep.id
+       and ea2.account_id = ea.account_id
+       and amtech_relationship_current(ea2.status, ea2.starts_at, ea2.ends_at)
+  )
+on conflict do nothing;
 
--- Every durable binding receives a principal-specific resource grant. Existing
--- human grants are not reused as connector authority.
 insert into assignment_resource_grants (
   id, assignment_id, principal_id, resource_class, resource_id, actions,
   status, starts_at, policy_version, provenance, created_at
@@ -304,7 +289,6 @@ create trigger connector_binding_scope_guard
 before insert or update on connector_bindings
 for each row execute function amtech_connector_binding_scope_guard();
 
--- Replace the attestation function with grant and command-actor enforcement.
 create or replace function attest_ambient_connector_custody(
   p_inbox_id text,
   p_assignment_id text,
@@ -349,9 +333,9 @@ begin
   if v_binding.id is null
      or v_binding.assignment_id <> p_assignment_id
      or v_binding.provider <> v_inbox.provider
+     or v_binding.external_subject <> v_inbox.subject_key
      or v_binding.resource_class <> p_resource_class
      or v_binding.resource_id is distinct from p_resource_id
-     or v_binding.external_subject <> v_inbox.subject_key
      or v_binding.status <> 'active'
      or v_binding.revoked_at is not null
      or (v_binding.expires_at is not null and v_binding.expires_at <= now()) then
@@ -406,8 +390,6 @@ begin
 end
 $$;
 
--- Existing reconciler-owned AMTECH events are approved system ingress, not
--- customer connector events. They remain claimable without a connector binding.
 update ambient_event_inbox
    set authorization_state = 'public_ingress'
  where provider = 'amtech'
@@ -415,7 +397,7 @@ update ambient_event_inbox
    and authorization_state = 'waiting_for_binding';
 
 -- --------------------------------------------------------------------------
--- S6 canonical meter, rollup, budget, and gateway dimensions
+-- S6 canonical meter, rollup, budget, invoice, and gateway dimensions
 -- --------------------------------------------------------------------------
 
 insert into commercial_price_versions (
@@ -512,26 +494,23 @@ create index if not exists commercial_usage_rollups_scope_idx
 create index if not exists commercial_budget_policies_scope_idx
   on commercial_budget_policies(assignment_id, status, effective_at, expires_at);
 
--- Accepted provider usage is a real accounting receipt even when the model call
--- is not itself a consequential customer-side effect. Consequential command
--- effects remain C3-receipt-bound.
 alter table commercial_usage_receipts
   add column if not exists receipt_kind text not null default 'command_effect'
     check (receipt_kind in ('provider_usage','command_effect','invoice'));
 
 do $$
 declare
-  constraint_name text;
+  row_record record;
 begin
-  select conname into constraint_name
-    from pg_constraint
-   where conrelid = 'commercial_usage_receipts'::regclass
-     and contype = 'c'
-     and pg_get_constraintdef(oid) like '%state%accepted%effect_receipt_id%'
-   limit 1;
-  if constraint_name is not null then
-    execute format('alter table commercial_usage_receipts drop constraint %I', constraint_name);
-  end if;
+  for row_record in
+    select conname
+      from pg_constraint
+     where conrelid = 'commercial_usage_receipts'::regclass
+       and contype = 'c'
+       and pg_get_constraintdef(oid) like '%state%accepted%effect_receipt_id%'
+  loop
+    execute format('alter table commercial_usage_receipts drop constraint %I', row_record.conname);
+  end loop;
 end
 $$;
 
@@ -543,55 +522,125 @@ alter table commercial_usage_receipts
     or (
       provider_receipt_id is not null
       and (
-        (receipt_kind = 'provider_usage')
+        receipt_kind = 'provider_usage'
+        or receipt_kind = 'invoice'
         or (receipt_kind = 'command_effect' and effect_receipt_id is not null)
-        or (receipt_kind = 'invoice')
       )
     )
   );
 
--- Gateway credentials receive immutable assignment and commercial context at
--- issuance. NOT VALID preserves ambiguous historical rows while rejecting every
--- new unscoped credential.
+create or replace function amtech_commercial_usage_receipt_guard()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+declare
+  v_payer commercial_relationships%rowtype;
+  v_beneficiary commercial_relationships%rowtype;
+  v_price commercial_price_versions%rowtype;
+  v_effect effect_receipts%rowtype;
+begin
+  select * into v_payer from commercial_relationships where id = new.payer_relationship_id;
+  select * into v_beneficiary from commercial_relationships where id = new.beneficiary_relationship_id;
+  select * into v_price from commercial_price_versions where id = new.price_version_id;
+
+  if v_payer.id is null or v_payer.relationship_type <> 'payer'
+     or v_payer.assignment_id <> new.assignment_id
+     or not amtech_relationship_current(v_payer.status, v_payer.starts_at, v_payer.ends_at) then
+    raise exception 'invalid_payer_relationship';
+  end if;
+  if v_beneficiary.id is null or v_beneficiary.relationship_type <> 'beneficiary'
+     or v_beneficiary.assignment_id <> new.assignment_id
+     or not amtech_relationship_current(v_beneficiary.status, v_beneficiary.starts_at, v_beneficiary.ends_at) then
+    raise exception 'invalid_beneficiary_relationship';
+  end if;
+  if v_price.id is null or v_price.assignment_id <> new.assignment_id
+     or v_price.status <> 'active'
+     or v_price.effective_at > new.observed_at
+     or (v_price.expires_at is not null and new.observed_at >= v_price.expires_at)
+     or v_price.currency <> new.currency then
+    raise exception 'invalid_price_version';
+  end if;
+
+  if new.state = 'accepted' and new.receipt_kind = 'command_effect' then
+    select * into v_effect from effect_receipts where id = new.effect_receipt_id;
+    if v_effect.id is null or v_effect.assignment_id <> new.assignment_id or v_effect.state <> 'accepted' then
+      raise exception 'accepted_usage_requires_matching_effect_receipt';
+    end if;
+  elsif new.state = 'accepted' and new.provider_receipt_id is null then
+    raise exception 'accepted_usage_requires_provider_receipt';
+  end if;
+  return new;
+end
+$$;
+
 alter table model_gateway_credentials
   add column if not exists assignment_id text references employee_assignments(id) on delete restrict,
   add column if not exists payer_relationship_id text references commercial_relationships(id) on delete restrict,
   add column if not exists beneficiary_relationship_id text references commercial_relationships(id) on delete restrict,
   add column if not exists price_version_id text references commercial_price_versions(id) on delete restrict;
 
-update model_gateway_credentials mgc
-   set assignment_id = scope.assignment_id,
-       payer_relationship_id = scope.payer_relationship_id,
-       beneficiary_relationship_id = scope.beneficiary_relationship_id,
-       price_version_id = scope.price_version_id
-  from lateral (
-    select
-      ea.id as assignment_id,
-      payer.id as payer_relationship_id,
-      beneficiary.id as beneficiary_relationship_id,
-      price.id as price_version_id
-    from employee_principals ep
-    join employee_assignments ea
-      on ea.employee_principal_id = ep.id
-     and ea.account_id = mgc.account_id
-     and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
-    join commercial_relationships payer
-      on payer.assignment_id = ea.id
-     and payer.relationship_type = 'payer'
-     and amtech_relationship_current(payer.status, payer.starts_at, payer.ends_at)
-    join commercial_relationships beneficiary
-      on beneficiary.assignment_id = ea.id
-     and beneficiary.relationship_type = 'beneficiary'
-     and amtech_relationship_current(beneficiary.status, beneficiary.starts_at, beneficiary.ends_at)
-    join commercial_price_versions price
-      on price.assignment_id = ea.id
-     and price.policy_key = 'provider-cost-observation'
-     and price.version = '1.0.0'
-     and price.status = 'active'
-    where ep.employee_id = mgc.employee_id
-    limit 1
-  ) scope
- where mgc.assignment_id is null;
+alter table model_gateway_request_audit
+  add column if not exists provider_receipt_id text;
+
+-- Backfill only deterministic current commercial scope. Ambiguous or incomplete
+-- historical credentials remain unpromoted and cannot be reissued as S6-scoped.
+do $$
+declare
+  credential record;
+  v_assignment_id text;
+  v_payer_id text;
+  v_beneficiary_id text;
+  v_price_id text;
+begin
+  for credential in
+    select id, account_id, employee_id
+      from model_gateway_credentials
+     where assignment_id is null
+  loop
+    v_assignment_id := amtech_default_assignment_for_employee_account(
+      credential.employee_id,
+      credential.account_id
+    );
+    if v_assignment_id is null then
+      continue;
+    end if;
+
+    select id into v_payer_id
+      from commercial_relationships
+     where assignment_id = v_assignment_id
+       and relationship_type = 'payer'
+       and amtech_relationship_current(status, starts_at, ends_at)
+     order by created_at
+     limit 1;
+    select id into v_beneficiary_id
+      from commercial_relationships
+     where assignment_id = v_assignment_id
+       and relationship_type = 'beneficiary'
+       and amtech_relationship_current(status, starts_at, ends_at)
+     order by created_at
+     limit 1;
+    select id into v_price_id
+      from commercial_price_versions
+     where assignment_id = v_assignment_id
+       and policy_key = 'provider-cost-observation'
+       and version = '1.0.0'
+       and status = 'active'
+     order by effective_at desc
+     limit 1;
+
+    if v_payer_id is not null and v_beneficiary_id is not null and v_price_id is not null then
+      update model_gateway_credentials
+         set assignment_id = v_assignment_id,
+             payer_relationship_id = v_payer_id,
+             beneficiary_relationship_id = v_beneficiary_id,
+             price_version_id = v_price_id
+       where id = credential.id;
+    end if;
+  end loop;
+end
+$$;
 
 alter table model_gateway_credentials
   drop constraint if exists model_gateway_credentials_s6_scope;
@@ -613,6 +662,7 @@ alter table model_gateway_request_audit
       and payer_relationship_id is not null
       and beneficiary_relationship_id is not null
       and price_version_id is not null
+      and provider_receipt_id is not null
       and accounting_receipt_id is not null
     )
   ) not valid;
@@ -651,6 +701,11 @@ begin
   return new;
 end
 $$;
+
+drop trigger if exists commercial_usage_receipt_guard on commercial_usage_receipts;
+create trigger commercial_usage_receipt_guard
+before insert or update on commercial_usage_receipts
+for each row execute function amtech_commercial_usage_receipt_guard();
 
 drop trigger if exists commercial_meter_event_scope_guard on commercial_meter_events;
 create trigger commercial_meter_event_scope_guard
