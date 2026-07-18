@@ -82,7 +82,7 @@ Overall:
 - Base: `research`
 - Integration PR: draft `#23`
 - Lane 1 relationship/authorization checkpoint is integrated
-- Lane 3 durable command/effect kernel is CI-green on draft PR `#26` and awaits integration
+- Lane 3 durable command/effect kernel is integrated at `c94be46137b8c87b610ba0c4b48302bb2e944564`; its contract, migration, and seven-case PostgreSQL matrix are CI-green
 - Real Supabase, provider, browser/SMS, commercial, capacity, recovery, rollback, attestation, and production acceptance remain pending
 
 Production-ready means every non-waivable gate in `mvp-build/STANDARD.md` passes on the exact deployed SHA. Tuesday is an engineering checkpoint, not permission to lower the bar.

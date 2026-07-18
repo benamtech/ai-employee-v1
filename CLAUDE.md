@@ -45,7 +45,7 @@ Source, migrations, executable proof, and newest memory outrank stale prose.
 - Integration PR: draft `#23`
 - `main` is not the integration or release shortcut
 - Lane 1 relationship/authorization checkpoint is integrated
-- Lane 3 durable command/effect kernel is CI-green on draft PR `#26` and awaits integration
+- Lane 3 durable command/effect kernel is integrated at `c94be46137b8c87b610ba0c4b48302bb2e944564` with green contract, migration, command/effect matrix, and relationship-regression CI
 - Production, real Supabase, provider, browser/channel, commercial, capacity, recovery, rollback, and release acceptance remain pending until exact proof exists
 
 ## Working rules
