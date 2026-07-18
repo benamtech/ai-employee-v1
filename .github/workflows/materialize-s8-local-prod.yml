@@ -1,0 +1,45 @@
+name: Temporary S8 Local Prod Source Materialization
+
+on:
+  push:
+    branches:
+      - employee-production-tuesday
+    paths:
+      - ".github/workflows/materialize-s8-local-prod.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Collect exact source files without executing repository code
+        run: |
+          mkdir -p /tmp/s8-local-prod
+          cp --parents \
+            mvp-build/apps/manager/src/server.ts \
+            mvp-build/apps/manager/src/lib/admin.ts \
+            mvp-build/apps/manager/src/lib/durable-command-runtime.ts \
+            mvp-build/apps/manager/src/lib/run-tool.ts \
+            mvp-build/apps/manager/src/lib/employee-lifecycle.ts \
+            mvp-build/apps/manager/src/lib/mcp-auth.ts \
+            mvp-build/packages/shared/src/index.ts \
+            mvp-build/packages/shared/src/ids.ts \
+            mvp-build/packages/shared/src/materialization.ts \
+            mvp-build/packages/shared/src/release-evidence.ts \
+            mvp-build/package.json \
+            mvp-build/vitest.config.ts \
+            README.md \
+            CODEGRAPH.md \
+            /tmp/s8-local-prod/
+          cp -R --parents .github/workflows /tmp/s8-local-prod/
+          cp -R --parents mvp-build/infra/scripts /tmp/s8-local-prod/
+          cp -R --parents mvp-build/infra/deploy /tmp/s8-local-prod/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: s8-local-prod-source-${{ github.sha }}
+          path: /tmp/s8-local-prod
+          if-no-files-found: error
