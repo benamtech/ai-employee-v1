@@ -112,6 +112,10 @@ interface ModelGatewayCredentialRow {
   id: string;
   account_id: string;
   employee_id: string;
+  assignment_id: string;
+  payer_relationship_id: string;
+  beneficiary_relationship_id: string;
+  price_version_id: string;
   credential_version: number;
   token_hash: string;
   token_secret_ref: string;
@@ -158,6 +162,10 @@ const credentialRowShape = {
   id: "mgwc_typeproof",
   account_id: "acct_typeproof",
   employee_id: "emp_typeproof",
+  assignment_id: "asn_typeproof",
+  payer_relationship_id: "crel_typeproof_payer",
+  beneficiary_relationship_id: "crel_typeproof_beneficiary",
+  price_version_id: "price_typeproof",
   credential_version: 1,
   token_hash: "b".repeat(64),
   token_secret_ref: "sealed-ref",
@@ -205,6 +213,10 @@ const claimsShape = {
   credential_id: credentialRowShape.id,
   account_id: credentialRowShape.account_id,
   employee_id: credentialRowShape.employee_id,
+  assignment_id: credentialRowShape.assignment_id,
+  payer_relationship_id: credentialRowShape.payer_relationship_id,
+  beneficiary_relationship_id: credentialRowShape.beneficiary_relationship_id,
+  price_version_id: credentialRowShape.price_version_id,
   issued_at: "2026-07-17T00:00:00.000Z",
   ...modelPolicy,
 } satisfies ModelGatewayTokenClaims;
