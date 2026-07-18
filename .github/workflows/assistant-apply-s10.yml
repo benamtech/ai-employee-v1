@@ -15,7 +15,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  apply:
+  publish-source:
     if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'employee-production-tuesday'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -24,49 +24,22 @@ jobs:
         with:
           ref: employee-production-tuesday
           fetch-depth: 0
-      - name: Apply reviewed archive and capture result
-        id: apply
+      - name: Publish reviewed non-workflow implementation
         shell: bash
         run: |
-          set +e
-          exec > >(tee "$RUNNER_TEMP/apply-diagnostics.txt") 2>&1
-          set -x
+          set -euo pipefail
           cat .agent/s10-payload/part* > "$RUNNER_TEMP/s10-files.b64"
           echo "cb622a756442b8aef1dcccf673956d122b348dc3fcb9e5a41fd70af95e56e873  $RUNNER_TEMP/s10-files.b64" | sha256sum -c -
-          reconstruct_status=$?
           base64 -d "$RUNNER_TEMP/s10-files.b64" > "$RUNNER_TEMP/s10-files.tgz"
-          decode_status=$?
           echo "16fa488cf693b2ead7172741b8c6a176ce98ceb8e5e4c3077edaefc742905771  $RUNNER_TEMP/s10-files.tgz" | sha256sum -c -
-          archive_status=$?
           tar -xzf "$RUNNER_TEMP/s10-files.tgz"
-          extract_status=$?
+          git restore .github/workflows/lane10-integrated-ci-release-evidence.yml
+          rm -f .github/workflows/s10-onboarding-identity.yml
           rm -rf .agent/s10-payload
-          rm -f .github/workflows/assistant-source-snapshot.yml
-          rm -f .github/workflows/assistant-apply-s10.yml
           git add -A
-          git status --short
-          git diff --cached --name-only | sort
-          staged_count="$(git diff --cached --name-only | wc -l)"
-          echo "staged_count=$staged_count"
+          test "$(git diff --cached --name-only | wc -l)" -eq 22
+          test -z "$(git diff --cached --name-only | grep '^\.github/workflows/' || true)"
           git config user.name "AMTECH Production Agent"
           git config user.email "automation@amtechai.com"
           git commit -m "feat: enforce verified onboarding identity activation"
-          commit_status=$?
           git push origin HEAD:employee-production-tuesday
-          push_status=$?
-          echo "reconstruct_status=$reconstruct_status"
-          echo "decode_status=$decode_status"
-          echo "archive_status=$archive_status"
-          echo "extract_status=$extract_status"
-          echo "commit_status=$commit_status"
-          echo "push_status=$push_status"
-          echo "push_status=$push_status" >> "$GITHUB_OUTPUT"
-          exit 0
-      - name: Upload apply diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: s10-apply-diagnostics-${{ github.sha }}
-          path: ${{ runner.temp }}/apply-diagnostics.txt
-          if-no-files-found: error
-          retention-days: 1
