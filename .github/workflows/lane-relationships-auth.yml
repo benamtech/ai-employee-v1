@@ -11,6 +11,8 @@ on:
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
       - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
       - "mvp-build/packages/shared/src/assignment-resolver.ts"
+      - "mvp-build/packages/shared/src/connector-custody.ts"
+      - "mvp-build/packages/shared/src/commercial-attribution.ts"
       - "mvp-build/packages/shared/src/session-enforcer.ts"
       - "mvp-build/packages/shared/src/materialization.ts"
       - "mvp-build/packages/shared/src/preview-links.ts"
@@ -20,7 +22,9 @@ on:
       - "mvp-build/tests/unit/relationship-contract.test.ts"
       - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
       - "mvp-build/tests/unit/assignment-enforcement-contract.test.ts"
+      - "mvp-build/tests/unit/connector-commercial-contract.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
+      - "mvp-build/tests/integration/connector-commercial-boundary.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
   pull_request:
@@ -32,6 +36,8 @@ on:
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
       - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
       - "mvp-build/packages/shared/src/assignment-resolver.ts"
+      - "mvp-build/packages/shared/src/connector-custody.ts"
+      - "mvp-build/packages/shared/src/commercial-attribution.ts"
       - "mvp-build/packages/shared/src/session-enforcer.ts"
       - "mvp-build/packages/shared/src/materialization.ts"
       - "mvp-build/packages/shared/src/preview-links.ts"
@@ -41,7 +47,9 @@ on:
       - "mvp-build/tests/unit/relationship-contract.test.ts"
       - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
       - "mvp-build/tests/unit/assignment-enforcement-contract.test.ts"
+      - "mvp-build/tests/unit/connector-commercial-contract.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
+      - "mvp-build/tests/integration/connector-commercial-boundary.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
 
@@ -71,8 +79,15 @@ jobs:
         run: npm run typecheck --workspace @amtech/shared
       - name: Build shared relationship contracts
         run: npm run build --workspace @amtech/shared
-      - name: Run relationship and assignment-scope contract invariants
-        run: npx vitest run tests/unit/relationship-contract.test.ts tests/unit/authorization-scope-registry.test.ts tests/unit/assignment-enforcement-contract.test.ts
+      - name: Relationship contract invariants
+        run: npx vitest run tests/unit/relationship-contract.test.ts
+      - name: Authorization scope registry invariants
+        run: npx vitest run tests/unit/authorization-scope-registry.test.ts
+      - name: Assignment enforcement invariants
+        run: npx vitest run tests/unit/assignment-enforcement-contract.test.ts
+      - name: Connector and commercial contract invariants
+        if: ${{ hashFiles('mvp-build/tests/unit/connector-commercial-contract.test.ts') != '' }}
+        run: npx vitest run tests/unit/connector-commercial-contract.test.ts
 
   relationship-matrix:
     needs: contract
@@ -151,10 +166,19 @@ jobs:
           set +e
           npx vitest run --config vitest.integration.config.ts tests/integration/relationship-authorization-matrix.test.ts 2>&1 | tee relationship-matrix.log
           exit ${PIPESTATUS[0]}
+      - name: Execute connector and commercial PostgreSQL matrix
+        if: ${{ hashFiles('mvp-build/tests/integration/connector-commercial-boundary.test.ts') != '' }}
+        shell: bash
+        run: |
+          set +e
+          npx vitest run --config vitest.integration.config.ts tests/integration/connector-commercial-boundary.test.ts 2>&1 | tee connector-commercial-matrix.log
+          exit ${PIPESTATUS[0]}
       - name: Upload relationship matrix diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: relationship-matrix-${{ github.run_id }}
-          path: mvp-build/relationship-matrix.log
-          if-no-files-found: error
+          path: |
+            mvp-build/relationship-matrix.log
+            mvp-build/connector-commercial-matrix.log
+          if-no-files-found: warn
