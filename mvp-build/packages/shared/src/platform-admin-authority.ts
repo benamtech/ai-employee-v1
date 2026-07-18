@@ -81,10 +81,20 @@ export type PlatformAdminAuthorityDecision =
 
 const currentStatuses = new Set(["active", "current"]);
 
+function parsedTimestamp(value: string | null | undefined): number | null {
+  if (!value) return null;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 function current(status: string, startsAt: string | null | undefined, endsAt: string | null | undefined, now: Date): boolean {
   if (!currentStatuses.has(status)) return false;
-  if (startsAt && Date.parse(startsAt) > now.getTime()) return false;
-  if (endsAt && Date.parse(endsAt) <= now.getTime()) return false;
+  const starts = parsedTimestamp(startsAt);
+  const ends = parsedTimestamp(endsAt);
+  if (startsAt && starts === null) return false;
+  if (endsAt && ends === null) return false;
+  if (starts !== null && starts > now.getTime()) return false;
+  if (ends !== null && ends <= now.getTime()) return false;
   return true;
 }
 
@@ -149,7 +159,8 @@ export function evaluatePlatformAdminAuthority(input: {
   if (input.mutable_header_identity_present) return deny("mutable_header_identity_denied", 403, evidence);
   if (!input.session) return deny("platform_session_missing", 401, evidence);
   if (input.session.revoked_at) return deny("platform_session_revoked", 410, evidence);
-  if (Date.parse(input.session.expires_at) <= now.getTime()) return deny("platform_session_expired", 410, evidence);
+  const sessionExpiry = parsedTimestamp(input.session.expires_at);
+  if (sessionExpiry === null || sessionExpiry <= now.getTime()) return deny("platform_session_expired", 410, evidence);
   if (input.session.audience !== input.audience) return deny("platform_audience_mismatch", 403, evidence);
   if (!input.principal || input.session.principal_id !== input.principal.principal_id || !current(input.principal.status, input.principal.starts_at, input.principal.ends_at, now)) {
     return deny("platform_principal_not_current", 403, { ...evidence, durable_identity_checked: true });
@@ -161,10 +172,15 @@ export function evaluatePlatformAdminAuthority(input: {
     return deny("platform_role_denied", 403, { ...evidence, durable_identity_checked: true });
   }
 
-  const stepUpRequired = input.require_step_up || input.action_class === "support_write" || input.action_class === "security_write" || input.action_class === "billing_write";
+  const stepUpRequired = Boolean(input.require_step_up)
+    || input.action_class === "support_write"
+    || input.action_class === "security_write"
+    || input.action_class === "billing_write";
   if (stepUpRequired) {
     const maxAge = Math.max(60, input.step_up_max_age_seconds ?? 900) * 1000;
-    if (!input.session.step_up_at || now.getTime() - Date.parse(input.session.step_up_at) > maxAge) {
+    const stepUpAt = parsedTimestamp(input.session.step_up_at);
+    const stepUpAge = stepUpAt === null ? Number.POSITIVE_INFINITY : now.getTime() - stepUpAt;
+    if (stepUpAt === null || stepUpAge < 0 || stepUpAge > maxAge) {
       return deny("platform_step_up_required", 403, {
         ...evidence,
         durable_identity_checked: true,
@@ -173,22 +189,28 @@ export function evaluatePlatformAdminAuthority(input: {
     }
   }
 
-  const leaseRequired = input.require_support_lease || input.action_class === "support_read" || input.action_class === "support_write";
+  const leaseRequired = Boolean(input.require_support_lease)
+    || input.action_class === "support_read"
+    || input.action_class === "support_write";
   if (leaseRequired) {
     if (!input.lease) return deny("support_lease_required", 403, { ...evidence, durable_identity_checked: true, step_up_checked: stepUpRequired, lease_checked: true });
     if (input.lease.revoked_at) return deny("support_lease_revoked", 410, { ...evidence, durable_identity_checked: true, step_up_checked: stepUpRequired, lease_checked: true });
-    if (Date.parse(input.lease.expires_at) <= now.getTime() || Date.parse(input.lease.starts_at) > now.getTime()) {
+    const leaseStart = parsedTimestamp(input.lease.starts_at);
+    const leaseExpiry = parsedTimestamp(input.lease.expires_at);
+    if (leaseStart === null || leaseExpiry === null || leaseExpiry <= now.getTime() || leaseStart > now.getTime()) {
       return deny("support_lease_expired", 410, { ...evidence, durable_identity_checked: true, step_up_checked: stepUpRequired, lease_checked: true });
     }
+    const employeeScopeMatches = input.employee_id ? input.lease.employee_id === input.employee_id : true;
+    const assignmentScopeMatches = input.assignment_id ? input.lease.assignment_id === input.assignment_id : true;
     const scopeMatches = input.lease.principal_id === input.principal.principal_id
       && input.lease.account_id === input.account_id
-      && (!input.employee_id || !input.lease.employee_id || input.lease.employee_id === input.employee_id)
-      && (!input.assignment_id || !input.lease.assignment_id || input.lease.assignment_id === input.assignment_id)
+      && employeeScopeMatches
+      && assignmentScopeMatches
       && input.lease.allowed_actions.includes(input.action);
     if (!scopeMatches) {
       return deny("support_lease_scope_mismatch", 403, { ...evidence, durable_identity_checked: true, step_up_checked: stepUpRequired, lease_checked: true });
     }
-    if (!input.lease.reason.trim()) {
+    if (input.lease.reason.trim().length < 8) {
       return deny("support_reason_required", 409, { ...evidence, durable_identity_checked: true, step_up_checked: stepUpRequired, lease_checked: true });
     }
   }
