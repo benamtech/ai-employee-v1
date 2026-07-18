@@ -7,7 +7,7 @@ on:
       - employee-production-tuesday
     paths:
       - "mvp-build/packages/shared/src/**"
-      - "mvp-build/packages/db/migrations/**"
+      - "mvp-build/packages/db/**"
       - "mvp-build/tests/**"
       - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
       - "mvp-build/package.json"
@@ -18,7 +18,7 @@ on:
       - research
     paths:
       - "mvp-build/packages/shared/src/**"
-      - "mvp-build/packages/db/migrations/**"
+      - "mvp-build/packages/db/**"
       - "mvp-build/tests/**"
       - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
       - "mvp-build/package.json"
@@ -47,10 +47,14 @@ jobs:
           cache: npm
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
-      - name: Typecheck all active workspaces
-        run: npm run typecheck
-      - name: Build all active workspaces
-        run: npm run build
+      - name: Typecheck release-bound shared contracts
+        run: npm run typecheck --workspace @amtech/shared
+      - name: Build release-bound shared contracts
+        run: npm run build --workspace @amtech/shared
+      - name: Typecheck release-bound database package
+        run: npm run typecheck --workspace @amtech/db
+      - name: Build release-bound database package
+        run: npm run build --workspace @amtech/db
       - name: Run source contract and plan gates
         run: |
           npx vitest run \
