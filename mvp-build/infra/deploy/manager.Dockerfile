@@ -9,6 +9,13 @@ COPY apps/web/package.json apps/web/package.json
 COPY packages/shared/package.json packages/shared/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/agent-template/package.json packages/agent-template/package.json
+
+# Root npm prepare generates the canonical Manager server. Copy its complete,
+# hash-pinned input closure before npm ci so lifecycle scripts cannot fail or
+# silently generate from a partial source tree.
+COPY apps/manager/scripts/generate-production-server.mjs apps/manager/scripts/generate-production-server.mjs
+COPY apps/manager/scripts/production-admin-block.mjs apps/manager/scripts/production-admin-block.mjs
+COPY apps/manager/src/server.template.ts apps/manager/src/server.template.ts
 RUN npm ci
 
 COPY . .
