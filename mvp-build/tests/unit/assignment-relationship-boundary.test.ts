@@ -70,6 +70,17 @@ describe("P0 assignment relationship graph remediation", () => {
     expect(migration).toContain("monthly_limit_cents integer not null default 0");
     expect(migration).toContain("status text not null default 'reserved'");
   });
+
+  it("preserves current normal-employee write paths with database assignment triggers", async () => {
+    const triggers = await source("packages/db/migrations/0040_assignment_scope_runtime_triggers.sql");
+    expect(triggers).toContain("validation-vector((pass-vector: legacy production insert paths");
+    expect(triggers).toContain("ensure_employee_relationship_graph(p_employee_id text)");
+    expect(triggers).toContain("prepare_employee_principal_before_write");
+    expect(triggers).toContain("employees_relationship_graph_after_write");
+    expect(triggers).toContain("fill_assignment_context_from_employee");
+    expect(triggers).toContain("before insert or update of employee_id, assignment_id");
+    expect(triggers).toContain("artifact_links_fill_assignment_context");
+  });
 });
 
 describe("runtime credentials are assignment-bound", () => {
