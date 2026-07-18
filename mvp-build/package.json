@@ -18,6 +18,7 @@
     "test": "npm run test:unit",
     "test:unit": "vitest run",
     "test:integration": "vitest run --config vitest.integration.config.ts",
+    "test:remediation-plan": "vitest run tests/unit/remediation-plan-integrity.test.ts",
     "test:production-boundary": "vitest run tests/unit/model-profile-isolation.test.ts tests/unit/model-gateway-http-isolation.test.ts tests/unit/provisioner-idempotency.test.ts tests/unit/ambient-inbox-contract.test.ts tests/unit/production-boundary-source.test.ts tests/unit/production-live-harness.test.ts",
     "test:worker-migrations": "vitest run --config vitest.integration.config.ts tests/integration/worker-migrations.test.ts",
     "test:watch": "vitest",
