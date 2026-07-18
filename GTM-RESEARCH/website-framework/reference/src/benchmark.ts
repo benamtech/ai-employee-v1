@@ -9,6 +9,16 @@ export type KnownFeatureRole = typeof FEATURE_ROLES[number];
 export type FeatureRole = string;
 export type FeatureMap = { [role: string]: string | undefined };
 
+export interface VectorSpaceIdentity {
+  namespace: string;
+  symbolVersion: string;
+}
+
+export const DEFAULT_VECTOR_SPACE_IDENTITY: VectorSpaceIdentity = {
+  namespace: "amtech-reference",
+  symbolVersion: "1",
+};
+
 export const DESIGN_CAPABILITIES = [
   "semantic-hierarchy", "responsive-grid", "evidence-dense", "comparison-table", "workflow-steps",
   "progressive-disclosure", "conversion-panel", "media-slot", "reduced-motion", "long-form-reading",
@@ -126,15 +136,24 @@ export function generateBenchmarkFixture(contextCount = 500): BenchmarkFixture {
   return { contexts, pages };
 }
 
-export function compileHrrFeatures(features: FeatureMap, dimensions = 512): Vector {
+export function compileHrrFeatures(
+  features: FeatureMap,
+  dimensions = 512,
+  identity: VectorSpaceIdentity = DEFAULT_VECTOR_SPACE_IDENTITY,
+): Vector {
+  validateVectorIdentity(identity);
+  const prefix = `vsa:${identity.namespace}:symbols:${identity.symbolVersion}`;
   const parts = Object.entries(features)
     .filter((entry): entry is [string, string] => Boolean(entry[1]))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([role, value]) => ({
-      vector: bind(deterministicSymbol(`role:${role}`, dimensions), deterministicSymbol(`value:${role}:${value}`, dimensions)),
+      vector: bind(
+        deterministicSymbol(`${prefix}:role:${role}`, dimensions),
+        deterministicSymbol(`${prefix}:value:${role}:${value}`, dimensions),
+      ),
       weight: roleWeight(role),
     }));
-  if (parts.length === 0) return deterministicSymbol("empty-context", dimensions);
+  if (parts.length === 0) return deterministicSymbol(`${prefix}:empty-context`, dimensions);
   return weightedSuperposition(parts);
 }
 
@@ -231,6 +250,10 @@ function roleWeight(role: string): number {
     case "surface": return 0.15;
     default: return 0.5;
   }
+}
+function validateVectorIdentity(identity: VectorSpaceIdentity): void {
+  if (!identity.namespace.trim()) throw new Error("vector namespace is required");
+  if (!identity.symbolVersion.trim()) throw new Error("vector symbol version is required");
 }
 function queryPhrase(task: string, stage: string, proof: string, index: number): string {
   const verbs = stage === "diagnose" ? ["why", "how to fix", "what causes"] : stage === "compare" ? ["best", "versus", "compare"] : ["how to automate", "setup", "implementation"];

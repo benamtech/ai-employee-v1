@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "status": "source_wired_research",
   "production_ready": false,
   "updated_at": "2026-07-17",
@@ -13,6 +13,7 @@
   "vector_space": {
     "first_class": true,
     "namespace": "amtech-hyper-site-v1",
+    "symbol_version": "1",
     "vector_dimensions": 512,
     "axes": {
       "industry": { "description": "The market, trade, or operating domain served by the page." },
@@ -37,20 +38,29 @@
   "agent_harness": {
     "mode": "propose_validate_compile",
     "publication_default": "noindex",
+    "coverage_policy": {
+      "minimum_contexts": 1,
+      "minimum_normalized_marginal_gain": 0.01,
+      "minimum_improving_contexts": 1,
+      "maximum_existing_similarity": 0.985
+    },
     "required_stages": [
       "research-demand-and-problem-space",
       "declare-target-vector-region",
+      "declare-explicit-coverage-contexts",
       "propose-distinct-information-object",
       "bind-claims-to-evidence",
       "compose-semantic-modules",
-      "estimate-marginal-coverage",
+      "compute-marginal-coverage",
       "validate-neighbors-cannibalization-and-graph-role",
       "compile-and-render-fixtures"
     ],
     "required_outputs": [
       "feature-atoms",
       "canonical-question",
+      "coverage-contexts",
       "marginal-coverage-hypothesis",
+      "computed-coverage-report",
       "information-object",
       "claim-evidence-bindings",
       "semantic-module-plan",
@@ -100,8 +110,9 @@
     { "id": "evidence:offer", "level": 4, "summary": "Canonical AMTECH offer: Start Free, Managed AI Employee from $400, Workforce custom." },
     { "id": "evidence:approval", "level": 3, "summary": "Owner approval is required at customer, money, reputation, and destructive-action boundaries." },
     { "id": "evidence:synthetic-workflow", "level": 2, "summary": "Synthetic workflow fixture for compiler and UI validation only." },
-    { "id": "evidence:context-ranking-paper", "level": 3, "summary": "Kong et al. 2023 supports measuring document-context compatibility in ranking; it does not validate public SEO corpus generation.", "url": "https://arxiv.org/abs/2309.05113" },
-    { "id": "evidence:hdc-vsa-survey", "level": 3, "summary": "Kleyko et al. survey HDC/VSA applications and cognitive architectures; it does not establish SEO lift.", "url": "https://arxiv.org/abs/2112.15424" }
+    { "id": "evidence:context-ranking-paper", "level": 3, "summary": "Kong et al. 2023 supports separate query-document and context-document relevance with explicit cohort context and graded labels; it does not validate public SEO corpus generation.", "url": "https://arxiv.org/abs/2309.05113" },
+    { "id": "evidence:hdc-vsa-survey", "level": 3, "summary": "Kleyko et al. survey HDC/VSA applications and cognitive architectures; it does not establish SEO lift.", "url": "https://arxiv.org/abs/2112.15424" },
+    { "id": "evidence:csi-paper", "level": 2, "summary": "Iyer 2026 proposes Complement Submodular Information for balanced head/tail subset selection and outlier suppression. It is a new preprint and is used only as a research comparison arm.", "url": "https://arxiv.org/abs/2605.24779" }
   ],
   "claims": [
     { "id": "claim:research-state", "text": "This framework is a source-wired research reference, not a production-accepted website platform.", "evidenceIds": ["evidence:framework-state"], "requiredLevel": 4 },

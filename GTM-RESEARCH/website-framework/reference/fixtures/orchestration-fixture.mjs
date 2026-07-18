@@ -1,0 +1,191 @@
+export function createOrchestrationFixture(manifest) {
+  const atom = (dimension, value, source_id = "source:fixture") => ({ dimension, value, source_id, provenance: "researched" });
+  const judgments = (label) => [
+    { assessorId: "assessor:a", label, rationale: `independent ${label} judgment A` },
+    { assessorId: "assessor:b", label, rationale: `independent ${label} judgment B` },
+  ];
+  const contexts = [
+    { id: "ctx:paint:train", split: "train", industry: "painting-contractor", problem: "estimate-backlog", useCase: "estimate-followup", label: "perfect" },
+    { id: "ctx:landscape:train", split: "train", industry: "landscaping", problem: "missed-calls", useCase: "lead-recovery", label: "perfect" },
+    { id: "ctx:paint:validation", split: "validation", industry: "painting-contractor", problem: "evening-office-work", useCase: "estimate-followup", label: "good" },
+    { id: "ctx:landscape:validation", split: "validation", industry: "landscaping", problem: "missed-calls", useCase: "lead-recovery", label: "good" },
+    { id: "ctx:paint:test", split: "test", industry: "painting-contractor", problem: "estimate-backlog", useCase: "estimate-followup", label: "perfect" },
+    { id: "ctx:landscape:test", split: "test", industry: "landscaping", problem: "missed-calls", useCase: "lead-recovery", label: "good" },
+  ].map((item) => ({
+    id: item.id,
+    query: `${item.problem} ${item.industry}`,
+    task: item.useCase,
+    weight: 1,
+    featureAtoms: [atom("industry", item.industry), atom("problem", item.problem), atom("use_case", item.useCase), atom("audience", "owner-operator"), atom("stage", "evaluate"), atom("surface", "canonical-page")],
+    sourceIds: ["source:fixture"],
+    judgments: judgments(item.label),
+    hiddenSliceIds: [item.industry],
+    explicitSplit: item.split,
+    provenance: { createdBy: "research-agent", authorClass: "independent-research", createdAt: "2026-07-17" },
+  }));
+  const edge = (id, fromPageId, toPageId, type, rationale) => ({ id, fromPageId, toPageId, type, rationale, sourceIds: ["source:fixture"], eligibility: [], priority: 1 });
+  const prototype = (id, industry, problem, useCase) => ({ id, feature_atoms: [atom("industry", industry), atom("problem", problem), atom("use_case", useCase), atom("audience", "owner-operator"), atom("stage", "evaluate"), atom("surface", "canonical-page")] });
+  const paint = prototype("owner-estimate", "painting-contractor", "estimate-backlog", "estimate-followup");
+  const paintSecondary = prototype("evening-estimate", "painting-contractor", "evening-office-work", "estimate-followup");
+  const landscape = prototype("owner-lead-recovery", "landscaping", "missed-calls", "lead-recovery");
+  const common = {
+    serviceOfferIds: ["offer:free-ai-employee"],
+    sourceIds: ["source:fixture"],
+    evidenceIds: ["evidence:source:fixture"],
+    conversionPathId: "conversion:start-free",
+    commercialValue: 3,
+    lifecycleCost: 1,
+    rareGroupIds: ["trade-owners"],
+    eligibility: { requiredSharedDimensions: ["industry"], excludedAtomSets: [] },
+  };
+  const candidateSeeds = [
+    {
+      ...common,
+      id: "candidate:painting-estimate",
+      route: "/research/painting-contractors/create-estimates-with-ai",
+      canonicalQuestion: "How can a painting contractor turn job notes into an approved estimate with AI?",
+      intent: "complete-estimate-workflow",
+      topicProblemIds: ["problem:estimate-backlog"],
+      workflowIntegrationIds: ["workflow:estimate-followup"],
+      desiredOutcomeIds: ["outcome:customer-ready-estimate"],
+      primaryPrototypeId: "owner-estimate",
+      prototypes: [paintSecondary, paint],
+      informationObjectIds: ["info:estimate-workflow"],
+      utilityOrTaskContractIds: ["task:estimate-draft"],
+      requiredModuleKinds: ["hero", "answer", "workflow", "proof", "cta"],
+      requiredLayoutRoles: ["lead", "support", "proof", "conversion"],
+      requiredCapabilities: ["semantic-hierarchy", "workflow-steps", "conversion-panel"],
+      graphEdges: [edge("edge:paint-to-landscape", "candidate:painting-estimate", "candidate:landscape-leads", "comparison-alternative", "Compare adjacent owner workflows without implying identical needs")],
+    },
+    {
+      ...common,
+      id: "candidate:landscape-leads",
+      route: "/research/landscapers/recover-missed-calls-with-ai",
+      canonicalQuestion: "How can a landscaping owner recover missed calls with a bounded AI Employee?",
+      intent: "recover-missed-leads",
+      topicProblemIds: ["problem:missed-calls"],
+      workflowIntegrationIds: ["workflow:lead-recovery"],
+      desiredOutcomeIds: ["outcome:qualified-callback"],
+      primaryPrototypeId: "owner-lead-recovery",
+      prototypes: [landscape],
+      informationObjectIds: ["info:lead-recovery-workflow"],
+      utilityOrTaskContractIds: ["task:lead-recovery"],
+      requiredModuleKinds: ["hero", "answer", "workflow", "cta"],
+      requiredLayoutRoles: ["lead", "support", "conversion"],
+      requiredCapabilities: ["semantic-hierarchy", "workflow-steps", "conversion-panel"],
+      graphEdges: [edge("edge:landscape-to-paint", "candidate:landscape-leads", "candidate:painting-estimate", "comparison-alternative", "Expose adjacent contractor workflow examples")],
+    },
+    {
+      ...common,
+      id: "candidate:painting-estimate-copy",
+      route: "/research/painting-contractors/estimate-ai-copy",
+      canonicalQuestion: "How can painting contractors create estimates with AI again?",
+      intent: "complete-estimate-workflow",
+      topicProblemIds: ["problem:estimate-backlog"],
+      workflowIntegrationIds: ["workflow:estimate-followup"],
+      desiredOutcomeIds: ["outcome:customer-ready-estimate"],
+      primaryPrototypeId: "owner-estimate",
+      prototypes: [paint],
+      informationObjectIds: ["info:estimate-workflow"],
+      utilityOrTaskContractIds: [],
+      requiredModuleKinds: ["hero", "answer", "cta"],
+      requiredLayoutRoles: ["lead", "conversion"],
+      requiredCapabilities: ["semantic-hierarchy", "conversion-panel"],
+      graphEdges: [],
+      commercialValue: 1,
+      rareGroupIds: [],
+    },
+  ];
+  const project = {
+    id: "project:amtech-framework-fixture",
+    version: "1",
+    business: {
+      purpose: "Generate evidence-bounded AI Employee landing pages and public task surfaces.",
+      services: ["AI Employee infrastructure"],
+      offers: ["Start Free", "Managed AI Employee from $400"],
+      audiences: ["contractor owner-operators"],
+      locations: ["United States"],
+      workflows: ["estimate drafting", "lead recovery"],
+      integrations: ["QuickBooks"],
+      constraints: ["owner approval", "no fabricated proof"],
+      proofPoints: ["source-wired framework fixture"],
+      pricingFacts: ["Managed AI Employee from $400"],
+    },
+    brand: {
+      name: "AMTECH",
+      voice: ["direct", "operational", "human"],
+      prohibitedLanguage: ["revolutionize", "unlock"],
+      palette: { ink: "#111111", red: "#E11D2A", blue: "#2563EB", white: "#FFFFFF" },
+      typography: ["Inter", "system-ui"],
+      visualRules: ["light surfaces only", "restrained motion"],
+      componentRules: ["semantic modules", "no decorative pills"],
+    },
+    technical: {
+      repositoryRoot: ".",
+      framework: "static semantic compiler",
+      deploymentTarget: "Cloudflare static assets",
+      browserTargets: ["Chrome >= 111", "Firefox >= 113", "Safari >= 16.4"],
+      performanceBudgets: { criticalCssBytes: 24576, canonicalJsBytes: 1, htmlBytes: 131072 },
+      accessibilityStandard: "WCAG 2.2 AA",
+    },
+    goals: {
+      primaryConversions: ["Start Free"],
+      searchOutcomes: ["compatible discovery"],
+      utilityOutcomes: ["completed estimate draft", "qualified callback"],
+      publicationRiskTolerance: "low",
+      maximumInitialPages: 2,
+    },
+    sources: [{ id: "source:fixture", kind: "company", title: "AMTECH fixture authority", summary: "Synthetic source used only for compiler orchestration validation.", retrievedAt: "2026-07-17", applicability: ["framework-fixture"], confidence: "verified" }],
+    assets: [{ id: "asset:logo", kind: "logo", pathOrUri: "assets/amtech.svg", altOrPurpose: "AMTECH logo", rights: "owned" }],
+  };
+  const calibration = (id, contextId, documentId, split, rawScore, label) => ({ id, contextId, documentId, scorerId: "hrr-positive-cosine-v1", sourceIds: ["source:fixture"], split, rawScore, label, weight: 1 });
+  return {
+    project,
+    manifest,
+    contextCorpus: {
+      id: "corpus:fixture",
+      version: "1",
+      cases: contexts,
+      splitPolicy: { train: 0.5, validation: 0.25, test: 0.25, seed: "fixture-v1", minimumAssessors: 2, forbidGeneratorAuthoredAcceptance: true },
+      generationAgentId: "generation-agent",
+    },
+    calibrationObservations: [
+      calibration("cal:bad:train", "ctx:landscape:train", "doc:mismatch", "train", 0, "bad"),
+      calibration("cal:fair:train", "ctx:paint:train", "doc:partial", "train", 0.35, "fair"),
+      calibration("cal:good:train", "ctx:landscape:train", "doc:good", "train", 0.7, "good"),
+      calibration("cal:perfect:train", "ctx:paint:train", "doc:perfect", "train", 1, "perfect"),
+      calibration("cal:bad:validation", "ctx:paint:validation", "doc:mismatch", "validation", 0.05, "bad"),
+      calibration("cal:good:validation", "ctx:landscape:validation", "doc:good", "validation", 0.72, "good"),
+      calibration("cal:fair:test", "ctx:landscape:test", "doc:partial", "test", 0.4, "fair"),
+      calibration("cal:perfect:test", "ctx:paint:test", "doc:perfect", "test", 0.95, "perfect"),
+    ],
+    candidateSeeds,
+    selection: { budget: 2, maximumPages: 2, informationWeight: 0.2, rareTailWeight: 0.1, diversityWeight: 0, minimumValidationCoverage: 0.6, minimumTestCoverage: 0.6 },
+    claims: { allowed: ["claim:offer"], prohibited: ["claim:guaranteed-results"] },
+  };
+}
+
+export const createFrameworkInput = createOrchestrationFixture;
+
+export function createFixtureExecutor() {
+  return {
+    id: "fixture-executor",
+    async execute(request) {
+      const fail = request.pass === "content" && request.attempt === 0;
+      return {
+        pass: request.pass,
+        status: fail ? "fail" : "pass",
+        summary: fail ? "content specificity critic requested repair" : `${request.pass} completed`,
+        artifacts: { pageId: request.job.pageId, pass: request.pass, attempt: request.attempt },
+        usedSourceIds: [request.job.sourceIds[0]],
+        findings: [{
+          attributeId: fail ? "coordinate.specificity" : request.pass === "repair" ? "runner.checkpoints" : "job.contract",
+          state: fail ? "fail" : "pass",
+          detail: fail ? "first content draft was too generic" : `${request.pass} fixture validation passed`,
+        }],
+      };
+    },
+  };
+}
+
+export const createAgentPassExecutor = createFixtureExecutor;
