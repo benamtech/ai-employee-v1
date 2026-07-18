@@ -121,12 +121,12 @@ function actionAllowed(actions: readonly AssignmentAction[], action: AssignmentA
 
 function evidenceFor(input: {
   principal: HumanPrincipal;
-  assignment?: AssignmentPrincipalRecord;
-  resource_class?: string | null;
-  resource_id?: string | null;
-  action?: AssignmentAction | null;
-  grant_checked?: boolean;
-  command_effect_checked?: boolean;
+  assignment?: AssignmentPrincipalRecord | undefined;
+  resource_class?: string | null | undefined;
+  resource_id?: string | null | undefined;
+  action?: AssignmentAction | null | undefined;
+  grant_checked?: boolean | undefined;
+  command_effect_checked?: boolean | undefined;
 }): AssignmentScopeEvidence {
   const evidence: AssignmentScopeEvidence = {
     principal_id: input.principal?.principal_id ?? "",
