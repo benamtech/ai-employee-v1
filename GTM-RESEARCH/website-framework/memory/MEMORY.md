@@ -3,7 +3,7 @@
 format: TOON-oriented Markdown
 status: active
 scope: GTM-RESEARCH/website-framework
-updated_at: 2026-07-17T20:05:00-04:00
+updated_at: 2026-07-17T20:30:00-04:00
 
 ## protocol
 
@@ -22,19 +22,20 @@ rules[8]:
 
 ## current
 
-state{branch,pr,status,latest_validated_authority_head,validated_code_head,workflow_run}:
-  agent/ui-metaprogramming-pass-1,17,"draft; source-level compiler pass; agent orchestration/relevance/runtime/field blocked",a15327cf99cbd628b96e936b1043523bbdf9d152,9ef48b97308e09d5a97f4978820255e3c8b53c7e,29577907501
+state{branch,pr,status,latest_authority_head_before_memory_update,validated_code_head,workflow_run}:
+  agent/ui-metaprogramming-pass-1,17,"draft; architecture authority updated; executable orchestration/generation/relevance/runtime/field blocked",35d340f59b7c6176318bd906dbe8cb85d2109ae5,9ef48b97308e09d5a97f4978820255e3c8b53c7e,29577907501
 
 compiled{manifest_version,pages,indexable,prototypes,namespace,symbol_version,tests}:
   1.1.0,6,0,7,amtech-hyper-site-v1,1,"22/22"
 
 product_boundary:
-  "user operates framework through coding agent; agent generates and maintains manifest/site program from business+brand+asset+source inputs; compiler validates/emits; this orchestration is not implemented"
+  "user operates through coding agent; agent forms project/vector/corpus and executes vector-derived page-generation jobs; current executable package begins near manifest/compiler end of lifecycle"
 
 ## handoffs
 
-handoffs[7]{at,file,status,scope}:
-  2026-07-17T20:05:00-04:00,2026-07-17-2005-agent-operated-generation-wasm-research.md,current,"canonical agent-operated lifecycle; Wasm research; search-scale rejection boundary"
+handoffs[8]{at,file,status,scope}:
+  2026-07-17T20:30:00-04:00,2026-07-17-2030-agent-generation-jobs-workflow-validation.md,current,"agent at intake+generation; PageGenerationJobs; full workflow validation matrix"
+  2026-07-17T20:05:00-04:00,2026-07-17-2005-agent-operated-generation-wasm-research.md,current-foundation,"agent-operated lifecycle; Wasm research; search-scale rejection boundary"
   2026-07-17T08:15:00-04:00,2026-07-17-0815-comprehensive-reorientation.md,current-code-review,"full codebase review; coverage qualification; runtime findings"
   2026-07-17T07:30:00-04:00,2026-07-17-0730-vector-native-reorientation.md,superseded-interpretation,"compiler corrections; overstates proposal coverage acceptance; retained immutable"
   2026-07-17T06:30:00-04:00,2026-07-17-ui-metaprogramming-pass-1.md,historical-source-pass,"browser-first CSS; semantic UI; bounded R3F"
@@ -44,59 +45,74 @@ handoffs[7]{at,file,status,scope}:
 
 ## authority
 
-read_order[14]{order,file,role}:
+read_order[17]{order,file,role}:
   1,../../identity.md,"root identity"
   2,../identity.md,"scope identity"
   3,../../CODEGRAPH.md,"root map"
   4,../AGENTS.md,"operating/memory rules"
-  5,../CODEGRAPH.md,"current source/product graph"
-  6,../README.md,"current reality"
+  5,../CODEGRAPH.md,"current product/source graph"
+  6,../README.md,"current reality + workflow"
   7,MEMORY.md,"current durable state"
-  8,2026-07-17-2005-agent-operated-generation-wasm-research.md,"current product/execution handoff"
-  9,../20-agent-operated-vector-site-generation-and-wasm.md,"canonical usage + Wasm model"
-  10,../18-vector-node-path-web-framework-model.md,"three planes"
-  11,../19-vector-native-corrections-and-csi-validation.md,"academic validation"
-  12,../validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md,"full findings"
-  13,../validation/reports/2026-07-17-vector-native-corrections.md,"exact source proof"
-  14,../site-manifest.yaml,"single compiled-project/corpus authority"
+  8,2026-07-17-2030-agent-generation-jobs-workflow-validation.md,"current handoff"
+  9,../20-agent-operated-vector-site-generation-and-wasm.md,"product/use/Wasm model"
+  10,../21-vector-to-generation-job-compiler.md,"vector -> agent generation jobs"
+  11,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system validation/pass/fail matrix"
+  12,../18-vector-node-path-web-framework-model.md,"three planes"
+  13,../19-vector-native-corrections-and-csi-validation.md,"academic validation"
+  14,../validation/reports/2026-07-17-agent-operated-generation-workflow-reorientation.md,"current architecture report"
+  15,../validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md,"full findings"
+  16,../validation/reports/2026-07-17-vector-native-corrections.md,"exact source proof"
+  17,../site-manifest.yaml,"single compiled-project/corpus authority"
 
 ## architecture
 
 interface:
-  "user -> coding agent -> ProjectInput/source/evidence/asset ledgers -> context corpus/ontology/candidate site program -> vector compiler/optimizer -> content/UI/task proposals -> deterministic emissions"
+  "user -> coding agent -> ProjectInput/ledgers -> independent contexts -> ontology/vector space -> candidate coordinates -> selected corpus -> PageGenerationJobs -> specialized agent passes -> manifest/compiler -> emissions"
+
+agent_roles[2]{stage,work}:
+  formation,"inspect, normalize, research, context corpus, ontology, candidate program, selection"
+  generation,"research, concept, content, utility/task, SEO/graph, UI, critic, repair per accepted job"
+
+workflow:
+  "init -> inspect/doctor -> research -> plan -> generate -> dev/preview -> validate -> build -> publish -> measure"
 
 planes[3]{plane,state}:
-  publication,"all-prototype compiler implemented; agent intake/orchestration and relevance calibration absent"
+  publication,"all-prototype compiler implemented; intake/candidate/job/generation orchestration absent"
   navigation,"untyped similarity page IDs only"
   interaction,"public AI Employee task IR absent"
 
 compute:
-  "typed pruning -> lexical/semantic/facet/graph prefilter -> bounded multi-prototype vector scoring -> facility-location/CSI selection -> generated stable nodes"
+  "typed pruning -> lexical/semantic/facet/graph prefilter -> bounded multi-prototype vector scoring -> facility-location/CSI selection -> generation jobs -> reviewed stable nodes"
 
 wasm:
   "candidate portable SIMD math kernel for binding/scoring/top-k/duplicates/facility/CSI/parity; native Zig control may win locally; canonical pages remain static and Wasm-free"
 
 ## decisions
 
-decisions[18]{id,decision,ref}:
+decisions[23]{id,decision,ref}:
   D01,"coding agent is primary framework interface","../20-agent-operated-vector-site-generation-and-wasm.md"
-  D02,"user supplies business/brand/assets/source/goals; agent generates site program","../README.md"
-  D03,"manifest is sole compiled-project/corpus authority, not user-facing authoring surface","../site-manifest.yaml"
-  D04,"HTML/UI are emissions","../README.md"
-  D05,"vector chunks are reusable prospect situations, not people","../18-vector-node-path-web-framework-model.md"
-  D06,"namespace/symbol_version alter actual symbols","../reference/src/benchmark.ts"
-  D07,"all prototypes survive packed compilation","../reference/src/framework.ts"
-  D08,"coverage mechanics compare current vs proposed corpus","../reference/src/manifest.ts"
-  D09,"coverage mechanics are not relevance acceptance","../validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md"
-  D10,"CSI is batch/split control, not single-page oracle","../reference/src/csi.ts"
-  D11,"context paper is baseline, not SEO validation","../19-vector-native-corrections-and-csi-validation.md"
-  D12,"page/node-path/public-session are separate planes","../18-vector-node-path-web-framework-model.md"
-  D13,"UI static/browser-first; 3D optional/noncanonical","2026-07-17-ui-metaprogramming-pass-1.md"
-  D14,"Wasm requires repeated data-parallel workload and portability, not merely vectors","../20-agent-operated-vector-site-generation-and-wasm.md"
-  D15,"dual kernel controls: TS oracle, Zig native, Wasm scalar/SIMD","../20-agent-operated-vector-site-generation-and-wasm.md"
-  D16,"page count is not objective; marginal useful coverage is","../AGENTS.md"
-  D17,"static canonical delivery must not require Wasm","../20-agent-operated-vector-site-generation-and-wasm.md"
-  D18,"timestamped memories immutable","../AGENTS.md"
+  D02,"agent is integral at project formation and page generation","../21-vector-to-generation-job-compiler.md"
+  D03,"user supplies business/brand/assets/source/goals; agent generates site program","../README.md"
+  D04,"manifest is sole compiled-project/corpus authority, not user-facing authoring surface","../site-manifest.yaml"
+  D05,"accepted vector coordinates compile to typed PageGenerationJobs","../21-vector-to-generation-job-compiler.md"
+  D06,"specialized agent passes write/build content, utility, SEO/graph, UI, criticism, repair","../21-vector-to-generation-job-compiler.md"
+  D07,"framework operation follows init/inspect/research/plan/generate/preview/validate/build/publish/measure","../22-agent-operated-framework-workflow-validation-matrix.md"
+  D08,"every feature/workflow/algorithm/UX/UI/runtime stage requires validation+pass+fail vectors","../22-agent-operated-framework-workflow-validation-matrix.md"
+  D09,"HTML/UI are emissions","../README.md"
+  D10,"vector chunks are reusable prospect situations, not people","../18-vector-node-path-web-framework-model.md"
+  D11,"context attributes belong only when they change useful output and pass policy","../21-vector-to-generation-job-compiler.md"
+  D12,"namespace/symbol_version alter actual symbols","../reference/src/benchmark.ts"
+  D13,"all prototypes survive packed compilation","../reference/src/framework.ts"
+  D14,"coverage mechanics compare current vs proposed corpus","../reference/src/manifest.ts"
+  D15,"coverage mechanics are not relevance acceptance","../validation/reports/2026-07-17-comprehensive-codebase-reorientation-review.md"
+  D16,"CSI is batch/split control, not single-page oracle","../reference/src/csi.ts"
+  D17,"context paper is baseline, not SEO validation","../19-vector-native-corrections-and-csi-validation.md"
+  D18,"page/node-path/public-session are separate planes","../18-vector-node-path-web-framework-model.md"
+  D19,"UI static/browser-first; 3D optional/noncanonical","2026-07-17-ui-metaprogramming-pass-1.md"
+  D20,"Wasm requires repeated data-parallel workload and portability, not merely vectors","../20-agent-operated-vector-site-generation-and-wasm.md"
+  D21,"dual kernel controls: TS oracle, Zig native, Wasm scalar/SIMD","../20-agent-operated-vector-site-generation-and-wasm.md"
+  D22,"page count is not objective; held-out useful coverage and distinct utility are","../AGENTS.md"
+  D23,"timestamped memories immutable","../AGENTS.md"
 
 ## proof
 
@@ -110,48 +126,65 @@ passed[5]:
   all-prototype-agent-context
   mechanical-distinct-vs-duplicate-and-csi-fixtures
 
+architecture_authority[4]:
+  agent-at-formation-and-generation
+  vector-to-PageGenerationJob-bridge
+  framework-operator-lifecycle
+  27-feature-workflow-validation-matrix
+
 partial[2]:
   proposal-coverage,"computed; shifted cosine + self-supplied contexts"
   primary-page-vector,"all prototypes preserved; primary alias implicit"
 
-research_only[3]:
+research_only[5]:
   agent-operated-project-generation
+  PageGenerationJob-compiler
+  specialized-agent-runner
   Zig-native-vs-Wasm-performance
   search-scale-corpus-value
 
 ## academic_platform
 
-sources[7]{id,url,use,boundary}:
+sources[12]{id,url,use,boundary}:
   Kong-2023,https://arxiv.org/abs/2309.05113,"explicit context-doc relevance + graded labels","not HRR/corpus/search/revenue proof"
   Kleyko-2021,https://arxiv.org/abs/2112.15424,"HDC/VSA compositional computing","not SEO/UI/commercial proof"
   Iyer-2026,https://arxiv.org/abs/2605.24779,"CSI batch/split balance","preprint; no single-page authority"
   W3C-Wasm,https://www.w3.org/TR/wasm-core/,"portable low-level SIMD execution","not automatic speedup"
-  Cloudflare-Wasm,https://developers.cloudflare.com/workers/runtime-apis/webassembly/,"Workers supports SIMD; single-threaded; size/startup boundary","not production acceptance"
+  Cloudflare-Wasm,https://developers.cloudflare.com/workers/runtime-apis/webassembly/,"Workers SIMD + single-thread boundary","not production acceptance"
+  R3F-scaling,https://r3f.docs.pmnd.rs/advanced/scaling-performance,"demand rendering/resource reuse","not visual-value proof"
+  Vite,https://vite.dev/guide/,"scaffold/dev/build framework lifecycle","ergonomic baseline only"
+  Next,https://nextjs.org/docs/app/getting-started/installation,"scaffold/dev/build framework lifecycle","ergonomic baseline only"
+  Astro,https://docs.astro.build/en/install-and-setup/,"scaffold/dev/build framework lifecycle","ergonomic baseline only"
+  Playwright,https://playwright.dev/docs/best-practices,"user-facing isolated browser tests","not accessibility completion"
   Google-AI,https://developers.google.com/search/docs/fundamentals/using-gen-ai-content,"automation allowed when useful","scaled low-value pages fail"
-  Google-AI-Search,https://developers.google.com/search/docs/fundamentals/ai-optimization-guide,"avoid separate page for every query variation","platform constraint not design objective"
+  Google-AI-Search,https://developers.google.com/search/docs/fundamentals/ai-optimization-guide,"avoid page per query variation","platform constraint not design objective"
 
 ## blockers
 
-p0[6]{id,item,ref}:
-  R-00,"ProjectInput/source/evidence/asset and coding-agent orchestration","../20-agent-operated-vector-site-generation-and-wasm.md"
-  R-01,"primary prototype semantics","../reference/src/manifest.ts; ../reference/src/framework.ts"
-  R-02,"shifted-cosine compatibility calibration","../reference/src/manifest.ts"
-  R-03,"independent graded context corpus","../19-vector-native-corrections-and-csi-validation.md"
+p0[9]{id,item,ref}:
+  R-00,"ProjectInput/source/evidence/asset contracts","../22-agent-operated-framework-workflow-validation-matrix.md"
+  R-01,"independent ContextCorpus + frozen splits","../22-agent-operated-framework-workflow-validation-matrix.md"
+  R-02,"primary prototype semantics","../reference/src/manifest.ts; ../reference/src/framework.ts"
+  R-03,"shifted-cosine compatibility calibration","../reference/src/manifest.ts"
   R-04,"typed semantic graph paths","../18-vector-node-path-web-framework-model.md"
-  R-05,"realistic TS/Zig-native/Wasm benchmark harness","../reference/src/wasm.ts; ../reference/zig/kernel.zig"
+  R-05,"candidate PageCoordinate compiler + staged funnel","../21-vector-to-generation-job-compiler.md"
+  R-06,"SelectedCorpusPlan + PageGenerationJob compiler","../21-vector-to-generation-job-compiler.md"
+  R-07,"specialized agent runner/checkpoints/repair","../21-vector-to-generation-job-compiler.md"
+  R-08,"dev/preview/corpus-review framework UX","../22-agent-operated-framework-workflow-validation-matrix.md"
 
 p1[8]{id,item,ref}:
-  R-06,"candidate staged filtering/optimizer integration","../reference/src/optimizer.ts"
-  R-07,"learned semantic baseline","../reference/src/benchmark.ts"
-  R-08,"public employee task IR","../../../mvp-build/docs/public-interaction-standard.md"
-  R-09,"resolver identity/mask/prototype support","../reference/src/resolver.ts"
-  R-10,"Worker/TS resolver parity","../reference/worker/src/index.ts"
-  R-11,"Wasm memory-grow view safety","../reference/src/wasm.ts"
-  R-12,"experiment/window/event correctness","../reference/src/distribution.ts"
-  R-13,"browser/accessibility/CWV","../validation/reports/2026-07-17-ui-metaprogramming-pass-1.md"
+  R-09,"realistic TS/Zig-native/Wasm benchmark harness","../reference/src/wasm.ts; ../reference/zig/kernel.zig"
+  R-10,"learned semantic baseline","../reference/src/benchmark.ts"
+  R-11,"public employee task IR","../../../mvp-build/docs/public-interaction-standard.md"
+  R-12,"resolver identity/mask/prototype support","../reference/src/resolver.ts"
+  R-13,"Worker/TS resolver parity","../reference/worker/src/index.ts"
+  R-14,"Wasm memory-grow view safety","../reference/src/wasm.ts"
+  R-15,"experiment/window/event correctness","../reference/src/distribution.ts"
+  R-16,"browser/accessibility/CWV","../validation/reports/2026-07-17-ui-metaprogramming-pass-1.md"
 
-not_claimed[9]:
+not_claimed[10]:
   agent-can-yet-generate-complete-site
+  generation-job-compiler-implemented
   reviewed-2000-page-corpus
   search-ranking-lift
   AI-citation-lift
@@ -163,17 +196,19 @@ not_claimed[9]:
 
 ## next
 
-next[10]{order,task,gate}:
-  1,"ProjectInput + source/evidence/asset contracts","agent can normalize real business/brand package"
-  2,"agent orchestration/checkpoint/repair lifecycle","full dry-run without hand-authored pages"
+next[12]{order,task,gate}:
+  1,"ProjectInput + source/evidence/asset contracts","agent normalizes real business/brand package"
+  2,"independent ContextCorpus + frozen splits","non-self-confirming opportunity/relevance authority"
   3,"primary prototype semantics","explicit deterministic invariant"
-  4,"compatibility calibration + frozen contexts","independent grades + reliability"
+  4,"compatibility calibration","independent grades + reliability"
   5,"typed node paths","edge types + provenance + usefulness"
-  6,"kernel benchmark","TS vs Zig native vs Wasm scalar/SIMD realistic matrices"
-  7,"candidate funnel/optimizer","pruning + coverage + batch comparison"
-  8,"content/UI/public-task packets","bounded generation with evidence and utility"
-  9,"first cohort","20–40 noindex agent-generated pages"
-  10,"field gate","browser/accessibility then matched publication"
+  6,"candidate PageCoordinate compiler","coherent conjunctions + hard pruning"
+  7,"SelectedCorpusPlan + PageGenerationJob compiler","accepted vectors become executable jobs"
+  8,"specialized agent runner/checkpoints/repair","traceable bounded generation"
+  9,"dev/preview/corpus-review UX","framework-like operation without internal edits"
+  10,"kernel benchmark","TS vs Zig native vs Wasm scalar/SIMD realistic loops"
+  11,"first cohort","20–40 noindex agent-generated pages after gates"
+  12,"field gate","browser/accessibility then matched publication"
 
 ## write_next
 
