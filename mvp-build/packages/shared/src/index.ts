@@ -21,3 +21,4 @@ export * from "./approval-policy.js";
 export * from "./admin.js";
 export * from "./relationship-contract.js";
 export * from "./labor-relationship-record.js";
+export * from "./command-effect.js";
