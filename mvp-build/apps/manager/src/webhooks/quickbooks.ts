@@ -8,7 +8,11 @@ import { TOOL_REGISTRY } from "../tools/registry.js";
 import type { ToolContext } from "../tools/types.js";
 import { ingestEvent } from "../events/ingress.js";
 import { insertDedup } from "../lib/db.js";
-import { AmbientWaitingForBindingError, enqueueAmbientEvent, type AmbientInboxRow } from "../lib/ambient-inbox.js";
+import { AmbientWaitingForBindingError, type AmbientInboxRow } from "../lib/ambient-inbox.js";
+import {
+  enqueueVerifiedConnectorEvent,
+  upsertAssignmentConnectorBinding,
+} from "../lib/connector-custody.js";
 
 function resultPage(message: string, success: boolean): string {
   return `<!doctype html><html><head><meta charset="utf-8"><title>AMTECH</title></head>` +
@@ -23,6 +27,12 @@ export interface QboChangeEvent {
   entity_id: string;
   operation: string;
   cloudevent_id: string | null;
+}
+
+interface ScopedAmbientInboxRow extends AmbientInboxRow {
+  assignment_id?: string | null;
+  connector_binding_id?: string | null;
+  command_id?: string | null;
 }
 
 export function parseQboEvents(body: unknown): QboChangeEvent[] {
@@ -73,51 +83,95 @@ export function verifyQboWebhookSignature(rawBody: string, header: string | unde
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-export async function recordAndDeliverQboEvent(db: SupabaseClient, event: QboChangeEvent): Promise<{ delivered: boolean; duplicate: boolean; matched: boolean }> {
-  const { data: connRaw } = await db
-    .from("connector_accounts").select("id,account_id,employee_id")
-    .eq("realm_id", event.realm_id).eq("connector_key", "accounting").eq("provider", "quickbooks");
-  const connectors = (connRaw ?? []) as Array<{ id: string; account_id: string; employee_id: string }>;
-  if (connectors.length === 0) return { delivered: false, duplicate: false, matched: false };
-
-  let deliveredCount = 0;
-  let duplicateCount = 0;
-  for (const connector of connectors) {
-    const rowId = newId(ID_PREFIX.inboundQboEvent);
-    const ins = await insertDedup(
-      db.from("inbound_qbo_events").insert({
-        id: rowId, connector_id: connector.id, realm_id: event.realm_id, entity_type: event.entity_type,
-        entity_id: event.entity_id, operation: event.operation, cloudevent_id: event.cloudevent_id, delivery_status: "pending",
-      }),
-      "inbound_qbo_events.insert",
-    );
-    if (ins.conflict) { duplicateCount += 1; continue; }
-
-    const res = await ingestEvent(db, {
-      source: "quickbooks",
-      payload: {
-        account_id: connector.account_id,
-        employee_id: connector.employee_id,
-        connector_id: connector.id,
-        realm_id: event.realm_id,
-        entity_type: event.entity_type,
-        entity_id: event.entity_id,
-        operation: event.operation,
-        cloudevent_id: event.cloudevent_id,
-      },
-    });
-    await db.from("inbound_qbo_events").update({ delivery_status: res.duplicate ? "duplicate" : "delivered" }).eq("id", rowId);
-    if (res.duplicate) duplicateCount += 1; else deliveredCount += 1;
+export async function recordAndDeliverQboEvent(
+  db: SupabaseClient,
+  event: QboChangeEvent,
+  scope?: { connector_id: string; assignment_id: string; account_id: string; employee_id: string },
+): Promise<{ delivered: boolean; duplicate: boolean; matched: boolean }> {
+  if (!scope) return { delivered: false, duplicate: false, matched: false };
+  const connector = await db
+    .from("connector_accounts")
+    .select("id,account_id,employee_id,assignment_id,realm_id,connector_key,provider")
+    .eq("id", scope.connector_id)
+    .eq("realm_id", event.realm_id)
+    .eq("connector_key", "accounting")
+    .eq("provider", "quickbooks")
+    .maybeSingle();
+  if (connector.error) throw connector.error;
+  if (!connector.data || connector.data.account_id !== scope.account_id || connector.data.employee_id !== scope.employee_id) {
+    return { delivered: false, duplicate: false, matched: false };
   }
-  return { delivered: deliveredCount > 0, duplicate: deliveredCount === 0 && duplicateCount > 0, matched: true };
+  if (connector.data.assignment_id && connector.data.assignment_id !== scope.assignment_id) {
+    return { delivered: false, duplicate: false, matched: false };
+  }
+
+  const rowId = newId(ID_PREFIX.inboundQboEvent);
+  const ins = await insertDedup(
+    db.from("inbound_qbo_events").insert({
+      id: rowId,
+      connector_id: scope.connector_id,
+      assignment_id: scope.assignment_id,
+      realm_id: event.realm_id,
+      entity_type: event.entity_type,
+      entity_id: event.entity_id,
+      operation: event.operation,
+      cloudevent_id: event.cloudevent_id,
+      delivery_status: "pending",
+    }),
+    "inbound_qbo_events.insert",
+  );
+  if (ins.conflict) return { delivered: false, duplicate: true, matched: true };
+
+  const res = await ingestEvent(db, {
+    source: "quickbooks",
+    payload: {
+      assignment_id: scope.assignment_id,
+      account_id: scope.account_id,
+      employee_id: scope.employee_id,
+      connector_id: scope.connector_id,
+      realm_id: event.realm_id,
+      entity_type: event.entity_type,
+      entity_id: event.entity_id,
+      operation: event.operation,
+      cloudevent_id: event.cloudevent_id,
+    },
+  });
+  await db.from("inbound_qbo_events").update({ delivery_status: res.duplicate ? "duplicate" : "delivered" }).eq("id", rowId);
+  return { delivered: !res.duplicate, duplicate: res.duplicate, matched: true };
 }
 
 export async function processQuickbooksAmbientEvent(db: SupabaseClient, inbox: AmbientInboxRow): Promise<Record<string, unknown>> {
+  const scoped = inbox as ScopedAmbientInboxRow;
   const change = inbox.payload?.change as QboChangeEvent | undefined;
   if (!change?.realm_id || !change.entity_type || !change.entity_id || !change.operation) throw new Error("quickbooks_ambient_payload_invalid");
-  const result = await recordAndDeliverQboEvent(db, change);
+  if (!scoped.assignment_id || !scoped.connector_binding_id || !scoped.command_id || !inbox.account_id || !inbox.employee_id) {
+    throw new AmbientWaitingForBindingError("quickbooks_assignment_custody_missing");
+  }
+  const binding = await db
+    .from("connector_bindings")
+    .select("connector_account_id")
+    .eq("id", scoped.connector_binding_id)
+    .eq("assignment_id", scoped.assignment_id)
+    .maybeSingle();
+  if (binding.error) throw binding.error;
+  const connectorId = String(binding.data?.connector_account_id ?? "");
+  if (!connectorId) throw new AmbientWaitingForBindingError("quickbooks_connector_account_missing");
+  const result = await recordAndDeliverQboEvent(db, change, {
+    connector_id: connectorId,
+    assignment_id: scoped.assignment_id,
+    account_id: inbox.account_id,
+    employee_id: inbox.employee_id,
+  });
   if (!result.matched) throw new AmbientWaitingForBindingError("quickbooks_realm_waiting_for_binding");
-  return { ...result, realm_id: change.realm_id, entity_type: change.entity_type, entity_id: change.entity_id };
+  return {
+    ...result,
+    assignment_id: scoped.assignment_id,
+    connector_binding_id: scoped.connector_binding_id,
+    command_id: scoped.command_id,
+    realm_id: change.realm_id,
+    entity_type: change.entity_type,
+    entity_id: change.entity_id,
+  };
 }
 
 export function registerQuickbooksWebhooks(app: Hono): void {
@@ -132,9 +186,32 @@ export function registerQuickbooksWebhooks(app: Hono): void {
 
     const handler = TOOL_REGISTRY.get("complete_quickbooks_oauth");
     if (!handler) return c.text("unavailable", 500);
-    const ctx: ToolContext = { db: serviceClient(), actor: "manager", account_id: null, employee_id: null };
+    const db = serviceClient();
+    const ctx: ToolContext = { db, actor: "manager", account_id: null, employee_id: null };
     const envelope = await handler(ctx, { state, code, realmId });
     const success = envelope.status === "ok";
+    if (success) {
+      const proof = (envelope.proof ?? {}) as Record<string, unknown>;
+      const connectorId = String(proof.connector_id ?? "");
+      const boundRealm = String(proof.realm_id ?? realmId);
+      const accountId = String(envelope.account_id ?? "");
+      const employeeId = String(envelope.employee_id ?? "");
+      if (!connectorId || !boundRealm || !accountId || !employeeId) {
+        return c.html(resultPage("QuickBooks connected but assignment binding could not be established.", false), 500);
+      }
+      await upsertAssignmentConnectorBinding(db, {
+        provider: "quickbooks",
+        external_subject: boundRealm,
+        account_id: accountId,
+        employee_id: employeeId,
+        resource_class: "connector:quickbooks",
+        resource_id: boundRealm,
+        connector_account_id: connectorId,
+        capability_class: "consumer_dedupe",
+        provider_verification_ref: `quickbooks-oauth:${connectorId}:${boundRealm}`,
+        provenance: { oauth_state_verified: true, realm_id_verified: true },
+      });
+    }
     const redirect = process.env.QBO_OAUTH_SUCCESS_REDIRECT;
     if (success && redirect) return c.redirect(redirect);
     return c.html(
@@ -159,24 +236,30 @@ export function registerQuickbooksWebhooks(app: Hono): void {
     const events = parseQboEvents(body);
     const db = serviceClient();
     let duplicates = 0;
+    let waiting = 0;
+    let denied = 0;
     for (const event of events) {
       const fallback = createHash("sha256").update(`${raw}:${event.realm_id}:${event.entity_type}:${event.entity_id}:${event.operation}`).digest("hex").slice(0, 32);
       const externalId = event.cloudevent_id
         ? `${event.cloudevent_id}:${event.realm_id}:${event.entity_type}:${event.entity_id}:${event.operation}`
         : fallback;
-      const queued = await enqueueAmbientEvent(db, {
-        source_type: "provider_webhook",
+      const queued = await enqueueVerifiedConnectorEvent(db, {
         provider: "quickbooks",
         external_event_id: externalId,
+        external_subject: event.realm_id,
         event_type: "quickbooks.entity.changed",
-        subject_key: `${event.realm_id}:${event.entity_type}:${event.entity_id}`,
+        resource_class: "connector:quickbooks",
+        resource_id: event.realm_id,
+        capability_class: "consumer_dedupe",
         ordering_key: `quickbooks:${event.realm_id}:${event.entity_type}:${event.entity_id}`,
+        verification_ref: `quickbooks-hmac:${externalId}`,
         payload: { change: event },
-        headers_metadata: { intuit_signature_present: Boolean(c.req.header("intuit-signature")) },
         verification_metadata: { intuit_hmac_verified: true, cloudevent_id: event.cloudevent_id },
       });
       if (queued.duplicate) duplicates += 1;
+      if (queued.status === "waiting_for_binding") waiting += 1;
+      if (queued.status === "denied" || queued.status === "revoked") denied += 1;
     }
-    return c.json({ received: true, queued: events.length, duplicates }, 202);
+    return c.json({ received: true, queued: events.length, duplicates, waiting_for_binding: waiting, denied }, 202);
   });
 }
