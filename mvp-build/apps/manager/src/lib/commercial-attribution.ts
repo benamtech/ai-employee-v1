@@ -248,6 +248,7 @@ export async function recordProviderUsageReceipt(
     quantity: input.quantity,
     amount_minor: input.amount_minor,
     currency: input.currency,
+    correlation_id: input.correlation_id,
     evidence: {
       request_id: input.request_id,
       correlation_id: input.correlation_id,
