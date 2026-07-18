@@ -44,7 +44,7 @@ source = replaceOne(
 source = replaceOne(
   source,
   `import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";`,
-  `import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";\nimport { executeOwnerWebTurnCommand } from "./lib/owner-turn-command.js";`,
+  `import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";\nimport { executeOwnerWebTurnCommand } from "./lib/owner-turn-command.js";\nimport { repairOwnerWebTurnCommand } from "./lib/owner-turn-repair.js";`,
   "owner_turn_command_import",
 );
 source = replaceOne(
@@ -229,6 +229,44 @@ const ownerMessageBlock = `  app.post("/manager/employee/:employeeId/message", a
     });
   });
 
+  app.post("/manager/employee/:employeeId/commands/:commandId/repair", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const employeeId = c.req.param("employeeId");
+    const commandId = c.req.param("commandId");
+    const { owner_session_token } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    const session = await requireOwnerSession(db, owner_session_token);
+    if (!session) return c.json({ error: "owner_session_invalid" }, 401);
+    const command = await db.from("durable_commands")
+      .select("id,assignment_id,command_type")
+      .eq("id", commandId)
+      .maybeSingle();
+    if (command.error) throw command.error;
+    if (!command.data?.id || command.data.command_type !== "owner.web.turn") {
+      return c.json({ error: "command_not_found" }, 404);
+    }
+    const assignmentId = String(command.data.assignment_id);
+    const authority = await authorizeOwnerAssignment(db, {
+      session,
+      employee_id: employeeId,
+      assignment_id: assignmentId,
+      resource_class: "employee",
+      resource_id: employeeId,
+      action: "read",
+      allowed_roles: ["owner", "manager", "operator"],
+    });
+    if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
+    const result = await repairOwnerWebTurnCommand(db, {
+      account_id: session.account_id,
+      employee_id: employeeId,
+      assignment_id: assignmentId,
+      command_id: commandId,
+    });
+    if (result.status === "accepted") return c.json(result, 200);
+    return c.json(result, result.status === "ambiguous" ? 202 : 502);
+  });
+
 `;
 source = source.slice(0, ownerMessageStart) + ownerMessageBlock + source.slice(ownerMessageEnd);
 
@@ -246,6 +284,7 @@ const required = [
   "String(employeeId)",
   "approvalResolution",
   "executeOwnerWebTurnCommand",
+  "repairOwnerWebTurnCommand",
   "loadOwnerCommandPolicyVersion",
   "owner_web_session:",
 ];
