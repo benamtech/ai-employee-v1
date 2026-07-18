@@ -85,8 +85,8 @@ values
    array['account_membership_only','employees_account_id_only','bearer_possession_only','mutable_header_identity'],
    array['credential-assignment-binding','employee-principal-current','policy-version-current'],
    'apps/manager/src/lib/mcp-auth.ts','MCP bearer possession resolves one durable employee principal and assignment before tool dispatch.'),
-  ('signed:artifact-link','signed_resource','signed artifact delivery','Lane 1','signed_resource_assignment','C2',true,true,
-   array['account_membership_only','employees_account_id_only','bearer_possession_only'],
+  ('signed:artifact-link','signed_resource','signed artifact delivery','Lane 1','assignment_resolver','C2',true,true,
+   array['account_membership_only','employees_account_id_only','bearer_possession_only','signed_payload_without_resource_lookup'],
    array['signed-assignment-claim','durable-artifact-link-assignment','artifact-resource-grant'],
    'apps/manager/src/server.ts','Artifact token possession is checked against the durable link and artifact assignment.')
 on conflict (key) do update set
