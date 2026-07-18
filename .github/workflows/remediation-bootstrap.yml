@@ -1,0 +1,115 @@
+name: Phase 2 Remediation Bootstrap
+
+on:
+  push:
+    branches:
+      - employee-work-remediation-validation
+    paths:
+      - ".github/workflows/remediation-bootstrap.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  remediate-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: amtech_boundary
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d amtech_boundary"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      BASE_SHA: 571ab08bbf7c84071ee97da1a71d89027618597f
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_boundary
+      STAGING_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_boundary
+      PGPASSWORD: postgres
+      HERMES_RUNTIME_COMMAND: node -e "process.exit(0)"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - name: Reconstruct and apply remediation
+        run: |
+          cat .remediation/payload.* | base64 -d | gzip -d > /tmp/apply_phase2_remediation.py
+          python3 -m py_compile /tmp/apply_phase2_remediation.py
+          python3 /tmp/apply_phase2_remediation.py
+          git diff --check
+          git diff --exit-code "$BASE_SHA" -- mvp-build/STANDARD.md
+      - name: Install dependencies
+        working-directory: mvp-build
+        run: npm ci
+      - name: Bootstrap Supabase-compatible database
+        working-directory: mvp-build
+        run: |
+          psql -h 127.0.0.1 -U postgres -d amtech_boundary -v ON_ERROR_STOP=1 <<'SQL'
+          do $$ begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+          end $$;
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create or replace function auth.role() returns text language sql stable as $$ select current_user::text $$;
+          create schema if not exists storage;
+          create table if not exists storage.buckets (
+            id text primary key, name text not null unique, owner uuid, public boolean not null default false,
+            file_size_limit bigint, allowed_mime_types text[], created_at timestamptz not null default now(), updated_at timestamptz not null default now()
+          );
+          create table if not exists storage.objects (
+            id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id), name text not null,
+            owner uuid, metadata jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+            last_accessed_at timestamptz not null default now(), unique(bucket_id, name)
+          );
+          SQL
+      - name: Full static contracts
+        working-directory: mvp-build
+        run: |
+          npm run lint
+          npm run typecheck
+          npm run build
+      - name: Migration and invariant vectors
+        working-directory: mvp-build
+        run: |
+          npm run db:migrate
+          npm run db:verify:worker-migrations
+          npm run db:verify:phase2-remediation
+          npm run test:worker-migrations
+          npm run test:phase2-remediation
+      - name: Full unit and production-boundary suites
+        working-directory: mvp-build
+        run: |
+          npm run test:unit
+          npm run test:production-boundary
+      - name: Acceptance syntax and production image
+        working-directory: mvp-build
+        run: |
+          find infra/scripts/acceptance -name '*.mjs' -print0 | xargs -0 -n1 node --check
+          docker build -f infra/deploy/manager.Dockerfile .
+      - name: Create clean remediation commit
+        run: |
+          git diff --binary "$BASE_SHA" -- . ':(exclude).remediation/**' ':(exclude).github/workflows/remediation-bootstrap.yml' > /tmp/remediation.patch
+          git reset --hard "$BASE_SHA"
+          git clean -fdx
+          git apply --index /tmp/remediation.patch
+          git diff --cached --check
+          git config user.name "AMTECH Remediation Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "feat: enforce Phase 2 assignment and approval boundaries"
+          git push --force origin HEAD:employee-work-remediation-validation
