@@ -1,9 +1,9 @@
 name: Assistant Fix Authority Seed Fixtures
 
 on:
-  pull_request:
+  push:
     branches:
-      - research
+      - employee-production-tuesday
     paths:
       - ".github/workflows/assistant-fix-authority-seed-fixtures.yml"
 
@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   patch-fixtures:
-    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'employee-production-tuesday'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
