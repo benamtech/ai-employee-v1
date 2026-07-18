@@ -9,7 +9,7 @@ on:
     paths:
       - "mvp-build/packages/shared/src/onboarding-identity.ts"
       - "mvp-build/packages/shared/src/index.ts"
-      - "mvp-build/packages/db/migrations/0064_onboarding_identity_activation_authority.sql"
+      - "mvp-build/packages/db/migrations/006*_onboarding_identity*.sql"
       - "mvp-build/apps/manager/src/lib/onboarding-identity*.ts"
       - "mvp-build/apps/manager/src/lib/owner-session.ts"
       - "mvp-build/apps/manager/src/tools/verified-provisioning.stub.ts"
@@ -28,7 +28,7 @@ on:
     paths:
       - "mvp-build/packages/shared/src/onboarding-identity.ts"
       - "mvp-build/packages/shared/src/index.ts"
-      - "mvp-build/packages/db/migrations/0064_onboarding_identity_activation_authority.sql"
+      - "mvp-build/packages/db/migrations/006*_onboarding_identity*.sql"
       - "mvp-build/apps/manager/src/lib/onboarding-identity*.ts"
       - "mvp-build/apps/manager/src/lib/owner-session.ts"
       - "mvp-build/apps/manager/src/tools/verified-provisioning.stub.ts"
