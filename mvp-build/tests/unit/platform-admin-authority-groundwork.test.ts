@@ -22,6 +22,7 @@ const session: PlatformAdminSessionRecord = {
   session_version: 4,
   authenticated_at: "2026-07-18T18:30:00.000Z",
   step_up_at: "2026-07-18T18:55:00.000Z",
+  step_up_expires_at: "2026-07-18T19:10:00.000Z",
   expires_at: "2026-07-18T20:00:00.000Z",
 };
 const lease: PlatformSupportLeaseRecord = {
@@ -54,13 +55,14 @@ function decide(overrides: Partial<Parameters<typeof evaluatePlatformAdminAuthor
   });
 }
 
-describe("S8 platform authority groundwork", () => {
-  it("stays fail-closed while the registry and issuance path are disabled", () => {
+describe("S8 live platform authority", () => {
+  it("stays fail-closed when the live registry/issuance path is disabled", () => {
     const decision = decide({ enabled: false });
     expect(decision.ok).toBe(false);
     if (!decision.ok) {
       expect(decision.status).toBe(503);
       expect(decision.reason).toBe("platform_authority_disabled");
+      expect(decision.evidence.authority_mode).toBe("disabled");
       expect(decision.evidence.groundwork_only).toBe(true);
     }
   });
@@ -71,7 +73,7 @@ describe("S8 platform authority groundwork", () => {
     if (!decision.ok) expect(decision.reason).toBe("mutable_header_identity_denied");
   });
 
-  it("requires current versioned principal, correct audience, role, and recent step-up", () => {
+  it("requires a current versioned principal, correct audience, role, and bounded step-up", () => {
     const stale = decide({ session: { ...session, session_version: 3 } });
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.reason).toBe("platform_session_version_stale");
@@ -84,12 +86,16 @@ describe("S8 platform authority groundwork", () => {
     expect(role.ok).toBe(false);
     if (!role.ok) expect(role.reason).toBe("platform_role_denied");
 
-    const noStepUp = decide({ session: { ...session, step_up_at: null } });
+    const noStepUp = decide({ session: { ...session, step_up_at: null, step_up_expires_at: null } });
     expect(noStepUp.ok).toBe(false);
     if (!noStepUp.ok) expect(noStepUp.reason).toBe("platform_step_up_required");
+
+    const expiredStepUp = decide({ session: { ...session, step_up_expires_at: "2026-07-18T18:59:59.000Z" } });
+    expect(expiredStepUp.ok).toBe(false);
+    if (!expiredStepUp.ok) expect(expiredStepUp.reason).toBe("platform_step_up_required");
   });
 
-  it("requires a current action-scoped support lease with a concrete reason", () => {
+  it("requires a current exact action-scoped support lease with a concrete reason", () => {
     const missing = decide({ lease: null });
     expect(missing.ok).toBe(false);
     if (!missing.ok) expect(missing.reason).toBe("support_lease_required");
@@ -102,12 +108,16 @@ describe("S8 platform authority groundwork", () => {
     expect(wrongAssignment.ok).toBe(false);
     if (!wrongAssignment.ok) expect(wrongAssignment.reason).toBe("support_lease_scope_mismatch");
 
+    const broadEmployeeLease = decide({ lease: { ...lease, employee_id: null, assignment_id: null } });
+    expect(broadEmployeeLease.ok).toBe(false);
+    if (!broadEmployeeLease.ok) expect(broadEmployeeLease.reason).toBe("support_lease_scope_mismatch");
+
     const noReason = decide({ lease: { ...lease, reason: "" } });
     expect(noReason.ok).toBe(false);
     if (!noReason.ok) expect(noReason.reason).toBe("support_reason_required");
   });
 
-  it("defines the future allow path without enabling any live route", () => {
+  it("allows only the live durable session, role, step-up, and exact lease chain", () => {
     const decision = decide();
     expect(decision.ok).toBe(true);
     if (decision.ok) {
@@ -118,8 +128,28 @@ describe("S8 platform authority groundwork", () => {
         step_up_checked: true,
         lease_checked: true,
         durable_identity_checked: true,
-        groundwork_only: true,
+        authority_mode: "live",
+        groundwork_only: false,
       });
     }
+  });
+
+  it("permits an account-only read only with an exact account-only lease", () => {
+    const accountLease = { ...lease, employee_id: null, assignment_id: null, allowed_actions: ["admin:account:inspect"] };
+    const decision = evaluatePlatformAdminAuthority({
+      enabled: true,
+      principal,
+      session,
+      lease: accountLease,
+      audience: "manager-admin",
+      action: "admin:account:inspect",
+      action_class: "support_read",
+      allowed_roles: ["platform_owner", "platform_operator", "support_readonly"],
+      account_id: "acct_target",
+      employee_id: null,
+      assignment_id: null,
+      now,
+    });
+    expect(decision.ok).toBe(true);
   });
 });
