@@ -10,10 +10,11 @@ Use the three layers correctly:
 - `../../wiki/MVP/implementation-records/`: factual source/proof ledger.
 - `../second-half-plan/`: active forward-plan family.
 
-**Current branch note (2026-07-18):** `employee-work` remains based on `research`, with draft PR `#19` targeting `research`; do not edit `main` directly. The AMTECH Standard v0.1 Draft 2 received explicit human approval on 2026-07-18 and the Phase 2 evidence-only enforcement audit is complete against implementation head `d963efcaff9285cdf8ebc6c069213a2cda7d110d`. The verdict is non-conforming and launch-blocked: 4 P0, 13 P1, 6 P2, 4 P3, and 2 P4 findings. No remediation code, production migration, deployment, provider test, or destructive live proof was performed.
+**Current branch note (2026-07-18):** `employee-work` remains based on `research`, with draft PR `#19` targeting `research`; do not edit `main` directly. The AMTECH Standard v0.1 Draft 2 received explicit human approval on 2026-07-18 and the Phase 2 enforcement audit found the prior implementation non-conforming and launch-blocked: 4 P0, 13 P1, 6 P2, 4 P3, and 2 P4 findings. A first P0 remediation source pass is now present for the assignment/labor relationship graph, assignment-aware RLS, principal-bound approvals, revocable relationship leases, assignment-bound runtime credentials, and compatibility triggers preserving the normal-employee path. This is still `source-wired_not-live-accepted`; no production migration, real Supabase proof, provider packet, browser packet, paid/commercial validation, or destructive recovery test has been run.
 
 ## Index — newest first
 
+- [2026-07-18 — assignment relationship P0 remediation pass](2026-07-18-assignment-relationship-p0-remediation-pass.md) — Added source-wired canonical assignment/labor relationship graph migrations, assignment-aware RLS helpers/policies, principal-bound approval/link claim RPCs, assignment-bound Model Gateway/MCP credentials, compatibility triggers for legacy normal-employee write paths, and production-boundary source tests. Validation not run; P0 remains pending real DB/RLS/provider/browser proof.
 - [2026-07-18 — AMTECH Phase 2 Standard Enforcement Audit](2026-07-18-amtech-phase-2-standard-enforcement-audit.md) — Enforced the approved standard against `employee-work@d963efcaff9285cdf8ebc6c069213a2cda7d110d`, created `GAPS.md` and `REMEDIATION.md`, and found the implementation non-conforming and launch-blocked. Root cause: singleton account/employee ontology without durable assignment, authority, resource-custody, payer, beneficiary, and labor-attribution relationships. Evidence-only audit; no code, migration, deployment, provider, or destructive live test.
 - [2026-07-18 — AMTECH Standard v0.1 Draft 2](2026-07-18-amtech-standard-v0.1-draft-2.md) — Completed the proposed Phase 1 standard extraction, corrected the singleton tenancy model into an organization/account/user/employee/assignment relationship graph, added shared-employee isolation, labor-native billing, and hard-gate validation-vector/HRR research protocols. Human approval pending; Phase 2 not started; docs inspection only.
 - [2026-07-17 — employee-work production boundary reconciler pass](2026-07-17-employee-work-production-boundary-reconciler-pass.md) — Bound the private Model Gateway to employee credentials/routes, made provisioning reconciler-owned, converged lifecycle/provider ingress, added crash recovery and duplicate evidence, and created the nine-phase release-bound live proof harness. Actions run `29618584037` passed all 39 migrations and DB behavior checks, shared/database/Manager builds, 27 focused tests, acceptance-script syntax, and the production Manager image. Production Supabase still stops at `0031`; no live runtime/provider/browser acceptance is claimed.
@@ -38,7 +39,7 @@ Older handoffs remain in this folder and are historical evidence. Read them only
 ## Status vocabulary
 
 - `source-wired`: source or schema exists; state exactly what static/local checks, if any, actually ran.
-- `provider-accepted`: real external provider proof IDs exist.
+- `provider-accepted`: real external provider IDs exist.
 - `runtime-accepted`: real employee runtime/host proof artifacts exist.
 - `planned`: designed but not implemented.
 - `pending`: blocked, unattempted, or missing proof.
