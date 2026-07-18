@@ -2,14 +2,18 @@ name: amtech-ai-employee
 
 services:
   manager:
+    image: amtech-ai-employee-manager:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/manager.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     env_file:
       - ./.env.production
     environment:
       NODE_ENV: production
       PORT: "8080"
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
       PROVISIONER_SOCKET_PATH: /run/amtech-provisioner/provisioner.sock
       MODEL_GATEWAY_EMPLOYEE_BASE_URL: ${MODEL_GATEWAY_EMPLOYEE_BASE_URL:-http://host.docker.internal:8092/v1}
     volumes:
@@ -33,14 +37,18 @@ services:
         max-file: "5"
 
   model-gateway:
+    image: amtech-ai-employee-manager:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/manager.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     command: ["node", "apps/manager/dist/model-gateway-server.js"]
     env_file:
       - ./.env.production
     environment:
       NODE_ENV: production
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
       MODEL_GATEWAY_HOST: "0.0.0.0"
       MODEL_GATEWAY_PORT: "8092"
     networks:
@@ -61,13 +69,17 @@ services:
         max-file: "5"
 
   host-provisioner:
+    image: amtech-ai-employee-provisioner:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/provisioner.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     env_file:
       - ./.env.production
     environment:
       NODE_ENV: production
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
       PROVISIONER_SOCKET_PATH: /run/amtech-provisioner/provisioner.sock
       PROVISIONER_AUDIT_LOG: /var/lib/amtech/audit/host-provisioner.jsonl
       CADDY_ADMIN_ORIGIN: http://caddy:2019
@@ -94,15 +106,19 @@ services:
         max-file: "5"
 
   web:
+    image: amtech-ai-employee-web:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/web.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     env_file:
       - ./.env.production
     environment:
       NODE_ENV: production
       PORT: "3000"
       HOSTNAME: "0.0.0.0"
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     networks:
       - amtech_control
     ports:
@@ -124,14 +140,18 @@ services:
         max-file: "5"
 
   caddy:
+    image: amtech-ai-employee-caddy:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/caddy.Dockerfile
+      args:
+        AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     env_file:
       - ./.env.production
     environment:
       WEB_UPSTREAM: ${WEB_UPSTREAM:-web:3000}
       MANAGER_UPSTREAM: ${MANAGER_UPSTREAM:-manager:8080}
+      AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     volumes:
       - ../caddy/production.Caddyfile:/etc/caddy/Caddyfile:ro
       - /var/lib/amtech/caddy/clients:/etc/caddy/clients
