@@ -13,7 +13,6 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
   private filters: Filter[] = [];
 
   constructor(private readonly store: FakeSupabase, private readonly table: string) {}
-
   select(_columns = "*"): this { return this; }
   insert(payload: Row | Row[]): this { this.operation = "insert"; this.payload = payload; return this; }
   update(payload: Row): this { this.operation = "update"; this.payload = payload; return this; }
@@ -89,8 +88,12 @@ function request(employeeId: string, token: string): Request {
 }
 
 describe("model gateway HTTP isolation", () => {
-  it("accepts only the credential bound to the employee route and never calls upstream for rejected credentials", async () => {
+  it("accepts only the credential bound to the employee route and current assignment", async () => {
     const fake = new FakeSupabase();
+    fake.rows("employee_assignments").push(
+      { id: "asgn_alpha", account_id: "acct_alpha", employee_id: "emp_alpha", status: "active", legacy_default: true },
+      { id: "asgn_bravo", account_id: "acct_bravo", employee_id: "emp_bravo", status: "active", legacy_default: true },
+    );
     const db = fake as unknown as SupabaseClient;
     const employeeA = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
     const employeeB = await mintModelGatewayCredential(db, { account_id: "acct_bravo", employee_id: "emp_bravo" });
@@ -106,7 +109,7 @@ describe("model gateway HTTP isolation", () => {
     });
     await revokeModelGatewayCredential(db, revoked.credential_id);
 
-    const upstreamCalls: Array<{ url: string; authorization: string | null; employee: string | null }> = [];
+    const upstreamCalls: Array<{ url: string; authorization: string | null; assignment: string | null; employee: string | null }> = [];
     const app = buildModelGatewayApp({
       db: () => db,
       fetch: async (input, init) => {
@@ -114,6 +117,7 @@ describe("model gateway HTTP isolation", () => {
         upstreamCalls.push({
           url: String(input),
           authorization: headers.get("Authorization"),
+          assignment: headers.get("X-Amtech-Assignment-Id"),
           employee: headers.get("X-Amtech-Employee-Id"),
         });
         return new Response(JSON.stringify({ id: "provider-response", usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 } }), {
@@ -125,8 +129,11 @@ describe("model gateway HTTP isolation", () => {
 
     const ownA = await app.fetch(request("emp_alpha", employeeA.token));
     expect(ownA.status).toBe(200);
-    expect((await ownA.json()).model).toBe("amtech-primary");
+    const ownAJson = await ownA.json();
+    expect(ownAJson.model).toBe("amtech-primary");
+    expect(ownAJson.amtech_gateway.assignment_id).toBe("asgn_alpha");
     expect(upstreamCalls).toHaveLength(1);
+    expect(upstreamCalls[0]?.assignment).toBe("asgn_alpha");
     expect(upstreamCalls[0]?.employee).toBe("emp_alpha");
     expect(upstreamCalls[0]?.authorization).toBe("Bearer provider-master-key-never-returned");
 
