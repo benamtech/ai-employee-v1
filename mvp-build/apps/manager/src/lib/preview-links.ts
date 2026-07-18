@@ -186,6 +186,26 @@ function sameActions(left: readonly string[], right: readonly string[]): boolean
   return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
+async function authorityVersionCurrent(
+  db: SupabaseClient,
+  scopeType: "employee_assignment" | "human_principal",
+  scopeId: string,
+  issuedVersion: number | null | undefined,
+): Promise<boolean> {
+  if (!issuedVersion || !Number.isSafeInteger(Number(issuedVersion)) || Number(issuedVersion) < 1) return false;
+  const result = await db.from("authority_versions")
+    .select("current_version,revoked_at")
+    .eq("scope_type", scopeType)
+    .eq("scope_id", scopeId)
+    .maybeSingle();
+  if (result.error) throw result.error;
+  return Boolean(
+    result.data?.current_version &&
+    !result.data.revoked_at &&
+    Number(result.data.current_version) === Number(issuedVersion),
+  );
+}
+
 export async function resolvePreviewLink(db: SupabaseClient, token: string): Promise<PreviewResolution> {
   const claims = verifyPreviewToken(token);
   if (!claims) return { ok: false, reason: "invalid" };
@@ -209,45 +229,41 @@ export async function resolvePreviewLink(db: SupabaseClient, token: string): Pro
   ) {
     return { ok: false, reason: "scope_mismatch" };
   }
-  if (row.resource_type === "approval" && (
-    !row.assignment_id ||
-    !row.resolver_principal_id ||
-    !row.policy_version ||
-    !row.approval_snapshot_hash ||
-    !row.assignment_authority_version ||
-    !row.resolver_authority_version
-  )) {
+  if (
+    (row.assignment_id && !row.assignment_authority_version) ||
+    (row.resolver_principal_id && !row.resolver_authority_version) ||
+    (row.resource_type === "approval" && (
+      !row.assignment_id ||
+      !row.resolver_principal_id ||
+      !row.policy_version ||
+      !row.approval_snapshot_hash
+    ))
+  ) {
     return { ok: false, reason: "scope_mismatch" };
   }
   if (row.revoked_at) return { ok: false, reason: "revoked" };
   if (row.expires_at && Date.parse(row.expires_at) <= Date.now()) return { ok: false, reason: "expired" };
   if (row.consumed_at) return { ok: false, reason: "consumed" };
 
-  if (row.resource_type === "approval") {
-    const [assignmentAuthority, resolverAuthority] = await Promise.all([
-      db.from("authority_versions")
-        .select("current_version,revoked_at")
-        .eq("scope_type", "employee_assignment")
-        .eq("scope_id", String(row.assignment_id))
-        .maybeSingle(),
-      db.from("authority_versions")
-        .select("current_version,revoked_at")
-        .eq("scope_type", "human_principal")
-        .eq("scope_id", String(row.resolver_principal_id))
-        .maybeSingle(),
-    ]);
-    if (assignmentAuthority.error) throw assignmentAuthority.error;
-    if (resolverAuthority.error) throw resolverAuthority.error;
-    if (
-      !assignmentAuthority.data?.current_version ||
-      assignmentAuthority.data.revoked_at ||
-      Number(assignmentAuthority.data.current_version) !== Number(row.assignment_authority_version) ||
-      !resolverAuthority.data?.current_version ||
-      resolverAuthority.data.revoked_at ||
-      Number(resolverAuthority.data.current_version) !== Number(row.resolver_authority_version)
-    ) {
-      return { ok: false, reason: "revoked" };
-    }
+  const checks: Array<Promise<boolean>> = [];
+  if (row.assignment_id) {
+    checks.push(authorityVersionCurrent(
+      db,
+      "employee_assignment",
+      row.assignment_id,
+      row.assignment_authority_version,
+    ));
+  }
+  if (row.resolver_principal_id) {
+    checks.push(authorityVersionCurrent(
+      db,
+      "human_principal",
+      row.resolver_principal_id,
+      row.resolver_authority_version,
+    ));
+  }
+  if (checks.length > 0 && !(await Promise.all(checks)).every(Boolean)) {
+    return { ok: false, reason: "revoked" };
   }
 
   return { ok: true, link: row, claims };
