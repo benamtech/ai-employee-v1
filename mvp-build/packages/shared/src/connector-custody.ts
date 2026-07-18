@@ -171,7 +171,10 @@ export function resolveConnectorCustody(input: {
 
   const activeBindings = providerBindings.filter((binding) => currentBinding(binding, now));
   if (activeBindings.length === 0) {
-    return deny({ ...baseEvidence, binding: providerBindings[0] }, "revoked_or_expired_connector_binding", 410);
+    const inactiveBinding = providerBindings[0];
+    return inactiveBinding
+      ? deny({ ...baseEvidence, binding: inactiveBinding }, "revoked_or_expired_connector_binding", 410)
+      : deny(baseEvidence, "missing_connector_binding");
   }
   if (activeBindings.length !== 1) {
     return deny(baseEvidence, "ambiguous_connector_binding", 409);
@@ -200,7 +203,6 @@ export function resolveConnectorCustody(input: {
 
   const principal: HumanPrincipal = {
     principal_id: binding.principal_id,
-    kind: "service",
   };
   const scope = resolveAssignmentScope({
     principal,
@@ -209,7 +211,7 @@ export function resolveConnectorCustody(input: {
     account_id: binding.account_id,
     employee_id: binding.employee_id,
     assignment_id: binding.assignment_id,
-    allowed_roles: ["owner", "operator", "employee", "system"],
+    allowed_roles: ["owner", "manager", "operator", "approver", "viewer", "billing"],
     resource_class: binding.resource_class,
     resource_id: binding.resource_id,
     action: input.action ?? "connector:event:ingest",
