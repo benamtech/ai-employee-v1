@@ -42,9 +42,13 @@ jobs:
           path: |
             GTM-RESEARCH/website-framework/reference/ci-test.log
             GTM-RESEARCH/website-framework/reference/src/manifest.ts
+            GTM-RESEARCH/website-framework/reference/src/framework-orchestrator.ts
+            GTM-RESEARCH/website-framework/reference/src/page-coordinate.ts
+            GTM-RESEARCH/website-framework/reference/src/page-generation.ts
           retention-days: 7
       - run: npm run manifest:emit
       - run: npm run ui:emit
+      - run: npm run orchestration:check
       - run: npm run browser:check
       - run: npm run ui:r3f:build
       - uses: actions/upload-artifact@v4
@@ -53,4 +57,5 @@ jobs:
           path: |
             GTM-RESEARCH/website-framework/reference/generated-manifest
             GTM-RESEARCH/website-framework/reference/generated-ui
+            GTM-RESEARCH/website-framework/reference/generated-orchestration
           retention-days: 7
