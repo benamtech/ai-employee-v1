@@ -123,8 +123,13 @@ try {
 
   const ambientId = `ain_claim_${suffix}`;
   await client.query(`
-    insert into ambient_event_inbox(inbox_id, source_type, provider, external_event_id, event_type, dedupe_key, processing_state, next_attempt_at)
-    values($1, 'system', 'amtech', $2, 'verification.event', $3, 'received', now() - interval '1 second')
+    insert into ambient_event_inbox(
+      inbox_id, source_type, provider, external_event_id, event_type,
+      dedupe_key, processing_state, authorization_state, next_attempt_at
+    ) values(
+      $1, 'system', 'amtech', $2, 'verification.event',
+      $3, 'received', 'public_ingress', now() - interval '1 second'
+    )
   `, [ambientId, `external:${suffix}`, `dedupe:${suffix}`]);
   await client.query("set local role service_role");
   const ambientClaim = await one("select inbox_id, processing_state, attempt_count from claim_next_ambient_event($1, 30)", [`ambient_lease_${suffix}`]);
@@ -134,8 +139,14 @@ try {
   const welcomeId = `ain_welcome_${suffix}`;
   const welcomeJobId = `pjob_welcome_${suffix}`;
   await client.query(`
-    insert into ambient_event_inbox(inbox_id, source_type, provider, external_event_id, account_id, employee_id, event_type, dedupe_key, processing_state, payload)
-    values($1, 'system', 'amtech', $2, $3, $4, 'employee.welcome.requested', $5, 'received', jsonb_build_object('message', 'Verifier welcome'))
+    insert into ambient_event_inbox(
+      inbox_id, source_type, provider, external_event_id, account_id, employee_id,
+      event_type, dedupe_key, processing_state, authorization_state, payload
+    ) values(
+      $1, 'system', 'amtech', $2, $3, $4,
+      'employee.welcome.requested', $5, 'received', 'public_ingress',
+      jsonb_build_object('message', 'Verifier welcome')
+    )
   `, [welcomeId, `welcome:${suffix}`, accountId, employeeId, `welcome-dedupe:${suffix}`]);
   await client.query(`
     insert into provisioning_jobs(id, account_id, employee_id, idempotency_key, state, worker_context)
