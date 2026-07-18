@@ -20,4 +20,24 @@ export function createOrchestrationFixture(manifest) {
   const project={id:"project:amtech-framework-fixture",version:"1",business:{purpose:"Generate evidence-bounded AI Employee landing pages and public task surfaces.",services:["AI Employee infrastructure"],offers:["Start Free","Managed AI Employee from $400"],audiences:["contractor owner-operators"],locations:["United States"],workflows:["estimate drafting","lead recovery"],integrations:["QuickBooks"],constraints:["owner approval","no fabricated proof"],proofPoints:["source-wired framework fixture"],pricingFacts:["Managed AI Employee from $400"]},brand:{name:"AMTECH",voice:["direct","operational","human"],prohibitedLanguage:["revolutionize","unlock"],palette:{ink:"#111111",red:"#E11D2A",blue:"#2563EB",white:"#FFFFFF"},typography:["Inter","system-ui"],visualRules:["light surfaces only","restrained motion"],componentRules:["semantic modules","no decorative pills"]},technical:{repositoryRoot:".",framework:"static semantic compiler",deploymentTarget:"Cloudflare static assets",browserTargets:["Chrome >= 111","Firefox >= 113","Safari >= 16.4"],performanceBudgets:{criticalCssBytes:24576,canonicalJsBytes:1,htmlBytes:131072},accessibilityStandard:"WCAG 2.2 AA"},goals:{primaryConversions:["Start Free"],searchOutcomes:["compatible discovery"],utilityOutcomes:["completed estimate draft","qualified callback"],publicationRiskTolerance:"low",maximumInitialPages:2},sources:[{id:"source:fixture",kind:"company",title:"AMTECH fixture authority",summary:"Synthetic source used only for compiler orchestration validation.",retrievedAt:"2026-07-17",applicability:["framework-fixture"],confidence:"verified"}],assets:[{id:"asset:logo",kind:"logo",pathOrUri:"assets/amtech.svg",altOrPurpose:"AMTECH logo",rights:"owned"}]};
   return{project,manifest,contextCorpus:{id:"corpus:fixture",version:"1",cases:contexts,splitPolicy:{train:0.5,validation:0.25,test:0.25,seed:"fixture-v1",minimumAssessors:2,forbidGeneratorAuthoredAcceptance:true},generationAgentId:"generation-agent"},calibrationObservations:[{id:"cal:bad:train",split:"train",rawScore:0,label:"bad",weight:1},{id:"cal:fair:train",split:"train",rawScore:0.35,label:"fair",weight:1},{id:"cal:good:train",split:"train",rawScore:0.7,label:"good",weight:1},{id:"cal:perfect:train",split:"train",rawScore:1,label:"perfect",weight:1},{id:"cal:bad:validation",split:"validation",rawScore:0.05,label:"bad",weight:1},{id:"cal:good:validation",split:"validation",rawScore:0.72,label:"good",weight:1},{id:"cal:fair:test",split:"test",rawScore:0.4,label:"fair",weight:1},{id:"cal:perfect:test",split:"test",rawScore:0.95,label:"perfect",weight:1}],candidateSeeds,selection:{budget:2,informationWeight:0.2,rareTailWeight:0.1,diversityWeight:0,minimumValidationCoverage:0.6,minimumTestCoverage:0.6},claims:{allowed:["claim:offer"],prohibited:["claim:guaranteed-results"]}};
 }
-export function createFixtureExecutor(){return{id:"fixture-executor",async execute(request){const fail=request.pass==="content"&&request.attempt===0;return{pass:request.pass,status:fail?"fail":"pass",summary:fail?"content specificity critic requested repair":`${request.pass} completed`,artifacts:{pageId:request.job.pageId,pass:request.pass,attempt:request.attempt},usedSourceIds:[request.job.sourceIds[0]],findings:[{attributeId:fail?"coordinate.specificity":request.pass==="repair"?"runner.checkpoints":"job.contract",state:fail?"fail":"pass",detail:fail?"first content draft was too generic":`${request.pass} fixture validation passed`} ]};}}};}
+
+export function createFixtureExecutor() {
+  return {
+    id: "fixture-executor",
+    async execute(request) {
+      const fail = request.pass === "content" && request.attempt === 0;
+      return {
+        pass: request.pass,
+        status: fail ? "fail" : "pass",
+        summary: fail ? "content specificity critic requested repair" : `${request.pass} completed`,
+        artifacts: { pageId: request.job.pageId, pass: request.pass, attempt: request.attempt },
+        usedSourceIds: [request.job.sourceIds[0]],
+        findings: [{
+          attributeId: fail ? "coordinate.specificity" : request.pass === "repair" ? "runner.checkpoints" : "job.contract",
+          state: fail ? "fail" : "pass",
+          detail: fail ? "first content draft was too generic" : `${request.pass} fixture validation passed`,
+        }],
+      };
+    },
+  };
+}
