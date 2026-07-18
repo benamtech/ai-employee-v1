@@ -153,4 +153,15 @@ jobs:
           path: mvp-build/production-boundary-tests.log
           if-no-files-found: warn
       - name: Production image inclusion
-        run: docker build -f infra/deploy/manager.Dockerfile .
+        shell: bash
+        run: |
+          set +e
+          docker build --progress=plain -f infra/deploy/manager.Dockerfile . 2>&1 | tee manager-image-build.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload Manager image diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-image-build-${{ github.run_id }}
+          path: mvp-build/manager-image-build.log
+          if-no-files-found: error
