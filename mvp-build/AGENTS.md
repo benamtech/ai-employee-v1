@@ -26,7 +26,7 @@ Source, migrations, executable proof, and newest memory outrank stale prose.
 - Integration PR: draft `#23`.
 - Overall: `standard-remediation_in-progress_source-and-ci-evidence_not-live-accepted_not-launch-cleared`.
 - Lane 1 relationship/authorization checkpoint is integrated.
-- Lane 3 durable command/effect kernel is CI-green on draft PR `#26` and awaits integration.
+- Lane 3 durable command/effect kernel is integrated at `c94be46137b8c87b610ba0c4b48302bb2e944564`; contract, blank-migration, seven-case database matrix, and relationship-regression CI are green.
 - Real Supabase, provider, browser/SMS, commercial, capacity, recovery, rollback, attestation, and production acceptance remain pending.
 
 ## Canonical product boundary
@@ -75,13 +75,19 @@ The public estimator, fixtures, `/api/dev/login`, local `live:*`, and manually i
 
 ## Dependency order
 
-1. Lane 3 durable command/effect kernel.
-2. Complete Lane 1 assignment and authorization scope.
-3. Lane 10 full CI and release evidence spine.
-4. Sessions, approvals, admin/support, and onboarding identity saga.
-5. Commercial gateway, connector custody, channel envelope, and worker adaptation.
-6. Product surfaces, 100–700 agent capacity, recovery, and public-service limits.
-7. Real Supabase, live web/SMS/provider proof, commercial reconciliation, attestation, deployment, acceptance, and rollback proof.
+Completed foundation checkpoints:
+
+1. Lane 1 relationship and initial authorization foundation.
+2. Lane 3 durable command/effect kernel.
+
+Next:
+
+1. Complete Lane 1 assignment and authorization scope across all consequential consumers.
+2. Build Lane 10 full CI and release-evidence spine.
+3. Implement sessions, approvals, admin/support authority, revocation, and onboarding identity saga against the shared foundations.
+4. Adapt commercial gateway, connector custody, channel envelope, and workers.
+5. Close product surfaces, 100–700 agent capacity, recovery, and public-service limits.
+6. Run real Supabase, live web/SMS/provider proof, commercial reconciliation, attestation, deployment, acceptance, and rollback proof.
 
 Do not jump to downstream consumers that would invent feature-local authority or effect semantics.
 
