@@ -1,11 +1,6 @@
 name: Assistant Apply S10.1
 
 on:
-  push:
-    branches:
-      - employee-production-tuesday
-    paths:
-      - ".github/workflows/assistant-apply-s10.yml"
   pull_request:
     branches:
       - research
@@ -16,17 +11,19 @@ permissions:
   contents: write
 
 concurrency:
-  group: assistant-apply-s10-${{ github.event_name }}-${{ github.ref }}
+  group: assistant-apply-s10-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   validate-and-apply:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'employee-production-tuesday'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event_name == 'push' && github.ref || '' }}
+          ref: employee-production-tuesday
+          fetch-depth: 0
       - name: Reconstruct reviewed payload
         shell: bash
         run: |
@@ -47,7 +44,6 @@ jobs:
           npx vitest run tests/unit/onboarding-identity-contract.test.ts
           npm run lint -- --quiet
       - name: Commit reviewed implementation
-        if: github.event_name == 'push'
         shell: bash
         run: |
           set -euo pipefail
