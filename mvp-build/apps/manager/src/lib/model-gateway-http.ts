@@ -55,7 +55,7 @@ async function proxyOpenAiCompatible(
     return c.json({
       error: {
         code: "model_gateway_unauthorized",
-        message: "Model gateway credential is invalid, expired, revoked, or not bound to this employee route.",
+        message: "Model gateway credential is invalid, expired, revoked, or not bound to this employee route and assignment.",
       },
     }, 401);
   }
@@ -72,6 +72,7 @@ async function proxyOpenAiCompatible(
     await recordModelGatewayUsage(db, {
       request_id: requestId,
       credential_id: claims.credential_id,
+      assignment_id: claims.assignment_id,
       account_id: claims.account_id,
       employee_id: claims.employee_id,
       model_alias: claims.model_alias,
@@ -111,6 +112,7 @@ async function proxyOpenAiCompatible(
         headers: {
           Authorization: `Bearer ${upstreamApiKey()}`,
           "Content-Type": "application/json",
+          "X-Amtech-Assignment-Id": claims.assignment_id,
           "X-Amtech-Account-Id": claims.account_id,
           "X-Amtech-Employee-Id": claims.employee_id,
           "X-Amtech-Correlation-Id": correlationId,
@@ -130,6 +132,7 @@ async function proxyOpenAiCompatible(
       await recordModelGatewayUsage(db, {
         request_id: requestId,
         credential_id: claims.credential_id,
+        assignment_id: claims.assignment_id,
         account_id: claims.account_id,
         employee_id: claims.employee_id,
         model_alias: claims.model_alias,
@@ -151,7 +154,11 @@ async function proxyOpenAiCompatible(
       return c.json({
         ...json,
         model: claims.model_alias,
-        amtech_gateway: { request_id: requestId, credential_version: claims.credential_version },
+        amtech_gateway: {
+          request_id: requestId,
+          assignment_id: claims.assignment_id,
+          credential_version: claims.credential_version,
+        },
       });
     } catch (err) {
       clearTimeout(timeout);
@@ -164,6 +171,7 @@ async function proxyOpenAiCompatible(
   await recordModelGatewayUsage(db, {
     request_id: requestId,
     credential_id: claims.credential_id,
+    assignment_id: claims.assignment_id,
     account_id: claims.account_id,
     employee_id: claims.employee_id,
     model_alias: claims.model_alias,
