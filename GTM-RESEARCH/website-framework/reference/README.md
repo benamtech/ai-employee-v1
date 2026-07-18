@@ -1,106 +1,139 @@
 # Website-Framework Reference Package
 
-Status: executable vector-native research reference; not production accepted
+Status: executable groundwork orchestration, vector-native compiler, and deterministic UI research reference; not production accepted
 
 ## Primary path
 
 ```text
-../../site-manifest.yaml
+ProjectInput
+-> source/evidence/asset ledgers
+-> independent ContextCorpus + frozen splits
+-> isotonic compatibility calibration
+-> explicit-primary PageCoordinates
+-> calibrated finite SelectedCorpusPlan + typed graph
+-> PageGenerationJobs
+-> bounded provider-neutral agent runner
+-> static framework preview
+-> ../../site-manifest.yaml
 -> compileFrameworkManifest()
--> namespaced/versioned hyper-vector symbols
--> all page prototype regions
--> computed proposal coverage + vector-neighbor suggestions
--> SiteSource / PageIR / packed prototype artifacts
--> HTML, instruction, agent-context, and UI emissions
+-> SiteSource / PageIR / packed artifacts
+-> static HTML, instruction, agent-context, and UI emissions
 ```
 
-The Request Mirror and synthetic compiler are profiles/fixtures inside the same manifest/compiler path.
+The project fixture proves this path. Real repository ingestion, independent context assessment, provider adapters, and output transaction into the canonical manifest remain pending.
 
 ## Commands
 
 ```bash
 npm install
 npm test
+npm run framework:doctor
+npm run framework:plan
+npm run framework:validate
+npm run framework:preview
+npm run orchestration:check
 npm run manifest:emit
 npm run ui:emit
 npm run browser:check
 npm run ui:r3f:build
 npm run benchmark:scale
-npm run generate:field
-ZIG=/path/to/zig-0.15.2 ./zig/build.sh
-node scripts/verify-wasm.mjs
 ```
 
-## Emissions
+## Groundwork emissions
 
-`manifest:emit` produces:
+`orchestration:check` produces:
 
-- all current noindex HTML fixtures;
-- instruction projections;
-- empty sitemap while no pages are approved/indexable;
-- vector namespace, symbol version, axes, vocabulary, and all prototype metadata;
-- packed prototype offsets/IDs/count;
-- all-prototype agent context;
-- UI scaffold plan;
-- build and vector-space hashes;
-- current proposal coverage policy.
+- normalized `project-input.json`;
+- source, evidence, and asset ledgers;
+- frozen context corpus and split state;
+- calibration model and held-out metrics;
+- candidate coordinates;
+- selected corpus plan and typed graph;
+- page-generation jobs;
+- generation-run checkpoints;
+- preview model;
+- JavaScript-free preview HTML;
+- deterministic summary hashes.
+
+`framework:preview` produces the same review model through the generic operator command layer.
 
 ## Package layers
 
 | File | Authority |
 |---|---|
-| `benchmark.ts` | deterministic vector identity; synthetic lexical/token-hash-semantic/facet/graph/HRR controls |
-| `optimizer.ts` | classical corpus coverage, distinctness, and rare-tail research controls |
-| `csi.ts` | Facility Location Complement Information batch/split research arm |
-| `manifest.ts` | unified parser/composer; geometry; canonical hash; computed proposal admission; profiles/publication |
-| `agent-harness.ts` | all-prototype context supplied to generation agents |
-| `framework.ts` | semantic IR; all-prototype packed arrays; primary compatibility alias; neutral emissions |
-| `ui-scaffold.ts` | renderer-independent module/capability/fixture input |
-| `ui-metaprogramming.ts` | deterministic AMTECH layout/component plan |
-| `ui-renderer.ts` | static HTML/CSS renderer |
-| `distribution.ts` | unaccepted field search/conversion measurement scaffold |
-| `resolver.ts` | finite variant-selection fixture |
-| `worker/` | asset-first Cloudflare source scaffold |
-| `zig/`, `wasm.ts` | unaccepted scalar/SIMD/Wasm research path |
-| `ui-r3f/` | optional noncanonical R3F visualization adapter |
+| `validation-contracts.ts` | Cross-layer validation/pass/fail attributes, findings, severity, reports, hashes |
+| `project-input.ts` | Business/brand/technical/goals and source/evidence/asset ledgers |
+| `context-corpus.ts` | Independent contexts, assessors, graded labels, frozen splits, isotonic calibration |
+| `typed-graph.ts` | Typed semantic edge and path compiler |
+| `page-coordinate.ts` | Explicit-primary candidate coordinates, eligibility, calibrated multi-prototype fit |
+| `corpus-plan.ts` | Budgeted facility/information/rare/diversity corpus selection |
+| `page-generation.ts` | Typed noindex jobs and bounded provider-neutral agent runner |
+| `framework-preview.ts` | Selected/rejected static review artifact |
+| `framework-orchestrator.ts` | End-to-end groundwork entrypoint |
+| `benchmark.ts` | Vector identity and synthetic ranking controls |
+| `optimizer.ts` | Facility/composite/LogDet controls |
+| `csi.ts` | Complement-aware batch/split research arm |
+| `manifest.ts` | Existing unified manifest parser/composer and legacy proposal path |
+| `agent-harness.ts` | All-prototype context for generation agents |
+| `framework.ts` | Semantic/packed IR and neutral emissions |
+| `ui-scaffold.ts`, `ui-metaprogramming.ts`, `ui-renderer.ts` | Deterministic static UI path |
+| `resolver.ts`, `worker/`, `zig/`, `wasm.ts` | Unaccepted runtime/performance research paths |
+| `ui-r3f/` | Optional noncanonical visualization adapter |
+
+## Operator module contract
+
+`framework-cli.mjs` accepts:
+
+```text
+command
+manifest path
+project module path
+output directory
+```
+
+A project module exports:
+
+```js
+createOrchestrationFixture(manifest) // replace with a real ProjectInput/corpus/candidate factory
+createFixtureExecutor()              // replace with a real AgentPassExecutor adapter
+```
+
+Provider-specific details remain behind `AgentPassExecutor`. They cannot alter canonical source, validation, or publication state directly.
 
 ## Current proof
 
-Exact validated head: `9ef48b97308e09d5a97f4978820255e3c8b53c7e`
-
-Workflow run: `29576487817`
+Validated source head before documentation: `ad3c81cfc202ba94f63f08b54649cfaaf71b00d7`  
+Workflow run: `29624909676`
 
 ```text
 strict TypeScript build: pass
-Node tests: 22/22
+Node tests: 30/30
 manifest emission: pass
 UI emission: pass
+orchestration emission: pass
+framework validate: pass
+framework preview: pass
 browser resolution: pass
 R3F build: pass
-pages: 6
-indexable pages: 0
-packed prototypes: 7
+artifact upload: pass
 ```
 
-## Acceptance boundary
+Fixture:
 
-Passing source tests establishes internal invariants only. It does not establish:
+```text
+6 contexts: 2 train / 2 validation / 2 test
+3 candidates
+2 selected
+1 duplicate rejected with explicit reason
+2/2 jobs completed after bounded repair
+validation/test fixture coverage: 1.0 / 1.0
+```
 
-- that proposal contexts are independent or correctly graded;
-- that pages should be indexed;
-- that Google/Bing will rank them;
-- that zero-volume targets are valuable;
-- that generated content is useful;
-- that graph links form useful prospect paths;
-- that browser/accessibility quality passes;
-- that public AI Employee task surfaces exist;
-- that Zig/Wasm or Cloudflare improves end-to-end performance;
-- that search, conversion, or revenue improves.
+## Boundaries
 
-## Immediate technical debt
-
-1. Add explicit `primary_prototype_id` or remove the single page-vector alias from authoritative scoring.
-2. Replace raw untyped similarity links with typed semantic edges and reviewable rationale.
-3. Build an independently judged context/document test collection with graded relevance.
-4. Treat the current token-hash “semantic” arm as a fixture; add a learned semantic control.
-5. Repair experiment/window aggregation and business event identity before field metrics.
+- Synthetic fixtures prove wiring only.
+- The current calibration is not external relevance authority.
+- Legacy manifest pages still require explicit-primary and typed-edge migration.
+- No real model provider is connected.
+- Successful agent output does not yet transact into evidence/modules/pages/tasks.
+- Browser/accessibility/Core Web Vitals, Zig/Wasm benefit, indexing, search, conversion, and revenue remain unvalidated.
