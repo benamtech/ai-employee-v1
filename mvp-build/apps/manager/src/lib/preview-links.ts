@@ -136,6 +136,7 @@ export async function createPreviewLink(
         policy_version: input.policy_version ?? null,
         approval_snapshot_hash: input.approval_snapshot_hash ?? null,
       };
+  if (!authority.assignment_id) throw new Error("preview_assignment_required");
   const token = mintPreviewToken({
     account_id: input.account_id,
     employee_id: input.employee_id,
@@ -230,10 +231,10 @@ export async function resolvePreviewLink(db: SupabaseClient, token: string): Pro
     return { ok: false, reason: "scope_mismatch" };
   }
   if (
-    (row.assignment_id && !row.assignment_authority_version) ||
+    !row.assignment_id ||
+    !row.assignment_authority_version ||
     (row.resolver_principal_id && !row.resolver_authority_version) ||
     (row.resource_type === "approval" && (
-      !row.assignment_id ||
       !row.resolver_principal_id ||
       !row.policy_version ||
       !row.approval_snapshot_hash
@@ -245,15 +246,12 @@ export async function resolvePreviewLink(db: SupabaseClient, token: string): Pro
   if (row.expires_at && Date.parse(row.expires_at) <= Date.now()) return { ok: false, reason: "expired" };
   if (row.consumed_at) return { ok: false, reason: "consumed" };
 
-  const checks: Array<Promise<boolean>> = [];
-  if (row.assignment_id) {
-    checks.push(authorityVersionCurrent(
-      db,
-      "employee_assignment",
-      row.assignment_id,
-      row.assignment_authority_version,
-    ));
-  }
+  const checks: Array<Promise<boolean>> = [authorityVersionCurrent(
+    db,
+    "employee_assignment",
+    row.assignment_id,
+    row.assignment_authority_version,
+  )];
   if (row.resolver_principal_id) {
     checks.push(authorityVersionCurrent(
       db,
@@ -262,7 +260,7 @@ export async function resolvePreviewLink(db: SupabaseClient, token: string): Pro
       row.resolver_authority_version,
     ));
   }
-  if (checks.length > 0 && !(await Promise.all(checks)).every(Boolean)) {
+  if (!(await Promise.all(checks)).every(Boolean)) {
     return { ok: false, reason: "revoked" };
   }
 
