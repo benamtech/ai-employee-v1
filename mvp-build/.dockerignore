@@ -1,0 +1,44 @@
+# Dependency and build outputs are recreated inside the image.
+node_modules
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+coverage
+**/coverage
+
+# Local evidence, diagnostics, caches, and mutable operator state.
+*.log
+**/*.log
+.agent_checkpoint
+**/.agent_checkpoint
+release-evidence-manifest.json
+migration-verification.log
+manager-typecheck.log
+production-boundary-tests.log
+manager-image-build.log
+signed-resource-revocation.log
+
+# Local secrets and environment overlays never enter the build context.
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Editor and OS noise.
+.DS_Store
+**/.DS_Store
+.vscode
+**/.vscode
+.idea
+**/.idea
+
+# Repository-only material not required to compile or run the production image.
+memory
+**/memory
+wiki
+**/wiki
+docs
+**/docs
