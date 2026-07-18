@@ -1,0 +1,57 @@
+name: Lane 1 Relationships and Authorization
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - lane/relationships-auth
+    paths:
+      - "mvp-build/packages/shared/src/relationship-contract.ts"
+      - "mvp-build/packages/shared/src/labor-relationship-record.ts"
+      - "mvp-build/packages/shared/src/ids.ts"
+      - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/tests/unit/relationship-contract.test.ts"
+      - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
+      - "mvp-build/packages/db/migrations/**"
+      - ".github/workflows/lane-relationships-auth.yml"
+  pull_request:
+    branches:
+      - employee-production-tuesday
+    paths:
+      - "mvp-build/packages/shared/src/relationship-contract.ts"
+      - "mvp-build/packages/shared/src/labor-relationship-record.ts"
+      - "mvp-build/packages/shared/src/ids.ts"
+      - "mvp-build/packages/shared/src/index.ts"
+      - "mvp-build/tests/unit/relationship-contract.test.ts"
+      - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
+      - "mvp-build/packages/db/migrations/**"
+      - ".github/workflows/lane-relationships-auth.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lane-relationships-auth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Typecheck shared relationship contracts
+        run: npm run typecheck --workspace @amtech/shared
+      - name: Build shared relationship contracts
+        run: npm run build --workspace @amtech/shared
+      - name: Run relationship contract invariants
+        run: npx vitest run tests/unit/relationship-contract.test.ts
