@@ -68,6 +68,7 @@ export interface ProjectGoals {
   searchOutcomes: readonly string[];
   utilityOutcomes: readonly string[];
   publicationRiskTolerance: "low" | "medium" | "high";
+  minimumInitialPages?: number;
   maximumInitialPages: number;
 }
 
@@ -111,7 +112,7 @@ export const PROJECT_INPUT_VALIDATION: readonly ValidationAttribute[] = [
   { id: "project.sources", feature: "Source and evidence ledger", workflowStep: "research", algorithmChoice: "provenance-bearing immutable ledger", userEffect: "the user can see what supports each generated claim and page concept", developerEffect: "agents have bounded source IDs and freshness/applicability metadata", validationVector: ["unique source IDs", "retrieval date", "confidence", "applicability", "hash"], passVector: ["every source has stable identity", "duplicate IDs fail", "source order does not alter hash"], failVector: ["claim source exists only in prompt history", "missing provenance", "duplicate source IDs"], simplerBaseline: "URL list", severity: "hard" },
   { id: "project.assets", feature: "Asset ledger", workflowStep: "inspect", algorithmChoice: "rights-aware typed asset inventory", userEffect: "the user can review which assets are available and legally usable", developerEffect: "renderers receive stable asset IDs instead of guessed paths", validationVector: ["unique asset IDs", "purpose/alt", "rights", "hash"], passVector: ["unknown rights remain explicit", "all assets have stable IDs"], failVector: ["asset usage without rights state", "decorative asset guessed by agent", "duplicate IDs"], simplerBaseline: "assets folder scan", severity: "soft" },
   { id: "project.technical", feature: "Technical and performance contract", workflowStep: "doctor", algorithmChoice: "typed deployment/browser/budget profile", userEffect: "the site is generated for the actual runtime and browser audience", developerEffect: "CSS, rendering, and build decisions have explicit constraints", validationVector: ["framework", "deployment target", "browser targets", "budgets", "accessibility standard"], passVector: ["browser targets are non-empty", "budgets are finite and positive"], failVector: ["CSS generated before targets", "negative budgets", "deployment assumptions hidden"], simplerBaseline: "framework auto-detection only", severity: "hard" },
-  { id: "project.goals", feature: "Project goals and initial corpus budget", workflowStep: "init", algorithmChoice: "typed conversion/search/utility outcomes with bounded initial page count", userEffect: "the user can see what the site is optimizing and cap the first generation cohort", developerEffect: "corpus selection receives explicit outcome and page-budget constraints", validationVector: ["conversion outcomes", "search outcomes", "utility outcomes", "risk tolerance", "maximum pages"], passVector: ["at least one outcome", "positive finite page cap", "risk tolerance explicit"], failVector: ["page count is the only goal", "unbounded initial corpus", "no measurable outcome"], simplerBaseline: "generate as many pages as possible", severity: "hard" },
+  { id: "project.goals", feature: "Project goals and one-shot site corpus bounds", workflowStep: "init", algorithmChoice: "typed conversion/search/utility outcomes with minimum and maximum page counts", userEffect: "the user can request a complete site-scale generation run while retaining an explicit upper bound", developerEffect: "ontology discovery and corpus planning must produce enough valid regions before page-generation API work starts", validationVector: ["conversion outcomes", "search outcomes", "utility outcomes", "risk tolerance", "minimum pages", "maximum pages"], passVector: ["at least one outcome", "positive finite bounds", "minimum <= maximum", "risk tolerance explicit"], failVector: ["page count is the only goal", "unbounded site generation", "minimum exceeds maximum", "no measurable outcome"], simplerBaseline: "generate until the agent stops", severity: "hard" },
 ];
 
 export function normalizeProjectInput(input: ProjectInput): NormalizedProject {
@@ -139,12 +140,18 @@ export function normalizeProjectInput(input: ProjectInput): NormalizedProject {
   const technicalOk = Boolean(input.technical.framework.trim()) && Boolean(input.technical.deploymentTarget.trim()) && input.technical.browserTargets.length > 0 && budgets.every(([, value]) => Number.isFinite(value) && value > 0);
   findings.push(finding("project.technical", technicalOk ? "pass" : "fail", technicalOk ? "technical target, browser policy, accessibility standard, and budgets are explicit" : "technical target, browser policy, and positive finite budgets are required"));
   const outcomeCount = input.goals.primaryConversions.length + input.goals.searchOutcomes.length + input.goals.utilityOutcomes.length;
-  const goalsOk = outcomeCount > 0 && Number.isInteger(input.goals.maximumInitialPages) && input.goals.maximumInitialPages > 0;
-  findings.push(finding("project.goals", goalsOk ? "pass" : "fail", goalsOk ? `${outcomeCount} outcomes declared with initial page cap ${input.goals.maximumInitialPages}` : "at least one measurable outcome and a positive integer initial page cap are required"));
+  const minimumInitialPages = input.goals.minimumInitialPages ?? 1;
+  const goalsOk = outcomeCount > 0
+    && Number.isInteger(minimumInitialPages)
+    && minimumInitialPages > 0
+    && Number.isInteger(input.goals.maximumInitialPages)
+    && input.goals.maximumInitialPages >= minimumInitialPages;
+  findings.push(finding("project.goals", goalsOk ? "pass" : "fail", goalsOk ? `${outcomeCount} outcomes declared with one-shot site bounds ${minimumInitialPages}..${input.goals.maximumInitialPages}` : "measurable outcomes and positive integer page bounds with minimum <= maximum are required"));
 
   if (input.business.pricingFacts.length === 0) missing.push("pricing facts");
   if (input.business.proofPoints.length === 0) missing.push("proof points");
-  if (input.goals.maximumInitialPages < 1 || !Number.isInteger(input.goals.maximumInitialPages)) contradictions.push("maximumInitialPages must be a positive integer");
+  if (!Number.isInteger(minimumInitialPages) || minimumInitialPages < 1) contradictions.push("minimumInitialPages must be a positive integer");
+  if (!Number.isInteger(input.goals.maximumInitialPages) || input.goals.maximumInitialPages < minimumInitialPages) contradictions.push("maximumInitialPages must be an integer greater than or equal to minimumInitialPages");
   const evidenceLedger: EvidenceLedgerEntry[] = sourceLedger.map((source) => ({ id: `evidence:${source.id}`, sourceIds: [source.id], statement: source.summary, applicability: [...source.applicability], confidence: source.confidence, ...(source.freshnessDays === undefined ? {} : { freshnessDays: source.freshnessDays }) }));
   const validation = buildValidationReport(`project:${input.id}`, PROJECT_INPUT_VALIDATION, findings);
   const canonical = { input: canonicalProjectInput(input), sourceLedger, evidenceLedger, assetLedger, missingInformation: [...missing].sort(), contradictions: [...contradictions].sort() };
@@ -152,7 +159,15 @@ export function normalizeProjectInput(input: ProjectInput): NormalizedProject {
 }
 
 function canonicalProjectInput(input: ProjectInput): ProjectInput {
-  return { ...input, business: { ...input.business, services: sorted(input.business.services), offers: sorted(input.business.offers), audiences: sorted(input.business.audiences), locations: sorted(input.business.locations), workflows: sorted(input.business.workflows), integrations: sorted(input.business.integrations), constraints: sorted(input.business.constraints), proofPoints: sorted(input.business.proofPoints), pricingFacts: sorted(input.business.pricingFacts) }, brand: { ...input.brand, voice: sorted(input.brand.voice), prohibitedLanguage: sorted(input.brand.prohibitedLanguage), palette: Object.fromEntries(Object.entries(input.brand.palette).sort(([left], [right]) => left.localeCompare(right))), typography: sorted(input.brand.typography), visualRules: sorted(input.brand.visualRules), componentRules: sorted(input.brand.componentRules) }, technical: { ...input.technical, browserTargets: sorted(input.technical.browserTargets), performanceBudgets: Object.fromEntries(Object.entries(input.technical.performanceBudgets).sort(([left], [right]) => left.localeCompare(right))) }, goals: { ...input.goals, primaryConversions: sorted(input.goals.primaryConversions), searchOutcomes: sorted(input.goals.searchOutcomes), utilityOutcomes: sorted(input.goals.utilityOutcomes) }, sources: [...input.sources].sort((left, right) => left.id.localeCompare(right.id)).map((source) => ({ ...source, applicability: sorted(source.applicability) })), assets: [...input.assets].sort((left, right) => left.id.localeCompare(right.id)) };
+  return {
+    ...input,
+    business: { ...input.business, services: sorted(input.business.services), offers: sorted(input.business.offers), audiences: sorted(input.business.audiences), locations: sorted(input.business.locations), workflows: sorted(input.business.workflows), integrations: sorted(input.business.integrations), constraints: sorted(input.business.constraints), proofPoints: sorted(input.business.proofPoints), pricingFacts: sorted(input.business.pricingFacts) },
+    brand: { ...input.brand, voice: sorted(input.brand.voice), prohibitedLanguage: sorted(input.brand.prohibitedLanguage), palette: Object.fromEntries(Object.entries(input.brand.palette).sort(([left], [right]) => left.localeCompare(right))), typography: sorted(input.brand.typography), visualRules: sorted(input.brand.visualRules), componentRules: sorted(input.brand.componentRules) },
+    technical: { ...input.technical, browserTargets: sorted(input.technical.browserTargets), performanceBudgets: Object.fromEntries(Object.entries(input.technical.performanceBudgets).sort(([left], [right]) => left.localeCompare(right))) },
+    goals: { ...input.goals, minimumInitialPages: input.goals.minimumInitialPages ?? 1, primaryConversions: sorted(input.goals.primaryConversions), searchOutcomes: sorted(input.goals.searchOutcomes), utilityOutcomes: sorted(input.goals.utilityOutcomes) },
+    sources: [...input.sources].sort((left, right) => left.id.localeCompare(right.id)).map((source) => ({ ...source, applicability: sorted(source.applicability) })),
+    assets: [...input.assets].sort((left, right) => left.id.localeCompare(right.id)),
+  };
 }
 function canonicalSource(source: ProjectSourceInput): object { return { ...source, applicability: sorted(source.applicability) }; }
 function canonicalAsset(asset: ProjectAssetInput): object { return { ...asset }; }
