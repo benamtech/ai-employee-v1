@@ -1,8 +1,8 @@
 /**
- * Single dispatch path for Manager tools, shared by every transport. The caller
- * supplies authenticated principal context; model input never does. The legacy
- * signed-preview route identifies itself as actor=owner, so this dispatcher
- * resolves the one principal-bound durable preview row before invoking S7.
+ * Single dispatch path for Manager tools, shared by every transport. Authenticated
+ * principal context is supplied by the transport that actually verified it; the
+ * dispatcher never rediscovers authority from an unrelated active link or from
+ * model-controlled input.
  */
 import { getToolSchema, failed, type ToolEnvelope, type ToolName } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
@@ -27,38 +27,6 @@ export interface RunManagerToolOptions {
   principal_id?: string | null;
   principal_class?: ToolContext["principal_class"];
   authenticated_by?: string | null;
-}
-
-async function signedPreviewAuthority(
-  db: ReturnType<typeof serviceClient>,
-  name: ToolName,
-  input: Record<string, unknown>,
-  opts: RunManagerToolOptions,
-): Promise<RunManagerToolOptions> {
-  if (name !== "resolve_approval" || opts.actor !== "owner" || opts.principal_id) return opts;
-  const approvalId = String(input.approval_id ?? "");
-  const channel = String(input.channel ?? "");
-  if (!approvalId || channel !== "sms") return opts;
-  const rows = await db.from("preview_links")
-    .select("id,assignment_id,resolver_principal_id,policy_version,approval_snapshot_hash,resource_type,resource_id,revoked_at,consumed_at,expires_at")
-    .eq("resource_type", "approval")
-    .eq("resource_id", approvalId)
-    .is("revoked_at", null)
-    .is("consumed_at", null)
-    .gt("expires_at", new Date().toISOString())
-    .limit(2);
-  if (rows.error) throw rows.error;
-  const current = rows.data ?? [];
-  if (current.length !== 1) return opts;
-  const link = current[0]!;
-  if (!link.assignment_id || !link.resolver_principal_id || !link.policy_version || !link.approval_snapshot_hash) return opts;
-  return {
-    ...opts,
-    assignment_id: String(link.assignment_id),
-    principal_id: String(link.resolver_principal_id),
-    principal_class: "human",
-    authenticated_by: `signed_preview_link:${link.id}`,
-  };
 }
 
 export async function runManagerTool(
@@ -87,17 +55,15 @@ export async function runManagerTool(
   }
 
   const input = parsed.data as Record<string, unknown>;
-  const db = serviceClient();
-  const authority = await signedPreviewAuthority(db, name, input, opts);
   const ctx: ToolContext = {
-    db,
+    db: serviceClient(),
     account_id: (input.account_id as string) ?? null,
     employee_id: (input.employee_id as string) ?? null,
-    assignment_id: authority.assignment_id ?? null,
-    principal_id: authority.principal_id ?? null,
-    principal_class: authority.principal_class ?? null,
-    authenticated_by: authority.authenticated_by ?? null,
-    actor: authority.actor ?? "manager",
+    assignment_id: opts.assignment_id ?? null,
+    principal_id: opts.principal_id ?? null,
+    principal_class: opts.principal_class ?? null,
+    authenticated_by: opts.authenticated_by ?? null,
+    actor: opts.actor ?? "manager",
   };
   const envelope = await handler(ctx, input);
   return { kind: "ok", envelope };
