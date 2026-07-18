@@ -22,5 +22,7 @@ export * from "./admin.js";
 export * from "./relationship-contract.js";
 export * from "./labor-relationship-record.js";
 export * from "./authorization-scope-registry.js";
+export * from "./assignment-resolver.js";
+export * from "./session-enforcer.js";
 export * from "./command-effect.js";
 export * from "./release-evidence.js";
