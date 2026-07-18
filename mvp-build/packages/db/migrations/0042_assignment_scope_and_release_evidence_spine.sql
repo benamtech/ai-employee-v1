@@ -116,13 +116,18 @@ stable
 security definer
 set search_path = public
 as $$
-  select ea.id
-    from employee_principals ep
-    join employee_assignments ea on ea.employee_principal_id = ep.id
-   where ep.employee_id = p_employee_id
-     and ea.account_id = p_account_id
-     and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
-   order by ea.created_at asc
+  with current_matches as (
+    select ea.id, ea.created_at, count(*) over () as match_count
+      from employee_principals ep
+      join employee_assignments ea on ea.employee_principal_id = ep.id
+     where ep.employee_id = p_employee_id
+       and ea.account_id = p_account_id
+       and amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
+  )
+  select id
+    from current_matches
+   where match_count = 1
+   order by created_at asc
    limit 1
 $$;
 
