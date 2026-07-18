@@ -32,6 +32,8 @@ export interface WorkAction {
   style?: "primary" | "danger" | "default";
   /** True when this action resolves a money/customer-facing/dangerous gate. */
   gated?: boolean;
+  /** True when the action must be claimed through the C3 durable command/effect kernel before side effects. */
+  requires_command_effect?: boolean;
 }
 
 /** How the body of a resource should be rendered — the generic renderer tiers.
@@ -57,6 +59,8 @@ export interface WorkResourceMedia {
 export interface WorkResource {
   resource_type: PreviewResourceType;
   resource_id: string;
+  /** S3: signature proves possession only; durable resource lookup supplies assignment scope. */
+  assignment_id?: string | null;
   title: string;
   subtitle?: string;
   summary?: string;
@@ -106,20 +110,20 @@ export function defaultActionsFor(
   );
   if (resourceType === "approval" || gated) {
     return [
-      { action: "approve", label: LABELS.approve, style: "primary", gated: true },
-      { action: "reject", label: LABELS.reject, style: "danger", gated: true },
-      { action: "respond", label: LABELS.respond, style: "default" },
+      { action: "approve", label: LABELS.approve, style: "primary", gated: true, requires_command_effect: true },
+      { action: "reject", label: LABELS.reject, style: "danger", gated: true, requires_command_effect: true },
+      { action: "respond", label: LABELS.respond, style: "default", requires_command_effect: true },
     ];
   }
   if (resourceType === "connector") {
     return [
-      { action: "acknowledge", label: LABELS.acknowledge, style: "primary" },
-      { action: "respond", label: LABELS.respond, style: "default" },
+      { action: "acknowledge", label: LABELS.acknowledge, style: "primary", requires_command_effect: true },
+      { action: "respond", label: LABELS.respond, style: "default", requires_command_effect: true },
     ];
   }
   return [
-    { action: "respond", label: LABELS.respond, style: "default" },
-    { action: "acknowledge", label: LABELS.acknowledge, style: "default" },
+    { action: "respond", label: LABELS.respond, style: "default", requires_command_effect: true },
+    { action: "acknowledge", label: LABELS.acknowledge, style: "default", requires_command_effect: true },
   ];
 }
 
