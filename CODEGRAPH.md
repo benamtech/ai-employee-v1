@@ -79,26 +79,27 @@ Overall status:
 
 `standard-remediation_in-progress_source-and-ci-evidence_not-live-accepted_not-launch-cleared`
 
-### Integrated
+### Integrated checkpoints
 
-- Lane 1 checkpoint: labor/domain relationships, assignment model, initial authorization evaluator, migrations `0039` and `0040`, and the five-case PostgreSQL relationship/RLS matrix.
-- Existing production-like normal-employee deployment path remains preserved.
+- Lane 1 relationship/authorization foundation merged from PR `#24` at `b37d479a70983fcb3e88942b1f36481a07a97d17`: labor/domain relationships, assignment model, initial authorization evaluator, migrations `0039` and `0040`, and the five-case PostgreSQL relationship/RLS matrix.
+- Repository-boundary cleanup merged from PR `#27` at `3ec7a5c541fd8d6e6ec074e94f178163c7ec9477`: removed the independent Hyper Site subtree and its orphaned workflow, then repaired root and scoped routing documents.
+- Lane 3 durable command/effect kernel merged from PR `#26` at `c94be46137b8c87b610ba0c4b48302bb2e944564`: scheduler-independent concurrency harness, migration `0041`, stable intent registration, atomic claims, effect reservation, accepted/failed/ambiguous receipts, receipt-gated completion, deterministic replay, and bounded lease reclaim.
+- Lane 3 Actions run `29642874619` passed shared typecheck/build, six contract invariants, blank PostgreSQL 17 migration application, and the seven-case command/effect matrix. Relationship/authorization run `29642874652` also passed on the same lane head.
+- Existing production-like normal-employee deployment machinery remains preserved.
 
-### Active
+These are source/CI/PostgreSQL checkpoints only. They are not real-Supabase, provider, runtime, browser/SMS, commercial, capacity, deployment, or production acceptance.
 
-- Lane 3 durable command/effect kernel is implemented on draft PR `#26`.
-- The concurrency harness was corrected so no caller index is assumed to win.
-- The corrected missing-schema RED state was recaptured before implementation.
-- Migration `0041_durable_command_effect_kernel.sql` and the seven-case database matrix passed on Actions run `29642874619`.
-- The existing relationship/authorization workflow also passed on the same head via run `29642874652`.
+### Next dependency gates
 
-Lane 3 is CI-accepted on its branch, but not integrated, real-Supabase-accepted, provider-accepted, runtime-accepted, or production-deployed.
+1. Complete Lane 1 assignment and authorization scope across every consequential resource, route, SMS path, signed resource, connector, owner session, admin/support action, and commercial consumer.
+2. Build Lane 10’s integrated CI and release-evidence spine early enough to prevent later lanes from accumulating unverifiable claims.
+3. Then implement Lane 2 sessions, approvals, admin/support authority, revocation, and Lane 4 onboarding identity saga against the shared relationship and command/effect kernels.
 
-### Pending hard gates
+### Remaining hard gates
 
-- complete assignment scope across all consequential resources, routes, SMS, signed resources, connectors, sessions, admin/support, and commercial consumers;
+- complete assignment scope and non-recursive privilege review;
 - owner sessions, approvals, admin/support authority, and revocation;
-- onboarding identity saga and repair;
+- onboarding identity saga, compensation, and repair;
 - budget, usage, payer/beneficiary, provider cost, and invoice reconciliation;
 - connector custody and unified channel envelope;
 - separated workers, capacity, recovery, and fairness for 100–700 provisioned agents;
