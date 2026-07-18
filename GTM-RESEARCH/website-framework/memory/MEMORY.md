@@ -3,7 +3,7 @@
 format: TOON-oriented Markdown  
 status: active  
 scope: GTM-RESEARCH/website-framework  
-updated_at: 2026-07-17T23:40:00-04:00
+updated_at: 2026-07-18T00:55:00-04:00
 
 ## protocol
 
@@ -22,11 +22,11 @@ rules[8]:
 
 ## current
 
-state{branch,pr,status,latest_validated_source_head,workflow_run,tests}:
-  agent/ui-metaprogramming-pass-1,17,"draft; agent ontology + 10k site-program source-pass; real ingestion/providers/content/browser/search/field pending",dcc8beded51290f8084a421996c51c18b2afed83,29628832989,"46/46"
+state{branch,pr,status,latest_validated_code_head,workflow_run,tests}:
+  agent/ui-metaprogramming-pass-1,17,"draft; agent ontology + 10k site-program + academic crosswalk source-pass; real ingestion/providers/content/browser/search/field pending",f6d726d08491c63f8aac3e8de28ddb84edaa93a1,29629423243,"46/46"
 
 note:
-  "latest_validated_source_head precedes documentation/memory commits; final exact-head workflow must remain green after authority updates"
+  "latest_validated_code_head includes the comprehensive source/code/SEO review and passed exact-head CI; subsequent academic-crosswalk and memory-only commits require normal final-head CI confirmation"
 
 job_boundary:
   "one job is one finite full-site creation run with the declared minimum page-region jobs and batched agent/API work; it is not request-time serving or an always-on VPS"
@@ -37,10 +37,14 @@ product_boundary:
 pipeline:
   "ProjectInput -> AgentOntologyProposal -> ApprovedOntology -> sparse ontology graph/constraints -> ProductionOpportunitySpace -> SiteGenerationPlan -> PageConceptProposals -> CandidatePageSeeds -> existing PageCoordinate/SelectedCorpusPlan/PageGenerationJob/manifest/PageIR/UI compiler"
 
+research_boundary:
+  "external/generated bibliography is a lead list; exact primary source, applicability, simpler baseline, validation vector, and measured result are required before a claim becomes framework authority"
+
 ## handoffs
 
-handoffs[11]{at,file,status,scope}:
-  2026-07-17T23:40:00-04:00,2026-07-17-agent-ontology-10k-site-program.md,current,"agent-discovered ontology; sparse 10k planning; Wasm decision"
+handoffs[12]{at,file,status,scope}:
+  2026-07-18T00:55:00-04:00,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,current,"verified research; external harness; structured generation; Wasm boundary"
+  2026-07-17T23:40:00-04:00,2026-07-17-agent-ontology-10k-site-program.md,current-foundation,"agent-discovered ontology; sparse 10k planning; Wasm decision"
   2026-07-17T21:20:00-04:00,2026-07-17-2120-groundwork-orchestration-implementation.md,current-foundation,"implemented orchestration spine; preview/operator UX"
   2026-07-17T20:45:00-04:00,2026-07-17-2045-agent-generation-workflow-ci-closure.md,historical-authority,"pre-implementation workflow authority"
   2026-07-17T20:30:00-04:00,2026-07-17-2030-agent-generation-jobs-workflow-validation.md,historical-design,"PageGenerationJob and workflow validation model"
@@ -54,7 +58,7 @@ handoffs[11]{at,file,status,scope}:
 
 ## authority
 
-read_order[15]{order,file,role}:
+read_order[18]{order,file,role}:
   1,../../identity.md,"root identity"
   2,../identity.md,"scope identity"
   3,../../CODEGRAPH.md,"root map"
@@ -62,14 +66,17 @@ read_order[15]{order,file,role}:
   5,../CODEGRAPH.md,"current source graph"
   6,../README.md,"current reality"
   7,MEMORY.md,"durable current state"
-  8,2026-07-17-agent-ontology-10k-site-program.md,"latest immutable handoff"
-  9,../24-agent-discovered-ontology-and-10k-site-program.md,"current implementation/research authority"
-  10,../validation/reports/2026-07-17-agent-ontology-10k-site-program.md,"exact proof and boundaries"
-  11,../23-groundwork-orchestration-implementation.md,"groundwork implementation authority"
-  12,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
-  13,../21-vector-to-generation-job-compiler.md,"generation-job model"
-  14,../20-agent-operated-vector-site-generation-and-wasm.md,"historical product/Wasm model"
-  15,../site-manifest.yaml,"downstream compiled corpus authority"
+  8,2026-07-18-0055-academic-crosswalk-harness-acceleration.md,"latest immutable handoff"
+  9,../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md,"verified research crosswalk"
+  10,../validation/reports/2026-07-18-academic-crosswalk-harness-and-acceleration.md,"research validation report"
+  11,../validation/reports/2026-07-18-comprehensive-framework-code-seo-performance-review.md,"deep current code/SEO/performance review"
+  12,../24-agent-discovered-ontology-and-10k-site-program.md,"current implementation/research authority"
+  13,../validation/reports/2026-07-17-agent-ontology-10k-site-program.md,"exact source proof and boundaries"
+  14,../23-groundwork-orchestration-implementation.md,"groundwork implementation authority"
+  15,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
+  16,../21-vector-to-generation-job-compiler.md,"generation-job model"
+  17,../20-agent-operated-vector-site-generation-and-wasm.md,"historical product/Wasm model"
+  18,../site-manifest.yaml,"downstream compiled corpus authority"
 
 ## source
 
@@ -112,7 +119,7 @@ decisions[24]{id,decision,ref}:
   G14,"Stage-2 drift or missing information/utility fails",../reference/src/site-program.ts
   G15,"bounded local neighbors are advisory, not publication authority",../reference/src/site-program-optimized.ts
   G16,"candidate seeds compile into existing explicit-primary path",../reference/src/site-program.ts
-  G17,"Leiden is exploratory comparison only",../24-agent-discovered-ontology-and-10k-site-program.md
+  G17,"Leiden is exploratory comparison only",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
   G18,"sparse clustering reserved for real customer-row studies",../24-agent-discovered-ontology-and-10k-site-program.md
   G19,"learned embeddings/HNSW/GNN/GraphRAG are later comparison arms",../24-agent-discovered-ontology-and-10k-site-program.md
   G20,"Blackwell/local GPU is optional agent provider, not compiler dependency",../24-agent-discovered-ontology-and-10k-site-program.md
@@ -121,10 +128,20 @@ decisions[24]{id,decision,ref}:
   G23,"canonical HTML remains static and runtime-independent",../20-agent-operated-vector-site-generation-and-wasm.md
   G24,"source/scale proof cannot be described as search/commercial proof",../validation/reports/2026-07-17-agent-ontology-10k-site-program.md
 
+research_decisions[8]{id,decision,ref}:
+  R01,"generated bibliography is not authority until primary-source verification",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
+  R02,"same-model self-critique cannot accept ontology/page output",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
+  R03,"external deterministic compiler findings control repair and acceptance",../reference/src/validation-contracts.ts
+  R04,"JSON-schema constrained decoding is future provider infrastructure, not semantic authority",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
+  R05,"AgentO is future interoperability comparison, not business ontology replacement",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
+  R06,"SGLang/equivalent is future execution-provider comparison only",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
+  R07,"CSI waits for frozen real hidden-slice evaluation",../25-academic-crosswalk-agent-harness-structured-generation-and-acceleration.md
+  R08,"Wasm remains benchmark-gated after algorithm-first optimization",../reference/src/acceleration-decision.ts
+
 ## proof
 
-proof{head,run,tests,stages}:
-  dcc8beded51290f8084a421996c51c18b2afed83,29628832989,"46/46","TypeScript; manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
+proof{source_head,source_run,latest_exact_head,latest_run,tests,stages}:
+  dcc8beded51290f8084a421996c51c18b2afed83,29628832989,f6d726d08491c63f8aac3e8de28ddb84edaa93a1,29629423243,"46/46","TypeScript; manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
 
 scale{candidates,selected,batches,packed_bytes,total_ms}:
   15000,10000,400,2560000,5284.510
@@ -162,16 +179,18 @@ p0[5]{id,item,ref}:
   N04,"Stage-2 provider and canonical output transaction",../reference/src/site-program.ts
   N05,"100-500 real noindex cohort with content/information-gain review",../24-agent-discovered-ontology-and-10k-site-program.md
 
-p1[7]{id,item}:
+p1[9]{id,item}:
   legacy-manifest-explicit-primary-migration
   legacy-links-typed-edge-migration
   public-ai-employee-task-ir
+  provider-json-schema-benchmark
+  sglang-equivalent-runtime-comparison
   10000-complete-page-emissions
   browser-accessibility-cwv-crawler-scale
   zig-wasm-bridge-inclusive-kernel-benchmark
   matched-field-publication
 
-not_claimed[11]:
+not_claimed[14]:
   external-relevance
   production-agent-generation
   reviewed-10000-page-corpus
@@ -183,15 +202,19 @@ not_claimed[11]:
   leiden-clustering-embedding-ann-superiority
   blackwell-cost-throughput
   browser-beauty-acceptance
+  sglang-provider-superiority
+  agento-interoperability-acceptance
+  csi-superiority-on-real-corpus
 
 ## next
 
-next[8]{order,task,gate}:
+next[9]{order,task,gate}:
   1,"repository/source ingestion adapters","real ProjectInput/OntologyProposal without invented truth"
-  2,"Stage-1 provider + reviewer workflow","reviewed ontology and observations"
+  2,"Stage-1 schema-constrained provider + reviewer workflow","reviewed ontology and observations"
   3,"independent context/assessor workflow","external labels and held-out relevance"
-  4,"Stage-2 provider adapter","bounded real PageConceptProposals"
+  4,"Stage-2 schema-constrained provider adapter","bounded real PageConceptProposals"
   5,"canonical transaction","atomic successful output -> evidence/modules/tasks/pages"
   6,"first cohort","100-500 real noindex pages with information-gain/cannibalization review"
   7,"scale emissions","10000 complete static pages + browser/accessibility/performance acceptance"
-  8,"field gates","matched publication then search/commercial measurement"
+  8,"50k/100k profile","measured need before ANN/native/Wasm/GPU"
+  9,"field gates","matched publication then search/commercial measurement"
