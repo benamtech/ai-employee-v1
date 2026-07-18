@@ -87,17 +87,23 @@ Overall status:
 - Lane 3 Actions run `29642874619` passed shared typecheck/build, six contract invariants, blank PostgreSQL 17 migration application, and the seven-case command/effect matrix. Relationship/authorization run `29642874652` also passed on the same lane head.
 - Existing production-like normal-employee deployment machinery remains preserved.
 
-These are source/CI/PostgreSQL checkpoints only. They are not real-Supabase, provider, runtime, browser/SMS, commercial, capacity, deployment, or production acceptance.
+### Current source-wired progress on PR #23
+
+- Lane 1 now has an executable consequential-surface registry at `mvp-build/packages/shared/src/authorization-scope-registry.ts` covering tables, Manager routes, SMS paths, signed resources, connector bindings, owner sessions, admin/support actions, commercial rows, service workers, and public claims.
+- Migration `0042_assignment_scope_and_release_evidence_spine.sql` persists the scope registry, adds nullable `assignment_id` columns to existing consequential tables where present, records deterministic high-confidence assignment backfills only, and leaves ambiguous rows unpromoted.
+- Lane 10 now has `mvp-build/packages/shared/src/release-evidence.ts`, `infra/scripts/acceptance/release-evidence-spine.mjs`, and `.github/workflows/lane10-integrated-ci-release-evidence.yml` to bind source/CI evidence, migration matrices, and pending hard gates to the exact SHA.
+
+These are source/CI/PostgreSQL checkpoints only until the new workflows pass. They are not real-Supabase, provider, runtime, browser/SMS, commercial, capacity, deployment, or production acceptance.
 
 ### Next dependency gates
 
-1. Complete Lane 1 assignment and authorization scope across every consequential resource, route, SMS path, signed resource, connector, owner session, admin/support action, and commercial consumer.
-2. Build Lane 10’s integrated CI and release-evidence spine early enough to prevent later lanes from accumulating unverifiable claims.
+1. Get the Lane 1 scope registry, migration `0042`, relationship matrix, command/effect matrix, and Lane 10 evidence workflow green on the current PR head.
+2. Convert registry entries into route/session/SMS/signed-resource/connector/commercial consumer enforcement without allowing account-membership, bearer-only, phone-only, mutable-header, or caller-selected identity shortcuts.
 3. Then implement Lane 2 sessions, approvals, admin/support authority, revocation, and Lane 4 onboarding identity saga against the shared relationship and command/effect kernels.
 
 ### Remaining hard gates
 
-- complete assignment scope and non-recursive privilege review;
+- complete consumer-level assignment enforcement and non-recursive privilege review;
 - owner sessions, approvals, admin/support authority, and revocation;
 - onboarding identity saga, compensation, and repair;
 - budget, usage, payer/beneficiary, provider cost, and invoice reconciliation;
