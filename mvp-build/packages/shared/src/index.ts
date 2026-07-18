@@ -22,7 +22,26 @@ export * from "./admin.js";
 export * from "./relationship-contract.js";
 export * from "./labor-relationship-record.js";
 export * from "./authorization-scope-registry.js";
-export * from "./assignment-resolver.js";
+export {
+  authorizedAssignmentsForPrincipal,
+  resolveAssignmentScope,
+  resolveSmsChannelAssignment,
+  validateSignedResourceDurableBoundary,
+  type AssignmentAction,
+  type AssignmentDenialReason,
+  type AssignmentPrincipalRecord,
+  type AssignmentPrincipalRole,
+  type AssignmentPrincipalStatus,
+  type AssignmentResourceGrantRecord,
+  type AssignmentScopeDecision,
+  type AssignmentScopeEvidence,
+  type AssignmentScopeRequest,
+  type DurableScopedResource,
+  type HumanPrincipal as AssignmentHumanPrincipal,
+  type SignedResourceBoundaryDecision,
+  type SignedResourcePossession,
+  type SmsPhoneBinding,
+} from "./assignment-resolver.js";
 export * from "./session-enforcer.js";
 export * from "./command-effect.js";
 export * from "./release-evidence.js";
