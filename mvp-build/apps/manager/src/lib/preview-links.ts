@@ -1,7 +1,7 @@
 /**
  * Signed preview/action links. The signature proves possession only; the durable
  * row binds assignment, human resolver, policy, snapshot, action scope, expiry,
- * revocation, and single-use state.
+ * revocation, single-use state, and the authority versions current at issuance.
  */
 import type { SupabaseClient } from "@amtech/db";
 import { ID_PREFIX, newId, reviewRoute, type PreviewResourceType, type PreviewActionType } from "@amtech/shared";
@@ -27,6 +27,8 @@ export interface PreviewLinkRow {
   resolver_principal_id?: string | null;
   policy_version?: string | null;
   approval_snapshot_hash?: string | null;
+  resolver_authority_version?: number | null;
+  assignment_authority_version?: number | null;
   token_jti?: string | null;
   resource_type: PreviewResourceType;
   resource_id: string;
@@ -208,12 +210,45 @@ export async function resolvePreviewLink(db: SupabaseClient, token: string): Pro
     return { ok: false, reason: "scope_mismatch" };
   }
   if (row.resource_type === "approval" && (
-    !row.assignment_id || !row.resolver_principal_id || !row.policy_version || !row.approval_snapshot_hash
+    !row.assignment_id ||
+    !row.resolver_principal_id ||
+    !row.policy_version ||
+    !row.approval_snapshot_hash ||
+    !row.assignment_authority_version ||
+    !row.resolver_authority_version
   )) {
     return { ok: false, reason: "scope_mismatch" };
   }
   if (row.revoked_at) return { ok: false, reason: "revoked" };
   if (row.expires_at && Date.parse(row.expires_at) <= Date.now()) return { ok: false, reason: "expired" };
   if (row.consumed_at) return { ok: false, reason: "consumed" };
+
+  if (row.resource_type === "approval") {
+    const [assignmentAuthority, resolverAuthority] = await Promise.all([
+      db.from("authority_versions")
+        .select("current_version,revoked_at")
+        .eq("scope_type", "employee_assignment")
+        .eq("scope_id", String(row.assignment_id))
+        .maybeSingle(),
+      db.from("authority_versions")
+        .select("current_version,revoked_at")
+        .eq("scope_type", "human_principal")
+        .eq("scope_id", String(row.resolver_principal_id))
+        .maybeSingle(),
+    ]);
+    if (assignmentAuthority.error) throw assignmentAuthority.error;
+    if (resolverAuthority.error) throw resolverAuthority.error;
+    if (
+      !assignmentAuthority.data?.current_version ||
+      assignmentAuthority.data.revoked_at ||
+      Number(assignmentAuthority.data.current_version) !== Number(row.assignment_authority_version) ||
+      !resolverAuthority.data?.current_version ||
+      resolverAuthority.data.revoked_at ||
+      Number(resolverAuthority.data.current_version) !== Number(row.resolver_authority_version)
+    ) {
+      return { ok: false, reason: "revoked" };
+    }
+  }
+
   return { ok: true, link: row, claims };
 }
