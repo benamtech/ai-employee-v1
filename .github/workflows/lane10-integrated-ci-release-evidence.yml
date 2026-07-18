@@ -10,6 +10,7 @@ on:
       - "mvp-build/packages/db/**"
       - "mvp-build/tests/**"
       - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
+      - "mvp-build/infra/scripts/acceptance/assignment-enforcement-spine.mjs"
       - "mvp-build/package.json"
       - "mvp-build/package-lock.json"
       - ".github/workflows/lane10-integrated-ci-release-evidence.yml"
@@ -21,6 +22,7 @@ on:
       - "mvp-build/packages/db/**"
       - "mvp-build/tests/**"
       - "mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs"
+      - "mvp-build/infra/scripts/acceptance/assignment-enforcement-spine.mjs"
       - "mvp-build/package.json"
       - "mvp-build/package-lock.json"
       - ".github/workflows/lane10-integrated-ci-release-evidence.yml"
@@ -60,9 +62,12 @@ jobs:
           npx vitest run \
             tests/unit/relationship-contract.test.ts \
             tests/unit/authorization-scope-registry.test.ts \
+            tests/unit/assignment-enforcement-contract.test.ts \
             tests/unit/command-effect-contract.test.ts \
             tests/unit/release-evidence-contract.test.ts \
             tests/unit/remediation-plan-integrity.test.ts
+      - name: Verify assignment enforcement source spine
+        run: npm run release:assignment-enforcement
 
   postgres-boundary:
     needs: source-contracts
