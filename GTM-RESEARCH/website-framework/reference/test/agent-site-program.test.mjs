@@ -6,6 +6,7 @@ import {
   compileAgentSiteProgram,
   compileApprovedOntology,
   compileOntologyGraph,
+  compileOpportunitySpace,
   compileSiteGenerationPlan,
   normalizeProjectInput,
   prepareAgentSiteProgram,
@@ -85,13 +86,40 @@ test("page concept compiler rejects a proposal that does not express its selecte
 
 test("one-shot sparse planner produces a 10,000-page site program without serving runtime", { timeout: 120_000 }, () => {
   const fixture = createScaleAgentSiteFixture(10_000);
-  const started = performance.now();
-  const prepared = prepareAgentSiteProgram(fixture);
-  const elapsedMilliseconds = performance.now() - started;
-  assert.equal(prepared.siteGenerationPlan.pageConceptJobs.length, 10_000);
-  assert.equal(prepared.siteGenerationPlan.batches.length, 400);
-  assert.equal(prepared.opportunitySpace.selected.packedVectors.byteLength, 10_000 * 64 * 4);
-  assert.equal(prepared.opportunitySpace.selected.validation.passes, true);
-  assert.ok(prepared.opportunitySpace.candidates.length >= 10_000);
+  const totalStarted = performance.now();
+  const projectStarted = performance.now();
+  const project = normalizeProjectInput(fixture.project);
+  const projectMilliseconds = performance.now() - projectStarted;
+  const ontologyStarted = performance.now();
+  const ontology = compileApprovedOntology(project, fixture.ontologyProposal, fixture.ontologyPolicy);
+  const ontologyMilliseconds = performance.now() - ontologyStarted;
+  const graphStarted = performance.now();
+  const graph = compileOntologyGraph(ontology, fixture.graphPolicy);
+  const graphMilliseconds = performance.now() - graphStarted;
+  const opportunityStarted = performance.now();
+  const opportunitySpace = compileOpportunitySpace(project, ontology, graph, fixture.vectorIdentity, fixture.opportunityPolicy);
+  const opportunityMilliseconds = performance.now() - opportunityStarted;
+  const siteProgramStarted = performance.now();
+  const siteGenerationPlan = compileSiteGenerationPlan(project, ontology, opportunitySpace.selected, fixture.siteGenerationPolicy);
+  const siteProgramMilliseconds = performance.now() - siteProgramStarted;
+  const elapsedMilliseconds = performance.now() - totalStarted;
+  const profile = {
+    projectMilliseconds,
+    ontologyMilliseconds,
+    graphMilliseconds,
+    opportunityMilliseconds,
+    siteProgramMilliseconds,
+    elapsedMilliseconds,
+    candidates: opportunitySpace.candidates.length,
+    selected: siteGenerationPlan.pageConceptJobs.length,
+    packedVectorBytes: opportunitySpace.selected.packedVectors.byteLength,
+    batches: siteGenerationPlan.batches.length,
+  };
+  console.log(`10k-site-profile ${JSON.stringify(profile)}`);
+  assert.equal(siteGenerationPlan.pageConceptJobs.length, 10_000);
+  assert.equal(siteGenerationPlan.batches.length, 400);
+  assert.equal(opportunitySpace.selected.packedVectors.byteLength, 10_000 * 64 * 4);
+  assert.equal(opportunitySpace.selected.validation.passes, true);
+  assert.ok(opportunitySpace.candidates.length >= 10_000);
   assert.ok(elapsedMilliseconds < fixture.project.technical.performanceBudgets.planningMilliseconds, `planning took ${elapsedMilliseconds.toFixed(1)}ms`);
 });
