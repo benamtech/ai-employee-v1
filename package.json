@@ -1,0 +1,27 @@
+{
+  "name": "amtech-ai-employee-local-production",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "help": "node scripts/local-prod/help.mjs",
+    "audit": "node scripts/local-prod/audit.mjs",
+    "preflight": "node scripts/local-prod/preflight.mjs",
+    "typecheck": "node scripts/local-prod/measure-command.mjs typecheck 60 4096 -- npm --prefix mvp-build run typecheck",
+    "lint": "node scripts/local-prod/measure-command.mjs lint 30 4096 -- npm --prefix mvp-build run lint",
+    "build": "node scripts/local-prod/build.mjs",
+    "test": "node scripts/local-prod/test.mjs",
+    "dev": "node scripts/local-prod/dev.mjs",
+    "verify": "node scripts/local-prod/verify.mjs",
+    "s9:go-no-go": "node scripts/local-prod/go-no-go.mjs",
+    "sdrt:validate": "python3 scripts/sdrt/sdrt_validator.py local-prod/example.sdrt --closed",
+    "sdrt:roundtrip": "python3 scripts/sdrt/sdrt_validator.py local-prod/example.sdrt --round-trip",
+    "sdrt:query": "python3 scripts/sdrt/sdrt_validator.py local-prod/example.sdrt --query=type:gap",
+    "sdrt:mcp": "python3 scripts/sdrt/sdrt_mcp_server.py --dry-run local-prod/example.sdrt",
+    "admin": "npm --prefix mvp-build run ops:platform-admin --"
+  }
+}
