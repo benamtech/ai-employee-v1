@@ -18,6 +18,7 @@ export * from "./tool-schemas.js";
 export * from "./profile-package.js";
 export * from "./model-gateway.js";
 export * from "./approval-policy.js";
+export * from "./approval-authority.js";
 export * from "./admin.js";
 export * from "./relationship-contract.js";
 export * from "./labor-relationship-record.js";
