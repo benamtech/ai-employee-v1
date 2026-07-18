@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { ROOT, directoryBytes, gitSha, runMeasured, writeProof } from "./lib.mjs";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
-  console.log("Usage: pnpm build\nBuilds canonical npm workspaces and the existing production manager/web/caddy images for the exact Git SHA. Enforces a 30s/4GB caller-process budget and a 100MB application-artifact budget. It never starts or deploys containers.");
+  console.log("Usage: pnpm build\nBuilds canonical npm workspaces and the full production manager/model-gateway/host-provisioner/web/caddy image set for the exact Git SHA. Enforces a 30s/4GB caller-process budget and a 100MB application-artifact budget. It never starts or deploys containers.");
   process.exit(0);
 }
 if (!existsSync(join(ROOT, "mvp-build", "node_modules"))) {
@@ -16,6 +16,11 @@ if (!existsSync(join(ROOT, "mvp-build", "node_modules"))) {
 const deployEnv = join(ROOT, "mvp-build", "infra", "deploy", ".env.production");
 if (!existsSync(deployEnv)) {
   console.error("mvp-build/infra/deploy/.env.production missing. Prepare it from the documented example before building production images.");
+  process.exit(1);
+}
+const trackedStatus = spawnSync("git", ["status", "--porcelain", "--untracked-files=no"], { cwd: ROOT, encoding: "utf8", timeout: 5000 });
+if (trackedStatus.status !== 0 || trackedStatus.stdout.trim()) {
+  console.error("tracked working tree must be clean before an exact-SHA production build");
   process.exit(1);
 }
 const sha = gitSha();
@@ -46,6 +51,7 @@ const maxBytes = Number(process.env.LOCAL_PROD_BUILD_MAX_ARTIFACT_MB ?? 100) * 1
 const artifactPass = bytes > 0 && bytes <= maxBytes;
 const imageNames = [
   `amtech-ai-employee-manager:${sha}`,
+  `amtech-ai-employee-provisioner:${sha}`,
   `amtech-ai-employee-web:${sha}`,
   `amtech-ai-employee-caddy:${sha}`,
 ];
@@ -64,6 +70,7 @@ const images = imageNames.map((image) => {
 const imagePass = images.every((image) => image.status === "pass");
 const proof = writeProof("build-artifacts", {
   status: result.status === "pass" && artifactPass && imagePass ? "pass" : "fail",
+  topology: "full production compose: manager, model-gateway, host-provisioner, web, caddy",
   artifact_bytes: bytes,
   artifact_mb: Math.round(bytes / 1024 / 1024 * 10) / 10,
   max_artifact_mb: maxBytes / 1024 / 1024,
@@ -71,7 +78,7 @@ const proof = writeProof("build-artifacts", {
   paths: candidates.filter(existsSync).map((path) => path.slice(ROOT.length + 1)),
   images,
   exact_revision_pass: imagePass,
-  docker_daemon_memory_note: "Caller process-tree RSS is measured. Docker daemon/BuildKit memory is recorded as an explicit measurement limitation and must be checked with host telemetry for final capacity acceptance.",
+  docker_daemon_memory_note: "Caller process-tree RSS is measured. Docker daemon/BuildKit memory is an explicit unproven vector until host telemetry confirms peak total memory below the configured limit.",
 });
 console.log(`artifact_proof_json:${proof.latest}`);
 if (!artifactPass || !imagePass || result.status !== "pass") process.exit(1);
