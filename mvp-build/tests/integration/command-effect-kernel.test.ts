@@ -62,7 +62,7 @@ async function seedAssignment(client: Client): Promise<void> {
 
       insert into human_principals (id, user_id, status) values
         ('hpr_kernel', 'user_kernel', 'active')
-      on conflict (id) do update set status = excluded.status;
+      on conflict (user_id) do update set id = excluded.id, status = excluded.status;
 
       insert into employee_principals (id, employee_id, status) values
         ('epr_kernel', 'emp_kernel', 'active')

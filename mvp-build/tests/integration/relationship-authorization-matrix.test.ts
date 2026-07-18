@@ -128,7 +128,7 @@ async function seedMatrix(client: Client): Promise<void> {
         ('hpr_matrix_owner', 'user_matrix_owner', 'active'),
         ('hpr_matrix_operator', 'user_matrix_operator', 'active'),
         ('hpr_matrix_multi', 'user_matrix_multi', 'active')
-      on conflict (id) do update set status = excluded.status;
+      on conflict (user_id) do update set id = excluded.id, status = excluded.status;
 
       insert into employee_principals (id, employee_id, status) values
         ('epr_matrix_a1', 'emp_matrix_a1', 'active'),

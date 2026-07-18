@@ -52,7 +52,7 @@ async function seed(client: Client): Promise<void> {
     await client.query(`
       insert into human_principals(id, user_id, status, session_version)
       values($1, $2, 'active', 1)
-      on conflict (id) do update set status = 'active', credentials_revoked_at = null
+      on conflict (user_id) do update set id = excluded.id, status = 'active', session_version = excluded.session_version, credentials_revoked_at = null
     `, [ids.human, ids.user]);
     await client.query(`
       insert into employee_principals(id, employee_id, status)
