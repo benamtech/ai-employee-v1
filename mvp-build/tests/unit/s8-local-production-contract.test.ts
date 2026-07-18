@@ -33,6 +33,7 @@ describe("S8 production admin authority source boundary", () => {
     expect(template).toContain("async function adminActor(");
     expect(generator).toContain('expectedTemplateBlob = "bd60a15384e8efd2db8b2fe8e92b1bedddaf9911"');
     expect(generator).toContain("production_server_template_hash_mismatch");
+    expect(generator).toContain('from "node:url"');
     expect(managerPackage).toMatchObject({
       main: "./dist/server.generated.js",
       scripts: {
@@ -99,26 +100,36 @@ describe("local machine production gate", () => {
     await expect(readFile(join(repoRoot, "pnpm-lock.yaml"), "utf8")).resolves.toContain("importers:");
   });
 
-  it("builds and starts only exact-SHA production images", async () => {
-    const compose = await source("infra/deploy/docker-compose.yml");
+  it("builds and starts only exact-SHA images for the full production topology", async () => {
+    const compose = await source("infra/deploy/docker-compose.production.yml");
     const manager = await source("infra/deploy/manager.Dockerfile");
+    const provisioner = await source("infra/deploy/provisioner.Dockerfile");
     const web = await source("infra/deploy/web.Dockerfile");
     const caddy = await source("infra/deploy/caddy.Dockerfile");
-    for (const text of [compose, manager, web, caddy]) expect(text).toContain("AMTECH_GIT_SHA");
+    for (const text of [compose, manager, provisioner, web, caddy]) expect(text).toContain("AMTECH_GIT_SHA");
+    for (const service of ["manager:", "model-gateway:", "host-provisioner:", "web:", "caddy:"]) expect(compose).toContain(service);
     expect(compose).toContain("AMTECH_GIT_SHA is required");
+    const managerBlock = compose.split("  model-gateway:")[0];
+    expect(managerBlock).not.toContain("/var/run/docker.sock");
+    expect(compose).toContain("provisioner_socket:/run/amtech-provisioner");
     expect(manager).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
     expect(manager).toContain("apps/manager/dist/server.generated.js");
     expect(manager).not.toContain('CMD ["node", "apps/manager/dist/server.js"]');
+    expect(provisioner).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
     expect(web).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
     expect(caddy).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
   });
 
-  it("denies external network during unit tests and never builds or pulls during dev", async () => {
+  it("denies external network during all tests and never builds or pulls during dev", async () => {
     const guard = await rootSource("scripts/local-prod/offline-guard.mjs");
     const tests = await rootSource("scripts/local-prod/test.mjs");
+    const postgres = await rootSource("scripts/local-prod/postgres-test.mjs");
     const dev = await rootSource("scripts/local-prod/dev.mjs");
     expect(guard).toContain("offline_test_network_denied");
     expect(tests).toContain("LOCAL_PROD_TEST_BUDGET_SECONDS ?? 10");
+    expect(postgres).toContain("LOCAL_PROD_ALLOW_LOOPBACK");
+    expect(postgres).toContain("offline-guard.mjs");
+    expect(dev).toContain("docker-compose.production.yml");
     expect(dev).toContain('"--no-build"');
     expect(dev).toContain('"--pull", "never"');
     expect(dev).toContain("requireProof(\"build-artifacts\")");
@@ -126,7 +137,7 @@ describe("local machine production gate", () => {
   });
 
   it("exposes help without running build, test, or deploy work", async () => {
-    for (const script of ["preflight.mjs", "audit.mjs", "build.mjs", "test.mjs", "dev.mjs", "measure-command.mjs"]) {
+    for (const script of ["preflight.mjs", "audit.mjs", "build.mjs", "build-runner.mjs", "test.mjs", "test-runner.mjs", "postgres-test.mjs", "dev.mjs", "verify.mjs", "go-no-go.mjs", "measure-command.mjs"]) {
       const result = spawnSync(process.execPath, [join(repoRoot, "scripts", "local-prod", script), "--help"], { cwd: repoRoot, encoding: "utf8", timeout: 3000 });
       expect(result.status, `${script}: ${result.stderr}`).toBe(0);
       expect(result.stdout).toMatch(/Usage:/);
