@@ -25,6 +25,7 @@ export function prepareFrameworkProject(input: FrameworkGroundworkInput): Prepar
   assertValidationPass(project.validation);
   const contextCorpus = freezeContextCorpus(input.contextCorpus.id, input.contextCorpus.version, input.contextCorpus.cases, input.contextCorpus.splitPolicy, input.contextCorpus.generationAgentId);
   assertValidationPass(contextCorpus.validation);
+  validateCalibrationObservations(project, contextCorpus, input.calibrationObservations);
   const calibration = fitIsotonicCalibration(`${project.input.id}:compatibility`, input.calibrationObservations);
   assertValidationPass(calibration.validationReport);
   const coordinates = compilePageCoordinates(input.manifest, contextCorpus, calibration, input.candidateSeeds);
@@ -61,4 +62,19 @@ export async function executeFrameworkProject(
   const previewHtml = renderFrameworkPreviewHtml(preview);
   const canonical = { preparedHash: prepared.preparedHash, runHashes: generationRuns.map((item) => item.runHash), previewHash: preview.previewHash, previewHtmlHash: sha256(previewHtml) };
   return { ...prepared, generationRuns, preview, previewHtml, executionHash: sha256(JSON.stringify(canonical)) };
+}
+
+function validateCalibrationObservations(
+  project: NormalizedProject,
+  corpus: ContextCorpus,
+  observations: readonly CalibrationObservation[],
+): void {
+  const contextById = new Map(corpus.cases.map((item) => [item.id, item]));
+  const sourceIds = new Set(project.sourceLedger.map((item) => item.id));
+  for (const observation of observations) {
+    const context = contextById.get(observation.contextId);
+    if (!context) throw new Error(`calibration observation ${observation.id} references unknown context ${observation.contextId}`);
+    if (context.split !== observation.split) throw new Error(`calibration observation ${observation.id} split ${observation.split} disagrees with context ${context.split}`);
+    for (const sourceId of observation.sourceIds) if (!sourceIds.has(sourceId)) throw new Error(`calibration observation ${observation.id} references unknown source ${sourceId}`);
+  }
 }
