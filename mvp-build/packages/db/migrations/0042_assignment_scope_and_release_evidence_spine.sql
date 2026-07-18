@@ -129,8 +129,6 @@ $$;
 revoke all on function amtech_default_assignment_for_employee_account(text,text) from public;
 grant execute on function amtech_default_assignment_for_employee_account(text,text) to authenticated, service_role;
 
--- Add nullable assignment columns to existing consequential tables. The columns
--- are safe on blank databases and do not claim ambiguous legacy rows as accepted.
 do $$
 declare
   scope_table text;
@@ -171,8 +169,6 @@ begin
   end loop;
 end $$;
 
--- Deterministic high-confidence backfill only where a row already carries both
--- employee_id and account_id and exactly one current assignment matches that pair.
 do $$
 declare
   scope_table text;
@@ -235,6 +231,33 @@ create table if not exists release_evidence_gates (
   generated_at    timestamptz not null,
   notes           text not null,
   created_at      timestamptz not null default now(),
-  unique (manifest_id, gate),
-  check (evidence_sha = (select commit_sha from release_evidence_manifests where id = manifest_id))
+  unique (manifest_id, gate)
 );
+
+create or replace function amtech_release_evidence_gate_sha_guard()
+returns trigger
+language plpgsql
+as $$
+declare
+  manifest_sha text;
+begin
+  select commit_sha into manifest_sha
+    from release_evidence_manifests
+   where id = new.manifest_id;
+
+  if manifest_sha is null then
+    raise exception 'release evidence manifest % not found', new.manifest_id;
+  end if;
+
+  if new.evidence_sha <> manifest_sha then
+    raise exception 'release evidence gate % sha % does not match manifest sha %', new.gate, new.evidence_sha, manifest_sha;
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists release_evidence_gate_sha_guard on release_evidence_gates;
+create trigger release_evidence_gate_sha_guard
+before insert or update on release_evidence_gates
+for each row execute function amtech_release_evidence_gate_sha_guard();
