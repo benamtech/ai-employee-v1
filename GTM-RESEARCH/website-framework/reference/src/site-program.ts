@@ -218,7 +218,7 @@ function proposalToSeed(job: PageConceptJob, proposal: PageConceptProposal, onto
   const attributeById = new Map(ontology.attributes.map((item) => [item.id, item]));
   const atoms: ManifestFeatureAtom[] = job.attributes.map((item) => {
     const attribute = required(attributeById, item.id);
-    return { dimension: attribute.dimension, value: attribute.id, source_id: proposal.sourceIds[0], provenance: "agent_proposed" };
+    return { dimension: attribute.dimension, value: attribute.id, source_id: proposal.sourceIds[0], provenance: "agent_proposed" as const };
   }).sort((left, right) => left.dimension.localeCompare(right.dimension) || left.value.localeCompare(right.value));
   const prototype: ManifestPrototype = { id: `${job.regionId}:primary`, feature_atoms: atoms };
   const anchorAttributes = job.attributes.filter((item) => item.anchorKind);
