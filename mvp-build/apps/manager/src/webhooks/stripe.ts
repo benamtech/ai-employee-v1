@@ -1,18 +1,26 @@
-/** Stripe signature verification and ambient-inbox ingress. */
+/** Stripe signature verification and assignment-bound ambient-inbox ingress. */
 import type { Hono } from "hono";
 import { EVENT_TYPES, ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
 import { serviceClient, type SupabaseClient } from "@amtech/db";
 import { verifyStripeSignature } from "../lib/stripe-signature.js";
 import { ingestEvent } from "../events/ingress.js";
 import { insertDedup } from "../lib/db.js";
-import { AmbientWaitingForBindingError, enqueueAmbientEvent, type AmbientInboxRow } from "../lib/ambient-inbox.js";
+import { AmbientWaitingForBindingError, type AmbientInboxRow } from "../lib/ambient-inbox.js";
+import { enqueueVerifiedConnectorEvent } from "../lib/connector-custody.js";
 
 export interface StripeEvent {
   id: string;
   type: string;
+  account?: string;
   livemode?: boolean;
   created?: number;
   data?: { object?: Record<string, unknown> };
+}
+
+interface ScopedAmbientInboxRow extends AmbientInboxRow {
+  assignment_id?: string | null;
+  connector_binding_id?: string | null;
+  command_id?: string | null;
 }
 
 export function normalizedStripeType(stripeType: string): string | null {
@@ -21,17 +29,30 @@ export function normalizedStripeType(stripeType: string): string | null {
   return null;
 }
 
-async function resolveInvoiceContext(db: SupabaseClient, event: StripeEvent) {
+async function resolveInvoiceContext(
+  db: SupabaseClient,
+  event: StripeEvent,
+  scope: { connector_id: string; assignment_id: string; account_id: string; employee_id: string },
+) {
   const obj = event.data?.object as { id?: string } | undefined;
   const stripeInvoiceId = obj?.id;
   if (!stripeInvoiceId) return null;
-  const { data: inv } = await db.from("stripe_invoices").select("*").eq("stripe_invoice_id", stripeInvoiceId).maybeSingle();
-  if (!inv) return null;
-  const invoice = inv as { stripe_connection_id: string; estimate_id: string | null; deposit_amount: number | null };
-  const { data: conn } = await db.from("stripe_connections").select("account_id,employee_id").eq("id", invoice.stripe_connection_id).maybeSingle();
-  if (!conn) return null;
-  const c = conn as { account_id: string; employee_id: string };
-  return { account_id: c.account_id, employee_id: c.employee_id, estimate_id: invoice.estimate_id, deposit_amount: invoice.deposit_amount };
+  const invoice = await db
+    .from("stripe_invoices")
+    .select("stripe_connection_id,estimate_id,deposit_amount,assignment_id")
+    .eq("stripe_invoice_id", stripeInvoiceId)
+    .eq("stripe_connection_id", scope.connector_id)
+    .maybeSingle();
+  if (invoice.error) throw invoice.error;
+  if (!invoice.data) return null;
+  if (invoice.data.assignment_id && invoice.data.assignment_id !== scope.assignment_id) return null;
+  return {
+    assignment_id: scope.assignment_id,
+    account_id: scope.account_id,
+    employee_id: scope.employee_id,
+    estimate_id: invoice.data.estimate_id as string | null,
+    deposit_amount: invoice.data.deposit_amount as number | null,
+  };
 }
 
 export interface StripeProcessResult {
@@ -42,12 +63,26 @@ export interface StripeProcessResult {
   processed?: boolean;
 }
 
-export async function recordAndProcessStripeEvent(db: SupabaseClient, event: StripeEvent): Promise<StripeProcessResult> {
+export async function recordAndProcessStripeEvent(
+  db: SupabaseClient,
+  event: StripeEvent,
+  scope?: { connector_id: string; assignment_id: string; account_id: string; employee_id: string },
+): Promise<StripeProcessResult> {
+  if (!scope) return { duplicate: false, normalized_type: normalizedStripeType(event.type), delivered: false, processed: false };
   const rowId = newId(ID_PREFIX.stripeWebhookEvent);
   const ins = await insertDedup(
     db.from("stripe_webhook_events").insert({
-      id: rowId, stripe_event_id: event.id, type: event.type, livemode: Boolean(event.livemode),
-      signature_verified: true, processed: false, trace: { object_type: (event.data?.object as { object?: string })?.object ?? null },
+      id: rowId,
+      stripe_event_id: event.id,
+      type: event.type,
+      livemode: Boolean(event.livemode),
+      signature_verified: true,
+      processed: false,
+      assignment_id: scope.assignment_id,
+      trace: {
+        object_type: (event.data?.object as { object?: string })?.object ?? null,
+        connector_id: scope.connector_id,
+      },
     }),
     "stripe_webhook_events.insert",
   );
@@ -58,11 +93,12 @@ export async function recordAndProcessStripeEvent(db: SupabaseClient, event: Str
   const isInvoiceEvent = norm === EVENT_TYPES.stripeInvoicePaid || norm === EVENT_TYPES.stripeInvoiceSent;
   let contextResolved = true;
   if (isInvoiceEvent) {
-    const ctx = await resolveInvoiceContext(db, event);
+    const ctx = await resolveInvoiceContext(db, event, scope);
     if (ctx) {
       const res = await ingestEvent(db, {
         source: "stripe",
         payload: {
+          assignment_id: ctx.assignment_id,
           account_id: ctx.account_id,
           employee_id: ctx.employee_id,
           stripe_event_id: event.id,
@@ -82,11 +118,36 @@ export async function recordAndProcessStripeEvent(db: SupabaseClient, event: Str
 }
 
 export async function processStripeAmbientEvent(db: SupabaseClient, inbox: AmbientInboxRow): Promise<Record<string, unknown>> {
+  const scoped = inbox as ScopedAmbientInboxRow;
   const event = inbox.payload?.event as StripeEvent | undefined;
   if (!event?.id || !event.type) throw new Error("stripe_ambient_payload_invalid");
-  const result = await recordAndProcessStripeEvent(db, event);
+  if (!scoped.assignment_id || !scoped.connector_binding_id || !scoped.command_id || !inbox.account_id || !inbox.employee_id) {
+    throw new AmbientWaitingForBindingError("stripe_assignment_custody_missing");
+  }
+  const binding = await db
+    .from("connector_bindings")
+    .select("connector_account_id,external_subject")
+    .eq("id", scoped.connector_binding_id)
+    .eq("assignment_id", scoped.assignment_id)
+    .maybeSingle();
+  if (binding.error) throw binding.error;
+  const connectorId = String(binding.data?.connector_account_id ?? "");
+  if (!connectorId || String(binding.data?.external_subject ?? "") !== String(event.account ?? "")) {
+    throw new AmbientWaitingForBindingError("stripe_connection_waiting_for_binding");
+  }
+  const result = await recordAndProcessStripeEvent(db, event, {
+    connector_id: connectorId,
+    assignment_id: scoped.assignment_id,
+    account_id: inbox.account_id,
+    employee_id: inbox.employee_id,
+  });
   if (result.processed === false) throw new AmbientWaitingForBindingError("stripe_invoice_waiting_for_binding");
-  return { ...result };
+  return {
+    ...result,
+    assignment_id: scoped.assignment_id,
+    connector_binding_id: scoped.connector_binding_id,
+    command_id: scoped.command_id,
+  };
 }
 
 export function registerStripeWebhooks(app: Hono): void {
@@ -110,18 +171,46 @@ export function registerStripeWebhooks(app: Hono): void {
       return c.json({ received: true, ignored: "livemode_rejected" }, 202);
     }
 
-    const queued = await enqueueAmbientEvent(serviceClient(), {
-      source_type: "provider_webhook",
+    const objectId = String((event.data?.object as { id?: string } | undefined)?.id ?? event.id);
+    const externalSubject = String(event.account ?? "");
+    if (!externalSubject) {
+      const queued = await enqueueVerifiedConnectorEvent(serviceClient(), {
+        provider: "stripe",
+        external_event_id: event.id,
+        external_subject: `unbound:${objectId}`,
+        occurred_at: event.created ? new Date(event.created * 1000).toISOString() : null,
+        event_type: event.type,
+        resource_class: "connector:stripe",
+        resource_id: null,
+        capability_class: "consumer_dedupe",
+        ordering_key: `stripe-unbound:${objectId}`,
+        verification_ref: `stripe-signature:${event.id}`,
+        payload: { event },
+        verification_metadata: { stripe_signature_verified: true, livemode: Boolean(event.livemode), binding_subject_missing: true },
+      });
+      return c.json({ received: true, queued: true, authorized: false, status: queued.status, reason: queued.reason }, 202);
+    }
+
+    const queued = await enqueueVerifiedConnectorEvent(serviceClient(), {
       provider: "stripe",
       external_event_id: event.id,
+      external_subject: externalSubject,
       occurred_at: event.created ? new Date(event.created * 1000).toISOString() : null,
       event_type: event.type,
-      subject_key: String((event.data?.object as { id?: string } | undefined)?.id ?? event.id),
-      ordering_key: `stripe:${String((event.data?.object as { id?: string } | undefined)?.id ?? event.id)}`,
+      resource_class: "connector:stripe",
+      resource_id: externalSubject,
+      capability_class: "consumer_dedupe",
+      ordering_key: `stripe:${externalSubject}:${objectId}`,
+      verification_ref: `stripe-signature:${event.id}`,
       payload: { event },
-      headers_metadata: { stripe_signature_present: Boolean(c.req.header("Stripe-Signature")) },
       verification_metadata: { stripe_signature_verified: true, livemode: Boolean(event.livemode) },
     });
-    return c.json({ received: true, queued: true, duplicate: queued.duplicate }, 202);
+    return c.json({
+      received: true,
+      queued: true,
+      duplicate: queued.duplicate,
+      authorized: queued.status === "authorized",
+      status: queued.status,
+    }, 202);
   });
 }
