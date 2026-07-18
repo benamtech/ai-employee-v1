@@ -19,6 +19,10 @@ export interface ToolContext {
   employee_id?: string | null;
   /** Canonical execution scope. account_id/employee_id remain compatibility projections only. */
   assignment_id?: string | null;
+  /** Authenticated principal supplied by the transport, never by model input. */
+  principal_id?: string | null;
+  principal_class?: "human" | "employee" | "service" | "platform" | null;
+  authenticated_by?: string | null;
   actor: "front_door" | "employee" | "manager" | "owner" | "scheduler";
 }
 
