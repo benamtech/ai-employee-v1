@@ -1,8 +1,8 @@
 # CODEGRAPH.md — AMTECH workspace map
 
 Status: active
-Updated: 2026-07-17
-Active integration branch: `research`, based on current `main`
+Updated: 2026-07-18
+Active integration branch: `employee-production-tuesday`, based on `research`; draft PR `#23` targets `research`; `main` is untouched
 
 ## Read first
 
@@ -62,16 +62,17 @@ The public estimator is outdated and non-canonical. It may remain as an acquisit
 
 ## Current product implementation state
 
-**Overall: source-wired, not live-accepted after the WS1/WS2 production-boundary pass.**
+**Overall: standard remediation is in progress; source and CI evidence exist, but the product is not live-accepted or launch-cleared.**
 
-- Owner product: Home / Talk / Proof / Connected, persisted conversation, approvals, signed review resources, owner-safe materialization, and connected-capability surfaces are source-wired.
-- WS1: model-gateway credential custody and rendered-profile integrity are source-wired.
-- WS2: durable provisioning resource graph, transitions, leases, commands, retry/drift/rotation/compensation foundations are source-wired; the true reconciler worker remains pending.
-- WS3: `ambient_event_inbox` schema exists; provider ingress migration is not complete.
-- Production runtime boundary: host-private provisioner and per-employee isolation exist in source, but hostile/runtime proof is pending.
-- Live provider/runtime acceptance requires fresh production credentials, real provider IDs, runtime proof artifacts, and a normal-employee run through the canonical path.
+- The approved Phase 2 plan and 29-finding machine registry passed plan-integrity CI on run `29638985374`.
+- Lane 1 checkpoint is integrated at `b37d479a70983fcb3e88942b1f36481a07a97d17`: C1/C2 contracts, relationship graph migrations `0039`/`0040`, deterministic compatibility backfill, authorization helpers, and the five-case PostgreSQL relationship/RLS matrix are green.
+- Lane 1 is not fully closed: assignment scoping across all routes/resources, real Supabase acceptance, browser/SMS isolation, and the helper privilege-model review remain pending.
+- The integrated branch passed plan-integrity run `29639654226` and the existing production-boundary run `29639654276`, including migrations, shared/database/Manager builds, focused tests, and the production Manager image.
+- Lane 3 draft PR `#26` has a green C3 shared contract and a PostgreSQL pre-implementation red boundary on run `29639915565`. No command/effect migration has been implemented. One concurrency assertion must be made scheduler-order-independent before the red harness is final.
+- Owner product, Model Gateway, reconciler, ambient inbox, runtime boundary, and live-proof harness remain at their previously documented source/CI tiers; no new live provider/runtime/browser/commercial acceptance is claimed.
+- Production Supabase still stops at `0031_public_estimator.sql`.
 
-Detailed authority: `mvp-build/CODEGRAPH.md`.
+Detailed authority: `mvp-build/CODEGRAPH.md`, `mvp-build/memory/MEMORY.md`, and `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`.
 
 ## Website-framework state
 
@@ -149,7 +150,7 @@ Framework authority:
 
 ### Product
 
-Close the normal-employee P0 now-to-live checklist and produce real provider/runtime proof through the canonical path.
+Correct and recapture Lane 3's scheduler-order-independent red harness, then implement the reusable command/effect kernel without weakening the tests. In parallel, continue assignment scoping and real-Supabase isolation work required for complete Lane 1 closure.
 
 ### Public experience
 
@@ -166,4 +167,4 @@ unified manifest + passing CI
 
 ## Validation state
 
-The coordinated website-framework implementation is in PR #16 on `agent/phase-2-materialization-engine-plan`. Local TypeScript reference tests and synthetic scale evidence exist. The unified manifest/composer, CI, and UI-readiness update require a passing branch workflow before merge. Environment-dependent product/runtime and public-search acceptance remain pending unless explicitly recorded by a later proof artifact.
+Product remediation control and the Lane 1 checkpoint are CI-accepted at the exact runs listed above. Lane 3 is contract-accepted and intentionally pre-implementation; its final red harness correction remains pending. Production Supabase, real providers, employee runtimes, browsers/channels, commercial reconciliation, and market validation remain unaccepted unless a later release-bound proof packet explicitly records them.
