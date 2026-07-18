@@ -241,6 +241,7 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
       const turn = await deliverOwnerTurnToRuntime(db, {
         account_id: accountId,
         employee_id: employeeId,
+        assignment_id: assignmentId,
         body: params.Body ?? "",
         channel: "sms",
         idempotency_key: `twilio:${assignmentId}:${inboundProviderId}`,

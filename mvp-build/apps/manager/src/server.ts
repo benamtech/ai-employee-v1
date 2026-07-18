@@ -31,6 +31,7 @@ import { registerOrchestratorRoutes } from "./orchestrator.js";
 import { registerPublicEstimatorRoutes } from "./public-estimator.js";
 import { decodeSignedToken, tokenHash, verifySignedToken } from "./lib/signed-links.js";
 import { requireOwnerSession, mintOwnerSession } from "./lib/owner-session.js";
+import { authorizeOwnerAssignment, listOwnerAssignments } from "./lib/owner-assignment-authority.js";
 import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
 import { createArtifactStorageSignedUrl } from "./lib/artifacts.js";
 import { renderArtifactHtml } from "./lib/artifact-view.js";
@@ -156,6 +157,7 @@ async function deliverApprovalResolutionFollowup(
   params: {
     account_id: string;
     employee_id: string;
+    assignment_id: string;
     approval_id: string;
     resolution: ApprovalResolution;
     channel?: "sms" | "web";
@@ -165,6 +167,7 @@ async function deliverApprovalResolutionFollowup(
     const turn = await deliverOwnerTurnToRuntime(db, {
       account_id: params.account_id,
       employee_id: params.employee_id,
+      assignment_id: params.assignment_id,
       body: approvalResolutionWakeBody(params),
       channel: params.channel ?? "web",
       idempotency_key: `approval-resolution:${params.approval_id}:${params.resolution}`,
@@ -362,6 +365,7 @@ export function buildApp(): Hono {
         const followup = await deliverApprovalResolutionFollowup(serviceClient(), {
           account_id: String(approvalInput.account_id),
           employee_id: String(approvalInput.employee_id),
+          assignment_id: String(outcome.envelope.assignment_id ?? ""),
           approval_id: String(approvalInput.approval_id),
           resolution,
           channel: approvalInput.channel,
@@ -639,52 +643,84 @@ export function buildApp(): Hono {
     const denied = denyInternal(c);
     if (denied) return denied;
     const employeeId = c.req.param("employeeId");
-    const { owner_session_token, message } = await c.req.json().catch(() => ({}));
+    const { owner_session_token, message, intent_id } = await c.req.json().catch(() => ({}));
     if (!message) return c.json({ error: "message_required" }, 400);
+    if (!intent_id || !/^[A-Za-z0-9:_-]{8,160}$/.test(String(intent_id))) {
+      return c.json({ error: "stable_intent_id_required" }, 400);
+    }
     const db = serviceClient();
     const session = await requireOwnerSession(db, owner_session_token);
     if (!session) return c.json({ error: "owner_session_invalid" }, 401);
+    const authority = await authorizeOwnerAssignment(db, {
+      session,
+      employee_id: employeeId,
+      resource_class: "employee",
+      resource_id: employeeId,
+      action: "message:create",
+      allowed_roles: ["owner", "manager", "operator"],
+    });
+    if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
+    const assignmentId = authority.assignment.assignment_id;
     const employee = orThrow(
       await db.from("employees").select("*").eq("id", employeeId).eq("account_id", session.account_id).maybeSingle(),
       "employees.lookup",
     );
     if (!employee) return c.json({ error: "employee_not_found" }, 404);
-    await mustWrite(
-      db.from("employee_messages").insert({
-        id: newId(ID_PREFIX.message),
-        employee_id: employeeId,
-        direction: "to_employee",
-        source: "web",
-        channel: "web",
-        body: message,
-        status: "received",
-      }),
-      "employee_messages.insert.to_employee",
-    );
-    await stampChannelPresence(db, { account_id: session.account_id, employee_id: employeeId, channel: "web", session_info: { source: "web_message" } });
+    const inboundMessageId = `msg_${String(intent_id).replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 80)}`;
+    const existing = await db.from("employee_messages")
+      .select("id,assignment_id,body")
+      .eq("id", inboundMessageId)
+      .maybeSingle();
+    if (existing.error) throw existing.error;
+    if (existing.data && (existing.data.assignment_id !== assignmentId || existing.data.body !== String(message))) {
+      return c.json({ error: "intent_id_conflict" }, 409);
+    }
+    if (!existing.data) {
+      await mustWrite(
+        db.from("employee_messages").insert({
+          id: inboundMessageId,
+          assignment_id: assignmentId,
+          account_id: session.account_id,
+          employee_id: employeeId,
+          direction: "to_employee",
+          source: "web",
+          channel: "web",
+          body: message,
+          status: "received",
+        }),
+        "employee_messages.insert.to_employee",
+      );
+    }
+    await stampChannelPresence(db, {
+      account_id: session.account_id,
+      employee_id: employeeId,
+      channel: "web",
+      session_info: { source: "web_message", assignment_id: assignmentId, intent_id: String(intent_id) },
+    });
     const turn = await deliverOwnerTurnToRuntime(db, {
       account_id: session.account_id,
       employee_id: employeeId,
+      assignment_id: assignmentId,
       body: String(message),
       channel: "web",
-      idempotency_key: `web:${employeeId}:${Date.now()}:${newId(ID_PREFIX.message)}`,
+      idempotency_key: `web:${assignmentId}:${String(intent_id)}`,
     });
     if (turn.status === "succeeded" || turn.status === "duplicate") {
-      await mustWrite(
-        db.from("employee_messages").insert({
-          id: newId(ID_PREFIX.message),
-          employee_id: employeeId,
-          direction: "to_owner",
-          source: "employee",
-          channel: "web",
-          body: turn.reply,
-          status: "delivered",
-        }),
-        "employee_messages.insert.to_owner",
-      );
-      return c.json({ employee_id: employeeId, reply: turn.reply, turn_job_id: turn.job_id });
+      const outboundMessageId = `${inboundMessageId}_reply`;
+      await db.from("employee_messages").upsert({
+        id: outboundMessageId,
+        assignment_id: assignmentId,
+        account_id: session.account_id,
+        employee_id: employeeId,
+        direction: "to_owner",
+        source: "employee",
+        channel: "web",
+        body: turn.reply,
+        status: "delivered",
+      }, { onConflict: "id", ignoreDuplicates: true });
+      return c.json({ employee_id: employeeId, assignment_id: assignmentId, reply: turn.reply, turn_job_id: turn.job_id });
     }
-    return c.json({ employee_id: employeeId, reply: "", status: turn.status, turn_job_id: turn.job_id, error: turn.error ?? null }, turn.status === "failed" ? 502 : 202);
+    return c.json({ employee_id: employeeId, assignment_id: assignmentId, reply: "", status: turn.status, turn_job_id: turn.job_id, error: turn.error ?? null }, turn.status === "failed" ? 502 : 202);
   });
 
   app.post(MANAGER_API.ownerDashboard, async (c) => {
@@ -694,31 +730,42 @@ export function buildApp(): Hono {
     const db = serviceClient();
     const session = await requireOwnerSession(db, owner_session_token);
     if (!session) return c.json({ error: "owner_session_invalid" }, 401);
+    const assignments = await listOwnerAssignments(db, session);
+    const employeeIds = [...new Set(assignments.map((assignment) => assignment.employee_id))];
+    const assignmentByEmployee = new Map(assignments.map((assignment) => [assignment.employee_id, assignment]));
     const { data: account } = await db
       .from("accounts")
       .select("id,display_name,slug,timezone,created_at")
       .eq("id", session.account_id)
       .maybeSingle();
-    const { data: employees } = await db
-      .from("employees")
-      .select("id,account_id,name,status,profile_id,web_route,profile_package_key,created_at")
-      .eq("account_id", session.account_id)
-      .order("created_at", { ascending: false });
-    const employeeIds = (employees ?? []).map((employee: { id: string }) => employee.id);
-    const { data: endpoints } = employeeIds.length
+    const { data: employees } = employeeIds.length
+      ? await db
+        .from("employees")
+        .select("id,account_id,name,status,profile_id,web_route,profile_package_key,created_at")
+        .eq("account_id", session.account_id)
+        .in("id", employeeIds)
+        .order("created_at", { ascending: false })
+      : { data: [] };
+    const assignmentIds = assignments.map((assignment) => assignment.assignment_id);
+    const { data: endpoints } = assignmentIds.length
       ? await db
         .from("runtime_endpoints")
-        .select("employee_id,sms_number_e164,public_web_route,gateway_port,backend_type,health,created_at")
-        .in("employee_id", employeeIds)
+        .select("employee_id,assignment_id,sms_number_e164,public_web_route,gateway_port,backend_type,health,created_at")
+        .in("assignment_id", assignmentIds)
       : { data: [] };
-    const endpointByEmployee = new Map((endpoints ?? []).map((endpoint: { employee_id: string }) => [endpoint.employee_id, endpoint]));
+    const endpointByAssignment = new Map((endpoints ?? []).map((endpoint: { assignment_id: string }) => [endpoint.assignment_id, endpoint]));
     return c.json({
       account,
-      employees: (employees ?? []).map((employee: { id: string; web_route?: string | null }) => ({
-        ...employee,
-        runtime_endpoint: endpointByEmployee.get(employee.id) ?? null,
-        open_route: employee.web_route ?? `/agent/${employee.id}`,
-      })),
+      employees: (employees ?? []).map((employee: { id: string; web_route?: string | null }) => {
+        const assignment = assignmentByEmployee.get(employee.id);
+        return {
+          ...employee,
+          assignment_id: assignment?.assignment_id ?? null,
+          assignment_role: assignment?.role ?? null,
+          runtime_endpoint: assignment ? endpointByAssignment.get(assignment.assignment_id) ?? null : null,
+          open_route: employee.web_route ?? `/agent/${employee.id}`,
+        };
+      }),
     });
   });
 
@@ -730,13 +777,21 @@ export function buildApp(): Hono {
     const db = serviceClient();
     const session = await requireOwnerSession(db, owner_session_token);
     if (!session) return c.json({ error: "owner_session_invalid" }, 401);
-    const employee = orThrow(
-      await db.from("employees").select("id,account_id").eq("id", employeeId).eq("account_id", session.account_id).maybeSingle(),
-      "employees.lookup",
-    );
-    if (!employee) return c.json({ error: "employee_not_found" }, 404);
-    await stampChannelPresence(db, { account_id: session.account_id, employee_id: employeeId, channel: "web", session_info: { source: "heartbeat" } });
-    return c.json({ status: "ok" });
+    const authority = await authorizeOwnerAssignment(db, {
+      session,
+      employee_id: employeeId,
+      resource_class: "employee",
+      resource_id: employeeId,
+      action: "heartbeat",
+    });
+    if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
+    await stampChannelPresence(db, {
+      account_id: session.account_id,
+      employee_id: employeeId,
+      channel: "web",
+      session_info: { source: "heartbeat", assignment_id: authority.assignment.assignment_id },
+    });
+    return c.json({ status: "ok", assignment_id: authority.assignment.assignment_id });
   });
 
   app.post(MANAGER_API.artifactResolve(":employeeId", ":artifactId"), async (c) => {
@@ -750,26 +805,31 @@ export function buildApp(): Hono {
       await db.from("artifacts").select("*").eq("id", artifactId).eq("employee_id", employeeId).maybeSingle(),
       "artifacts.lookup",
     );
-    if (!artifact) return c.json({ error: "artifact_not_found" }, 404);
+    if (!artifact?.assignment_id) return c.json({ error: "artifact_not_found_or_unscoped" }, 404);
 
     let authorized = false;
     let expiredLink = false;
     let linkId: string | null = null;
     let linkToIncrement: string | null = null;
     if (signed_token) {
-      // decode (not verify) so an aged-out token is distinguishable from a forged one.
       const decoded = decodeSignedToken(String(signed_token), "artifact_link");
       const payload = decoded?.payload;
       if (payload &&
         payload.subject === artifactId &&
         payload.extra?.employee_id === employeeId &&
-        payload.extra?.account_id === artifact.account_id
+        payload.extra?.account_id === artifact.account_id &&
+        payload.extra?.assignment_id === artifact.assignment_id
       ) {
         if (decoded!.expired) {
           expiredLink = true;
         } else {
           const link = orThrow(
-            await db.from("artifact_links").select("*").eq("artifact_id", artifactId).eq("token_hash", tokenHash(String(signed_token))).maybeSingle(),
+            await db.from("artifact_links")
+              .select("*")
+              .eq("artifact_id", artifactId)
+              .eq("assignment_id", artifact.assignment_id)
+              .eq("token_hash", tokenHash(String(signed_token)))
+              .maybeSingle(),
             "artifact_links.lookup",
           );
           if (link && (link.revoked_at || (link.expires_at && new Date(link.expires_at).getTime() < Date.now()))) {
@@ -785,12 +845,20 @@ export function buildApp(): Hono {
 
     if (!authorized && owner_session_token) {
       const session = await requireOwnerSession(db, owner_session_token);
-      authorized = Boolean(session && session.account_id === artifact.account_id);
+      if (session) {
+        const authority = await authorizeOwnerAssignment(db, {
+          session,
+          employee_id: employeeId,
+          assignment_id: artifact.assignment_id,
+          resource_class: "artifact",
+          resource_id: artifactId,
+          action: "artifact:read",
+        });
+        authorized = authority.ok;
+      }
     }
 
     if (!authorized) {
-      // An expired/revoked (but validly-signed and correctly-scoped) link gets the
-      // owner-friendly reissue path, consistent with the preview route.
       if (expiredLink) return c.json({ error: "artifact_link_expired", expired: true }, 410);
       return c.json({ error: "artifact_access_denied" }, 403);
     }
@@ -798,16 +866,11 @@ export function buildApp(): Hono {
     if (!artifact.storage_ref && !fallbackHtml) return c.json({ error: "artifact_not_found" }, 404);
     const signedUrl = artifact.storage_ref ? await createArtifactStorageSignedUrl(db, String(artifact.storage_ref)) : null;
     if (linkToIncrement) {
-      // Best-effort analytics counter — never fail the owner's read on it (access
-      // is authorized by the signed token/expiry, not by this count).
-      try {
-        await db.rpc("increment_artifact_link_access_count", { p_link_id: linkToIncrement });
-      } catch {
-        // best effort
-      }
+      try { await db.rpc("increment_artifact_link_access_count", { p_link_id: linkToIncrement }); } catch { /* best effort */ }
     }
     await db.from("audit_log").insert({
       id: newId(ID_PREFIX.audit),
+      assignment_id: artifact.assignment_id,
       account_id: artifact.account_id,
       employee_id: employeeId,
       actor: owner_session_token ? "owner" : "manager",
@@ -817,19 +880,9 @@ export function buildApp(): Hono {
       details: { artifact_link_id: linkId, via_signed_token: Boolean(signed_token) },
     });
     if (!artifact.storage_ref) {
-      return c.json({
-        artifact_id: artifactId,
-        employee_id: employeeId,
-        html: fallbackHtml,
-        mime_type: "text/html",
-      });
+      return c.json({ artifact_id: artifactId, employee_id: employeeId, assignment_id: artifact.assignment_id, html: fallbackHtml, mime_type: "text/html" });
     }
-    return c.json({
-      artifact_id: artifactId,
-      employee_id: employeeId,
-      signed_url: signedUrl,
-      mime_type: artifact.mime_type ?? "application/pdf",
-    });
+    return c.json({ artifact_id: artifactId, employee_id: employeeId, assignment_id: artifact.assignment_id, signed_url: signedUrl, mime_type: artifact.mime_type ?? "application/pdf" });
   });
 
   // Signed mobile preview (Phase 3). The signed token IS the credential and encodes
@@ -869,6 +922,7 @@ export function buildApp(): Hono {
     }
     await db.from("audit_log").insert({
       id: newId(ID_PREFIX.audit),
+      assignment_id: link.assignment_id,
       account_id: link.account_id,
       employee_id: link.employee_id,
       actor: "owner",
@@ -913,10 +967,17 @@ export function buildApp(): Hono {
       const outcome = await runManagerTool("resolve_approval", {
         account_id: link.account_id,
         employee_id: link.employee_id,
+        assignment_id: String(link.assignment_id),
         approval_id: link.resource_id,
         owner_response: act === "approve" ? "approved" : "rejected",
         channel: "sms",
-      }, { actor: "owner" });
+      }, {
+        actor: "owner",
+        assignment_id: link.assignment_id,
+        principal_id: link.resolver_principal_id,
+        principal_class: "human",
+        authenticated_by: `signed_preview_link:${link.id}:${resolution.claims.jti}`,
+      });
       if (outcome.kind !== "ok" || outcome.envelope.status !== "ok") {
         return c.json({ error: "resolve_failed", detail: outcome.kind === "ok" ? outcome.envelope : outcome.kind }, 400);
       }
@@ -924,6 +985,7 @@ export function buildApp(): Hono {
       const followup = await deliverApprovalResolutionFollowup(db, {
         account_id: link.account_id,
         employee_id: link.employee_id,
+        assignment_id: String(link.assignment_id),
         approval_id: link.resource_id,
         resolution,
         channel: "sms",
@@ -942,6 +1004,8 @@ export function buildApp(): Hono {
       await mustWrite(
         db.from("employee_messages").insert({
           id: messageId,
+          assignment_id: link.assignment_id,
+          account_id: link.account_id,
           employee_id: link.employee_id,
           direction: "to_employee",
           source: "web",
@@ -954,6 +1018,7 @@ export function buildApp(): Hono {
       const turn = await deliverOwnerTurnToRuntime(db, {
         account_id: link.account_id,
         employee_id: link.employee_id,
+        assignment_id: String(link.assignment_id),
         body,
         channel: "web",
         idempotency_key: `preview:${link.id}:${messageId}`,
@@ -967,7 +1032,7 @@ export function buildApp(): Hono {
 
     if (terminal) {
       await mustWrite(
-        db.from("preview_links").update({ consumed_at: new Date().toISOString() }).eq("id", link.id),
+        db.from("preview_links").update({ consumed_at: new Date().toISOString() }).eq("id", link.id).is("consumed_at", null),
         "preview_links.consume",
       );
     }
@@ -993,12 +1058,15 @@ export function buildApp(): Hono {
     const db = serviceClient();
     const session = await requireOwnerSession(db, owner_session_token);
     if (!session) return c.json({ error: "owner_session_invalid" }, 401);
-    const employee = orThrow(
-      await db.from("employees").select("*").eq("id", employeeId).eq("account_id", session.account_id).maybeSingle(),
-      "employees.lookup",
-    );
-    if (!employee) return c.json({ error: "employee_not_found" }, 404);
-    const snapshot = await buildEmployeeSnapshot(db, employeeId, session.account_id);
+    const authority = await authorizeOwnerAssignment(db, {
+      session,
+      employee_id: employeeId,
+      resource_class: "employee",
+      resource_id: employeeId,
+      action: "materialize",
+    });
+    if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
+    const snapshot = await buildEmployeeSnapshot(db, employeeId, session.account_id, authority.assignment.assignment_id);
     return c.json(snapshot);
   });
 
@@ -1015,12 +1083,16 @@ export function buildApp(): Hono {
     const db = serviceClient();
     const session = await requireOwnerSession(db, token);
     if (!session) return c.json({ error: "owner_session_invalid" }, 401);
-    const employee = orThrow(
-      await db.from("employees").select("id").eq("id", employeeId).eq("account_id", session.account_id).maybeSingle(),
-      "employees.lookup.stream",
-    );
-    if (!employee) return c.json({ error: "employee_not_found" }, 404);
+    const authority = await authorizeOwnerAssignment(db, {
+      session,
+      employee_id: employeeId,
+      resource_class: "employee",
+      resource_id: employeeId,
+      action: "stream:read",
+    });
+    if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
     const accountId = session.account_id;
+    const assignmentId = authority.assignment.assignment_id;
     const pollMs = Number(process.env.WORK_STREAM_POLL_MS ?? 2000);
 
     return streamSSE(c, async (stream) => {
@@ -1041,13 +1113,13 @@ export function buildApp(): Hono {
         void writeSse({ event: "work_progress", data: JSON.stringify({ kind: "work_progress", ...p }) });
       });
       try {
-        const snapshot = await buildEmployeeSnapshot(db, employeeId, accountId);
+        const snapshot = await buildEmployeeSnapshot(db, employeeId, accountId, assignmentId);
         await writeSse({ event: "snapshot", data: JSON.stringify({ kind: "snapshot", snapshot }) });
         let cursor = cursorFromSnapshot(snapshot);
         while (!closed) {
           await waitForEmployeeChange(employeeId, pollMs);
           if (closed) break;
-          const delta = await fetchWorkEventsSince(db, employeeId, accountId, cursor);
+          const delta = await fetchWorkEventsSince(db, employeeId, accountId, cursor, assignmentId);
           for (const event of delta.workEvents) {
             await writeSse({ event: "work_event", data: JSON.stringify({ kind: "work_event", event }) });
           }
