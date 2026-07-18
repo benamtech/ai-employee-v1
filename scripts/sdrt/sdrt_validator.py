@@ -82,13 +82,39 @@ def escape(value: str) -> str:
     return value.replace("\\", "\\\\").replace("|", "\\|").replace(":", "\\:")
 
 
+def unescape(value: str) -> str:
+    out: list[str] = []
+    escaped = False
+    for char in value:
+        if escaped:
+            out.append(char)
+            escaped = False
+        elif char == "\\":
+            escaped = True
+        else:
+            out.append(char)
+    if escaped:
+        raise SDRTError("dangling escape")
+    return "".join(out)
+
+
 def split_escaped(value: str, delimiter: str) -> list[str]:
+    """Split one structural delimiter while preserving escapes for later stages.
+
+    The line parser first splits on ``|``. An escaped ``:`` must remain escaped so
+    the field parser does not mistake a value colon for the key/value delimiter.
+    Escaped pipes and backslashes can be decoded immediately because they no longer
+    have structural meaning after this split.
+    """
     out: list[str] = []
     current: list[str] = []
     escaped = False
     for char in value:
         if escaped:
-            current.append(char)
+            if char == delimiter or char == "\\":
+                current.append(char)
+            else:
+                current.extend(("\\", char))
             escaped = False
         elif char == "\\":
             escaped = True
@@ -111,7 +137,9 @@ def split_field(token: str) -> tuple[str, str]:
         elif char == "\\":
             escaped = True
         elif char == ":":
-            return token[:index], token[index + 1 :]
+            return unescape(token[:index]), unescape(token[index + 1 :])
+    if escaped:
+        raise SDRTError("dangling escape")
     raise SDRTError(f"field lacks ':' delimiter: {token!r}")
 
 
@@ -140,13 +168,16 @@ def parse_text(text: str, *, closed: bool = False) -> Document:
             raise SDRTError(f"line {line_number}: unknown marker @{marker}")
         if not tokens:
             raise SDRTError(f"line {line_number}: missing identifier")
-        identifier = tokens.pop(0)
+        identifier = unescape(tokens.pop(0))
         if not ID_RE.fullmatch(identifier):
             raise SDRTError(f"line {line_number}: invalid identifier {identifier!r}")
         version: str | None = None
         if tokens and VERSION_RE.fullmatch(tokens[0]):
             version = tokens.pop(0)
-            major = int(VERSION_RE.fullmatch(version).group(1))
+            version_match = VERSION_RE.fullmatch(version)
+            if version_match is None:
+                raise SDRTError(f"line {line_number}: invalid schema version")
+            major = int(version_match.group(1))
             if major != 2:
                 raise SDRTError(f"line {line_number}: unsupported SDRT major {major}")
             document_version = document_version or version
