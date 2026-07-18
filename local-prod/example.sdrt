@@ -1,5 +1,5 @@
 @S|audit_schema|v2|D0:criticality|D1:effort|D2:gate_number|D3:perf_baseline
-@E|finding_s8_authority|type:gap|severity:critical|vector:mutable_header_identity|perf_impact:release_blocked
-@R|blocks|src:finding_s8_authority|dst:s9_readiness|severity:critical
-@M|mitigates|src:finding_s8_authority|dst:S8-AUTH-001|resolves:durable_session_step_up_lease_c3_receipt
+@E|finding_local_proof|type:gap|severity:critical|vector:exact_sha_local_evidence_missing|perf_impact:s9_blocked
+@R|blocks|src:finding_local_proof|dst:s9_readiness|severity:critical
+@M|mitigates|src:finding_local_proof|dst:LOCAL-PROD-001|resolves:run_build_test_verify_dev_on_exact_sha
 @C|s9_go_no_go|scope:decision|active:NO_GO|projection:[D0,D1,D2,D3]
