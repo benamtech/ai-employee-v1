@@ -20,6 +20,7 @@ export * from "./model-gateway.js";
 export * from "./approval-policy.js";
 export * from "./approval-authority.js";
 export * from "./admin.js";
+export * from "./platform-admin-authority.js";
 export * from "./relationship-contract.js";
 export * from "./labor-relationship-record.js";
 export * from "./authorization-scope-registry.js";
