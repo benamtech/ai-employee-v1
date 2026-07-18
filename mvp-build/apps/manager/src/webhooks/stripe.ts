@@ -1,22 +1,17 @@
-/**
- * Stripe webhook route (Phase 4 groundwork, test mode). Verifies `Stripe-Signature`
- * against the RAW body BEFORE acting, rejects live-mode events unless explicitly
- * enabled, dedupes by Stripe `event.id`, stores a webhook trace, and normalizes
- * known invoice events into the shared event mesh. The Stripe API-calling tools
- * (connect/invoice) remain honestly not_implemented until real test-mode proof.
- * Spec: 09-event-mesh-v1.md, 10-security-ops-observability.md.
- */
+/** Stripe signature verification and ambient-inbox ingress. */
 import type { Hono } from "hono";
 import { EVENT_TYPES, ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
 import { serviceClient, type SupabaseClient } from "@amtech/db";
 import { verifyStripeSignature } from "../lib/stripe-signature.js";
 import { ingestEvent } from "../events/ingress.js";
 import { insertDedup } from "../lib/db.js";
+import { AmbientWaitingForBindingError, enqueueAmbientEvent, type AmbientInboxRow } from "../lib/ambient-inbox.js";
 
 export interface StripeEvent {
   id: string;
   type: string;
   livemode?: boolean;
+  created?: number;
   data?: { object?: Record<string, unknown> };
 }
 
@@ -26,7 +21,6 @@ export function normalizedStripeType(stripeType: string): string | null {
   return null;
 }
 
-/** Resolve account/employee/estimate for an invoice event, if the invoice is known. */
 async function resolveInvoiceContext(db: SupabaseClient, event: StripeEvent) {
   const obj = event.data?.object as { id?: string } | undefined;
   const stripeInvoiceId = obj?.id;
@@ -45,18 +39,10 @@ export interface StripeProcessResult {
   duplicate: boolean;
   normalized_type: string | null;
   delivered: boolean;
-  /** False when an invoice event could not be mapped to an account yet (replayable). */
   processed?: boolean;
 }
 
-/**
- * Dedupe, store, and normalize a SIGNATURE-VERIFIED Stripe event. Pure w.r.t. the
- * injected db so it is unit-testable; the route handles transport + signature.
- */
 export async function recordAndProcessStripeEvent(db: SupabaseClient, event: StripeEvent): Promise<StripeProcessResult> {
-  // Atomic dedupe: two concurrent deliveries of the same Stripe event.id both used to
-  // pass a check-then-insert and both call ingestEvent. `stripe_event_id` is UNIQUE
-  // (0001), so insertDedup lets exactly one winner proceed; the loser is a clean duplicate.
   const rowId = newId(ID_PREFIX.stripeWebhookEvent);
   const ins = await insertDedup(
     db.from("stripe_webhook_events").insert({
@@ -87,15 +73,20 @@ export async function recordAndProcessStripeEvent(db: SupabaseClient, event: Str
       });
       delivered = norm === EVENT_TYPES.stripeInvoicePaid && !res.duplicate;
     } else {
-      // The invoice couldn't be mapped to an account yet (e.g. the connection row
-      // arrives later). Leave processed=false so a replay can pick it up once
-      // context exists, instead of foreclosing it as a benign duplicate.
       contextResolved = false;
     }
   }
 
   await db.from("stripe_webhook_events").update({ processed: contextResolved }).eq("id", rowId);
   return { stored_id: rowId, duplicate: false, normalized_type: norm, delivered, processed: contextResolved };
+}
+
+export async function processStripeAmbientEvent(db: SupabaseClient, inbox: AmbientInboxRow): Promise<Record<string, unknown>> {
+  const event = inbox.payload?.event as StripeEvent | undefined;
+  if (!event?.id || !event.type) throw new Error("stripe_ambient_payload_invalid");
+  const result = await recordAndProcessStripeEvent(db, event);
+  if (result.processed === false) throw new AmbientWaitingForBindingError("stripe_invoice_waiting_for_binding");
+  return { ...result };
 }
 
 export function registerStripeWebhooks(app: Hono): void {
@@ -116,11 +107,21 @@ export function registerStripeWebhooks(app: Hono): void {
     if (!event?.id) return c.text("missing event id", 400);
 
     if (Boolean(event.livemode) && process.env.STRIPE_ALLOW_LIVE !== "true") {
-      // Accept (2xx) so Stripe stops retrying, but do not process live events.
       return c.json({ received: true, ignored: "livemode_rejected" }, 202);
     }
 
-    const result = await recordAndProcessStripeEvent(serviceClient(), event);
-    return c.json({ received: true, ...result });
+    const queued = await enqueueAmbientEvent(serviceClient(), {
+      source_type: "provider_webhook",
+      provider: "stripe",
+      external_event_id: event.id,
+      occurred_at: event.created ? new Date(event.created * 1000).toISOString() : null,
+      event_type: event.type,
+      subject_key: String((event.data?.object as { id?: string } | undefined)?.id ?? event.id),
+      ordering_key: `stripe:${String((event.data?.object as { id?: string } | undefined)?.id ?? event.id)}`,
+      payload: { event },
+      headers_metadata: { stripe_signature_present: Boolean(c.req.header("Stripe-Signature")) },
+      verification_metadata: { stripe_signature_verified: true, livemode: Boolean(event.livemode) },
+    });
+    return c.json({ received: true, queued: true, duplicate: queued.duplicate }, 202);
   });
 }

@@ -1,0 +1,156 @@
+name: Employee Work Production Boundary
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - employee-work
+  pull_request:
+    branches:
+      - research
+      - employee-work
+    paths:
+      - "mvp-build/**"
+      - ".github/workflows/employee-work-production-boundary.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: employee-work-production-boundary-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: amtech_boundary
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d amtech_boundary"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_boundary
+      STAGING_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_boundary
+      PGPASSWORD: postgres
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Bootstrap Supabase-compatible database roles and schemas
+        run: |
+          psql -h 127.0.0.1 -U postgres -d amtech_boundary -v ON_ERROR_STOP=1 <<'SQL'
+          do $$ begin
+            if not exists (select 1 from pg_roles where rolname = 'anon') then create role anon nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
+            if not exists (select 1 from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+          end $$;
+          create schema if not exists auth;
+          create table if not exists auth.users (id uuid primary key default gen_random_uuid(), email text);
+          create or replace function auth.uid() returns uuid language sql stable as $$ select null::uuid $$;
+          create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
+          create or replace function auth.role() returns text language sql stable as $$ select current_user::text $$;
+
+          create schema if not exists storage;
+          create table if not exists storage.buckets (
+            id text primary key,
+            name text not null unique,
+            owner uuid,
+            public boolean not null default false,
+            file_size_limit bigint,
+            allowed_mime_types text[],
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now()
+          );
+          create table if not exists storage.objects (
+            id uuid primary key default gen_random_uuid(),
+            bucket_id text references storage.buckets(id),
+            name text not null,
+            owner uuid,
+            metadata jsonb,
+            created_at timestamptz not null default now(),
+            updated_at timestamptz not null default now(),
+            last_accessed_at timestamptz not null default now(),
+            unique(bucket_id, name)
+          );
+          SQL
+      - name: Shared contracts
+        run: |
+          npm run typecheck --workspace @amtech/shared
+          npm run build --workspace @amtech/shared
+      - name: Database contracts
+        run: |
+          npm run typecheck --workspace @amtech/db
+          npm run build --workspace @amtech/db
+      - name: Apply and verify migration ledger
+        shell: bash
+        run: |
+          set +e
+          {
+            npm run db:migrate
+            migrate_status=$?
+            if [ "$migrate_status" -eq 0 ]; then npm run db:verify:worker-migrations; verify_status=$?; else verify_status=0; fi
+            if [ "$migrate_status" -eq 0 ] && [ "$verify_status" -eq 0 ]; then npm run test:worker-migrations; test_status=$?; else test_status=0; fi
+            status=$((migrate_status || verify_status || test_status))
+            echo "migration_status=$migrate_status verify_status=$verify_status test_status=$test_status"
+            exit "$status"
+          } 2>&1 | tee migration-verification.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload migration diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migration-verification-${{ github.run_id }}
+          path: mvp-build/migration-verification.log
+          if-no-files-found: error
+      - name: Manager and Hono contracts
+        shell: bash
+        run: |
+          set +e
+          touch manager-typecheck.log
+          npm run typecheck --workspace @amtech/manager 2>&1 | tee manager-typecheck.log
+          status=${PIPESTATUS[0]}
+          if [ "$status" -eq 0 ]; then npm run build --workspace @amtech/manager; fi
+          exit "$status"
+      - name: Upload Manager typecheck diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-typecheck-${{ github.run_id }}
+          path: mvp-build/manager-typecheck.log
+          if-no-files-found: warn
+      - name: Validate acceptance script syntax
+        run: find infra/scripts/acceptance -name '*.mjs' -print0 | xargs -0 -n1 node --check
+      - name: Production boundary unit and source proofs
+        shell: bash
+        env:
+          HERMES_RUNTIME_COMMAND: node -e "process.exit(0)"
+        run: |
+          set +e
+          npm run test:production-boundary 2>&1 | tee production-boundary-tests.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload production boundary test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-boundary-tests-${{ github.run_id }}
+          path: mvp-build/production-boundary-tests.log
+          if-no-files-found: warn
+      - name: Production image inclusion
+        run: docker build -f infra/deploy/manager.Dockerfile .
