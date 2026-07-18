@@ -72,7 +72,9 @@ export interface PlatformAdminAuthorityEvidence {
   step_up_checked: boolean;
   lease_checked: boolean;
   durable_identity_checked: boolean;
-  groundwork_only: true;
+  authority_mode: "disabled" | "live";
+  /** Compatibility field for older proof readers. */
+  groundwork_only: boolean;
 }
 
 export type PlatformAdminAuthorityDecision =
@@ -99,6 +101,7 @@ function current(status: string, startsAt: string | null | undefined, endsAt: st
 }
 
 function baseEvidence(input: {
+  enabled: boolean;
   action: string;
   action_class: PlatformAdminActionClass;
   audience: string;
@@ -123,7 +126,8 @@ function baseEvidence(input: {
     step_up_checked: false,
     lease_checked: false,
     durable_identity_checked: false,
-    groundwork_only: true,
+    authority_mode: input.enabled ? "live" : "disabled",
+    groundwork_only: !input.enabled,
   };
 }
 
@@ -200,12 +204,12 @@ export function evaluatePlatformAdminAuthority(input: {
     if (leaseStart === null || leaseExpiry === null || leaseExpiry <= now.getTime() || leaseStart > now.getTime()) {
       return deny("support_lease_expired", 410, { ...evidence, durable_identity_checked: true, step_up_checked: stepUpRequired, lease_checked: true });
     }
-    const employeeScopeMatches = input.employee_id ? input.lease.employee_id === input.employee_id : true;
-    const assignmentScopeMatches = input.assignment_id ? input.lease.assignment_id === input.assignment_id : true;
+    const expectedEmployeeId = input.employee_id ?? null;
+    const expectedAssignmentId = input.assignment_id ?? null;
     const scopeMatches = input.lease.principal_id === input.principal.principal_id
       && input.lease.account_id === input.account_id
-      && employeeScopeMatches
-      && assignmentScopeMatches
+      && (input.lease.employee_id ?? null) === expectedEmployeeId
+      && (input.lease.assignment_id ?? null) === expectedAssignmentId
       && input.lease.allowed_actions.includes(input.action);
     if (!scopeMatches) {
       return deny("support_lease_scope_mismatch", 403, { ...evidence, durable_identity_checked: true, step_up_checked: stepUpRequired, lease_checked: true });
@@ -226,6 +230,8 @@ export function evaluatePlatformAdminAuthority(input: {
       durable_identity_checked: true,
       step_up_checked: stepUpRequired,
       lease_checked: leaseRequired,
+      authority_mode: "live",
+      groundwork_only: false,
     },
   };
 }
