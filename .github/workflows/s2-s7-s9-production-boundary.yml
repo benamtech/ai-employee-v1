@@ -81,8 +81,14 @@ jobs:
       - run: npm ci
       - name: Generate canonical Manager production source
         run: npm run generate:production-sources
-      - name: Typecheck shared contracts
-        run: npm run typecheck --workspace @amtech/shared
+      - name: Typecheck and build shared contracts
+        run: |
+          npm run typecheck --workspace @amtech/shared
+          npm run build --workspace @amtech/shared
+      - name: Typecheck and build database contracts
+        run: |
+          npm run typecheck --workspace @amtech/db
+          npm run build --workspace @amtech/db
       - name: Typecheck Manager and Hermes control-plane adapters
         run: npm run typecheck --workspace @amtech/manager
       - name: Run S2 S7 S9 unit contracts
