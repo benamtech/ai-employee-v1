@@ -16,6 +16,7 @@ import { qboTools } from "./qbo.stub.js";
 import { approvalAuthorityTools } from "./approval-authority.stub.js";
 import { approvedActionTools } from "./approved-actions.stub.js";
 import { qboApprovalPromotionTools } from "./qbo-approval-promotion.stub.js";
+import { assignmentArtifactTools } from "./assignment-artifacts.stub.js";
 
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
@@ -26,8 +27,9 @@ const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...eventTools,
   ...repairTools,
   ...qboTools,
-  // S7 canonical overrides. Legacy feature-local approval checks remain
-  // unreachable compatibility code; every transport resolves through these.
+  // Canonical assignment and approval overrides. Legacy feature-local checks
+  // remain unreachable compatibility code; every transport resolves here.
+  ...assignmentArtifactTools,
   ...qboApprovalPromotionTools,
   ...approvalAuthorityTools,
   ...approvedActionTools,
@@ -37,9 +39,9 @@ export function buildToolRegistry(): Map<ToolName, ToolHandler> {
   const reg = new Map<ToolName, ToolHandler>();
   const missing: string[] = [];
   for (const name of TOOL_NAMES) {
-    const h = merged[name];
-    if (!h) missing.push(name);
-    else reg.set(name, h);
+    const handler = merged[name];
+    if (!handler) missing.push(name);
+    else reg.set(name, handler);
   }
   if (missing.length) {
     throw new Error(`Tool registry incomplete — missing handlers: ${missing.join(", ")}`);
