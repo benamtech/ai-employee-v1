@@ -128,4 +128,15 @@ jobs:
       - name: Apply audited baseline migrations
         run: npm run db:migrate
       - name: Execute assignment-aware relationship and RLS matrix
-        run: npx vitest run --config vitest.integration.config.ts tests/integration/relationship-authorization-matrix.test.ts
+        shell: bash
+        run: |
+          set +e
+          npx vitest run --config vitest.integration.config.ts tests/integration/relationship-authorization-matrix.test.ts 2>&1 | tee relationship-matrix.log
+          exit ${PIPESTATUS[0]}
+      - name: Upload relationship matrix diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relationship-matrix-${{ github.run_id }}
+          path: mvp-build/relationship-matrix.log
+          if-no-files-found: error
