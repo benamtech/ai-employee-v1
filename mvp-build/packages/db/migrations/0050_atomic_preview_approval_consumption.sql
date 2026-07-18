@@ -32,11 +32,10 @@ begin
      and pl.consumed_at is null
      and (pl.expires_at is null or pl.expires_at > now());
 
-  if v_match_count <> 1 then
-    raise exception case
-      when v_match_count = 0 then 'approval_preview_link_missing_or_consumed'
-      else 'approval_preview_link_ambiguous'
-    end;
+  if v_match_count = 0 then
+    raise exception 'approval_preview_link_missing_or_consumed';
+  elsif v_match_count > 1 then
+    raise exception 'approval_preview_link_ambiguous';
   end if;
 
   select * into v_link
