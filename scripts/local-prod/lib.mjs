@@ -31,17 +31,25 @@ export function writeProof(kind, payload) {
   return { proof, latest, historical };
 }
 
+function sdrtValue(value) {
+  return String(value ?? "unknown")
+    .replaceAll("\\", "\\\\")
+    .replaceAll("|", "\\|")
+    .replaceAll("\r", " ")
+    .replaceAll("\n", " ");
+}
+
 export function toSdrt(proof) {
   const lines = [
     "@S|audit_schema|v2|D0:criticality|D1:effort|D2:gate_number|D3:perf_baseline",
   ];
   for (const finding of proof.findings ?? []) {
-    const id = finding.id ?? `finding_${lines.length}`;
-    lines.push(`@E|${id}|type:gap|severity:${finding.severity}|vector:${finding.vector}|perf_impact:${finding.perf_impact}`);
-    lines.push(`@R|blocks|src:${id}|dst:s9_readiness|severity:${finding.severity}`);
-    lines.push(`@M|mitigates|src:${id}|dst:${finding.test_case_id}|mitigation:${String(finding.mitigation).replaceAll("|", "/")}`);
+    const id = String(finding.id ?? `finding_${lines.length}`).replaceAll(/[^A-Za-z0-9_.:/-]/g, "_").slice(0, 160);
+    lines.push(`@E|${id}|type:gap|severity:${sdrtValue(finding.severity)}|vector:${sdrtValue(finding.vector)}|perf_impact:${sdrtValue(finding.perf_impact)}`);
+    lines.push(`@R|blocks|src:${id}|dst:s9_readiness|severity:${sdrtValue(finding.severity)}`);
+    lines.push(`@M|mitigates|src:${id}|dst:${sdrtValue(finding.test_case_id)}|mitigation:${sdrtValue(finding.mitigation)}`);
   }
-  lines.push(`@C|s9_go_no_go|scope:decision|active:${proof.status ?? "unknown"}|projection:[D0,D1,D2,D3]`);
+  lines.push(`@C|s9_go_no_go|scope:decision|active:${sdrtValue(proof.status ?? "unknown")}|projection:[D0,D1,D2,D3]`);
   return `${lines.join("\n")}\n`;
 }
 
@@ -104,6 +112,16 @@ export function displayPath(path) {
   return relative(ROOT, path) || ".";
 }
 
+function stopChild(child) {
+  if (!child || child.exitCode !== null || child.killed) return;
+  try { child.kill("SIGTERM"); } catch { /* process already gone */ }
+  setTimeout(() => {
+    if (child.exitCode === null) {
+      try { child.kill("SIGKILL"); } catch { /* process already gone */ }
+    }
+  }, 1500).unref();
+}
+
 export async function runMeasured({ label, command, args, budgetSeconds, maxRssMb, env = {}, cwd = ROOT, stdio = "inherit" }) {
   const started = Date.now();
   const child = spawn(command, args, {
@@ -113,8 +131,15 @@ export async function runMeasured({ label, command, args, budgetSeconds, maxRssM
     detached: false,
   });
   let peakRssKb = 0;
+  let timedOut = false;
+  const hardTimeoutMs = Math.max((budgetSeconds + 10) * 1000, budgetSeconds * 2 * 1000);
+  const hardTimeout = setTimeout(() => {
+    timedOut = true;
+    stopChild(child);
+  }, hardTimeoutMs);
+  hardTimeout.unref();
   const sample = setInterval(() => {
-    const ps = spawnSync("ps", ["-eo", "pid=,ppid=,rss="], { encoding: "utf8" });
+    const ps = spawnSync("ps", ["-eo", "pid=,ppid=,rss="], { encoding: "utf8", timeout: 2000 });
     if (ps.status !== 0) return;
     const rows = ps.stdout.trim().split(/\n/).flatMap((line) => {
       const [pid, ppid, rss] = line.trim().split(/\s+/).map(Number);
@@ -133,6 +158,7 @@ export async function runMeasured({ label, command, args, budgetSeconds, maxRssM
     child.on("exit", (code, signal) => resolveExit(code ?? (signal ? 128 : 1)));
     child.on("error", () => resolveExit(127));
   });
+  clearTimeout(hardTimeout);
   clearInterval(sample);
   const elapsedMs = Date.now() - started;
   const performance = {
@@ -140,8 +166,10 @@ export async function runMeasured({ label, command, args, budgetSeconds, maxRssM
     peak_rss_mb: Math.round((peakRssKb / 1024) * 10) / 10,
     budget_seconds: budgetSeconds,
     max_rss_mb: maxRssMb,
+    hard_timeout_ms: hardTimeoutMs,
+    timed_out: timedOut,
   };
-  const budgetPass = elapsedMs <= budgetSeconds * 1000 && performance.peak_rss_mb <= maxRssMb;
+  const budgetPass = !timedOut && elapsedMs <= budgetSeconds * 1000 && performance.peak_rss_mb <= maxRssMb;
   const result = {
     label,
     command: [command, ...args].join(" "),
