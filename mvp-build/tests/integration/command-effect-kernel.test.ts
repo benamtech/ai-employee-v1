@@ -248,8 +248,16 @@ describe.skipIf(!databaseUrl)("durable command and effect kernel", () => {
         ),
       ),
     );
-    const effectIds = new Set(reservations.map((result) => result.rows[0]?.effect_id));
-    expect(effectIds).toEqual(new Set(["eff_kernel_effect_0"]));
+    const reservationRows = reservations.map((result) => result.rows[0]);
+    const effectIds = new Set(reservationRows.map((row) => row?.effect_id));
+    const winners = reservationRows.filter((row) => row?.duplicate === false);
+    const duplicates = reservationRows.filter((row) => row?.duplicate === true);
+
+    expect(effectIds.size).toBe(1);
+    expect(winners).toHaveLength(1);
+    expect(duplicates).toHaveLength(49);
+    expect(winners[0]?.effect_id).toBe([...effectIds][0]);
+    expect(duplicates.every((row) => row?.effect_id === winners[0]?.effect_id)).toBe(true);
 
     await expect(
       pool.query(
