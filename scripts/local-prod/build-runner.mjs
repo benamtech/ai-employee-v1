@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { ROOT } from "./lib.mjs";
 
 if (process.argv.includes("--help") || process.argv.includes("-h")) {
-  console.log("Usage: node scripts/local-prod/build-runner.mjs\nInternal runner: npm workspace build followed by exact-SHA production compose image build.");
+  console.log("Usage: node scripts/local-prod/build-runner.mjs\nInternal runner: npm workspace build followed by the full exact-SHA production compose image build (manager, gateway, host provisioner, web, and edge).");
   process.exit(0);
 }
 const sha = process.env.AMTECH_GIT_SHA;
@@ -16,7 +16,7 @@ function run(command, args, cwd = ROOT) {
 run("npm", ["--prefix", "mvp-build", "run", "build"]);
 run("docker", [
   "compose",
-  "-f", "infra/deploy/docker-compose.yml",
+  "-f", "infra/deploy/docker-compose.production.yml",
   "--env-file", "infra/deploy/.env.production",
   "build",
   "--parallel",
