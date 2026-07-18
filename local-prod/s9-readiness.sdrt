@@ -1,0 +1,17 @@
+@S|audit_schema|v2|D0:criticality|D1:effort|D2:gate_number|D3:perf_baseline
+@E|local_build_proof_missing|type:gap|severity:critical|vector:exact_sha_build_unproven|perf_impact:build_30s_and_4gb_unproven
+@R|blocks|src:local_build_proof_missing|dst:s9_readiness|severity:critical
+@M|mitigates|src:local_build_proof_missing|dst:LOCAL-BUILD-001|mitigation:run_pnpm_build_on_clean_exact_sha
+@E|local_test_proof_missing|type:gap|severity:critical|vector:offline_full_suite_unproven|perf_impact:test_10s_and_4gb_unproven
+@R|blocks|src:local_test_proof_missing|dst:s9_readiness|severity:critical
+@M|mitigates|src:local_test_proof_missing|dst:LOCAL-TEST-001|mitigation:run_pnpm_test_with_preexisting_postgres_image
+@E|local_dev_proof_missing|type:gap|severity:critical|vector:full_production_topology_unproven|perf_impact:cold_start_5s_unproven
+@R|blocks|src:local_dev_proof_missing|dst:s9_readiness|severity:critical
+@M|mitigates|src:local_dev_proof_missing|dst:LOCAL-DEV-001|mitigation:run_pnpm_dev_and_capture_exact_sha_health
+@E|local_capacity_proof_missing|type:gap|severity:critical|vector:docker_daemon_memory_unmeasured|perf_impact:total_peak_memory_unproven
+@R|blocks|src:local_capacity_proof_missing|dst:s9_readiness|severity:critical
+@M|mitigates|src:local_capacity_proof_missing|dst:LOCAL-CAPACITY-001|mitigation:capture_host_cpu_memory_disk_and_io_telemetry
+@E|live_acceptance_not_claimed|type:gap|severity:critical|vector:provider_and_remote_evidence_absent|perf_impact:launch_remains_blocked
+@R|blocks|src:live_acceptance_not_claimed|dst:launch_readiness|severity:critical
+@M|mitigates|src:live_acceptance_not_claimed|dst:LIVE-ACCEPTANCE-001|mitigation:complete_later_live_provider_and_remote_acceptance_without_reusing_local_proof
+@C|s9_go_no_go|scope:decision|active:NO_GO|projection:[D0,D1,D2,D3]
