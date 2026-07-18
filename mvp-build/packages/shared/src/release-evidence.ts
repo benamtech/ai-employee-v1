@@ -23,6 +23,8 @@ export const ReleaseGateNameSchema = z.enum([
   "owner_route_assignment_enforcement",
   "signed_resource_assignment_enforcement",
   "sms_channel_assignment_enforcement",
+  "connector_custody_enforcement",
+  "commercial_attribution_enforcement",
   "command_effect_matrix",
   "blank_migration_apply",
   "snapshot_clone_migration_apply",
@@ -189,6 +191,8 @@ export function buildSourceCiReleaseEvidenceManifest(params: {
     "owner_route_assignment_enforcement",
     "signed_resource_assignment_enforcement",
     "sms_channel_assignment_enforcement",
+    "connector_custody_enforcement",
+    "commercial_attribution_enforcement",
     "command_effect_matrix",
     "blank_migration_apply",
   ]);
