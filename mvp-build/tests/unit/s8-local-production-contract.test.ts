@@ -31,7 +31,7 @@ describe("S8 production admin authority source boundary", () => {
       "",
     ].join("\n"));
     expect(template).toContain("async function adminActor(");
-    expect(generator).toContain('expectedTemplateBlob = "bd60a15384e8efd2db8b2fe8e92b1bedddaf9911"');
+    expect(generator).toContain('expectedTemplateBlob = "c1ba7ef5b3f26a4511cd639f70b926605e7d834c"');
     expect(generator).toContain("production_server_template_hash_mismatch");
     expect(generator).toContain('from "node:url"');
     expect(managerPackage).toMatchObject({
