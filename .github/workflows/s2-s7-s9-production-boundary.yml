@@ -27,6 +27,7 @@ on:
       - "mvp-build/tests/unit/authority-version-contract.test.ts"
       - "mvp-build/tests/integration/approval-authority-boundary.test.ts"
       - "mvp-build/tests/integration/authority-revocation-boundary.test.ts"
+      - "mvp-build/tests/integration/signed-resource-revocation-boundary.test.ts"
       - "mvp-build/tests/integration/ambiguous-command-reconciliation.test.ts"
       - ".github/workflows/s2-s7-s9-production-boundary.yml"
   pull_request:
@@ -54,6 +55,7 @@ on:
       - "mvp-build/tests/unit/authority-version-contract.test.ts"
       - "mvp-build/tests/integration/approval-authority-boundary.test.ts"
       - "mvp-build/tests/integration/authority-revocation-boundary.test.ts"
+      - "mvp-build/tests/integration/signed-resource-revocation-boundary.test.ts"
       - "mvp-build/tests/integration/ambiguous-command-reconciliation.test.ts"
       - ".github/workflows/s2-s7-s9-production-boundary.yml"
 
@@ -176,5 +178,7 @@ jobs:
         run: npx vitest run --config vitest.integration.config.ts tests/integration/approval-authority-boundary.test.ts
       - name: Run S9 revocation and credential propagation matrix
         run: npx vitest run --config vitest.integration.config.ts tests/integration/authority-revocation-boundary.test.ts
+      - name: Run all signed-resource revocation matrix
+        run: npx vitest run --config vitest.integration.config.ts tests/integration/signed-resource-revocation-boundary.test.ts
       - name: Run C3 ambiguous Hermes-turn reconciliation matrix
         run: npx vitest run --config vitest.integration.config.ts tests/integration/ambiguous-command-reconciliation.test.ts
