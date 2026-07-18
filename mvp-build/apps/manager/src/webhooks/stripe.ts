@@ -214,7 +214,8 @@ export function registerStripeWebhooks(app: Hono): void {
         payload: { event },
         verification_metadata: { stripe_signature_verified: true, livemode: Boolean(event.livemode), binding_subject_missing: true },
       });
-      return c.json({ received: true, queued: true, authorized: false, status: queued.status, reason: queued.reason }, 202);
+      const reason = queued.status === "authorized" ? "unexpected_authorized_unbound_event" : queued.reason;
+      return c.json({ received: true, queued: true, authorized: false, status: queued.status, reason }, 202);
     }
 
     const queued = await enqueueVerifiedConnectorEvent(serviceClient(), {
