@@ -18,6 +18,7 @@ const ids = {
   payer: "crel_s56_payer",
   beneficiary: "crel_s56_beneficiary",
   price: "price_s56_provider",
+  gatewayCredential: "mgwc_s56_scoped",
   binding: "cb_s56_gmail",
   bindingNoGrant: "cb_s56_quickbooks",
   grant: "grant_s56_gmail",
@@ -95,6 +96,30 @@ async function seed(client: Client): Promise<void> {
       ids.accountA, ids.accountB, ids.employeeA, ids.employeeB,
       ids.organizationA, ids.organizationB, ids.principalA, ids.principalB,
       ids.assignmentA, ids.assignmentB, ids.payer, ids.beneficiary, ids.price,
+    ]);
+
+    await client.query(`
+      insert into model_gateway_credentials(
+        id, account_id, employee_id, assignment_id,
+        payer_relationship_id, beneficiary_relationship_id, price_version_id,
+        credential_version, token_hash, token_secret_ref, gateway_url,
+        model_alias, allowed_providers, allowed_models, spend_limit_cents,
+        rate_limit_per_minute, expires_at
+      ) values(
+        $1,$2,$3,$4,$5,$6,$7,99,$8,'sealed:test',
+        'http://gateway.invalid/v1/employees/emp_s56_matrix_a',
+        'amtech-primary',array['provider'],array['amtech-primary'],10000,60,
+        now() + interval '1 day'
+      )
+      on conflict (id) do update set
+        assignment_id = excluded.assignment_id,
+        payer_relationship_id = excluded.payer_relationship_id,
+        beneficiary_relationship_id = excluded.beneficiary_relationship_id,
+        price_version_id = excluded.price_version_id,
+        revoked_at = null
+    `, [
+      ids.gatewayCredential, ids.accountA, ids.employeeA, ids.assignmentA,
+      ids.payer, ids.beneficiary, ids.price, "c".repeat(64),
     ]);
 
     await client.query(`
@@ -322,9 +347,12 @@ describe.skipIf(!databaseUrl)("S6 commercial attribution PostgreSQL boundary", (
         upstream_model, credential_version, latency_ms, prompt_tokens,
         completion_tokens, total_tokens, estimated_cost_cents, status
       ) values(
-        'mgwr_s56_missing_receipts','mgwc_missing',$1,$2,$3,$4,$5,$6,
-        null,null,'amtech-primary','provider','model',1,1,1,1,2,1,'ok'
+        'mgwr_s56_missing_receipts',$7,$1,$2,$3,$4,$5,$6,
+        null,null,'amtech-primary','provider','model',99,1,1,1,2,1,'ok'
       )
-    `, [ids.accountA, ids.employeeA, ids.assignmentA, ids.payer, ids.beneficiary, ids.price])).rejects.toThrow(/model_gateway_request_audit_success_receipt/);
+    `, [
+      ids.accountA, ids.employeeA, ids.assignmentA, ids.payer,
+      ids.beneficiary, ids.price, ids.gatewayCredential,
+    ])).rejects.toThrow(/model_gateway_request_audit_success_receipt/);
   });
 });
