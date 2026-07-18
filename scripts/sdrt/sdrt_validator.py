@@ -99,20 +99,22 @@ def unescape(value: str) -> str:
 
 
 def split_escaped(value: str, delimiter: str) -> list[str]:
-    """Split one structural delimiter while preserving escapes for later stages.
+    """Split one structural delimiter while preserving later-stage escapes.
 
-    The line parser first splits on ``|``. An escaped ``:`` must remain escaped so
-    the field parser does not mistake a value colon for the key/value delimiter.
-    Escaped pipes and backslashes can be decoded immediately because they no longer
-    have structural meaning after this split.
+    The line parser first splits on ``|``. Escaped colons must remain escaped for
+    the field parser, and escaped backslashes must remain doubled until ``unescape``
+    runs exactly once. Only an escaped instance of this split's delimiter is decoded
+    immediately because it no longer has structural meaning after the split.
     """
     out: list[str] = []
     current: list[str] = []
     escaped = False
     for char in value:
         if escaped:
-            if char == delimiter or char == "\\":
+            if char == delimiter:
                 current.append(char)
+            elif char == "\\":
+                current.extend(("\\", "\\"))
             else:
                 current.extend(("\\", char))
             escaped = False
@@ -228,7 +230,6 @@ def validate_graph(nodes: Iterable[Node]) -> None:
                 target = fields[key]
                 if not ID_RE.fullmatch(target):
                     raise SDRTError(f"line {node.line}: invalid {key} reference {target!r}")
-                # External targets such as s9_readiness are valid in open graph mode.
         if node.marker == "C" and not fields.get("scope", "").strip():
             raise SDRTError(f"line {node.line}: empty constraint scope")
     if len(entity_ids) > MAX_LINES:
