@@ -20,11 +20,12 @@ interface QueryResult<T = unknown> {
   error: null;
 }
 
-type Filter = (row: Record<string, unknown>) => boolean;
+type Row = Record<string, unknown>;
+type Filter = (row: Row) => boolean;
 
 class FakeQuery implements PromiseLike<QueryResult<any>> {
   private operation: "select" | "insert" | "update" = "select";
-  private payload: Record<string, unknown> | Record<string, unknown>[] | null = null;
+  private payload: Row | Row[] | null = null;
   private filters: Filter[] = [];
   private limitCount: number | null = null;
   private orderKey: string | null = null;
@@ -37,13 +38,13 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
     return this;
   }
 
-  insert(payload: Record<string, unknown> | Record<string, unknown>[]): this {
+  insert(payload: Row | Row[]): this {
     this.operation = "insert";
     this.payload = payload;
     return this;
   }
 
-  update(payload: Record<string, unknown>): this {
+  update(payload: Row): this {
     this.operation = "update";
     this.payload = payload;
     return this;
@@ -59,6 +60,14 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
     return this;
   }
 
+  lte(_column: string, _value: unknown): this {
+    return this;
+  }
+
+  or(_expression: string): this {
+    return this;
+  }
+
   order(column: string, options?: { ascending?: boolean }): this {
     this.orderKey = column;
     this.orderAscending = options?.ascending ?? true;
@@ -70,10 +79,10 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
     return this;
   }
 
-  async maybeSingle(): Promise<QueryResult<Record<string, unknown> | null>> {
+  async maybeSingle(): Promise<QueryResult<Row | null>> {
     const result = await this.execute();
     const rows = Array.isArray(result.data) ? result.data : [result.data];
-    return { data: (rows[0] as Record<string, unknown> | undefined) ?? null, error: null };
+    return { data: (rows[0] as Row | undefined) ?? null, error: null };
   }
 
   then<TResult1 = QueryResult<any>, TResult2 = never>(
@@ -107,16 +116,63 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
 }
 
 class FakeSupabase {
-  private readonly tables = new Map<string, Record<string, unknown>[]>();
+  private readonly tables = new Map<string, Row[]>();
 
   from(table: string): FakeQuery {
     return new FakeQuery(this, table);
   }
 
-  rows(table: string): Record<string, unknown>[] {
+  rows(table: string): Row[] {
     const current = this.tables.get(table) ?? [];
     this.tables.set(table, current);
     return current;
+  }
+
+  async rpc(name: string, params: Record<string, unknown>): Promise<QueryResult<unknown>> {
+    if (name !== "amtech_default_assignment_for_employee_account") {
+      return { data: null, error: null };
+    }
+    const employeeId = String(params.p_employee_id ?? "");
+    const accountId = String(params.p_account_id ?? "");
+    const assignmentId = `asn_${employeeId}`;
+    const startsAt = "2026-01-01T00:00:00.000Z";
+    const ensure = (table: string, row: Row) => {
+      if (!this.rows(table).some((current) => current.id === row.id)) this.rows(table).push(row);
+    };
+
+    ensure("commercial_relationships", {
+      id: `crel_payer_${employeeId}`,
+      assignment_id: assignmentId,
+      relationship_type: "payer",
+      organization_id: `org_payer_${employeeId}`,
+      account_id: accountId,
+      status: "active",
+      starts_at: startsAt,
+      ends_at: null,
+    });
+    ensure("commercial_relationships", {
+      id: `crel_beneficiary_${employeeId}`,
+      assignment_id: assignmentId,
+      relationship_type: "beneficiary",
+      organization_id: `org_beneficiary_${employeeId}`,
+      account_id: accountId,
+      status: "active",
+      starts_at: startsAt,
+      ends_at: null,
+    });
+    ensure("commercial_price_versions", {
+      id: `price_${employeeId}`,
+      assignment_id: assignmentId,
+      policy_key: "provider-cost-observation",
+      version: "1.0.0",
+      currency: "USD",
+      unit: "provider_request",
+      unit_price_minor: 0,
+      status: "active",
+      effective_at: startsAt,
+      expires_at: null,
+    });
+    return { data: assignmentId, error: null };
   }
 }
 
@@ -169,6 +225,8 @@ describe("model gateway credential isolation", () => {
     });
 
     expect(valid.policy.gateway_url).toBe(employeeModelGatewayUrl("emp_alpha"));
+    expect(valid.claims.assignment_id).toBe("asn_emp_alpha");
+    expect(valid.claims.payer_relationship_id).toBe("crel_payer_emp_alpha");
     expect(await verifyModelGatewayCredential(db, `Bearer ${valid.token}`, { account_id: "acct_alpha", employee_id: "emp_alpha" })).not.toBeNull();
     expect(await verifyModelGatewayCredential(db, "Bearer malformed", { employee_id: "emp_alpha" })).toBeNull();
     expect(await verifyModelGatewayCredential(db, `Bearer ${valid.token}`, { employee_id: "emp_bravo" })).toBeNull();
@@ -201,6 +259,7 @@ describe("model gateway credential isolation", () => {
 
     const live = await verifyModelGatewayCredential(db, `Bearer ${replacement.token}`, { account_id: "acct_alpha", employee_id: "emp_alpha" });
     expect(live?.credential_version).toBe(2);
+    expect(live?.assignment_id).toBe("asn_emp_alpha");
     await revokeModelGatewayCredential(db, oldCredential.credential_id);
     expect(await verifyModelGatewayCredential(db, `Bearer ${oldCredential.token}`, { employee_id: "emp_alpha" })).toBeNull();
     expect(await verifyModelGatewayCredential(db, `Bearer ${replacement.token}`, { employee_id: "emp_alpha" })).not.toBeNull();
