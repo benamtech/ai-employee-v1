@@ -149,4 +149,19 @@ jobs:
       - name: Apply full forward migration ledger
         run: npm run db:migrate
       - name: Run S10.1 onboarding identity and activation matrix
-        run: npx vitest run --config vitest.integration.config.ts tests/integration/onboarding-identity-boundary.test.ts
+        id: postgres_matrix
+        shell: bash
+        run: |
+          set +e
+          npx vitest run --config vitest.integration.config.ts tests/integration/onboarding-identity-boundary.test.ts 2>&1 | tee "$RUNNER_TEMP/s10-postgres-boundary.log"
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit "$status"
+      - name: Upload S10.1 PostgreSQL diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: s10-postgres-boundary-${{ github.sha }}
+          path: ${{ runner.temp }}/s10-postgres-boundary.log
+          if-no-files-found: error
+          retention-days: 7
