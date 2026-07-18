@@ -11,8 +11,8 @@ begin;
 
 create extension if not exists pgcrypto;
 
--- Consequential resources receive explicit assignment scope. Compatibility
--- columns remain projections and never authorize the approval.
+-- Consequential resources carry explicit assignment scope. Compatibility
+-- account/employee columns never authorize an approval.
 alter table outbound_emails
   add column if not exists assignment_id text references employee_assignments(id) on delete restrict;
 alter table stripe_invoices
@@ -129,10 +129,11 @@ alter table preview_links
   drop constraint if exists preview_links_snapshot_hash_check,
   add constraint preview_links_snapshot_hash_check
     check (approval_snapshot_hash is null or approval_snapshot_hash ~ '^sha256:[0-9a-f]{64}$');
-create unique index if not exists preview_links_token_jti_unique on preview_links(token_jti) where token_jti is not null;
+create unique index if not exists preview_links_token_jti_unique
+  on preview_links(token_jti) where token_jti is not null;
 
 -- --------------------------------------------------------------------------
--- Deterministic immutable snapshots from durable resources
+-- Deterministic immutable resource snapshots
 -- --------------------------------------------------------------------------
 
 create or replace function amtech_approval_snapshot(
@@ -149,6 +150,8 @@ set search_path = public
 as $$
 declare
   v_snapshot jsonb;
+  v_stored_hash text;
+  v_computed_hash text;
 begin
   if p_resource_class = 'outbound_email' and p_action_key in ('send_estimate_email','send_email') then
     select jsonb_build_object(
@@ -161,9 +164,8 @@ begin
       'to_email', oe.to_email,
       'subject', oe.subject,
       'body_hash', 'sha256:' || encode(digest(convert_to(coalesce(oe.body, ''), 'utf8'), 'sha256'), 'hex'),
-      'attachment_artifact_ids', to_jsonb(coalesce(oe.attachment_artifact_ids, array[]::text[])),
-      'gmail_thread_id', oe.gmail_thread_id,
-      'sent_status', oe.sent_status
+      'attachment_artifact_ids', coalesce(to_jsonb(oe.attachment_artifact_ids), '[]'::jsonb),
+      'gmail_thread_id', oe.gmail_thread_id
     ) into v_snapshot
       from outbound_emails oe
      where oe.id = p_resource_id
@@ -178,8 +180,7 @@ begin
       'stripe_connection_id', si.stripe_connection_id,
       'stripe_invoice_id', si.stripe_invoice_id,
       'estimate_id', si.estimate_id,
-      'deposit_amount', si.deposit_amount,
-      'status', si.status
+      'deposit_amount', si.deposit_amount
     ) into v_snapshot
       from stripe_invoices si
      where si.id = p_resource_id
@@ -189,22 +190,27 @@ begin
           'commit_quickbooks_expense','commit_quickbooks_bill',
           'commit_quickbooks_invoice','commit_quickbooks_payment'
         ) then
-    select jsonb_build_object(
-      'schema_version', 'approval-snapshot-v1',
-      'assignment_id', qpw.assignment_id,
-      'action_key', qpw.action_key,
-      'resource_class', p_resource_class,
-      'resource_id', qpw.id,
-      'connector_id', qpw.connector_id,
-      'entity_type', qpw.entity_type,
-      'payload_hash', qpw.payload_hash,
-      'canonical_payload_hash', 'sha256:' || encode(digest(convert_to(qpw.canonical_payload, 'utf8'), 'sha256'), 'hex'),
-      'status', qpw.status
-    ) into v_snapshot
+    select
+      qpw.payload_hash,
+      encode(digest(convert_to(qpw.canonical_payload, 'utf8'), 'sha256'), 'hex'),
+      jsonb_build_object(
+        'schema_version', 'approval-snapshot-v1',
+        'assignment_id', qpw.assignment_id,
+        'action_key', qpw.action_key,
+        'resource_class', p_resource_class,
+        'resource_id', qpw.id,
+        'connector_id', qpw.connector_id,
+        'entity_type', qpw.entity_type,
+        'payload_hash', 'sha256:' || qpw.payload_hash
+      )
+      into v_stored_hash, v_computed_hash, v_snapshot
       from quickbooks_pending_writes qpw
      where qpw.id = p_resource_id
        and qpw.assignment_id = p_assignment_id
        and qpw.action_key = p_action_key;
+    if v_snapshot is not null and v_stored_hash <> v_computed_hash then
+      raise exception 'approval_resource_payload_hash_mismatch';
+    end if;
   else
     raise exception 'unsupported_approval_resource: %/%', p_resource_class, p_action_key;
   end if;
@@ -213,7 +219,7 @@ begin
     raise exception 'approval_resource_not_found_or_wrong_assignment';
   end if;
   return v_snapshot;
-end
+end;
 $$;
 
 create or replace function amtech_approval_snapshot_hash(p_snapshot jsonb)
@@ -226,7 +232,7 @@ as $$
 $$;
 
 -- --------------------------------------------------------------------------
--- Policy defaults for implemented consequential action classes
+-- Current action policies
 -- --------------------------------------------------------------------------
 
 insert into assignment_authority_policies(
@@ -313,9 +319,7 @@ begin
      or not amtech_relationship_current(v_assignment.status, v_assignment.starts_at, v_assignment.ends_at) then
     raise exception 'approval_assignment_invalid';
   end if;
-  select * into v_employee_principal
-    from employee_principals
-   where id = v_assignment.employee_principal_id;
+  select * into v_employee_principal from employee_principals where id = v_assignment.employee_principal_id;
   if v_employee_principal.id is null or v_employee_principal.employee_id <> p_employee_id then
     raise exception 'approval_employee_assignment_mismatch';
   end if;
@@ -328,11 +332,11 @@ begin
    where assignment_id = p_assignment_id
      and policy_version = v_assignment.policy_version
      and action = p_action_key
-     and amtech_relationship_current(status, created_at, null)
+     and status = 'active'
    limit 1;
   if v_policy.id is null then raise exception 'approval_authority_policy_missing'; end if;
-  if case p_risk_level when 'low' then 1 when 'medium' then 2 when 'high' then 3 when 'critical' then 4 else 0 end
-     < case v_policy.risk_class when 'low' then 1 when 'medium' then 2 when 'high' then 3 when 'critical' then 4 else 99 end then
+  if (case p_risk_level when 'low' then 1 when 'medium' then 2 when 'high' then 3 when 'critical' then 4 else 0 end)
+     < (case v_policy.risk_class when 'low' then 1 when 'medium' then 2 when 'high' then 3 when 'critical' then 4 else 99 end) then
     raise exception 'approval_risk_below_policy';
   end if;
 
@@ -389,11 +393,11 @@ begin
   ) on conflict (id) do nothing;
 
   return next v_approval;
-end
+end;
 $$;
 
 -- --------------------------------------------------------------------------
--- Atomic human decision and C3 registration
+-- Atomic human resolution and C3 command registration
 -- --------------------------------------------------------------------------
 
 create or replace function resolve_approval_authority(
@@ -433,11 +437,7 @@ begin
   select * into v_approval from approvals where id = p_approval_id for update;
   if v_approval.id is null or v_approval.status = 'legacy' then raise exception 'approval_not_promoted'; end if;
   if v_approval.revoked_at is not null or v_approval.status = 'revoked' then raise exception 'approval_revoked'; end if;
-  if v_approval.expires_at <= now() or v_approval.status = 'expired' then
-    update approvals set status = 'expired', resolution = 'expired', resolved_at = coalesce(resolved_at, now()), updated_at = now()
-     where id = p_approval_id;
-    raise exception 'approval_expired';
-  end if;
+  if v_approval.expires_at <= now() or v_approval.status = 'expired' then raise exception 'approval_expired'; end if;
 
   if v_approval.status in ('approved','rejected') then
     if v_approval.resolution = p_resolution and v_approval.resolved_by_principal_id = p_resolver_principal_id then
@@ -450,7 +450,10 @@ begin
   end if;
   if v_approval.status <> 'pending' then raise exception 'approval_not_pending'; end if;
   if v_approval.requester_principal_id = p_resolver_principal_id then raise exception 'approval_self_resolution_denied'; end if;
-  if not exists (select 1 from human_principals hp where hp.id = p_resolver_principal_id and hp.status = 'active') then
+  if not exists (
+    select 1 from human_principals hp
+     where hp.id = p_resolver_principal_id and hp.status = 'active'
+  ) then
     raise exception 'approval_resolver_not_current_human';
   end if;
 
@@ -471,8 +474,7 @@ begin
      and action = v_approval.action_key
      and status = 'active'
    limit 1;
-  if v_policy.id is null
-     or v_policy.required_roles <> v_approval.required_resolver_roles then
+  if v_policy.id is null or v_policy.required_roles <> v_approval.required_resolver_roles then
     raise exception 'approval_policy_changed';
   end if;
 
@@ -537,11 +539,13 @@ begin
   return query select v_approval.id, v_approval.assignment_id, v_approval.resolution,
     v_approval.resolved_by_role, v_approval.command_intent_id, v_approval.command_id,
     v_approval.effect_key, false;
-end
+end;
 $$;
 
--- Revalidate the exact approved snapshot and the resolver's still-current
--- authority immediately before C3 claims the command/effect.
+-- --------------------------------------------------------------------------
+-- Execution revalidation and receipt linkage
+-- --------------------------------------------------------------------------
+
 create or replace function assert_approved_action_execution(
   p_approval_id text,
   p_action_key text,
@@ -571,6 +575,7 @@ begin
      or v_approval.resource_id <> p_resource_id then
     raise exception 'approval_execution_scope_mismatch';
   end if;
+
   v_snapshot_hash := amtech_approval_snapshot_hash(amtech_approval_snapshot(
     v_approval.assignment_id, v_approval.action_key,
     v_approval.resource_class, v_approval.resource_id
@@ -579,6 +584,7 @@ begin
      or p_current_snapshot_hash <> v_approval.snapshot_hash then
     raise exception 'approval_snapshot_changed';
   end if;
+
   if not exists (
     select 1 from assignment_principals ap
      where ap.assignment_id = v_approval.assignment_id
@@ -613,8 +619,9 @@ begin
   ) then
     raise exception 'approval_policy_changed';
   end if;
+
   return next v_approval;
-end
+end;
 $$;
 
 create or replace function record_approval_execution_receipt(
@@ -643,6 +650,7 @@ begin
   if v_approval.execution_receipt_id is not null and v_approval.execution_receipt_id <> p_receipt_id then
     raise exception 'approval_execution_receipt_conflict';
   end if;
+
   update approvals
      set execution_receipt_id = p_receipt_id,
          execution_state = case v_receipt.state
@@ -654,11 +662,10 @@ begin
    where id = p_approval_id
   returning * into v_approval;
   return next v_approval;
-end
+end;
 $$;
 
--- Immutable authority fields cannot drift after creation. The decision and
--- execution state are mutable only through the restricted RPCs above.
+-- Authority-defining fields cannot drift after promotion.
 create or replace function amtech_approval_immutable_guard()
 returns trigger
 language plpgsql
@@ -687,7 +694,7 @@ begin
     raise exception 'approval_immutable_authority_changed';
   end if;
   return new;
-end
+end;
 $$;
 
 drop trigger if exists approval_immutable_guard on approvals;
@@ -695,9 +702,6 @@ create trigger approval_immutable_guard
 before update on approvals
 for each row execute function amtech_approval_immutable_guard();
 
--- Browser roles cannot mutate authority rows directly. Manager service role uses
--- the restricted functions, which revalidate assignment, policy, resolver, and
--- immutable resource state.
 alter table approvals enable row level security;
 revoke insert, update, delete on approvals from anon, authenticated;
 revoke all on function create_approval_authority_request(text,text,text,text,text,text,text,text,text,text,text,text,timestamptz,text,text,text) from public, anon, authenticated;
