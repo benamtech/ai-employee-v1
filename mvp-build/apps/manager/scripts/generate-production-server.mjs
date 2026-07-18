@@ -42,6 +42,12 @@ source = replaceOne(
 );
 source = replaceOne(
   source,
+  `          employee_id: employeeId,\n          assignment_id: artifact.assignment_id,`,
+  `          employee_id: String(employeeId),\n          assignment_id: artifact.assignment_id,`,
+  "artifact_owner_employee",
+);
+source = replaceOne(
+  source,
   `      const resolution = act === "approve" ? "approved" : "rejected";\n      const followup = await deliverApprovalResolutionFollowup(db, {`,
   `      const approvalResolution = act === "approve" ? "approved" : "rejected";\n      const followup = await deliverApprovalResolutionFollowup(db, {`,
   "preview_resolution_name",
@@ -201,6 +207,7 @@ const required = [
   "X-AMTECH-Admin-Authorization",
   "X-AMTECH-Support-Lease-Id",
   "String(link.assignment_id)",
+  "String(employeeId)",
   "approvalResolution",
 ];
 for (const marker of required) {
