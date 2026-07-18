@@ -1,16 +1,7 @@
 /**
  * Manager control plane, exposed to the Hermes employee as a native MCP server.
- *
- * This is a TRANSPORT over the existing tool registry — not a second
- * implementation. `tools/list` advertises each Manager tool's JSON Schema
- * (derived from the Step-2 zod source of truth) and `tools/call` dispatches
- * through `runManagerTool`, so gates, audit, secrets-by-reference, and the
- * approval flow (all inside the handlers) are reused verbatim. The employee
- * calls Manager tools natively instead of parsing a prose HTTP contract.
- *
- * Stateless: a fresh Server + web-standard transport per request
- * (sessionIdGenerator undefined, enableJsonResponse true), so it composes with
- * Hono via `c.req.raw` and needs no session store.
+ * The verified MCP credential supplies employee principal and assignment context;
+ * model arguments can neither choose nor override that authority.
  */
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
@@ -29,9 +20,6 @@ import { buildBusinessBrainIndex, readBusinessFactsResource } from "./business-b
 
 const SERVER_INFO = { name: "amtech-manager", version: "0.1.0" } as const;
 
-/** Short, model-facing descriptions to guide tool selection. Behavioral policy
- *  (sequences, gate discipline) lives in the workspace AGENTS/manager-tools
- *  prose; this is just the one-line "what is this tool". */
 const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
   get_business_brain: "Read the business brain index and resource map; use business-facts only for explicit fact details.",
   save_business_brain_fact: "Persist one durable fact resource inside the broader business brain.",
@@ -63,37 +51,31 @@ const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
   get_aged_payables: "Read a QuickBooks A/P aging summary (what the business owes, and how overdue).",
 };
 
-/** Tools the employee may call over MCP: everything except scheduler-only,
- *  timer-driven tools (those run only through the protected scheduler runner). */
 function employeeCallableTools(): ToolName[] {
   return TOOL_NAMES.filter((name) => !SCHEDULER_ONLY_TOOLS.has(name));
 }
 
-/** Owner-context fields bound to the employee's runtime, injected server-side from
- *  the MCP request identity — the model neither sees nor supplies them. */
 const INJECTED_OWNER_FIELDS = ["account_id", "employee_id"] as const;
 
 function inputSchemaFor(name: ToolName): Record<string, unknown> {
   const json = zodToJsonSchema(getToolSchema(name), { $refStrategy: "none" }) as Record<string, unknown>;
   delete json.$schema;
-  // MCP inputSchema must be a JSON-Schema object; our tools all take an object.
   if (json.type !== "object") return { type: "object", additionalProperties: true };
-  // Don't advertise the injected identity fields — otherwise the model sees them
-  // as required inputs and asks the owner for an account_id / employee_id it should
-  // never handle. They are injected from the request identity in the call handler.
   const props = json.properties as Record<string, unknown> | undefined;
-  if (props) for (const f of INJECTED_OWNER_FIELDS) delete props[f];
+  if (props) for (const field of INJECTED_OWNER_FIELDS) delete props[field];
   if (Array.isArray(json.required)) {
-    json.required = (json.required as string[]).filter((r) => !INJECTED_OWNER_FIELDS.includes(r as never));
+    json.required = (json.required as string[]).filter((required) => !INJECTED_OWNER_FIELDS.includes(required as never));
   }
   return json;
 }
 
-/** Identity bound to the employee's baked MCP config (rendered request headers),
- *  NOT anything the model provides. Injected into every tool call. */
 export interface McpIdentity {
   account_id?: string;
   employee_id?: string;
+  assignment_id?: string;
+  principal_id?: string;
+  policy_version?: string;
+  credential_id?: string;
 }
 
 const RESOURCE_DEFS = [
@@ -112,27 +94,28 @@ function jsonResource(uri: string, payload: unknown) {
 }
 
 async function readManagerResource(uri: string, identity: McpIdentity) {
-  if (!identity.account_id || !identity.employee_id) {
-    return jsonResource(uri, { error: "identity_required" });
+  if (!identity.account_id || !identity.employee_id || !identity.assignment_id || !identity.principal_id) {
+    return jsonResource(uri, { error: "assignment_identity_required" });
   }
   const db = serviceClient();
-  const snapshot = await buildEmployeeSnapshot(db, identity.employee_id, identity.account_id);
+  const snapshot = await buildEmployeeSnapshot(db, identity.employee_id, identity.account_id, identity.assignment_id);
   if (uri === "amtech://manager/connector-status") return jsonResource(uri, {
+    assignment_id: identity.assignment_id,
     connection_surfaces: snapshot.connection_surfaces ?? [],
-    connectors: snapshot.connectors.map((c) => ({
-      id: c.id,
-      connector_key: c.connector_key,
-      provider: c.provider,
-      status: c.status,
-      external_email: c.external_email ?? null,
-      last_error: c.last_error ?? null,
+    connectors: snapshot.connectors.map((connector) => ({
+      id: connector.id,
+      connector_key: connector.connector_key,
+      provider: connector.provider,
+      status: connector.status,
+      external_email: connector.external_email ?? null,
+      last_error: connector.last_error ?? null,
     })),
   });
-  if (uri === "amtech://manager/artifacts") return jsonResource(uri, { artifacts: snapshot.artifacts, outputs: snapshot.outputs ?? [] });
-  if (uri === "amtech://manager/approvals") return jsonResource(uri, { approvals: snapshot.approvals });
-  if (uri === "amtech://manager/work-queue") return jsonResource(uri, { tasks: snapshot.tasks ?? [], resurface_items: snapshot.resurface_items ?? [], surface_envelopes: snapshot.surface_envelopes ?? [] });
-  if (uri === "amtech://manager/runtime-health") return jsonResource(uri, { runtime_health: snapshot.runtime_health });
-  if (uri === "amtech://manager/capability-registry") return jsonResource(uri, { capabilities: snapshot.capabilities ?? [], abilities: snapshot.abilities ?? [] });
+  if (uri === "amtech://manager/artifacts") return jsonResource(uri, { assignment_id: identity.assignment_id, artifacts: snapshot.artifacts, outputs: snapshot.outputs ?? [] });
+  if (uri === "amtech://manager/approvals") return jsonResource(uri, { assignment_id: identity.assignment_id, approvals: snapshot.approvals });
+  if (uri === "amtech://manager/work-queue") return jsonResource(uri, { assignment_id: identity.assignment_id, tasks: snapshot.tasks ?? [], resurface_items: snapshot.resurface_items ?? [], surface_envelopes: snapshot.surface_envelopes ?? [] });
+  if (uri === "amtech://manager/runtime-health") return jsonResource(uri, { assignment_id: identity.assignment_id, runtime_health: snapshot.runtime_health });
+  if (uri === "amtech://manager/capability-registry") return jsonResource(uri, { assignment_id: identity.assignment_id, capabilities: snapshot.capabilities ?? [], abilities: snapshot.abilities ?? [] });
   if (uri === "amtech://manager/business-brain") return jsonResource(uri, await buildBusinessBrainIndex(db, {
     account_id: identity.account_id,
     employee_id: identity.employee_id,
@@ -146,10 +129,10 @@ async function readManagerResource(uri: string, identity: McpIdentity) {
 }
 
 export function isRealMcpToolExecutionResult(value: unknown): boolean {
-  const v = value as { structuredContent?: { proof?: unknown; status?: unknown }; content?: Array<{ text?: string }> } | undefined;
-  if (!v?.structuredContent || typeof v.structuredContent !== "object") return false;
-  if (!("status" in v.structuredContent)) return false;
-  return Boolean(v.structuredContent.proof && typeof v.structuredContent.proof === "object");
+  const result = value as { structuredContent?: { proof?: unknown; status?: unknown }; content?: Array<{ text?: string }> } | undefined;
+  if (!result?.structuredContent || typeof result.structuredContent !== "object") return false;
+  if (!("status" in result.structuredContent)) return false;
+  return Boolean(result.structuredContent.proof && typeof result.structuredContent.proof === "object");
 }
 
 export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
@@ -164,28 +147,32 @@ export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
   }));
 
   server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-    resources: RESOURCE_DEFS.map((r) => ({
-      uri: r.uri,
-      name: r.name,
-      mimeType: r.mimeType,
-      description: `${r.name} for the bound AMTECH employee context.`,
+    resources: RESOURCE_DEFS.map((resource) => ({
+      uri: resource.uri,
+      name: resource.name,
+      mimeType: resource.mimeType,
+      description: `${resource.name} for the bound AMTECH employee assignment.`,
     })),
   }));
 
-  server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
-    const uri = String(req.params.uri ?? "");
-    if (!RESOURCE_DEFS.some((r) => r.uri === uri)) return jsonResource(uri, { error: "resource_not_found" });
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const uri = String(request.params.uri ?? "");
+    if (!RESOURCE_DEFS.some((resource) => resource.uri === uri)) return jsonResource(uri, { error: "resource_not_found" });
     return readManagerResource(uri, identity);
   });
 
-  server.setRequestHandler(CallToolRequestSchema, async (req) => {
-    const name = req.params.name as ToolName;
-    // Inject/override the owner context from the bound identity so the model can
-    // neither spoof another account nor omit ids it should never have to know.
-    const args = { ...((req.params.arguments ?? {}) as Record<string, unknown>) };
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const name = request.params.name as ToolName;
+    const args = { ...((request.params.arguments ?? {}) as Record<string, unknown>) };
     if (identity.account_id) args.account_id = identity.account_id;
     if (identity.employee_id) args.employee_id = identity.employee_id;
-    const outcome = await runManagerTool(name, args, { actor: "employee" });
+    const outcome = await runManagerTool(name, args, {
+      actor: "employee",
+      assignment_id: identity.assignment_id ?? null,
+      principal_id: identity.principal_id ?? null,
+      principal_class: identity.principal_id ? "employee" : null,
+      authenticated_by: identity.credential_id ? `employee_mcp_credential:${identity.credential_id}` : null,
+    });
 
     if (outcome.kind === "unknown_tool") {
       return { content: [{ type: "text", text: `unknown_tool: ${name}` }], isError: true };
@@ -197,17 +184,12 @@ export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
     const envelope = outcome.envelope;
     const isError = outcome.kind === "invalid_input" || envelope.status === "failed" || envelope.status === "denied";
     const text = envelope.user_facing_summary_hint || `${name}: ${envelope.status}`;
-    // structuredContent carries the full typed envelope (proof, gates, next action);
-    // text is the owner-safe hint. Never leak raw provider tokens (handlers already
-    // return secrets by reference only).
     return { content: [{ type: "text", text }], structuredContent: envelope as unknown as Record<string, unknown>, isError };
   });
 
   return server;
 }
 
-/** Handle one MCP HTTP request (stateless). Auth is enforced by the caller
- *  (denyInternal) before this runs. */
 export async function handleManagerMcpRequest(request: Request, identity: McpIdentity = {}): Promise<Response> {
   const server = buildManagerMcpServer(identity);
   const transport = new WebStandardStreamableHTTPServerTransport({
@@ -216,12 +198,9 @@ export async function handleManagerMcpRequest(request: Request, identity: McpIde
   });
   await server.connect(transport);
   try {
-    const res = await transport.handleRequest(request);
-    // Fully buffer the JSON response, then tear down the per-request server so
-    // closing can never truncate a lazily-read body (enableJsonResponse mode
-    // returns a complete JSON document).
-    const buf = await res.arrayBuffer();
-    return new Response(buf, { status: res.status, headers: res.headers });
+    const response = await transport.handleRequest(request);
+    const buffer = await response.arrayBuffer();
+    return new Response(buffer, { status: response.status, headers: response.headers });
   } finally {
     await transport.close().catch(() => {});
     await server.close().catch(() => {});
