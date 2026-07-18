@@ -5,24 +5,30 @@ on:
   push:
     branches:
       - lane/relationships-auth
+      - employee-production-tuesday
     paths:
       - "mvp-build/packages/shared/src/relationship-contract.ts"
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
+      - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
       - "mvp-build/packages/shared/src/ids.ts"
       - "mvp-build/packages/shared/src/index.ts"
       - "mvp-build/tests/unit/relationship-contract.test.ts"
+      - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
   pull_request:
     branches:
+      - research
       - employee-production-tuesday
     paths:
       - "mvp-build/packages/shared/src/relationship-contract.ts"
       - "mvp-build/packages/shared/src/labor-relationship-record.ts"
+      - "mvp-build/packages/shared/src/authorization-scope-registry.ts"
       - "mvp-build/packages/shared/src/ids.ts"
       - "mvp-build/packages/shared/src/index.ts"
       - "mvp-build/tests/unit/relationship-contract.test.ts"
+      - "mvp-build/tests/unit/authorization-scope-registry.test.ts"
       - "mvp-build/tests/integration/relationship-authorization-matrix.test.ts"
       - "mvp-build/packages/db/migrations/**"
       - ".github/workflows/lane-relationships-auth.yml"
@@ -53,8 +59,8 @@ jobs:
         run: npm run typecheck --workspace @amtech/shared
       - name: Build shared relationship contracts
         run: npm run build --workspace @amtech/shared
-      - name: Run relationship contract invariants
-        run: npx vitest run tests/unit/relationship-contract.test.ts
+      - name: Run relationship and assignment-scope contract invariants
+        run: npx vitest run tests/unit/relationship-contract.test.ts tests/unit/authorization-scope-registry.test.ts
 
   relationship-matrix:
     needs: contract
