@@ -42,6 +42,8 @@ export {
   type SignedResourcePossession,
   type SmsPhoneBinding,
 } from "./assignment-resolver.js";
+export * from "./connector-custody.js";
+export * from "./commercial-attribution.js";
 export * from "./session-enforcer.js";
 export * from "./command-effect.js";
 export * from "./release-evidence.js";
