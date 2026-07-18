@@ -148,6 +148,18 @@ describe.skipIf(!databaseUrl)("S9 signed resource revocation boundary", () => {
     expect(Number(result.rows[0].preview_resolver_version)).toBe(Number(result.rows[0].human_version));
   });
 
+  it("denies issuance of a signed preview without one exact assignment", async () => {
+    await expect(db!.query(`
+      insert into preview_links(
+        id, account_id, employee_id, token_jti,
+        resource_type, resource_id, token_hash, actions, audience, expires_at
+      ) values(
+        'prev_signed_s9_unscoped',$1,$2,'signed-s9-unscoped-jti',
+        'artifact',$3,'signed-s9-unscoped-hash',array['view'],'owner',now() + interval '1 hour'
+      )
+    `, [ids.account, ids.employee, ids.artifact])).rejects.toThrow(/preview_assignment_required/);
+  });
+
   it("revokes both credentials synchronously after an assignment role change", async () => {
     await db!.query(`update assignment_principals set role = 'manager' where id = $1`, [ids.ownerPrincipal]);
     const result = await db!.query(`
