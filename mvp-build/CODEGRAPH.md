@@ -76,11 +76,11 @@ For the production-shaped normal-employee path, use `docs/production-normal-empl
 - Command board: issue `#25`.
 - Integration PR: draft `#23`.
 
-### Lane 1 — relationship and authorization foundation
+### Lane 1 — relationship and authorization foundation plus scope spine
 
-Integrated from PR `#24` at `b37d479a70983fcb3e88942b1f36481a07a97d17`.
+Foundation integrated from PR `#24` at `b37d479a70983fcb3e88942b1f36481a07a97d17`.
 
-Delivered:
+Delivered foundation:
 
 - C1 labor/domain relationship schemas;
 - C2 authorization request/decision schemas;
@@ -91,9 +91,15 @@ Delivered:
 - assignment-aware helpers and initial `accounts`/`employees` RLS replacement;
 - five-case PostgreSQL relationship/RLS matrix green on run `29639593725`.
 
+Current PR #23 source-wired progress:
+
+- `packages/shared/src/authorization-scope-registry.ts` defines the executable inventory for every consequential surface category: table, Manager route, SMS path, signed resource, connector binding, owner session, admin/support action, commercial row, service worker, and public claim.
+- `tests/unit/authorization-scope-registry.test.ts` fails closed when forbidden authorizers are allowed, when commercial rows are not explicitly assignment-scoped, or when public estimator evidence enters canonical proof.
+- Migration `0042_assignment_scope_and_release_evidence_spine.sql` persists a durable registry, adds nullable `assignment_id` columns to existing consequential tables where present, adds indexes, and backfills only high-confidence employee/account rows through `amtech_default_assignment_for_employee_account`.
+
 Still open:
 
-- every consequential row, route, channel, signed resource, connector, session, admin/support action, and commercial consumer is not yet assignment-scoped;
+- consumer enforcement remains incomplete until each route/session/SMS/signed-resource/connector/commercial path uses the assignment registry/resolver at runtime;
 - real Supabase and fixture-free browser/channel packets are pending;
 - helper privilege design requires a reviewed non-recursive policy solution or explicit exception.
 
@@ -125,7 +131,19 @@ Correct RED-first sequence:
 5. Actions run `29642874619` passed shared typecheck/build, six contract invariants, blank PostgreSQL 17 migration application, and all seven database cases.
 6. Relationship/authorization regression run `29642874652` also passed on the same lane head.
 
-This is integrated source/CI/PostgreSQL evidence only. It is not real-Supabase, provider, runtime, browser/SMS, commercial, capacity, deployment, or production acceptance.
+This remains integrated source/CI/PostgreSQL evidence only. It is not real-Supabase, provider, runtime, browser/SMS, commercial, capacity, deployment, or production acceptance.
+
+### Lane 10 — integrated CI and release-evidence spine
+
+Current PR #23 source-wired progress:
+
+- `packages/shared/src/release-evidence.ts` defines C6 release-state schemas, required hard gates, cross-SHA/stale-evidence rejection, and public-claim promotion checks.
+- `tests/unit/release-evidence-contract.test.ts` proves source/CI-only manifests cannot upgrade live acceptance, rejects stale gate SHAs, rejects production-ready claims without all hard gates, and rejects missing gates.
+- `infra/scripts/acceptance/release-evidence-spine.mjs` emits a release-evidence manifest bound to repository, branch, exact SHA, run ID, digest, and gate states.
+- `.github/workflows/lane10-integrated-ci-release-evidence.yml` runs active workspace typecheck/build, source contract gates, blank PostgreSQL migration application, Lane 1 relationship matrix, Lane 3 command/effect matrix, and uploads the release-evidence manifest.
+- `.github/workflows/lane-relationships-auth.yml` now includes the assignment-scope registry and targets PRs into `research`.
+
+This is a CI/evidence spine, not production acceptance. Real Supabase, runtime, provider, browser/SMS, commercial, capacity/recovery, rollback, attestation, and deployment gates remain pending until their own packets exist and bind to the same SHA.
 
 ### Repository boundary cleanup
 
@@ -142,8 +160,8 @@ The shared relationship/authorization and command/effect kernels now exist. Down
 
 Next dependency order:
 
-1. **Complete Lane 1 scope.** A perfect effect kernel is unsafe if a route, session, connector, signed resource, or commercial row can select the wrong assignment.
-2. **Build Lane 10 integrated CI/evidence spine.** Later lanes must fail closed when migrations, RLS, concurrency, protocol, browser/SMS, provider, capacity, recovery, or claims drift.
+1. **Get Lane 1 scope + Lane 10 CI green.** Registry, migration `0042`, source contracts, relationship matrix, command/effect matrix, and release-evidence generation must pass on the current PR head.
+2. **Complete Lane 1 consumer enforcement.** A perfect inventory is insufficient if a route, session, connector, signed resource, SMS path, or commercial row can still select work by account membership, bearer possession, phone number, mutable header, or caller-selected account/employee ID.
 3. **Lane 2 sessions/approvals/admin and Lane 4 onboarding saga.** These need both explicit relationship authority and durable commands/effects.
 4. **Lanes 5–7 commercial, connectors/channels, and workers.** These adapt existing gateway, inbox, provider, provisioning, and reconciler machinery to the shared kernels.
 5. **Lanes 8–9 product surfaces and 100–700 agent operations.** UI and capacity proof come after authority, durable work, and accounting semantics are stable.
@@ -164,17 +182,22 @@ Primary areas:
 - `packages/shared/src/work-stream.ts`
 - `packages/shared/src/preview-links.ts`
 
-Home, Talk, Proof, Connected, persisted conversation, signed review, approvals, owner-safe materialization, SSE/poll fallback, Connector Center, and generative-card seams are source-wired. Their consumers still require full assignment, command/effect, session, connector, commercial, and release conformance.
+Home, Talk, Proof, Connected, persisted conversation, signed review, approvals, owner-safe materialization, SSE/poll fallback, Connector Center, and generative-card seams are source-wired. Their consumers still require runtime assignment, command/effect, session, connector, commercial, and release conformance.
 
-### Relationship and authorization
+### Relationship, authorization, and assignment scope
 
 Primary files:
 
 - `packages/shared/src/relationship-contract.ts`
 - `packages/shared/src/labor-relationship-record.ts`
+- `packages/shared/src/authorization-scope-registry.ts`
 - `packages/db/migrations/0039_labor_relationship_authorization_foundation.sql`
 - `packages/db/migrations/0040_fix_assignment_authorization_policy_version.sql`
+- `packages/db/migrations/0042_assignment_scope_and_release_evidence_spine.sql`
+- `tests/unit/relationship-contract.test.ts`
+- `tests/unit/authorization-scope-registry.test.ts`
 - `tests/integration/relationship-authorization-matrix.test.ts`
+- `.github/workflows/lane-relationships-auth.yml`
 
 ### Durable command and effects
 
@@ -185,6 +208,16 @@ Primary files:
 - `tests/unit/command-effect-contract.test.ts`
 - `tests/integration/command-effect-kernel.test.ts`
 - `.github/workflows/lane-commands-effects.yml`
+
+### Release evidence and CI
+
+Primary files:
+
+- `packages/shared/src/release-evidence.ts`
+- `tests/unit/release-evidence-contract.test.ts`
+- `infra/scripts/acceptance/release-evidence-spine.mjs`
+- `.github/workflows/lane10-integrated-ci-release-evidence.yml`
+- `infra/acceptance/production-boundary-live.json`
 
 ### Model Gateway and profile isolation
 
@@ -239,7 +272,7 @@ Assignment-safe connector custody, unified channel envelopes, consent/revocation
 
 ## Now-to-live checklist
 
-### Integrated source/CI evidence
+### Integrated/source-wired evidence
 
 - [x] Approved remediation plan and 29-finding registry pass integrity CI.
 - [x] C1/C2 relationship and authorization foundation integrated.
@@ -247,8 +280,10 @@ Assignment-safe connector custody, unified channel envelopes, consent/revocation
 - [x] Lane 3 scheduler-independent RED harness corrected and recaptured.
 - [x] C3 durable command/effect contract and migration integrated.
 - [x] Seven-case command/effect PostgreSQL matrix green.
+- [x] Lane 1 consequential-surface registry source-wired.
+- [x] Lane 10 release-evidence contract and generator source-wired.
+- [ ] Current PR head passes Lane 1 scope, migration `0042`, relationship matrix, command/effect matrix, and Lane 10 integrated evidence workflow.
 - [ ] Complete all relationship/authorization consumers and fault suites.
-- [ ] Establish full integrated CI and release evidence spine.
 - [ ] Close remaining P0/P1 lanes.
 
 ### Live execution still required
