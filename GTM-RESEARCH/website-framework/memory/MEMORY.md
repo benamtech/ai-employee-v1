@@ -3,7 +3,7 @@
 format: TOON-oriented Markdown  
 status: active  
 scope: GTM-RESEARCH/website-framework  
-updated_at: 2026-07-17T21:20:00-04:00
+updated_at: 2026-07-17T23:40:00-04:00
 
 ## protocol
 
@@ -23,21 +23,25 @@ rules[8]:
 ## current
 
 state{branch,pr,status,latest_validated_source_head,workflow_run,tests}:
-  agent/ui-metaprogramming-pass-1,17,"draft; groundwork orchestration source-pass; provider/external-relevance/browser/runtime/field pending",ad3c81cfc202ba94f63f08b54649cfaaf71b00d7,29624909676,"30/30"
+  agent/ui-metaprogramming-pass-1,17,"draft; agent ontology + 10k site-program source-pass; real ingestion/providers/content/browser/search/field pending",dcc8beded51290f8084a421996c51c18b2afed83,29628832989,"46/46"
 
 note:
-  "latest_validated_source_head precedes documentation/memory commits; run a final exact-head workflow after authority updates"
+  "latest_validated_source_head precedes documentation/memory commits; final exact-head workflow must remain green after authority updates"
+
+job_boundary:
+  "one job is one finite full-site creation run with the declared minimum page-region jobs and batched agent/API work; it is not request-time serving or an always-on VPS"
 
 product_boundary:
-  "coding agent forms project/context/vector/corpus and executes typed PageGenerationJobs; provider adapters and successful-output transaction into canonical manifest remain pending"
+  "Stage-1 agent discovers ontology from project truth; compiler approves attributes/relations/observations and selects vector regions; Stage-2 agent proposes page concepts; compiler validates expression/distinctness and emits CandidatePageSeeds into the existing coordinate/job/manifest/PageIR/UI path"
 
 pipeline:
-  "ProjectInput -> ledgers -> independent ContextCorpus -> frozen splits -> isotonic calibration -> explicit-primary PageCoordinates -> eligibility/calibrated scoring -> SelectedCorpusPlan -> typed graph -> PageGenerationJobs -> bounded runner/repair -> static preview -> existing manifest/compiler/UI"
+  "ProjectInput -> AgentOntologyProposal -> ApprovedOntology -> sparse ontology graph/constraints -> ProductionOpportunitySpace -> SiteGenerationPlan -> PageConceptProposals -> CandidatePageSeeds -> existing PageCoordinate/SelectedCorpusPlan/PageGenerationJob/manifest/PageIR/UI compiler"
 
 ## handoffs
 
-handoffs[10]{at,file,status,scope}:
-  2026-07-17T21:20:00-04:00,2026-07-17-2120-groundwork-orchestration-implementation.md,current,"implemented orchestration spine; 30-test proof; preview/operator UX"
+handoffs[11]{at,file,status,scope}:
+  2026-07-17T23:40:00-04:00,2026-07-17-agent-ontology-10k-site-program.md,current,"agent-discovered ontology; sparse 10k planning; Wasm decision"
+  2026-07-17T21:20:00-04:00,2026-07-17-2120-groundwork-orchestration-implementation.md,current-foundation,"implemented orchestration spine; preview/operator UX"
   2026-07-17T20:45:00-04:00,2026-07-17-2045-agent-generation-workflow-ci-closure.md,historical-authority,"pre-implementation workflow authority"
   2026-07-17T20:30:00-04:00,2026-07-17-2030-agent-generation-jobs-workflow-validation.md,historical-design,"PageGenerationJob and workflow validation model"
   2026-07-17T20:05:00-04:00,2026-07-17-2005-agent-operated-generation-wasm-research.md,current-foundation,"agent lifecycle; Wasm/search-scale research"
@@ -50,7 +54,7 @@ handoffs[10]{at,file,status,scope}:
 
 ## authority
 
-read_order[14]{order,file,role}:
+read_order[15]{order,file,role}:
   1,../../identity.md,"root identity"
   2,../identity.md,"scope identity"
   3,../../CODEGRAPH.md,"root map"
@@ -58,103 +62,136 @@ read_order[14]{order,file,role}:
   5,../CODEGRAPH.md,"current source graph"
   6,../README.md,"current reality"
   7,MEMORY.md,"durable current state"
-  8,2026-07-17-2120-groundwork-orchestration-implementation.md,"latest immutable handoff"
-  9,../23-groundwork-orchestration-implementation.md,"implementation authority"
-  10,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
-  11,../21-vector-to-generation-job-compiler.md,"generation-job model"
-  12,../validation/reports/2026-07-17-groundwork-orchestration-implementation.md,"exact proof/boundaries"
-  13,../20-agent-operated-vector-site-generation-and-wasm.md,"product/Wasm model"
-  14,../site-manifest.yaml,"downstream compiled corpus authority"
+  8,2026-07-17-agent-ontology-10k-site-program.md,"latest immutable handoff"
+  9,../24-agent-discovered-ontology-and-10k-site-program.md,"current implementation/research authority"
+  10,../validation/reports/2026-07-17-agent-ontology-10k-site-program.md,"exact proof and boundaries"
+  11,../23-groundwork-orchestration-implementation.md,"groundwork implementation authority"
+  12,../22-agent-operated-framework-workflow-validation-matrix.md,"whole-system matrix"
+  13,../21-vector-to-generation-job-compiler.md,"generation-job model"
+  14,../20-agent-operated-vector-site-generation-and-wasm.md,"historical product/Wasm model"
+  15,../site-manifest.yaml,"downstream compiled corpus authority"
 
 ## source
 
-layers[10]{layer,file,state}:
+layers[18]{layer,file,state}:
   validation,../reference/src/validation-contracts.ts,source-pass
-  project-ledgers,../reference/src/project-input.ts,source-pass
+  project-ledgers-bounds,../reference/src/project-input.ts,source-pass
+  sparse-lexical,../reference/src/sparse-lexical.ts,source-pass
+  ontology-discovery,../reference/src/ontology-discovery.ts,"source-pass; provider/reviewer pending"
+  ontology-graph,../reference/src/ontology-graph.ts,source-pass
+  opportunity-baseline,../reference/src/opportunity-space.ts,"source-pass; transparency oracle"
+  opportunity-generation,../reference/src/opportunity-generation-optimized.ts,"source-pass; exact small-fixture parity"
+  opportunity-selection,../reference/src/opportunity-space-optimized.ts,source-pass
+  opportunity-production,../reference/src/opportunity-space-production.ts,source-pass
+  site-stage2-contracts,../reference/src/site-program.ts,"source-pass; provider transaction pending"
+  site-sparse-planner,../reference/src/site-program-optimized.ts,source-pass
+  agent-site-orchestrator,../reference/src/agent-site-orchestrator.ts,source-pass
+  acceleration-decision,../reference/src/acceleration-decision.ts,"source-pass; Wasm not promoted"
   context-calibration,../reference/src/context-corpus.ts,"source-pass; synthetic proof only"
-  typed-graph,../reference/src/typed-graph.ts,"source-pass; legacy links not migrated"
   coordinates,../reference/src/page-coordinate.ts,source-pass
   corpus-plan,../reference/src/corpus-plan.ts,"source-pass; small fixture"
   generation-jobs-runner,../reference/src/page-generation.ts,"source-pass; provider-neutral"
-  preview,../reference/src/framework-preview.ts,source-pass
-  orchestrator,../reference/src/framework-orchestrator.ts,source-pass
-  operator-cli,../reference/scripts/framework-cli.mjs,source-pass
-
-validation_attributes{project,context,graph,orchestration,total}:
-  7,4,3,8,22
+  manifest-pageir-ui,../reference/src/framework.ts,"source-pass; real content/browser acceptance pending"
 
 ## decisions
 
-decisions[14]{id,decision,ref}:
+decisions[24]{id,decision,ref}:
   G01,"agent first-class at formation and generation",../21-vector-to-generation-job-compiler.md
   G02,"ProjectInput/ledgers are deterministic typed state",../reference/src/project-input.ts
-  G03,"acceptance contexts independent of generation agent",../reference/src/context-corpus.ts
-  G04,"frozen train/validation/test with stable hashes",../reference/src/context-corpus.ts
-  G05,"train-only isotonic calibration; held-out metrics",../reference/src/context-corpus.ts
-  G06,"eligibility before scoring; ineligible=0",../reference/src/page-coordinate.ts
-  G07,"explicit primary prototype in generated-coordinate path",../reference/src/page-coordinate.ts
-  G08,"typed edges replace published raw similarity",../reference/src/typed-graph.ts
-  G09,"finite budgeted corpus selection; no Cartesian emission",../reference/src/corpus-plan.ts
-  G10,"PageGenerationJob typed/noindex/source-bound",../reference/src/page-generation.ts
-  G11,"ordered checkpointed bounded-repair runner",../reference/src/page-generation.ts
-  G12,"selected/rejected static preview with reasons",../reference/src/framework-preview.ts
-  G13,"every layer carries validation/pass/fail/baseline/severity",../reference/src/validation-contracts.ts
-  G14,"canonical HTML static/Wasm-free",../20-agent-operated-vector-site-generation-and-wasm.md
+  G03,"one-shot minimum/maximum site page counts are explicit project truth",../reference/src/project-input.ts
+  G04,"Stage-1 agent proposes ontology; compiler is authority",../reference/src/ontology-discovery.ts
+  G05,"protected/private/inferred-sensitive attributes rejected",../reference/src/ontology-discovery.ts
+  G06,"demographic/lifestyle axes require approval and stronger materiality",../reference/src/ontology-discovery.ts
+  G07,"TF-IDF/BM25 is deterministic lexical baseline",../reference/src/sparse-lexical.ts
+  G08,"typed graph channels and hard constraints precede HRR",../reference/src/ontology-graph.ts
+  G09,"k-core prunes isolated non-anchors; connected components descriptive only",../reference/src/ontology-graph.ts
+  G10,"observed closed conjunctions and bounded graph expansion replace Cartesian matrices",../reference/src/opportunity-space-production.ts
+  G11,"sparse concave coverage selects the finite corpus",../reference/src/opportunity-space-optimized.ts
+  G12,"HRR represents approved structure after eligibility/pruning",../reference/src/opportunity-space-optimized.ts
+  G13,"Stage-2 receives one exact selected region per PageConceptJob",../reference/src/site-program.ts
+  G14,"Stage-2 drift or missing information/utility fails",../reference/src/site-program.ts
+  G15,"bounded local neighbors are advisory, not publication authority",../reference/src/site-program-optimized.ts
+  G16,"candidate seeds compile into existing explicit-primary path",../reference/src/site-program.ts
+  G17,"Leiden is exploratory comparison only",../24-agent-discovered-ontology-and-10k-site-program.md
+  G18,"sparse clustering reserved for real customer-row studies",../24-agent-discovered-ontology-and-10k-site-program.md
+  G19,"learned embeddings/HNSW/GNN/GraphRAG are later comparison arms",../24-agent-discovered-ontology-and-10k-site-program.md
+  G20,"Blackwell/local GPU is optional agent provider, not compiler dependency",../24-agent-discovered-ontology-and-10k-site-program.md
+  G21,"TypeScript remains semantic/production oracle",../reference/src/acceleration-decision.ts
+  G22,"Wasm requires isolated dense kernel, bridge-inclusive repeated speedup, parity, and fallback",../reference/src/acceleration-decision.ts
+  G23,"canonical HTML remains static and runtime-independent",../20-agent-operated-vector-site-generation-and-wasm.md
+  G24,"source/scale proof cannot be described as search/commercial proof",../validation/reports/2026-07-17-agent-ontology-10k-site-program.md
 
 ## proof
 
 proof{head,run,tests,stages}:
-  ad3c81cfc202ba94f63f08b54649cfaaf71b00d7,29624909676,"30/30","manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
+  dcc8beded51290f8084a421996c51c18b2afed83,29628832989,"46/46","TypeScript; manifest; UI; orchestration; framework validate/preview; browser; R3F; artifact"
 
-fixture{contexts,splits,candidates,selected,rejected,jobs,validation,test}:
-  6,"2/2/2",3,2,1,"2/2",1.0,1.0
+scale{candidates,selected,batches,packed_bytes,total_ms}:
+  15000,10000,400,2560000,5284.510
 
-hashes{project,corpus,prepared,execution,preview}:
-  3b695e0952f0c346eeb8a6d5736ecf266531f8c558254d127017d37bc27cba2d,e99f20fb92f2b5729ae91fde99acf21ed33c2bae5934116baeff873880289e81,388c70fe0116512375c4e73c3df00d84a74e707a51f18870befa0d9ac22cb454,1f42528d8a9f8d93db43983ffbd0335f157d588d78b95fbbeca88676508ecb91,1b7c0a0697f8da3e55fc0ac575e92ded15c11b22ddf97cba8191445d8b85d1d4
+profile_ms{project,ontology,graph,itemsets,candidates,selection,site_program}:
+  0.126,20.363,36.644,202.478,2218.216,1784.044,973.168
 
-adversarial[7]:
-  self-authored-context-rejected
-  ineligible-fit-zero
-  primary-reorder-invariant
-  duplicate-rejected-with-reason
-  repair-exercised
-  exhausted-repair-rejects
-  preview-no-script
+baseline_comparison{original_ms,production_ms,recorded_speedup}:
+  "~29000",5284.510,"~5.5x"
+
+hrr_sample{regions,ms,linear_10k_estimate_ms,estimated_share}:
+  1000,49.358,"~493.58","~9.3%"
+
+adversarial[13]:
+  inferred-sensitive-medical-rejected
+  unreviewed-age-rejected
+  weaker-exact-duplicate-rejected
+  lifestyle-requires-approval-materiality
+  relation-to-rejected-endpoint-ledgered
+  hard-exclusion-separate
+  numeric-labels-distinct
+  description-boilerplate-not-duplicate-authority
+  optimized-candidate-ordered-hash-parity
+  minimum-10k-enforced
+  exact-batch-coverage
+  stage2-missing-attribute-rejected
+  wasm-not-promoted-with-small-dense-share
 
 ## blockers
 
 p0[5]{id,item,ref}:
   N01,"real repository/source ingestion",../reference/src/project-input.ts
-  N02,"real independent context collection/assessment",../reference/src/context-corpus.ts
-  N03,"BM25/learned-semantic/facet/graph candidate prefilter",../reference/src/page-coordinate.ts
-  N04,"real AgentPassExecutor provider adapter",../reference/src/page-generation.ts
-  N05,"successful agent-output transaction into manifest evidence/modules/pages/tasks",../reference/src/framework-orchestrator.ts
+  N02,"Stage-1 provider + reviewer workflow",../reference/src/ontology-discovery.ts
+  N03,"real customer/search observations and assessment",../reference/src/context-corpus.ts
+  N04,"Stage-2 provider and canonical output transaction",../reference/src/site-program.ts
+  N05,"100-500 real noindex cohort with content/information-gain review",../24-agent-discovered-ontology-and-10k-site-program.md
 
-p1[6]{id,item}:
+p1[7]{id,item}:
   legacy-manifest-explicit-primary-migration
   legacy-links-typed-edge-migration
   public-ai-employee-task-ir
-  browser-accessibility-cwv
-  zig-native-wasm-full-loop-benchmark
-  first-real-noindex-cohort
+  10000-complete-page-emissions
+  browser-accessibility-cwv-crawler-scale
+  zig-wasm-bridge-inclusive-kernel-benchmark
+  matched-field-publication
 
-not_claimed[8]:
+not_claimed[11]:
   external-relevance
   production-agent-generation
-  reviewed-2000-page-corpus
-  search-ranking-lift
+  reviewed-10000-page-corpus
+  complete-10000-page-bodies-ui
+  search-indexing-ranking-lift
   ai-citation-lift
   conversion-or-revenue-lift
   wasm-performance-win
+  leiden-clustering-embedding-ann-superiority
+  blackwell-cost-throughput
   browser-beauty-acceptance
 
 ## next
 
-next[7]{order,task,gate}:
-  1,"repository/source ingestion adapters","real ProjectInput without invented truth"
-  2,"context collection + assessor workflow","frozen externally judged corpus"
-  3,"hybrid candidate prefilter","BM25 + learned semantic + facets + graph controls"
-  4,"provider adapter","real bounded AgentPassExecutor"
-  5,"manifest transaction","atomic successful output -> canonical state"
-  6,"first cohort","20-40 real noindex pages with human review"
-  7,"field gates","browser/accessibility/performance then matched publication"
+next[8]{order,task,gate}:
+  1,"repository/source ingestion adapters","real ProjectInput/OntologyProposal without invented truth"
+  2,"Stage-1 provider + reviewer workflow","reviewed ontology and observations"
+  3,"independent context/assessor workflow","external labels and held-out relevance"
+  4,"Stage-2 provider adapter","bounded real PageConceptProposals"
+  5,"canonical transaction","atomic successful output -> evidence/modules/tasks/pages"
+  6,"first cohort","100-500 real noindex pages with information-gain/cannibalization review"
+  7,"scale emissions","10000 complete static pages + browser/accessibility/performance acceptance"
+  8,"field gates","matched publication then search/commercial measurement"
