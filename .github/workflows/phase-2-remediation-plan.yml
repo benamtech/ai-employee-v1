@@ -6,11 +6,19 @@ on:
     branches:
       - employee-production-tuesday
     paths:
+      - "mvp-build/second-half-plan/phase-2-standard-remediation-execution.md"
+      - "mvp-build/validation/phase-2-remediation-vectors.json"
+      - "mvp-build/tests/unit/remediation-plan-integrity.test.ts"
+      - "mvp-build/package.json"
       - ".github/workflows/phase-2-remediation-plan.yml"
   pull_request:
     branches:
       - research
     paths:
+      - "mvp-build/second-half-plan/phase-2-standard-remediation-execution.md"
+      - "mvp-build/validation/phase-2-remediation-vectors.json"
+      - "mvp-build/tests/unit/remediation-plan-integrity.test.ts"
+      - "mvp-build/package.json"
       - ".github/workflows/phase-2-remediation-plan.yml"
 
 permissions:
@@ -21,19 +29,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  source-materialization:
+  plan-integrity:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mvp-build
     steps:
       - uses: actions/checkout@v4
-      - name: Collect generator inputs without executing repository code
-        run: |
-          mkdir -p /tmp/manager-generator/mvp-build/apps/manager/src
-          mkdir -p /tmp/manager-generator/mvp-build/apps/manager/scripts
-          cp mvp-build/apps/manager/src/server.template.ts /tmp/manager-generator/mvp-build/apps/manager/src/
-          cp mvp-build/apps/manager/scripts/generate-production-server.mjs /tmp/manager-generator/mvp-build/apps/manager/scripts/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/setup-node@v4
         with:
-          name: manager-generator-inputs-${{ github.sha }}
-          path: /tmp/manager-generator
-          if-no-files-found: error
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Validate remediation registry and dependency graph
+        run: npm run test:remediation-plan
+      - name: Parse machine-readable vectors independently
+        run: node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('validation/phase-2-remediation-vectors.json','utf8')); if(p.findings.length!==29) process.exit(1); console.log({plan:p.plan_id,findings:p.findings.length,contracts:p.contracts.length,lanes:p.lanes.length});"
