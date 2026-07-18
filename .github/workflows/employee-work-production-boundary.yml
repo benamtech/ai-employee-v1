@@ -152,5 +152,20 @@ jobs:
           name: production-boundary-tests-${{ github.run_id }}
           path: mvp-build/production-boundary-tests.log
           if-no-files-found: warn
+      - name: Upload exact Manager source for structural review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-source-${{ github.sha }}
+          path: |
+            mvp-build/apps/manager/src/server.ts
+            mvp-build/apps/manager/src/lib/employee-stream.ts
+            mvp-build/apps/manager/src/lib/runtime.ts
+            mvp-build/apps/manager/src/lib/turn-queue.ts
+            mvp-build/apps/manager/src/lib/run-tool.ts
+            mvp-build/apps/manager/src/lib/owner-session.ts
+            mvp-build/apps/manager/src/middleware/assignment-guard.ts
+          if-no-files-found: error
+          retention-days: 1
       - name: Production image inclusion
         run: docker build -f infra/deploy/manager.Dockerfile .
