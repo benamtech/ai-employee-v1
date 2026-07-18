@@ -1,4 +1,4 @@
-/** Twilio signature verification and ambient-inbox ingress. */
+/** Twilio signature verification and assignment-bound ambient-inbox ingress. */
 import type { Hono } from "hono";
 import { validateTwilioSignature } from "../lib/signature.js";
 import { ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
@@ -13,10 +13,20 @@ import {
   AmbientEffectAmbiguousError,
   claimAmbientEffect,
   completeAmbientEffect,
-  enqueueAmbientEvent,
   failAmbientEffect,
   type AmbientInboxRow,
 } from "../lib/ambient-inbox.js";
+import {
+  enqueuePublicVerifiedEvent,
+  enqueueVerifiedConnectorEvent,
+} from "../lib/connector-custody.js";
+
+interface ScopedAmbientInboxRow extends AmbientInboxRow {
+  assignment_id?: string | null;
+  connector_binding_id?: string | null;
+  command_intent_id?: string | null;
+  command_id?: string | null;
+}
 
 function authToken(): string {
   const t = process.env.TWILIO_AUTH_TOKEN;
@@ -143,30 +153,47 @@ async function processFrontDoor(db: SupabaseClient, event: AmbientInboxRow, para
   return { session_id: sessionId, outbound_message_id: sent.sid, idempotent_replay: sent.idempotent_replay, ready_for_phone_verification: Boolean(out.ready_for_phone_verification) };
 }
 
-async function processStatus(db: SupabaseClient, params: Record<string, string>): Promise<Record<string, unknown>> {
+async function processStatus(db: SupabaseClient, event: AmbientInboxRow, params: Record<string, string>): Promise<Record<string, unknown>> {
   const sid = params.MessageSid || params.SmsSid;
   const status = params.MessageStatus || params.SmsStatus;
   if (!sid || !status) throw new Error("twilio_status_payload_invalid");
-  const updated = await db.from("employee_messages").update({ status }).eq("provider_id", sid);
+  const message = await db.from("employee_messages").select("id,assignment_id").eq("provider_id", sid).maybeSingle();
+  if (message.error) throw message.error;
+  if (!message.data?.id || !message.data.assignment_id) throw new Error("twilio_status_durable_message_scope_missing");
+  const updated = await db.from("employee_messages").update({ status }).eq("id", message.data.id).eq("assignment_id", message.data.assignment_id);
   if (updated.error) throw updated.error;
-  return { provider_id: sid, status };
+  return { provider_id: sid, status, assignment_id: message.data.assignment_id };
 }
 
 async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow, params: Record<string, string>): Promise<Record<string, unknown>> {
-  const employeeId = String(event.employee_id ?? event.payload?.employee_id ?? "");
+  const scoped = event as ScopedAmbientInboxRow;
+  const employeeId = String(event.employee_id ?? "");
+  const accountId = String(event.account_id ?? "");
+  const assignmentId = String(scoped.assignment_id ?? "");
   const ownerFrom = params.From;
-  if (!employeeId || !ownerFrom) throw new Error("twilio_employee_payload_invalid");
-  const { data: employee } = await db.from("employees").select("id,account_id,status").eq("id", employeeId).maybeSingle();
-  if (!employee || employee.status !== "live") throw new Error("twilio_employee_not_live");
-  const { data: phone } = await db.from("verified_phones").select("phone_e164").eq("account_id", employee.account_id).eq("phone_e164", ownerFrom).maybeSingle();
-  if (!phone) throw new Error("twilio_sender_not_authorized");
+  if (!employeeId || !accountId || !assignmentId || !scoped.connector_binding_id || !scoped.command_id || !ownerFrom) {
+    throw new Error("twilio_employee_assignment_custody_missing");
+  }
+  const employee = await db
+    .from("employees")
+    .select("id,account_id,status")
+    .eq("id", employeeId)
+    .eq("account_id", accountId)
+    .maybeSingle();
+  if (employee.error) throw employee.error;
+  if (!employee.data || employee.data.status !== "live") throw new Error("twilio_employee_not_live");
 
   const inboundProviderId = params.MessageSid || event.external_event_id;
-  const existingInbound = await db.from("employee_messages").select("id").eq("provider_id", inboundProviderId).eq("direction", "to_employee").maybeSingle();
+  const existingInbound = await db.from("employee_messages").select("id,assignment_id").eq("provider_id", inboundProviderId).eq("direction", "to_employee").maybeSingle();
   if (existingInbound.error) throw existingInbound.error;
+  if (existingInbound.data?.assignment_id && existingInbound.data.assignment_id !== assignmentId) {
+    throw new Error("twilio_inbound_cross_assignment_replay");
+  }
   if (!existingInbound.data) {
     const inbound = await db.from("employee_messages").insert({
       id: newId(ID_PREFIX.message),
+      assignment_id: assignmentId,
+      account_id: accountId,
       employee_id: employeeId,
       direction: "to_employee",
       source: "twilio",
@@ -176,32 +203,53 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
       status: "received",
     });
     if (inbound.error) throw inbound.error;
-    await stampChannelPresence(db, { account_id: employee.account_id, employee_id: employeeId, channel: "sms", session_info: { message_sid: inboundProviderId } });
+    await stampChannelPresence(db, {
+      account_id: accountId,
+      employee_id: employeeId,
+      channel: "sms",
+      session_info: {
+        message_sid: inboundProviderId,
+        assignment_id: assignmentId,
+        connector_binding_id: scoped.connector_binding_id,
+      },
+    });
   }
 
   const turn = await deliverOwnerTurnToRuntime(db, {
-    account_id: employee.account_id,
+    account_id: accountId,
     employee_id: employeeId,
     body: params.Body ?? "",
     channel: "sms",
-    idempotency_key: `twilio:${inboundProviderId}`,
+    idempotency_key: `twilio:${assignmentId}:${inboundProviderId}`,
   });
   const response = turn.reply || (turn.status === "queued" ? "I got it. I'm working on that now." : "I hit a snag. I saved your message and will pick it back up.");
   const fromNumber = await resolveEmployeeSmsSender(db, employeeId);
   const sent = await sendSmsWithReceipt(db, event, {
-    effect_key: `twilio:employee-reply:${event.inbox_id}`,
+    effect_key: `twilio:employee-reply:${assignmentId}:${event.inbox_id}`,
     to: ownerFrom,
     from: fromNumber,
     body: response,
-    evidence: { employee_id: employeeId, inbound_message_id: inboundProviderId, runtime_turn_status: turn.status },
+    evidence: {
+      assignment_id: assignmentId,
+      connector_binding_id: scoped.connector_binding_id,
+      command_id: scoped.command_id,
+      employee_id: employeeId,
+      inbound_message_id: inboundProviderId,
+      runtime_turn_status: turn.status,
+    },
   });
 
   const outboundSource = `ambient:${event.inbox_id}`;
-  const existingOutbound = await db.from("employee_messages").select("id").eq("employee_id", employeeId).eq("source", outboundSource).maybeSingle();
+  const existingOutbound = await db.from("employee_messages").select("id,assignment_id").eq("employee_id", employeeId).eq("source", outboundSource).maybeSingle();
   if (existingOutbound.error) throw existingOutbound.error;
+  if (existingOutbound.data?.assignment_id && existingOutbound.data.assignment_id !== assignmentId) {
+    throw new Error("twilio_outbound_cross_assignment_replay");
+  }
   if (!existingOutbound.data) {
     const stored = await db.from("employee_messages").insert({
       id: newId(ID_PREFIX.message),
+      assignment_id: assignmentId,
+      account_id: accountId,
       employee_id: employeeId,
       direction: "to_owner",
       source: outboundSource,
@@ -212,13 +260,21 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
     });
     if (stored.error) throw stored.error;
   }
-  return { inbound_message_id: inboundProviderId, outbound_message_id: sent.sid, idempotent_replay: sent.idempotent_replay, runtime_turn_status: turn.status };
+  return {
+    assignment_id: assignmentId,
+    connector_binding_id: scoped.connector_binding_id,
+    command_id: scoped.command_id,
+    inbound_message_id: inboundProviderId,
+    outbound_message_id: sent.sid,
+    idempotent_replay: sent.idempotent_replay,
+    runtime_turn_status: turn.status,
+  };
 }
 
 export async function processTwilioAmbientEvent(db: SupabaseClient, event: AmbientInboxRow): Promise<Record<string, unknown>> {
   const params = paramsFromEvent(event);
   if (event.event_type === "twilio.frontdoor.inbound") return processFrontDoor(db, event, params);
-  if (event.event_type === "twilio.message.status") return processStatus(db, params);
+  if (event.event_type === "twilio.message.status") return processStatus(db, event, params);
   if (event.event_type === "twilio.employee.inbound") return processEmployeeInbound(db, event, params);
   throw new Error(`twilio_event_type_unsupported:${event.event_type}`);
 }
@@ -233,15 +289,14 @@ export function registerTwilioWebhooks(app: Hono): void {
     const valid = validateTwilioSignature(authToken(), signedUrl("/frontdoor"), params, sig, { insecureNoSignature: insecure });
     if (!valid) return c.text("invalid signature", 403);
     if (!params.From || !params.MessageSid) return c.text("missing From or MessageSid", 400);
-    await enqueueAmbientEvent(serviceClient(), {
-      source_type: "provider_webhook",
+    await enqueuePublicVerifiedEvent(serviceClient(), {
       provider: "twilio",
       external_event_id: params.MessageSid,
+      external_subject: params.From,
       event_type: "twilio.frontdoor.inbound",
-      subject_key: params.From,
-      ordering_key: `twilio:${params.From}`,
+      ordering_key: `twilio-frontdoor:${params.From}`,
+      verification_ref: `twilio-signature:${params.MessageSid}`,
       payload: { params },
-      headers_metadata: { twilio_signature_present: Boolean(sig) },
       verification_metadata: { twilio_signature_verified: true, insecure_dev_override: insecure },
     });
     return c.text("<Response></Response>", 200, { "Content-Type": "text/xml" });
@@ -255,43 +310,45 @@ export function registerTwilioWebhooks(app: Hono): void {
     const sid = params.MessageSid || params.SmsSid;
     const status = params.MessageStatus || params.SmsStatus;
     if (!sid || !status) return c.text("missing status", 400);
-    await enqueueAmbientEvent(serviceClient(), {
-      source_type: "provider_webhook",
+    await enqueuePublicVerifiedEvent(serviceClient(), {
       provider: "twilio",
       external_event_id: `${sid}:${status}`,
+      external_subject: sid,
       event_type: "twilio.message.status",
-      subject_key: sid,
       ordering_key: `twilio-status:${sid}`,
+      verification_ref: `twilio-signature:${sid}:${status}`,
       payload: { params },
-      headers_metadata: { twilio_signature_present: Boolean(sig) },
       verification_metadata: { twilio_signature_verified: true, insecure_dev_override: insecure },
     });
     return c.text("<Response></Response>", 200, { "Content-Type": "text/xml" });
   });
 
   app.post("/webhooks/twilio/:employeeId", async (c) => {
-    const employeeId = c.req.param("employeeId");
+    const employeeRouteHint = c.req.param("employeeId");
     const params = await formParams(c);
     const sig = c.req.header("X-Twilio-Signature");
-    const valid = validateTwilioSignature(authToken(), signedUrl(`/${employeeId}`), params, sig, { insecureNoSignature: insecure });
+    const valid = validateTwilioSignature(authToken(), signedUrl(`/${employeeRouteHint}`), params, sig, { insecureNoSignature: insecure });
     if (!valid) return c.text("invalid signature", 403);
-    if (!params.From || !params.MessageSid) return c.text("missing From or MessageSid", 400);
-    const db = serviceClient();
-    const employee = await db.from("employees").select("account_id").eq("id", employeeId).maybeSingle();
-    if (employee.error) throw employee.error;
-    await enqueueAmbientEvent(db, {
-      source_type: "provider_webhook",
+    if (!params.From || !params.To || !params.MessageSid) return c.text("missing From, To, or MessageSid", 400);
+    const externalSubject = `${params.To}|${params.From}`;
+    const queued = await enqueueVerifiedConnectorEvent(serviceClient(), {
       provider: "twilio",
       external_event_id: params.MessageSid,
-      account_id: employee.data?.account_id ?? null,
-      employee_id: employeeId,
+      external_subject: externalSubject,
       event_type: "twilio.employee.inbound",
-      subject_key: params.From,
-      ordering_key: `twilio:${employeeId}:${params.From}`,
-      payload: { params, employee_id: employeeId },
-      headers_metadata: { twilio_signature_present: Boolean(sig) },
-      verification_metadata: { twilio_signature_verified: true, insecure_dev_override: insecure },
+      resource_class: "channel:sms",
+      resource_id: params.From,
+      capability_class: "consumer_dedupe",
+      ordering_key: `twilio:${externalSubject}`,
+      verification_ref: `twilio-signature:${params.MessageSid}`,
+      payload: { params, route_hint: employeeRouteHint },
+      verification_metadata: {
+        twilio_signature_verified: true,
+        insecure_dev_override: insecure,
+        employee_route_hint_non_authoritative: employeeRouteHint,
+      },
     });
-    return c.text("<Response></Response>", 200, { "Content-Type": "text/xml" });
+    const headers = { "Content-Type": "text/xml", "X-Amtech-Custody-State": queued.status };
+    return c.text("<Response></Response>", 200, headers);
   });
 }
