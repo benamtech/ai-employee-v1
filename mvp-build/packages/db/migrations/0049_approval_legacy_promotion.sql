@@ -118,7 +118,7 @@ begin
   ) on conflict (id) do nothing;
 
   return next v_approval;
-end
+end;
 $$;
 
 revoke all on function promote_legacy_approval_authority_request(text,text,text,text,text,text,text,text,text,text,text,text,timestamptz,text,text,text) from public, anon, authenticated;
