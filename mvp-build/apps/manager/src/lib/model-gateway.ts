@@ -56,6 +56,26 @@ function defaultAllowedModels(): string[] {
     .filter(Boolean);
 }
 
+async function resolveCurrentAssignmentId(
+  db: SupabaseClient,
+  input: { account_id: string; employee_id: string; assignment_id?: string | null },
+): Promise<string> {
+  const query = db
+    .from("employee_assignments")
+    .select("id,account_id,employee_id,status,revoked_at,valid_until,legacy_default")
+    .eq("account_id", input.account_id)
+    .eq("employee_id", input.employee_id)
+    .eq("status", "active");
+  const result = input.assignment_id
+    ? await query.eq("id", input.assignment_id).maybeSingle()
+    : await query.eq("legacy_default", true).maybeSingle();
+  const row = result.data as { id?: string; revoked_at?: string | null; valid_until?: string | null } | null;
+  if (result.error || !row?.id) throw new Error(`assignment_not_resolved:${input.account_id}:${input.employee_id}`);
+  if (row.revoked_at) throw new Error(`assignment_revoked:${row.id}`);
+  if (row.valid_until && Date.parse(row.valid_until) <= Date.now()) throw new Error(`assignment_expired:${row.id}`);
+  return row.id;
+}
+
 export function buildModelGatewayPolicy(overrides: Partial<ModelGatewayPolicy> = {}): ModelGatewayPolicy {
   const ttlMs = Number(process.env.MODEL_GATEWAY_CREDENTIAL_TTL_MS ?? 1000 * 60 * 60 * 24 * 30);
   return {
@@ -71,13 +91,14 @@ export function buildModelGatewayPolicy(overrides: Partial<ModelGatewayPolicy> =
 }
 
 export async function mintModelGatewayCredential(db: SupabaseClient, input: {
+  assignment_id?: string | null;
   account_id: string;
   employee_id: string;
   policy?: Partial<ModelGatewayPolicy>;
   rotated_from_credential_id?: string | null;
-}): Promise<{ credential_id: string; token: string; token_hash: string; token_prefix: string; policy: ModelGatewayPolicy }> {
-  // The employee id is part of the OpenAI-compatible base URL. A valid token for
-  // another employee therefore fails before any provider request is attempted.
+}): Promise<{ credential_id: string; assignment_id: string; token: string; token_hash: string; token_prefix: string; policy: ModelGatewayPolicy }> {
+  // validation-vector((pass-vector: credential mints only after resolving a current assignment row)-(fail-vector: account_id or employee_id alone becomes runtime authority))
+  const assignment_id = await resolveCurrentAssignmentId(db, input);
   const policy = buildModelGatewayPolicy({
     ...input.policy,
     gateway_url: employeeModelGatewayUrl(input.employee_id),
@@ -87,6 +108,7 @@ export async function mintModelGatewayCredential(db: SupabaseClient, input: {
   const claims: ModelGatewayTokenClaims = {
     token_type: "model_gateway",
     credential_id,
+    assignment_id,
     account_id: input.account_id,
     employee_id: input.employee_id,
     issued_at,
@@ -98,6 +120,8 @@ export async function mintModelGatewayCredential(db: SupabaseClient, input: {
 
   const inserted = await db.from("model_gateway_credentials").insert({
     id: credential_id,
+    assignment_id,
+    execution_context_type: "assignment",
     account_id: input.account_id,
     employee_id: input.employee_id,
     credential_version: policy.credential_version,
@@ -113,7 +137,7 @@ export async function mintModelGatewayCredential(db: SupabaseClient, input: {
     rotated_from_credential_id: input.rotated_from_credential_id ?? null,
   });
   if (inserted.error) throw inserted.error;
-  return { credential_id, token, token_hash: hash, token_prefix: token.slice(0, 14), policy };
+  return { credential_id, assignment_id, token, token_hash: hash, token_prefix: token.slice(0, 14), policy };
 }
 
 export async function revokeModelGatewayCredential(db: SupabaseClient, credentialId: string): Promise<void> {
@@ -128,7 +152,7 @@ export async function revokeModelGatewayCredential(db: SupabaseClient, credentia
 export async function verifyModelGatewayCredential(
   db: SupabaseClient,
   authorization: string | null | undefined,
-  expected?: { account_id?: string | null; employee_id?: string | null },
+  expected?: { assignment_id?: string | null; account_id?: string | null; employee_id?: string | null },
 ): Promise<ModelGatewayTokenClaims | null> {
   const token = authorization?.startsWith("Bearer ") ? authorization.slice("Bearer ".length) : "";
   if (!token.startsWith(MODEL_GATEWAY_TOKEN_PREFIX)) return null;
@@ -146,7 +170,8 @@ export async function verifyModelGatewayCredential(
     return null;
   }
   if (claims.token_type !== "model_gateway") return null;
-  if (!claims.account_id || !claims.employee_id || !claims.credential_id) return null;
+  if (!claims.assignment_id || !claims.account_id || !claims.employee_id || !claims.credential_id) return null;
+  if (expected?.assignment_id && claims.assignment_id !== expected.assignment_id) return null;
   if (expected?.account_id && claims.account_id !== expected.account_id) return null;
   if (expected?.employee_id && claims.employee_id !== expected.employee_id) return null;
   if (claims.gateway_url !== employeeModelGatewayUrl(claims.employee_id)) return null;
@@ -154,8 +179,9 @@ export async function verifyModelGatewayCredential(
 
   const row = await db
     .from("model_gateway_credentials")
-    .select("id,account_id,employee_id,credential_version,token_hash,revoked_at,expires_at,gateway_url")
+    .select("id,assignment_id,account_id,employee_id,credential_version,token_hash,revoked_at,expires_at,gateway_url")
     .eq("id", claims.credential_id)
+    .eq("assignment_id", claims.assignment_id)
     .eq("account_id", claims.account_id)
     .eq("employee_id", claims.employee_id)
     .maybeSingle();
@@ -165,6 +191,16 @@ export async function verifyModelGatewayCredential(
   if (Number(row.data.credential_version) !== Number(claims.credential_version)) return null;
   if (Date.parse(String(row.data.expires_at)) <= Date.now()) return null;
   if (row.data.token_hash !== tokenHash(token)) return null;
+
+  try {
+    await resolveCurrentAssignmentId(db, {
+      assignment_id: claims.assignment_id,
+      account_id: claims.account_id,
+      employee_id: claims.employee_id,
+    });
+  } catch {
+    return null;
+  }
   return claims;
 }
 
@@ -196,6 +232,8 @@ export async function recordModelGatewayUsage(db: SupabaseClient, usage: ModelGa
   const inserted = await db.from("model_gateway_request_audit").insert({
     id: usage.request_id,
     credential_id: usage.credential_id,
+    assignment_id: usage.assignment_id,
+    execution_context_type: "assignment",
     account_id: usage.account_id,
     employee_id: usage.employee_id,
     model_alias: usage.model_alias,
