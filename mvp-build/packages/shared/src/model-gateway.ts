@@ -2,10 +2,10 @@
  * Model Gateway contracts.
  *
  * Employee runtimes never receive provider master credentials. They receive only an
- * employee-scoped gateway credential whose claims bind the request to one account,
- * one employee, one credential version, and an allowed model/provider policy. The
- * Manager/host-private gateway owns provider selection, retries, usage capture,
- * cost attribution, circuit breaking, and redacted audit.
+ * assignment-scoped gateway credential whose claims bind the request to one labor
+ * assignment, one account, one employee, one credential version, and an allowed
+ * model/provider policy. The Manager/host-private gateway owns provider selection,
+ * retries, usage capture, cost attribution, circuit breaking, and redacted audit.
  */
 
 export const MODEL_GATEWAY_TOKEN_PREFIX = "mgw_";
@@ -26,6 +26,7 @@ export interface ModelGatewayPolicy {
 export interface ModelGatewayTokenClaims extends ModelGatewayPolicy {
   token_type: "model_gateway";
   credential_id: string;
+  assignment_id: string;
   account_id: string;
   employee_id: string;
   issued_at: string;
@@ -40,6 +41,7 @@ export interface ModelGatewayCredentialRecord extends ModelGatewayTokenClaims {
 export interface ModelGatewayUsageRecord {
   request_id: string;
   credential_id: string;
+  assignment_id: string;
   account_id: string;
   employee_id: string;
   model_alias: string;
