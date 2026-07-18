@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/export-website-framework-to-hyper-site
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
