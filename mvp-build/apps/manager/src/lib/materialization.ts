@@ -91,7 +91,22 @@ function workResourceFromEnvelope(e: SurfaceEnvelope): WorkResource | null {
   return null;
 }
 
+function normalizeOwnerTasks(snapshot: EmployeeSnapshot): NonNullable<EmployeeSnapshot["tasks"]> {
+  const quietObserveTaskIds = new Set(
+    snapshot.work_events
+      .filter((event) => event.work_event_descriptor?.move === "observe")
+      .map((event) => `work:${event.id}`),
+  );
+  return (snapshot.tasks ?? []).filter((task) => !quietObserveTaskIds.has(task.id));
+}
+
 export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): MaterializedWork {
+  // `buildEmployeeSnapshot` derives resurfacing immediately after materialization.
+  // Normalize the shared read model here so quiet observation remains durable and
+  // visible as a system change without becoming false active work or an obligation.
+  const ownerTasks = normalizeOwnerTasks(snapshot);
+  snapshot.tasks = ownerTasks;
+
   const capabilities = buildCapabilityRegistry(snapshot);
   const envelopes: SurfaceEnvelope[] = [];
 
@@ -265,6 +280,6 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
     work_actions,
     abilities: abilitiesFromCapabilities(capabilities),
     outputs: snapshot.outputs ?? [],
-    tasks: snapshot.tasks ?? [],
+    tasks: ownerTasks,
   };
 }
