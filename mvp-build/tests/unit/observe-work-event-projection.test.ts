@@ -97,7 +97,7 @@ describe("quiet work-event projection", () => {
     expect(materialized.surface_envelopes.some((envelope) => envelope.proof.inbound_event_id === "evt_observe")).toBe(true);
   });
 
-  it("projects Manager-compiled generated UI into the canonical operating resource", async () => {
+  it("projects Manager-compiled generated UI into a durable approval resource", async () => {
     const input = snapshot();
     input.work_events.push({
       id: "evt_generated",
@@ -135,6 +135,8 @@ describe("quiet work-event projection", () => {
     expect(envelope?.render_hints.tier).toBe("mcp_ui");
     expect(envelope?.assignment_id).toBe(assignmentId);
     expect(envelope?.resource?.assignment_id).toBe(assignmentId);
+    expect(envelope?.resource?.resource_type).toBe("approval");
+    expect(envelope?.resource?.resource_id).toBe("apr_generated");
     expect(envelope?.resource?.ui_resource?.resource.uri).toBe("ui://amtech/outbound_message/apr_generated");
     expect(envelope?.resource?.actions.map((action) => action.action)).toEqual(["approve", "reject", "respond"]);
 
@@ -143,6 +145,37 @@ describe("quiet work-event projection", () => {
     expect(renderer).toContain("<McpUiResource");
     expect(renderer).toContain('candidate.action === action');
     expect(renderer).toContain('intent === "accept" || intent === "accept_all"');
+  });
+
+  it("does not expose terminal approval controls without a durable approval id", () => {
+    const input = snapshot();
+    input.work_events.push({
+      id: "evt_unscoped_gate",
+      event_type: "proposal.unscoped",
+      provider_id: "provider_fixture",
+      status: "delivered",
+      created_at: "2026-07-19T08:02:00.000Z",
+      work_event_descriptor: {
+        account_id: accountId,
+        employee_id: employeeId,
+        source_event_id: "evt_unscoped_gate",
+        move: "review",
+        title: "Unscoped proposal",
+        summary: "The descriptor claims a consequential action but has no durable approval.",
+        deliverable: {
+          type: "outbound_message",
+          title: "Unscoped proposal",
+          refs: {},
+          leaves_business: true,
+          acceptance: ["approve", "reject", "respond"],
+        },
+      },
+    });
+
+    const materialized = materializeEmployeeSnapshot(input);
+    const envelope = materialized.surface_envelopes.find((candidate) => candidate.proof.inbound_event_id === "evt_unscoped_gate");
+    expect(envelope?.resource?.resource_type).toBe("work_event");
+    expect(envelope?.resource?.actions.map((action) => action.action)).toEqual(["respond"]);
   });
 
   it("bounds owner stream authorization lifetime and disables proxy buffering", async () => {
