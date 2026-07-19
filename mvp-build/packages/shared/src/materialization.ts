@@ -37,6 +37,10 @@ export interface SafetyEnvelope {
 
 export interface ProofEnvelope {
   run_id?: string | null;
+  parent_run_id?: string | null;
+  child_run_id?: string | null;
+  delegation_id?: string | null;
+  receipt_id?: string | null;
   audit_id?: string | null;
   artifact_id?: string | null;
   approval_id?: string | null;
@@ -45,6 +49,7 @@ export interface ProofEnvelope {
   delivery_decision_id?: string | null;
   source_table?: string;
   source_id?: string;
+  source_refs?: string[];
   /** S2/S3 receipt hook: every owner-facing consequential surface resolves through an assignment. */
   assignment_id?: string | null;
 }
