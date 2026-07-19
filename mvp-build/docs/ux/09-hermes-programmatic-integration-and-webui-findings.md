@@ -269,9 +269,9 @@ A new `WorkView.kind` must fail typecheck until a renderer is registered. Every 
 
 ## Implemented in This Pass
 
-- made adaptive focus-loop selection independent of input order using explicit state precedence, recency, and stable ID tie-breaking;
-- bounded volume bonuses so high-volume low-risk changes cannot displace governance-critical work;
-- added explicit rationale and precedence for high-risk owner decisions, reached active-save return conditions, and material delegated failures;
+- verified that the canonical V2 adaptive planner already provided deterministic state/recency/ID focus selection, bounded event-volume scoring, and explicit high-risk/returned-save/delegated-failure rationale;
+- removed a second planner implementation from the contract module and made it re-export the canonical V2 planner;
+- added a package-root/direct-module parity test so adaptive scoring cannot silently diverge again;
 - replaced the generated-view switch with an exhaustive typed renderer registry;
 - aligned Manager-owned generated HTML with the canonical light surface, AMTECH-red primary action, 44px minimum controls, visible focus, and reduced-motion behavior;
 - added contract coverage for every declared `WorkView` kind and canonical generated-surface styling;
@@ -280,7 +280,17 @@ A new `WorkView.kind` must fail typecheck until a renderer is registered. Every 
 - repaired the compiled Next standalone-server discovery path;
 - fixed the browser-discovered undersized login brand link without weakening the 44px assertion.
 
-The implementation scope is `ci-accepted` on SHA `34f67dd4bd3d2a944fd036ca7e818f0857ba9e0e`, including source/type/build contracts and the compiled adaptive fixture plus unauthenticated login/dashboard browser matrices. This does not establish provider-backed generative UI, real staging, fixture-free live browser/channel acceptance, or production readiness.
+The implementation scope is `ci-accepted` on SHA `e0a585290c3eb0ef78e1ac23cfcbe631facba347`. Exact successful workflow runs:
+
+- Phase 2 Remediation Plan Integrity — `29683146460`;
+- Lane 1 Relationships and Authorization — `29683146457`;
+- S10.1 Onboarding Identity Authority — `29683146465`;
+- S2 S7 S9 Production Boundary — `29683146476`;
+- Employee Work Production Boundary — `29683146456`;
+- Lane 10 Integrated CI and Release Evidence — `29683146463`;
+- Agent Operating Surface Standard — `29683146482`.
+
+The UI workflow includes shared/database/Manager/web typecheck and builds, UI source validation, focused UI contracts, a compiled production Next build, adaptive fixture browser acceptance, unauthenticated login/dashboard product-shell acceptance, and retained browser evidence. This does not establish provider-backed generative UI, real staging, fixture-free live browser/channel acceptance, or production readiness.
 
 ## Why No Hermes MCP Runtime Code Was Added
 
