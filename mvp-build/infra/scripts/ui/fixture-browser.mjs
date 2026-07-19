@@ -64,9 +64,11 @@ try {
   }
 
   await page.getByRole("button", { name: /Live/ }).click();
-  await page.getByRole("heading", { name: "Avery in Fixture business" }).waitFor({ timeout: 10_000 });
-  await page.getByText(/bounded owner-safe context signals/).waitFor({ timeout: 10_000 });
-  await page.getByRole("button", { name: "Close", exact: true }).click();
+  const contextPanel = page.locator(".os-context-panel");
+  await contextPanel.waitFor({ state: "visible", timeout: 10_000 });
+  await contextPanel.getByText("Operating context", { exact: true }).waitFor({ timeout: 10_000 });
+  await contextPanel.getByText(/bounded owner-safe context signals/).waitFor({ timeout: 10_000 });
+  await contextPanel.getByRole("button", { name: "Close", exact: true }).click();
 
   const command = page.getByRole("textbox", { name: "Command Avery" });
   await command.fill("Watch Riverbend through Friday and bring it back if the customer changes scope.");
