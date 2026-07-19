@@ -1,5 +1,9 @@
 import type { Context, Hono } from "hono";
-import { buildEffectiveCapabilityReport, type CapabilityEvidenceInput } from "@amtech/shared";
+import {
+  buildEffectiveCapabilityReport,
+  resolveOwnerOAuthConnectorSetup,
+  type CapabilityEvidenceInput,
+} from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { requireOwnerSession } from "./owner-session.js";
 import { authorizeOwnerAssignment } from "./owner-assignment-authority.js";
@@ -70,17 +74,14 @@ export function registerArtifactWorkbenchRoutes(app: Hono, denyInternal: Interna
   app.post("/manager/employee/:employeeId/workbench/connect/:connector", async (c) => {
     const auth = await ownerAuthority(c, "connector:connect", denyInternal);
     if (auth.denied) return auth.denied;
-    const connector = c.req.param("connector");
-    if (connector !== "gmail") return c.json({ error: "connector_not_supported" }, 404);
+    const setup = resolveOwnerOAuthConnectorSetup(c.req.param("connector"));
+    if (!setup) return c.json({ error: "connector_not_supported" }, 404);
     const returnTo = safeWorkbenchReturnPath(auth.body.return_to, auth.employeeId);
-    const outcome = await runManagerTool("connect_email", {
+    const outcome = await runManagerTool(setup.start_tool, {
       account_id: auth.session.account_id,
       employee_id: auth.employeeId,
-      provider: "gmail",
-      requested_scopes: [
-        "https://www.googleapis.com/auth/gmail.modify",
-        "https://www.googleapis.com/auth/gmail.send",
-      ],
+      provider: setup.provider,
+      requested_scopes: setup.requested_scopes,
       return_to: returnTo,
     }, {
       actor: "owner",
