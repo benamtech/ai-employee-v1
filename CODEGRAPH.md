@@ -16,7 +16,8 @@ Active integration branch: `employee-production-tuesday`, based on `research`; d
 8. [`mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`](mvp-build/second-half-plan/phase-2-standard-remediation-execution.md)
 9. [`mvp-build/docs/architecture/README.md`](mvp-build/docs/architecture/README.md)
 10. [`mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`](mvp-build/docs/architecture/11-agent-orientation-and-role-map.md)
-11. relevant UX, deployment, source, migrations, scripts, tests, workflows, proof, release records, and current diff
+11. [`mvp-build/docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md`](mvp-build/docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md)
+12. relevant UX, deployment, source, migrations, scripts, tests, workflows, proof, release records, and current diff
 
 Source, applied migrations, executable proof, and newest scoped memory outrank older documentation.
 
@@ -76,8 +77,9 @@ For the production-shaped normal-employee path, use `mvp-build/docs/production-n
 - Base: `research`
 - Draft PR: `#23`
 - Migration head: `0069`
-- Branch status: source/CI remediation active; not real-Supabase accepted, not target-runtime accepted, not provider/channel/commercial accepted, not deployed, not launch-cleared
-- Final exact-head proof anchor and workflow IDs are synchronized in `mvp-build/CODEGRAPH.md`, the newest memory handoff, and PR `#23` after the documentation pass completes
+- Complete green code/test evidence anchor: `7492c52ba2dbb97ce57efcda4f8d4b7e839b39ec`
+- Canonical current handoff: `mvp-build/memory/2026-07-19-final-document-authority-infra-test-production-handoff.md`
+- Branch status: source/CI remediation accepted on the named anchor; later documentation commits do not imply full workflow rerun; not real-Supabase accepted, not target-runtime accepted, not provider/channel/commercial accepted, not deployed, not launch-cleared
 
 Current branch source includes:
 
@@ -93,6 +95,10 @@ Current branch source includes:
 - task-agnostic operating surface, typed generated UI, sandboxed action routing, and compiled production Web tests;
 - exact-head repository archaeology and documentation/effect/relationship ledgers.
 
+## Critical production warning
+
+The canonical deployment topology is `mvp-build/infra/deploy/docker-compose.production.yml`, but the normal production, production-like, smoke, and rollback helpers still select or default to the legacy `docker-compose.yml` family. The legacy stack mounts Docker socket into Manager, lacks the separate Model Gateway/Host Provisioner shape, and uses bridge-network Caddy. Close this deploy fork with red source tests before running production commands.
+
 ## Source-of-truth routing
 
 | Question | Authority |
@@ -102,12 +108,12 @@ Current branch source includes:
 | What is the production standard? | `mvp-build/STANDARD.md` |
 | What is the active dependency order? | active second-half remediation execution program and vector registry |
 | What is the current cross-system architecture? | `mvp-build/docs/architecture/README.md` |
-| What are current P0/P1/P2 gaps? | architecture risk register |
+| What are current P0/P1/P2 gaps? | architecture risk register and infrastructure/test audit |
 | How should coding agents orient and select roles? | architecture agent role map |
 | How are CODEGRAPH, memory, plans, records, and Markdown organized? | architecture document-control map |
 | What is the newest handoff? | `mvp-build/memory/MEMORY.md` and newest relevant entry |
 | What records historical factual implementation? | `wiki/MVP/implementation-records/` |
-| How is the normal employee deployed? | normal-employee live deploy runbook |
+| How is the normal employee intended to deploy? | normal-employee live deploy runbook plus canonical production Compose; entry scripts require reconciliation |
 | What is canonical UX doctrine? | `mvp-build/docs/ux/` |
 | What is the offer? | this file and current GTM strategy docs |
 | Where does Hyper Site live? | `benamtech/hyper-site`; not authority here |
@@ -126,6 +132,7 @@ Current branch source includes:
 
 Current source/CI state does **not** by itself claim:
 
+- convergence of all deploy/smoke/rollback entrypoints on the canonical production Compose;
 - application of migrations `0032–0069` to the approved real Supabase target;
 - managed production secret custody and rotation acceptance;
 - target-host Caddy/Docker/employee-network acceptance;
