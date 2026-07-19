@@ -17,9 +17,22 @@ Official Hermes Agent surfaces examined:
 
 - ACP over stdio;
 - TUI gateway JSON-RPC;
-- OpenAI-compatible HTTP/SSE.
+- OpenAI-compatible HTTP/SSE;
+- the separate `hermes mcp serve` messaging-channel bridge over stdio.
 
-`NousResearch/hermes-agent#360` is closed because those shipped surfaces cover the requested RPC use cases. No official `hermes serve-mcp` command or source contract was verified in the current guide/repository search. Hermes consuming MCP servers is not evidence that Hermes itself ships as an MCP server. AMTECH must not depend on that claim without exact official versioned proof.
+`NousResearch/hermes-agent#360` is closed because ACP, the TUI gateway, and HTTP/SSE cover the proposed general RPC use cases.
+
+A final source verification corrected the MCP claim:
+
+- the current command is `hermes mcp serve`, not `hermes serve-mcp`;
+- the current parser exposes `serve`, `--verbose`, and shared hook acceptance, not HTTP transport or port flags;
+- the current implementation runs FastMCP over stdio;
+- it exposes a fixed conversation/message/event/channel/permission bridge rather than the full Hermes native tool registry;
+- `messages_send` calls the send-message tool directly;
+- `permissions_respond` is best-effort without gateway IPC and only updates bridge-local observed state;
+- event cursor and pending-approval state are process-local and non-durable.
+
+AMTECH therefore does not adopt this MCP server in the owner or ordinary employee path. A post-baseline platform-operator experiment may wrap a dedicated employee's process and allowlist read-only conversation/history/event methods, but only behind Manager platform authority, tenant/runtime isolation, redaction, bounded output, audit, and independent durable verification. Direct message sending and approval response remain denied outside C3.
 
 The deep review of `nesquena/hermes-webui` yielded bounded techniques rather than an adoptable product architecture:
 
@@ -109,7 +122,7 @@ The UI workflow success includes:
 - owner access remains exact principal + assignment + grants + policy;
 - generated UI remains typed data compiled by Manager, never raw model HTML;
 - no browser talks directly to Hermes or receives runtime credentials;
-- no unverified Hermes-as-MCP-server path was added;
+- no Hermes MCP write or approval path was added;
 - no database, authority, approval, commercial, provider, or runtime semantics changed in this pass.
 
 ## Unresolved risks
@@ -118,8 +131,9 @@ The UI workflow success includes:
 2. Provider-backed generative UI remains unaccepted until one real business-context work object traverses typed view, owner action, external effect, and durable proof IDs.
 3. Capability-probe evidence and effective-capability graph hashing are not yet persisted.
 4. A future Hermes TUI adapter must begin read-only and remain Manager/platform-authority/C3 mediated.
-5. Shared/fractional cross-account employee assignment, broad role perspectives, public employee behavior, commercial reconciliation, capacity, recovery, rollback, deployment manifest, and fixture-free live browser/SMS/Review proof remain outside this pass.
+5. A future `hermes mcp serve` experiment must be dedicated-runtime and read-only, deny send/approval tools, treat cursors as non-durable, and prove tenant isolation.
+6. Shared/fractional cross-account employee assignment, broad role perspectives, public employee behavior, commercial reconciliation, capacity, recovery, rollback, deployment manifest, and fixture-free live browser/SMS/Review proof remain outside this pass.
 
 ## Next concrete move
 
-Return to the release-critical normal-employee path: identify the approved staging target, apply/verify migrations, capture fixture-free owner/runtime/provider/effect/receipt evidence on one SHA, and only then run the first provider-backed generated-view acceptance slice. Treat persisted capability evidence and a read-only Manager runtime-session projection as post-baseline P1 work.
+Return to the release-critical normal-employee path: identify the approved staging target, apply/verify migrations, capture fixture-free owner/runtime/provider/effect/receipt evidence on one SHA, and only then run the first provider-backed generated-view acceptance slice. Treat persisted capability evidence, a read-only Manager runtime-session projection, and any read-only Hermes MCP/TUI operator adapter as post-baseline P1/P2 work.
