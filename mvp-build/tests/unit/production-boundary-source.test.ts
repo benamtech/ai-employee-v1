@@ -1,9 +1,105 @@
-import { readFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import { readFile, unlink, writeFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const source = (path: string) => readFile(join(root, path), "utf8");
+
+const productionEntrypoints = [
+  "infra/scripts/production-normal-up.mjs",
+  "infra/scripts/prod-like-normal-employee-up.mjs",
+  "infra/scripts/deploy-smoke.mjs",
+  "infra/scripts/deploy-rollback.mjs",
+] as const;
+
+const dockerComposeAvailable = spawnSync("docker", ["compose", "version"], {
+  cwd: root,
+  encoding: "utf8",
+}).status === 0;
+
+describe("canonical production deployment topology", () => {
+  it("routes every production launcher, smoke, and rollback entrypoint through one compose authority", async () => {
+    const topology = await source("infra/scripts/production-topology.mjs");
+    expect(topology).toContain('PRODUCTION_COMPOSE_FILE = "infra/deploy/docker-compose.production.yml"');
+    expect(topology).toContain('PRODUCTION_CONTROL_NETWORK = "amtech_control"');
+
+    for (const path of productionEntrypoints) {
+      const script = await source(path);
+      expect(script, path).toContain('from "./production-topology.mjs"');
+      expect(script, path).not.toContain("infra/deploy/docker-compose.yml");
+    }
+  });
+
+  it("removes legacy bridge-Caddy and shared employee-network assumptions from production-like startup", async () => {
+    const script = await source("infra/scripts/prod-like-normal-employee-up.mjs");
+    expect(script).not.toContain("amtech_runtime");
+    expect(script).not.toContain("amtech-ai-employee-caddy-1");
+    expect(script).not.toContain("amtech-hermes-{{EMPLOYEE_ID}}");
+    expect(script).toContain('put("CADDY_EMPLOYEE_UPSTREAM_HOST", "localhost")');
+    expect(script).toContain('removeEnv(state, "HERMES_DOCKER_NETWORK")');
+    expect(script).toContain("PROVISIONER_SOCKET_PATH");
+    expect(script).toContain("MODEL_GATEWAY_EMPLOYEE_BASE_URL");
+  });
+
+  it("requires canonical five-service health, Unix-socket custody, and host-side employee topology inspection", async () => {
+    const smoke = await source("infra/scripts/deploy-smoke.mjs");
+    for (const service of ["manager", "model-gateway", "host-provisioner", "web", "caddy"]) {
+      expect(smoke).toContain(`composeHealth("${service}")`);
+    }
+    expect(smoke).toContain('"host-provisioner",\n    "test",\n    "-S",\n    "/run/amtech-provisioner/provisioner.sock"');
+    expect(smoke).toContain('spawnSync("docker", ["network", "inspect", network]');
+    expect(smoke).not.toContain("getent");
+    expect(smoke).not.toContain("EMPLOYEE_DNS_ALIAS");
+  });
+
+  it("plans rollback across the complete control plane and recomputes acceptance", async () => {
+    const rollback = await source("infra/scripts/deploy-rollback.mjs");
+    for (const service of ["manager", "model-gateway", "host-provisioner", "web", "caddy"]) {
+      expect(rollback).toContain(service);
+    }
+    expect(rollback).toContain("config --quiet");
+    expect(rollback).toContain("npm run deploy:smoke");
+    expect(rollback).toContain("npm run prod:normal:validate");
+    expect(rollback).toContain("ROLLBACK_DATABASE_COMPATIBILITY");
+  });
+
+  it.runIf(dockerComposeAvailable)("renders the canonical compose as a five-service topology with separated Docker authority", async () => {
+    const envPath = join(root, "infra", "deploy", ".env.production");
+    const createdEnv = !existsSync(envPath);
+    if (createdEnv) await writeFile(envPath, "AMTECH_GIT_SHA=compose-contract-test\n", "utf8");
+
+    try {
+      const result = spawnSync("docker", [
+        "compose",
+        "-f",
+        "infra/deploy/docker-compose.production.yml",
+        "--env-file",
+        "infra/deploy/.env.production",
+        "config",
+        "--format",
+        "json",
+      ], { cwd: root, encoding: "utf8" });
+
+      expect(result.status, `${result.stdout ?? ""}\n${result.stderr ?? ""}`).toBe(0);
+      const config = JSON.parse(result.stdout);
+      expect(Object.keys(config.services).sort()).toEqual([
+        "caddy",
+        "host-provisioner",
+        "manager",
+        "model-gateway",
+        "web",
+      ]);
+      expect(JSON.stringify(config.services.manager)).not.toContain("/var/run/docker.sock");
+      expect(JSON.stringify(config.services["host-provisioner"])).toContain("/var/run/docker.sock");
+      expect(config.services.caddy.network_mode).toBe("host");
+      expect(config.networks.amtech_control.name).toBe("amtech_control");
+    } finally {
+      if (createdEnv) await unlink(envPath);
+    }
+  });
+});
 
 describe("production image inclusion", () => {
   it("fails the image build when gateway or worker artifacts are absent", async () => {
