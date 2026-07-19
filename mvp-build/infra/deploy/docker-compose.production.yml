@@ -2,6 +2,7 @@ name: amtech-ai-employee
 
 services:
   manager:
+    container_name: amtech-manager
     image: amtech-ai-employee-manager:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
@@ -15,7 +16,8 @@ services:
       PORT: "8080"
       AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
       PROVISIONER_SOCKET_PATH: /run/amtech-provisioner/provisioner.sock
-      MODEL_GATEWAY_EMPLOYEE_BASE_URL: ${MODEL_GATEWAY_EMPLOYEE_BASE_URL:-http://host.docker.internal:8092/v1}
+      DOCKER_MANAGER_API_ORIGIN: http://amtech-manager:8080
+      MODEL_GATEWAY_EMPLOYEE_BASE_URL: http://amtech-model-gateway:8092/v1
     volumes:
       - /var/lib/amtech:/var/lib/amtech
       - provisioner_socket:/run/amtech-provisioner
@@ -37,6 +39,7 @@ services:
         max-file: "5"
 
   model-gateway:
+    container_name: amtech-model-gateway
     image: amtech-ai-employee-manager:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
@@ -69,6 +72,7 @@ services:
         max-file: "5"
 
   host-provisioner:
+    container_name: amtech-host-provisioner
     image: amtech-ai-employee-provisioner:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
@@ -82,7 +86,9 @@ services:
       AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
       PROVISIONER_SOCKET_PATH: /run/amtech-provisioner/provisioner.sock
       PROVISIONER_AUDIT_LOG: /var/lib/amtech/audit/host-provisioner.jsonl
-      CADDY_ADMIN_ORIGIN: http://caddy:2019
+      MANAGER_CONTAINER_NAME: amtech-manager
+      MODEL_GATEWAY_CONTAINER_NAME: amtech-model-gateway
+      CADDY_EMPLOYEE_UPSTREAM_HOST: localhost
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/amtech:/var/lib/amtech
@@ -106,6 +112,7 @@ services:
         max-file: "5"
 
   web:
+    container_name: amtech-web
     image: amtech-ai-employee-web:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
@@ -139,7 +146,12 @@ services:
         max-size: "10m"
         max-file: "5"
 
+  # Production Caddy deliberately shares the Linux host network. The public proxy
+  # must reach Web, Manager, and every employee Hermes gateway through ports that
+  # are published only on host loopback. A bridge-network Caddy cannot reach those
+  # 127.0.0.1 bindings because its localhost is its own network namespace.
   caddy:
+    container_name: amtech-caddy
     image: amtech-ai-employee-caddy:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
@@ -149,19 +161,15 @@ services:
     env_file:
       - ./.env.production
     environment:
-      WEB_UPSTREAM: ${WEB_UPSTREAM:-web:3000}
-      MANAGER_UPSTREAM: ${MANAGER_UPSTREAM:-manager:8080}
+      WEB_UPSTREAM: ${WEB_UPSTREAM:-127.0.0.1:3000}
+      MANAGER_UPSTREAM: ${MANAGER_UPSTREAM:-127.0.0.1:8080}
       AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     volumes:
       - ../caddy/production.Caddyfile:/etc/caddy/Caddyfile:ro
       - /var/lib/amtech/caddy/clients:/etc/caddy/clients
       - caddy_data:/data
       - caddy_config:/config
-    networks:
-      - amtech_control
-    ports:
-      - "80:80"
-      - "443:443"
+    network_mode: host
     restart: unless-stopped
     depends_on:
       manager:
