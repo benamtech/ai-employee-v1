@@ -2,11 +2,24 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ResourcePayload, WorkEventRow } from "./surface-types";
-import type { SurfaceEnvelope, WorkAction, WorkResource } from "@amtech/shared";
+import {
+  planAdaptiveOperatingLayout,
+  type ActiveSave,
+  type AdaptiveLayoutRegion,
+  type DelegatedWorkUnit,
+  type OperatingContextManifest,
+  type OperatingDecision,
+  type OperatingEvidence,
+  type OperatingSurfaceState,
+  type OperatingSystemChange,
+  type OperatingWorkLoop,
+  type SurfaceEnvelope,
+  type WorkAction,
+  type WorkResource,
+} from "@amtech/shared";
 import { fixtureResourcePayload } from "./fixtures";
 import { WorkObjectRenderer } from "./components/WorkObjectRenderer";
 
-type PrimaryView = "command" | "work" | "decisions" | "proof" | "connected";
 type StreamState = "connecting" | "live" | "reconnecting" | "offline";
 type Notice = { tone: "info" | "success" | "error"; text: string } | null;
 
@@ -17,6 +30,7 @@ interface Props {
 
 const EMPTY: ResourcePayload = {
   account_id: "",
+  assignment_id: "",
   employee_id: "",
   artifacts: [],
   approvals: [],
@@ -35,24 +49,18 @@ const EMPTY: ResourcePayload = {
   tasks: [],
 };
 
-const VIEWS: Array<{ id: PrimaryView; label: string; description: string }> = [
-  { id: "command", label: "Command", description: "Talk to your employee" },
-  { id: "work", label: "Work", description: "Active and prepared work" },
-  { id: "decisions", label: "Decisions", description: "What needs your say" },
-  { id: "proof", label: "Proof", description: "Receipts and outcomes" },
-  { id: "connected", label: "Connected", description: "Systems and readiness" },
-];
-
 export function AgentSurface({ employeeId, fixtureMode }: Props) {
   const [res, setRes] = useState<ResourcePayload>(() => fixtureMode ? fixtureResourcePayload(employeeId) : EMPTY);
-  const [view, setView] = useState<PrimaryView>("work");
   const [input, setInput] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
   const [loading, setLoading] = useState(!fixtureMode);
   const [sending, setSending] = useState(false);
   const [progress, setProgress] = useState("");
   const [streamState, setStreamState] = useState<StreamState>(fixtureMode ? "live" : "connecting");
+  const [focusLoopId, setFocusLoopId] = useState<string | null>(null);
+  const [contextOpen, setContextOpen] = useState(false);
   const retryIntent = useRef<{ message: string; intentId: string } | null>(null);
+  const refreshTimer = useRef<number | null>(null);
 
   const refresh = useCallback(async () => {
     if (fixtureMode) {
@@ -65,21 +73,31 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
       const response = await fetch(`/api/employee/${employeeId}/resources`, { method: "POST" });
       const json = await response.json().catch(() => ({}));
       if (!response.ok) {
-        setNotice({ tone: "error", text: ownerError(json.error ?? "Could not load this employee's work.") });
+        setNotice({ tone: "error", text: ownerError(json.error ?? "Could not load this employee's operating state.") });
         setStreamState("offline");
         return;
       }
       setRes({ ...EMPTY, ...json });
       setNotice(null);
     } catch {
-      setNotice({ tone: "error", text: "The work surface could not reach AMTECH. No message was resent." });
+      setNotice({ tone: "error", text: "The operating surface could not reach AMTECH. No command was resent." });
       setStreamState("offline");
     } finally {
       setLoading(false);
     }
   }, [employeeId, fixtureMode]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  const scheduleRefresh = useCallback(() => {
+    if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
+    refreshTimer.current = window.setTimeout(() => { void refresh(); }, 180);
+  }, [refresh]);
+
+  useEffect(() => {
+    void refresh();
+    return () => {
+      if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
+    };
+  }, [refresh]);
 
   useEffect(() => {
     if (fixtureMode) return;
@@ -95,28 +113,22 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
         reconnectDelay = 1000;
         setStreamState("live");
       });
-      source.addEventListener("snapshot", (event) => {
-        try {
-          const payload = JSON.parse((event as MessageEvent).data);
-          const snapshot = payload?.snapshot ?? payload;
-          if (snapshot?.account_id) setRes({ ...EMPTY, ...snapshot });
-          setStreamState("live");
-        } catch {
-          setNotice({ tone: "error", text: "AMTECH received an unreadable state update and requested a fresh snapshot." });
-          void refresh();
-        }
+      source.addEventListener("snapshot", () => {
+        setStreamState("live");
+        scheduleRefresh();
       });
       source.addEventListener("work_event", (event) => {
         try {
           const payload = JSON.parse((event as MessageEvent).data);
           const next = payload?.event as WorkEventRow | undefined;
-          if (!next?.id) return;
-          setRes((current) => ({
-            ...current,
-            work_events: [next, ...current.work_events.filter((item) => item.id !== next.id)],
-          }));
-        } catch {
-          void refresh();
+          if (next?.id) {
+            setRes((current) => ({
+              ...current,
+              work_events: [next, ...current.work_events.filter((item) => item.id !== next.id)],
+            }));
+          }
+        } finally {
+          scheduleRefresh();
         }
       });
       source.addEventListener("work_progress", (event) => {
@@ -125,12 +137,12 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
           const verb = typeof payload?.verb === "string" ? payload.verb : "Working";
           const state = typeof payload?.state === "string" ? payload.state : "working";
           setProgress(state === "completed" ? "" : verb);
-          if (state === "completed") void refresh();
+          if (state === "completed") scheduleRefresh();
         } catch {
           setProgress("");
         }
       });
-      source.addEventListener("approval_update", () => { void refresh(); });
+      source.addEventListener("approval_update", scheduleRefresh);
       source.onerror = () => {
         source?.close();
         if (closed) return;
@@ -145,18 +157,13 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
       closed = true;
       source?.close();
     };
-  }, [employeeId, fixtureMode, refresh]);
+  }, [employeeId, fixtureMode, scheduleRefresh]);
 
-  const envelopes = res.surface_envelopes ?? [];
-  const decisions = useMemo(() => envelopes.filter((envelope) =>
-    envelope.kind === "approval" || envelope.safety.requires_approval || envelope.status === "needs_you" || envelope.status === "blocked",
-  ), [envelopes]);
-  const work = useMemo(() => envelopes.filter((envelope) =>
-    !decisions.some((decision) => decision.id === envelope.id) && envelope.status !== "done" && envelope.status !== "failed",
-  ), [decisions, envelopes]);
-  const proof = useMemo(() => envelopes.filter((envelope) =>
-    envelope.status === "done" || envelope.status === "failed" || hasProof(envelope),
-  ), [envelopes]);
+  const operating = useMemo(() => res.operating_state ?? fallbackOperatingState(res, employeeId), [employeeId, res]);
+  const employeeName = res.employee?.name ?? operating.context.employee_name ?? "Your employee";
+  const selectedLoopId = focusLoopId ?? operating.focus_loop_id ?? operating.layout.focus_loop_id ?? operating.loops[0]?.id ?? null;
+  const selectedLoop = operating.loops.find((loop) => loop.id === selectedLoopId) ?? null;
+  const envelopeById = useMemo(() => new Map((res.surface_envelopes ?? []).map((envelope) => [envelope.id, envelope])), [res.surface_envelopes]);
 
   async function sendMessage(messageOverride?: string) {
     const body = (messageOverride ?? input).trim();
@@ -165,7 +172,7 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
     const intentId = previous?.message === body ? previous.intentId : createIntentId(employeeId);
     retryIntent.current = { message: body, intentId };
     setSending(true);
-    setNotice({ tone: "info", text: "Starting this work with the exact employee and assignment shown above." });
+    setNotice({ tone: "info", text: "Starting this work with the exact employee, assignment, and current operating context." });
 
     if (fixtureMode) {
       const now = new Date().toISOString();
@@ -174,13 +181,13 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
         messages: [
           ...current.messages,
           { id: `fixture-owner-${Date.now()}`, direction: "from_owner", body, status: "delivered", created_at: now },
-          { id: `fixture-employee-${Date.now()}`, direction: "to_owner", body: "I picked that up. I will prepare the work, stop when your judgment is needed, and leave proof after any accepted action.", status: "delivered", created_at: now },
+          { id: `fixture-employee-${Date.now()}`, direction: "to_owner", body: "I picked that up. I will form the work, delegate bounded parts where useful, bring back decisions and active saves, and leave evidence after accepted effects.", status: "delivered", created_at: now },
         ],
       }));
       setInput("");
       retryIntent.current = null;
       setSending(false);
-      setNotice({ tone: "success", text: "Fixture demonstration only. No provider or customer action occurred." });
+      setNotice({ tone: "success", text: "Fixture demonstration only. No provider, customer, or business effect occurred." });
       return;
     }
 
@@ -198,7 +205,7 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
       }
       setInput("");
       retryIntent.current = null;
-      setNotice({ tone: response.status === 202 ? "info" : "success", text: response.status === 202 ? "The turn started but is not terminal. AMTECH is reconciling it; do not resend." : "The turn was accepted. Work and proof will update here." });
+      setNotice({ tone: response.status === 202 ? "info" : "success", text: response.status === 202 ? "The turn started but is not terminal. AMTECH is reconciling it; do not resend." : "The turn was accepted. The operating state will update as work changes." });
       await refresh();
     } catch {
       setInput(body);
@@ -218,7 +225,7 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
     });
     const json = await result.json().catch(() => ({}));
     setNotice(result.ok
-      ? { tone: "success", text: json.user_facing_summary_hint ?? (response === "approved" ? "Approved. The employee can continue within this gate." : "Declined. The employee will not perform that action.") }
+      ? { tone: "success", text: json.user_facing_summary_hint ?? (response === "approved" ? "Approved. The employee can continue only within this gate." : "Declined. The employee will not perform that action.") }
       : { tone: "error", text: ownerError(json.error ?? "The decision was not accepted.") });
     await refresh();
   }
@@ -232,215 +239,286 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
       await sendMessage(`${resource.title}: ${note ?? "Please revise this work."}`);
       return;
     }
-    if (action === "acknowledge") {
-      await sendMessage(`${resource.title}: acknowledged.`);
-    }
+    if (action === "acknowledge") await sendMessage(`${resource.title}: acknowledged.`);
   }
 
-  const employeeName = res.employee?.name ?? "Avery";
-  const activeDescription = VIEWS.find((item) => item.id === view)?.description ?? "";
-
   return (
-    <main className="as-root">
-      <style>{SURFACE_CSS}</style>
-      <header className="as-header">
-        <div className="as-identity">
-          <a className="as-brand" href="/dashboard">AMTECH<span>.</span></a>
+    <main className="os-root">
+      <style>{OPERATING_CSS}</style>
+      <header className="os-header">
+        <div className="os-identity">
+          <a className="os-brand" href="/dashboard">AMTECH<span>.</span></a>
           <div>
             <strong>{employeeName}</strong>
-            <span>{runtimeLabel(res, streamState)}</span>
+            <span>{operating.context.business_name ?? "AI employee operating surface"}</span>
           </div>
         </div>
-        <div className="as-runtime" aria-label="Runtime identity">
-          <span className={`as-dot ${streamState}`} aria-hidden />
-          <span>{streamState === "live" ? "Connected" : streamState === "reconnecting" ? "Reconnecting without replay" : streamState}</span>
-          <small>{res.employee_id ?? employeeId}</small>
-        </div>
+        <button className="os-runtime" type="button" onClick={() => setContextOpen((value) => !value)} aria-expanded={contextOpen}>
+          <span className={`os-dot ${streamState}`} aria-hidden />
+          <span>{streamState === "live" ? "Live" : streamState === "reconnecting" ? "Restoring state" : readable(streamState)}</span>
+          <small>{operating.context.dominant_domains.slice(0, 3).map(readable).join(" · ") || "General operations"}</small>
+        </button>
       </header>
 
-      <div className="as-shell">
-        <nav className="as-tabs" role="tablist" aria-label="Employee work planes">
-          {VIEWS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              role="tab"
-              aria-selected={view === item.id}
-              className={view === item.id ? "active" : ""}
-              onClick={() => setView(item.id)}
-            >
-              {item.label}
-              {item.id === "decisions" && decisions.length ? <span>{decisions.length}</span> : null}
-            </button>
-          ))}
-        </nav>
-
-        <section className="as-heading">
+      <div className={`os-shell ${operating.layout.density}`}>
+        <section className={`os-guidance ${operating.guidance.mode}`}>
           <div>
-            <p>{activeDescription}</p>
-            <h1>{VIEWS.find((item) => item.id === view)?.label}</h1>
+            <p>{guidanceEyebrow(operating)}</p>
+            <h1>{operating.guidance.headline}</h1>
+            <span>{operating.guidance.summary}</span>
           </div>
-          {progress ? <div className="as-progress" aria-live="polite">{employeeName} is working: {progress}</div> : null}
+          <div className="os-guidance-actions">
+            {operating.guidance.suggested_prompt ? (
+              <button type="button" onClick={() => setInput(operating.guidance.suggested_prompt ?? "")}>Use suggested direction</button>
+            ) : null}
+            {selectedLoop ? <button className="secondary" type="button" onClick={() => document.getElementById(`loop-${selectedLoop.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}>Open current work</button> : null}
+          </div>
+          {progress ? <div className="os-progress" aria-live="polite">{employeeName} is working: {progress}</div> : null}
         </section>
 
         {notice ? (
-          <div className={`as-notice ${notice.tone}`} role={notice.tone === "error" ? "alert" : "status"}>
+          <div className={`os-notice ${notice.tone}`} role={notice.tone === "error" ? "alert" : "status"}>
             <span>{notice.text}</span>
             {notice.tone === "error" ? <button type="button" onClick={() => void refresh()}>Refresh state</button> : null}
           </div>
         ) : null}
 
-        {loading ? <QuietState title={`Loading ${employeeName}'s current state`} body="AMTECH is resolving the exact owner, assignment, runtime, and latest durable snapshot." /> : null}
+        {contextOpen ? <ContextPanel context={operating.context} runtime={res.runtime_health?.message} onClose={() => setContextOpen(false)} /> : null}
+        {loading ? <QuietState title={`Resolving ${employeeName}'s operating state`} body="AMTECH is loading the exact assignment, runtime, current work, active saves, delegated units, and evidence." /> : null}
 
-        {!loading && view === "command" ? (
-          <section className="as-command" role="tabpanel">
-            <div className="as-messages" aria-live="polite">
-              {res.messages.length ? res.messages.slice(-24).map((message) => (
-                <article key={message.id} className={message.direction === "to_owner" ? "employee" : "owner"}>
-                  <span>{message.direction === "to_owner" ? employeeName : "You"}</span>
-                  <p>{message.body}</p>
-                  <small>{message.status}</small>
-                </article>
-              )) : <QuietState title="Start with normal words" body="Describe the job, customer request, office task, or result. Durable work will move into Work, Decisions, and Proof." />}
-            </div>
-            <Composer employeeName={employeeName} value={input} setValue={setInput} sending={sending} onSend={() => void sendMessage()} />
-          </section>
-        ) : null}
-
-        {!loading && view === "work" ? (
-          <section className="as-grid" role="tabpanel">
-            {work.length ? work.map((envelope) => <EnvelopeCard key={envelope.id} envelope={envelope} onAction={handleObjectAction} />) : null}
-            {!work.length && (res.tasks ?? []).filter((task) => ["in_progress", "scheduled"].includes(task.status)).map((task) => (
-              <article className="as-card" key={task.id}>
-                <span className="as-eyebrow">{task.status}</span>
-                <h2>{task.title}</h2>
-                <p>{task.summary ?? "This work is active in the durable employee state."}</p>
-              </article>
+        {!loading ? (
+          <div className="os-regions">
+            {operating.layout.ordered_regions.map((region) => (
+              <OperatingRegion
+                key={region.kind}
+                region={region}
+                operating={operating}
+                res={res}
+                selectedLoopId={selectedLoopId}
+                setSelectedLoopId={setFocusLoopId}
+                envelopeById={envelopeById}
+                onObjectAction={handleObjectAction}
+                onApproval={resolveApproval}
+                onCommand={(message) => void sendMessage(message)}
+              />
             ))}
-            {!work.length && !(res.tasks ?? []).some((task) => ["in_progress", "scheduled"].includes(task.status)) ? <QuietState title="No active work" body="Give the employee a real task in Command. Prepared objects and current progress will appear here." /> : null}
-          </section>
+          </div>
         ) : null}
 
-        {!loading && view === "decisions" ? (
-          <section className="as-grid" role="tabpanel">
-            {decisions.map((envelope) => <EnvelopeCard key={envelope.id} envelope={envelope} onAction={handleObjectAction} />)}
-            {!decisions.length && res.approvals.map((approval) => (
-              <article className="as-card decision" key={approval.id}>
-                <span className="as-eyebrow">Needs your say · {approval.risk_level}</span>
-                <h2>{approval.summary}</h2>
-                <p>The employee is holding this action until the current authorized owner decides.</p>
-                <div className="as-actions">
-                  <button className="primary" type="button" onClick={() => void resolveApproval(approval.id, "approved")}>Approve</button>
-                  <button type="button" onClick={() => void resolveApproval(approval.id, "rejected")}>Decline</button>
-                </div>
-              </article>
-            ))}
-            {!decisions.length && !res.approvals.length ? <QuietState title="Nothing needs your say" body="Customer-facing, money-related, blocked, and judgment-heavy work will stop here before it proceeds." /> : null}
-          </section>
-        ) : null}
-
-        {!loading && view === "proof" ? (
-          <section className="as-proof" role="tabpanel">
-            {proof.map((envelope) => <EnvelopeCard key={envelope.id} envelope={envelope} onAction={handleObjectAction} compact />)}
-            {res.work_events.slice(0, 18).map((event) => (
-              <article className="as-proof-row" key={event.id}>
-                <span>{formatDate(event.created_at)}</span>
-                <div>
-                  <strong>{event.work_event_descriptor?.title ?? readable(event.event_type)}</strong>
-                  <p>{event.work_event_descriptor?.summary ?? `Recorded as ${event.status}.`}</p>
-                </div>
-                <small>{Object.keys(event.work_event_descriptor?.proof ?? {}).length ? "Proof attached" : event.status}</small>
-              </article>
-            ))}
-            {!proof.length && !res.work_events.length ? <QuietState title="No proof yet" body="Accepted sends, receipts, completed work, failures, and repair outcomes will settle here." /> : null}
-          </section>
-        ) : null}
-
-        {!loading && view === "connected" ? (
-          <section className="as-grid connections" role="tabpanel">
-            {(res.connection_surfaces ?? []).map((connection) => (
-              <article className="as-card" key={connection.id}>
-                <span className="as-eyebrow">{readable(connection.state)}</span>
-                <h2>{connection.label}</h2>
-                <p>{connection.health ?? connection.what_employee_can_do}</p>
-                <dl>
-                  <div><dt>Can do</dt><dd>{connection.what_employee_can_do}</dd></div>
-                  {connection.account_label ? <div><dt>Account</dt><dd>{connection.account_label}</dd></div> : null}
-                  {connection.last_action ? <div><dt>Last action</dt><dd>{connection.last_action}</dd></div> : null}
-                </dl>
-              </article>
-            ))}
-            {!(res.connection_surfaces ?? []).length ? <QuietState title="No connected systems reported" body="Connections appear only when Manager can prove their current scope and health." /> : null}
-          </section>
-        ) : null}
+        <section className="os-command-dock" aria-label={`Work with ${employeeName}`}>
+          <div className="os-command-label">
+            <strong>Work with {employeeName}</strong>
+            <span>Give an outcome, change priority, answer a question, or ask what will return next.</span>
+          </div>
+          <div className="os-command-input">
+            <textarea
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyDown={(event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key === "Enter") void sendMessage();
+              }}
+              rows={3}
+              placeholder="Example: Watch the campaign through Friday, delegate the source review, and bring it back if cost per lead rises above $85."
+              aria-label={`Command ${employeeName}`}
+            />
+            <button type="button" disabled={!input.trim() || sending} onClick={() => void sendMessage()}>{sending ? "Starting…" : "Send"}</button>
+          </div>
+          <small>External effects remain governed by assignment, policy, approval, C3, and durable receipts.</small>
+        </section>
       </div>
     </main>
   );
 }
 
-function EnvelopeCard({ envelope, onAction, compact = false }: {
-  envelope: SurfaceEnvelope;
-  onAction: (resource: WorkResource, action: WorkAction["action"], note?: string) => Promise<void> | void;
-  compact?: boolean;
+function OperatingRegion({
+  region,
+  operating,
+  res,
+  selectedLoopId,
+  setSelectedLoopId,
+  envelopeById,
+  onObjectAction,
+  onApproval,
+  onCommand,
+}: {
+  region: AdaptiveLayoutRegion;
+  operating: OperatingSurfaceState;
+  res: ResourcePayload;
+  selectedLoopId: string | null;
+  setSelectedLoopId: (id: string) => void;
+  envelopeById: Map<string, SurfaceEnvelope>;
+  onObjectAction: (resource: WorkResource, action: WorkAction["action"], note?: string) => Promise<void> | void;
+  onApproval: (approvalId: string, response: "approved" | "rejected") => Promise<void> | void;
+  onCommand: (message: string) => void;
 }) {
-  if (envelope.resource) {
+  if (region.kind === "guidance") return null;
+  if (region.kind === "attention") {
+    const blocked = operating.loops.filter((loop) => loop.state === "blocked" || loop.state === "failed");
+    if (!operating.decisions.length && !blocked.length) return null;
     return (
-      <div className="as-card resource">
-        <WorkObjectRenderer resource={envelope.resource} compact={compact} onAction={(action, note) => onAction(envelope.resource!, action, note)} />
-        <ProofLine envelope={envelope} />
-      </div>
+      <Section title="Needs you" summary="Judgment, authorization, or a blocking dependency is holding the next branch." tone="attention">
+        <div className="os-card-grid">
+          {operating.decisions.slice(0, region.limit).map((decision) => (
+            <DecisionCard key={decision.id} decision={decision} envelope={decision.source_envelope_id ? envelopeById.get(decision.source_envelope_id) : undefined} onObjectAction={onObjectAction} onApproval={onApproval} />
+          ))}
+          {blocked.slice(0, Math.max(0, region.limit - operating.decisions.length)).map((loop) => (
+            <LoopCard key={loop.id} loop={loop} selected={selectedLoopId === loop.id} onSelect={() => setSelectedLoopId(loop.id)} delegated={operating.delegated_work.filter((unit) => unit.parent_loop_id === loop.id)} saves={operating.active_saves.filter((save) => save.loop_id === loop.id)} />
+          ))}
+        </div>
+      </Section>
     );
   }
-  return (
-    <article className={`as-card ${envelope.safety.requires_approval ? "decision" : ""}`}>
-      <span className="as-eyebrow">{readable(envelope.status ?? envelope.kind)}</span>
-      <h2>{envelope.title}</h2>
-      <p>{envelope.summary ?? "This state came from the owner-safe Manager read model."}</p>
-      <ProofLine envelope={envelope} />
-    </article>
-  );
+  if (region.kind === "work_loops") {
+    if (!operating.loops.length) return <Section title="Current work" summary="Durable work loops will form here as the employee takes on real outcomes."><QuietState title="No work loop is active" body="Use the command below to describe the next business outcome. AMTECH will shape it into persistent work rather than leaving it as a chat message." /></Section>;
+    const loops = operating.loops.slice(0, region.limit);
+    const focused = operating.loops.find((loop) => loop.id === selectedLoopId) ?? loops[0];
+    const focusedEnvelopes = focused?.source_envelope_ids.map((id) => envelopeById.get(id)).filter((value): value is SurfaceEnvelope => Boolean(value)) ?? [];
+    return (
+      <Section title="Current work" summary="Persistent outcomes the employee is carrying across systems, sessions, and time.">
+        <div className="os-loop-layout">
+          <div className="os-loop-list">
+            {loops.map((loop) => <LoopCard key={loop.id} loop={loop} selected={focused?.id === loop.id} onSelect={() => setSelectedLoopId(loop.id)} delegated={operating.delegated_work.filter((unit) => unit.parent_loop_id === loop.id)} saves={operating.active_saves.filter((save) => save.loop_id === loop.id)} />)}
+          </div>
+          {focused ? (
+            <article className="os-focus" id={`loop-${focused.id}`}>
+              <div className="os-focus-head">
+                <div><p>{readable(focused.domain)} · {readable(focused.state)}</p><h3>{focused.title}</h3><span>{focused.summary ?? "This loop is preserved in the employee's durable operating state."}</span></div>
+                <button type="button" onClick={() => onCommand(`For ${focused.title}: show me what changed, what is delegated, what is uncertain, and the next safe action.`)}>Ask about this work</button>
+              </div>
+              <dl className="os-loop-facts">
+                <div><dt>Next</dt><dd>{focused.next_step ?? "Continue from current state"}</dd></div>
+                {focused.return_condition ? <div><dt>Returns when</dt><dd>{focused.return_condition.description}</dd></div> : null}
+                <div><dt>Updated</dt><dd>{formatDate(focused.updated_at)}</dd></div>
+              </dl>
+              {focusedEnvelopes.map((envelope) => <EnvelopeCard key={envelope.id} envelope={envelope} onAction={onObjectAction} />)}
+              <DelegationStrip units={operating.delegated_work.filter((unit) => unit.parent_loop_id === focused.id)} />
+              <SaveStrip saves={operating.active_saves.filter((save) => save.loop_id === focused.id)} />
+            </article>
+          ) : null}
+        </div>
+      </Section>
+    );
+  }
+  if (region.kind === "active_saves") {
+    if (!operating.active_saves.length) return null;
+    return <Section title="Held for return" summary="Future intentions the employee is carrying—not notifications you must remember yourself."><div className="os-card-grid saves">{operating.active_saves.slice(0, region.limit).map((save) => <ActiveSaveCard key={save.id} save={save} />)}</div></Section>;
+  }
+  if (region.kind === "system_changes") {
+    if (!operating.changes.length) return null;
+    return <Section title="What changed" summary="Meaningful business and runtime changes from the ambient event stream."><div className="os-change-list">{operating.changes.slice(0, region.limit).map((change) => <ChangeRow key={change.id} change={change} />)}</div></Section>;
+  }
+  if (region.kind === "delegated_work") {
+    if (!operating.delegated_work.length) return null;
+    return <Section title="Work delegated by the employee" summary="Bounded contributors are shown by purpose and result—not as an org chart you must manage."><div className="os-delegated-list">{operating.delegated_work.slice(0, region.limit).map((unit) => <DelegatedRow key={unit.id} unit={unit} />)}</div></Section>;
+  }
+  if (region.kind === "evidence") {
+    if (!operating.evidence.length) return null;
+    return <Section title="Evidence and outcomes" summary="Artifacts, receipts, recorded results, and terminal failures tied back to the work."><div className="os-evidence-list">{operating.evidence.slice(0, region.limit).map((item) => <EvidenceRow key={item.id} item={item} />)}</div></Section>;
+  }
+  if (region.kind === "connections") {
+    const connections = (res.connection_surfaces ?? []).filter((connection) => connection.state === "needs_you" || connection.state === "working").slice(0, region.limit);
+    if (!connections.length) return null;
+    return <Section title="Systems affecting work" summary="Connections appear here only when their state changes what the employee can do."><div className="os-card-grid">{connections.map((connection) => <article className="os-card" key={connection.id}><p>{readable(connection.state)}</p><h3>{connection.label}</h3><span>{connection.health ?? connection.what_employee_can_do}</span>{connection.last_event ? <small>{connection.last_event}</small> : null}</article>)}</div></Section>;
+  }
+  if (region.kind === "context") {
+    return <details className="os-context-inline"><summary>Why this surface is arranged this way</summary><p>{operating.layout.rationale_codes.map(readable).join(" · ")}</p><small>Context {operating.layout.context_fingerprint.slice(0, 20)}…</small></details>;
+  }
+  return null;
 }
 
-function ProofLine({ envelope }: { envelope: SurfaceEnvelope }) {
-  const proof = Object.entries(envelope.proof).filter(([, value]) => value);
-  return proof.length ? (
-    <div className="as-proof-line">
-      <strong>Proof</strong>
-      <span>{proof.map(([key, value]) => `${readable(key)} ${String(value)}`).join(" · ")}</span>
-    </div>
-  ) : null;
+function Section({ title, summary, tone, children }: { title: string; summary: string; tone?: "attention"; children: React.ReactNode }) {
+  return <section className={`os-section ${tone ?? ""}`}><header><div><p>{title}</p><h2>{title}</h2></div><span>{summary}</span></header>{children}</section>;
 }
 
-function Composer({ employeeName, value, setValue, sending, onSend }: {
-  employeeName: string;
-  value: string;
-  setValue: (value: string) => void;
-  sending: boolean;
-  onSend: () => void;
-}) {
-  return (
-    <div className="as-composer">
-      <label htmlFor="employee-command">Tell {employeeName} what happened or what you need</label>
-      <div>
-        <textarea
-          id="employee-command"
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          onKeyDown={(event) => {
-            if ((event.metaKey || event.ctrlKey) && event.key === "Enter") onSend();
-          }}
-          rows={4}
-          placeholder="Customer approved the estimate. Prepare the deposit invoice and show me before sending."
-        />
-        <button type="button" disabled={!value.trim() || sending} onClick={onSend}>{sending ? "Starting…" : "Send to employee"}</button>
-      </div>
-      <small>Command starts work. Decisions and external effects remain governed by assignment, approval, and durable receipts.</small>
-    </div>
-  );
+function LoopCard({ loop, selected, onSelect, delegated, saves }: { loop: OperatingWorkLoop; selected: boolean; onSelect: () => void; delegated: DelegatedWorkUnit[]; saves: ActiveSave[] }) {
+  return <button type="button" className={`os-loop-card ${selected ? "selected" : ""} ${loop.state}`} onClick={onSelect}><span>{readable(loop.state)} · {readable(loop.horizon)}</span><strong>{loop.title}</strong><p>{loop.summary ?? loop.next_step}</p><small>{delegated.length ? `${delegated.length} delegated` : "Handled by employee"}{saves.length ? ` · ${saves.length} held for return` : ""}</small></button>;
+}
+
+function DecisionCard({ decision, envelope, onObjectAction, onApproval }: { decision: OperatingDecision; envelope?: SurfaceEnvelope; onObjectAction: (resource: WorkResource, action: WorkAction["action"], note?: string) => Promise<void> | void; onApproval: (approvalId: string, response: "approved" | "rejected") => Promise<void> | void }) {
+  if (envelope?.resource) return <div className="os-card decision"><WorkObjectRenderer resource={envelope.resource} onAction={(action, note) => onObjectAction(envelope.resource!, action, note)} /></div>;
+  const approvalId = decision.target?.kind === "approval" ? decision.target.id : null;
+  return <article className="os-card decision"><p>{readable(decision.risk)} impact</p><h3>{decision.title}</h3><span>{decision.consequence}</span>{approvalId ? <div className="os-actions"><button type="button" onClick={() => void onApproval(approvalId, "approved")}>Approve</button><button className="secondary" type="button" onClick={() => void onApproval(approvalId, "rejected")}>Decline</button></div> : null}</article>;
+}
+
+function ActiveSaveCard({ save }: { save: ActiveSave }) {
+  return <article className={`os-card save ${save.state}`}><p>{readable(save.state)}</p><h3>{save.title}</h3><span>{save.why_held}</span><div className="os-return"><strong>Returns when</strong><small>{save.return_condition.description}</small>{save.return_condition.due_at ? <small>{formatDate(save.return_condition.due_at)}</small> : null}</div></article>;
+}
+
+function ChangeRow({ change }: { change: OperatingSystemChange }) {
+  return <article className={`os-change ${change.state}`}><time>{formatDate(change.occurred_at)}</time><div><strong>{change.title}</strong><p>{change.summary ?? `Recorded from ${readable(change.source)}.`}</p></div><span>{readable(change.state)}</span></article>;
+}
+
+function DelegatedRow({ unit }: { unit: DelegatedWorkUnit }) {
+  return <article className={`os-delegated ${unit.state}`}><div><p>{readable(unit.executor_kind)}</p><strong>{unit.title}</strong><span>{unit.purpose}</span></div><div><strong>{readable(unit.state)}</strong><small>{unit.result_summary ?? unit.blocking_reason ?? unit.executor_label ?? "Bounded delegated work"}</small></div></article>;
+}
+
+function EvidenceRow({ item }: { item: OperatingEvidence }) {
+  const content = <><div><strong>{item.title}</strong><p>{item.summary ?? "Recorded in durable operating evidence."}</p></div><span>{readable(item.state)} · {formatDate(item.recorded_at)}</span></>;
+  return item.href ? <a className={`os-evidence ${item.state}`} href={item.href} target="_blank" rel="noreferrer">{content}</a> : <article className={`os-evidence ${item.state}`}>{content}</article>;
+}
+
+function DelegationStrip({ units }: { units: DelegatedWorkUnit[] }) {
+  if (!units.length) return null;
+  return <div className="os-strip"><strong>Delegated work</strong>{units.map((unit) => <span key={unit.id}>{unit.title} · {readable(unit.state)}</span>)}</div>;
+}
+
+function SaveStrip({ saves }: { saves: ActiveSave[] }) {
+  if (!saves.length) return null;
+  return <div className="os-strip saves"><strong>Held for return</strong>{saves.map((save) => <span key={save.id}>{save.title} · {save.return_condition.description}</span>)}</div>;
+}
+
+function EnvelopeCard({ envelope, onAction }: { envelope: SurfaceEnvelope; onAction: (resource: WorkResource, action: WorkAction["action"], note?: string) => Promise<void> | void }) {
+  if (envelope.resource) return <div className="os-object"><WorkObjectRenderer resource={envelope.resource} onAction={(action, note) => onAction(envelope.resource!, action, note)} /></div>;
+  return <article className="os-object"><p>{readable(envelope.status ?? envelope.kind)}</p><h3>{envelope.title}</h3><span>{envelope.summary ?? "Materialized from the current owner-safe state."}</span></article>;
+}
+
+function ContextPanel({ context, runtime, onClose }: { context: OperatingContextManifest; runtime?: string; onClose: () => void }) {
+  return <aside className="os-context-panel"><header><div><p>Operating context</p><h2>{context.employee_name} in {context.business_name ?? "this business"}</h2></div><button type="button" onClick={onClose}>Close</button></header><dl><div><dt>Assignment</dt><dd>{context.assignment_id}</dd></div><div><dt>Profile</dt><dd>{context.profile_key ?? "general"}{context.profile_version ? ` · ${context.profile_version}` : ""}</dd></div><div><dt>Session</dt><dd>{context.session_id ?? "No current transcript ID"}</dd></div><div><dt>Last active</dt><dd>{formatDate(context.session_last_active)}</dd></div><div><dt>Runtime</dt><dd>{runtime ?? "No runtime message"}</dd></div><div><dt>Domains</dt><dd>{context.dominant_domains.map(readable).join(", ")}</dd></div></dl><p>Layout uses {context.signals.length} bounded owner-safe context signals. Raw memory, soul files, provider payloads, AGENTS.md, CODEGRAPH.md, credentials, and private reasoning are not exposed here.</p></aside>;
 }
 
 function QuietState({ title, body }: { title: string; body: string }) {
-  return <div className="as-quiet"><strong>{title}</strong><p>{body}</p></div>;
+  return <div className="os-quiet"><strong>{title}</strong><p>{body}</p></div>;
+}
+
+function fallbackOperatingState(res: ResourcePayload, employeeId: string): OperatingSurfaceState {
+  const now = new Date().toISOString();
+  const loops: OperatingWorkLoop[] = (res.tasks ?? []).map((task) => ({
+    id: `loop:${task.id}`,
+    title: task.title,
+    summary: task.summary,
+    state: task.status === "in_progress" ? "active" : task.status === "scheduled" ? "waiting" : task.status,
+    horizon: task.status === "scheduled" ? "later" : "now",
+    domain: "custom",
+    updated_at: task.created_at ?? null,
+    next_step: task.status === "needs_you" ? "Owner input" : task.status === "blocked" ? "Clear the dependency" : "Continue",
+    return_condition: task.status === "scheduled" ? { kind: "time", description: task.summary ?? "Return at the scheduled time", due_at: task.created_at ?? null } : null,
+    source_envelope_ids: [],
+    target: task.target_id ? { kind: task.type, id: task.target_id } : null,
+    proof: { assignment_id: res.assignment_id ?? null, source_table: "fixture_tasks", source_id: task.id },
+  }));
+  const saves: ActiveSave[] = (res.resurface_items ?? []).map((item) => ({
+    id: `save:${item.id}`,
+    title: item.title,
+    why_held: item.why,
+    state: item.status === "scheduled" ? "scheduled" : item.status === "needs_you" ? "needs_you" : item.status === "blocked" || item.status === "failed" ? "blocked" : "waiting",
+    return_condition: { kind: item.status === "scheduled" ? "time" : item.status === "needs_you" ? "owner" : item.kind === "connector" ? "dependency" : "event", description: item.why, due_at: item.resurface_at ?? null, source: item.channel },
+    target: item.target ?? null,
+    proof: { ...item.proof, assignment_id: res.assignment_id ?? null },
+  }));
+  const decisions: OperatingDecision[] = (res.approvals ?? []).map((approval) => ({ id: `decision:${approval.id}`, title: approval.summary, consequence: "This action is held until an authorized owner decides.", risk: approval.risk_level === "low" ? "low" : approval.risk_level === "medium" ? "medium" : "high", target: { kind: "approval", id: approval.id }, proof: { approval_id: approval.id, assignment_id: res.assignment_id ?? null } }));
+  const changes: OperatingSystemChange[] = (res.work_events ?? []).map((event) => ({ id: `change:${event.id}`, title: event.work_event_descriptor?.title ?? readable(event.event_type), summary: event.work_event_descriptor?.summary, source: "fixture", state: event.status === "failed" ? "failed" : "observed", occurred_at: event.created_at, proof: { inbound_event_id: event.id, assignment_id: res.assignment_id ?? null } }));
+  const evidence: OperatingEvidence[] = (res.outputs ?? []).map((output) => ({ id: `evidence:${output.id}`, title: output.title, summary: output.summary, state: output.status === "failed" ? "failed" : output.status === "draft" ? "draft" : "recorded", recorded_at: output.created_at ?? null, href: output.href ?? null, proof: { artifact_id: output.artifact_id ?? null, assignment_id: res.assignment_id ?? null } }));
+  const context: OperatingContextManifest = { version: 1, generated_at: now, account_id: res.account_id, assignment_id: res.assignment_id ?? "fixture_assignment", employee_id: res.employee_id ?? employeeId, employee_name: res.employee?.name ?? "Avery", business_name: "Fixture business", business_kind: "demonstration", profile_key: res.employee?.profile_id ?? "fixture", profile_version: "fixture", session_id: "fixture-session", session_last_active: now, runtime_context_version: "fixture", doctrine_versions: { design_system: "fixture", agent_interface: "fixture" }, dominant_domains: ["customer", "finance", "operations"], owner_experience: "guided", preferred_density: "balanced", signals: [] };
+  const layout = planAdaptiveOperatingLayout({ generated_at: now, context_fingerprint: "fixture", owner_experience: context.owner_experience, preferred_density: context.preferred_density, loops, active_saves: saves, decisions, changes, delegated_work: [], evidence, connection_attention_count: (res.connection_surfaces ?? []).filter((connection) => connection.state === "needs_you").length });
+  return { version: 1, generated_at: now, guidance: decisions.length ? { headline: `${context.employee_name} has ${decisions.length} decisions ready`, summary: "Fixture operating state shows how work, future intentions, decisions, and evidence return to the owner.", suggested_prompt: "Explain the most important decision and what happens next.", mode: "needs_you" } : { headline: `${context.employee_name} is ready`, summary: "Give the employee a business outcome to carry across time and systems.", suggested_prompt: "Here is the outcome I need next...", mode: "quiet" }, focus_loop_id: layout.focus_loop_id, loops, active_saves: saves, decisions, changes, delegated_work: [], evidence, context, layout };
+}
+
+function guidanceEyebrow(operating: OperatingSurfaceState): string {
+  if (operating.guidance.mode === "needs_you") return "Your judgment is needed";
+  if (operating.guidance.mode === "blocked") return "Work is safely held";
+  if (operating.guidance.mode === "working") return "Employee operating now";
+  if (operating.guidance.mode === "degraded") return "Degraded but explicit";
+  return "Ready for the next outcome";
 }
 
 function createIntentId(employeeId: string): string {
@@ -448,12 +526,8 @@ function createIntentId(employeeId: string): string {
   return `web:${employeeId}:${random}`.slice(0, 160);
 }
 
-function hasProof(envelope: SurfaceEnvelope): boolean {
-  return Object.values(envelope.proof).some(Boolean);
-}
-
 function readable(value: string): string {
-  return value.replace(/[_:-]+/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
+  return String(value).replace(/[_:-]+/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 function ownerError(value: string): string {
@@ -461,31 +535,27 @@ function ownerError(value: string): string {
 }
 
 function formatDate(value?: string | null): string {
-  if (!value) return "Unknown time";
+  if (!value) return "Not recorded";
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-function runtimeLabel(res: ResourcePayload, streamState: StreamState): string {
-  if (res.runtime_health?.message) return res.runtime_health.message;
-  if (streamState === "live") return "Exact assignment and runtime connected";
-  if (streamState === "reconnecting") return "Restoring state without replaying work";
-  return "Resolving exact runtime context";
-}
-
-const SURFACE_CSS = `
-  .as-root{min-height:100vh;background:radial-gradient(circle at 8% 0%,rgba(223,246,255,.9),transparent 28rem),radial-gradient(circle at 92% 6%,rgba(225,29,42,.06),transparent 24rem),var(--amtech-canvas);color:var(--amtech-ink)}
-  .as-header{position:sticky;top:0;z-index:20;min-height:72px;padding:12px clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--amtech-line);background:rgba(255,255,255,.86);backdrop-filter:blur(28px)}
-  .as-identity,.as-runtime{display:flex;align-items:center;gap:12px}.as-brand{font-weight:850;letter-spacing:.04em;text-decoration:none}.as-brand span{color:var(--amtech-red)}.as-identity>div{display:grid}.as-identity strong{font-size:16px}.as-identity div span,.as-runtime{font-size:12px;color:var(--amtech-muted)}
-  .as-runtime{justify-content:flex-end;flex-wrap:wrap}.as-runtime small{max-width:180px;overflow:hidden;text-overflow:ellipsis}.as-dot{width:9px;height:9px;border-radius:50%;background:var(--amtech-blue)}.as-dot.live{background:var(--amtech-green)}.as-dot.offline{background:var(--amtech-red)}
-  .as-shell{width:min(1180px,100%);margin:0 auto;padding:24px clamp(16px,4vw,40px) 64px}.as-tabs{display:flex;gap:8px;overflow:auto;padding:4px;margin-bottom:24px;border:1px solid var(--amtech-line);border-radius:999px;background:rgba(255,255,255,.72);backdrop-filter:blur(24px)}
-  .as-tabs button{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:transparent;font-weight:700;white-space:nowrap}.as-tabs button.active{background:var(--amtech-red);color:#fff;box-shadow:0 8px 22px rgba(225,29,42,.18)}.as-tabs button span{margin-left:7px;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.25);font-size:11px}
-  .as-heading{display:flex;align-items:end;justify-content:space-between;gap:24px;margin:0 0 20px}.as-heading p,.as-eyebrow{font-size:11px;font-weight:750;letter-spacing:.12em;text-transform:uppercase;color:var(--amtech-muted)}.as-heading h1{font-size:clamp(30px,5vw,52px);line-height:1;font-weight:850;letter-spacing:-.045em}.as-progress{max-width:420px;padding:10px 14px;border-radius:999px;background:var(--amtech-blue-soft);color:var(--amtech-blue);font-size:13px;font-weight:700}
-  .as-notice{margin-bottom:20px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid var(--amtech-line);border-radius:16px;background:var(--amtech-white);font-size:13px}.as-notice.info{border-color:rgba(37,99,235,.18);background:var(--amtech-blue-soft);color:var(--amtech-blue)}.as-notice.success{border-color:rgba(22,138,87,.18);background:var(--amtech-green-soft);color:var(--amtech-green)}.as-notice.error{border-color:rgba(225,29,42,.2);background:var(--amtech-danger-soft);color:var(--amtech-red)}.as-notice button{min-height:36px;padding:0 14px;border:1px solid currentColor;border-radius:999px;background:#fff;color:inherit;font-weight:700}
-  .as-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}.as-grid.connections{align-items:start}.as-card,.as-quiet,.as-command{border:1px solid var(--amtech-line);border-radius:var(--amtech-radius-card);background:var(--amtech-glass);box-shadow:var(--amtech-shadow-card);backdrop-filter:blur(28px)}.as-card{padding:20px;display:grid;gap:12px;align-content:start}.as-card.resource{padding:20px}.as-card.decision{border-color:rgba(225,29,42,.22);box-shadow:0 14px 38px rgba(225,29,42,.07)}.as-card h2{font-size:20px;line-height:1.15}.as-card>p{color:var(--amtech-muted)}
-  .as-card dl{margin:4px 0 0;display:grid;gap:8px}.as-card dl div{display:grid;grid-template-columns:90px 1fr;gap:12px;padding-top:8px;border-top:1px solid var(--amtech-line)}.as-card dt{color:var(--amtech-muted);font-size:12px}.as-card dd{margin:0;font-size:13px;font-weight:650}.as-actions{display:flex;gap:8px;flex-wrap:wrap}.as-actions button{min-height:44px;padding:0 18px;border:1px solid var(--amtech-line-strong);border-radius:999px;background:#fff;font-weight:750}.as-actions button.primary{background:var(--amtech-red);border-color:var(--amtech-red);color:#fff}
-  .as-proof-line{margin-top:4px;padding-top:12px;display:grid;gap:4px;border-top:1px solid var(--amtech-line);font-size:11px;color:var(--amtech-green)}.as-proof-line span{overflow-wrap:anywhere}.as-proof{display:grid;gap:12px}.as-proof-row{padding:16px 18px;display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:18px;align-items:start;border:1px solid var(--amtech-line);border-radius:16px;background:rgba(255,255,255,.78)}.as-proof-row>span,.as-proof-row small{font-size:12px;color:var(--amtech-muted)}.as-proof-row p{margin-top:4px;color:var(--amtech-muted)}
-  .as-command{padding:20px;display:grid;gap:16px}.as-messages{min-height:360px;max-height:58vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:4px}.as-messages article{max-width:min(82%,680px);padding:12px 14px;border:1px solid var(--amtech-line);border-radius:16px;background:#fff}.as-messages article.owner{align-self:flex-end;background:var(--amtech-cyan)}.as-messages article span,.as-messages article small{font-size:11px;font-weight:750;color:var(--amtech-muted)}.as-messages article p{margin:5px 0}.as-composer{display:grid;gap:8px}.as-composer label{font-weight:750}.as-composer>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}.as-composer textarea{width:100%;min-height:112px;padding:14px 16px;resize:vertical;border:1px solid var(--amtech-line-strong);border-radius:16px;background:#fff;outline:none}.as-composer textarea:focus{border-color:var(--amtech-blue);box-shadow:0 0 0 4px var(--amtech-blue-soft)}.as-composer button{min-height:48px;padding:0 22px;border:0;border-radius:999px;background:var(--amtech-red);color:#fff;font-weight:800}.as-composer button:disabled{opacity:.45}.as-composer small{color:var(--amtech-muted)}
-  .as-quiet{padding:28px;text-align:center;display:grid;gap:8px}.as-quiet p{max-width:620px;margin:0 auto;color:var(--amtech-muted)}
-  @media(max-width:720px){.as-header{align-items:flex-start}.as-runtime small{display:none}.as-shell{padding-top:16px}.as-heading{align-items:flex-start;flex-direction:column}.as-tabs{border-radius:18px}.as-proof-row{grid-template-columns:1fr}.as-composer>div{grid-template-columns:1fr}.as-composer button{width:100%}.as-messages article{max-width:92%}}
+const OPERATING_CSS = `
+  .os-root{min-height:100vh;background:radial-gradient(circle at 8% 0%,rgba(223,246,255,.9),transparent 30rem),radial-gradient(circle at 92% 7%,rgba(225,29,42,.06),transparent 26rem),var(--amtech-canvas);color:var(--amtech-ink)}
+  .os-header{position:sticky;top:0;z-index:30;min-height:72px;padding:12px clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid var(--amtech-line);background:rgba(255,255,255,.86);backdrop-filter:blur(30px)}.os-identity,.os-runtime{display:flex;align-items:center;gap:12px}.os-brand{font-weight:860;letter-spacing:.04em;text-decoration:none}.os-brand span{color:var(--amtech-red)}.os-identity>div{display:grid}.os-identity strong{font-size:16px}.os-identity div span{font-size:12px;color:var(--amtech-muted)}
+  .os-runtime{min-height:44px;padding:0 14px;border:1px solid var(--amtech-line);border-radius:999px;background:rgba(255,255,255,.82);color:var(--amtech-ink)}.os-runtime>span{font-size:12px;font-weight:760}.os-runtime small{max-width:240px;color:var(--amtech-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.os-dot{width:9px;height:9px;border-radius:50%;background:var(--amtech-blue)}.os-dot.live{background:var(--amtech-green)}.os-dot.offline{background:var(--amtech-red)}
+  .os-shell{width:min(1240px,100%);margin:0 auto;padding:24px clamp(16px,4vw,42px) 180px}.os-shell.calm{width:min(1080px,100%)}.os-shell.dense{width:min(1380px,100%)}
+  .os-guidance{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;padding:clamp(24px,5vw,48px);border:1px solid var(--amtech-line);border-radius:var(--amtech-radius-panel);background:rgba(255,255,255,.84);box-shadow:var(--amtech-shadow-float);backdrop-filter:blur(30px);overflow:hidden}.os-guidance:after{content:"";position:absolute;right:-80px;top:-120px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.1),transparent 68%);pointer-events:none}.os-guidance.needs_you{border-color:rgba(225,29,42,.18)}.os-guidance.blocked{border-color:rgba(225,29,42,.22)}.os-guidance>div:first-child{position:relative;z-index:1;max-width:820px}.os-guidance p,.os-section header p,.os-card>p,.os-object>p,.os-focus-head p,.os-delegated p{font-size:11px;font-weight:780;letter-spacing:.12em;text-transform:uppercase;color:var(--amtech-muted)}.os-guidance h1{margin:8px 0 12px;font-size:clamp(34px,6vw,66px);line-height:.98;letter-spacing:-.05em;font-weight:870}.os-guidance>div:first-child>span{display:block;max-width:720px;color:var(--amtech-muted);font-size:16px;line-height:1.65}.os-guidance-actions{position:relative;z-index:1;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:8px;min-width:220px}.os-guidance-actions button,.os-actions button{min-height:44px;padding:0 18px;border:1px solid var(--amtech-red);border-radius:999px;background:var(--amtech-red);color:#fff;font-weight:780}.os-guidance-actions button.secondary,.os-actions button.secondary{border-color:var(--amtech-line-strong);background:#fff;color:var(--amtech-ink)}.os-progress{position:absolute;left:clamp(24px,5vw,48px);bottom:14px;padding:7px 11px;border-radius:999px;background:var(--amtech-blue-soft);color:var(--amtech-blue);font-size:12px;font-weight:720}
+  .os-notice{margin-top:16px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid var(--amtech-line);border-radius:16px;background:#fff;font-size:13px}.os-notice.info{border-color:rgba(37,99,235,.18);background:var(--amtech-blue-soft);color:var(--amtech-blue)}.os-notice.success{border-color:rgba(22,138,87,.18);background:var(--amtech-green-soft);color:var(--amtech-green)}.os-notice.error{border-color:rgba(225,29,42,.2);background:var(--amtech-danger-soft);color:var(--amtech-red)}.os-notice button{min-height:36px;padding:0 14px;border:1px solid currentColor;border-radius:999px;background:#fff;color:inherit;font-weight:720}
+  .os-context-panel{margin-top:16px;padding:20px;border:1px solid rgba(37,99,235,.18);border-radius:var(--amtech-radius-card);background:rgba(255,255,255,.9);box-shadow:var(--amtech-shadow-card)}.os-context-panel header{display:flex;justify-content:space-between;gap:16px}.os-context-panel header p{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--amtech-blue);font-weight:780}.os-context-panel h2{font-size:22px}.os-context-panel header button{min-height:40px;padding:0 14px;border:1px solid var(--amtech-line);border-radius:999px;background:#fff}.os-context-panel dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:18px 0}.os-context-panel dl div{padding:10px 12px;border:1px solid var(--amtech-line);border-radius:12px;background:var(--amtech-canvas)}.os-context-panel dt{font-size:11px;color:var(--amtech-muted)}.os-context-panel dd{margin:3px 0 0;font-size:12px;font-weight:680;overflow-wrap:anywhere}.os-context-panel>p{color:var(--amtech-muted);font-size:12px}
+  .os-regions{display:grid;gap:28px;margin-top:28px}.os-section{display:grid;gap:16px}.os-section>header{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,.7fr);gap:24px;align-items:end}.os-section>header p{color:var(--amtech-red)}.os-section>header h2{font-size:clamp(24px,4vw,36px);line-height:1.05;letter-spacing:-.035em}.os-section>header>span{color:var(--amtech-muted);font-size:13px;line-height:1.55}.os-section.attention>header p{color:var(--amtech-red)}
+  .os-card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}.os-card{padding:20px;display:grid;gap:10px;border:1px solid var(--amtech-line);border-radius:var(--amtech-radius-card);background:var(--amtech-glass);box-shadow:var(--amtech-shadow-card);backdrop-filter:blur(26px)}.os-card.decision{border-color:rgba(225,29,42,.22)}.os-card.save{border-color:rgba(37,99,235,.16)}.os-card h3,.os-object h3{font-size:19px;line-height:1.15}.os-card>span,.os-object>span{color:var(--amtech-muted);line-height:1.55}.os-card small{color:var(--amtech-muted)}.os-return{margin-top:4px;padding-top:10px;display:grid;gap:3px;border-top:1px solid var(--amtech-line)}.os-return strong{font-size:11px;color:var(--amtech-blue);text-transform:uppercase;letter-spacing:.08em}
+  .os-loop-layout{display:grid;grid-template-columns:minmax(260px,.72fr) minmax(0,1.6fr);gap:16px;align-items:start}.os-loop-list{display:grid;gap:8px;position:sticky;top:92px}.os-loop-card{width:100%;padding:15px 16px;display:grid;gap:5px;text-align:left;border:1px solid var(--amtech-line);border-radius:16px;background:rgba(255,255,255,.78);color:var(--amtech-ink)}.os-loop-card.selected{border-color:rgba(37,99,235,.32);background:#fff;box-shadow:var(--amtech-shadow-card)}.os-loop-card.needs_you,.os-loop-card.blocked,.os-loop-card.failed{border-left:4px solid var(--amtech-red)}.os-loop-card.active,.os-loop-card.repairing{border-left:4px solid var(--amtech-blue)}.os-loop-card>span{font-size:10px;font-weight:760;text-transform:uppercase;letter-spacing:.08em;color:var(--amtech-muted)}.os-loop-card>strong{font-size:15px}.os-loop-card>p{font-size:12px;color:var(--amtech-muted);line-height:1.45}.os-loop-card>small{font-size:10px;color:var(--amtech-muted)}
+  .os-focus{padding:22px;display:grid;gap:16px;border:1px solid var(--amtech-line);border-radius:var(--amtech-radius-panel);background:rgba(255,255,255,.9);box-shadow:var(--amtech-shadow-float)}.os-focus-head{display:flex;align-items:start;justify-content:space-between;gap:20px}.os-focus-head h3{font-size:clamp(24px,4vw,38px);line-height:1.04;letter-spacing:-.035em}.os-focus-head>div>span{display:block;margin-top:8px;color:var(--amtech-muted)}.os-focus-head button{min-height:42px;padding:0 15px;border:1px solid var(--amtech-line-strong);border-radius:999px;background:#fff;white-space:nowrap;font-weight:720}.os-loop-facts{margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}.os-loop-facts div{padding:10px 12px;border:1px solid var(--amtech-line);border-radius:12px;background:var(--amtech-canvas)}.os-loop-facts dt{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--amtech-muted)}.os-loop-facts dd{margin:4px 0 0;font-size:12px;font-weight:650}.os-object{padding:16px;border:1px solid var(--amtech-line);border-radius:16px;background:#fff;display:grid;gap:8px}.os-strip{padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap;border:1px solid rgba(37,99,235,.16);border-radius:14px;background:var(--amtech-blue-soft);font-size:11px;color:var(--amtech-blue)}.os-strip.saves{border-color:rgba(22,138,87,.16);background:var(--amtech-green-soft);color:var(--amtech-green)}.os-strip strong{width:100%;text-transform:uppercase;letter-spacing:.08em}
+  .os-change-list,.os-delegated-list,.os-evidence-list{display:grid;gap:8px}.os-change,.os-delegated,.os-evidence{padding:14px 16px;display:grid;grid-template-columns:130px minmax(0,1fr) auto;gap:16px;align-items:start;border:1px solid var(--amtech-line);border-radius:14px;background:rgba(255,255,255,.76);color:inherit;text-decoration:none}.os-change time,.os-change>span,.os-evidence>span{font-size:11px;color:var(--amtech-muted)}.os-change p,.os-evidence p{margin-top:3px;color:var(--amtech-muted);font-size:12px}.os-change.failed,.os-evidence.failed{border-color:rgba(225,29,42,.2)}.os-change.accepted,.os-evidence.accepted{border-color:rgba(22,138,87,.18)}.os-delegated{grid-template-columns:minmax(0,1fr) minmax(180px,.45fr)}.os-delegated>div{display:grid;gap:4px}.os-delegated>div:last-child{text-align:right}.os-delegated span,.os-delegated small{color:var(--amtech-muted);font-size:12px}.os-delegated.blocked,.os-delegated.failed{border-left:4px solid var(--amtech-red)}.os-delegated.working{border-left:4px solid var(--amtech-blue)}
+  .os-context-inline{padding:14px 16px;border:1px solid var(--amtech-line);border-radius:14px;background:rgba(255,255,255,.64);color:var(--amtech-muted);font-size:12px}.os-context-inline summary{cursor:pointer;font-weight:720;color:var(--amtech-ink)}.os-context-inline p{margin:8px 0 4px}
+  .os-command-dock{position:fixed;left:50%;bottom:14px;z-index:40;width:min(1120px,calc(100% - 28px));transform:translateX(-50%);padding:14px;display:grid;grid-template-columns:minmax(180px,.45fr) minmax(0,1.55fr);gap:14px;border:1px solid var(--amtech-line-strong);border-radius:22px;background:rgba(255,255,255,.92);box-shadow:0 24px 70px rgba(30,48,80,.2);backdrop-filter:blur(34px)}.os-command-label{display:grid;align-content:center;gap:3px}.os-command-label strong{font-size:14px}.os-command-label span,.os-command-dock>small{font-size:11px;color:var(--amtech-muted)}.os-command-input{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.os-command-input textarea{width:100%;min-height:70px;max-height:180px;padding:11px 13px;resize:vertical;border:1px solid var(--amtech-line-strong);border-radius:14px;background:#fff;outline:none}.os-command-input textarea:focus{border-color:var(--amtech-blue);box-shadow:0 0 0 4px var(--amtech-blue-soft)}.os-command-input button{min-width:96px;border:0;border-radius:999px;background:var(--amtech-red);color:#fff;font-weight:800}.os-command-input button:disabled{opacity:.45}.os-command-dock>small{grid-column:2}
+  .os-quiet{padding:28px;text-align:center;display:grid;gap:8px;border:1px solid var(--amtech-line);border-radius:var(--amtech-radius-card);background:rgba(255,255,255,.72)}.os-quiet p{max-width:640px;margin:0 auto;color:var(--amtech-muted)}
+  @media(max-width:850px){.os-guidance{grid-template-columns:1fr}.os-guidance-actions{min-width:0;flex-direction:row;justify-content:flex-start;flex-wrap:wrap}.os-loop-layout{grid-template-columns:1fr}.os-loop-list{position:static;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}.os-section>header{grid-template-columns:1fr}.os-command-dock{grid-template-columns:1fr}.os-command-dock>small{grid-column:1}.os-command-label{display:none}}
+  @media(max-width:620px){.os-header{align-items:flex-start}.os-runtime small{display:none}.os-shell{padding-top:16px;padding-bottom:190px}.os-guidance{padding:24px 20px}.os-guidance h1{font-size:36px}.os-guidance-actions button{width:100%}.os-focus-head{flex-direction:column}.os-focus-head button{width:100%}.os-change,.os-evidence,.os-delegated{grid-template-columns:1fr}.os-delegated>div:last-child{text-align:left}.os-command-input{grid-template-columns:1fr}.os-command-input button{min-height:44px}.os-command-dock{bottom:8px;width:calc(100% - 16px);padding:10px;border-radius:18px}}
 `;
