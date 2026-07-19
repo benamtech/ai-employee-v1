@@ -11,5 +11,6 @@ export async function POST(
   return proxyJson(`/manager/employee/${employeeId}/message`, {
     owner_session_token: cookieStore.get("amtech_owner_session")?.value,
     message: body.message,
+    intent_id: body.intent_id,
   });
 }
