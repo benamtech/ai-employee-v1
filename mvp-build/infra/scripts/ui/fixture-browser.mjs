@@ -90,8 +90,8 @@ try {
   const firstRun = await browser.newPage({ viewport: { width: 1024, height: 768 } });
   await openRoute(firstRun, firstRunUrl);
   await firstRun.getByRole("heading", { name: "Avery is ready", exact: true }).waitFor({ timeout: 20_000 });
-  await firstRun.getByText("No work loop is active", { exact: true }).waitFor({ timeout: 10_000 });
   await firstRun.getByRole("textbox", { name: "Command Avery" }).waitFor({ timeout: 10_000 });
+  assertCount(await firstRun.getByRole("heading", { name: "Current work", exact: true }).count(), 0, "first_run_empty_work_region_present");
   assertCount(await firstRun.locator('[role="tablist"]').count(), 0, "first_run_fixed_tablist_present");
   await firstRun.screenshot({ path: join(screenshotDir, "operating-surface-first-run.png"), fullPage: true });
   await firstRun.close();
@@ -99,7 +99,7 @@ try {
     id: "adaptive-first-run",
     route: `/agent/${employeeId}-new`,
     viewport: "1024x768",
-    checks: ["guided_empty_state", "contextual_command", "no_fixed_tabs"],
+    checks: ["guided_empty_state", "empty_regions_hidden", "contextual_command", "no_fixed_tabs"],
     status: "PASS",
   });
 
