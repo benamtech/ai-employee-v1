@@ -11,7 +11,7 @@
  * (lib/signed-links.ts + lib/preview-links.ts) and builds the resource
  * (lib/preview-render.ts); the web review page renders it.
  */
-import type { WorkDeliverableDescriptor } from "./work-events.js";
+import type { UiResourceEnvelope, WorkDeliverableDescriptor } from "./work-events.js";
 
 /** Every owner-inspectable resource type a signed link can point at. */
 export type PreviewResourceType =
@@ -70,6 +70,9 @@ export interface WorkResource {
   recipient?: string;
   risk?: "low" | "medium" | "high";
   body_kind?: WorkResourceBodyKind;
+  /** Manager-compiled, owner-safe generated interface. The iframe host still
+   *  validates every emitted intent against `actions`; this is presentation only. */
+  ui_resource?: UiResourceEnvelope;
   /** Self-contained, escaped HTML for a `document` body (from artifact-view). */
   body_html?: string;
   /** Signed URL to open the underlying document/file directly (stored artifacts,
