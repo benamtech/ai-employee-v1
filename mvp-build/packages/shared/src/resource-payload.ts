@@ -7,13 +7,14 @@
 import type { WorkEventDescriptor } from "./work-events.js";
 import type { CapabilityCategory, CapabilityGraphNode, ProofEnvelope, SurfaceEnvelope } from "./materialization.js";
 import type { OperatingSurfaceState } from "./operating-system.js";
+import type { TaskCapabilityMatch, ToolCapabilityCatalog, ToolCapabilityDescriptor } from "./task-capabilities.js";
 
 export interface ArtifactRow {
   id: string;
   kind: string;
   mime_type?: string | null;
   storage_ref?: string | null;
-  payload?: { customer_name?: string; job_description?: string; recommended_total?: number };
+  payload?: { customer_name?: string; job_description?: string; recommended_total?: number; project?: Record<string, unknown> };
   created_at: string;
 }
 
@@ -183,6 +184,10 @@ export interface ResourcePayload {
   work_events: WorkEventRow[];
   abilities?: AbilitySummary[];
   capabilities?: CapabilityGraphNode[];
+  /** Transport-neutral owner-safe tools. Presence never grants execution. */
+  tool_catalog?: ToolCapabilityCatalog;
+  tool_capabilities?: ToolCapabilityDescriptor[];
+  task_capability_matches?: TaskCapabilityMatch[];
   surface_envelopes?: SurfaceEnvelope[];
   connection_surfaces?: ConnectionSurface[];
   resurface_items?: ResurfaceItem[];
