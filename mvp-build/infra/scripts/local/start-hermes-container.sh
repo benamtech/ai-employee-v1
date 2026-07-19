@@ -14,8 +14,10 @@ set -a
 source "$profile_dir/.env"
 set +a
 
-version="${HERMES_VERSION:-0.18.0}"
-image="${HERMES_DOCKER_IMAGE:-hermes-agent:${version}}"
+# Hermes v0.18.0 is published under the immutable upstream release tag v2026.7.1.
+# Production may override with the same tag plus an OCI digest.
+version="${HERMES_VERSION:-v2026.7.1}"
+image="${HERMES_DOCKER_IMAGE:-nousresearch/hermes-agent:${version}}"
 employee_id="${EMPLOYEE_ID:?EMPLOYEE_ID missing from profile .env}"
 container="amtech-hermes-${employee_id}"
 network="amtech-employee-${employee_id}"
@@ -26,9 +28,10 @@ model_gateway_health_url="${model_gateway_url%%/v1*}/health"
 runtime_health_url="http://127.0.0.1:${port}/health"
 manager_container="${MANAGER_CONTAINER_NAME:-}"
 model_gateway_container="${MODEL_GATEWAY_CONTAINER_NAME:-}"
+runtime_data="${HERMES_RUNTIME_DATA_DIR:-$(dirname "$workspace")/runtime-data/${employee_id}}"
 
 case "$image" in
-  hermes-agent:*|ghcr.io/nousresearch/hermes-agent:*) ;;
+  hermes-agent:*|nousresearch/hermes-agent:*|ghcr.io/nousresearch/hermes-agent:*) ;;
   *) echo "Hermes image is not allowlisted: $image" >&2; exit 1 ;;
 esac
 
@@ -83,7 +86,23 @@ if [[ "$peer_isolated" == "1" ]]; then
   docker network connect --alias amtech-model-gateway --gw-priority -1 "$network" "$model_gateway_container"
 fi
 
-mkdir -p "$workspace"
+# The rendered profile is immutable authority/configuration. Hermes' own sessions,
+# memory, checkpoints, caches, lazy dependencies, and plugins live in a distinct
+# employee-scoped writable data directory mounted at the upstream HERMES_HOME.
+mkdir -p "$workspace" "$runtime_data"
+if [[ ! -f "$runtime_data/.amtech-runtime-initialized" ]]; then
+  cp -a "$profile_dir/." "$runtime_data/"
+  touch "$runtime_data/.amtech-runtime-initialized"
+fi
+# Refresh only profile-owned inputs. Never overwrite runtime-owned memory/session
+# state during restart or credential rotation.
+for path in config.yaml .env hooks prompts skills plugins profile-build-params.json; do
+  if [[ -e "$profile_dir/$path" ]]; then
+    rm -rf "$runtime_data/$path"
+    cp -a "$profile_dir/$path" "$runtime_data/$path"
+  fi
+done
+chmod 700 "$runtime_data"
 
 security_args=(
   --cap-drop=ALL
@@ -123,7 +142,7 @@ docker run -d \
   -e "HERMES_GID=$(id -g)" \
   -e "API_SERVER_HOST=0.0.0.0" \
   -e "WORKSPACE_DIR=/workspace" \
-  -v "$profile_dir:/opt/data:ro" \
+  -v "$runtime_data:/opt/data" \
   -v "$profile_dir:/opt/amtech/profile:ro" \
   -v "$workspace:/workspace" \
   --tmpfs /opt/amtech/secrets:rw,nosuid,nodev,noexec,size=16m,mode=0700 \
@@ -166,4 +185,4 @@ if [[ "$runtime_healthy" != "1" ]]; then
   exit 1
 fi
 
-echo "container:$container network:$network loopback_port:$port runtime_healthy:$runtime_health_url model_gateway_reachable:$model_gateway_health_url isolated:$peer_isolated"
+echo "container:$container network:$network loopback_port:$port runtime_data:$runtime_data runtime_healthy:$runtime_health_url model_gateway_reachable:$model_gateway_health_url isolated:$peer_isolated"
