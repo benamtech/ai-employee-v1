@@ -24,51 +24,61 @@ export function ReviewClient({
   const [outcome, setOutcome] = useState("");
 
   async function act(action: WorkAction["action"], note?: string) {
-    if (action === "view") return;
+    if (action === "view" || status === "working") return;
     setStatus("working");
+    setOutcome("Submitting this action against the current signed scope.");
     try {
-      const res = await fetch(`/api/employee/${employeeId}/preview/action`, {
+      const response = await fetch(`/api/employee/${employeeId}/preview/action`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signed_token: token, action, note }),
       });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) {
+      const json = await response.json().catch(() => ({}));
+      if (!response.ok) {
         setStatus("failed");
-        setOutcome(json?.error === "already_actioned" ? "You already handled this." : "That did not go through. Try again in a moment.");
+        setOutcome(json?.error === "already_actioned"
+          ? "This review was already handled. Ask your employee for a fresh work object if something changed."
+          : "AMTECH could not prove that the action was accepted. Nothing will be shown as complete; try again or ask for a fresh link.");
         return;
       }
       setStatus("done");
-      setOutcome(action === "approve" ? "Approved. Avery is on it." : action === "reject" ? "Declined. Avery will not proceed." : "Sent to Avery.");
+      setOutcome(action === "approve"
+        ? "Approved. Your employee can continue only within this decision gate."
+        : action === "reject"
+          ? "Declined. Your employee will not perform the held action."
+          : "Your response was accepted and sent to your employee.");
     } catch {
       setStatus("failed");
-      setOutcome("That did not go through. Try again in a moment.");
+      setOutcome("The connection ended before acceptance could be proved. Do not assume the action completed; retry or request a fresh link.");
     }
   }
 
   return (
-    <main className="review-root">
+    <main className="review-root" aria-busy={status === "working"}>
       <style>{REVIEW_CSS}</style>
       <section className="review-shell">
         <header className="review-head">
-          <span>AMTECH</span>
-          <strong>Avery needs your say</strong>
+          <div>
+            <span>AMTECH<span aria-hidden>.</span></span>
+            <strong>Secure Review</strong>
+          </div>
+          <p>{resource?.resource_type === "approval" ? "A decision is held for you" : "One scoped work object"}</p>
         </header>
+
         {error || !resource ? (
           <div className="review-state">
             <p>{error === "expired" ? "Expired" : "Unavailable"}</p>
             <h1>{error === "expired" ? "This link has expired" : error === "not_found" ? "Nothing to show here" : "This link cannot be opened"}</h1>
             <span>
               {error === "expired"
-                ? "For security, review links do not last forever. Text Avery and it can send a fresh one."
-                : "Text Avery and it can resend the work object."}
+                ? "Review links expire and can also be revoked. Text your employee for a fresh link."
+                : "AMTECH failed closed rather than showing work from another employee or assignment. Text your employee to resend it."}
             </span>
           </div>
         ) : (
           <div className="review-object">
             <WorkObjectRenderer resource={resource} onAction={act} />
-            {status === "done" ? <div className="review-outcome done">{outcome}</div> : null}
-            {status === "failed" ? <div className="review-outcome failed">{outcome}</div> : null}
+            {status !== "idle" ? <div className={`review-outcome ${status}`} role={status === "failed" ? "alert" : "status"}>{outcome}</div> : null}
           </div>
         )}
       </section>
@@ -77,63 +87,10 @@ export function ReviewClient({
 }
 
 const REVIEW_CSS = `
-  .review-root {
-    min-height: 100dvh;
-    background:
-      radial-gradient(circle at 50% -18%, rgba(220,239,244,.9), transparent 24rem),
-      linear-gradient(180deg, #fffaf0 0%, #ebe9e1 100%);
-    color: #111717;
-    font-family: var(--font-inter), Inter, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  }
-  .review-shell {
-    width: min(100%, 600px);
-    min-height: 100dvh;
-    margin: 0 auto;
-    background: rgba(255,255,255,.78);
-    border-left: 1px solid rgba(62,76,72,.14);
-    border-right: 1px solid rgba(62,76,72,.14);
-    box-shadow: 0 24px 70px rgba(43,52,48,.14);
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-  .review-head {
-    min-height: 58px;
-    padding: 0 16px;
-    border-bottom: 1px solid rgba(62,76,72,.14);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    font-size: 11px;
-    font-weight: 780;
-    text-transform: uppercase;
-    backdrop-filter: blur(16px);
-  }
-  .review-head span { color: #9f1f2b; }
-  .review-head strong { color: #687777; font-size: 11px; }
-  .review-object { padding: 16px; display: grid; gap: 12px; align-content: start; }
-  .review-state { padding: 42px 18px; text-align: center; display: grid; gap: 10px; align-content: center; }
-  .review-state p {
-    margin: 0;
-    font-size: 11px;
-    font-weight: 780;
-    text-transform: uppercase;
-    color: #b4323a;
-  }
-  .review-state h1 { margin: 0; font-size: 28px; line-height: 1.1; }
-  .review-state span { color: #687777; line-height: 1.5; }
-  .review-outcome {
-    position: sticky;
-    bottom: 0;
-    border: 1px solid rgba(62,76,72,.14);
-    background: rgba(255,255,255,.92);
-    border-radius: 16px;
-    padding: 12px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 780;
-    text-transform: uppercase;
-  }
-  .review-outcome.done { color: #23734d; }
-  .review-outcome.failed { color: #b4323a; }
+  .review-root{min-height:100dvh;padding:0 12px;background:radial-gradient(circle at 50% -12%,rgba(223,246,255,.95),transparent 28rem),radial-gradient(circle at 90% 12%,rgba(225,29,42,.06),transparent 22rem),var(--amtech-canvas);color:var(--amtech-ink);font-family:var(--amtech-font)}
+  .review-shell{width:min(100%,640px);min-height:100dvh;margin:0 auto;background:rgba(255,255,255,.84);border-left:1px solid var(--amtech-line);border-right:1px solid var(--amtech-line);box-shadow:var(--amtech-shadow-float);backdrop-filter:blur(30px);display:grid;grid-template-rows:auto 1fr}
+  .review-head{min-height:72px;padding:12px 20px;border-bottom:1px solid var(--amtech-line);display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,.78);backdrop-filter:blur(28px)}.review-head>div{display:grid;gap:2px}.review-head span{font-weight:850;letter-spacing:.04em}.review-head span span{color:var(--amtech-red)}.review-head strong{font-size:12px;color:var(--amtech-muted)}.review-head p{max-width:210px;text-align:right;font-size:12px;color:var(--amtech-muted)}
+  .review-object{padding:20px;display:grid;gap:14px;align-content:start}.review-state{padding:48px 24px;text-align:center;display:grid;gap:12px;align-content:center}.review-state p{font-size:11px;font-weight:780;letter-spacing:.12em;text-transform:uppercase;color:var(--amtech-red)}.review-state h1{font-size:clamp(28px,8vw,40px);line-height:1.05;letter-spacing:-.035em}.review-state span{max-width:480px;margin:0 auto;color:var(--amtech-muted);line-height:1.55}
+  .review-outcome{position:sticky;bottom:12px;padding:13px 15px;border:1px solid var(--amtech-line);border-radius:16px;background:rgba(255,255,255,.94);box-shadow:var(--amtech-shadow-card);text-align:center;font-size:13px;font-weight:750;backdrop-filter:blur(24px)}.review-outcome.working{border-color:rgba(37,99,235,.2);color:var(--amtech-blue)}.review-outcome.done{border-color:rgba(22,138,87,.2);background:var(--amtech-green-soft);color:var(--amtech-green)}.review-outcome.failed{border-color:rgba(225,29,42,.22);background:var(--amtech-danger-soft);color:var(--amtech-red)}
+  @media(max-width:640px){.review-root{padding:0}.review-shell{border:0;box-shadow:none}.review-head{align-items:flex-start}.review-object{padding:16px}.review-head p{max-width:150px}}
 `;
