@@ -4,7 +4,7 @@
 
 - Branch: `employee-production-tuesday`
 - Draft PR: `#23` into `research`
-- Implementation/CI anchor: `34f67dd4bd3d2a944fd036ca7e818f0857ba9e0e`
+- Implementation/CI anchor: `e0a585290c3eb0ef78e1ac23cfcbe631facba347`
 - `main`: untouched
 
 ## Status
@@ -61,18 +61,15 @@ Canonical decision record:
 
 ## Implementation
 
-### Deterministic adaptive operating surface
+### Canonical adaptive planner parity
 
-Changed `mvp-build/packages/shared/src/operating-system.ts`:
+The canonical planner in `mvp-build/packages/shared/src/operating-layout.ts` already implemented deterministic focus selection through explicit state precedence, newest `updated_at`, and stable ID tie-breaking. It also bounded event-volume priority and encoded explicit rationale for high-risk decisions, reached active saves, and material delegated failures.
 
-- focus selection no longer depends on incoming loop order;
-- explicit state precedence, newest `updated_at`, and stable ID tie-breaking select focus;
-- event-volume priority is bounded;
-- high-risk decisions receive `high_risk_owner_decision` prominence;
-- reached active saves receive `return_condition_reached` prominence;
-- blocked/failed delegated work receives `delegated_failure_material` prominence.
+Changed `mvp-build/packages/shared/src/operating-system.ts` and `mvp-build/tests/unit/amtech-agent-ui-contract.test.ts`:
 
-This closes the source/test drift already encoded in `amtech-agent-ui-contract.test.ts`.
+- removed the second planner implementation from the contract module;
+- re-exported the canonical V2 planner from the contract module;
+- added package-root/direct-module parity coverage so scoring and focus semantics cannot silently diverge again.
 
 ### Generated-view congruence and design-system alignment
 
@@ -103,21 +100,21 @@ The pass:
 - retained server-readiness diagnostics and evidence upload;
 - fixed the browser-discovered 80×22 login brand link to a full 44px target instead of weakening the target assertion.
 
-## Exact CI evidence on `34f67dd4bd3d2a944fd036ca7e818f0857ba9e0e`
+## Exact CI evidence on `e0a585290c3eb0ef78e1ac23cfcbe631facba347`
 
-- Phase 2 Remediation Plan Integrity — run `29682503047`: success
-- S10.1 Onboarding Identity Authority — run `29682503074`: success
-- Lane 1 Relationships and Authorization — run `29682503095`: success
-- S2 S7 S9 Production Boundary — run `29682503063`: success
-- Employee Work Production Boundary — run `29682503078`: success
-- Lane 10 Integrated CI and Release Evidence — run `29682503096`: success
-- Agent Operating Surface Standard — run `29682503072`: success
+- Phase 2 Remediation Plan Integrity — run `29683146460`: success
+- Lane 1 Relationships and Authorization — run `29683146457`: success
+- S10.1 Onboarding Identity Authority — run `29683146465`: success
+- S2 S7 S9 Production Boundary — run `29683146476`: success
+- Employee Work Production Boundary — run `29683146456`: success
+- Lane 10 Integrated CI and Release Evidence — run `29683146463`: success
+- Agent Operating Surface Standard — run `29683146482`: success
 
 The UI workflow success includes:
 
 - shared/db/Manager/web typecheck and required builds;
 - UI source validation;
-- focused UI contract tests, including generated-view parity;
+- focused UI contract tests, including generated-view and adaptive-planner export parity;
 - compiled production Next build;
 - adaptive fixture browser acceptance;
 - unauthenticated login/dashboard product-shell acceptance;
