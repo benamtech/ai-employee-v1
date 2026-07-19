@@ -187,7 +187,17 @@ describe.skipIf(!databaseUrl)("S10.1 onboarding identity PostgreSQL boundary", (
     const row = activation.rows[0];
     expect(row.duplicate).toBe(false);
 
-    const lateOwner = await createAccountMember(owner.accountId, "activation-late-owner", "owner");
+    const lateAccountOwner = await createAccountMember(owner.accountId, "activation-late-owner", "owner");
+    await db!.query(`
+      insert into assignment_principals(
+        id, assignment_id, principal_id, principal_class, role, status,
+        starts_at, policy_version, provenance
+      ) values (
+        'aspr_s10_explicit_coowner',$1,$2,'human','owner','active',now(),
+        'authorization-v1','{"source":"explicit_test_assignment"}'::jsonb
+      )
+    `, [row.assignment_id, coOwner.humanId]);
+
     const requiredSurfaceActions = ["read", "message:create", "stream:read", "materialize", "heartbeat", "turn:create"];
     const authority = await db!.query(`
       select
@@ -207,18 +217,19 @@ describe.skipIf(!databaseUrl)("S10.1 onboarding identity PostgreSQL boundary", (
         and ap.principal_id = any($4::text[])
       group by ap.principal_id, ap.status
       order by ap.principal_id
-    `, [row.assignment_id, row.employee_id, requiredSurfaceActions, [owner.humanId, coOwner.humanId, lateOwner.humanId, unassignedViewer.humanId]]);
-    expect(authority.rows.map((entry) => entry.principal_id).sort()).toEqual([owner.humanId, coOwner.humanId, lateOwner.humanId].sort());
+    `, [row.assignment_id, row.employee_id, requiredSurfaceActions, [owner.humanId, coOwner.humanId, lateAccountOwner.humanId, unassignedViewer.humanId]]);
+    expect(authority.rows.map((entry) => entry.principal_id).sort()).toEqual([owner.humanId, coOwner.humanId].sort());
     for (const entry of authority.rows) {
       expect(entry.status).toBe("active");
       expect(entry.has_full_surface_grant).toBe(true);
     }
 
     await db!.query(`
-      update account_memberships
-         set role = 'viewer'
-       where account_id = $1 and user_id = $2
-    `, [owner.accountId, coOwner.userId]);
+      update assignment_principals
+         set status = 'revoked',
+             ends_at = greatest(now(), starts_at + interval '1 microsecond')
+       where assignment_id = $1 and principal_id = $2 and role = 'owner'
+    `, [row.assignment_id, coOwner.humanId]);
     const revoked = await db!.query(`
       select ap.status as principal_status, g.status as grant_status
         from assignment_principals ap
