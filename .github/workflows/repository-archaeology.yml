@@ -29,10 +29,16 @@ jobs:
         with:
           node-version: 22
 
-      - name: Read every tracked file and build archaeology bundle
-        run: node mvp-build/scripts/repository-archaeology.mjs
+      - id: archaeology
+        name: Read every tracked file and build archaeology bundle
+        continue-on-error: true
+        run: |
+          mkdir -p mvp-build/.artifacts/repository-archaeology
+          node mvp-build/scripts/repository-archaeology.mjs > mvp-build/.artifacts/repository-archaeology/archaeology-run.log 2>&1
+          cat mvp-build/.artifacts/repository-archaeology/archaeology-run.log
 
       - name: Verify exhaustive ledger exists
+        if: steps.archaeology.outcome == 'success'
         run: |
           test -s mvp-build/.artifacts/repository-archaeology/repository-archaeology.json
           test -s mvp-build/.artifacts/repository-archaeology/file-primitives.jsonl
@@ -41,10 +47,15 @@ jobs:
           test -s mvp-build/.artifacts/repository-archaeology/defect-audit.json
           test -s mvp-build/.artifacts/repository-archaeology/README.md
 
-      - name: Upload exact-SHA archaeology evidence
+      - name: Upload exact-SHA archaeology evidence and diagnostics
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: repository-archaeology-${{ github.sha }}
           path: mvp-build/.artifacts/repository-archaeology/
           if-no-files-found: error
           retention-days: 30
+
+      - name: Fail when traversal failed
+        if: steps.archaeology.outcome != 'success'
+        run: exit 1
