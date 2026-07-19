@@ -22,6 +22,12 @@ interface ArtifactApprovalInput {
   expiry_seconds?: number;
 }
 
+function scalarString(value: unknown): string | null {
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return null;
+}
+
 async function requestArtifactApproval(ctx: Parameters<ToolHandler>[0], input: ArtifactApprovalInput) {
   if (!ctx.assignment_id) return failed("unauthorized", "Artifact approval requires an assignment-bound employee principal.", {
     account_id: input.account_id,
@@ -98,6 +104,9 @@ async function requestArtifactApproval(ctx: Parameters<ToolHandler>[0], input: A
   const row = Array.isArray(result.data) ? result.data[0] : result.data;
   if (!row || typeof row !== "object") throw new Error("artifact_approval_request_not_persisted");
   const approval = row as Record<string, unknown>;
+  const snapshotHash = scalarString(approval.snapshot_hash);
+  const expiresAt = scalarString(approval.expires_at);
+  const policyVersion = scalarString(assignment.data.policy_version);
   const audit_id = await writeAudit(ctx.db, {
     assignment_id: ctx.assignment_id,
     account_id: input.account_id,
@@ -111,7 +120,7 @@ async function requestArtifactApproval(ctx: Parameters<ToolHandler>[0], input: A
       resource_class: "artifact",
       resource_id: artifactId,
       current_revision_id: artifact.data.current_revision_id,
-      snapshot_hash: approval.snapshot_hash ?? null,
+      snapshot_hash: snapshotHash,
       command_id: commandId,
       effect_key: effectKey,
     },
@@ -130,12 +139,12 @@ async function requestArtifactApproval(ctx: Parameters<ToolHandler>[0], input: A
     proof: {
       approval_id: approvalId,
       artifact_id: artifactId,
-      current_revision_id: artifact.data.current_revision_id,
-      snapshot_hash: approval.snapshot_hash ?? null,
-      policy_version: assignment.data.policy_version,
+      current_revision_id: String(artifact.data.current_revision_id),
+      snapshot_hash: snapshotHash,
+      policy_version: policyVersion,
       command_id: commandId,
       effect_key: effectKey,
-      expires_at: approval.expires_at ?? null,
+      expires_at: expiresAt,
     },
     user_facing_summary_hint: input.summary,
     next_suggested_action: "Wait for an authorized human to approve the exact validated artifact revision.",
