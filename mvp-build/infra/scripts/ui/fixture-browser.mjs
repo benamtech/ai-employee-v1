@@ -160,7 +160,7 @@ function assertCount(actual, expected, code) {
 
 async function openRoute(page, url) {
   await waitForAppRoute(url);
-  await page.goto(url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  await page.goto(url, { waitUntil: "networkidle", timeout: 90_000 });
 }
 
 async function serverReady() {
