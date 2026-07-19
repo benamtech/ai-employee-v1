@@ -35,6 +35,7 @@ function profileRequest(token: string, version: number, workspace: string): Prov
   return {
     request_id: `preq_profile_${version}`,
     operation: version === 1 ? "render_profile" : "rotate_model_gateway_credential",
+    profile_package_key: "contractor_estimator",
     account_id: "acct_alpha",
     employee_id: "emp_alpha",
     issued_at: new Date().toISOString(),
