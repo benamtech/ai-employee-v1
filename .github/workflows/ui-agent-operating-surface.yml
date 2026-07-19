@@ -60,7 +60,20 @@ jobs:
       - run: npm run typecheck --workspace @amtech/shared
       - run: npm run build --workspace @amtech/db
       - run: npm run typecheck --workspace @amtech/db
-      - run: npm run typecheck --workspace @amtech/manager
+      - name: Typecheck Manager
+        shell: bash
+        run: |
+          set +e
+          npm run typecheck --workspace @amtech/manager 2>&1 | tee "$RUNNER_TEMP/manager-typecheck.log"
+          exit ${PIPESTATUS[0]}
+      - name: Upload Manager typecheck diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-ui-typecheck-${{ github.sha }}
+          path: ${{ runner.temp }}/manager-typecheck.log
+          if-no-files-found: error
+          retention-days: 7
       - run: npm run typecheck --workspace @amtech/web
       - run: npm run ui:validate
       - run: npm run test:ui:contracts
