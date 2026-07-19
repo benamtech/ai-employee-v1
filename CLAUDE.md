@@ -1,9 +1,9 @@
 # CLAUDE.md — AMTECH AI Employee repository instructions
 
-Status: active
-Updated: 2026-07-18
+Status: active  
+Updated: 2026-07-19
 
-Read `identity.md` first, then `CODEGRAPH.md`. `AGENTS.md` contains the tool-agnostic repository rules; the nearest scoped `CLAUDE.md`, `AGENTS.md`, and `CODEGRAPH.md` govern work inside a subtree.
+Read `identity.md` first. Root `AGENTS.md` contains the tool-agnostic mirror of these repository rules. The nearest scoped `CLAUDE.md`, `AGENTS.md`, and `CODEGRAPH.md` govern work inside a subtree.
 
 ## Repository purpose
 
@@ -11,9 +11,9 @@ This repository contains:
 
 1. the AMTECH AI Employee product implementation in `mvp-build/`;
 2. the company/product brain and historical rationale in `wiki/`;
-3. supporting product and operating documents in `docs/`.
+3. supporting product, design, and operating documents in `docs/`.
 
-The former `GTM-RESEARCH/website-framework/` workspace moved to the independent `benamtech/hyper-site` repository. It is not part of the AI Employee architecture, execution plan, CI, release proof, or documentation authority.
+The former `GTM-RESEARCH/website-framework/` workspace moved to the independent `benamtech/hyper-site` repository. It is not part of AI Employee architecture, execution, CI, release proof, or documentation authority.
 
 ## Canonical product and offer
 
@@ -27,45 +27,40 @@ Canonical offer:
 
 The public estimator is outdated and non-canonical.
 
-## Production work read order
+## Mandatory product-work read order
 
-1. `mvp-build/CODEGRAPH.md`
-2. `mvp-build/memory/MEMORY.md`, newest relevant handoff first
-3. `mvp-build/STANDARD.md`
-4. `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`
-5. the nearest scoped instructions
-6. source, migrations, scripts, tests, proof artifacts, and release records
+1. `identity.md`
+2. root `CODEGRAPH.md`
+3. `mvp-build/AGENTS.md` or `mvp-build/CLAUDE.md`
+4. `mvp-build/CODEGRAPH.md`
+5. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
+6. `mvp-build/STANDARD.md`
+7. `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`
+8. `mvp-build/docs/architecture/README.md`
+9. `mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`
+10. applicable UX, deployment, source, migrations, tests, workflow, proof, and release files
 
-Source, migrations, executable proof, and newest memory outrank stale prose.
+Source, applied migrations, executable proof, and newest scoped memory outrank stale prose.
 
 ## Current branch state
 
-- Integration branch: `employee-production-tuesday`
-- Base: `research`
-- Integration PR: draft `#23`
-- `main` is not the integration or release shortcut
-- Current implementation proof anchor: `a9184be1af68ed6c5372d642928db46b51eb0506`
-- Branch-level status: `standard-remediation_s2-s9-branch-ci-postgres-image-accepted_not-live-accepted_not-launch-cleared`
-- Lane 1 relationship/authorization and Lane 3 durable command/effect foundations are integrated
-- S5 connector custody, S6 commercial attribution, S7 approval authority, source-wired S8 platform-admin authority, and S9 authority-version revocation are present on the integration branch
-- Owner web turns use C3 around the existing Hermes runtime path; ambiguous Hermes turn jobs are repairable without a second effect
-- New signed preview/action credentials require one exact assignment and carry current authority versions
-- Generated Manager routing and the production Manager image build are green at the implementation proof anchor
-- Real Supabase, live runtime, provider, fixture-free browser/SMS, commercial reconciliation, capacity, recovery, rollback, deployment, and production acceptance remain pending
-
-Exact implementation-head Actions:
-
-- Phase 2 Remediation Plan Integrity `29662757178`: success
-- Lane 1 Relationships and Authorization `29662757194`: success
-- S2 S7 S9 Production Boundary `29662757252`: success
-- Lane 10 Integrated CI and Release Evidence `29662757197`: success
-- Employee Work Production Boundary `29662757204`: success
-
-The detailed branch checkpoint is `mvp-build/memory/2026-07-18-s2-s9-authority-runtime-checkpoint.md`.
+- Integration branch: `employee-production-tuesday`.
+- Base: `research`.
+- Integration PR: draft `#23`.
+- Migration head: `0069`.
+- `main` is not the integration or release shortcut.
+- Current exact proof anchor and workflow IDs live in root/scoped CODEGRAPH, the newest handoff, and PR `#23`.
+- Real Supabase, live runtime, provider, fixture-free browser/SMS/Review, commercial reconciliation, capacity/fairness, crash recovery, rollback, deployment attestation, and production acceptance remain separate live gates unless exact evidence says otherwise.
 
 ## Runtime architecture rule
 
-Stay as close to Hermes runtime as possible. Hermes remains the agent substrate for execution, transcript/session continuity, streaming, recovery, rotation, materialization, and memory behavior. Manager adds authority, durable command/effect semantics, credential custody, approval, revocation, accounting provenance, repair, and release proof. Do not build a parallel agent runtime when an existing Hermes capability can be constrained or adapted.
+Stay as close to Hermes runtime as possible. Hermes remains the agent substrate for execution, transcript/session continuity, streaming, recovery, rotation, materialization, and memory behavior. Manager adds identity/assignment authority, durable command/effect semantics, credential custody, approval, revocation, accounting provenance, repair, and release proof. Do not build a parallel agent runtime when an existing Hermes capability can be constrained or adapted.
+
+## Agent-role rule
+
+For substantial work, name one primary role and its interacting subsystems using `mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`. A role defines the source hubs, invariants, and validation surface; it does not grant authority to ignore neighboring systems.
+
+Trajectory artifacts in `mvp-build/docs/architecture/trajectories/` are useful only for dependency ordering, interaction analysis, hard-wall checks, and testable bifurcation warnings. They do not override source, grant runtime authority, or promote production acceptance.
 
 ## Working rules
 
@@ -74,20 +69,28 @@ Stay as close to Hermes runtime as possible. Hermes remains the agent substrate 
 - Keep specialist lanes narrow and dependency-ordered.
 - Preserve existing production-like Manager, Hermes, reconciler, inbox, provider, owner-surface, materialization, session, recovery, and deployment machinery; adapt it to shared contracts rather than rebuilding parallel platforms.
 - Every consequential path resolves principal, assignment or approved platform/system context, policy, bounded effect, durable receipt, and audit/commercial provenance.
-- Never claim acceptance from source wiring, fixtures, old runs, confidence, or documentation-only SHAs.
+- Never claim acceptance from source wiring, fixtures, old runs, confidence, trajectory scores, or documentation-only SHAs.
 - Update the nearest CODEGRAPH and durable memory after substantial architectural or implementation work.
 - Keep public claims synchronized with the exact deployed and proven SHA.
 
 ## Validation vocabulary
 
-- `source-wired`: code/schema/config exists; name checks actually run.
-- `ci-accepted`: the named CI gate passed on the named SHA.
-- `real-supabase-accepted`: the actual database target passed migration and behavior checks.
+- `source-wired`: code/schema/config exists; name the checks that ran.
+- `ci-accepted`: the named CI gate passed on the named SHA and scope.
+- `real-supabase-accepted`: the approved database target passed migration and behavior checks.
 - `runtime-accepted`: real host/runtime proof exists.
 - `provider-accepted`: real external provider IDs exist.
-- `browser/channel-accepted`: fixture-free web/SMS proof exists.
+- `browser/channel-accepted`: fixture-free web/SMS/signed-review proof exists.
 - `commercial-accepted`: usage, payer/beneficiary, provider cost, and invoice reconciliation passed.
 - `production-ready`: every non-waivable Standard gate is green on the exact deployed SHA.
+
+## Documentation and memory
+
+- Root `CODEGRAPH.md` owns repository-level current state and routing.
+- `mvp-build/CODEGRAPH.md` owns implementation topology, migration head, current proof boundary, and next dependency gates.
+- `mvp-build/memory/MEMORY.md` is the sole handoff index.
+- `mvp-build/docs/architecture/12-document-control-memory-and-handoff-map.md` defines document families and synchronization rules.
+- Historical handoffs and implementation records remain point-in-time evidence; do not silently repeat them as current state.
 
 ## Git discipline
 
