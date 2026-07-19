@@ -2,6 +2,9 @@ import type { Context, Hono } from "hono";
 import { StartOnboardingIdentityVerification } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { requireOwnerSession } from "./owner-session.js";
+import { authorizeOwnerAssignment } from "./owner-assignment-authority.js";
+import { buildEmployeeSnapshot } from "./employee-stream.js";
+import { buildOperatingSurfaceState } from "./operating-surface.js";
 import {
   loadOnboardingIdentity,
   processMiddeskIdentityWebhook,
@@ -108,6 +111,32 @@ export function registerOnboardingIdentityRoutes(app: Hono, denyInternal: DenyIn
           ? "identity_revoked"
           : "identity_unverified";
     return c.json({ allowed: identity.status === "verified", error, identity });
+  });
+
+  /**
+   * Owner-safe operating snapshot. This is registered beside onboarding routes to
+   * preserve the generated server seam in this pass; it remains an ordinary read:
+   * exact owner session + assignment + materialize scope, with no C3 registration.
+   */
+  app.post("/manager/employee/:employeeId/operating-snapshot", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const employeeId = c.req.param("employeeId");
+    const { owner_session_token } = await c.req.json().catch(() => ({}));
+    const db = serviceClient();
+    const session = await requireOwnerSession(db, String(owner_session_token ?? ""));
+    if (!session) return c.json({ error: "owner_session_invalid" }, 401);
+    const authority = await authorizeOwnerAssignment(db, {
+      session,
+      employee_id: employeeId,
+      resource_class: "employee",
+      resource_id: employeeId,
+      action: "materialize",
+    });
+    if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
+    const snapshot = await buildEmployeeSnapshot(db, employeeId, session.account_id, authority.assignment.assignment_id);
+    const operating_state = await buildOperatingSurfaceState(db, snapshot);
+    return c.json({ ...snapshot, operating_state });
   });
 
   app.post("/webhooks/middesk/onboarding-identity", async (c) => {
