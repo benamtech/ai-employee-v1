@@ -169,8 +169,16 @@ jobs:
           set -euo pipefail
           EVIDENCE_DIR="infra/.local/ui-fixtures"
           STANDALONE_ROOT="apps/web/.next/standalone"
-          APP_ROOT="$STANDALONE_ROOT/apps/web"
-          mkdir -p "$EVIDENCE_DIR" "$APP_ROOT/.next"
+          mkdir -p "$EVIDENCE_DIR"
+
+          SERVER_ENTRY="$(find "$STANDALONE_ROOT" -path '*/node_modules' -prune -o -type f -name server.js -print | sort | head -n 1)"
+          if [ -z "$SERVER_ENTRY" ]; then
+            echo "No standalone Next server.js found under $STANDALONE_ROOT." >&2
+            find "$STANDALONE_ROOT" -maxdepth 5 -type f -print >&2 || true
+            exit 1
+          fi
+          APP_ROOT="$(dirname "$SERVER_ENTRY")"
+          mkdir -p "$APP_ROOT/.next"
           rm -rf "$APP_ROOT/.next/static"
           cp -R apps/web/.next/static "$APP_ROOT/.next/static"
           if [ -d apps/web/public ]; then
@@ -179,8 +187,8 @@ jobs:
           fi
 
           (
-            cd "$STANDALONE_ROOT"
-            PORT=3200 HOSTNAME=127.0.0.1 node apps/web/server.js
+            cd "$APP_ROOT"
+            PORT=3200 HOSTNAME=127.0.0.1 node server.js
           ) >"$GITHUB_WORKSPACE/mvp-build/$EVIDENCE_DIR/standalone-server.log" 2>&1 &
           SERVER_PID=$!
           cleanup() {
