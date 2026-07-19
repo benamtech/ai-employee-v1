@@ -46,14 +46,23 @@ describe("employee snapshot strict reads", () => {
       .rejects.toThrow("employee_snapshot_read_failed:approvals:XX001");
   });
 
-  it("routes every production owner snapshot entry point through the strict adapter", async () => {
+  it("routes every production owner and employee context entry point through strict reads", async () => {
     const generator = await readFile(join(process.cwd(), "apps/manager/scripts/generate-production-server.mjs"), "utf8");
     const operatingRoutes = await readFile(join(process.cwd(), "apps/manager/src/lib/onboarding-identity-routes.ts"), "utf8");
     const previews = await readFile(join(process.cwd(), "apps/manager/src/lib/preview-render.ts"), "utf8");
+    const mcp = await readFile(join(process.cwd(), "apps/manager/src/lib/mcp-server.ts"), "utf8");
+    const brain = await readFile(join(process.cwd(), "apps/manager/src/lib/business-brain.ts"), "utf8");
 
     expect(generator).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
     expect(generator).toContain("fetchWorkEventsSinceStrict as fetchWorkEventsSince");
     expect(operatingRoutes).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
+    expect(operatingRoutes).toContain("buildOperatingSurfaceState(strictSnapshotClient(db), snapshot)");
     expect(previews).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
+    expect(mcp).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
+    expect(brain).toContain('"business_brain.employee"');
+    expect(brain).toContain('"business_brain.manifest"');
+    expect(brain).toContain('"business_brain.profile_build"');
+    expect(brain).toContain('"business_brain.facts"');
+    expect(brain).toContain("if (result.error) throw result.error");
   });
 });
