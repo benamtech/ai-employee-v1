@@ -78,6 +78,7 @@ function profileRequest(token: string, version: number, workspace: string): Prov
       },
     },
     render_secrets: {
+      manager_mcp_token: `mcp_scoped_employee_alpha_v${version}`,
       model_gateway_token: token,
     },
   };
