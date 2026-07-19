@@ -36,7 +36,7 @@ const employeeId = `emp_migration_${suffix}`;
 
 try {
   await client.connect();
-  const expectedMigrations = [
+  const workerMigrations = [
     "0032_gateway_reconciler_inbox_foundations.sql",
     "0033_provisioning_operation_key_retry_idx.sql",
     "0034_reconciler_workers_and_ambient_replay.sql",
@@ -45,8 +45,14 @@ try {
     "0037_welcome_effect_ready_gate.sql",
     "0038_needs_reprovision_command_trigger.sql",
   ];
+  const artifactMigrations = [
+    "0070_effective_capabilities_and_artifact_revisions.sql",
+    "0071_artifact_policy_seed_and_contract_guards.sql",
+    "0072_artifact_revision_scope_guards.sql",
+  ];
+  const expectedMigrations = [...workerMigrations, ...artifactMigrations];
   const applied = new Set((await rows("select name from _migrations where name = any($1::text[])", [expectedMigrations])).map((row) => row.name));
-  check("migration_ledger_0032_0038", expectedMigrations.every((name) => applied.has(name)), `${applied.size}/${expectedMigrations.length}`);
+  check("migration_ledger_worker_and_artifact", expectedMigrations.every((name) => applied.has(name)), `${applied.size}/${expectedMigrations.length}`);
 
   const controlTables = [
     "model_gateway_credentials",
@@ -56,6 +62,9 @@ try {
     "ambient_event_inbox",
     "ambient_event_dead_letters",
     "ambient_effect_receipts",
+    "artifact_revisions",
+    "artifact_validations",
+    "effective_capability_evidence",
   ];
   const tableSecurity = await rows(`
     select c.relname, c.relrowsecurity,
@@ -88,6 +97,29 @@ try {
     check(`service_role_execute:${fn.proname}`, fn.service_execute === true);
     check(`browser_execute_revoked:${fn.proname}`, fn.anon_execute === false && fn.authenticated_execute === false);
   }
+
+  const viewerActions = (await one("select amtech_employee_surface_actions_for_role('viewer') as actions"))?.actions ?? [];
+  const operatorActions = (await one("select amtech_employee_surface_actions_for_role('operator') as actions"))?.actions ?? [];
+  check("viewer_workbench_read_only", !viewerActions.some((action) => ["connector:connect", "artifact:revise", "artifact:validate", "artifact:publish"].includes(action)), viewerActions.join(","));
+  check("operator_workbench_actions_present", ["connector:connect", "artifact:revise", "artifact:validate", "artifact:publish"].every((action) => operatorActions.includes(action)), operatorActions.join(","));
+
+  const artifactTriggers = await rows(`
+    select t.tgname
+      from pg_trigger t
+      join pg_class c on c.oid = t.tgrelid
+     where not t.tgisinternal
+       and t.tgname = any($1::text[])
+  `, [[
+    "employee_assignments_sync_artifact_publish_policy",
+    "artifact_revisions_assert_scope",
+    "artifact_validations_assert_scope",
+    "artifacts_assert_current_revision_scope",
+  ]]);
+  check("artifact_scope_and_policy_triggers_present", artifactTriggers.length === 4, `${artifactTriggers.length}/4`);
+
+  const approvalSnapshot = await one("select pg_get_functiondef('amtech_approval_snapshot(text,text,text,text)'::regprocedure) as body");
+  const snapshotBody = String(approvalSnapshot?.body ?? "");
+  check("artifact_approval_snapshot_binds_head_hash", snapshotBody.includes("publish_artifact_sandbox") && snapshotBody.includes("current_revision_id") && snapshotBody.includes("content_sha256"));
 
   await client.query("begin");
   await client.query("insert into accounts(id, display_name) values($1, $2)", [accountId, "Migration Verification"]);
