@@ -97,12 +97,62 @@ describe("quiet work-event projection", () => {
     expect(materialized.surface_envelopes.some((envelope) => envelope.proof.inbound_event_id === "evt_observe")).toBe(true);
   });
 
+  it("projects Manager-compiled generated UI into the canonical operating resource", async () => {
+    const input = snapshot();
+    input.work_events.push({
+      id: "evt_generated",
+      event_type: "proposal.ready",
+      provider_id: "provider_fixture",
+      status: "delivered",
+      created_at: "2026-07-19T08:01:00.000Z",
+      work_event_descriptor: {
+        account_id: accountId,
+        employee_id: employeeId,
+        source_event_id: "evt_generated",
+        move: "review",
+        title: "Send customer proposal",
+        summary: "A customer-facing proposal is ready for owner review.",
+        deliverable: {
+          type: "outbound_message",
+          title: "Customer proposal",
+          refs: { approval_id: "apr_generated" },
+          leaves_business: true,
+          acceptance: ["approve", "reject", "respond"],
+          ui_resource: {
+            type: "resource",
+            resource: {
+              uri: "ui://amtech/outbound_message/apr_generated",
+              mimeType: "text/html",
+              text: "<!doctype html><html><body><button data-intent='accept'>Approve</button></body></html>",
+            },
+          },
+        },
+      },
+    });
+
+    const materialized = materializeEmployeeSnapshot(input);
+    const envelope = materialized.surface_envelopes.find((candidate) => candidate.proof.inbound_event_id === "evt_generated");
+    expect(envelope?.render_hints.tier).toBe("mcp_ui");
+    expect(envelope?.assignment_id).toBe(assignmentId);
+    expect(envelope?.resource?.assignment_id).toBe(assignmentId);
+    expect(envelope?.resource?.ui_resource?.resource.uri).toBe("ui://amtech/outbound_message/apr_generated");
+    expect(envelope?.resource?.actions.map((action) => action.action)).toEqual(["approve", "reject", "respond"]);
+
+    const renderer = await readFile(join(process.cwd(), "apps/web/app/agent/[employeeId]/components/WorkObjectRenderer.tsx"), "utf8");
+    expect(renderer).toContain("resource.ui_resource");
+    expect(renderer).toContain("<McpUiResource");
+    expect(renderer).toContain('candidate.action === action');
+    expect(renderer).toContain('intent === "accept" || intent === "accept_all"');
+  });
+
   it("bounds owner stream authorization lifetime and disables proxy buffering", async () => {
     const route = await readFile(join(process.cwd(), "apps/web/app/api/employee/[employeeId]/events/route.ts"), "utf8");
 
     expect(route).toContain("OWNER_STREAM_REAUTH_MS");
     expect(route).toContain("AbortController");
     expect(route).toContain('cache: "no-store"');
+    expect(route).toContain('"X-AMTECH-Owner-Session": token');
     expect(route).toContain('"X-Accel-Buffering": "no"');
+    expect(route).not.toContain("owner_session_token=");
   });
 });
