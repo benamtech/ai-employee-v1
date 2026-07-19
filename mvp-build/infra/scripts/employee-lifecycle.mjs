@@ -35,6 +35,8 @@ const commandByAction = {
   stop: "suspend",
   repair: "repair_drift",
   reprovision: "reprovision",
+  replace: "replace_runtime",
+  teardown: "teardown",
   rotate: "rotate_model_gateway_credential",
 };
 
@@ -61,12 +63,12 @@ async function queueLifecycleCommand(commandType) {
 
 try {
   if (!action || action === "help" || action === "--help") {
-    console.log("Usage: node infra/scripts/employee-lifecycle.mjs <inspect|restart|stop|repair|reprovision|rotate> <employee_id>");
+    console.log("Usage: node infra/scripts/employee-lifecycle.mjs <inspect|restart|stop|repair|reprovision|replace|teardown|rotate> <employee_id>");
     process.exit(0);
   }
   requireEmployee();
   if (action === "inspect") {
-    console.log(docker(["inspect", `amtech-hermes-${employeeId}`, "--format", "{{json .State}}"]))
+    console.log(docker(["inspect", `amtech-hermes-${employeeId}`, "--format", "{{json .State}}"]));
   } else if (action === "gc") {
     throw new Error("direct runtime GC is disabled; use reconciler drift inspection and repair");
   } else {
