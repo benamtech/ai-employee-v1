@@ -1,5 +1,5 @@
 {
-  "version": "2026-07-18",
+  "version": "2026-07-19",
   "authority": [
     "docs/AMTECH_WEB_DESIGN_SYSTEM.md",
     "docs/AMTECH_AGENT_INTERFACE_STANDARD.md",
@@ -8,8 +8,8 @@
   ],
   "statuses": ["pass", "fail", "blocked", "not_run", "warning"],
   "release_rules": {
-    "branch_candidate": "G0-G8 required vectors pass on the exact SHA",
-    "live_candidate": "G0-G9 required vectors pass on the exact deployed SHA",
+    "branch_candidate": "G0-G9 required vectors pass on the exact SHA",
+    "live_candidate": "G0-G10 required vectors pass on the exact deployed SHA",
     "blocked_or_not_run_counts_as_pass": false
   },
   "vectors": [
@@ -27,13 +27,14 @@
     {
       "id": "G0-02",
       "gate": "authority",
-      "name": "historical_doctrines_superseded",
+      "name": "historical_and_fixed_tab_doctrines_superseded",
       "required": true,
       "forbidden_source_patterns": [
         "3px spacing grid",
         "border-radius: 0",
         "No shadows, no gradients",
-        "two text/background modes only"
+        "two text/background modes only",
+        "const VIEWS: Array<{ id: PrimaryView"
       ]
     },
     {
@@ -85,79 +86,105 @@
       "gate": "design",
       "name": "inter_only_product_typography",
       "required": true,
-      "forbidden_source_patterns": [
-        "IBM_Plex_Mono",
-        "--font-plex-mono"
-      ]
+      "forbidden_source_patterns": ["IBM_Plex_Mono", "--font-plex-mono"]
     },
     {
       "id": "G1-05",
       "gate": "design",
       "name": "eight_pixel_rhythm_and_soft_surfaces",
       "required": true,
-      "required_source_patterns": [
-        "--amtech-space-1: 8px",
-        "--amtech-radius-card: 20px"
-      ],
-      "forbidden_source_patterns": [
-        "*::before,\n*::after {\n  box-sizing: border-box;\n  border-radius: 0"
-      ]
+      "required_source_patterns": ["--amtech-space-1: 8px", "--amtech-radius-card: 20px"],
+      "forbidden_source_patterns": ["border-radius: 0"]
     },
     {
       "id": "G2-01",
-      "gate": "agent_semantics",
-      "name": "four_operational_planes",
+      "gate": "operating_semantics",
+      "name": "adaptive_operating_primitives",
       "required": true,
       "required_source_patterns": [
-        "Command",
-        "Work",
-        "Decisions",
-        "Proof"
+        "OperatingSurfaceState",
+        "OperatingWorkLoop",
+        "ActiveSave",
+        "OperatingDecision",
+        "OperatingSystemChange",
+        "DelegatedWorkUnit",
+        "OperatingEvidence"
       ]
     },
     {
       "id": "G2-02",
-      "gate": "agent_semantics",
-      "name": "state_and_recovery",
+      "gate": "operating_semantics",
+      "name": "fixed_tab_shell_absent",
       "required": true,
-      "required_source_patterns": [
-        "needs_you",
-        "blocked",
-        "failed",
-        "done"
+      "forbidden_source_patterns": [
+        "type PrimaryView = \"command\" | \"work\" | \"decisions\" | \"proof\" | \"connected\"",
+        "role=\"tablist\"",
+        "Employee work planes"
       ]
     },
     {
       "id": "G2-03",
-      "gate": "agent_semantics",
-      "name": "consequence_and_receipt",
+      "gate": "operating_semantics",
+      "name": "active_save_return_conditions",
       "required": true,
-      "required_source_patterns": [
-        "requires_approval",
-        "proof"
-      ]
+      "required_source_patterns": ["return_condition", "Returns when", "future intention"]
+    },
+    {
+      "id": "G2-04",
+      "gate": "operating_semantics",
+      "name": "delegation_is_outcome_bound",
+      "required": true,
+      "required_source_patterns": ["parent_loop_id", "purpose", "result_summary", "blocking_reason"]
     },
     {
       "id": "G3-01",
-      "gate": "ag_ui",
-      "name": "snapshot_reconnect_not_replay",
+      "gate": "adaptive_context",
+      "name": "manager_compiled_context_manifest",
       "required": true,
       "required_source_patterns": [
-        "EventSource",
-        "snapshot"
+        "OperatingContextManifest",
+        "context_fingerprint",
+        "doctrine_versions",
+        "owner_experience",
+        "preferred_density"
       ]
     },
     {
       "id": "G3-02",
-      "gate": "ag_ui",
-      "name": "stable_intent_id",
+      "gate": "adaptive_context",
+      "name": "deterministic_bounded_layout",
       "required": true,
-      "required_source_patterns": [
-        "intent_id"
+      "required_source_patterns": ["planAdaptiveOperatingLayout", "Math.log1p", "rationale_codes"]
+    },
+    {
+      "id": "G3-03",
+      "gate": "adaptive_context",
+      "name": "private_context_not_exposed",
+      "required": true,
+      "forbidden_source_patterns": [
+        "raw_agents_md",
+        "raw_codegraph",
+        "raw_soul",
+        "chain_of_thought",
+        "provider_secret"
       ]
     },
     {
       "id": "G4-01",
+      "gate": "ag_ui",
+      "name": "snapshot_reconnect_not_replay",
+      "required": true,
+      "required_source_patterns": ["EventSource", "snapshot", "intent_id", "scheduleRefresh"]
+    },
+    {
+      "id": "G4-02",
+      "gate": "ag_ui",
+      "name": "stable_owner_intent",
+      "required": true,
+      "required_source_patterns": ["intent_id", "createIntentId"]
+    },
+    {
+      "id": "G5-01",
       "gate": "mcp_apps",
       "name": "sandboxed_allowlisted_apps",
       "required": true,
@@ -166,66 +193,66 @@
         "e.source !== ref.current.contentWindow",
         "amtech-mcp-ui"
       ],
-      "forbidden_source_patterns": [
-        "allow-same-origin"
-      ]
+      "forbidden_source_patterns": ["allow-same-origin"]
     },
     {
-      "id": "G5-01",
+      "id": "G6-01",
       "gate": "accessibility",
       "name": "focus_and_reduced_motion",
       "required": true,
-      "required_source_patterns": [
-        ":focus-visible",
-        "prefers-reduced-motion"
-      ]
+      "required_source_patterns": [":focus-visible", "prefers-reduced-motion"]
     },
     {
-      "id": "G5-02",
+      "id": "G6-02",
       "gate": "accessibility",
       "name": "persistent_form_labels",
       "required": true,
       "manual": true
     },
     {
-      "id": "G6-01",
+      "id": "G7-01",
       "gate": "evidence",
       "name": "estimator_noncanonical_label",
       "required": true,
-      "required_source_patterns": [
-        "Non-canonical preview"
-      ]
+      "required_source_patterns": ["Non-canonical preview"]
     },
     {
-      "id": "G6-02",
+      "id": "G7-02",
       "gate": "evidence",
       "name": "fixture_claims_labeled",
       "required": true,
       "manual": true
     },
     {
-      "id": "G7-01",
+      "id": "G8-01",
       "gate": "resilience",
       "name": "production_build",
       "required": true,
       "command": "npm run build"
     },
     {
-      "id": "G7-02",
+      "id": "G8-02",
       "gate": "resilience",
       "name": "typecheck",
       "required": true,
       "command": "npm run typecheck"
     },
     {
-      "id": "G8-01",
+      "id": "G8-03",
+      "gate": "resilience",
+      "name": "layout_determinism_and_volume_dampening",
+      "required": true,
+      "command": "npm run test:ui:contracts"
+    },
+    {
+      "id": "G9-01",
       "gate": "fixture_browser",
-      "name": "critical_surface_matrix",
+      "name": "critical_operating_surface_matrix",
       "required": true,
       "command": "npm run ui:test"
     },
     {
-      "id": "G9-01",
+      "id": "G10-01",
       "gate": "live",
       "name": "verified_identity_activation",
       "required": true,
