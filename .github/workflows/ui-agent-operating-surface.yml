@@ -7,16 +7,22 @@ on:
     paths:
       - "docs/AMTECH_*"
       - "docs/ui/**"
+      - "mvp-build/STANDARD_UI_RUNTIME_AMENDMENT_2026-07-19.md"
       - "mvp-build/docs/ux/**"
       - "mvp-build/apps/web/**"
       - "mvp-build/apps/manager/src/lib/operating-surface.ts"
+      - "mvp-build/apps/manager/src/lib/materialization.ts"
+      - "mvp-build/apps/manager/src/lib/employee-stream.ts"
+      - "mvp-build/apps/manager/src/lib/hermes-client.ts"
       - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
       - "mvp-build/packages/shared/src/**"
-      - "mvp-build/infra/scripts/ui/fixture-browser.mjs"
+      - "mvp-build/infra/scripts/ui/**"
       - "mvp-build/scripts/validate-ui-system.mjs"
       - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
       - "mvp-build/tests/unit/ui-fixture-guard.test.ts"
+      - "mvp-build/tests/unit/observe-work-event-projection.test.ts"
       - "mvp-build/validation/amtech-agent-ui-vectors.json"
+      - "mvp-build/validation/amtech-live-ui-role-runtime-vectors.json"
       - "mvp-build/package.json"
       - "mvp-build/package-lock.json"
       - ".github/workflows/ui-agent-operating-surface.yml"
@@ -25,16 +31,22 @@ on:
     paths:
       - "docs/AMTECH_*"
       - "docs/ui/**"
+      - "mvp-build/STANDARD_UI_RUNTIME_AMENDMENT_2026-07-19.md"
       - "mvp-build/docs/ux/**"
       - "mvp-build/apps/web/**"
       - "mvp-build/apps/manager/src/lib/operating-surface.ts"
+      - "mvp-build/apps/manager/src/lib/materialization.ts"
+      - "mvp-build/apps/manager/src/lib/employee-stream.ts"
+      - "mvp-build/apps/manager/src/lib/hermes-client.ts"
       - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
       - "mvp-build/packages/shared/src/**"
-      - "mvp-build/infra/scripts/ui/fixture-browser.mjs"
+      - "mvp-build/infra/scripts/ui/**"
       - "mvp-build/scripts/validate-ui-system.mjs"
       - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
       - "mvp-build/tests/unit/ui-fixture-guard.test.ts"
+      - "mvp-build/tests/unit/observe-work-event-projection.test.ts"
       - "mvp-build/validation/amtech-agent-ui-vectors.json"
+      - "mvp-build/validation/amtech-live-ui-role-runtime-vectors.json"
       - "mvp-build/package.json"
       - "mvp-build/package-lock.json"
       - ".github/workflows/ui-agent-operating-surface.yml"
@@ -137,7 +149,7 @@ jobs:
           AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
           AMTECH_ENVIRONMENT_NAME: "ui-fixture-ci"
         run: npm run build --workspace @amtech/web
-      - name: Run compiled adaptive fixture browser matrix
+      - name: Run compiled adaptive fixture and product-shell browser matrices
         shell: bash
         env:
           UI_HEADLESS: "1"
@@ -175,9 +187,16 @@ jobs:
 
           set +e
           npm run ui:test 2>&1 | tee "$EVIDENCE_DIR/browser-test.log"
-          TEST_STATUS=${PIPESTATUS[0]}
+          FIXTURE_STATUS=${PIPESTATUS[0]}
+          if [ "$FIXTURE_STATUS" -eq 0 ]; then
+            npm run ui:test:shell 2>&1 | tee "$EVIDENCE_DIR/product-shell-test.log"
+            SHELL_STATUS=${PIPESTATUS[0]}
+          else
+            SHELL_STATUS=1
+          fi
           set -e
-          exit "$TEST_STATUS"
+          if [ "$FIXTURE_STATUS" -ne 0 ]; then exit "$FIXTURE_STATUS"; fi
+          exit "$SHELL_STATUS"
       - name: Upload adaptive browser evidence
         if: always()
         uses: actions/upload-artifact@v4
