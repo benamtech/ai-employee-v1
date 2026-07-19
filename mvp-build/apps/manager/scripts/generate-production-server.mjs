@@ -83,6 +83,12 @@ source = replaceOne(
   `        resolution: approvalResolution,\n        channel: "sms",\n      });\n      resultBody = {\n        ok: true,\n        resolution: approvalResolution,`,
   "preview_resolution_use",
 );
+source = replaceOne(
+  source,
+  `    const token = c.req.query("owner_session_token") ?? "";`,
+  `    const token = c.req.header("X-AMTECH-Owner-Session") ?? "";`,
+  "owner_stream_session_header",
+);
 
 const toolRouteStart = source.indexOf('  app.post("/manager/tools/:name"');
 const toolRouteEnd = source.indexOf("  // Manager control plane as a native MCP server", toolRouteStart);
@@ -283,6 +289,7 @@ const required = [
   "executePlatformAdminSupportAction",
   "X-AMTECH-Admin-Authorization",
   "X-AMTECH-Support-Lease-Id",
+  "X-AMTECH-Owner-Session",
   "String(link.assignment_id)",
   "String(employeeId)",
   "approvalResolution",
