@@ -9,7 +9,7 @@ This folder is the versioned narrative handoff layer for the AMTECH AI Employee 
 
 - `memory/` — session narrative, architectural decisions, incidents, unresolved risks, and next-agent handoff.
 - `../CODEGRAPH.md` — current implementation topology, source hubs, migration head, and evidence boundary.
-- `../docs/architecture/` — current cross-system structure, effects, risks, agent roles, and trajectory analysis.
+- `../docs/architecture/` — current cross-system structure, effects, risks, agent roles, trajectory analysis, and infrastructure/test audit.
 - `../../wiki/MVP/implementation-records/` — older factual implementation/proof ledger.
 - `../second-half-plan/` — active execution program plus historical plan family.
 - source, migrations, tests, workflows, and proof — implementation and acceptance authority.
@@ -20,9 +20,13 @@ This folder is the versioned narrative handoff layer for the AMTECH AI Employee 
 
 The active integration branch is `employee-production-tuesday`, based on `research`, with draft PR `#23`; `main` is not the integration shortcut. Migration head is `0069`.
 
-The current documentation/architecture pass adds the source-backed architecture live map, repository archaeology ledger/workflow, production trajectory packet, agent role/orientation map, and document-control map; closes production Caddy/employee-network reachability, strict Manager MCP/business-brain/operating-surface reads, and Web operating-state protocol failures; removes tracked bytecode/orphaned Gitlink/superseded scanner; and synchronizes root/scoped agent instructions, README, CODEGRAPH, UX coverage, plan index, and implementation-record index.
+The complete green code/test evidence anchor for the current review session is `7492c52ba2dbb97ce57efcda4f8d4b7e839b39ec`. Later commits synchronize documentation and do not automatically inherit a complete workflow rerun.
 
-Final exact-head CI synchronization is pending in the initial version of the newest handoff. Do not infer real Supabase, target-runtime/network, live identity/provider, provider-backed generated UI, fixture-free Web/SMS/Review, commercial reconciliation, capacity, crash/repair, rollback, deployment, or launch acceptance from this documentation state.
+The current pass closes the established activation/generated-UI/bearer/strict-read findings; corrects production Caddy and per-employee network source topology; extends strict context reads; rejects missing production operating state; adds exhaustive tracked-object archaeology; creates the architecture, trajectory, agent-role, document-control, memory, infrastructure, deployment, UI-test, and validation maps; and synchronizes root/scoped control documents.
+
+The final infra audit also confirms that normal production, production-like, smoke, and rollback helpers still select the legacy Compose family. Do not deploy through those commands until they converge on `docker-compose.production.yml` and pass source plus target-host tests.
+
+Do not infer real Supabase, target-runtime/network, live identity/provider, provider-backed browser action/effect, fixture-free Web/SMS/Review, commercial reconciliation, capacity, crash/repair, rollback, deployment, or launch acceptance from the current source/CI state.
 
 ## Read order inside memory
 
@@ -38,7 +42,8 @@ The complete classification and document-family map is `../docs/architecture/12-
 
 ### Current architecture, UI/runtime, and production boundary
 
-- [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Current documentation/code-review checkpoint. Maps the entire system, closes source-confirmed network/context/UI protocol defects, accounts for all document families and handoffs, and defines coding-agent roles and production trajectories.
+- [2026-07-19 — Final document authority, infra/test audit, and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md) — Session-ground final handoff. Names the green code/test anchor, all major changes, document-authority bootstrap, canonical-versus-legacy deployment fork, UI/browser evidence boundary, production blockers, and next TDD sequence.
+- [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Documentation/code-review checkpoint. Maps the entire system, closes source-confirmed network/context/UI protocol defects, accounts for all document families and handoffs, and defines coding-agent roles and production trajectories.
 - [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Official Hermes programmatic surfaces, issue `#360`, MCP bridge patterns, Hermes WebUI architecture, protocol congruence, adaptive-planner authority, generated-view parity, production Next browser harness, and exact-SHA UI evidence predecessor.
 - [2026-07-19 — UI, Hermes, roles, assignments, and production-readiness handoff](2026-07-19-ui-runtime-production-readiness-handoff.md) — UI/runtime/role/session/shared-employee/public/operator analysis and production sequence predecessor.
 - [2026-07-18 — S2–S9 authority and runtime-boundary checkpoint](2026-07-18-s2-s9-authority-runtime-checkpoint.md) — Owner assignment, C3 owner-turn repair, connector custody, commercial attribution, approval, platform authority, revocation, signed-resource closure, generated Manager, and production-image predecessor.
