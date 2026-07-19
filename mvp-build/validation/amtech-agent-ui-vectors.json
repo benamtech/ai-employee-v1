@@ -1,0 +1,270 @@
+{
+  "version": "2026-07-18",
+  "authority": [
+    "docs/AMTECH_WEB_DESIGN_SYSTEM.md",
+    "docs/AMTECH_AGENT_INTERFACE_STANDARD.md",
+    "docs/AMTECH_UI_VALIDATION_STANDARD.md",
+    "docs/ui/HERMES_RUNTIME_UI_DERIVATIONS.md"
+  ],
+  "statuses": ["pass", "fail", "blocked", "not_run", "warning"],
+  "release_rules": {
+    "branch_candidate": "G0-G8 required vectors pass on the exact SHA",
+    "live_candidate": "G0-G9 required vectors pass on the exact deployed SHA",
+    "blocked_or_not_run_counts_as_pass": false
+  },
+  "vectors": [
+    {
+      "id": "G0-01",
+      "gate": "authority",
+      "name": "canonical_docs_exist",
+      "required": true,
+      "evidence": [
+        "docs/AMTECH_WEB_DESIGN_SYSTEM.md",
+        "docs/AMTECH_AGENT_INTERFACE_STANDARD.md",
+        "docs/AMTECH_UI_VALIDATION_STANDARD.md"
+      ]
+    },
+    {
+      "id": "G0-02",
+      "gate": "authority",
+      "name": "historical_doctrines_superseded",
+      "required": true,
+      "forbidden_source_patterns": [
+        "3px spacing grid",
+        "border-radius: 0",
+        "No shadows, no gradients",
+        "two text/background modes only"
+      ]
+    },
+    {
+      "id": "G1-01",
+      "gate": "design",
+      "name": "canonical_palette",
+      "required": true,
+      "required_source_patterns": [
+        "--amtech-ink: #111111",
+        "--amtech-white: #ffffff",
+        "--amtech-canvas: #f7f9fc",
+        "--amtech-red: #e11d2a",
+        "--amtech-blue: #2563eb",
+        "--amtech-cyan: #dff6ff",
+        "--amtech-green: #168a57"
+      ]
+    },
+    {
+      "id": "G1-02",
+      "gate": "design",
+      "name": "light_surfaces_only",
+      "required": true,
+      "forbidden_source_patterns": [
+        "prefers-color-scheme: dark",
+        "data-theme=\"dark\"",
+        "className=\"dark",
+        "background: #0a0a0a",
+        "background:#0a0a0a"
+      ]
+    },
+    {
+      "id": "G1-03",
+      "gate": "design",
+      "name": "forbidden_accents_absent",
+      "required": true,
+      "forbidden_source_patterns": [
+        "amber-",
+        "orange-",
+        "#a86a12",
+        "#fff2cf",
+        "#fffaf0",
+        "#ebe9e1",
+        "#fffdf8",
+        "#f4f1e9"
+      ]
+    },
+    {
+      "id": "G1-04",
+      "gate": "design",
+      "name": "inter_only_product_typography",
+      "required": true,
+      "forbidden_source_patterns": [
+        "IBM_Plex_Mono",
+        "--font-plex-mono"
+      ]
+    },
+    {
+      "id": "G1-05",
+      "gate": "design",
+      "name": "eight_pixel_rhythm_and_soft_surfaces",
+      "required": true,
+      "required_source_patterns": [
+        "--amtech-space-1: 8px",
+        "--amtech-radius-card: 20px"
+      ],
+      "forbidden_source_patterns": [
+        "*::before,\n*::after {\n  box-sizing: border-box;\n  border-radius: 0"
+      ]
+    },
+    {
+      "id": "G2-01",
+      "gate": "agent_semantics",
+      "name": "four_operational_planes",
+      "required": true,
+      "required_source_patterns": [
+        "Command",
+        "Work",
+        "Decisions",
+        "Proof"
+      ]
+    },
+    {
+      "id": "G2-02",
+      "gate": "agent_semantics",
+      "name": "state_and_recovery",
+      "required": true,
+      "required_source_patterns": [
+        "needs_you",
+        "blocked",
+        "failed",
+        "done"
+      ]
+    },
+    {
+      "id": "G2-03",
+      "gate": "agent_semantics",
+      "name": "consequence_and_receipt",
+      "required": true,
+      "required_source_patterns": [
+        "requires_approval",
+        "proof"
+      ]
+    },
+    {
+      "id": "G3-01",
+      "gate": "ag_ui",
+      "name": "snapshot_reconnect_not_replay",
+      "required": true,
+      "required_source_patterns": [
+        "EventSource",
+        "snapshot"
+      ]
+    },
+    {
+      "id": "G3-02",
+      "gate": "ag_ui",
+      "name": "stable_intent_id",
+      "required": true,
+      "required_source_patterns": [
+        "intent_id"
+      ]
+    },
+    {
+      "id": "G4-01",
+      "gate": "mcp_apps",
+      "name": "sandboxed_allowlisted_apps",
+      "required": true,
+      "required_source_patterns": [
+        "sandbox=\"allow-scripts\"",
+        "e.source !== ref.current.contentWindow",
+        "amtech-mcp-ui"
+      ],
+      "forbidden_source_patterns": [
+        "allow-same-origin"
+      ]
+    },
+    {
+      "id": "G5-01",
+      "gate": "accessibility",
+      "name": "focus_and_reduced_motion",
+      "required": true,
+      "required_source_patterns": [
+        ":focus-visible",
+        "prefers-reduced-motion"
+      ]
+    },
+    {
+      "id": "G5-02",
+      "gate": "accessibility",
+      "name": "persistent_form_labels",
+      "required": true,
+      "manual": true
+    },
+    {
+      "id": "G6-01",
+      "gate": "evidence",
+      "name": "estimator_noncanonical_label",
+      "required": true,
+      "required_source_patterns": [
+        "Non-canonical preview"
+      ]
+    },
+    {
+      "id": "G6-02",
+      "gate": "evidence",
+      "name": "fixture_claims_labeled",
+      "required": true,
+      "manual": true
+    },
+    {
+      "id": "G7-01",
+      "gate": "resilience",
+      "name": "production_build",
+      "required": true,
+      "command": "npm run build"
+    },
+    {
+      "id": "G7-02",
+      "gate": "resilience",
+      "name": "typecheck",
+      "required": true,
+      "command": "npm run typecheck"
+    },
+    {
+      "id": "G8-01",
+      "gate": "fixture_browser",
+      "name": "critical_surface_matrix",
+      "required": true,
+      "command": "npm run ui:test"
+    },
+    {
+      "id": "G9-01",
+      "gate": "live",
+      "name": "verified_identity_activation",
+      "required": true,
+      "command": "npm run prod:boundary:onboarding"
+    },
+    {
+      "id": "HRT-01",
+      "gate": "hermes_runtime",
+      "name": "exact_profile_assignment_context",
+      "required": true,
+      "manual": true
+    },
+    {
+      "id": "HRT-02",
+      "gate": "hermes_runtime",
+      "name": "no_silent_runtime_fallback",
+      "required": true,
+      "manual": true
+    },
+    {
+      "id": "HRT-03",
+      "gate": "hermes_runtime",
+      "name": "started_vs_not_started_transport_state",
+      "required": true,
+      "manual": true
+    },
+    {
+      "id": "HRT-04",
+      "gate": "hermes_runtime",
+      "name": "last_active_session_contract",
+      "required": true,
+      "manual": true
+    },
+    {
+      "id": "HRT-05",
+      "gate": "hermes_runtime",
+      "name": "sync_async_runtime_context_parity",
+      "required": true,
+      "manual": true
+    }
+  ]
+}
