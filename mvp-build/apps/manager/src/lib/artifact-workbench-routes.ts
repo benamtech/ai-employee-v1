@@ -40,11 +40,14 @@ export function safeWorkbenchReturnPath(value: unknown, employeeId: string): str
 async function ownerAuthority(c: Context, action: string, denyInternal: InternalGate): Promise<OwnerAuthorityResult> {
   const denied = denyInternal(c);
   if (denied) return { denied };
-  const employeeId = c.req.param("employeeId");
+  const employeeId = String(c.req.param("employeeId") ?? "");
+  if (!employeeId) return { denied: c.json({ error: "employee_id_required" }, 400) };
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>;
   const db = serviceClient();
-  const session = await requireOwnerSession(db, String(body.owner_session_token ?? ""));
-  if (!session?.human_principal_id) return { denied: c.json({ error: "owner_session_invalid" }, 401) };
+  const ownerSessionToken = typeof body.owner_session_token === "string" ? body.owner_session_token : "";
+  const session = await requireOwnerSession(db, ownerSessionToken);
+  const humanPrincipalId = typeof session?.human_principal_id === "string" ? session.human_principal_id : "";
+  if (!session || !humanPrincipalId) return { denied: c.json({ error: "owner_session_invalid" }, 401) };
   const authority = await authorizeOwnerAssignment(db, {
     session,
     employee_id: employeeId,
@@ -54,7 +57,13 @@ async function ownerAuthority(c: Context, action: string, denyInternal: Internal
     allowed_roles: ["owner", "manager", "operator"],
   });
   if (!authority.ok) return { denied: c.json({ error: authority.reason }, authority.status) };
-  return { db, session: session as typeof session & { human_principal_id: string }, authority, body, employeeId };
+  return {
+    db,
+    session: { ...session, human_principal_id: humanPrincipalId },
+    authority,
+    body,
+    employeeId,
+  };
 }
 
 export function registerArtifactWorkbenchRoutes(app: Hono, denyInternal: InternalGate): void {
@@ -145,7 +154,7 @@ export function registerArtifactWorkbenchRoutes(app: Hono, denyInternal: Interna
       approval.account_id !== auth.session.account_id ||
       approval.employee_id !== auth.employeeId ||
       approval.action_key !== "publish_artifact_sandbox" ||
-      approval.resource_class !== "artifact" ||
+      String(approval.resource_class) !== "artifact" ||
       approval.resource_id !== artifactId
     ) {
       return c.json({ error: "artifact_approval_scope_mismatch" }, 403);
