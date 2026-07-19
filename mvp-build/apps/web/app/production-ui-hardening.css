@@ -1,4 +1,4 @@
-/* Release-bound interaction guarantees shared by owner and signed-review UI. */
+/* Release-bound interaction guarantees shared by owner, review, and fixture-lab UI. */
 html {
   scroll-padding-block-start: 88px;
   scroll-padding-block-end: 176px;
@@ -7,13 +7,28 @@ html {
 .os-root button,
 .os-root [role="button"],
 .review-root button,
-.review-root [role="button"] {
+.review-root [role="button"],
+.fixture-lab-root button,
+.fixture-lab-root [role="button"],
+.lab-index button,
+.lab-index [role="button"] {
+  min-inline-size: 44px;
+  min-block-size: 44px !important;
+  min-height: 44px !important;
+}
+
+.os-brand,
+.fixture-lab-brand {
   min-inline-size: 44px;
   min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
 }
 
 .os-root :focus-visible,
-.review-root :focus-visible {
+.review-root :focus-visible,
+.fixture-lab-root :focus-visible,
+.lab-index :focus-visible {
   scroll-margin-block: 96px 184px;
 }
 
@@ -27,7 +42,13 @@ html {
   .os-root *::after,
   .review-root *,
   .review-root *::before,
-  .review-root *::after {
+  .review-root *::after,
+  .fixture-lab-root *,
+  .fixture-lab-root *::before,
+  .fixture-lab-root *::after,
+  .lab-index *,
+  .lab-index *::before,
+  .lab-index *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
