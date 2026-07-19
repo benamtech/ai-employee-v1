@@ -19,6 +19,7 @@ import { approvedActionTools } from "./approved-actions.stub.js";
 import { qboApprovalPromotionTools } from "./qbo-approval-promotion.stub.js";
 import { assignmentArtifactTools } from "./assignment-artifacts.stub.js";
 import { connectEmailWithOwnerReturn } from "./gmail-connect-owner.js";
+import { connectQuickBooksWithOwnerReturn } from "./qbo-connect-owner.js";
 import { artifactWorkbenchTools } from "./artifact-workbench-tools.js";
 import { requestApprovalWithArtifactSupport } from "./artifact-approval-authority.js";
 
@@ -38,9 +39,10 @@ const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...qboApprovalPromotionTools,
   ...approvalAuthorityTools,
   ...approvedActionTools,
-  // Preserve all Gmail implementation while adding the signed initiating-work
-  // return target to the consent-start seam.
+  // Provider implementations remain canonical. These wrappers only bind a safe,
+  // signed owner return target to their consent-start seams.
   connect_email: connectEmailWithOwnerReturn,
+  connect_quickbooks: connectQuickBooksWithOwnerReturn,
   // Existing resources stay on the canonical handler; only artifact publication
   // enters the additive immutable-snapshot branch.
   request_approval: requestApprovalWithArtifactSupport,
