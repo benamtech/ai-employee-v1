@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { WorkAction, WorkResource } from "@amtech/shared";
+import { McpUiResource, type McpUiIntent } from "./McpUiResource";
 
 export type WorkObjectActionHandler = (action: WorkAction["action"], note?: string) => Promise<void> | void;
 
@@ -46,6 +47,32 @@ export function WorkObjectRenderer({
     }
   }
 
+  async function handleUiIntent(intent: McpUiIntent, payload: Record<string, unknown>) {
+    const action: WorkAction["action"] = intent === "accept" || intent === "accept_all"
+      ? "approve"
+      : intent;
+    if (!onAction || !resource.actions.some((candidate) => candidate.action === action)) return;
+
+    let responseNote: string | undefined;
+    if (action === "respond") {
+      const fields = payload.fields && typeof payload.fields === "object"
+        ? payload.fields as Record<string, unknown>
+        : {};
+      responseNote = Object.entries(fields)
+        .map(([key, value]) => `${key}: ${String(value ?? "")}`)
+        .join(", ")
+        .trim();
+      if (!responseNote) return;
+    }
+
+    setWorkingAction(action);
+    try {
+      await onAction(action, responseNote);
+    } finally {
+      setWorkingAction(null);
+    }
+  }
+
   const gated = resource.actions.some((action) => action.gated);
 
   return (
@@ -73,6 +100,13 @@ export function WorkObjectRenderer({
             </div>
           ))}
         </dl>
+      ) : null}
+
+      {resource.ui_resource ? (
+        <McpUiResource
+          resource={resource.ui_resource}
+          onIntent={(intent, _approvalId, payload) => { void handleUiIntent(intent, payload); }}
+        />
       ) : null}
 
       {resource.body_html ? (
