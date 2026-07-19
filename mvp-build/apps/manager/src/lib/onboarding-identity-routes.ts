@@ -3,7 +3,7 @@ import { StartOnboardingIdentityVerification } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { mintOwnerSession, requireOwnerSession } from "./owner-session.js";
 import { authorizeOwnerAssignment } from "./owner-assignment-authority.js";
-import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot } from "./employee-stream-strict.js";
+import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot, strictSnapshotClient } from "./employee-stream-strict.js";
 import { buildOperatingSurfaceState } from "./operating-surface.js";
 import {
   loadOnboardingIdentity,
@@ -215,7 +215,7 @@ export function registerOnboardingIdentityRoutes(app: Hono, denyInternal: DenyIn
     });
     if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
     const snapshot = await buildEmployeeSnapshot(db, employeeId, session.account_id, authority.assignment.assignment_id);
-    const operating_state = await buildOperatingSurfaceState(db, snapshot);
+    const operating_state = await buildOperatingSurfaceState(strictSnapshotClient(db), snapshot);
     return c.json({ ...snapshot, operating_state });
   });
 
