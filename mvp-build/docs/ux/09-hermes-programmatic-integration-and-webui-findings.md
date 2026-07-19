@@ -2,7 +2,7 @@
 
 Status: active decision record  
 Updated: 2026-07-19  
-Scope: Hermes Agent programmatic surfaces, Hermes messaging MCP server, third-party Hermes WebUI architecture, generated-view congruence, and the AMTECH production boundary
+Scope: Hermes Agent programmatic surfaces, Hermes messaging MCP server, curated Hermes-tools MCP bridge, third-party Hermes WebUI architecture, generated-view congruence, and the AMTECH production boundary
 
 ## Decision Summary
 
@@ -27,7 +27,8 @@ The useful external findings are implementation invariants, not a replacement ar
 4. fail closed when loaded runtime source identity drifts;
 5. keep extensions local, bounded, allowlisted, separately consented, and outside authority;
 6. reserve richer Hermes control protocols for a Manager-mediated operator surface;
-7. never confuse an MCP-exposed capability with AMTECH assignment, approval, or effect authority.
+7. never confuse an MCP-exposed capability with AMTECH assignment, approval, or effect authority;
+8. compile any cross-runtime tool bridge from an explicit allowlist intersected with the authoritative runtime registry.
 
 ## Source Disposition
 
@@ -76,6 +77,21 @@ AMTECH disposition:
 - A future platform-operator experiment may wrap a dedicated employee's stdio process and allowlist read-only conversation/history/event methods, but only behind platform authority, tenant/runtime isolation, redaction, bounded output, immutable audit, and independent Manager verification.
 - HTTP exposure, remote authentication, broad tool filtering, and production tenancy must not be inferred from the current stdio implementation.
 
+### Internal curated Hermes-tools MCP bridge
+
+Hermes also contains a separate internal stdio MCP server used by its Codex app-server runtime. This is not the `hermes mcp serve` conversation bridge and is not presented as a general owner-facing server.
+
+Its useful design choices are:
+
+- one explicit `EXPOSED_TOOLS` allowlist;
+- intersection with the authoritative Hermes `get_tool_definitions()` registry at startup;
+- reuse of the authoritative JSON schemas when generating MCP call signatures;
+- omission of shell/filesystem/process tools already owned by the host runtime;
+- omission of loop-bound tools such as delegation, memory, session search, and todo because a stateless MCP callback cannot safely provide the required live `AIAgent` context;
+- quiet stdout and secret-redaction defaults because stdio is the protocol wire.
+
+AMTECH disposition: **adapt the compiler pattern, not the server or its tool list.** A future effective-capability compiler should classify every capability as runtime-native, Manager-mediated, connector-backed, stateless-bridge-compatible, loop-bound, policy-gated, or unavailable. It should hash the declared allowlist plus observed runtime registry and persist that evidence. AMTECH must not claim a tool is available merely because it appears in source, a schema registry, or an MCP server template.
+
 ### `nesquena/hermes-webui`
 
 This is a useful third-party implementation reference, not AMTECH runtime authority. It is designed primarily as a lightweight self-hosted browser equivalent of the Hermes CLI and openly documents single-user and concurrency limitations that make direct production reuse inappropriate for AMTECH.
@@ -91,16 +107,17 @@ This commit is relevant in one narrow way: it repaired drift between the LLM-pro
 | Hermes HTTP/SSE API | Keep for ordinary employee turns | Language-neutral, already compatible with the Manager-mediated owner path, and does not require browser credentials or direct runtime authority. |
 | Hermes TUI gateway JSON-RPC | Research a narrow operator adapter | Rich state/control vocabulary is useful for exact-run inspection, interrupt, compression, and recovery, but only behind platform authority, C3, redaction, and immutable audit. |
 | `hermes mcp serve` messaging bridge | Verified; do not adopt directly | Stdio-only, process-authority bridge across gateway conversations; includes direct messaging and non-durable best-effort approval tools. A future read-only operator wrapper may be evaluated after live baseline. |
+| Internal curated Hermes-tools MCP bridge | Adapt its allowlist/schema-congruence pattern only | Purpose-built for a Codex subprocess; stateless and deliberately incomplete. Useful evidence for capability compilation, not a Manager or owner transport. |
 | ACP | Do not use for ordinary owner/product UI | It is optimized for IDE/editor hosts and adds no launch-critical owner capability. |
 | In-process `AIAgent` embedding | Reject for the production Manager | It couples Python module identity and process-global/thread context to the web server and increases mixed-revision, concurrency, and restart risk. |
 | Direct browser-to-Hermes | Reject | It bypasses exact assignment, grants, approvals, C3, commercial attribution, revocation, and release evidence. |
-| `hermes serve-mcp --transport http --port 8000` | Reject as an invalid current contract | The verified syntax and implementation are `hermes mcp serve` over stdio. |
+| `hermes serve-mcp --transport http --port 8000` | Reject as an invalid current contract | The verified public syntax and implementation are `hermes mcp serve` over stdio. |
 
 ## Hermes MCP Bridge Findings Worth Adapting
 
 ### 1. One durable session store should own routing and messages
 
-The bridge now builds its routing index from gateway rows in `state.db`, falling back to the legacy JSON index only for older databases. Its event poller uses the same database-file change signal for routing and messages, explicitly avoiding a prior dual-file race that could miss newly created conversations.
+The messaging bridge now builds its routing index from gateway rows in `state.db`, falling back to the legacy JSON index only for older databases. Its event poller uses the same database-file change signal for routing and messages, explicitly avoiding a prior dual-file race that could miss newly created conversations.
 
 AMTECH interpretation:
 
@@ -139,6 +156,46 @@ AMTECH interpretation:
 - do not use this method for AMTECH approvals;
 - a future adapter must map one exact Manager approval to one C3 command/effect, target the accepted runtime request, and persist the provider/runtime acknowledgement or a repairable failure;
 - UI must not show an approval as complete because an adapter removed it from local memory.
+
+## Curated Tool-Bridge Findings Worth Adapting
+
+### 1. Availability is the intersection of intent and observation
+
+The curated Hermes-tools server starts with an authored allowlist, reads the runtime's authoritative tool definitions, and registers only names present in both.
+
+AMTECH interpretation:
+
+```text
+effective capability
+= authored AMTECH allowlist
+∩ observed runtime registry
+∩ connector/runtime readiness
+∩ assignment/grant/policy authority
+∩ entitlement and risk boundary
+```
+
+A source schema alone proves shape, not runtime availability. Runtime discovery alone proves presence, not authority.
+
+### 2. Stateless bridges cannot impersonate the agent loop
+
+Hermes deliberately excludes tools requiring current `AIAgent` context from its stateless MCP callback bridge.
+
+AMTECH interpretation:
+
+- classify tools by execution context before exposing them;
+- loop-bound delegation, memory mutation, session control, and similar operations must remain inside a bound run/session command path;
+- never recreate missing context with global mutable state, guessed session IDs, or browser-provided identifiers;
+- UI may show a capability only at the strongest status actually proved: available, policy-gated, degraded, needs connection, needs live proof, or unavailable.
+
+### 3. Host overlap should remove capabilities, not duplicate them
+
+The curated bridge omits shell and file tools because the Codex host already owns those capabilities.
+
+AMTECH interpretation:
+
+- one effect class has one authority owner;
+- overlapping Manager, Hermes-native, connector, and MCP tools must resolve to one canonical capability and one effect path;
+- duplicate tool routes increase approval ambiguity, retry duplication, metering drift, and inconsistent receipts.
 
 ## Hermes WebUI Findings Worth Adapting
 
@@ -225,14 +282,27 @@ A new `WorkView.kind` must fail typecheck until a renderer is registered. Every 
 
 The implementation scope is `ci-accepted` on SHA `34f67dd4bd3d2a944fd036ca7e818f0857ba9e0e`, including source/type/build contracts and the compiled adaptive fixture plus unauthenticated login/dashboard browser matrices. This does not establish provider-backed generative UI, real staging, fixture-free live browser/channel acceptance, or production readiness.
 
+## Why No Hermes MCP Runtime Code Was Added
+
+AMTECH already has:
+
+- a typed Manager tool schema registry;
+- connector custody and policy metadata;
+- an owner-safe capability graph;
+- Hermes `/v1/capabilities` and `/v1/toolsets` probes;
+- Manager-mediated runtime credentials and exact employee session keys.
+
+However, the live Hermes toolset probe is not yet persisted or combined with Manager tools, connectors, assignments, grants, entitlements, and runtime revision into one immutable effective-capability proof. Directly installing either Hermes MCP server now would create a second capability/effect route and could make the UI overstate availability. The highest-value immediate work was therefore protocol/UI congruence and CI repair; MCP runtime adoption is deferred until the capability evidence compiler exists.
+
 ## Deferred, Worthy Follow-On
 
-1. Persist runtime capability-probe evidence with protocol version, runtime image/SHA, effective-capability graph hash, observed time, and invalidation reason.
-2. Define a read-only Manager `RuntimeSessionProjection` that normalizes source, lineage root/tip, state, last activity, compression, delegation, and bounded transport health without exposing transcript secrets or granting authority.
-3. Design-spike a Manager-mediated TUI adapter limited initially to read-only state/history/capability/recovery materializations.
-4. Separately evaluate a dedicated-runtime, read-only wrapper around `hermes mcp serve`; deny `messages_send` and `permissions_respond`, verify tenant/runtime isolation, and treat event cursors as non-durable hints.
-5. Add exact-run interrupt/compress only after platform authority, C3 command/effect semantics, stale-version denial, and duplicate-effect tests exist.
-6. Add cursor/version divergence handling and immediate stream authority-version close on the owner SSE path.
+1. Persist runtime capability-probe evidence with protocol version, runtime image/SHA, observed Hermes tool registry, authored AMTECH allowlist, effective-capability graph hash, observed time, and invalidation reason.
+2. Compile one deterministic effective capability graph from Manager schemas, observed Hermes toolsets, connector custody/readiness, assignment/grants, entitlement, risk policy, and execution-context classification.
+3. Define a read-only Manager `RuntimeSessionProjection` that normalizes source, lineage root/tip, state, last activity, compression, delegation, and bounded transport health without exposing transcript secrets or granting authority.
+4. Design-spike a Manager-mediated TUI adapter limited initially to read-only state/history/capability/recovery materializations.
+5. Separately evaluate a dedicated-runtime, read-only wrapper around `hermes mcp serve`; deny `messages_send` and `permissions_respond`, verify tenant/runtime isolation, and treat event cursors as non-durable hints.
+6. Add exact-run interrupt/compress only after platform authority, C3 command/effect semantics, stale-version denial, and duplicate-effect tests exist.
+7. Add cursor/version divergence handling and immediate stream authority-version close on the owner SSE path.
 
 ## Explicit Rejections for Tuesday
 
@@ -244,6 +314,7 @@ The implementation scope is `ci-accepted` on SHA `34f67dd4bd3d2a944fd036ca7e818f
 - raw Hermes WebUI extension scripts in owner pages;
 - raw runtime logs, private reasoning, memory/profile file editing, or subagent transcripts as owner UI;
 - treating `hermes mcp serve` as an HTTP service, authenticated multi-tenant API, durable event ledger, or approval authority;
+- exposing a full Hermes tool registry without explicit allowlisting, execution-context classification, duplicate-route elimination, and durable effective-capability evidence;
 - importing the-kitchen recipe vocabulary into AMTECH without an AMTECH work-state requirement.
 
 ## Acceptance Boundary
