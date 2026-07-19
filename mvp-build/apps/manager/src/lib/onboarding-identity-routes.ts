@@ -5,6 +5,7 @@ import { mintOwnerSession, requireOwnerSession } from "./owner-session.js";
 import { authorizeOwnerAssignment } from "./owner-assignment-authority.js";
 import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot, strictSnapshotClient } from "./employee-stream-strict.js";
 import { buildOperatingSurfaceState } from "./operating-surface.js";
+import { buildToolCapabilityCatalog } from "./tool-capability-catalog.js";
 import {
   loadOnboardingIdentity,
   processMiddeskIdentityWebhook,
@@ -14,7 +15,7 @@ import { verifyMiddeskWebhookSignature } from "./onboarding-identity-provider.js
 import { writeAudit } from "./audit.js";
 import { registerArtifactWorkbenchRoutes } from "./artifact-workbench-routes.js";
 
-type DenyInternal = (c: Context) => Response | null;
+ type DenyInternal = (c: Context) => Response | null;
 
 function retryAfterSeconds(retryAfterAt: string | null): number {
   if (!retryAfterAt) return 24 * 60 * 60;
@@ -221,8 +222,15 @@ export function registerOnboardingIdentityRoutes(app: Hono, denyInternal: DenyIn
     });
     if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
     const snapshot = await buildEmployeeSnapshot(db, employeeId, session.account_id, authority.assignment.assignment_id);
-    const operating_state = await buildOperatingSurfaceState(strictSnapshotClient(db), snapshot);
-    return c.json({ ...snapshot, operating_state });
+    const tool_catalog = await buildToolCapabilityCatalog(strictSnapshotClient(db), snapshot);
+    const enriched = {
+      ...snapshot,
+      tool_catalog,
+      tool_capabilities: tool_catalog.capabilities,
+      task_capability_matches: tool_catalog.task_matches,
+    };
+    const operating_state = await buildOperatingSurfaceState(strictSnapshotClient(db), enriched);
+    return c.json({ ...enriched, operating_state });
   });
 
   app.post("/webhooks/middesk/onboarding-identity", async (c) => {
