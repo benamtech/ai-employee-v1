@@ -9,6 +9,7 @@ import {
   type OperatingSystemChange,
   type OperatingWorkLoop,
 } from "@amtech/shared";
+import { planAdaptiveOperatingLayout as planAdaptiveOperatingLayoutContract } from "../../packages/shared/src/operating-system";
 
 const root = process.cwd();
 const source = (path: string) => readFile(join(root, path), "utf8");
@@ -133,6 +134,19 @@ describe("adaptive operating surface", () => {
   it("produces the same layout for the same bounded context", () => {
     const input = layoutInput({ changes: changes(12) });
     expect(planAdaptiveOperatingLayout(input)).toEqual(planAdaptiveOperatingLayout(input));
+  });
+
+  it("keeps package and contract-module planner exports identical", () => {
+    const input = layoutInput({
+      loops: [
+        activeLoop("loop:older", "2026-07-18T22:00:00.000Z"),
+        activeLoop("loop:newer", "2026-07-19T01:00:00.000Z"),
+      ],
+      active_saves: [returnedSave()],
+      delegated_work: [failedDelegation()],
+      changes: changes(100),
+    });
+    expect(planAdaptiveOperatingLayoutContract(input)).toEqual(planAdaptiveOperatingLayout(input));
   });
 
   it("keeps focus stable when equivalent loop input ordering changes", () => {
