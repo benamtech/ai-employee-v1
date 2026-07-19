@@ -29,6 +29,8 @@ The architecture is not a single agent process. It is a governed distributed sys
 10. [`trajectories/README.md`](trajectories/README.md) — Θ-state, gradients, hard walls, pair/triple/four-dimensional paths, attractor navigation, and production acceptance equation.
 11. [`11-agent-orientation-and-role-map.md`](11-agent-orientation-and-role-map.md) — coding-agent boot sequence, repository structure, roles, validation, handoff, and trajectory usage rules.
 12. [`12-document-control-memory-and-handoff-map.md`](12-document-control-memory-and-handoff-map.md) — root/scoped CODEGRAPH division, all handoff families, implementation records, plan routing, and Markdown organization policy.
+13. [`13a-complete-memory-handoff-catalog.md`](13a-complete-memory-handoff-catalog.md) — complete retained memory/handoff catalog and historical routing.
+14. [`14-infrastructure-deployment-and-test-coverage-audit.md`](14-infrastructure-deployment-and-test-coverage-audit.md) — canonical-versus-legacy deploy topology, live-proof scripts, UI/browser evidence limits, missing tests, and dependency-ordered TDD path.
 
 ## Source authority order
 
