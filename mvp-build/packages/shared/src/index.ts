@@ -13,6 +13,7 @@ export * from "./work-stream.js";
 export * from "./hermes.js";
 export * from "./platform-toolsets.js";
 export * from "./effective-capabilities.js";
+export * from "./golden-employee-scenarios.js";
 export * from "./model-context.js";
 export * from "./connector-registry.js";
 export * from "./channel-routing.js";
