@@ -8,18 +8,21 @@ This repository contains the AI Employee product implementation and its company/
 
 Read in this order:
 
-1. `identity.md`
-2. `AGENTS.md` or `CLAUDE.md`
-3. `CODEGRAPH.md`
-4. `mvp-build/CODEGRAPH.md`
-5. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
-6. `mvp-build/STANDARD.md`
-7. `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`
-8. source, migrations, scripts, tests, proofs, and release records
+1. [`identity.md`](identity.md)
+2. [`AGENTS.md`](AGENTS.md) or [`CLAUDE.md`](CLAUDE.md)
+3. root [`CODEGRAPH.md`](CODEGRAPH.md)
+4. [`mvp-build/AGENTS.md`](mvp-build/AGENTS.md) or [`mvp-build/CLAUDE.md`](mvp-build/CLAUDE.md)
+5. [`mvp-build/CODEGRAPH.md`](mvp-build/CODEGRAPH.md)
+6. [`mvp-build/memory/MEMORY.md`](mvp-build/memory/MEMORY.md), then the newest relevant handoff
+7. [`mvp-build/STANDARD.md`](mvp-build/STANDARD.md)
+8. [`mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`](mvp-build/second-half-plan/phase-2-standard-remediation-execution.md)
+9. [`mvp-build/docs/architecture/README.md`](mvp-build/docs/architecture/README.md)
+10. [`mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`](mvp-build/docs/architecture/11-agent-orientation-and-role-map.md)
+11. relevant UX, deployment, source, migrations, scripts, tests, workflows, proof, release records, and current diff
 
-Verified source, migrations, executable proof, and newest scoped memory outrank older documentation.
+Source, applied migrations, executable proof, and newest scoped memory outrank historical prose.
 
-## Canonical offer
+## Canonical product and offer
 
 - **Start Free:** one bounded useful AI Employee.
 - **Managed AI Employee:** from **$400/month**.
@@ -27,109 +30,71 @@ Verified source, migrations, executable proof, and newest scoped memory outrank 
 
 The public estimator is an outdated acquisition/regression surface. It is not canonical product UX, pricing, profile design, or launch proof.
 
-## Current production boundary
-
-Current governed launch surfaces:
-
-- web;
-- SMS;
-- signed review;
-- connected-system events.
-
-Voice is a future extension, not a launch acceptance gate.
-
-Canonical execution flow:
+## Canonical execution boundary
 
 ```text
 trigger
--> authenticated principal
--> assignment and grant resolution
--> durable intent
--> atomic command claim
--> Hermes or deterministic work
--> approval when required
--> bounded external effect
--> durable accepted, failed, or ambiguous receipt
--> role-safe owner surface
--> audit, metering, repair, and release proof
+→ authenticated principal
+→ exact assignment or approved platform/system context
+→ current relationship, grant, policy, and authority version
+→ stable durable intent
+→ immutable command and atomic claim
+→ Hermes or deterministic work
+→ approval when required
+→ one reserved bounded external effect
+→ accepted, failed, or ambiguous durable receipt
+→ deterministic replay or repair
+→ role-safe web, SMS, signed-review, or connected-system surface
+→ audit, metering, commercial attribution, revocation, and release proof
 ```
 
-The production-shaped normal-employee deployment path remains:
+Current governed launch surfaces are web, SMS, signed review, and connected-system events. Voice is a future extension, not a launch gate.
 
-```text
-public DNS / Cloudflare Tunnel
--> Caddy
--> production Web + Manager
--> real /create-ai-employee
--> Twilio Verify
--> account creation
--> Start Employee
--> durable provisioning and isolated Hermes runtime
--> owner web/SMS interaction
--> governed provider-backed work
--> durable proof
-```
+## Current integration state
 
-Use `mvp-build/docs/production-normal-employee-live-deploy-runbook.md` for launch execution. Fixtures, `/api/dev/login`, local `live:*`, manually injected provider results, and estimator flows are not launch proof.
-
-## Current state
-
-Overall:
-
-`standard-remediation_in-progress_source-and-ci-evidence_not-live-accepted_not-launch-cleared`
-
-- Integration branch: `employee-production-tuesday`
+- Branch: `employee-production-tuesday`
 - Base: `research`
-- Integration PR: draft `#23`
-- Lane 1 relationship/authorization checkpoint is integrated
-- Lane 3 durable command/effect kernel is integrated at `c94be46137b8c87b610ba0c4b48302bb2e944564`; its contract, migration, and seven-case PostgreSQL matrix are CI-green
-- Real Supabase, provider, browser/SMS, commercial, capacity, recovery, rollback, attestation, and production acceptance remain pending
+- Draft PR: `#23`
+- Migration head: `0069`
+- `main` is not the integration or production shortcut
+- Current exact implementation/proof anchor and workflow IDs are maintained in root/scoped CODEGRAPH, the newest handoff, and PR `#23`
+- Real Supabase, target-host runtime/network, live identity/provider, fixture-free browser/SMS/Review, commercial reconciliation, cumulative budget/shared rate enforcement, fleet capacity/fairness, crash/repair, rollback, deployment attestation, and production acceptance remain separate gates unless exact evidence closes them
 
-Production-ready means every non-waivable gate in `mvp-build/STANDARD.md` passes on the exact deployed SHA. Tuesday is an engineering checkpoint, not permission to lower the bar.
+Production-ready means every non-waivable gate in `mvp-build/STANDARD.md` passes on the exact deployed SHA. Source wiring, fixtures, old runs, trajectory scores, and documentation-only commits cannot satisfy a live gate.
 
 ## Repository layout
 
 ```text
 .
-├── identity.md
-├── AGENTS.md
-├── CLAUDE.md
-├── CODEGRAPH.md
-├── README.md
-├── .github/workflows/
-├── docs/
-├── wiki/
+├── identity.md                  AMTECH operating identity
+├── AGENTS.md / CLAUDE.md        repository-wide agent rules
+├── CODEGRAPH.md                 repository-level current map
+├── .github/workflows/           exact-SHA CI and release gates
+├── docs/                        supporting product/design/operating docs
+├── wiki/                        strategy, rationale, research, implementation records
+├── local-prod/                  exact-SHA local-production evidence orchestration
 └── mvp-build/
-    ├── apps/
-    ├── packages/
-    ├── infra/
-    ├── tests/
-    ├── docs/
-    ├── memory/
-    ├── second-half-plan/
-    ├── STANDARD.md
-    └── CODEGRAPH.md
+    ├── apps/web/                owner, review, onboarding, public, admin surfaces
+    ├── apps/manager/            control plane, tools, events, runtime, gateway, provisioning
+    ├── packages/shared/         contracts and finite vocabularies
+    ├── packages/db/             migrations, clients, generated types
+    ├── packages/agent-template/ Hermes profile packages and plugins
+    ├── infra/                   Docker, Caddy, deploy, operator, acceptance scripts
+    ├── tests/                   unit/source and PostgreSQL integration matrices
+    ├── docs/architecture/       current cross-system live map and risk/trajectory packet
+    ├── docs/ux/                 current owner UX doctrine and validation
+    ├── memory/                  durable handoffs, indexed newest-first
+    ├── second-half-plan/        active execution program and historical phase family
+    ├── STANDARD.md              non-waivable production standard
+    └── CODEGRAPH.md             current implementation graph and evidence boundary
 ```
 
-### `mvp-build/`
+## Document and memory routing
 
-The implementation home for:
-
-- Next.js owner and onboarding surfaces;
-- Manager/Hono control plane;
-- Hermes runtime provisioning and isolation;
-- shared authority, protocol, work, approval, and materialization contracts;
-- PostgreSQL/Supabase migrations;
-- webhooks, ambient inbox, connectors, workers, repair, metering, and proof;
-- deployment, acceptance, fault, capacity, and release machinery.
-
-### `wiki/`
-
-Product rationale, market evidence, strategy, historical plans, and implementation records. Use it for context and decisions, but verify implementation claims against `mvp-build/` source, migrations, tests, proofs, and newest memory.
-
-### `docs/`
-
-Supporting product, design, and operating documents. Documents that describe removed or independent systems are not product authority.
+- [`mvp-build/docs/architecture/12-document-control-memory-and-handoff-map.md`](mvp-build/docs/architecture/12-document-control-memory-and-handoff-map.md) accounts for root/scoped CODEGRAPH, every durable handoff family, implementation records, active/historical plans, architecture, UX, and runbooks.
+- [`mvp-build/memory/MEMORY.md`](mvp-build/memory/MEMORY.md) is the sole index for handoff files.
+- [`wiki/MVP/implementation-records/README.md`](wiki/MVP/implementation-records/README.md) indexes older factual implementation records.
+- Historical Markdown is retained in place to preserve point-in-time evidence and inbound references; current indexes and status banners determine what agents read first.
 
 ## Development
 
@@ -144,7 +109,7 @@ npm run lint
 npm run test:integration   # environment-gated
 ```
 
-Use targeted lane workflows while implementation is in progress. Full release CI must eventually include migration blank/upgrade/rerun, RLS matrices, command concurrency, protocol compatibility, browser/SMS/provider proof, fault injection, capacity/load, container build, SBOM/attestation, proof manifest, and claim/doc consistency.
+Use targeted workflows during implementation and exact-head integrated gates before updating proof state.
 
 ## Core invariants
 
@@ -154,5 +119,7 @@ Use targeted lane workflows while implementation is in progress. Full release CI
 4. Consequential success requires a matching durable accepted receipt.
 5. Provider master credentials never enter employee profiles or employee runtimes.
 6. Customer-, money-, reputation-, credential-, and destructive actions use governed approval.
-7. Revocation, ambiguity, retries, crashes, and partial provider outages remain repairable and observable.
-8. Public claims never exceed evidence bound to the exact release SHA.
+7. Hermes remains the runtime substrate; Manager owns authority, effect, custody, repair, and proof.
+8. Generated UI is presentation, not authority.
+9. Revocation, ambiguity, retries, crashes, and partial provider outages remain repairable and observable.
+10. Public claims never exceed evidence bound to the exact release SHA.
