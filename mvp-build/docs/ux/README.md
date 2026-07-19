@@ -24,7 +24,8 @@ This folder is the UX organization layer for AMTECH. It maps current implementat
 5. `05-generative-ui-frontier.md`
 6. `06-fixture-production-ui-policy.md`
 7. `08-speculative-ui-research-disposition.md`
-8. `07-post-release-ui-roadmap.md`
+8. `09-hermes-programmatic-integration-and-webui-findings.md`
+9. `07-post-release-ui-roadmap.md`
 
 ## Current UX Thesis
 
@@ -44,6 +45,8 @@ Generative UI remains the highest-upside frontier. It is source-wired through ty
 ## Current Research Boundary
 
 `08-speculative-ui-research-disposition.md` is the governing decision record for the continuous-field, CSG, WebGPU, psychographic, gradient-flow, attention-model, and chain-of-thought proposals.
+
+`09-hermes-programmatic-integration-and-webui-findings.md` governs the Hermes protocol choice, third-party WebUI lessons, the unverified `hermes serve-mcp` claim, operator-adapter boundary, and generated-view congruence invariant.
 
 AMTECH keeps explicit mixed-initiative states, risk-scaled prominence, registered components, deterministic adaptive density, visible rationale, reduced-motion-safe transitions, and recovery. It does not use hidden emotion/personality inference, private reasoning, arbitrary generated DOM, or simulation-heavy visual engines on the Tuesday release path.
 
