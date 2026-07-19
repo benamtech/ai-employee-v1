@@ -14,11 +14,13 @@ on:
       - "mvp-build/apps/manager/src/lib/materialization.ts"
       - "mvp-build/apps/manager/src/lib/employee-stream.ts"
       - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/apps/manager/src/lib/ui-resources.ts"
       - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
       - "mvp-build/packages/shared/src/**"
       - "mvp-build/infra/scripts/ui/**"
       - "mvp-build/scripts/validate-ui-system.mjs"
       - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
+      - "mvp-build/tests/unit/ui-resources.test.ts"
       - "mvp-build/tests/unit/ui-fixture-guard.test.ts"
       - "mvp-build/tests/unit/observe-work-event-projection.test.ts"
       - "mvp-build/validation/amtech-agent-ui-vectors.json"
@@ -38,11 +40,13 @@ on:
       - "mvp-build/apps/manager/src/lib/materialization.ts"
       - "mvp-build/apps/manager/src/lib/employee-stream.ts"
       - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/apps/manager/src/lib/ui-resources.ts"
       - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
       - "mvp-build/packages/shared/src/**"
       - "mvp-build/infra/scripts/ui/**"
       - "mvp-build/scripts/validate-ui-system.mjs"
       - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
+      - "mvp-build/tests/unit/ui-resources.test.ts"
       - "mvp-build/tests/unit/ui-fixture-guard.test.ts"
       - "mvp-build/tests/unit/observe-work-event-projection.test.ts"
       - "mvp-build/validation/amtech-agent-ui-vectors.json"
@@ -103,7 +107,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-ui-typecheck-${{ github.sha }}
-          path: ${{ runner.temp }}/web-typecheck.log
+          path: ${{ runner.temp }}/web-ui-typecheck.log
           if-no-files-found: error
           retention-days: 7
       - name: Validate UI source contracts
