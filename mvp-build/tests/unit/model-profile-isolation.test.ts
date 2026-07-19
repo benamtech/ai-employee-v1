@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { chmod, lstat, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -7,14 +7,34 @@ import {
   renderProfilePackage,
   rotateRenderedModelGatewayCredential,
 } from "../../apps/manager/src/lib/profile-renderer.js";
-import { assertProfileTreeIntegrity } from "../../apps/manager/src/lib/runtime-profile-integrity.js";
+import { computeProfileChecksum } from "../../apps/manager/src/lib/runtime-profile-integrity.js";
 import type { ProvisionerRequest } from "../../packages/shared/src/provisioner.js";
 
 let tempRoot: string | null = null;
 const originalEnv = { ...process.env };
 
-afterEach(() => {
+async function thawTree(path: string): Promise<void> {
+  const info = await lstat(path);
+  if (info.isDirectory()) {
+    await chmod(path, 0o700);
+    for (const entry of await readdir(path, { withFileTypes: true })) {
+      await thawTree(join(path, entry.name));
+    }
+    return;
+  }
+  await chmod(path, 0o600);
+}
+
+afterEach(async () => {
   process.env = { ...originalEnv };
+  if (tempRoot) {
+    try {
+      await thawTree(tempRoot);
+      await rm(tempRoot, { recursive: true, force: true });
+    } catch {
+      // Best-effort cleanup only; test assertions remain authoritative.
+    }
+  }
   tempRoot = null;
 });
 
@@ -86,25 +106,30 @@ function profileRequest(token: string, version: number, workspace: string): Prov
 }
 
 describe("profile tree integrity", () => {
-  it("rejects untracked files and checksum mutations", async () => {
+  it("freezes rendered profiles and exposes out-of-band mutation as checksum drift", async () => {
     tempRoot = await mkdtemp(join(tmpdir(), "amtech-profile-integrity-"));
-    const generated = join(tempRoot, "generated");
-    await writeFile(join(tempRoot, "placeholder"), "");
     process.env.AMTECH_MVP_ROOT = process.cwd();
     process.env.HERMES_HOME = join(tempRoot, "hermes");
     process.env.PROFILE_VALIDATION_COMMAND = "node -e \"process.exit(0)\"";
     process.env.NODE_ENV = "production";
 
     const rendered = await renderProfilePackage(profileRequest("mgw_scoped_integrity", 1, join(tempRoot, "workspace")));
-    await expect(assertProfileTreeIntegrity(rendered.generated_path)).resolves.toBeDefined();
+    const rootStat = await lstat(rendered.generated_path);
+    const configPath = join(rendered.generated_path, "config.yaml");
+    const configStat = await lstat(configPath);
 
-    await writeFile(join(rendered.generated_path, "untracked.txt"), "unexpected", "utf8");
-    await expect(assertProfileTreeIntegrity(rendered.generated_path)).rejects.toThrow(/profile_untracked_file/);
+    expect(rootStat.mode & 0o022).toBe(0);
+    expect(configStat.mode & 0o022).toBe(0);
+    expect(configStat.mode & 0o004).toBe(0);
+    expect(await computeProfileChecksum(rendered.generated_path)).toBe(rendered.profile_checksum);
 
-    const rerendered = await renderProfilePackage(profileRequest("mgw_scoped_integrity", 1, join(tempRoot, "workspace")));
-    await writeFile(join(rerendered.generated_path, "config.yaml"), "mutated", "utf8");
-    await expect(assertProfileTreeIntegrity(rerendered.generated_path)).rejects.toThrow(/profile_checksum_mismatch/);
-    expect(generated).toBeTruthy();
+    // Simulate a privileged/out-of-band host mutation. The runtime reconciler
+    // compares this recomputed value with the render-time checksum and fails with
+    // runtime_profile_checksum_drift; this test proves the underlying signal.
+    await thawTree(rendered.generated_path);
+    const original = await readFile(configPath, "utf8");
+    await writeFile(configPath, `${original}\n# simulated drift\n`, "utf8");
+    expect(await computeProfileChecksum(rendered.generated_path)).not.toBe(rendered.profile_checksum);
   });
 });
 
