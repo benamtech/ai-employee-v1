@@ -34,22 +34,30 @@ function meta(key: string): ConnectorMeta {
   };
 }
 
-/**
- * Connector consent + result. Owner-safe permission screen: what the employee
- * will and won't do, then Connect. `?state=connected|failed` renders the
- * landing an OAuth callback returns to. Static surface — no live OAuth claim.
- */
+function safeReturnPath(value: string | undefined, employeeId: string): string {
+  const fallback = `/agent/${encodeURIComponent(employeeId)}`;
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return fallback;
+  if (/[\u0000-\u001f\u007f]/.test(value) || value.length > 500) return fallback;
+  return value;
+}
+
+/** Owner-safe consent and result surface. The Connect action enters the existing
+ * Manager OAuth tool; the provider callback returns to the signed initiating work
+ * path rather than synthesizing a connected state in the browser. */
 export default async function Connect({
   params,
   searchParams,
 }: {
   params: Promise<{ employeeId: string; connector: string }>;
-  searchParams: Promise<{ state?: string }>;
+  searchParams: Promise<{ state?: string; returnTo?: string }>;
 }) {
   const { employeeId, connector } = await params;
-  const { state } = await searchParams;
+  const { state, returnTo: rawReturnTo } = await searchParams;
   const m = meta(connector);
-  const deskHref = `/agent/${employeeId}`;
+  const returnTo = safeReturnPath(rawReturnTo, employeeId);
+  const deskHref = returnTo;
+  const retryHref = `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(connector)}?returnTo=${encodeURIComponent(returnTo)}`;
+  const startHref = `/api/employee/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(connector)}?returnTo=${encodeURIComponent(returnTo)}`;
 
   if (state === "connected") {
     return (
@@ -57,23 +65,23 @@ export default async function Connect({
         <div className="cn-result">
           <p className="cn-kicker" style={{ color: "#0a0a0a" }}>✓ Connected</p>
           <h1>{m.label} is connected<span className="p">.</span></h1>
-          <p className="cn-sub">Your employee can do {m.label.toLowerCase()} work now — always behind your approval. You&rsquo;ll see it light up on the desk under Connected.</p>
-          <div className="cn-cta-row"><Link className="cn-cta" href={deskHref}>Back to the desk</Link></div>
+          <p className="cn-sub">Your employee can do {m.label.toLowerCase()} work now — always behind your approval. The connector remains scoped to this employee and can be revoked.</p>
+          <div className="cn-cta-row"><Link className="cn-cta" href={deskHref}>Return to the work</Link></div>
         </div>
       </Shell>
     );
   }
 
-  if (state === "failed") {
+  if (state === "error" || state === "failed") {
     return (
       <Shell employeeId={employeeId} note="Couldn't connect">
         <div className="cn-result">
           <p className="cn-kicker" style={{ color: "#e11d2a" }}>Couldn&rsquo;t connect</p>
           <h1>{m.label} didn&rsquo;t connect<span className="p">.</span></h1>
-          <p className="cn-sub">Nothing changed and no work was affected. This usually clears up on a second try — the sign-in window may have closed or timed out.</p>
+          <p className="cn-sub">Nothing was sent and no work was changed. The provider window may have been cancelled, expired, or rejected.</p>
           <div className="cn-cta-row">
-            <Link className="cn-cta" href={`/agent/${employeeId}/connect/${connector}`}>Try again</Link>
-            <Link className="cn-cta quiet" href={deskHref}>Back to the desk</Link>
+            <Link className="cn-cta" href={retryHref}>Try again</Link>
+            <Link className="cn-cta quiet" href={deskHref}>Return to the work</Link>
           </div>
         </div>
       </Shell>
@@ -99,7 +107,7 @@ export default async function Connect({
         </div>
 
         <div className="cn-cta-row">
-          <Link className="cn-cta" href={`/agent/${employeeId}/connect/${connector}?state=connected`}>Connect {m.label.toLowerCase()}</Link>
+          <Link className="cn-cta" href={startHref}>Connect {m.label.toLowerCase()}</Link>
           <Link className="cn-cta quiet" href={deskHref}>Not now</Link>
         </div>
       </div>
