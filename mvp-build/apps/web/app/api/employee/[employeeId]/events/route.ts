@@ -4,8 +4,8 @@ import { managerOrigin, managerHeaders } from "../../../_lib/manager";
 
 // Live Work Surface stream (Phase 5). Pass-through proxy of the Manager SSE
 // endpoint — the browser holds one EventSource to Next, Next relays Manager. The
-// owner session (httpOnly cookie) is forwarded only on the private Manager hop;
-// the browser never talks to Supabase or Manager directly.
+// owner session (httpOnly cookie) is forwarded only in a private header on the
+// Manager hop; it never appears in a browser-visible URL or Manager query string.
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
@@ -18,12 +18,16 @@ export async function GET(
   const { employeeId } = await params;
   const cookieStore = await cookies();
   const token = cookieStore.get("amtech_owner_session")?.value ?? "";
-  const url = `${managerOrigin()}${MANAGER_API.employeeStream(employeeId)}?owner_session_token=${encodeURIComponent(token)}`;
+  const url = `${managerOrigin()}${MANAGER_API.employeeStream(employeeId)}`;
   const controller = new AbortController();
   const reauthTimer = setTimeout(() => controller.abort("owner_stream_reauthorization"), STREAM_REAUTH_MS);
 
   const upstream = await fetch(url, {
-    headers: { ...managerHeaders(), Accept: "text/event-stream" },
+    headers: {
+      ...managerHeaders(),
+      Accept: "text/event-stream",
+      "X-AMTECH-Owner-Session": token,
+    },
     signal: controller.signal,
     cache: "no-store",
   });
