@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { resolveOwnerOAuthConnectorSetup } from "@amtech/shared";
 import { managerPost } from "../../../../_lib/manager";
 
 function safeReturnPath(value: string | null, employeeId: string): string {
@@ -9,11 +10,11 @@ function safeReturnPath(value: string | null, employeeId: string): string {
   return value;
 }
 
-function googleConsentUrl(value: unknown): URL | null {
+function providerConsentUrl(value: unknown, allowedHosts: string[]): URL | null {
   if (typeof value !== "string") return null;
   try {
     const url = new URL(value);
-    if (url.protocol !== "https:" || url.hostname !== "accounts.google.com") return null;
+    if (url.protocol !== "https:" || !allowedHosts.includes(url.hostname)) return null;
     return url;
   } catch {
     return null;
@@ -25,7 +26,8 @@ export async function GET(
   { params }: { params: Promise<{ employeeId: string; connector: string }> },
 ) {
   const { employeeId, connector } = await params;
-  if (connector !== "gmail") return NextResponse.json({ error: "connector_not_supported" }, { status: 404 });
+  const setup = resolveOwnerOAuthConnectorSetup(connector);
+  if (!setup) return NextResponse.json({ error: "connector_not_supported" }, { status: 404 });
   const cookieStore = await cookies();
   const ownerSession = cookieStore.get("amtech_owner_session")?.value;
   if (!ownerSession) {
@@ -34,7 +36,7 @@ export async function GET(
     return NextResponse.redirect(login);
   }
   const returnTo = safeReturnPath(new URL(req.url).searchParams.get("returnTo"), employeeId);
-  const response = await managerPost(`/manager/employee/${encodeURIComponent(employeeId)}/workbench/connect/${connector}`, {
+  const response = await managerPost(`/manager/employee/${encodeURIComponent(employeeId)}/workbench/connect/${encodeURIComponent(setup.key)}`, {
     owner_session_token: ownerSession,
     return_to: returnTo,
   });
@@ -44,12 +46,12 @@ export async function GET(
     proof?: { consent_url?: unknown };
   };
   if (!response.ok || json.error) {
-    const failure = new URL(`/agent/${encodeURIComponent(employeeId)}/connect/${connector}`, req.url);
+    const failure = new URL(`/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(setup.key)}`, req.url);
     failure.searchParams.set("state", "error");
     failure.searchParams.set("returnTo", returnTo);
     return NextResponse.redirect(failure);
   }
-  const consent = googleConsentUrl(json.proof?.consent_url);
+  const consent = providerConsentUrl(json.proof?.consent_url, setup.allowed_authorization_hosts);
   if (!consent) return NextResponse.json({ error: "connector_consent_url_invalid" }, { status: 502 });
   return NextResponse.redirect(consent);
 }
