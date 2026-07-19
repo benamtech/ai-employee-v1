@@ -1,47 +1,36 @@
 # AGENTS.md — AI Employee implementation rules
 
-Status: active
-Updated: 2026-07-18
+Status: active  
+Updated: 2026-07-19
 
 > Tool-agnostic mirror of `CLAUDE.md`. Keep both files synchronized except for the heading note.
 
 This is `mvp-build/`, the implementation home for AMTECH's AI Employee. The owner experiences one employee; Manager is invisible control-plane infrastructure and Hermes is the agent substrate.
 
-## Read order
+## Mandatory read order
 
 1. `../identity.md`
-2. `CODEGRAPH.md`
-3. `memory/MEMORY.md`, then the newest relevant handoff
-4. `STANDARD.md`
-5. `second-half-plan/phase-2-standard-remediation-execution.md`
-6. this file or `CLAUDE.md`
-7. `docs/production-normal-employee-live-deploy-runbook.md` for deployment/live work
-8. relevant source, migrations, scripts, tests, proofs, and release records
+2. root `../AGENTS.md` or `../CLAUDE.md` and root `../CODEGRAPH.md`
+3. this file or `CLAUDE.md`
+4. `CODEGRAPH.md`
+5. `memory/MEMORY.md`, then the newest relevant handoff
+6. `STANDARD.md`
+7. `second-half-plan/phase-2-standard-remediation-execution.md`
+8. `docs/architecture/README.md`
+9. `docs/architecture/11-agent-orientation-and-role-map.md`
+10. `docs/production-normal-employee-live-deploy-runbook.md` for deployment/live work
+11. relevant UX, source, migrations, scripts, tests, workflows, proofs, release records, and current diff
 
-Source, migrations, executable proof, and newest memory outrank stale prose.
+Source, applied migrations, executable proof, and newest memory outrank stale prose.
 
 ## Current status
 
 - Integration branch: `employee-production-tuesday`, based on `research`.
 - Integration PR: draft `#23`.
-- Implementation proof anchor: `a9184be1af68ed6c5372d642928db46b51eb0506`.
-- Overall: `standard-remediation_s2-s9-branch-ci-postgres-image-accepted_not-live-accepted_not-launch-cleared`.
-- Lane 1 relationship/authorization and Lane 3 durable command/effect foundations are integrated.
-- S5 connector custody, S6 commercial attribution, S7 approval authority, source-wired S8 platform-admin authority, and S9 authority-version revocation are present.
-- Owner web turns execute through C3 around the existing Hermes runtime path, with durable ambiguity and no-second-effect repair.
-- New preview/action links require one exact assignment; owner sessions, Hermes MCP credentials, approvals, preview links, and artifact links enforce current authority versions.
-- Generated Manager source and the production Manager image passed the branch production boundary.
-- Real Supabase, live runtime, provider, fixture-free browser/SMS, commercial reconciliation, capacity, recovery, rollback, attestation, deployment, and production acceptance remain pending.
-
-Exact implementation-head Actions:
-
-- Phase 2 Remediation Plan Integrity `29662757178`: success
-- Lane 1 Relationships and Authorization `29662757194`: success
-- S2 S7 S9 Production Boundary `29662757252`: success
-- Lane 10 Integrated CI and Release Evidence `29662757197`: success
-- Employee Work Production Boundary `29662757204`: success
-
-Read `memory/2026-07-18-s2-s9-authority-runtime-checkpoint.md` for the complete branch handoff and evidence boundary.
+- Migration head: `0069`.
+- Current implementation/proof anchors and workflow IDs are maintained in `CODEGRAPH.md`, the newest handoff, and PR `#23`.
+- Branch source includes relationship/authorization, C3, connector custody, commercial attribution, approval authority, platform authority, revocation, onboarding identity/activation, generated UI, strict owner/context reads, reconciler/ambient inbox, Model Gateway, production topology, and exact-head archaeology.
+- Real Supabase, target-host runtime/network, live identity/provider, fixture-free browser/SMS/Review, commercial reconciliation, cumulative budgets/shared rate limits, capacity/fairness, crash/repair, rollback, attestation, deployment, and launch acceptance remain separate gates unless named evidence closes them.
 
 ## Canonical product boundary
 
@@ -49,18 +38,18 @@ Current governed launch surfaces are web, SMS, signed review, and connected-syst
 
 ```text
 trigger
--> authenticated principal
--> exact assignment or approved platform/system context
--> current relationship, role, grant, policy, and authority version
--> stable durable intent
--> immutable command and atomic claim
--> Hermes or deterministic work
--> approval when required
--> one reserved bounded external effect
--> accepted, failed, or ambiguous durable receipt
--> deterministic replay or repair
--> role-safe surface
--> audit, metering, commercial attribution, revocation propagation, and release proof
+→ authenticated principal
+→ exact assignment or approved platform/system context
+→ current relationship, role, grant, policy, and authority version
+→ stable durable intent
+→ immutable command and atomic claim
+→ Hermes or deterministic work
+→ approval when required
+→ one reserved bounded external effect
+→ accepted, failed, or ambiguous durable receipt
+→ deterministic replay or repair
+→ role-safe surface
+→ audit, metering, commercial attribution, revocation propagation, and release proof
 ```
 
 The public estimator, fixtures, `/api/dev/login`, local `live:*`, and manually injected provider results are diagnostics only.
@@ -71,7 +60,24 @@ Stay as close to Hermes runtime as possible.
 
 Hermes owns agent execution, transcript/session continuity, streaming, recovery, rotation, employee-local materialization, and memory behavior. Manager owns authority, durable command/effect semantics, credential custody, approvals, revocation, commercial provenance, repair, and release evidence.
 
-Do not create a parallel runtime, transcript store, session manager, streaming stack, materialization layer, or recovery path when an existing Hermes capability can be constrained or adapted. Every control-plane change should preserve or improve Hermes performance, network behavior, runtime/session management, and existing production-like deployment machinery.
+Do not create a parallel runtime, transcript store, session manager, streaming stack, materialization layer, or recovery path when an existing Hermes capability can be constrained or adapted.
+
+## Agent roles
+
+Every substantial change names one primary role from `docs/architecture/11-agent-orientation-and-role-map.md`:
+
+- repository/documentation archaeologist;
+- contracts/shared vocabulary;
+- database/authority/relationships;
+- runtime/network/provisioning;
+- events/connectors/ambient inbox;
+- Hermes/context/capabilities;
+- owner UI/UX/generated view;
+- reliability/evidence/commercial;
+- deployment/release;
+- research/product trajectory.
+
+The role selects source hubs, invariants, and required validation. It does not permit ignoring interacting systems.
 
 ## Acceptance vocabulary
 
@@ -84,7 +90,7 @@ Do not create a parallel runtime, transcript store, session manager, streaming s
 - `commercial-accepted`: usage, payer/beneficiary, provider cost, and invoice reconciliation passed.
 - `production-ready`: every non-waivable Standard gate passes on the exact deployed SHA.
 
-Documentation-only commits do not automatically promote an implementation proof anchor.
+Documentation-only commits and trajectory scores do not promote an implementation proof anchor.
 
 ## Non-negotiables
 
@@ -98,39 +104,27 @@ Documentation-only commits do not automatically promote an implementation proof 
 8. Manager API authority and host lifecycle authority remain separated by the signed host-private provisioner boundary.
 9. No browser-readable database surface is added without Data API, RLS, grant, and cross-assignment review.
 10. Session, connector, approval, signed-resource, and runtime credentials fail closed after relevant authority-version changes.
-11. Public claims and release state never exceed evidence bound to the exact SHA.
+11. Generated UI and adaptive layout remain presentation, not authority or hidden psychographic control.
+12. Public claims and release state never exceed evidence bound to the exact SHA.
 
 ## Dependency order
 
-Completed branch-level source/CI checkpoints:
+Use `CODEGRAPH.md`, `docs/architecture/09-current-bug-risk-and-production-gap-register.md`, and `docs/architecture/trajectories/05-attractor-navigation-and-production-equation.md` together:
 
-1. Lane 1 relationship and authorization foundation.
-2. Lane 3 durable command/effect kernel.
-3. S2/S3 owner assignment and signed-resource enforcement.
-4. S5 connector custody.
-5. S6 commercial attribution and receipt-gated Model Gateway success.
-6. S7 approval authority and execution.
-7. S8 platform-admin authority source wiring and exact-SHA workflow definition.
-8. S9 authority-version revocation and signed-resource closure.
-9. Generated Manager production surface and successful production-image inclusion.
+1. CODEGRAPH states current implementation and proof.
+2. The risk register states source-confirmed P0/P1 gaps.
+3. The trajectory packet orders interacting prerequisites and bifurcation controls.
+4. `STANDARD.md` and live evidence decide acceptance.
 
-Next:
-
-1. Apply the full migration ledger through `0063` to the approved real Supabase staging target.
-2. Run the dedicated Lane 8 exact-SHA workflow if S8 acceptance is next.
-3. Capture fixture-free web/SMS/signed-review and real connector/provider packets.
-4. Implement and prove S10 onboarding identity saga, compensation, and repair.
-5. Close commercial reconciliation, separated workers, capacity/fairness, recovery, rollback, attestation, deployment, and release gates.
-
-Do not jump to downstream UI or capacity claims that would invent feature-local authority, effect, or proof semantics.
+Do not jump to downstream UX, capacity, MCP, or product claims that invent feature-local authority, effect, or proof semantics.
 
 ## Working rules
 
 - Inspect source and the applicable contract before editing.
 - Correct flawed tests or acceptance vectors before implementation.
 - Prefer the smallest coherent change that closes an invariant without hiding a failed gate.
-- Adapt existing Hermes, reconciler, inbox, gateway, provider, provisioning, materialization, session, recovery, and owner-surface machinery to shared contracts rather than replacing it.
-- Use targeted checks during lane work, then run required integrated and release gates at the declared checkpoint.
+- Adapt existing Hermes, reconciler, inbox, gateway, provider, provisioning, materialization, session, recovery, commercial, and owner-surface machinery to shared contracts.
+- Use targeted checks during lane work, then run required integrated/release gates at the declared checkpoint.
 - Do not repeat old pass counts as current proof unless rerun.
 - Never rewrite or renumber applied forward migrations; add a new forward migration.
 
@@ -146,15 +140,20 @@ npm run test:integration   # environment-gated
 
 Exact local-production orchestration lives at repository root under `local-prod/`, `scripts/local-prod/`, and root `pnpm` commands. `mvp-build/package-lock.json` plus `npm ci` remain application dependency authority.
 
-## Memory protocol
+## Documentation and memory protocol
 
-After substantial multi-file work, a phase checkpoint, incident, or architectural/product-direction change:
+After substantial multi-file work, a phase checkpoint, incident, architectural/product-direction change, or production-risk discovery:
 
-1. write a dated handoff in `memory/`;
-2. update `memory/MEMORY.md` newest-first;
-3. record exact validation and implementation SHA, or explicitly state what was not run;
-4. keep factual implementation/proof state synchronized with CODEGRAPH and release records;
-5. distinguish documentation-only follow-up commits from the implementation proof anchor.
+1. update the applicable architecture/UX contract;
+2. update `CODEGRAPH.md` when source hubs, migration head, proof, or production gates changed;
+3. write a dated handoff in `memory/`;
+4. update `memory/MEMORY.md` newest-first;
+5. update root CODEGRAPH when repository-level current state changed;
+6. update the active plan/vector only when dependency/gate state changed;
+7. update PR `#23` and exact-head workflow evidence;
+8. distinguish documentation-only follow-up commits from the implementation proof anchor.
+
+`docs/architecture/12-document-control-memory-and-handoff-map.md` defines the complete document-family transaction. Historical handoffs and implementation records remain point-in-time evidence and are not moved casually.
 
 ## Git
 
