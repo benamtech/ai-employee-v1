@@ -55,6 +55,12 @@ source = replaceOne(
 );
 source = replaceOne(
   source,
+  `import { buildEmployeeSnapshot, cursorFromSnapshot, fetchWorkEventsSince } from "./lib/employee-stream.js";`,
+  `import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot, cursorFromSnapshot, fetchWorkEventsSinceStrict as fetchWorkEventsSince } from "./lib/employee-stream-strict.js";`,
+  "strict_employee_stream_import",
+);
+source = replaceOne(
+  source,
   `  buildReadinessReport,\n  recordSupportAccess,\n  requirePlatformRole,\n  runAdminSupportAction,\n} from "./lib/admin.js";`,
   `  buildReadinessReport,\n} from "./lib/admin.js";\nimport {\n  authorizePlatformAdminRequest,\n  executePlatformAdminSupportAction,\n  resolvePlatformAdminAssignment,\n} from "./lib/platform-admin-runtime.js";`,
   "admin_import",
@@ -290,6 +296,7 @@ const required = [
   "X-AMTECH-Admin-Authorization",
   "X-AMTECH-Support-Lease-Id",
   "X-AMTECH-Owner-Session",
+  "employee-stream-strict.js",
   "String(link.assignment_id)",
   "String(employeeId)",
   "approvalResolution",
