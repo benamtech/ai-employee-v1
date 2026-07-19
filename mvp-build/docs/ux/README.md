@@ -46,7 +46,7 @@ Generative UI remains the highest-upside frontier. It is source-wired through ty
 
 `08-speculative-ui-research-disposition.md` is the governing decision record for the continuous-field, CSG, WebGPU, psychographic, gradient-flow, attention-model, and chain-of-thought proposals.
 
-`09-hermes-programmatic-integration-and-webui-findings.md` governs the Hermes protocol choice, third-party WebUI lessons, the unverified `hermes serve-mcp` claim, operator-adapter boundary, and generated-view congruence invariant.
+`09-hermes-programmatic-integration-and-webui-findings.md` governs the Hermes protocol choice, third-party WebUI lessons, the verified stdio-only `hermes mcp serve` messaging bridge and its corrected authority boundary, operator-adapter scope, and generated-view congruence invariant.
 
 AMTECH keeps explicit mixed-initiative states, risk-scaled prominence, registered components, deterministic adaptive density, visible rationale, reduced-motion-safe transitions, and recovery. It does not use hidden emotion/personality inference, private reasoning, arbitrary generated DOM, or simulation-heavy visual engines on the Tuesday release path.
 
