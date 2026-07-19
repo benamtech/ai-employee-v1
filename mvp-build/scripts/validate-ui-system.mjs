@@ -26,6 +26,8 @@ const [
   validationStandard,
   globals,
   layout,
+  login,
+  dashboard,
   agentSurface,
   operatingContracts,
   boundedPlanner,
@@ -39,12 +41,15 @@ const [
   identityControl,
   provisionRoute,
   resourcesRoute,
+  eventsRoute,
 ] = await Promise.all([
   read("../docs/AMTECH_WEB_DESIGN_SYSTEM.md"),
   read("../docs/AMTECH_AGENT_INTERFACE_STANDARD.md"),
   read("../docs/AMTECH_UI_VALIDATION_STANDARD.md"),
   read("apps/web/app/globals.css"),
   read("apps/web/app/layout.tsx"),
+  read("apps/web/app/login/page.tsx"),
+  read("apps/web/app/dashboard/page.tsx"),
   read("apps/web/app/agent/[employeeId]/AgentSurface.tsx"),
   read("packages/shared/src/operating-system.ts"),
   read("packages/shared/src/operating-layout.ts"),
@@ -58,7 +63,10 @@ const [
   read("apps/web/app/create-ai-employee/BusinessIdentityControl.tsx"),
   read("apps/web/app/api/front-door/provision/route.ts"),
   read("apps/web/app/api/employee/[employeeId]/resources/route.ts"),
+  read("apps/web/app/api/employee/[employeeId]/events/route.ts"),
 ]);
+
+const criticalProductSurfaces = globals + layout + login + dashboard + agentSurface + workObject + review;
 
 check("G0-01", containsAll(design + agentStandard + validationStandard, [
   "status:** canonical",
@@ -78,12 +86,12 @@ check("G1-01", containsAll(globals, [
   "--amtech-cyan: #dff6ff",
   "--amtech-green: #168a57",
 ]), "canonical palette is implemented in runtime tokens");
-check("G1-02", containsNone(globals + agentSurface + workObject + review, [
+check("G1-02", containsNone(criticalProductSurfaces, [
   "prefers-color-scheme: dark",
   "background: #0a0a0a",
   "background:#0a0a0a",
-]), "critical product surfaces stay light");
-check("G1-03", containsNone(agentSurface + workObject + review, [
+]), "login, dashboard, operating, work-object, and review surfaces stay light");
+check("G1-03", containsNone(login + dashboard + agentSurface + workObject + review, [
   "amber-",
   "orange-",
   "#a86a12",
@@ -93,9 +101,10 @@ check("G1-03", containsNone(agentSurface + workObject + review, [
   "#fffdf8",
   "#f4f1e9",
 ]), "critical product surfaces contain no forbidden accents or beige surfaces");
-check("G1-04", containsNone(layout + globals + agentSurface + workObject + review, ["IBM_Plex_Mono", "--font-plex-mono"]), "critical product UI uses Inter/system typography only");
+check("G1-04", containsNone(criticalProductSurfaces, ["IBM_Plex_Mono", "--font-plex-mono", "IBM Plex Mono"]), "critical product UI uses Inter/system typography only");
 check("G1-05", containsAll(globals, ["--amtech-space-1: 8px", "--amtech-radius-card: 20px", "prefers-reduced-motion"]), "runtime tokens implement 8px rhythm, soft surfaces, and reduced motion");
 check("G1-06", !globals.includes("border-radius: 0;"), "no square-corner doctrine remains in the global foundation");
+check("G1-07", containsAll(login + dashboard, ["min-height: 48px", ":focus-visible"]), "login and dashboard preserve minimum controls and keyboard focus");
 
 check("G2-01", containsAll(operatingContracts + agentSurface, [
   "OperatingSurfaceState",
@@ -124,6 +133,7 @@ check("G3-04", containsNone(operatingCompiler + agentSurface, ["raw_agents_md", 
 
 check("G4-01", containsAll(agentSurface, ["EventSource", "snapshot", "intent_id", "scheduleRefresh"]), "stream reconnect refreshes operating state without replaying commands");
 check("G4-02", containsAll(agentSurface, ["createIntentId", "intent_id"]), "owner messages carry stable intent IDs");
+check("G4-03", containsAll(eventsRoute, ["OWNER_STREAM_REAUTH_MS", "AbortController", "no-store", "X-Accel-Buffering"]), "owner stream has a bounded authorization lifetime and proxy buffering is disabled");
 
 check("G5-01", containsAll(mcpUi, ["sandbox=\"allow-scripts\"", "e.source !== ref.current.contentWindow", "amtech-mcp-ui"]), "MCP Apps are sandboxed and source/intent allowlisted");
 check("G5-02", !mcpUi.includes("allow-same-origin"), "MCP Apps do not receive same-origin privileges");
