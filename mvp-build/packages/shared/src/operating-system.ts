@@ -242,14 +242,46 @@ const REGION_BASE: Record<AdaptiveRegionKind, number> = {
   context: 10,
 };
 
+const MAX_VOLUME_BONUS = 24;
+
+const FOCUS_STATE_PRIORITY: Record<OperatingLoopState, number> = {
+  needs_you: 0,
+  blocked: 1,
+  failed: 1,
+  active: 2,
+  repairing: 2,
+  forming: 3,
+  waiting: 4,
+  done: 5,
+};
+
+function timestampScore(value: string | null | undefined): number {
+  if (!value) return 0;
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function selectFocusLoop(loops: OperatingWorkLoop[]): OperatingWorkLoop | undefined {
+  return [...loops].sort((a, b) => {
+    const stateDelta = FOCUS_STATE_PRIORITY[a.state] - FOCUS_STATE_PRIORITY[b.state];
+    if (stateDelta !== 0) return stateDelta;
+    const recencyDelta = timestampScore(b.updated_at) - timestampScore(a.updated_at);
+    if (recencyDelta !== 0) return recencyDelta;
+    return a.id.localeCompare(b.id);
+  })[0];
+}
+
 export function planAdaptiveOperatingLayout(input: AdaptiveLayoutInput): AdaptiveLayoutPlan {
   const blockedLoops = input.loops.filter((loop) => loop.state === "blocked" || loop.state === "failed").length;
   const activeLoops = input.loops.filter((loop) => ["forming", "active", "repairing"].includes(loop.state)).length;
+  const highRiskDecisions = input.decisions.filter((decision) => decision.risk === "high").length;
+  const returnedSaves = input.active_saves.filter((save) => save.state === "needs_you").length;
   const delegatedActive = input.delegated_work.filter((unit) => ["queued", "working", "blocked", "failed"].includes(unit.state)).length;
+  const delegatedFailures = input.delegated_work.filter((unit) => unit.state === "blocked" || unit.state === "failed").length;
   const regions: AdaptiveLayoutRegion[] = [];
   const add = (kind: AdaptiveRegionKind, count: number, bonus: number, rationale: string[]) => {
     if (count <= 0 && kind !== "guidance" && kind !== "context") return;
-    const volume = count > 0 ? Math.round(Math.log1p(count) * 8) : 0;
+    const volume = count > 0 ? Math.min(MAX_VOLUME_BONUS, Math.round(Math.log1p(count) * 8)) : 0;
     regions.push({
       kind,
       priority: REGION_BASE[kind] + bonus + volume,
@@ -260,24 +292,21 @@ export function planAdaptiveOperatingLayout(input: AdaptiveLayoutInput): Adaptiv
   };
 
   add("guidance", 1, input.decisions.length ? 18 : blockedLoops ? 14 : activeLoops ? 8 : 0, ["stable_operating_point"]);
-  add("attention", input.decisions.length + blockedLoops, input.decisions.length ? 40 : blockedLoops ? 28 : 0, [
-    ...(input.decisions.length ? ["owner_decision_required"] : []),
+  add("attention", input.decisions.length + blockedLoops, highRiskDecisions ? 48 : input.decisions.length ? 40 : blockedLoops ? 28 : 0, [
+    ...(highRiskDecisions ? ["high_risk_owner_decision"] : input.decisions.length ? ["owner_decision_required"] : []),
     ...(blockedLoops ? ["blocked_or_failed_work"] : []),
   ]);
   add("work_loops", input.loops.length, activeLoops ? 16 : 0, activeLoops ? ["active_work_present"] : ["durable_work_context"]);
-  add("active_saves", input.active_saves.length, input.active_saves.some((save) => save.state === "needs_you") ? 18 : 6, ["future_intention_held"]);
+  add("active_saves", input.active_saves.length, returnedSaves ? 52 : 6, returnedSaves ? ["return_condition_reached"] : ["future_intention_held"]);
   add("system_changes", input.changes.length, 0, ["meaningful_state_change"]);
-  add("delegated_work", input.delegated_work.length, delegatedActive ? 10 : 0, ["delegated_execution_visible_when_material"]);
+  add("delegated_work", input.delegated_work.length, delegatedFailures ? 64 : delegatedActive ? 10 : 0, delegatedFailures ? ["delegated_failure_material"] : ["delegated_execution_visible_when_material"]);
   add("evidence", input.evidence.length, 0, ["durable_outcomes"]);
   add("connections", input.connection_attention_count, input.connection_attention_count ? 12 : 0, ["connection_affects_work"]);
   add("context", 1, 0, ["inspectable_context_manifest"]);
 
   regions.sort((a, b) => b.priority - a.priority || a.kind.localeCompare(b.kind));
   const primary = regions[0]?.kind ?? "guidance";
-  const focusLoop = input.loops.find((loop) => loop.state === "needs_you")
-    ?? input.loops.find((loop) => loop.state === "blocked" || loop.state === "failed")
-    ?? input.loops.find((loop) => loop.state === "active" || loop.state === "repairing")
-    ?? input.loops[0];
+  const focusLoop = selectFocusLoop(input.loops);
 
   return {
     version: 1,
