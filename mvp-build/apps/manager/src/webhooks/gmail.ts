@@ -2,7 +2,7 @@
 import type { Hono } from "hono";
 import { MANAGER_API } from "@amtech/shared";
 import { serviceClient, type SupabaseClient } from "@amtech/db";
-import { verifyOAuthState } from "../lib/oauth-state.js";
+import { safeOAuthReturnPath, verifyOAuthState } from "../lib/oauth-state.js";
 import { decodePubSubPush, verifyPubSubJwt } from "../lib/pubsub.js";
 import { TOOL_REGISTRY } from "../tools/registry.js";
 import type { ToolContext } from "../tools/types.js";
@@ -18,6 +18,27 @@ function resultPage(message: string, success: boolean): string {
     `<body style="font-family:system-ui;max-width:560px;margin:12vh auto;text-align:center">` +
     `<h1 style="color:${success ? "#1a7f37" : "#b42318"}">${success ? "Connected" : "Connection failed"}</h1>` +
     `<p>${message}</p></body></html>`;
+}
+
+function ownerWebOrigin(): string | null {
+  const raw = process.env.AGENT_WEB_ORIGIN ?? process.env.PUBLIC_WEB_ORIGIN ?? "";
+  try {
+    const url = new URL(raw);
+    if (!/^https?:$/.test(url.protocol)) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
+}
+
+function oauthReturnUrl(returnTo: string | undefined, status: "connected" | "error"): string | null {
+  const origin = ownerWebOrigin();
+  const path = safeOAuthReturnPath(returnTo);
+  if (!origin || !path) return null;
+  const url = new URL(path, origin);
+  url.searchParams.set("connector", "gmail");
+  url.searchParams.set("state", status);
+  return url.toString();
 }
 
 interface ScopedAmbientInboxRow extends AmbientInboxRow {
@@ -88,18 +109,23 @@ export async function processGmailAmbientEvent(db: SupabaseClient, event: Ambien
 
 export function registerGmailWebhooks(app: Hono): void {
   app.get(MANAGER_API.webhooks.gmailOauthCallback, async (c) => {
+    const rawState = c.req.query("state") ?? "";
+    const state = rawState ? verifyOAuthState(rawState) : null;
+    if (!state || state.provider !== "gmail") return c.text("invalid oauth state", 403);
     const error = c.req.query("error");
-    if (error) return c.html(resultPage("Gmail connection was cancelled.", false), 400);
-    const state = c.req.query("state");
+    if (error) {
+      const returnUrl = oauthReturnUrl(state.return_to, "error");
+      if (returnUrl) return c.redirect(returnUrl);
+      return c.html(resultPage("Gmail connection was cancelled.", false), 400);
+    }
     const code = c.req.query("code");
-    if (!state || !verifyOAuthState(state)) return c.text("invalid oauth state", 403);
     if (!code) return c.text("missing code", 400);
 
     const handler = TOOL_REGISTRY.get("complete_gmail_oauth");
     if (!handler) return c.text("unavailable", 500);
     const db = serviceClient();
     const ctx: ToolContext = { db, actor: "manager", account_id: null, employee_id: null };
-    const envelope = await handler(ctx, { state, code });
+    const envelope = await handler(ctx, { state: rawState, code });
     const success = envelope.status === "ok";
     if (success) {
       const proof = (envelope.proof ?? {}) as Record<string, unknown>;
@@ -123,10 +149,12 @@ export function registerGmailWebhooks(app: Hono): void {
         provenance: { oauth_state_verified: true, profile_email_verified: true },
       });
     }
-    const redirect = process.env.GMAIL_OAUTH_SUCCESS_REDIRECT;
-    if (success && redirect) return c.redirect(redirect);
+    const returnUrl = oauthReturnUrl(state.return_to, success ? "connected" : "error");
+    if (returnUrl) return c.redirect(returnUrl);
+    const fallback = process.env.GMAIL_OAUTH_SUCCESS_REDIRECT;
+    if (success && fallback) return c.redirect(fallback);
     return c.html(
-      resultPage(success ? "Gmail is connected. Return to your employee to send the estimate." : "Gmail connection failed. Please try connecting again.", success),
+      resultPage(success ? "Gmail is connected. Return to your employee to continue the work." : "Gmail connection failed. Please try connecting again.", success),
       success ? 200 : 400,
     );
   });
