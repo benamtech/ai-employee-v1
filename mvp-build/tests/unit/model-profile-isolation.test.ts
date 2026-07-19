@@ -4,10 +4,10 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { employeeModelGatewayUrl } from "../../apps/manager/src/lib/model-gateway.js";
 import {
-  assertProfileTreeIntegrity,
   renderProfilePackage,
   rotateRenderedModelGatewayCredential,
 } from "../../apps/manager/src/lib/profile-renderer.js";
+import { assertProfileTreeIntegrity } from "../../apps/manager/src/lib/runtime-profile-integrity.js";
 import type { ProvisionerRequest } from "../../packages/shared/src/provisioner.js";
 
 let tempRoot: string | null = null;
