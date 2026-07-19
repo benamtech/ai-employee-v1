@@ -28,12 +28,14 @@ const [
   layout,
   agentSurface,
   operatingContracts,
+  boundedPlanner,
   operatingCompiler,
   workObject,
   review,
   mcpUi,
   estimator,
-  onboarding,
+  onboardingPage,
+  onboardingGate,
   identityControl,
   provisionRoute,
   resourcesRoute,
@@ -45,12 +47,14 @@ const [
   read("apps/web/app/layout.tsx"),
   read("apps/web/app/agent/[employeeId]/AgentSurface.tsx"),
   read("packages/shared/src/operating-system.ts"),
+  read("packages/shared/src/operating-layout.ts"),
   read("apps/manager/src/lib/operating-surface.ts"),
   read("apps/web/app/agent/[employeeId]/components/WorkObjectRenderer.tsx"),
   read("apps/web/app/agent/[employeeId]/review/ReviewClient.tsx"),
   read("apps/web/app/agent/[employeeId]/components/McpUiResource.tsx"),
   read("apps/web/app/free-estimator/FreeEstimatorClient.tsx"),
-  read("apps/web/app/create-ai-employee/CreateClient.tsx"),
+  read("apps/web/app/create-ai-employee/page.tsx"),
+  read("apps/web/app/create-ai-employee/OnboardingIdentityGate.tsx"),
   read("apps/web/app/create-ai-employee/BusinessIdentityControl.tsx"),
   read("apps/web/app/api/front-door/provision/route.ts"),
   read("apps/web/app/api/employee/[employeeId]/resources/route.ts"),
@@ -114,7 +118,7 @@ check("G3-01", containsAll(operatingContracts + operatingCompiler, [
   "owner_experience",
   "preferred_density",
 ]), "Manager compiles versioned owner-safe context and layout state");
-check("G3-02", containsAll(operatingContracts, ["planAdaptiveOperatingLayout", "Math.log1p", "rationale_codes"]), "layout is deterministic, bounded, and volume-dampened");
+check("G3-02", containsAll(boundedPlanner, ["planAdaptiveOperatingLayoutV2", "Math.log1p", "MAX_VOLUME_PRIORITY", "rationale_codes"]), "layout is deterministic, bounded, and volume-dampened");
 check("G3-03", containsAll(resourcesRoute, ["operating-snapshot", "owner_session_token"]), "web consumes one owner-authorized operating snapshot");
 check("G3-04", containsNone(operatingCompiler + agentSurface, ["raw_agents_md", "raw_codegraph", "raw_soul", "chain_of_thought", "provider_secret"]), "private context sources are not exposed to the browser");
 
@@ -127,14 +131,15 @@ check("G5-02", !mcpUi.includes("allow-same-origin"), "MCP Apps do not receive sa
 check("G6-01", containsAll(globals, [":focus-visible", "prefers-reduced-motion"]), "focus and reduced-motion foundations exist");
 check("G7-01", estimator.includes("Non-canonical preview"), "public estimator is visibly marked non-canonical");
 
-check("ONB-01", containsAll(onboarding + identityControl, [
+check("ONB-01", containsAll(onboardingPage + onboardingGate + identityControl, [
+  "OnboardingIdentityGate",
   "BusinessIdentityControl",
   "businessType",
   "taxId",
   "identityState",
   "/api/front-door/identity/verify",
-]), "onboarding includes secure business identity verification before activation");
-check("ONB-02", containsAll(provisionRoute, ["cookies", "owner_session_token"]), "provisioning proxy binds the HttpOnly owner session");
+]), "onboarding attaches secure business identity verification to the activation page");
+check("ONB-02", containsAll(provisionRoute, ["cookies", "owner_session_token", "identity/status", "identity_unverified"]), "provisioning is cookie-bound and fails closed until identity is verified");
 
 const report = {
   generated_at: new Date().toISOString(),
