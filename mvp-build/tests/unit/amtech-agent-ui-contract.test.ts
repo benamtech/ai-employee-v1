@@ -3,7 +3,9 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   planAdaptiveOperatingLayout,
+  type ActiveSave,
   type AdaptiveLayoutInput,
+  type DelegatedWorkUnit,
   type OperatingSystemChange,
   type OperatingWorkLoop,
 } from "@amtech/shared";
@@ -11,7 +13,7 @@ import {
 const root = process.cwd();
 const source = (path: string) => readFile(join(root, path), "utf8");
 
-function activeLoop(id = "loop:primary"): OperatingWorkLoop {
+function activeLoop(id = "loop:primary", updatedAt = "2026-07-19T00:00:00.000Z"): OperatingWorkLoop {
   return {
     id,
     title: "Grow qualified pipeline",
@@ -19,6 +21,7 @@ function activeLoop(id = "loop:primary"): OperatingWorkLoop {
     state: "active",
     horizon: "now",
     domain: "growth",
+    updated_at: updatedAt,
     source_envelope_ids: [],
     proof: { assignment_id: "asn_test" },
   };
@@ -32,6 +35,33 @@ function changes(count: number): OperatingSystemChange[] {
     state: "observed",
     proof: { assignment_id: "asn_test" },
   }));
+}
+
+function returnedSave(): ActiveSave {
+  return {
+    id: "save:returned",
+    title: "Customer changed scope",
+    why_held: "The employee was waiting for a material customer reply.",
+    state: "needs_you",
+    return_condition: {
+      kind: "event",
+      description: "Return when the customer changes scope.",
+    },
+    proof: { assignment_id: "asn_test" },
+  };
+}
+
+function failedDelegation(): DelegatedWorkUnit {
+  return {
+    id: "delegation:failed",
+    parent_loop_id: "loop:primary",
+    title: "Verify source trail",
+    purpose: "Trace a material claim to its primary source.",
+    executor_kind: "specialist_agent",
+    state: "failed",
+    blocking_reason: "The primary source could not be retrieved.",
+    proof: { assignment_id: "asn_test" },
+  };
 }
 
 function layoutInput(overrides: Partial<AdaptiveLayoutInput> = {}): AdaptiveLayoutInput {
@@ -105,6 +135,15 @@ describe("adaptive operating surface", () => {
     expect(planAdaptiveOperatingLayout(input)).toEqual(planAdaptiveOperatingLayout(input));
   });
 
+  it("keeps focus stable when equivalent loop input ordering changes", () => {
+    const older = activeLoop("loop:older", "2026-07-18T22:00:00.000Z");
+    const newer = activeLoop("loop:newer", "2026-07-19T01:00:00.000Z");
+    const forward = planAdaptiveOperatingLayout(layoutInput({ loops: [older, newer] }));
+    const reverse = planAdaptiveOperatingLayout(layoutInput({ loops: [newer, older] }));
+    expect(forward).toEqual(reverse);
+    expect(forward.focus_loop_id).toBe("loop:newer");
+  });
+
   it("puts an owner decision before high-volume low-risk activity", () => {
     const plan = planAdaptiveOperatingLayout(layoutInput({
       changes: changes(10_000),
@@ -117,6 +156,19 @@ describe("adaptive operating surface", () => {
       }],
     }));
     expect(plan.primary_region).toBe("attention");
+    expect(plan.rationale_codes).toContain("high_risk_owner_decision");
+  });
+
+  it("returns a reached active save ahead of routine active work", () => {
+    const plan = planAdaptiveOperatingLayout(layoutInput({ active_saves: [returnedSave()] }));
+    expect(plan.primary_region).toBe("active_saves");
+    expect(plan.rationale_codes).toContain("return_condition_reached");
+  });
+
+  it("surfaces a material delegated failure ahead of routine active work", () => {
+    const plan = planAdaptiveOperatingLayout(layoutInput({ delegated_work: [failedDelegation()] }));
+    expect(plan.primary_region).toBe("delegated_work");
+    expect(plan.rationale_codes).toContain("delegated_failure_material");
   });
 
   it("dampens event volume so active work remains structurally visible", () => {
