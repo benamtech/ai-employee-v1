@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * A single piece of work rendered as a coworker card, not a log line (build-plan 15
- * §4 three moves: notify / question / review). Driven entirely by WorkEventDescriptor.
- * The acceptance grammar (approve/edit/reject/respond/acknowledge) becomes the card's
- * actions; respond/edit open the one-line iterative feedback loop ("no, tweak this →").
+ * A single piece of owner-safe work rendered as a coworker card, not a raw log
+ * line. `observe` and `notify` remain quiet unless the descriptor explicitly
+ * supplies an acceptance action; `question` and `review` may open the bounded
+ * response loop. Approval still resolves through the host authority path.
  */
 import { useState } from "react";
 import type { WorkEventDescriptor } from "@amtech/shared";
@@ -30,7 +30,10 @@ export function WorkCard({
 
   const move = moveStyle[descriptor.move] ?? moveStyle.notify;
   const acceptance = descriptor.deliverable?.acceptance ?? [];
-  const canRespond = acceptance.includes("respond") || acceptance.includes("edit") || descriptor.move !== "notify";
+  const canRespond = acceptance.includes("respond")
+    || acceptance.includes("edit")
+    || descriptor.move === "question"
+    || descriptor.move === "review";
   const canAck = acceptance.includes("acknowledge");
   const approvalId = descriptor.deliverable?.refs.approval_id;
   const canApprove = Boolean(approvalId && acceptance.includes("approve") && onResolve);
@@ -103,7 +106,7 @@ export function WorkCard({
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
               placeholder="No — tweak this: tell your employee what to change…"
-              style={{ flex: 1, padding: `0 ${tokens.space.md}px`, height: 30, border: `1px solid ${tokens.color.borderStrong}`, fontSize: tokens.font.small, fontFamily: tokens.font.family, outline: "none" }}
+              style={{ flex: 1, padding: `0 ${tokens.space.md}px`, minHeight: 44, border: `1px solid ${tokens.color.borderStrong}`, fontSize: tokens.font.small, fontFamily: tokens.font.family, outline: "none" }}
             />
             <button onClick={submit} style={primaryBtn}>Send</button>
           </div>
@@ -123,7 +126,7 @@ export function WorkCard({
 const btnBase: React.CSSProperties = {
   fontFamily: tokens.font.mono, fontSize: tokens.font.small, fontWeight: 600,
   letterSpacing: "0.06em", textTransform: "uppercase",
-  padding: `0 ${tokens.space.md}px`, height: 30,
+  padding: `0 ${tokens.space.md}px`, minHeight: 44,
   display: "inline-flex", alignItems: "center", cursor: "pointer",
 };
 const primaryBtn: React.CSSProperties = {
