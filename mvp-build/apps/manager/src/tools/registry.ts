@@ -18,6 +18,7 @@ import { approvalAuthorityTools } from "./approval-authority.stub.js";
 import { approvedActionTools } from "./approved-actions.stub.js";
 import { qboApprovalPromotionTools } from "./qbo-approval-promotion.stub.js";
 import { assignmentArtifactTools } from "./assignment-artifacts.stub.js";
+import { connectEmailWithOwnerReturn } from "./gmail-connect-owner.js";
 
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
@@ -35,6 +36,9 @@ const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...qboApprovalPromotionTools,
   ...approvalAuthorityTools,
   ...approvedActionTools,
+  // Preserve all Gmail implementation while adding the signed initiating-work
+  // return target to the consent-start seam.
+  connect_email: connectEmailWithOwnerReturn,
 };
 
 export function buildToolRegistry(): Map<ToolName, ToolHandler> {
