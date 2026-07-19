@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { appendFile, mkdir, rm } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import type { ProvisionerOperation, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import {
   failureResult,
@@ -54,6 +54,13 @@ function stateRoot(): string {
 
 function safeId(value: unknown): string {
   if (typeof value !== "string" || !/^[A-Za-z0-9:_-]{8,220}$/.test(value)) throw new Error("invalid_identifier");
+  return value;
+}
+
+function optionalContainerName(name: string): string | null {
+  const value = process.env[name];
+  if (!value) return null;
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(value)) throw new Error(`${name}_invalid`);
   return value;
 }
 
@@ -209,9 +216,29 @@ async function activateRouting(req: HostProvisionerRequest): Promise<Provisioner
 async function removeRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
   const container = `amtech-hermes-${req.employee_id}`;
   const network = `amtech-employee-${req.employee_id}`;
+  const managerContainer = optionalContainerName("MANAGER_CONTAINER_NAME");
+  const modelGatewayContainer = optionalContainerName("MODEL_GATEWAY_CONTAINER_NAME");
   const removedContainer = await bestEffortCommand(`docker rm -f ${container}`, "remove runtime");
+  const detachedManager = managerContainer
+    ? await bestEffortCommand(`docker network disconnect -f ${network} ${managerContainer}`, "detach manager from runtime network")
+    : "manager_detach:not_configured";
+  const detachedGateway = modelGatewayContainer
+    ? await bestEffortCommand(`docker network disconnect -f ${network} ${modelGatewayContainer}`, "detach model gateway from runtime network")
+    : "model_gateway_detach:not_configured";
   const removedNetwork = await bestEffortCommand(`docker network rm ${network}`, "remove runtime network");
-  return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, network_name: network, logs: [`container:${removedContainer}`, `network:${removedNetwork}`] };
+  return {
+    status: "ok",
+    request_id: req.request_id,
+    operation: req.operation,
+    container_name: container,
+    network_name: network,
+    logs: [
+      `container:${removedContainer}`,
+      `manager:${detachedManager}`,
+      `model_gateway:${detachedGateway}`,
+      `network:${removedNetwork}`,
+    ],
+  };
 }
 
 async function ensureRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
