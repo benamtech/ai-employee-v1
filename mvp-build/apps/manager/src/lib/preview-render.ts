@@ -13,7 +13,7 @@ import {
   type WorkResource,
   type WorkResourceField,
 } from "@amtech/shared";
-import { buildEmployeeSnapshot } from "./employee-stream.js";
+import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot } from "./employee-stream-strict.js";
 import { renderArtifactHtml } from "./artifact-view.js";
 import { createArtifactStorageSignedUrl } from "./artifacts.js";
 import { orThrow } from "./db.js";
