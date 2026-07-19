@@ -76,7 +76,7 @@ export function WorkObjectRenderer({
   const gated = resource.actions.some((action) => action.gated);
 
   return (
-    <article className={compact ? "wo-root compact" : "wo-root"}>
+    <article id={`work-${resource.resource_id}`} className={compact ? "wo-root compact" : "wo-root"}>
       <style>{WORK_OBJECT_CSS}</style>
       <header className="wo-head">
         <div>
@@ -182,7 +182,13 @@ export function WorkObjectRenderer({
           ) : (
             resource.actions.map((action) => (
               action.action === "view" && resource.open_url ? (
-                <a key={action.action} className={buttonClass(action)} href={resource.open_url} target="_blank" rel="noreferrer">
+                <a
+                  key={action.action}
+                  className={buttonClass(action)}
+                  href={resource.open_url}
+                  target={isExternalHref(resource.open_url) ? "_blank" : undefined}
+                  rel={isExternalHref(resource.open_url) ? "noreferrer" : undefined}
+                >
                   {action.label}
                 </a>
               ) : (
@@ -223,8 +229,12 @@ function isHref(value: string): boolean {
   return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/") || value.startsWith("#");
 }
 
+function isExternalHref(value: string): boolean {
+  return value.startsWith("http://") || value.startsWith("https://");
+}
+
 const WORK_OBJECT_CSS = `
-  .wo-root{display:grid;gap:16px;color:var(--amtech-ink);font-family:var(--amtech-font)}
+  .wo-root{display:grid;gap:16px;color:var(--amtech-ink);font-family:var(--amtech-font);scroll-margin-top:72px}
   .wo-root.compact{gap:12px}.wo-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start}.wo-eyebrow,.wo-receipts>p{margin:0 0 6px;font-size:11px;line-height:1.2;text-transform:uppercase;letter-spacing:.11em;font-weight:750;color:var(--amtech-muted)}
   .wo-head h2{margin:0;font-size:clamp(20px,3vw,28px);line-height:1.08;letter-spacing:-.025em;font-weight:840}.wo-root.compact .wo-head h2{font-size:19px}.wo-summary{margin:8px 0 0;color:var(--amtech-muted);font-size:14px;line-height:1.55;max-width:68ch}
   .wo-meta{display:grid;gap:6px;justify-items:end;min-width:110px}.wo-meta strong{font-size:24px;line-height:1;font-weight:820;white-space:nowrap}.wo-meta>span:not(.wo-risk){color:var(--amtech-muted);font-size:12px;text-align:right}.wo-risk{padding:5px 10px;border:1px solid var(--amtech-line-strong);border-radius:999px;font-size:11px;font-weight:750}.wo-risk.medium{border-color:rgba(37,99,235,.25);background:var(--amtech-blue-soft);color:var(--amtech-blue)}.wo-risk.high{border-color:rgba(225,29,42,.25);background:var(--amtech-danger-soft);color:var(--amtech-red)}.wo-risk.low{border-color:rgba(22,138,87,.2);background:var(--amtech-green-soft);color:var(--amtech-green)}
