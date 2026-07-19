@@ -17,6 +17,7 @@ import { serviceClient } from "@amtech/db";
 import { runManagerTool, SCHEDULER_ONLY_TOOLS } from "./run-tool.js";
 import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot } from "./employee-stream-strict.js";
 import { buildBusinessBrainIndex, readBusinessFactsResource } from "./business-brain.js";
+import { buildToolCapabilityCatalog } from "./tool-capability-catalog.js";
 import {
   ARTIFACT_WORKBENCH_TOOL_NAMES,
   getArtifactWorkbenchToolSchema,
@@ -103,6 +104,8 @@ const RESOURCE_DEFS = [
   { uri: "amtech://manager/work-queue", name: "Work queue", mimeType: "application/json" },
   { uri: "amtech://manager/runtime-health", name: "Runtime health", mimeType: "application/json" },
   { uri: "amtech://manager/capability-registry", name: "Capability registry", mimeType: "application/json" },
+  { uri: "amtech://manager/tool-catalog", name: "Available tool catalog", mimeType: "application/json" },
+  { uri: "amtech://manager/task-capabilities", name: "Tools mapped to current work", mimeType: "application/json" },
 ] as const;
 
 function jsonResource(uri: string, payload: unknown) {
@@ -131,7 +134,22 @@ async function readManagerResource(uri: string, identity: McpIdentity) {
   if (uri === "amtech://manager/approvals") return jsonResource(uri, { assignment_id: identity.assignment_id, approvals: snapshot.approvals });
   if (uri === "amtech://manager/work-queue") return jsonResource(uri, { assignment_id: identity.assignment_id, tasks: snapshot.tasks ?? [], resurface_items: snapshot.resurface_items ?? [], surface_envelopes: snapshot.surface_envelopes ?? [] });
   if (uri === "amtech://manager/runtime-health") return jsonResource(uri, { assignment_id: identity.assignment_id, runtime_health: snapshot.runtime_health });
-  if (uri === "amtech://manager/capability-registry") return jsonResource(uri, { assignment_id: identity.assignment_id, capabilities: snapshot.capabilities ?? [], abilities: snapshot.abilities ?? [] });
+  if (uri === "amtech://manager/capability-registry" || uri === "amtech://manager/tool-catalog" || uri === "amtech://manager/task-capabilities") {
+    const catalog = await buildToolCapabilityCatalog(db, snapshot);
+    if (uri === "amtech://manager/tool-catalog") return jsonResource(uri, catalog);
+    if (uri === "amtech://manager/task-capabilities") return jsonResource(uri, {
+      assignment_id: identity.assignment_id,
+      generated_at: catalog.generated_at,
+      task_matches: catalog.task_matches,
+      capabilities: catalog.capabilities,
+    });
+    return jsonResource(uri, {
+      assignment_id: identity.assignment_id,
+      capabilities: snapshot.capabilities ?? [],
+      abilities: snapshot.abilities ?? [],
+      tool_catalog: catalog,
+    });
+  }
   if (uri === "amtech://manager/business-brain") return jsonResource(uri, await buildBusinessBrainIndex(db, {
     account_id: identity.account_id,
     employee_id: identity.employee_id,
