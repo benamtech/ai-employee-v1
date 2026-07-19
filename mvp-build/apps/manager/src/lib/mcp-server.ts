@@ -15,7 +15,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { TOOL_NAMES, getToolSchema, type ToolName } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { runManagerTool, SCHEDULER_ONLY_TOOLS } from "./run-tool.js";
-import { buildEmployeeSnapshot } from "./employee-stream.js";
+import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot } from "./employee-stream-strict.js";
 import { buildBusinessBrainIndex, readBusinessFactsResource } from "./business-brain.js";
 
 const SERVER_INFO = { name: "amtech-manager", version: "0.1.0" } as const;
