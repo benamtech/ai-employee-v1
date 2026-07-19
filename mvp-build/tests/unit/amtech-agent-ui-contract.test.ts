@@ -130,7 +130,7 @@ describe("adaptive operating surface", () => {
 describe("context compiler", () => {
   it("uses bounded manifest/profile/runtime/session doctrine without exposing raw files", async () => {
     const compiler = await source("apps/manager/src/lib/operating-surface.ts");
-    for (const marker of ["employee_manifests", "employee_profile_builds", "business_brain_facts", "agent_context_primer_sessions", "doctrine_versions", "context_fingerprint"]) {
+    for (const marker of ["employee_manifests", "employee_profile_builds", "readBusinessFactsResource", "agent_context_primer_sessions", "doctrine_versions", "context_fingerprint"]) {
       expect(compiler).toContain(marker);
     }
     for (const forbidden of ["raw_agents_md", "raw_codegraph", "raw_soul", "chain_of_thought", "provider_secret"]) {
