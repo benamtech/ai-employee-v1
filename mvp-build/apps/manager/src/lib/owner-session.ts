@@ -18,7 +18,7 @@ export async function mintOwnerSession(
   accountId: string,
   userId: string,
   ttlMs = 14 * 24 * 60 * 60 * 1000,
-): Promise<{ token: string; expires_at: string }> {
+): Promise<{ session_id: string; token: string; expires_at: string }> {
   const principal = await db.from("human_principals")
     .select("id,user_id,status,session_version")
     .eq("user_id", userId)
@@ -45,11 +45,12 @@ export async function mintOwnerSession(
   if (membership.error) throw membership.error;
   if (!membership.data?.id) throw new Error("owner_account_membership_not_active");
 
+  const session_id = newId(ID_PREFIX.ownerWebSession);
   const token = `ow_${randomBytes(32).toString("base64url")}`;
   const expires_at = new Date(Date.now() + ttlMs).toISOString();
   await mustWrite(
     db.from("owner_web_sessions").insert({
-      id: newId(ID_PREFIX.ownerWebSession),
+      id: session_id,
       account_id: accountId,
       user_id: userId,
       human_principal_id: principal.data.id,
@@ -61,7 +62,7 @@ export async function mintOwnerSession(
     }),
     "owner_web_sessions.insert",
   );
-  return { token, expires_at };
+  return { session_id, token, expires_at };
 }
 
 export async function requireOwnerSession(
