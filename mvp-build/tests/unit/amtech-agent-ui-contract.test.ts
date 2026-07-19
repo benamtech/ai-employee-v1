@@ -150,22 +150,26 @@ describe("MCP Apps boundary", () => {
 });
 
 describe("verified onboarding activation", () => {
-  it("requires secure identity UI and a cookie-bound provisioning proxy", async () => {
-    const client = await source("apps/web/app/create-ai-employee/CreateClient.tsx");
+  it("attaches secure identity UI and fails provisioning closed until verified", async () => {
+    const page = await source("apps/web/app/create-ai-employee/page.tsx");
+    const gate = await source("apps/web/app/create-ai-employee/OnboardingIdentityGate.tsx");
     const identity = await source("apps/web/app/create-ai-employee/BusinessIdentityControl.tsx");
     const route = await source("apps/web/app/api/front-door/provision/route.ts");
-    expect(client).toContain("BusinessIdentityControl");
+    expect(page).toContain("OnboardingIdentityGate");
+    expect(gate).toContain("BusinessIdentityControl");
     expect(identity).toContain("identityState");
     expect(identity).toContain("taxId");
     expect(identity).toContain("/api/front-door/identity/verify");
     expect(route).toContain("cookies");
     expect(route).toContain("owner_session_token");
+    expect(route).toContain("identity/status");
+    expect(route).toContain("identity_unverified");
   });
 });
 
 describe("evidence integrity", () => {
   it("marks the estimator as non-canonical", async () => {
-    const estimator = await source("apps/web/app/free-estimator/FreeEstimatorClient.tsx");
-    expect(estimator).toContain("Non-canonical preview");
+    const estimatorPage = await source("apps/web/app/free-estimator/page.tsx");
+    expect(estimatorPage).toContain("Non-canonical preview");
   });
 });
