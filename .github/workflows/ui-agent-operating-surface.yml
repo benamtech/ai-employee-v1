@@ -185,6 +185,25 @@ jobs:
           }
           trap cleanup EXIT
 
+          READY=0
+          for _attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error "$UI_FIXTURE_BASE_URL/login" >/dev/null 2>&1; then
+              READY=1
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Standalone server exited before readiness." >&2
+              cat "$EVIDENCE_DIR/standalone-server.log" >&2 || true
+              exit 1
+            fi
+            sleep 0.5
+          done
+          if [ "$READY" -ne 1 ]; then
+            echo "Standalone server did not become ready." >&2
+            cat "$EVIDENCE_DIR/standalone-server.log" >&2 || true
+            exit 1
+          fi
+
           set +e
           npm run ui:test 2>&1 | tee "$EVIDENCE_DIR/browser-test.log"
           FIXTURE_STATUS=${PIPESTATUS[0]}
