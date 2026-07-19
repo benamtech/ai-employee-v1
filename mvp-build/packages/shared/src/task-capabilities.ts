@@ -71,7 +71,8 @@ export interface ToolCapabilityCatalog {
   task_matches: TaskCapabilityMatch[];
 }
 
-const DOMAIN_CATEGORIES: Record<string, CapabilityCategory[]> = {
+const DEFAULT_DOMAIN_CATEGORIES: CapabilityCategory[] = ["office", "documents", "research", "automation"];
+const DOMAIN_CATEGORIES: Readonly<Record<string, readonly CapabilityCategory[]>> = {
   customer: ["communication", "office", "documents"],
   commerce: ["money", "communication", "office", "documents"],
   finance: ["accounting", "money", "documents", "office"],
@@ -80,7 +81,7 @@ const DOMAIN_CATEGORIES: Record<string, CapabilityCategory[]> = {
   research: ["research", "documents", "system"],
   people: ["communication", "office", "automation"],
   system: ["system", "automation", "research"],
-  custom: ["office", "documents", "research", "automation"],
+  custom: DEFAULT_DOMAIN_CATEGORIES,
 };
 
 const STOP_WORDS = new Set([
@@ -133,10 +134,10 @@ function rationale(task: TaskCapabilityInput, capability: ToolCapabilityDescript
           ? "relevant but not live-proved"
           : `${capability.availability.replace(/_/g, " ")}`;
   const fit = lexical >= 0.25
-    ? `Its description directly overlaps this work.`
+    ? "Its description directly overlaps this work."
     : categoryMatch > 0
       ? `It supports the ${inferredDomain(task)} domain.`
-      : `It can support a bounded part of the outcome.`;
+      : "It can support a bounded part of the outcome.";
   return `${capability.label} is ${state}. ${fit}`;
 }
 
@@ -153,7 +154,7 @@ export function matchTaskCapabilities(
   const out: TaskCapabilityMatch[] = [];
   for (const task of tasks) {
     const domain = inferredDomain(task);
-    const preferred = DOMAIN_CATEGORIES[domain] ?? DOMAIN_CATEGORIES.custom;
+    const preferred = DOMAIN_CATEGORIES[domain] ?? DEFAULT_DOMAIN_CATEGORIES;
     const taskTokens = tokens(`${task.type ?? ""} ${task.title} ${task.summary ?? ""} ${domain}`);
     const ranked = capabilities.map((capability) => {
       const capabilityTokens = tokens(`${capability.tool_name} ${capability.label} ${capability.summary} ${capability.category}`);
