@@ -46,6 +46,16 @@ function parseMcpResponse(text) {
   }
 }
 
+function parseProofJson(envelope, key) {
+  const raw = envelope?.proof?.[key];
+  if (typeof raw !== "string") throw new Error(`missing_proof_json:${key}`);
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new Error(`invalid_proof_json:${key}`);
+  }
+}
+
 async function mcpTool(name, args) {
   const response = await fetch(`${managerOrigin}/manager/mcp`, {
     method: "POST",
@@ -70,6 +80,9 @@ async function mcpTool(name, args) {
   if (["failed", "denied"].includes(envelope.status) || result.isError) {
     throw new Error(`${name}_tool_failed:${JSON.stringify(envelope).slice(0, 2000)}`);
   }
+  if (envelope.assignment_id !== assignmentId) {
+    throw new Error(`${name}_assignment_mismatch:${String(envelope.assignment_id)}`);
+  }
   return envelope;
 }
 
@@ -90,6 +103,7 @@ async function ownerResolve(approvalId, artifactId) {
   });
   const json = await response.json().catch(() => ({}));
   if (!response.ok || json.status !== "ok") throw new Error(`owner_approval_failed:${response.status}:${JSON.stringify(json).slice(0, 1500)}`);
+  if (json.assignment_id !== assignmentId) throw new Error(`owner_resolution_assignment_mismatch:${String(json.assignment_id)}`);
   return json;
 }
 
@@ -136,7 +150,7 @@ try {
     employee_id: employeeId,
     artifact_id: artifactId,
   });
-  const revisionsBefore = historyBefore.proof?.revisions ?? [];
+  const revisionsBefore = parseProofJson(historyBefore, "revisions_json");
   if (!Array.isArray(revisionsBefore) || revisionsBefore.length < 2) throw new Error("revision_history_missing");
   timeline.push({ step: "diff", before_revision_id: firstRevisionId, after_revision_id: secondRevisionId, distinct_hashes: true });
 
@@ -148,7 +162,8 @@ try {
     validations: scenario.validations,
   });
   if (validated.proof?.status !== "passed") throw new Error(`validation_not_passed:${validated.proof?.status}`);
-  timeline.push({ step: "validation", status: validated.proof.status, validation_ids: validated.proof.validation_ids });
+  const validationIds = parseProofJson(validated, "validation_ids_json");
+  timeline.push({ step: "validation", status: validated.proof.status, validation_ids: validationIds });
 
   const approval = await mcpTool("request_approval", {
     account_id: accountId,
@@ -204,7 +219,7 @@ try {
     employee_id: employeeId,
     artifact_id: artifactId,
   });
-  const validations = historyAfter.proof?.validations ?? [];
+  const validations = parseProofJson(historyAfter, "validations_json");
   if (!Array.isArray(validations) || !validations.some((item) => item.validator_key === "post_publish_verification" && item.status === "passed")) {
     throw new Error("verification_receipt_not_in_history");
   }
