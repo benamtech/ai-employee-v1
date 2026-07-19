@@ -87,7 +87,7 @@ export function registerOnboardingIdentityRoutes(app: Hono, denyInternal: DenyIn
       account_id: selectedAccountId,
       actor: "owner",
       action: "owner_web_session:login",
-      resource: ownerSession.session_id,
+      resource: publicUser.id,
       result: "ok",
       details: {
         user_id: publicUser.id,
