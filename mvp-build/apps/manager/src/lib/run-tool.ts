@@ -8,6 +8,7 @@ import { getToolSchema, failed, type ToolEnvelope, type ToolName } from "@amtech
 import { serviceClient } from "@amtech/db";
 import { TOOL_REGISTRY } from "../tools/registry.js";
 import type { ToolContext } from "../tools/types.js";
+import { getArtifactWorkbenchToolSchema } from "../tools/artifact-workbench-tools.js";
 
 export const SCHEDULER_ONLY_TOOLS = new Set<ToolName>([
   "dispatch_due_reminders",
@@ -38,7 +39,8 @@ export async function runManagerTool(
   const handler = TOOL_REGISTRY.get(name);
   if (!handler) return { kind: "unknown_tool" };
 
-  const parsed = getToolSchema(name).safeParse(rawInput ?? {});
+  const schema = getArtifactWorkbenchToolSchema(String(name)) ?? getToolSchema(name);
+  const parsed = schema.safeParse(rawInput ?? {});
   if (!parsed.success) {
     const raw = (rawInput ?? {}) as { account_id?: string; employee_id?: string };
     const detail = parsed.error.issues
