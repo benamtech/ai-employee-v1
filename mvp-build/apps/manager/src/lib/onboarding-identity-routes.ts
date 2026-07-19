@@ -1,7 +1,7 @@
 import type { Context, Hono } from "hono";
 import { StartOnboardingIdentityVerification } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
-import { requireOwnerSession } from "./owner-session.js";
+import { mintOwnerSession, requireOwnerSession } from "./owner-session.js";
 import { authorizeOwnerAssignment } from "./owner-assignment-authority.js";
 import { buildEmployeeSnapshot } from "./employee-stream.js";
 import { buildOperatingSurfaceState } from "./operating-surface.js";
@@ -21,6 +21,90 @@ function retryAfterSeconds(retryAfterAt: string | null): number {
 }
 
 export function registerOnboardingIdentityRoutes(app: Hono, denyInternal: DenyInternal): void {
+  /**
+   * Production owner login boundary. The web server authenticates email/password
+   * directly with Supabase Auth and sends only the resulting access token here.
+   * Manager then resolves public user + owner/admin memberships and mints the same
+   * authority-versioned owner session used by onboarding and owner surfaces.
+   * `account_id` is an explicit selection key only; membership remains authority.
+   */
+  app.post("/manager/auth/owner-login", async (c) => {
+    const denied = denyInternal(c);
+    if (denied) return denied;
+    const { access_token, account_id } = await c.req.json().catch(() => ({}));
+    if (typeof access_token !== "string" || access_token.length < 20) {
+      return c.json({ error: "auth_token_required" }, 400);
+    }
+    const db = serviceClient();
+    const auth = await db.auth.getUser(access_token);
+    const authUser = auth.data.user;
+    if (auth.error || !authUser?.id || !authUser.email_confirmed_at) {
+      return c.json({ error: "invalid_login" }, 401);
+    }
+
+    const publicUserResult = await db.from("users")
+      .select("id,email,full_name")
+      .eq("auth_user_id", authUser.id)
+      .maybeSingle();
+    if (publicUserResult.error) throw publicUserResult.error;
+    const publicUser = publicUserResult.data as { id?: string; email?: string | null; full_name?: string | null } | null;
+    if (!publicUser?.id) return c.json({ error: "owner_user_not_found" }, 403);
+
+    const membershipResult = await db.from("account_memberships")
+      .select("account_id,role")
+      .eq("user_id", publicUser.id)
+      .in("role", ["owner", "admin"]);
+    if (membershipResult.error) throw membershipResult.error;
+    const memberships = (membershipResult.data ?? []) as Array<{ account_id: string; role: string }>;
+    if (!memberships.length) return c.json({ error: "owner_membership_not_found" }, 403);
+
+    const accountIds = [...new Set(memberships.map((membership) => String(membership.account_id)))];
+    const accountsResult = await db.from("accounts")
+      .select("id,display_name,slug")
+      .in("id", accountIds);
+    if (accountsResult.error) throw accountsResult.error;
+    const accounts = (accountsResult.data ?? []) as Array<{ id: string; display_name?: string | null; slug?: string | null }>;
+
+    const requestedAccountId = typeof account_id === "string" && account_id.trim() ? account_id.trim() : null;
+    if (!requestedAccountId && accountIds.length > 1) {
+      return c.json({
+        error: "account_selection_required",
+        accounts: accounts.map((account) => ({
+          id: account.id,
+          display_name: account.display_name ?? "AMTECH account",
+          slug: account.slug ?? null,
+          role: memberships.find((membership) => membership.account_id === account.id)?.role ?? "owner",
+        })),
+      }, 409);
+    }
+    const selectedAccountId = requestedAccountId ?? accountIds[0];
+    if (!selectedAccountId || !accountIds.includes(selectedAccountId)) {
+      return c.json({ error: "account_access_denied" }, 403);
+    }
+
+    const ownerSession = await mintOwnerSession(db, selectedAccountId, publicUser.id);
+    const auditId = await writeAudit(db, {
+      account_id: selectedAccountId,
+      actor: "owner",
+      action: "owner_web_session:login",
+      resource: ownerSession.session_id,
+      result: "ok",
+      details: {
+        user_id: publicUser.id,
+        auth_user_id: authUser.id,
+        membership_role: memberships.find((membership) => membership.account_id === selectedAccountId)?.role ?? null,
+      },
+    });
+    return c.json({
+      status: "ok",
+      account_id: selectedAccountId,
+      owner: { email: publicUser.email ?? authUser.email ?? null, full_name: publicUser.full_name ?? null },
+      owner_session_token: ownerSession.token,
+      owner_session_expires_at: ownerSession.expires_at,
+      audit_id: auditId,
+    });
+  });
+
   app.post("/manager/onboarding/identity/verify", async (c) => {
     const denied = denyInternal(c);
     if (denied) return denied;
@@ -113,11 +197,7 @@ export function registerOnboardingIdentityRoutes(app: Hono, denyInternal: DenyIn
     return c.json({ allowed: identity.status === "verified", error, identity });
   });
 
-  /**
-   * Owner-safe operating snapshot. This is registered beside onboarding routes to
-   * preserve the generated server seam in this pass; it remains an ordinary read:
-   * exact owner session + assignment + materialize scope, with no C3 registration.
-   */
+  /** Owner-safe operating read. Exact session + assignment; no C3 registration. */
   app.post("/manager/employee/:employeeId/operating-snapshot", async (c) => {
     const denied = denyInternal(c);
     if (denied) return denied;
