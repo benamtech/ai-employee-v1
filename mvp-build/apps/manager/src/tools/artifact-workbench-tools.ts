@@ -160,7 +160,13 @@ const validateRevision: ToolHandler = async (ctx, raw) => {
     account_id: input.account_id,
     employee_id: input.employee_id,
     changed_resources: [`artifact:${input.artifact_id}`, ...result.validation_ids.map((id) => `artifact_validation:${id}`)],
-    proof: result,
+    proof: {
+      artifact_id: result.artifact_id,
+      revision_id: result.revision_id,
+      status: result.status,
+      validation_count: result.validation_ids.length,
+      validation_ids_json: JSON.stringify(result.validation_ids),
+    },
     user_facing_summary_hint: result.status === "passed" ? "Artifact validation passed." : `Artifact validation recorded: ${result.status}.`,
     next_suggested_action: result.status === "passed" ? "Request owner approval for the exact current artifact revision." : "Revise the artifact and validate again.",
     audit_id,
@@ -176,7 +182,13 @@ const getHistory: ToolHandler = async (ctx, raw) => {
     assignment_id: authorized.assignment.assignment_id,
     account_id: input.account_id,
     employee_id: input.employee_id,
-    proof: { artifact_id: input.artifact_id, ...history },
+    proof: {
+      artifact_id: input.artifact_id,
+      revision_count: history.revisions.length,
+      validation_count: history.validations.length,
+      revisions_json: JSON.stringify(history.revisions),
+      validations_json: JSON.stringify(history.validations),
+    },
     user_facing_summary_hint: `Loaded ${history.revisions.length} artifact revisions.`,
   });
 };
@@ -189,9 +201,9 @@ const publishSandbox: ToolHandler = async (ctx, raw) => {
   if (!approval || approval.assignment_id !== authorized.assignment.assignment_id || approval.account_id !== input.account_id || approval.employee_id !== input.employee_id) {
     return failed("unauthorized", "Publish approval is not bound to this assignment.");
   }
-  if (approval.action_key !== "publish_artifact_sandbox" || approval.resource_class !== "artifact" || approval.resource_id !== input.artifact_id) {
+  if (approval.action_key !== "publish_artifact_sandbox" || String(approval.resource_class) !== "artifact" || approval.resource_id !== input.artifact_id) {
     return failed("unauthorized", "Approval does not authorize this artifact publish.", {
-      proof: { approval_action_key: approval.action_key, approval_resource_class: approval.resource_class, approval_resource_id: approval.resource_id },
+      proof: { approval_action_key: approval.action_key, approval_resource_class: String(approval.resource_class), approval_resource_id: approval.resource_id },
     });
   }
   try {
