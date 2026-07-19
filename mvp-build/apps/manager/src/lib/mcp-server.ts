@@ -17,6 +17,10 @@ import { serviceClient } from "@amtech/db";
 import { runManagerTool, SCHEDULER_ONLY_TOOLS } from "./run-tool.js";
 import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot } from "./employee-stream-strict.js";
 import { buildBusinessBrainIndex, readBusinessFactsResource } from "./business-brain.js";
+import {
+  ARTIFACT_WORKBENCH_TOOL_NAMES,
+  getArtifactWorkbenchToolSchema,
+} from "../tools/artifact-workbench-tools.js";
 
 const SERVER_INFO = { name: "amtech-manager", version: "0.1.0" } as const;
 
@@ -51,14 +55,26 @@ const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
   get_aged_payables: "Read a QuickBooks A/P aging summary (what the business owes, and how overdue).",
 };
 
+const ARTIFACT_TOOL_DESCRIPTIONS: Record<string, string> = {
+  create_artifact_revision: "Create or revise one assignment-scoped artifact project and return its immutable revision hash.",
+  validate_artifact_revision: "Attach validator evidence to the current artifact revision. Failed evidence cannot be hidden by publishing.",
+  get_artifact_history: "Read immutable artifact revisions and validation evidence for comparison and owner review.",
+  publish_artifact_sandbox: "Publish the exact validated artifact revision to the AMTECH sandbox. Requires a matching approved approval_id.",
+  verify_artifact_publication: "Verify the observed sandbox publication and record a post-publish receipt.",
+};
+
 function employeeCallableTools(): ToolName[] {
-  return TOOL_NAMES.filter((name) => !SCHEDULER_ONLY_TOOLS.has(name));
+  return [
+    ...TOOL_NAMES.filter((name) => !SCHEDULER_ONLY_TOOLS.has(name)),
+    ...(ARTIFACT_WORKBENCH_TOOL_NAMES as readonly string[]).map((name) => name as ToolName),
+  ];
 }
 
 const INJECTED_OWNER_FIELDS = ["account_id", "employee_id"] as const;
 
 function inputSchemaFor(name: ToolName): Record<string, unknown> {
-  const json = zodToJsonSchema(getToolSchema(name), { $refStrategy: "none" }) as Record<string, unknown>;
+  const schema = getArtifactWorkbenchToolSchema(String(name)) ?? getToolSchema(name);
+  const json = zodToJsonSchema(schema, { $refStrategy: "none" }) as Record<string, unknown>;
   delete json.$schema;
   if (json.type !== "object") return { type: "object", additionalProperties: true };
   const props = json.properties as Record<string, unknown> | undefined;
@@ -141,7 +157,7 @@ export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: employeeCallableTools().map((name) => ({
       name,
-      description: TOOL_DESCRIPTIONS[name] ?? `Manager tool: ${name}`,
+      description: ARTIFACT_TOOL_DESCRIPTIONS[String(name)] ?? TOOL_DESCRIPTIONS[name] ?? `Manager tool: ${name}`,
       inputSchema: inputSchemaFor(name),
     })),
   }));
