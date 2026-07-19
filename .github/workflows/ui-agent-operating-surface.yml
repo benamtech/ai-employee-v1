@@ -143,16 +143,41 @@ jobs:
           UI_HEADLESS: "1"
           UI_FIXTURE_LOGS: "1"
           UI_FIXTURE_SERVER_MODE: "production"
+          UI_FIXTURE_BASE_URL: "http://127.0.0.1:3200"
           NEXT_PUBLIC_AMTECH_UI_FIXTURES: "1"
           NODE_ENV: "production"
           CI: "true"
           AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
           AMTECH_ENVIRONMENT_NAME: "ui-fixture-ci"
         run: |
-          mkdir -p infra/.local/ui-fixtures
+          set -euo pipefail
+          EVIDENCE_DIR="infra/.local/ui-fixtures"
+          STANDALONE_ROOT="apps/web/.next/standalone"
+          APP_ROOT="$STANDALONE_ROOT/apps/web"
+          mkdir -p "$EVIDENCE_DIR" "$APP_ROOT/.next"
+          rm -rf "$APP_ROOT/.next/static"
+          cp -R apps/web/.next/static "$APP_ROOT/.next/static"
+          if [ -d apps/web/public ]; then
+            rm -rf "$APP_ROOT/public"
+            cp -R apps/web/public "$APP_ROOT/public"
+          fi
+
+          (
+            cd "$STANDALONE_ROOT"
+            PORT=3200 HOSTNAME=127.0.0.1 node apps/web/server.js
+          ) >"$GITHUB_WORKSPACE/mvp-build/$EVIDENCE_DIR/standalone-server.log" 2>&1 &
+          SERVER_PID=$!
+          cleanup() {
+            kill "$SERVER_PID" 2>/dev/null || true
+            wait "$SERVER_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
           set +e
-          npm run ui:test 2>&1 | tee infra/.local/ui-fixtures/browser-test.log
-          exit ${PIPESTATUS[0]}
+          npm run ui:test 2>&1 | tee "$EVIDENCE_DIR/browser-test.log"
+          TEST_STATUS=${PIPESTATUS[0]}
+          set -e
+          exit "$TEST_STATUS"
       - name: Upload adaptive browser evidence
         if: always()
         uses: actions/upload-artifact@v4
