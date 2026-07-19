@@ -1,0 +1,125 @@
+# 2026-07-19 — Hermes/WebUI research and UI congruence pass
+
+## Branch and proof anchor
+
+- Branch: `employee-production-tuesday`
+- Draft PR: `#23` into `research`
+- Implementation/CI anchor: `34f67dd4bd3d2a944fd036ca7e818f0857ba9e0e`
+- `main`: untouched
+
+## Status
+
+`ci-accepted` for the source and compiled fixture/product-shell scope described below on the implementation anchor. This does not claim real-Supabase, provider, fixture-free browser/channel, commercial, deployment, or launch acceptance.
+
+## Research disposition
+
+Official Hermes Agent surfaces examined:
+
+- ACP over stdio;
+- TUI gateway JSON-RPC;
+- OpenAI-compatible HTTP/SSE.
+
+`NousResearch/hermes-agent#360` is closed because those shipped surfaces cover the requested RPC use cases. No official `hermes serve-mcp` command or source contract was verified in the current guide/repository search. Hermes consuming MCP servers is not evidence that Hermes itself ships as an MCP server. AMTECH must not depend on that claim without exact official versioned proof.
+
+The deep review of `nesquena/hermes-webui` yielded bounded techniques rather than an adoptable product architecture:
+
+- fail closed on loaded-runtime source revision drift;
+- read live session state through conservative read-only projections;
+- normalize source/session vocabulary and collapse compression lineage;
+- separate stream ownership from transport attachment and browser lifetime;
+- default extensions off, bound assets/state/redirects, keep same-origin paths strict, persist atomically, and consent separately to sidecar proxy authority;
+- do not reuse its single-user/process-global environment assumptions for AMTECH tenancy.
+
+The useful lesson from `jozef-barton/the-kitchen@43adc3e` is protocol congruence: declared generated section kinds, live registry, renderer, preview fixtures, and tests must be one finite vocabulary. No recipe-specific UI vocabulary was imported.
+
+Canonical decision record:
+
+- `mvp-build/docs/ux/09-hermes-programmatic-integration-and-webui-findings.md`
+
+## Implementation
+
+### Deterministic adaptive operating surface
+
+Changed `mvp-build/packages/shared/src/operating-system.ts`:
+
+- focus selection no longer depends on incoming loop order;
+- explicit state precedence, newest `updated_at`, and stable ID tie-breaking select focus;
+- event-volume priority is bounded;
+- high-risk decisions receive `high_risk_owner_decision` prominence;
+- reached active saves receive `return_condition_reached` prominence;
+- blocked/failed delegated work receives `delegated_failure_material` prominence.
+
+This closes the source/test drift already encoded in `amtech-agent-ui-contract.test.ts`.
+
+### Generated-view congruence and design-system alignment
+
+Changed `mvp-build/apps/manager/src/lib/ui-resources.ts` and `mvp-build/tests/unit/ui-resources.test.ts`:
+
+- replaced the renderer switch with an exhaustive `Record<WorkView["kind"], WorkViewRenderer>` registry;
+- every declared `WorkView` kind now compiles in contract tests;
+- preserved Manager-owned templates, escaping, sandboxed host rendering, and approval-bound intent envelopes;
+- removed the independent dark-mode branch;
+- changed primary generated actions from generic blue to AMTECH red;
+- enforced 44px controls, visible focus, canonical light colors, and reduced-motion behavior;
+- retained text-card fallback on compile failure.
+
+### CI and production-build browser harness
+
+Changed:
+
+- `mvp-build/package.json`
+- `.github/workflows/ui-agent-operating-surface.yml`
+- `mvp-build/apps/web/app/login/layout.tsx`
+
+The pass:
+
+- added `ui-resources.test.ts` to `test:ui:contracts`;
+- made generated-view compiler/test changes trigger the UI workflow;
+- restored the exact web typecheck artifact filename after an intermediate workflow-edit regression;
+- replaced the hardcoded standalone Next server path with bounded `server.js` discovery excluding `node_modules`;
+- retained server-readiness diagnostics and evidence upload;
+- fixed the browser-discovered 80×22 login brand link to a full 44px target instead of weakening the target assertion.
+
+## Exact CI evidence on `34f67dd4bd3d2a944fd036ca7e818f0857ba9e0e`
+
+- Phase 2 Remediation Plan Integrity — run `29682503047`: success
+- S10.1 Onboarding Identity Authority — run `29682503074`: success
+- Lane 1 Relationships and Authorization — run `29682503095`: success
+- S2 S7 S9 Production Boundary — run `29682503063`: success
+- Employee Work Production Boundary — run `29682503078`: success
+- Lane 10 Integrated CI and Release Evidence — run `29682503096`: success
+- Agent Operating Surface Standard — run `29682503072`: success
+
+The UI workflow success includes:
+
+- shared/db/Manager/web typecheck and required builds;
+- UI source validation;
+- focused UI contract tests, including generated-view parity;
+- compiled production Next build;
+- adaptive fixture browser acceptance;
+- unauthenticated login/dashboard product-shell acceptance;
+- uploaded browser/screenshots/log evidence.
+
+## Boundaries preserved
+
+- Manager remains the control plane.
+- Hermes remains the runtime substrate.
+- C3 remains the only consequential command/effect ledger.
+- capability discovery is not authorization;
+- owner access remains exact principal + assignment + grants + policy;
+- generated UI remains typed data compiled by Manager, never raw model HTML;
+- no browser talks directly to Hermes or receives runtime credentials;
+- no unverified Hermes-as-MCP-server path was added;
+- no database, authority, approval, commercial, provider, or runtime semantics changed in this pass.
+
+## Unresolved risks
+
+1. The approved real Supabase staging target still needs migrations and behavior proof.
+2. Provider-backed generative UI remains unaccepted until one real business-context work object traverses typed view, owner action, external effect, and durable proof IDs.
+3. Capability-probe evidence and effective-capability graph hashing are not yet persisted.
+4. A future Hermes TUI adapter must begin read-only and remain Manager/platform-authority/C3 mediated.
+5. Shared/fractional cross-account employee assignment, broad role perspectives, public employee behavior, commercial reconciliation, capacity, recovery, rollback, deployment manifest, and fixture-free live browser/SMS/Review proof remain outside this pass.
+
+## Next concrete move
+
+Return to the release-critical normal-employee path: identify the approved staging target, apply/verify migrations, capture fixture-free owner/runtime/provider/effect/receipt evidence on one SHA, and only then run the first provider-backed generated-view acceptance slice. Treat persisted capability evidence and a read-only Manager runtime-session projection as post-baseline P1 work.
