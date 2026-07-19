@@ -1,0 +1,67 @@
+name: Agent Operating Surface Standard
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [employee-production-tuesday]
+    paths:
+      - "docs/AMTECH_*"
+      - "docs/ui/**"
+      - "mvp-build/apps/web/**"
+      - "mvp-build/apps/manager/src/lib/operating-surface.ts"
+      - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
+      - "mvp-build/packages/shared/src/**"
+      - "mvp-build/scripts/validate-ui-system.mjs"
+      - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
+      - "mvp-build/validation/amtech-agent-ui-vectors.json"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/ui-agent-operating-surface.yml"
+  pull_request:
+    branches: [research]
+    paths:
+      - "docs/AMTECH_*"
+      - "docs/ui/**"
+      - "mvp-build/apps/web/**"
+      - "mvp-build/apps/manager/src/lib/operating-surface.ts"
+      - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
+      - "mvp-build/packages/shared/src/**"
+      - "mvp-build/scripts/validate-ui-system.mjs"
+      - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
+      - "mvp-build/validation/amtech-agent-ui-vectors.json"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/ui-agent-operating-surface.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-operating-surface-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - run: npm run generate:production-sources
+      - run: npm run build --workspace @amtech/shared
+      - run: npm run typecheck --workspace @amtech/shared
+      - run: npm run build --workspace @amtech/db
+      - run: npm run typecheck --workspace @amtech/db
+      - run: npm run typecheck --workspace @amtech/manager
+      - run: npm run typecheck --workspace @amtech/web
+      - run: npm run ui:validate
+      - run: npm run test:ui:contracts
+      - run: npm run build --workspace @amtech/web
