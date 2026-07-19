@@ -45,15 +45,20 @@ export async function POST(req: Request) {
     access_token: auth.access_token,
     ...(input.account_id ? { account_id: input.account_id } : {}),
   });
-  const json = await managerResponse.json().catch(() => ({}));
-  const response = NextResponse.json(json, { status: managerResponse.status });
-  if (managerResponse.ok && json.owner_session_token) {
-    response.cookies.set("amtech_owner_session", String(json.owner_session_token), {
+  const json = await managerResponse.json().catch(() => ({})) as Record<string, unknown>;
+  const ownerSessionToken = typeof json.owner_session_token === "string" ? json.owner_session_token : null;
+  const safeJson = { ...json };
+  delete safeJson.owner_session_token;
+
+  const response = NextResponse.json(safeJson, { status: managerResponse.status });
+  response.headers.set("Cache-Control", "no-store");
+  if (managerResponse.ok && ownerSessionToken) {
+    response.cookies.set("amtech_owner_session", ownerSessionToken, {
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      expires: json.owner_session_expires_at ? new Date(json.owner_session_expires_at) : undefined,
+      expires: typeof json.owner_session_expires_at === "string" ? new Date(json.owner_session_expires_at) : undefined,
     });
   }
   return response;
