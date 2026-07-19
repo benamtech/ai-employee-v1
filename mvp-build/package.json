@@ -100,6 +100,7 @@
     "prod-like:normal:browser-onboard": "node infra/scripts/local/acceptance/06-browser-onboard.mjs",
     "prod:onboarding-proof": "node infra/scripts/prod-onboarding-proof.mjs",
     "prod:normal:validate": "node infra/scripts/prod-normal-employee-validate.mjs",
+    "prod:boundary:hermes-filesystem": "node infra/scripts/acceptance/hermes-exact-image-filesystem-proof.mjs",
     "prod:boundary:migrations": "node infra/scripts/acceptance/migration-staging-live-proof.mjs",
     "prod:boundary:gateway": "node infra/scripts/acceptance/model-gateway-live-proof.mjs",
     "prod:boundary:rotation": "node infra/scripts/acceptance/rotation-live-proof.mjs",
