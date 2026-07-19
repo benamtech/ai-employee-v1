@@ -7,6 +7,7 @@ export * from "./work-events.js";
 export * from "./preview-links.js";
 export * from "./resource-payload.js";
 export * from "./materialization.js";
+export * from "./operating-system.js";
 export * from "./work-stream.js";
 export * from "./hermes.js";
 export * from "./platform-toolsets.js";
