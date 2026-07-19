@@ -11,6 +11,7 @@ on:
       - "mvp-build/apps/manager/src/lib/operating-surface.ts"
       - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
       - "mvp-build/packages/shared/src/**"
+      - "mvp-build/infra/scripts/ui/fixture-browser.mjs"
       - "mvp-build/scripts/validate-ui-system.mjs"
       - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
       - "mvp-build/validation/amtech-agent-ui-vectors.json"
@@ -26,6 +27,7 @@ on:
       - "mvp-build/apps/manager/src/lib/operating-surface.ts"
       - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
       - "mvp-build/packages/shared/src/**"
+      - "mvp-build/infra/scripts/ui/fixture-browser.mjs"
       - "mvp-build/scripts/validate-ui-system.mjs"
       - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
       - "mvp-build/validation/amtech-agent-ui-vectors.json"
@@ -91,3 +93,33 @@ jobs:
           retention-days: 7
       - run: npm run test:ui:contracts
       - run: npm run build --workspace @amtech/web
+
+  browser-fixture:
+    needs: source-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Install Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Run adaptive fixture browser matrix
+        env:
+          UI_HEADLESS: "1"
+        run: npm run ui:test
+      - name: Upload adaptive browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-operating-browser-${{ github.sha }}
+          path: mvp-build/infra/.local/ui-fixtures
+          if-no-files-found: error
+          retention-days: 14
