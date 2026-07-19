@@ -32,6 +32,22 @@ async function createOwner(suffix: string): Promise<OwnerFixture> {
   return { accountId, userId, humanId: String(human.rows[0].id) };
 }
 
+async function createAccountMember(accountId: string, suffix: string, role: string): Promise<OwnerFixture> {
+  const userId = `user_s10_${suffix}`;
+  await db!.query(`
+    insert into users(id, email, full_name)
+    values($1,$2,$3)
+    on conflict (id) do update set email = excluded.email
+  `, [userId, `s10-${suffix}@example.invalid`, `S10 ${suffix}`]);
+  await db!.query(`
+    insert into account_memberships(id, account_id, user_id, role)
+    values($1,$2,$3,$4)
+    on conflict (account_id,user_id) do update set role = excluded.role
+  `, [`mem_s10_${suffix}`, accountId, userId, role]);
+  const human = await db!.query(`select id from human_principals where user_id = $1`, [userId]);
+  return { accountId, userId, humanId: String(human.rows[0].id) };
+}
+
 function reserveArgs(owner: OwnerFixture, suffix: string, idempotencyKey: string) {
   return [
     `oid_s10_${suffix}`,
@@ -139,6 +155,8 @@ describe.skipIf(!databaseUrl)("S10.1 onboarding identity PostgreSQL boundary", (
 
   it("atomically creates the employee assignment and accepted C3 activation receipt", async () => {
     const owner = await createOwner("activation");
+    const coOwner = await createAccountMember(owner.accountId, "activation-admin", "admin");
+    const unassignedViewer = await createAccountMember(owner.accountId, "activation-viewer", "viewer");
     const identityId = await verifyIdentity(owner, "activation");
     const resourceGraph = [
       { resource_key: "account", resource_type: "account", desired_state: "present", idempotency_key: "s10:account" },
@@ -168,6 +186,54 @@ describe.skipIf(!databaseUrl)("S10.1 onboarding identity PostgreSQL boundary", (
     `, args);
     const row = activation.rows[0];
     expect(row.duplicate).toBe(false);
+
+    const lateOwner = await createAccountMember(owner.accountId, "activation-late-owner", "owner");
+    const requiredSurfaceActions = ["read", "message:create", "stream:read", "materialize", "heartbeat", "turn:create"];
+    const authority = await db!.query(`
+      select
+        ap.principal_id,
+        ap.status,
+        bool_or(
+          g.status = 'active'
+          and g.resource_class = 'employee'
+          and g.resource_id = $2
+          and g.actions @> $3::text[]
+        ) as has_full_surface_grant
+      from assignment_principals ap
+      left join assignment_resource_grants g
+        on g.assignment_id = ap.assignment_id
+       and g.principal_id = ap.principal_id
+      where ap.assignment_id = $1
+        and ap.principal_id = any($4::text[])
+      group by ap.principal_id, ap.status
+      order by ap.principal_id
+    `, [row.assignment_id, row.employee_id, requiredSurfaceActions, [owner.humanId, coOwner.humanId, lateOwner.humanId, unassignedViewer.humanId]]);
+    expect(authority.rows.map((entry) => entry.principal_id).sort()).toEqual([owner.humanId, coOwner.humanId, lateOwner.humanId].sort());
+    for (const entry of authority.rows) {
+      expect(entry.status).toBe("active");
+      expect(entry.has_full_surface_grant).toBe(true);
+    }
+
+    await db!.query(`
+      update account_memberships
+         set role = 'viewer'
+       where account_id = $1 and user_id = $2
+    `, [owner.accountId, coOwner.userId]);
+    const revoked = await db!.query(`
+      select ap.status as principal_status, g.status as grant_status
+        from assignment_principals ap
+        join assignment_resource_grants g
+          on g.assignment_id = ap.assignment_id
+         and g.principal_id = ap.principal_id
+         and g.resource_class = 'employee'
+         and g.resource_id = $3
+       where ap.assignment_id = $1
+         and ap.principal_id = $2
+         and g.id = 'grant_' || substr(md5('owner_employee_surface:' || ap.assignment_id || ':' || ap.principal_id), 1, 26)
+    `, [row.assignment_id, coOwner.humanId, row.employee_id]);
+    expect(revoked.rows[0].principal_status).toBe("revoked");
+    expect(revoked.rows[0].grant_status).toBe("revoked");
+
     const proof = await db!.query(`
       select
         dc.status as command_status,
