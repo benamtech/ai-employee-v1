@@ -3,7 +3,7 @@ import type { Hono } from "hono";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { ID_PREFIX, MANAGER_API, newId } from "@amtech/shared";
 import { serviceClient, type SupabaseClient } from "@amtech/db";
-import { verifyOAuthState } from "../lib/oauth-state.js";
+import { safeOAuthReturnPath, verifyOAuthState } from "../lib/oauth-state.js";
 import { TOOL_REGISTRY } from "../tools/registry.js";
 import type { ToolContext } from "../tools/types.js";
 import { ingestEvent } from "../events/ingress.js";
@@ -20,6 +20,26 @@ function resultPage(message: string, success: boolean): string {
     `<body style="font-family:system-ui;max-width:560px;margin:12vh auto;text-align:center">` +
     `<h1 style="color:${success ? "#1a7f37" : "#b42318"}">${success ? "Connected" : "Connection failed"}</h1>` +
     `<p>${message}</p></body></html>`;
+}
+
+function ownerWebOrigin(): string | null {
+  const raw = process.env.AGENT_WEB_ORIGIN ?? process.env.PUBLIC_WEB_ORIGIN ?? process.env.WEB_APP_ORIGIN ?? "";
+  try {
+    const url = new URL(raw);
+    return /^https?:$/.test(url.protocol) ? url.origin : null;
+  } catch {
+    return null;
+  }
+}
+
+function ownerReturnUrl(returnTo: string | undefined, state: "connected" | "error"): string | null {
+  const origin = ownerWebOrigin();
+  const path = safeOAuthReturnPath(returnTo);
+  if (!origin || !path) return null;
+  const url = new URL(path, origin);
+  url.searchParams.set("connector", "quickbooks");
+  url.searchParams.set("state", state);
+  return url.toString();
 }
 
 export interface QboChangeEvent {
@@ -200,19 +220,24 @@ export async function processQuickbooksAmbientEvent(db: SupabaseClient, inbox: A
 
 export function registerQuickbooksWebhooks(app: Hono): void {
   app.get(MANAGER_API.webhooks.quickbooksOauthCallback, async (c) => {
+    const rawState = c.req.query("state") ?? "";
+    const state = rawState ? verifyOAuthState(rawState) : null;
+    if (!state || state.provider !== "quickbooks") return c.text("invalid oauth state", 403);
     const error = c.req.query("error");
-    if (error) return c.html(resultPage("QuickBooks connection was cancelled.", false), 400);
-    const state = c.req.query("state");
+    if (error) {
+      const returnUrl = ownerReturnUrl(state.return_to, "error");
+      if (returnUrl) return c.redirect(returnUrl);
+      return c.html(resultPage("QuickBooks connection was cancelled.", false), 400);
+    }
     const code = c.req.query("code");
     const realmId = c.req.query("realmId");
-    if (!state || !verifyOAuthState(state)) return c.text("invalid oauth state", 403);
     if (!code || !realmId) return c.text("missing code or realmId", 400);
 
     const handler = TOOL_REGISTRY.get("complete_quickbooks_oauth");
     if (!handler) return c.text("unavailable", 500);
     const db = serviceClient();
     const ctx: ToolContext = { db, actor: "manager", account_id: null, employee_id: null };
-    const envelope = await handler(ctx, { state, code, realmId });
+    const envelope = await handler(ctx, { state: rawState, code, realmId });
     const success = envelope.status === "ok";
     if (success) {
       const proof = (envelope.proof ?? {}) as Record<string, unknown>;
@@ -236,6 +261,8 @@ export function registerQuickbooksWebhooks(app: Hono): void {
         provenance: { oauth_state_verified: true, realm_id_verified: true },
       });
     }
+    const returnUrl = ownerReturnUrl(state.return_to, success ? "connected" : "error");
+    if (returnUrl) return c.redirect(returnUrl);
     const redirect = process.env.QBO_OAUTH_SUCCESS_REDIRECT;
     if (success && redirect) return c.redirect(redirect);
     return c.html(
