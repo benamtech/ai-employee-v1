@@ -1,6 +1,7 @@
 name: UI Source Narrowing Patch
 
 on:
+  workflow_dispatch:
   push:
     branches: [employee-production-tuesday]
     paths: [".github/workflows/ui-source-narrowing-patch.yml"]
