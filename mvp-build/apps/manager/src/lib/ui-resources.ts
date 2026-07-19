@@ -97,12 +97,12 @@ function formHtml(v: Extract<WorkView, { kind: "form" }>): string {
 
 type WorkViewRenderer = (view: WorkView, deliverable: WorkDeliverableDescriptor) => string;
 
-const VIEW_RENDERERS = {
-  table: (view: WorkView, deliverable: WorkDeliverableDescriptor) => tableHtml(view as Extract<WorkView, { kind: "table" }>, deliverable),
-  schedule: (view: WorkView, deliverable: WorkDeliverableDescriptor) => scheduleHtml(view as Extract<WorkView, { kind: "schedule" }>, deliverable),
-  diff: (view: WorkView, deliverable: WorkDeliverableDescriptor) => diffHtml(view as Extract<WorkView, { kind: "diff" }>, deliverable),
-  form: (view: WorkView) => formHtml(view as Extract<WorkView, { kind: "form" }>),
-} satisfies Record<WorkView["kind"], WorkViewRenderer>;
+const VIEW_RENDERERS: Record<WorkView["kind"], WorkViewRenderer> = {
+  table: (view, deliverable) => tableHtml(view as Extract<WorkView, { kind: "table" }>, deliverable),
+  schedule: (view, deliverable) => scheduleHtml(view as Extract<WorkView, { kind: "schedule" }>, deliverable),
+  diff: (view, deliverable) => diffHtml(view as Extract<WorkView, { kind: "diff" }>, deliverable),
+  form: (view) => formHtml(view as Extract<WorkView, { kind: "form" }>),
+};
 
 export const SUPPORTED_WORK_VIEW_KINDS = Object.freeze(Object.keys(VIEW_RENDERERS) as WorkView["kind"][]);
 
