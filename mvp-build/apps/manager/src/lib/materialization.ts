@@ -223,15 +223,19 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
     const d = event.work_event_descriptor;
     const deliverable = d?.deliverable;
     const isTool = deliverable?.type === "tool_activity";
+    const uiResource = deliverable?.ui_resource;
+    const actions = defaultActionsFor("work_event", deliverable);
+    const bodyKind: WorkResource["body_kind"] = uiResource ? "structured" : "text";
     envelopes.push(envelope({
       account_id: snapshot.account_id,
+      assignment_id: snapshot.assignment_id,
       employee_id: snapshot.employee_id,
       kind: isTool ? "tool_activity" : "work_event",
       title: d?.title ?? event.event_type,
       summary: d?.summary,
       status: event.status,
       created_at: event.created_at,
-      render_hints: { tier: deliverable?.ui_resource ? "mcp_ui" : "generic", component: isTool ? "tool_activity" : "work_event", body_kind: "text" },
+      render_hints: { tier: uiResource ? "mcp_ui" : "generic", component: isTool ? "tool_activity" : "work_event", body_kind: bodyKind },
       safety: baseSafety({
         trust_level: isTool ? "manager_mcp" : "runtime",
         requires_approval: workDeliverableNeedsGate(deliverable),
@@ -239,12 +243,27 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
         money_involved: deliverable?.money?.involved ?? false,
       }),
       proof: proof("inbound_events", event.id, {
+        assignment_id: snapshot.assignment_id,
         inbound_event_id: event.id,
         approval_id: deliverable?.refs.approval_id ?? null,
         artifact_id: deliverable?.refs.artifact_id ?? null,
         run_id: d?.proof?.run_id ?? null,
       }),
-      actions: defaultActionsFor("work_event", deliverable),
+      actions,
+      resource: {
+        resource_type: "work_event",
+        resource_id: event.id,
+        assignment_id: snapshot.assignment_id,
+        title: d?.title ?? event.event_type,
+        subtitle: deliverable?.type ? humanKind(deliverable.type) : undefined,
+        summary: d?.summary,
+        risk: workDeliverableNeedsGate(deliverable)
+          ? deliverable?.money?.involved ? "high" : "medium"
+          : "low",
+        body_kind: bodyKind,
+        ui_resource: uiResource,
+        actions,
+      },
     }));
   }
 
