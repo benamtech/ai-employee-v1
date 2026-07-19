@@ -1,114 +1,164 @@
-# mvp-build — the AMTECH AI Employee MVP build
+# mvp-build — AMTECH AI Employee implementation home
 
-> **2026-07-18 remediation note:** The active integration branch is
-> `employee-production-tuesday`, based on `research`, with draft PR `#23`;
-> `main` is untouched. The canonical launch path remains
-> [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md):
-> public DNS/Cloudflare Tunnel -> Caddy -> Web/Manager -> real
-> `/create-ai-employee` -> Twilio Verify -> account creation -> Start Employee
-> -> isolated runtime -> owner surface -> provider-backed work and proof. Do not
-> count `local:*`, `live:*`, fixture mode, `/api/dev/login`, or
-> `prod-like:public-estimator:*` as launch proof.
->
-> Current remediation status: the Phase 2 plan/registry is validated; Lane 1's
-> relationship and authorization checkpoint is integrated at `b37d479...` with
-> migrations `0039`/`0040` and a green five-case PostgreSQL relationship/RLS
-> matrix. Lane 1 still requires complete route/resource scoping and real
-> Supabase/browser/channel proof. Lane 3 PR `#26` has a green durable
-> command/effect contract and a pre-implementation red database boundary; one
-> scheduler-order-dependent concurrency assertion must be corrected before SQL
-> implementation. Production Supabase still stops at `0031`; no new live
-> runtime/provider/browser/commercial acceptance is claimed.
+Status: **active integration; source/CI work in progress; not live-accepted or launch-cleared**  
+Updated: 2026-07-19
 
-Status: **standard remediation is active. The existing owner product, Manager/Hermes runtime spine, model gateway, reconciler, ambient inbox, and proof harness remain source-wired/CI-accepted at their documented tiers, but the approved standard audit remains launch-blocking until all P0/P1 authority, isolation, durable-effect, protocol, deployment, and proof gates close.** See [`CODEGRAPH.md`](CODEGRAPH.md), [`memory/MEMORY.md`](memory/MEMORY.md), and [`second-half-plan/phase-2-standard-remediation-execution.md`](second-half-plan/phase-2-standard-remediation-execution.md).
+`mvp-build/` contains the executable AMTECH AI Employee product: owner surfaces, Manager control plane, Hermes runtime integration, PostgreSQL authority/effect state, connectors, ambient inbox, Model Gateway, provisioning, deployment, tests, and release proof.
 
-**Agent? Start with [`../identity.md`](../identity.md), [`../CODEGRAPH.md`](../CODEGRAPH.md), [`CLAUDE.md`](CLAUDE.md) / [`AGENTS.md`](AGENTS.md)** (build-home guide), then [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md) for any live normal-employee launch work, [`CODEGRAPH.md`](CODEGRAPH.md) (MVP source map), the current second-half plan **[`second-half-plan/`](second-half-plan/)**, and the in-repo durable memory **[`memory/`](memory/)** (read the newest handoff + the writing protocol).
+## Agent start
 
-Current second-half plan: **[`second-half-plan/`](second-half-plan/)**. Current wiki companion: **[`../wiki/MVP/second-half-current-and-future-state.md`](../wiki/MVP/second-half-current-and-future-state.md)**. Older reconciled build plan: **[`../wiki/MVP/build-plan-current/`](../wiki/MVP/build-plan-current/)**. Original whole-product packet: **[`../wiki/MVP/old-build-plan/`](../wiki/MVP/old-build-plan/)**. Implementation records live in **[`../wiki/MVP/implementation-records/`](../wiki/MVP/implementation-records/)**.
+Read in this order:
 
-For UI contributors, start with **[`docs/ux/`](docs/ux/)** for the master UX system, research ledger, coverage audit, generative-UI frontier, and fixture/production policy. Then read the active **[`ui-redesign/`](ui-redesign/)** packet for the current owner MVP direction and screenshots. The old UI collaborator packet now lives at **[`docs/archive/ui-handoff-2026-07-14/`](docs/archive/ui-handoff-2026-07-14/)** as historical reference only; do not use it as the current starting point.
+1. [`../identity.md`](../identity.md)
+2. root [`../AGENTS.md`](../AGENTS.md) or [`../CLAUDE.md`](../CLAUDE.md), then root [`../CODEGRAPH.md`](../CODEGRAPH.md)
+3. scoped [`AGENTS.md`](AGENTS.md) or [`CLAUDE.md`](CLAUDE.md)
+4. [`CODEGRAPH.md`](CODEGRAPH.md)
+5. [`memory/MEMORY.md`](memory/MEMORY.md), then the newest relevant handoff
+6. [`STANDARD.md`](STANDARD.md)
+7. [`second-half-plan/phase-2-standard-remediation-execution.md`](second-half-plan/phase-2-standard-remediation-execution.md)
+8. [`docs/architecture/README.md`](docs/architecture/README.md)
+9. [`docs/architecture/11-agent-orientation-and-role-map.md`](docs/architecture/11-agent-orientation-and-role-map.md)
+10. applicable [`docs/ux/`](docs/ux/), deployment/runbook, source, migrations, scripts, tests, workflows, proof, and current diff
 
-UI contributors can work without full infrastructure:
+Source, applied migrations, executable proof, and newest scoped memory outrank historical prose.
 
-```bash
-npm run ui:dev          # fixture-backed web client on :3000
-npm run ui:browser      # headed browser against fixture data on :3200
-npm run ui:test         # headless UI-only Playwright smoke
-npm run ui:test:headed  # headed UI-only smoke
+## Current branch boundary
+
+- Integration branch: `employee-production-tuesday`
+- Base: `research`
+- Draft integration PR: `#23`
+- Migration head: `0069`
+- `main` remains outside the integration shortcut
+- The exact current implementation/proof anchor and workflow IDs live in `CODEGRAPH.md`, the newest handoff, and PR `#23`
+- Real Supabase, target-host runtime/network, live identity/provider, fixture-free Web/SMS/Review, commercial reconciliation, cumulative budgets/shared rate limits, fleet capacity/fairness, crash/repair, rollback, attestation, deployment, and launch acceptance remain separate live gates unless named evidence closes them
+
+Do not count fixtures, `/api/dev/login`, local `live:*`, manually injected provider results, or `prod-like:public-estimator:*` as launch proof.
+
+## Canonical normal-employee path
+
+Use [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md).
+
+```text
+public DNS / approved ingress
+→ Caddy
+→ production Web + Manager
+→ real owner authentication and identity verification
+→ canonical activation
+→ durable desired-resource graph and reconciler
+→ isolated Hermes runtime + scoped Manager/Model Gateway access
+→ owner Web/SMS/Review
+→ governed provider-backed work
+→ durable receipts, proof, recovery, and release evidence
 ```
 
-These commands use representative local Work Surface fixtures and do not require Manager, Supabase, Docker, Hermes containers, provider credentials, or model calls. They are for UI development, not provider/runtime acceptance. Fixture mode is guarded by [`docs/ux/06-fixture-production-ui-policy.md`](docs/ux/06-fixture-production-ui-policy.md) and must not be enabled in pod-like or production-like environments.
+## Architecture and documentation map
 
-Current fixture-guarded screenshots are copied into [`ui-redesign/screenshots/`](ui-redesign/screenshots/)
-from the latest local `npm run ui:test` proof:
+- [`docs/architecture/README.md`](docs/architecture/README.md) — current source-backed cross-system map.
+- [`docs/architecture/09-current-bug-risk-and-production-gap-register.md`](docs/architecture/09-current-bug-risk-and-production-gap-register.md) — current P0/P1/P2 register.
+- [`docs/architecture/trajectories/`](docs/architecture/trajectories/) — source-grounded dependency/bifurcation analysis; never acceptance authority.
+- [`docs/architecture/11-agent-orientation-and-role-map.md`](docs/architecture/11-agent-orientation-and-role-map.md) — role-specific source hubs, invariants, and proof requirements.
+- [`docs/architecture/12-document-control-memory-and-handoff-map.md`](docs/architecture/12-document-control-memory-and-handoff-map.md) — root/scoped CODEGRAPH, memory, plans, implementation records, and Markdown organization.
+- [`docs/ux/`](docs/ux/) — owner UX system, coverage audit, validation, fixture policy, research disposition, and Hermes/UI decision records.
+- [`memory/MEMORY.md`](memory/MEMORY.md) — sole newest-first handoff index.
+- [`../wiki/MVP/implementation-records/README.md`](../wiki/MVP/implementation-records/README.md) — historical factual implementation records.
 
-![Avery-first desktop Home](ui-redesign/screenshots/work-surface-desktop.png)
+Historical handoffs and implementation records stay in place to preserve point-in-time evidence and links. Current indexes tell agents what to read first.
 
-![Avery-first mobile Home](ui-redesign/screenshots/work-surface-mobile.png)
+## Product and runtime boundary
 
-![Proof surface](ui-redesign/screenshots/proof-desktop.png)
+AMTECH is not selling a model, estimate generator, developer dashboard, CRM, or workflow builder. AMTECH packages Hermes into a managed employee for owner-operated businesses.
 
-![Signed mobile Review](ui-redesign/screenshots/review-mobile.png)
+- Hermes supplies reasoning, sessions/runs, transcript continuity, memory behavior, runtime-local tools, and employee execution.
+- Manager supplies identity/assignment authority, business context/resources, tool schemas, connector/secret custody, approval, command/effect, commercial attribution, repair, and proof.
+- Web presents the primary owner operating surface; SMS and signed Review render the same durable work/resources/actions.
+- Caddy is public ingress; Host Provisioner is the only service with Docker-host authority; PostgreSQL/Supabase is durable authority/effect state.
 
-Production admin design lives in [`docs/admin-system-architecture.md`](docs/admin-system-architecture.md) and the implementation sequence in [`docs/admin-system-implementation-plan.md`](docs/admin-system-implementation-plan.md). Production metering design lives in [`docs/metering-architecture.md`](docs/metering-architecture.md) and the implementation sequence in [`docs/metering-implementation-plan.md`](docs/metering-implementation-plan.md). Production UX organization lives in [`docs/ux/`](docs/ux/). The Phase 6 metering foundation is source-wired (six Manager-only ledgers + `run_id` threading, `lib/metering.ts` helpers); instrumentation coverage, rollups, and budget-policy enforcement remain later work.
+Canonical consequential flow:
 
-## Hermes boundary
+```text
+trigger
+→ authenticated principal
+→ exact assignment / current grant / policy
+→ stable intent and durable command
+→ Hermes or deterministic work
+→ approval when required
+→ bounded external effect
+→ accepted / failed / ambiguous receipt
+→ repair/replay when needed
+→ owner-safe work and proof
+```
 
-This product leverages **Hermes agent from Nous Research**, an open-source agent substrate. Hermes is the live
-employee brain/profile/runtime; AMTECH's code is the product layer around it: provisioning, Manager tools, account
-and session boundaries, SMS/web surfaces, connector events, approvals, artifacts, scheduler, repair, admin, and
-metering.
+## Current source capabilities
 
-Current priority: **close the approved standard's authority, isolation, durable-effect, and proof boundaries before production promotion.** The existing Docker/Caddy runtime substrate remains useful and its prior source/on-host evidence remains valid at the recorded tier, but it does not substitute for the new relationship-aware, replay-safe, release-bound acceptance gates.
+The branch contains source and tests for:
 
-The session model — one employee, one number, one continuous thread across SMS/web/future voice, with a Manager-owned
-Channel/Session/Presence router (active session wins; ambient preferences when idle; silent events record without
-push; duplicate intents never double-deliver) — is already source-wired, along with Hermes Runs/Sessions turn-atomic
-handling and Jobs/worker lanes re-entering the Manager inbox.
+- relationship, assignment, grant, policy, and authority-version boundaries;
+- durable C3 command/effect and ambiguous repair;
+- onboarding identity and canonical activation through migration `0069`;
+- scoped owner sessions, previews, artifacts, and MCP credentials;
+- Gmail, QuickBooks, Stripe, Twilio, connector custody, ambient inbox, and provider event normalization;
+- payer/beneficiary/price attribution, Model Gateway, provider/accounting receipts, and usage audit;
+- desired resource graphs, reconciler, signed Unix-socket Host Provisioner, profile checksums, isolated employee networks, and Caddy routes;
+- task-agnostic operating surface, strict snapshots/context reads, SSE, WorkResource/WorkAction materialization, typed generated UI, and sandboxed host-routed intents;
+- admin/support authority, audit, metering, recovery tooling, local-production orchestration, and release-evidence contracts;
+- exact-head repository archaeology that reads every tracked Git object and emits file/effect/relationship ledgers.
 
-## Product and UI grounding
+See `CODEGRAPH.md` and the architecture map for exact source hubs and evidence tiers.
 
-AMTECH is not selling a model, an estimate generator, or a developer dashboard. AMTECH packages Hermes into a trusted small-business employee. Estimates are the first proof object, but the broader product is an employee that can help with customer intake, estimates, follow-ups, invoices, reminders, connector repair, web/media/document outputs, and future office workflows while asking before customer-facing, money, destructive, credential, or broad external actions.
+## UI development
 
-The UI job is to make that power visible and safe:
+```bash
+npm run ui:dev
+npm run ui:browser
+npm run ui:test
+npm run ui:test:shell
+```
 
-- Web is the primary high-fidelity Avery interaction surface.
-- SMS is the ambient inbox and approval path.
-- Signed links are scoped mobile previews/actions.
-- Admin is the operator proof/repair surface.
-- Future desktop/customer/email surfaces should render the same underlying work/resources/actions.
+These fixture/product-shell commands are development and CI evidence only. Fixture mode is visibly labeled and guarded from production-like environments. Live generative-UI acceptance requires a provider-backed Hermes run, typed Manager-compiled work view, exact owner action, external effect, and durable proof.
 
-Use `../wiki/` for product vision, strategy, research, and rationale. Use this `mvp-build/` folder for actual implementation state, source, tests, scripts, memory, and proof. If the wiki vision and source differ, do not assume the vision is built; check `CODEGRAPH.md`, `memory/MEMORY.md`, newest memory notes, and source.
+## Development baseline
 
-## What works now
+```bash
+npm ci
+npm run typecheck
+npm run test:unit
+npm run build
+npm run lint
+npm run test:integration   # environment-gated
+```
 
-- Source-wired onboarding/claim/account/provisioning for a contractor-estimator employee package.
-- Source-wired web + SMS employee contact paths that route owner messages to the runtime endpoint.
-- Source-wired estimate artifact flow: Manager-backed PDF artifact rows, private storage, signed links, approvals,
-  and owner Work Surface rendering.
-- Source-wired Gmail connector/event seams: OAuth/token custody, send/watch/history/PubSub verification, reply
-  normalization, typed work-event delivery.
-- Source-wired Stripe test-mode seams: Connect account/account-link, deposit invoice create/send behind approval,
-  signed webhook handling, paid-invoice events.
-- Source-wired close-the-loop scheduler/reminder seams: owner-confirmed internal reminders, due reminder dispatch,
-  Gmail watch renewal, daily briefs, runtime health snapshots.
-- Source-wired repair/event-bus seams: repair tools, source suppression, triage/batching, `deliver_only` vs
-  `wake_employee`, generic event-source registry, Work Surface SSE-shaped snapshot route.
-- Phase 1 acceptance harness exists and is locally verified; runtime/scheduler productionization is source-wired.
-- Source-wired live-employee spine: real Hermes Sessions client, DB-backed per-employee turn queue, generic two-door
-  event ingress, Channel/Session/Presence router, and Gmail-reply → live wake → validated work-event descriptors.
-- Source-wired Avery-first owner MVP UI (second-half Phase 2 reset): Home / Talk / Proof / Connected with Tell Avery,
-  inline Needs your say exact review, quiet Watching, Recent proof, optional work sheet, persisted conversation, live
-  SSE + poll fallback, and durable screenshots in `ui-redesign/screenshots/`.
-- Source-wired SMS ambient inbox + signed mobile Review (`/agent/[id]/review`): signed, scoped, expiring
-  preview/action links render a `WorkResource`; approving carries the work forward to execution.
-- Source-wired materialization/capability layer: `SurfaceEnvelope`/`WorkResource`/`WorkAction`/`CapabilityGraphNode`,
-  a Manager capability registry, MCP `resources/list`+`read`, a tool-agnostic Connector Center (`ConnectionSurface`),
-  and a resurfacing projection (`ResurfaceItem`).
-- Source-wired QuickBooks Online accounting connector: connector lifecycle, entity-name resolution with
-  disambiguation, approval-gated write previews + a single audited commit path, `query_quickbooks`, and P&L/BS/AR/AP
-  reports (new `accounting` capability category).
-- Source-wired MCP-UI generative cards: the agent emits a typed table/schedule/diff/form view that Manager compiles
-  into a sandboxed `ui://` resource; card actions route through the same approval gate.
-- Source-wired operator admin console (`/admin`): dashboard/accounts/provisioning/repairs/providers/billing-scaffold/
-  readiness/support-actions behind DB-backed platform roles + support-reason audit + server-side redaction.
+Use targeted checks during a narrow change, then run every integrated workflow required by the changed boundary on the exact branch head.
+
+## Directory map
+
+```text
+apps/web/                  owner, review, onboarding, public, admin surfaces
+apps/manager/              Manager API, tools, events, Hermes, Model Gateway, provisioning
+packages/shared/           contracts, schemas, finite vocabularies, evidence types
+packages/db/               migrations, clients, generated database types
+packages/agent-template/   rendered Hermes profiles, skills, plugins, doctrine
+packages/profiles/         profile packages and role definitions
+infra/deploy/              production images and Compose topology
+infra/caddy/               public/static and per-employee ingress
+infra/scripts/             local, deploy, lifecycle, repair, acceptance, release operations
+tests/unit/                deterministic/source/contract gates
+tests/integration/         PostgreSQL, authority, concurrency, receipt matrices
+docs/architecture/         current cross-system map and production trajectories
+docs/ux/                   owner UX doctrine and validation
+memory/                    durable session handoffs
+second-half-plan/          active execution program plus historical phase family
+validation/                machine-readable remediation/acceptance vectors
+```
+
+## Invariants
+
+1. Manager owns authority; Hermes owns runtime cognition/execution.
+2. Account membership is not employee assignment authority.
+3. Reads do not create effects, and authoritative read failures fail closed.
+4. Stable retries do not create duplicate irreversible effects.
+5. Consequential success requires a durable accepted receipt.
+6. Provider master credentials stay outside employee profiles/runtimes.
+7. Generated UI is presentation; the host resolves current actions and durable resources.
+8. Research/trajectory artifacts cannot create a second renderer, runtime, authority, or production claim.
+9. Historical records remain historical; current state is synchronized through CODEGRAPH, architecture, memory, PR, and exact-head proof.
+10. Production-ready means every non-waivable Standard gate passes on the exact deployed SHA.
