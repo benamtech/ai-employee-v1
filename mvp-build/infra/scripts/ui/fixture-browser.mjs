@@ -63,7 +63,10 @@ try {
     assertCount(await page.getByRole("button", { name: obsolete, exact: true }).count(), 0, `obsolete_${obsolete.toLowerCase()}_button_present`);
   }
 
-  await page.getByRole("button", { name: /Live/ }).click();
+  const runtimeToggle = page.locator(".os-runtime");
+  await runtimeToggle.click();
+  await runtimeToggle.waitFor({ state: "visible", timeout: 10_000 });
+  if (await runtimeToggle.getAttribute("aria-expanded") !== "true") throw new Error("operating_context_toggle_did_not_expand");
   const contextPanel = page.locator(".os-context-panel");
   await contextPanel.waitFor({ state: "visible", timeout: 10_000 });
   await contextPanel.getByText("Operating context", { exact: true }).waitFor({ timeout: 10_000 });
