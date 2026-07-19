@@ -4,7 +4,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { requireEnv, run, writeProof, assert } from "./production-proof-lib.mjs";
 
-const migrationHead = "0069";
+const migrationHead = "0070";
 const migrationStart = "0032";
 const migrationsDir = "packages/db/migrations";
 
