@@ -18,7 +18,8 @@ Official Hermes Agent surfaces examined:
 - ACP over stdio;
 - TUI gateway JSON-RPC;
 - OpenAI-compatible HTTP/SSE;
-- the separate `hermes mcp serve` messaging-channel bridge over stdio.
+- the separate `hermes mcp serve` messaging-channel bridge over stdio;
+- the internal curated Hermes-tools stdio MCP bridge used by the Codex app-server runtime.
 
 `NousResearch/hermes-agent#360` is closed because ACP, the TUI gateway, and HTTP/SSE cover the proposed general RPC use cases.
 
@@ -33,6 +34,15 @@ A final source verification corrected the MCP claim:
 - event cursor and pending-approval state are process-local and non-durable.
 
 AMTECH therefore does not adopt this MCP server in the owner or ordinary employee path. A post-baseline platform-operator experiment may wrap a dedicated employee's process and allowlist read-only conversation/history/event methods, but only behind Manager platform authority, tenant/runtime isolation, redaction, bounded output, audit, and independent durable verification. Direct message sending and approval response remain denied outside C3.
+
+The internal curated Hermes-tools MCP bridge provides a separate useful pattern:
+
+- authored `EXPOSED_TOOLS` allowlist intersected with the authoritative runtime tool definitions;
+- authoritative JSON-schema reuse for generated MCP call signatures;
+- duplicate host-owned shell/filesystem/process capabilities omitted;
+- loop-bound delegation, memory, session-search, and todo tools omitted because stateless callbacks cannot supply live `AIAgent` context.
+
+AMTECH adapts that compiler pattern only. No Hermes MCP runtime was installed because the live `/v1/toolsets` probe is not yet persisted or combined with Manager schemas, connector readiness/custody, assignment/grants, entitlements, runtime revision, and policy into one immutable effective-capability proof. Adding another route now could overstate tool availability and duplicate effect authority.
 
 The deep review of `nesquena/hermes-webui` yielded bounded techniques rather than an adoptable product architecture:
 
@@ -129,11 +139,12 @@ The UI workflow success includes:
 
 1. The approved real Supabase staging target still needs migrations and behavior proof.
 2. Provider-backed generative UI remains unaccepted until one real business-context work object traverses typed view, owner action, external effect, and durable proof IDs.
-3. Capability-probe evidence and effective-capability graph hashing are not yet persisted.
-4. A future Hermes TUI adapter must begin read-only and remain Manager/platform-authority/C3 mediated.
-5. A future `hermes mcp serve` experiment must be dedicated-runtime and read-only, deny send/approval tools, treat cursors as non-durable, and prove tenant isolation.
-6. Shared/fractional cross-account employee assignment, broad role perspectives, public employee behavior, commercial reconciliation, capacity, recovery, rollback, deployment manifest, and fixture-free live browser/SMS/Review proof remain outside this pass.
+3. Runtime capability/toolset probes and the effective-capability graph hash are not yet persisted.
+4. A future effective-capability compiler must intersect authored Manager allowlists, observed Hermes registry/toolsets, connector custody/readiness, assignment/grants, entitlement, policy, runtime revision, and execution context.
+5. A future Hermes TUI adapter must begin read-only and remain Manager/platform-authority/C3 mediated.
+6. A future `hermes mcp serve` experiment must be dedicated-runtime and read-only, deny send/approval tools, treat cursors as non-durable, and prove tenant isolation.
+7. Shared/fractional cross-account employee assignment, broad role perspectives, public employee behavior, commercial reconciliation, capacity, recovery, rollback, deployment manifest, and fixture-free live browser/SMS/Review proof remain outside this pass.
 
 ## Next concrete move
 
-Return to the release-critical normal-employee path: identify the approved staging target, apply/verify migrations, capture fixture-free owner/runtime/provider/effect/receipt evidence on one SHA, and only then run the first provider-backed generated-view acceptance slice. Treat persisted capability evidence, a read-only Manager runtime-session projection, and any read-only Hermes MCP/TUI operator adapter as post-baseline P1/P2 work.
+Return to the release-critical normal-employee path: identify the approved staging target, apply/verify migrations, capture fixture-free owner/runtime/provider/effect/receipt evidence on one SHA, and only then run the first provider-backed generated-view acceptance slice. Treat persisted effective-capability evidence, a read-only Manager runtime-session projection, and any read-only Hermes MCP/TUI operator adapter as post-baseline P1/P2 work.
