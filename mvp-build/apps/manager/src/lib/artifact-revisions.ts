@@ -15,7 +15,7 @@ function canonical(value: unknown): string {
       .map(([key, item]) => `${JSON.stringify(key)}:${canonical(item)}`)
       .join(",")}}`;
   }
-  return JSON.stringify(value ?? null);
+  return JSON.stringify(value ?? null) ?? "null";
 }
 
 export function artifactContentSha256(payload: unknown): string {
@@ -104,7 +104,7 @@ export async function createArtifactRevision(
   });
   if (revision.error) throw revision.error;
 
-  const updated = await db.from("artifacts").update({
+  let update = db.from("artifacts").update({
     kind: input.kind,
     payload: input.payload,
     mime_type: input.mime_type ?? null,
@@ -116,7 +116,15 @@ export async function createArtifactRevision(
     published_at: null,
     updated_at: new Date().toISOString(),
   }).eq("id", artifactId).eq("assignment_id", input.assignment_id);
-  if (updated.error) throw updated.error;
+  update = parentRevisionId
+    ? update.eq("current_revision_id", parentRevisionId)
+    : update.is("current_revision_id", null);
+  const updated = await update.select("id").maybeSingle();
+  if (updated.error || !updated.data?.id) {
+    await db.from("artifact_revisions").delete().eq("id", revisionId).eq("artifact_id", artifactId);
+    if (updated.error) throw updated.error;
+    throw new Error("artifact_revision_conflict");
+  }
 
   return { artifact_id: artifactId, revision_id: revisionId, revision_number: revisionNumber, content_sha256: contentSha256, parent_revision_id: parentRevisionId };
 }
@@ -140,8 +148,10 @@ export async function validateArtifactRevision(
     .eq("employee_id", input.employee_id)
     .maybeSingle();
   if (artifact.error) throw artifact.error;
-  const revisionId = input.revision_id ?? artifact.data?.current_revision_id;
-  if (!artifact.data?.id || !revisionId) throw new Error("artifact_revision_not_found");
+  const currentRevisionId = artifact.data?.current_revision_id ? String(artifact.data.current_revision_id) : null;
+  const revisionId = input.revision_id ?? currentRevisionId;
+  if (!artifact.data?.id || !revisionId || !currentRevisionId) throw new Error("artifact_revision_not_found");
+  if (revisionId !== currentRevisionId) throw new Error("artifact_revision_stale");
   if (!input.validations.length) throw new Error("artifact_validations_required");
 
   const validationIds = input.validations.map(() => id("aval"));
@@ -166,8 +176,12 @@ export async function validateArtifactRevision(
   const updated = await db.from("artifacts").update({
     validation_status: status,
     updated_at: new Date().toISOString(),
-  }).eq("id", input.artifact_id).eq("current_revision_id", revisionId);
-  if (updated.error) throw updated.error;
+  }).eq("id", input.artifact_id).eq("current_revision_id", revisionId).select("id").maybeSingle();
+  if (updated.error || !updated.data?.id) {
+    await db.from("artifact_validations").delete().in("id", validationIds);
+    if (updated.error) throw updated.error;
+    throw new Error("artifact_revision_stale");
+  }
   return { artifact_id: input.artifact_id, revision_id: revisionId, status, validation_ids: validationIds };
 }
 
@@ -185,16 +199,20 @@ export async function publishArtifactToSandbox(
   if (artifact.error) throw artifact.error;
   if (!artifact.data?.current_revision_id) throw new Error("artifact_revision_not_found");
   if (artifact.data.validation_status !== "passed") throw new Error("artifact_validation_not_passed");
+  const revisionId = String(artifact.data.current_revision_id);
   const publishedAt = new Date().toISOString();
-  const publicationRef = `sandbox://artifacts/${input.artifact_id}/revisions/${artifact.data.current_revision_id}`;
+  const publicationRef = `sandbox://artifacts/${input.artifact_id}/revisions/${revisionId}`;
   const updated = await db.from("artifacts").update({
     publication_state: "published",
     publication_ref: publicationRef,
     published_at: publishedAt,
     updated_at: publishedAt,
-  }).eq("id", input.artifact_id).eq("current_revision_id", artifact.data.current_revision_id);
-  if (updated.error) throw updated.error;
-  return { artifact_id: input.artifact_id, revision_id: String(artifact.data.current_revision_id), publication_ref: publicationRef, published_at: publishedAt };
+  }).eq("id", input.artifact_id).eq("current_revision_id", revisionId).eq("validation_status", "passed").select("id").maybeSingle();
+  if (updated.error || !updated.data?.id) {
+    if (updated.error) throw updated.error;
+    throw new Error("artifact_publish_head_changed");
+  }
+  return { artifact_id: input.artifact_id, revision_id: revisionId, publication_ref: publicationRef, published_at: publishedAt };
 }
 
 export async function verifyArtifactPublication(
@@ -224,8 +242,16 @@ export async function verifyArtifactPublication(
   });
   if (inserted.error) throw inserted.error;
   const updated = await db.from("artifacts").update({ publication_state: "verified", updated_at: new Date().toISOString() })
-    .eq("id", input.artifact_id).eq("current_revision_id", artifact.data.current_revision_id);
-  if (updated.error) throw updated.error;
+    .eq("id", input.artifact_id)
+    .eq("current_revision_id", artifact.data.current_revision_id)
+    .eq("publication_ref", input.observed_ref)
+    .select("id")
+    .maybeSingle();
+  if (updated.error || !updated.data?.id) {
+    await db.from("artifact_validations").delete().eq("id", receiptId);
+    if (updated.error) throw updated.error;
+    throw new Error("artifact_verification_head_changed");
+  }
   return { artifact_id: input.artifact_id, verified: true, publication_ref: input.observed_ref, receipt_id: receiptId };
 }
 
