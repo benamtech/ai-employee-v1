@@ -25,7 +25,7 @@
     "test:assignment-enforcement": "vitest run tests/unit/assignment-enforcement-contract.test.ts",
     "test:lane10-evidence": "vitest run tests/unit/release-evidence-contract.test.ts",
     "test:s10-onboarding": "npm run generate:production-sources && vitest run tests/unit/onboarding-identity-contract.test.ts",
-    "test:ui:contracts": "npm run generate:production-sources && vitest run tests/unit/amtech-agent-ui-contract.test.ts tests/unit/ui-fixture-guard.test.ts tests/unit/observe-work-event-projection.test.ts --reporter=verbose",
+    "test:ui:contracts": "npm run generate:production-sources && vitest run tests/unit/amtech-agent-ui-contract.test.ts tests/unit/ui-resources.test.ts tests/unit/ui-fixture-guard.test.ts tests/unit/observe-work-event-projection.test.ts --reporter=verbose",
     "test:production-boundary": "npm run generate:production-sources && vitest run tests/unit/model-profile-isolation.test.ts tests/unit/model-gateway-http-isolation.test.ts tests/unit/provisioner-idempotency.test.ts tests/unit/ambient-inbox-contract.test.ts tests/unit/production-boundary-source.test.ts tests/unit/production-live-harness.test.ts tests/unit/s8-local-production-contract.test.ts tests/unit/sdrt-v2-contract.test.ts",
     "test:worker-migrations": "vitest run --config vitest.integration.config.ts tests/integration/worker-migrations.test.ts",
     "test:watch": "vitest",
