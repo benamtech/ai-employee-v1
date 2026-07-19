@@ -43,6 +43,26 @@ describe("employee model-gateway network boundary", () => {
   });
 });
 
+describe("owner session containment", () => {
+  it("keeps the owner bearer out of browser JSON and private-hop URLs", async () => {
+    const login = await source("apps/web/app/api/auth/login/route.ts");
+    const stream = await source("apps/web/app/api/employee/[employeeId]/events/route.ts");
+    const generator = await source("apps/manager/scripts/generate-production-server.mjs");
+
+    expect(login).toContain("delete safeJson.owner_session_token");
+    expect(login).toContain('httpOnly: true');
+    expect(login).toContain('response.headers.set("Cache-Control", "no-store")');
+    expect(login).not.toContain("NextResponse.json(json");
+
+    expect(stream).toContain('"X-AMTECH-Owner-Session": token');
+    expect(stream).not.toContain("owner_session_token=");
+    expect(stream).not.toContain("encodeURIComponent(token)");
+
+    expect(generator).toContain('c.req.header("X-AMTECH-Owner-Session")');
+    expect(generator).toContain('"owner_stream_session_header"');
+  });
+});
+
 describe("rotation sequencing", () => {
   it("recreates the runtime from the rotated profile before old-token revocation", async () => {
     const renderer = await source("apps/manager/src/lib/profile-renderer.ts");
