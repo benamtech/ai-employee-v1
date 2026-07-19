@@ -7,7 +7,6 @@ import { runManagerTool } from "./run-tool.js";
 import {
   createArtifactRevision,
   loadArtifactRevisionHistory,
-  publishArtifactToSandbox,
   validateArtifactRevision,
   verifyArtifactPublication,
 } from "./artifact-revisions.js";
@@ -130,23 +129,43 @@ export function registerArtifactWorkbenchRoutes(app: Hono, denyInternal: Interna
     return c.json(result);
   });
 
-  app.post("/manager/employee/:employeeId/workbench/artifacts/publish-sandbox", async (c) => {
+  app.post("/manager/employee/:employeeId/workbench/approvals/resolve", async (c) => {
     const auth = await ownerAuthority(c, "artifact:publish", denyInternal);
     if (auth.denied) return auth.denied;
     const approvalId = String(auth.body.approval_id ?? "");
     const artifactId = String(auth.body.artifact_id ?? "");
-    const approval = approvalId ? await loadApprovalAuthority(auth.db, approvalId) : null;
-    if (!approval || approval.assignment_id !== auth.authority.assignment.assignment_id || approval.resource_class !== "artifact" || approval.resource_id !== artifactId || approval.status !== "approved") {
-      return c.json({ error: "approved_artifact_publish_required" }, 403);
+    const resolution = String(auth.body.resolution ?? "");
+    if (!approvalId || !artifactId || !["approved", "rejected"].includes(resolution)) {
+      return c.json({ error: "artifact_approval_resolution_required" }, 400);
     }
-    const result = await publishArtifactToSandbox(auth.db, {
+    const approval = await loadApprovalAuthority(auth.db, approvalId);
+    if (
+      !approval ||
+      approval.assignment_id !== auth.authority.assignment.assignment_id ||
+      approval.account_id !== auth.session.account_id ||
+      approval.employee_id !== auth.employeeId ||
+      approval.action_key !== "publish_artifact_sandbox" ||
+      approval.resource_class !== "artifact" ||
+      approval.resource_id !== artifactId
+    ) {
+      return c.json({ error: "artifact_approval_scope_mismatch" }, 403);
+    }
+    const outcome = await runManagerTool("resolve_approval", {
       account_id: auth.session.account_id,
       employee_id: auth.employeeId,
-      assignment_id: auth.authority.assignment.assignment_id,
-      artifact_id: artifactId,
       approval_id: approvalId,
+      owner_response: resolution,
+      channel: "web",
+    }, {
+      actor: "owner",
+      assignment_id: auth.authority.assignment.assignment_id,
+      principal_id: auth.session.human_principal_id,
+      principal_class: "human",
+      authenticated_by: `owner_web_session:${auth.session.session_id}`,
     });
-    return c.json(result);
+    if (outcome.kind === "unknown_tool" || outcome.kind === "scheduler_only") return c.json({ error: outcome.kind }, 400);
+    if (outcome.kind === "invalid_input") return c.json(outcome.envelope, 400);
+    return outcome.envelope.status === "ok" ? c.json(outcome.envelope) : c.json(outcome.envelope, 403);
   });
 
   app.post("/manager/employee/:employeeId/workbench/artifacts/verify-publication", async (c) => {
