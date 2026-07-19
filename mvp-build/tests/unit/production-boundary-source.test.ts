@@ -21,25 +21,45 @@ describe("production image inclusion", () => {
   });
 });
 
-describe("employee model-gateway network boundary", () => {
-  it("requires explicit host-gateway mapping plus gateway and runtime probes from the employee container", async () => {
+describe("employee runtime network boundary", () => {
+  it("creates one isolated bridge per employee and attaches only scoped control peers", async () => {
     const launcher = await source("infra/scripts/local/start-hermes-container.sh");
-    expect(launcher).toContain("--network \"$network\"");
-    expect(launcher).toContain("--add-host=host.docker.internal:host-gateway");
+    expect(launcher).toContain("--internal");
+    expect(launcher).toContain('docker network connect --alias amtech-manager --gw-priority -1');
+    expect(launcher).toContain('docker network connect --alias amtech-model-gateway --gw-priority -1');
+    expect(launcher).toContain('docker network disconnect -f "$network" "$manager_container"');
+    expect(launcher).toContain('docker network disconnect -f "$network" "$model_gateway_container"');
     expect(launcher).toContain("docker exec \"$container\" python3");
-    expect(launcher).toContain("MODEL_GATEWAY_URL");
-    expect(launcher).toContain("employee runtime cannot reach host-private model gateway");
+    expect(launcher).toContain("employee runtime cannot reach scoped model gateway");
     expect(launcher).toContain("employee runtime health did not pass");
     expect(launcher).toContain('os.environ["API_SERVER_PORT"]+"/health"');
   });
 
-  it("keeps the gateway loopback-bound and absent from public Caddy ingress", async () => {
+  it("uses network-scoped Manager and Model Gateway aliases in production profiles", async () => {
+    const compose = await source("infra/deploy/docker-compose.production.yml");
+    expect(compose).toContain("container_name: amtech-manager");
+    expect(compose).toContain("container_name: amtech-model-gateway");
+    expect(compose).toContain("DOCKER_MANAGER_API_ORIGIN: http://amtech-manager:8080");
+    expect(compose).toContain("MODEL_GATEWAY_EMPLOYEE_BASE_URL: http://amtech-model-gateway:8092/v1");
+    expect(compose).toContain("MANAGER_CONTAINER_NAME: amtech-manager");
+    expect(compose).toContain("MODEL_GATEWAY_CONTAINER_NAME: amtech-model-gateway");
+  });
+
+  it("keeps Model Gateway host-loopback-bound and absent from public Caddy ingress", async () => {
     const compose = await source("infra/deploy/docker-compose.production.yml");
     const caddy = await source("infra/caddy/production.Caddyfile");
     expect(compose).toContain('"127.0.0.1:8092:8092"');
     expect(compose).toContain('command: ["node", "apps/manager/dist/model-gateway-server.js"]');
     expect(caddy).not.toContain("8092");
     expect(caddy.toLowerCase()).not.toContain("model-gateway");
+  });
+
+  it("runs production Caddy in the host namespace so loopback-only upstreams are reachable", async () => {
+    const compose = await source("infra/deploy/docker-compose.production.yml");
+    expect(compose).toContain("network_mode: host");
+    expect(compose).toContain("WEB_UPSTREAM: ${WEB_UPSTREAM:-127.0.0.1:3000}");
+    expect(compose).toContain("MANAGER_UPSTREAM: ${MANAGER_UPSTREAM:-127.0.0.1:8080}");
+    expect(compose).toContain("CADDY_EMPLOYEE_UPSTREAM_HOST: localhost");
   });
 });
 
