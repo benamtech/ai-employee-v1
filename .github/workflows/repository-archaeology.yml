@@ -1,0 +1,49 @@
+name: Repository Documentation Archaeology
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - employee-production-tuesday
+    paths:
+      - "**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-archaeology-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Read every tracked file and build archaeology bundle
+        run: node mvp-build/scripts/repository-archaeology.mjs
+
+      - name: Verify exhaustive ledger exists
+        run: |
+          test -s mvp-build/.artifacts/repository-archaeology/repository-archaeology.json
+          test -s mvp-build/.artifacts/repository-archaeology/file-primitives.jsonl
+          test -s mvp-build/.artifacts/repository-archaeology/relationship-map.json
+          test -s mvp-build/.artifacts/repository-archaeology/effect-graph.json
+          test -s mvp-build/.artifacts/repository-archaeology/defect-audit.json
+          test -s mvp-build/.artifacts/repository-archaeology/README.md
+
+      - name: Upload exact-SHA archaeology evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-archaeology-${{ github.sha }}
+          path: mvp-build/.artifacts/repository-archaeology/
+          if-no-files-found: error
+          retention-days: 30
