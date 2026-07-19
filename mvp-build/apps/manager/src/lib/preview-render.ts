@@ -8,6 +8,7 @@
 import type { SupabaseClient } from "@amtech/db";
 import {
   defaultActionsFor,
+  resolveOwnerOAuthConnectorSetup,
   type PreviewResourceType,
   type WorkAction,
   type WorkDeliverableDescriptor,
@@ -48,6 +49,13 @@ function fieldsFrom(obj: Record<string, unknown> | undefined, keys: string[]): W
 function shortHash(value: unknown): string | null {
   const hash = typeof value === "string" ? value.replace(/^sha256:/, "") : "";
   return /^[a-f0-9]{64}$/.test(hash) ? `${hash.slice(0, 12)}…` : null;
+}
+
+function connectorConsentPath(employeeId: string, resourceId: string, provider?: string | null, connectorKey?: string | null): string | null {
+  const setup = resolveOwnerOAuthConnectorSetup(provider ?? connectorKey ?? "");
+  if (!setup) return null;
+  const returnTo = `/agent/${encodeURIComponent(employeeId)}#work-${encodeURIComponent(resourceId)}`;
+  return `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(setup.key)}?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
 export interface BuildWorkResourceInput {
@@ -270,6 +278,7 @@ export async function buildWorkResource(
   if (resource_type === "connector") {
     const c = snapshot.connectors.find((x) => x.id === resource_id);
     if (!c) return null;
+    const openUrl = connectorConsentPath(employee_id, resource_id, c.provider, c.connector_key);
     return {
       resource_type,
       resource_id,
@@ -277,7 +286,10 @@ export async function buildWorkResource(
       subtitle: humanKind(c.connector_key),
       summary: c.last_error ?? "Reconnect or test this connection.",
       body_kind: "text",
-      actions: defaultActionsFor("connector"),
+      open_url: openUrl ?? undefined,
+      actions: openUrl
+        ? [{ action: "view", label: c.status === "connected" ? "Reconnect" : "Connect", style: "primary" }, { action: "respond", label: "Ask a question", style: "default" }]
+        : defaultActionsFor("connector"),
     };
   }
 
