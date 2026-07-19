@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { MANAGER_API } from "@amtech/shared";
 import { proxyJson } from "../../../_lib/manager";
 
 export async function POST(
@@ -8,7 +7,7 @@ export async function POST(
 ) {
   const { employeeId } = await params;
   const cookieStore = await cookies();
-  return proxyJson(MANAGER_API.employeeResources(employeeId), {
+  return proxyJson(`/manager/employee/${employeeId}/operating-snapshot`, {
     owner_session_token: cookieStore.get("amtech_owner_session")?.value,
   });
 }
