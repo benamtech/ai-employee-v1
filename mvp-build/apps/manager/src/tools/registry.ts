@@ -19,6 +19,7 @@ import { approvedActionTools } from "./approved-actions.stub.js";
 import { qboApprovalPromotionTools } from "./qbo-approval-promotion.stub.js";
 import { assignmentArtifactTools } from "./assignment-artifacts.stub.js";
 import { connectEmailWithOwnerReturn } from "./gmail-connect-owner.js";
+import { artifactWorkbenchTools } from "./artifact-workbench-tools.js";
 
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
@@ -51,6 +52,11 @@ export function buildToolRegistry(): Map<ToolName, ToolHandler> {
   }
   if (missing.length) {
     throw new Error(`Tool registry incomplete — missing handlers: ${missing.join(", ")}`);
+  }
+  // Artifact workbench tools intentionally extend the existing Manager surface
+  // without rewriting the historical phase registry or creating another engine.
+  for (const [name, handler] of Object.entries(artifactWorkbenchTools)) {
+    reg.set(name as ToolName, handler);
   }
   return reg;
 }
