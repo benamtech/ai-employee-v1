@@ -29,6 +29,8 @@ runtime_health_url="http://127.0.0.1:${port}/health"
 manager_container="${MANAGER_CONTAINER_NAME:-}"
 model_gateway_container="${MODEL_GATEWAY_CONTAINER_NAME:-}"
 runtime_data="${HERMES_RUNTIME_DATA_DIR:-$(dirname "$workspace")/runtime-data/${employee_id}}"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+mvp_root="$(cd "$script_dir/../../.." && pwd)"
 
 case "$image" in
   hermes-agent:*|nousresearch/hermes-agent:*|ghcr.io/nousresearch/hermes-agent:*) ;;
@@ -96,12 +98,46 @@ if [[ ! -f "$runtime_data/.amtech-runtime-initialized" ]]; then
 fi
 # Refresh only profile-owned inputs. Never overwrite runtime-owned memory/session
 # state during restart or credential rotation.
-for path in config.yaml .env hooks prompts skills plugins profile-build-params.json; do
+for path in config.yaml .env hooks prompts skills profile-build-params.json; do
   if [[ -e "$profile_dir/$path" ]]; then
     rm -rf "$runtime_data/$path"
     cp -a "$profile_dir/$path" "$runtime_data/$path"
   fi
 done
+
+# Package plugins were historically copied to a host-global Hermes directory that
+# is not mounted into an employee container. Materialize only the current profile
+# package's plugin directories into this employee's data root. A marker removes
+# stale AMTECH-managed package plugins without touching runtime-installed plugins.
+package_key=""
+if [[ -f "$profile_dir/profile-build-params.json" ]]; then
+  package_key="$(node -e 'const fs=require("fs");const p=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));process.stdout.write(typeof p.profile_package_key==="string"?p.profile_package_key:"")' "$profile_dir/profile-build-params.json")"
+fi
+plugin_source=""
+if [[ "$package_key" == "contractor_estimator" ]]; then
+  plugin_source="$mvp_root/packages/agent-template/plugins"
+elif [[ "$package_key" =~ ^[A-Za-z0-9_-]+$ ]]; then
+  plugin_source="$mvp_root/packages/profile-packages/$package_key/plugins"
+fi
+plugin_marker="$runtime_data/.amtech-package-plugins"
+if [[ -f "$plugin_marker" ]]; then
+  while IFS= read -r prior_plugin; do
+    [[ "$prior_plugin" =~ ^[A-Za-z0-9_.-]+$ ]] || continue
+    rm -rf "$runtime_data/plugins/$prior_plugin"
+  done < "$plugin_marker"
+fi
+: > "$plugin_marker"
+if [[ -n "$plugin_source" && -d "$plugin_source" ]]; then
+  mkdir -p "$runtime_data/plugins"
+  for plugin_dir in "$plugin_source"/*; do
+    [[ -d "$plugin_dir" ]] || continue
+    plugin_name="$(basename "$plugin_dir")"
+    [[ "$plugin_name" =~ ^[A-Za-z0-9_.-]+$ ]] || { echo "invalid plugin directory name: $plugin_name" >&2; exit 1; }
+    rm -rf "$runtime_data/plugins/$plugin_name"
+    cp -a "$plugin_dir" "$runtime_data/plugins/$plugin_name"
+    printf '%s\n' "$plugin_name" >> "$plugin_marker"
+  done
+fi
 chmod 700 "$runtime_data"
 
 security_args=(
