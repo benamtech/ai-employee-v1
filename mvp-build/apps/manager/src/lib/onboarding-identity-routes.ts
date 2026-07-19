@@ -3,7 +3,7 @@ import { StartOnboardingIdentityVerification } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { mintOwnerSession, requireOwnerSession } from "./owner-session.js";
 import { authorizeOwnerAssignment } from "./owner-assignment-authority.js";
-import { buildEmployeeSnapshot } from "./employee-stream.js";
+import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot } from "./employee-stream-strict.js";
 import { buildOperatingSurfaceState } from "./operating-surface.js";
 import {
   loadOnboardingIdentity,
