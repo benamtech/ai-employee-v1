@@ -30,15 +30,19 @@ jobs:
           node-version: 22
 
       - id: archaeology
-        name: Read every tracked file and build archaeology bundle
-        continue-on-error: true
+        name: Read every tracked Git object and build archaeology bundle
+        shell: bash
         run: |
           mkdir -p mvp-build/.artifacts/repository-archaeology
-          node mvp-build/scripts/repository-archaeology.mjs > mvp-build/.artifacts/repository-archaeology/archaeology-run.log 2>&1
+          set +e
+          node mvp-build/scripts/repository-archaeology-v2.mjs > mvp-build/.artifacts/repository-archaeology/archaeology-run.log 2>&1
+          status=$?
+          set -e
           cat mvp-build/.artifacts/repository-archaeology/archaeology-run.log
+          echo "status=$status" >> "$GITHUB_OUTPUT"
 
       - name: Verify exhaustive ledger exists
-        if: steps.archaeology.outcome == 'success'
+        if: steps.archaeology.outputs.status == '0'
         run: |
           test -s mvp-build/.artifacts/repository-archaeology/repository-archaeology.json
           test -s mvp-build/.artifacts/repository-archaeology/file-primitives.jsonl
@@ -57,5 +61,5 @@ jobs:
           retention-days: 30
 
       - name: Fail when traversal failed
-        if: steps.archaeology.outcome != 'success'
+        if: steps.archaeology.outputs.status != '0'
         run: exit 1
