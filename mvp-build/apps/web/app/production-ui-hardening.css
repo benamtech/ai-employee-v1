@@ -1,0 +1,37 @@
+/* Release-bound interaction guarantees shared by owner and signed-review UI. */
+html {
+  scroll-padding-block-start: 88px;
+  scroll-padding-block-end: 176px;
+}
+
+.os-root button,
+.os-root [role="button"],
+.review-root button,
+.review-root [role="button"] {
+  min-inline-size: 44px;
+  min-block-size: 44px;
+}
+
+.os-root :focus-visible,
+.review-root :focus-visible {
+  scroll-margin-block: 96px 184px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  .os-root *,
+  .os-root *::before,
+  .os-root *::after,
+  .review-root *,
+  .review-root *::before,
+  .review-root *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
