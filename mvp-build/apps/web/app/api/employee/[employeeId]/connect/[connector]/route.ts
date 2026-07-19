@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { managerPost } from "../../../../../_lib/manager";
+import { managerPost } from "../../../../_lib/manager";
 
 function safeReturnPath(value: string | null, employeeId: string): string {
   const fallback = `/agent/${encodeURIComponent(employeeId)}`;
