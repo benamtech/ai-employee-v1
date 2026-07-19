@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { materializeEmployeeSnapshot } from "../../apps/manager/src/lib/materialization.js";
 import type { EmployeeSnapshot } from "../../apps/manager/src/lib/employee-stream.js";
@@ -93,5 +95,14 @@ describe("quiet work-event projection", () => {
     expect(materialized.tasks.map((task) => task.id)).toEqual(["work:evt_question"]);
     expect(input.tasks?.map((task) => task.id)).toEqual(["work:evt_question"]);
     expect(materialized.surface_envelopes.some((envelope) => envelope.proof.inbound_event_id === "evt_observe")).toBe(true);
+  });
+
+  it("bounds owner stream authorization lifetime and disables proxy buffering", async () => {
+    const route = await readFile(join(process.cwd(), "apps/web/app/api/employee/[employeeId]/events/route.ts"), "utf8");
+
+    expect(route).toContain("OWNER_STREAM_REAUTH_MS");
+    expect(route).toContain("AbortController");
+    expect(route).toContain('cache: "no-store"');
+    expect(route).toContain('"X-Accel-Buffering": "no"');
   });
 });
