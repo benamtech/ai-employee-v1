@@ -115,6 +115,7 @@ jobs:
         shell: bash
         env:
           UI_HEADLESS: "1"
+          UI_FIXTURE_LOGS: "1"
         run: |
           mkdir -p infra/.local/ui-fixtures
           set +e
