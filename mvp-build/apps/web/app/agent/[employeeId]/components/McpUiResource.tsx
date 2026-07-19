@@ -4,9 +4,9 @@
  * Renders a Manager-compiled MCP-UI resource (ui:// rawHtml) in a sandboxed iframe
  * and relays its owner-safe `intent` actions to the host. This is the utilitarian
  * MCP-UI client: real ui:// resources + the postMessage action protocol, rendered
- * via `srcdoc` with `sandbox="allow-scripts"` (no allow-same-origin — opaque origin,
- * no access to parent, cookies, or network). The heavier @mcp-ui/client AppFrame +
- * sandbox-proxy host is the documented upgrade path.
+ * through an opaque-origin script sandbox with no access to parent state, cookies,
+ * or arbitrary network context. The heavier @mcp-ui/client AppFrame and sandbox
+ * proxy host remain the documented upgrade path.
  *
  * Every action still routes through the host's existing approval/respond handlers,
  * so money/customer actions gate and audit exactly as a text-card action would.
@@ -28,7 +28,6 @@ export function McpUiResource({
 
   useEffect(() => {
     function onMessage(e: MessageEvent) {
-      // Only trust messages from THIS iframe with our envelope shape.
       if (!ref.current || e.source !== ref.current.contentWindow) return;
       const data = e.data as { source?: string; type?: string; intent?: string; approval_id?: string; payload?: Record<string, unknown> };
       if (data?.source !== "amtech-mcp-ui" || data.type !== "intent") return;
@@ -46,7 +45,7 @@ export function McpUiResource({
       title="work item"
       sandbox="allow-scripts"
       srcDoc={html}
-      style={{ width: "100%", minHeight: 162, border: "1px solid rgba(10,10,10,0.10)", marginTop: 9, background: "transparent" }}
+      style={{ width: "100%", minHeight: 162, border: "1px solid rgba(17,17,17,0.08)", marginTop: 9, background: "transparent" }}
     />
   );
 }
