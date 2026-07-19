@@ -224,7 +224,11 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
     const deliverable = d?.deliverable;
     const isTool = deliverable?.type === "tool_activity";
     const uiResource = deliverable?.ui_resource;
-    const actions = defaultActionsFor("work_event", deliverable);
+    const approvalId = deliverable?.refs.approval_id;
+    const resourceType: WorkResource["resource_type"] = approvalId ? "approval" : "work_event";
+    const actions = approvalId
+      ? defaultActionsFor("approval", deliverable)
+      : defaultActionsFor("work_event", deliverable).filter((action) => action.action === "respond" || action.action === "acknowledge");
     const bodyKind: WorkResource["body_kind"] = uiResource ? "structured" : "text";
     envelopes.push(envelope({
       account_id: snapshot.account_id,
@@ -245,14 +249,14 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
       proof: proof("inbound_events", event.id, {
         assignment_id: snapshot.assignment_id,
         inbound_event_id: event.id,
-        approval_id: deliverable?.refs.approval_id ?? null,
+        approval_id: approvalId ?? null,
         artifact_id: deliverable?.refs.artifact_id ?? null,
         run_id: d?.proof?.run_id ?? null,
       }),
       actions,
       resource: {
-        resource_type: "work_event",
-        resource_id: event.id,
+        resource_type: resourceType,
+        resource_id: approvalId ?? event.id,
         assignment_id: snapshot.assignment_id,
         title: d?.title ?? event.event_type,
         subtitle: deliverable?.type ? humanKind(deliverable.type) : undefined,
