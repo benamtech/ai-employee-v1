@@ -2,11 +2,11 @@
  * The employee Work Surface read-model. Manager builds it
  * (apps/manager/src/lib/employee-stream.ts `buildEmployeeSnapshot`) and the web
  * surface consumes it. Rendering is descriptor-driven — never raw provider
- * payloads (wiki/MVP/phase-3-generative-ui-reframe.md). Shared so the Manager
- * snapshot builder and the browser agree on one shape.
+ * payloads. Shared so Manager and browser agree on one owner-safe shape.
  */
 import type { WorkEventDescriptor } from "./work-events.js";
 import type { CapabilityCategory, CapabilityGraphNode, ProofEnvelope, SurfaceEnvelope } from "./materialization.js";
+import type { OperatingSurfaceState } from "./operating-system.js";
 
 export interface ArtifactRow {
   id: string;
@@ -169,6 +169,7 @@ export interface ResurfaceItem {
 
 export interface ResourcePayload {
   account_id: string;
+  assignment_id?: string;
   employee_id?: string;
   employee?: EmployeeSummary;
   runtime_health?: RuntimeHealthSummary | null;
@@ -187,4 +188,5 @@ export interface ResourcePayload {
   resurface_items?: ResurfaceItem[];
   outputs?: WorkOutput[];
   tasks?: WorkTask[];
+  operating_state?: OperatingSurfaceState;
 }
