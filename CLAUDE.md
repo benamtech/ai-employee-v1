@@ -7,15 +7,16 @@ Read `identity.md` first. Root `AGENTS.md` is the complete tool-agnostic contrac
 
 ## Current branch state
 
-- PR `#23` merged the reviewed cutover into `main` on 2026-07-20.
-- Current integration baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
-- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
+- PR `#31` merged the hardened WS-02 source/CI boundary into `main` on 2026-07-20.
+- Current integration baseline: `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`.
+- Final WS-02 exact evidence head: `e43f70a0e9a3afd4b87880b9d22089e6da2e94d0`.
 - New work starts on reviewed task branches from current `main`.
 - `employee-production-tuesday` and `research` are historical context, not current integration dependencies.
 - Migration head: `0072`.
 - Standard v0.2 is ratified and effective.
 - Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
-- Phase 1.1 repairs repository/test-contract truth, including the known red broad unit aggregate.
+- WS-01 and the WS-02 source/CI boundary are green. `ISS-011` live provider/protocol-host evidence remains open.
+- WS-03 P0 may begin from current `main`, starting with DB-P0-01 ledger/hash preflight only.
 
 ## Canonical boundary
 
