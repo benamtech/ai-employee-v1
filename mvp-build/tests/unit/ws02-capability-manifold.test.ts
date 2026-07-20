@@ -43,8 +43,8 @@ describe("WS-02 capability manifold", () => {
     const impossible = manifold.pairs.filter((candidate) => candidate.impossibility_proof);
     expect(impossible.length).toBeGreaterThan(0);
     for (const candidate of impossible) {
-      expect(candidate.operator).toBe("PARALLEL");
       expect(candidate.impossibility_proof).toContain("unauthorized hidden edge");
+      expect(candidate.hypothesis).toBe(candidate.impossibility_proof);
     }
   });
 });
