@@ -26,9 +26,9 @@ Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector o
 - WS-01 broad unit is accepted at **106 files / 613 tests** on its implementation head with no exclusions.
 - WS-02 ancestor `6f792ea` passed Standard `29731384034`, Hermes Upstream Review `29731384166`, and Main Integration `29731384039`, including **109 files / 630 tests**, build, archaeology, and compiled Chromium.
 - The later documentation head `7736271` failed Standard `29732040184` and Main Integration `29732040197` because this file had deleted the canonical shipped-adapter sentence. Hermes review `29732040182` passed.
-- The current branch is repairing that exact-head failure plus assignment-scoped streaming, final MCP authority revalidation, protocol-action version enforcement, and enforceable MCP App CSP. These repairs are **unverified until the final exact head passes**.
+- The current branch is repairing that exact-head failure plus assignment-scoped streaming, final MCP authority revalidation, protocol-action version enforcement, and enforceable MCP App CSP. These repairs are unverified until the final exact head passes.
 - Caller-supplied provider/profile/model/base URL/API key/header/token/credential/endpoint/routing fields remain denied before dispatch.
-- Remote MCP authorization, MCP Apps, AG-UI, effective-capability execution, and streaming Web are source implementations. Live provider, external-host, connector lifecycle, managed database, and target-runtime acceptance remain open.
+- Remote MCP authorization, MCP Apps, AG-UI, effective-capability execution, and streaming Web are source implementations. Their live provider, external-host, connector lifecycle, managed database, and target-runtime acceptance remain open.
 - Remote MCP tokens use the current Manager-held encrypted-envelope backend. This is not managed KMS/secret-manager acceptance.
 - Live connector authorization, health, staleness, revocation, scope change, outage, repair, and deletion remain `ISS-011`; Phase 1.2 is not release-complete.
 - Target-host, managed-platform, fixture-free channels, commercial, recovery, rollback, accessibility, capacity, deployment, pilot, and production acceptance remain open. The product is not launch-cleared.
