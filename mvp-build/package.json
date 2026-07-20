@@ -15,7 +15,7 @@
     "generate:production-sources": "node apps/manager/scripts/generate-production-server.mjs",
     "prepare": "npm run generate:production-sources",
     "build": "npm run generate:production-sources && npm run build --workspaces --if-present",
-    "typecheck": "npm run generate:production-sources && npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run generate:production-sources && npm run build --workspace @amtech/shared && npm run typecheck --workspace @amtech/shared && npm run build --workspace @amtech/db && npm run typecheck --workspace @amtech/db && npm run typecheck --workspace @amtech/manager && npm run typecheck --workspace @amtech/web",
     "lint": "npm run generate:production-sources && eslint . --ext .ts,.tsx",
     "test": "npm run test:unit",
     "test:unit": "npm run generate:production-sources && vitest run",
