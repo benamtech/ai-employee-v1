@@ -14,25 +14,28 @@ describe("managed native connector setup protocol", () => {
     const gmail = resolveOwnerManagedConnectorSetup("google-workspace");
     expect(gmail?.authorization_protocol).toBe("oauth2_authorization_code");
     expect(gmail?.setup_flow).toBe("oauth_redirect");
+    expect(gmail?.readiness_source).toBe("connector_accounts");
     expect(gmail?.allowed_authorization_hosts).toEqual(["accounts.google.com"]);
 
     const quickBooks = resolveOwnerManagedConnectorSetup("qbo");
     expect(quickBooks?.start_tool).toBe("connect_quickbooks");
+    expect(quickBooks?.managed_tool_names).toContain("create_invoice");
     expect(quickBooks?.custody).toBe("manager_mediated");
 
     const stripe = resolveOwnerManagedConnectorSetup("payments");
     expect(stripe?.authorization_protocol).toBe("provider_managed_onboarding");
+    expect(stripe?.readiness_source).toBe("stripe_connections");
     expect(stripe?.continuation?.tool).toBe("create_stripe_account_link");
     expect(stripe?.redirect_proof_fields).toContain("account_link_url");
 
     expect(resolveOwnerManagedConnectorSetup("unreviewed-write-provider")).toBeNull();
   });
 
-  it("derives setup from capability metadata rather than a Web provider branch", () => {
+  it("derives setup from exact connector or manifest tool metadata rather than a broad category", () => {
     expect(resolveManagedSetupForCapability({
       connector_id: "qbo",
       server_id: "amtech-manager",
-      tool_name: "prepare_quickbooks_expense",
+      tool_name: "create_invoice",
       category: "accounting",
     })?.key).toBe("quickbooks");
 
@@ -43,12 +46,24 @@ describe("managed native connector setup protocol", () => {
       category: "money",
     })?.key).toBe("stripe");
 
+    // Why: category is not provider identity; an unknown accounting tool cannot
+    // silently inherit QuickBooks scopes or redirect hosts.
     expect(resolveManagedSetupForCapability({
-      connector_id: "unreviewed-provider",
+      connector_id: null,
       server_id: "remote-mcp",
       tool_name: "write_everything",
-      category: "system",
+      category: "accounting",
     })).toBeNull();
+  });
+
+  it("keeps every governed tool in at most one native connector manifest", () => {
+    const owners = new Map<string, string>();
+    for (const setup of ownerManagedConnectorSetups()) {
+      for (const tool of setup.managed_tool_names) {
+        expect(owners.has(tool), `${tool} is owned by both ${owners.get(tool)} and ${setup.key}`).toBe(false);
+        owners.set(tool, setup.key);
+      }
+    }
   });
 
   it("retains risk-derived custody independent of provider setup support", () => {
