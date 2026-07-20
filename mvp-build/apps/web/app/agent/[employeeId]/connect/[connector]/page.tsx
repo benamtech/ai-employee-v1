@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { resolveOwnerOAuthConnectorSetup } from "@amtech/shared";
+import { resolveOwnerManagedConnectorSetup } from "@amtech/shared";
 
 export const metadata = { title: "Connect an account — AMTECH" };
 
@@ -10,9 +10,16 @@ function safeReturnPath(value: string | undefined, employeeId: string): string {
   return value;
 }
 
-/** Owner-safe consent and result surface. The Connect action enters the existing
- * Manager OAuth tool; the provider callback returns to the signed initiating work
- * path rather than synthesizing a connected state in the browser. */
+function setupKind(protocol: string): string {
+  return protocol === "oauth2_authorization_code" ? "Provider authorization" : "Provider-managed onboarding";
+}
+
+/**
+ * Owner-safe managed setup surface.
+ *
+ * Why: all native connectors use one AMTECH contract even when the provider
+ * uses OAuth, hosted onboarding, or another managed authorization mechanism.
+ */
 export default async function Connect({
   params,
   searchParams,
@@ -22,7 +29,7 @@ export default async function Connect({
 }) {
   const { employeeId, connector } = await params;
   const { state, returnTo: rawReturnTo } = await searchParams;
-  const setup = resolveOwnerOAuthConnectorSetup(connector);
+  const setup = resolveOwnerManagedConnectorSetup(connector);
   const returnTo = safeReturnPath(rawReturnTo, employeeId);
   const deskHref = returnTo;
 
@@ -33,8 +40,8 @@ export default async function Connect({
         <div className="cn-result">
           <p className="cn-kicker">Connection not self-service</p>
           <h1>{label} needs managed setup<span className="p">.</span></h1>
-          <p className="cn-sub">AMTECH does not have an approved OAuth start contract and redirect-host policy for this connector yet. Nothing was connected, and no generic redirect will be accepted.</p>
-          <div className="cn-insurance"><strong>Why this is blocked</strong><span>Unknown connectors default to Manager custody. A provider must have explicit scopes, callback handling, token storage, revocation, and authorization-host allowlisting before this button becomes active.</span></div>
+          <p className="cn-sub">AMTECH has not approved a native setup manifest for this connector. Nothing was connected, and no generic redirect, tool, scope, or credential flow will be inferred.</p>
+          <div className="cn-insurance"><strong>Why this is blocked</strong><span>Unknown connectors default to Manager custody. A connector needs an explicit authorization protocol, setup tools, credential posture, host allowlist, health check, revocation path, and evidence contract before self-service becomes active.</span></div>
           <div className="cn-cta-row"><Link className="cn-cta quiet" href={deskHref}>Return to the work</Link></div>
         </div>
       </Shell>
@@ -50,7 +57,7 @@ export default async function Connect({
         <div className="cn-result">
           <p className="cn-kicker" style={{ color: "#0a0a0a" }}>✓ Connected</p>
           <h1>{setup.label} is connected<span className="p">.</span></h1>
-          <p className="cn-sub">The provider returned through a signed, employee-bound state. AMTECH now keeps the credential in Manager custody; consequential actions still use the existing approval and receipt boundaries.</p>
+          <p className="cn-sub">The provider completed the approved setup flow for this employee. AMTECH keeps credentials in Manager custody; consequential actions still use assignment, approval, durable effect, and receipt boundaries.</p>
           <div className="cn-insurance"><strong>Credential posture</strong><span>{setup.credential_posture}</span></div>
           <div className="cn-cta-row"><Link className="cn-cta" href={deskHref}>Return to the work</Link></div>
         </div>
@@ -64,7 +71,7 @@ export default async function Connect({
         <div className="cn-result">
           <p className="cn-kicker" style={{ color: "#e11d2a" }}>Couldn&rsquo;t connect</p>
           <h1>{setup.label} didn&rsquo;t connect<span className="p">.</span></h1>
-          <p className="cn-sub">Nothing was sent and no business work was changed. The provider window may have been cancelled, expired, rejected, or returned without the expected signed state.</p>
+          <p className="cn-sub">No employee work was changed. The provider flow may have been cancelled, expired, rejected, or returned without the descriptor-bound proof URL and expected assignment context.</p>
           <div className="cn-cta-row">
             <Link className="cn-cta" href={retryHref}>Try again</Link>
             <Link className="cn-cta quiet" href={deskHref}>Return to the work</Link>
@@ -79,7 +86,7 @@ export default async function Connect({
       <div className="cn-consent">
         <p className="cn-kicker">Connect an account</p>
         <h1>Let your employee use {setup.label.toLowerCase()}<span className="p">.</span></h1>
-        <p className="cn-sub">This page is generated from the same connector contract used to select the Manager tool, requested scopes, and permitted provider authorization host.</p>
+        <p className="cn-sub">This page is generated from the same connector manifest that fixes the authorization protocol, Manager tools, requested scopes, credential custody, continuation steps, and permitted provider hosts.</p>
 
         <div className="cn-cols">
           <div className="cn-col">
@@ -92,11 +99,12 @@ export default async function Connect({
           </div>
         </div>
 
+        <div className="cn-insurance"><strong>Setup protocol</strong><span>{setupKind(setup.authorization_protocol)}. AMTECH does not mislabel provider-hosted onboarding, API keys, or service accounts as OAuth.</span></div>
         <div className="cn-insurance"><strong>Credential posture</strong><span>{setup.credential_posture}</span></div>
-        <div className="cn-insurance"><strong>Return guarantee</strong><span>After consent, the signed provider state returns you to this employee and the initiating work object. Arbitrary return URLs and unexpected provider hosts are rejected.</span></div>
+        <div className="cn-insurance"><strong>Return guarantee</strong><span>The descriptor permits only exact HTTPS provider hosts. OAuth state or provider return URLs remain employee/work-path bound; arbitrary return URLs are rejected.</span></div>
 
         <div className="cn-cta-row">
-          <Link className="cn-cta" href={startHref}>Connect {setup.label.toLowerCase()}</Link>
+          <Link className="cn-cta" href={startHref}>Continue with {setup.label.toLowerCase()}</Link>
           <Link className="cn-cta quiet" href={deskHref}>Not now</Link>
         </div>
       </div>
