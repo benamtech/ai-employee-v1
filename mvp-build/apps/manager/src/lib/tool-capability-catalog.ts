@@ -1,6 +1,8 @@
 import type { SupabaseClient } from "@amtech/db";
 import {
   matchTaskCapabilities,
+  resolveConnectorMeta,
+  resolveManagedSetupForCapability,
   type CapabilityCategory,
   type EffectiveCapabilityDecision,
   type TaskCapabilityInput,
@@ -234,6 +236,19 @@ function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt:
   return out;
 }
 
+function connectorIdForTool(snapshot: EmployeeSnapshot, toolName: string, category: CapabilityCategory): string | null {
+  const setup = resolveManagedSetupForCapability({ tool_name: toolName, category });
+  if (!setup || setup.readiness_source !== "connector_accounts") return null;
+  // Why: a domain category is not provider identity. Resolve each account row through
+  // the shared adapter registry and bind only the exact manifest owner.
+  const connector = (snapshot.connectors ?? []).find((item) => {
+    const providerMeta = resolveConnectorMeta(item.provider);
+    const keyMeta = resolveConnectorMeta(item.connector_key);
+    return providerMeta.key === setup.key || keyMeta.key === setup.key;
+  });
+  return connector?.id ?? null;
+}
+
 function managerDescriptors(snapshot: EmployeeSnapshot): ToolCapabilityDescriptor[] {
   const nodes = buildCapabilityRegistry(snapshot);
   return nodes.flatMap((node) => {
@@ -242,11 +257,6 @@ function managerDescriptors(snapshot: EmployeeSnapshot): ToolCapabilityDescripto
     if (!OWNER_MANAGER_TOOLS.has(toolName)) return [];
     const readOnly = isReadOnly(toolName);
     const availability = nodeAvailability(node.status, toolName);
-    const connector = (snapshot.connectors ?? []).find((item) => node.category === "communication"
-      ? item.provider === "gmail"
-      : node.category === "accounting"
-        ? item.provider === "quickbooks"
-        : false);
     return [{
       id: stableId("amtech-manager", toolName),
       capability_key: node.key,
@@ -263,7 +273,7 @@ function managerDescriptors(snapshot: EmployeeSnapshot): ToolCapabilityDescripto
       risk: riskFor(toolName, readOnly),
       requires_approval: APPROVAL_GATED.has(toolName),
       setup_requirement: node.setup_requirement,
-      connector_id: connector?.id ?? null,
+      connector_id: connectorIdForTool(snapshot, toolName, node.category),
       evidence: {
         level: "control_plane_contract",
         checked_at: snapshot.runtime_health?.checked_at ?? null,
