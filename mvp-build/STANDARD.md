@@ -1,1497 +1,711 @@
-# AMTECH STANDARD v0.1 — Draft 2
+# AMTECH Standard v0.2 — Ratified Production Standard
 
-**Status:** Proposed for human-operator approval  
-**Source baseline:** `employee-work@f01995fddddff0b2905922ec7b287307be52891e`  
-**Effective scope:** `mvp-build/`  
-**Effective date:** Not effective until approved by the AMTECH human operator  
-**Enforcement gate:** Phase 2 code review MUST NOT begin until this document is approved.
+Status: **ratified and effective**  
+Effective date: **2026-07-19**  
+Approved by: **AMTECH human operator through the production-governance directive recorded in draft PR #23**  
+Approved source baseline: `employee-production-tuesday@ee006c0d830367a69673e91d7b859226cae62c1f`  
+Ratification implementation: `AMTECH-P0-GOV-001` commits on `employee-production-tuesday`  
+Scope: `mvp-build/`, its production interfaces, and repository documents that make product or release claims  
+Supersedes: `AMTECH STANDARD v0.1 — Draft 2`  
+Evolution record: `validation/standard-v0.2-evolution-vector.json`  
+Research disposition: `docs/architecture/16-standard-research-basis-and-protocol-disposition.md`
 
 ---
 
-# 0. Purpose, Authority, and Grounding
+## 0. Authority, interpretation, and change control
 
-AMTECH is infrastructure for AI labor. It is a runtime and governance system for creating, assigning, operating, supervising, measuring, repairing, and commercializing persistent AI employees and AI workforces.
+### STD-0.1 — Purpose
 
-AMTECH is not limited to one user, one account, one organization, or one employee. A conforming implementation MUST support the following without collapsing them into one identifier:
+AMTECH is infrastructure for governed AI labor. It creates, assigns, operates, supervises, measures, repairs, and commercializes persistent AI Employees and workforces for owner-operated businesses.
 
-- one organization with one or more accounts;
-- one account with one or more human users;
-- one account with one or more AI employees;
-- one user participating in multiple accounts or organizations;
-- one AI employee assigned to multiple users, teams, accounts, or organizations under explicit grants;
-- one organization accessing an AI employee that it does not own or employ;
-- shared, managed, fractional, delegated, marketplace, contractor-like, or experimental AI labor arrangements;
-- multiple payers, beneficiaries, supervisors, operators, and resource owners for the same unit of work.
+A conforming product preserves separate concepts for:
 
-The standard therefore treats **identity**, **ownership**, **employment**, **assignment**, **access**, **authority**, **resource custody**, **benefit**, and **payment** as separate relationships.
+- human, employee, service, provider, and system principals;
+- organization, account, team, assignment, project, and work object;
+- ownership, employment, access, authority, custody, benefit, and payment;
+- model reasoning, runtime execution, capability discovery, external effects, and human-facing presentation.
 
-A conforming AMTECH system lets authorized humans experience accountable labor through web, SMS, signed review surfaces, connected business systems, future voice, and administrative controls. The employee performs work, remembers only the context it is authorized to retain, produces durable outputs, asks for decisions at real authority boundaries, and leaves proof. Manager is the invisible labor control plane. Models, Hermes, Hono, Supabase, Docker, Caddy, and individual providers are replaceable implementation mechanisms.
+Models, Hermes, Hono, PostgreSQL/Supabase, Docker, Caddy, MCP, MCP Apps, AG-UI, OAuth providers, and individual SaaS systems are replaceable mechanisms. Durable AMTECH labor, authority, effect, proof, and recovery contracts are the product boundary.
 
-## 0.1 Normative language
+### STD-0.2 — Normative language
 
-The terms **MUST**, **MUST NOT**, **REQUIRED**, **SHOULD**, **SHOULD NOT**, and **MAY** are normative.
+`MUST`, `MUST NOT`, `REQUIRED`, `SHOULD`, `SHOULD NOT`, and `MAY` are normative.
 
-A TypeScript type, interface, prompt, document, or UI mock is not a protocol implementation. A production protocol requires runtime validation, durable state, authorization, recovery semantics, tests, and evidence appropriate to the claim.
+A type, prompt, interface, generated page, architecture document, or passing fixture is not by itself a production implementation. Production conformance requires runtime validation, durable state, authorization, recovery behavior, tests, and evidence appropriate to the claim.
 
-## 0.2 Evidence hierarchy
+### STD-0.3 — Evidence hierarchy
 
 When sources disagree, authority descends in this order:
 
-1. deployed behavior with release-bound, redacted proof;
-2. database constraints, migrations, grants, RLS, and durable state transitions;
-3. executable source and production infrastructure configuration;
-4. automated tests and acceptance scripts;
-5. current canonical runbooks and implementation records;
-6. current memory handoffs;
-7. non-canonical plans, historical notes, fixtures, demos, and archived documents.
+1. release-bound deployed behavior with retained, redacted proof;
+2. applied database constraints, migrations, grants, policies, and durable transitions;
+3. executable source and generated production infrastructure;
+4. exact-SHA automated tests, acceptance scripts, and signed build evidence;
+5. this Standard and the active production program;
+6. current CODEGRAPH and architecture maps;
+7. the newest indexed memory handoff;
+8. historical records, plans, fixtures, screenshots, demos, and research notes.
 
-No document may upgrade an implementation state beyond the strongest available evidence.
+No document may upgrade implementation status beyond the strongest available evidence.
 
-## 0.3 Memory grounding used for this draft
+### STD-0.4 — Conformance unit
 
-This draft was reconciled against the six newest handoff summaries in `memory/MEMORY.md`:
-
-1. `2026-07-17-employee-work-production-boundary-reconciler-pass.md`;
-2. `2026-07-17-production-next-sequence-and-generative-ui-reconciliation.md`;
-3. `2026-07-17-website-framework-phase-1-closure.md`;
-4. `2026-07-17-holographic-website-framework-v0.1.md`;
-5. `2026-07-17-ws1-ws2-doc-reconciliation-and-website-frontier.md`;
-6. `2026-07-16-ws1-ws2-production-boundary-pass.md`.
-
-The two newest full handoffs were read as primary narrative grounding:
-
-- `memory/2026-07-17-employee-work-production-boundary-reconciler-pass.md`;
-- `memory/2026-07-17-production-next-sequence-and-generative-ui-reconciliation.md`.
-
-The research framework clauses additionally incorporate the documented HRR/VSA, typed compiler, deterministic benchmark, pass/fail-vector, privacy, and baseline-comparison discipline from the third and fourth handoffs. Those research concepts are not treated as validated product capabilities merely because they are documented.
-
-## 0.4 Scope
-
-This standard applies to active implementation under `mvp-build/`, including:
-
-- `apps/web/`;
-- `apps/manager/`;
-- `packages/shared/`;
-- `packages/db/`;
-- `packages/agent-template/`;
-- `infra/`;
-- active `docs/`;
-- `ui-redesign/` where it remains active;
-- tests, migrations, scripts, proof manifests, and production configuration.
-
-The following are informative, not implementation proof:
-
-- `../wiki/` vision material;
-- `../identity.md` brand material;
-- `CODEGRAPH.md` navigation;
-- historical archives;
-- fixtures, dev login, manually injected events, Quick Tunnels, and the public estimator.
-
-## 0.5 Conformance unit
-
-A feature conforms only when its entire production boundary conforms:
+A capability conforms only when its entire boundary conforms:
 
 ```text
-human, employee, provider, schedule, or system trigger
--> authenticated principal and relationship resolution
--> authorized organization/account/assignment scope
--> durable intent, command, inbox event, or work object
--> employee reasoning or deterministic processing
--> policy and authority evaluation
--> approval when required
--> bounded idempotent effect
--> provider/runtime receipt
--> owner-safe and role-safe materialization
--> audit, metering, billing attribution, recovery, and proof
+trigger
+→ authenticated principal
+→ explicit assignment or approved platform/system context
+→ current relationship, grant, policy, entitlement, and authority version
+→ durable intent, command, event, or work object
+→ Hermes reasoning or deterministic processing
+→ bounded capability selection and runtime validation
+→ approval when required
+→ one idempotent external-effect reservation
+→ accepted | failed | ambiguous durable receipt
+→ role-safe materialization
+→ audit, metering, billing attribution, revocation, recovery, and proof
 ```
 
-A success response without proof, a UI without durable state, an access check without relationship scope, a type without runtime validation, or a worker without recovery semantics is an incomplete boundary.
+A success response without proof, UI without durable state, tool without assignment scope, authorization token without custody and revocation, or worker without recovery semantics is an incomplete boundary.
 
-## 0.6 Foundational principles
+### STD-0.5 — Standard evolution
 
-Every AMTECH implementation MUST preserve these principles:
+Normative changes MUST:
 
-1. **Labor replacement, not tool usage.** Every capability MUST identify the human duty displaced, the retained human authority, the durable output, the exception path, and the recovery path.
-2. **Runtime, not wrapper.** AMTECH MUST add durable identity, context, policy, lifecycle, assignment, routing, observability, repair, and proof around model execution.
-3. **Protocol, not feature.** Cross-component, cross-tenant, cross-employee, and cross-surface behavior MUST use validated and versioned contracts.
-4. **Governance by default.** Consequential action requires provenance, scope, authority, policy evaluation, and audit.
-5. **Workforce, not singleton.** The architecture MUST support multiple employees, multiple humans, multiple accounts, and explicitly shared labor relationships.
-6. **One employee identity across authorized surfaces.** A given employee assignment MUST project consistent work state, approvals, context, and proof across channels.
-7. **Lean-business native.** Technical complexity MUST be abstracted from ordinary operators while remaining inspectable by AMTECH operators and researchers.
-8. **Research before mythology.** Novel mathematics, generative UI, autonomous planning, and labor-displacement claims MUST be hypotheses until they pass declared validation vectors.
-9. **Hard gates before weighted scores.** No composite score, model confidence, or business enthusiasm may override a failed safety, authority, privacy, accounting, or deployment gate.
-10. **Evidence before claims.** Built, tested, deployed, provider-accepted, runtime-accepted, commercially validated, and live-accepted are distinct states.
+- retain stable clause identifiers or provide an explicit crosswalk;
+- classify each change as `expansion`, `satisfaction`, `narrowing`, `destructive_modification`, `appendix`, or `reorientation`;
+- record implementation and supersession references;
+- identify lost protection or changed product claims;
+- receive human approval when a MUST is removed or weakened;
+- update `validation/standard-v0.2-evolution-vector.json`.
+
+Unrecorded destructive modification is prohibited. Git history preserves earlier Standards; current documents must not pretend historical claims were always current.
+
+### STD-0.6 — External frameworks
+
+NIST AI RMF, NIST SSDF, OWASP Agentic Top 10, IETF OAuth RFCs, MCP specifications, MCP Apps, AG-UI, OpenTelemetry semantic conventions, SLSA, in-toto, and Sigstore are research and interoperability inputs. AMTECH MUST state whether it conforms, partially maps, profiles, or merely references each framework. Reference does not equal certification or legal compliance.
 
 ---
 
-# 1. Agent Employment Protocol (AEP)
+## 1. Foundational product principles
 
-The Agent Employment Protocol defines what constitutes an AMTECH employee, assignment, work object, turn, and cross-surface presence.
+### STD-1.1 — Labor replacement, not tool exposure
 
-## 1.1 Employment and Assignment Contract
+Every production capability MUST identify:
 
-### AEP-1.1.1 — Employee identity is not tenant ownership
+1. the human duty reduced or replaced;
+2. the information a competent worker needs;
+3. the work the employee performs without interruption;
+4. retained human authority;
+5. the durable artifact, communication, decision, or system change proving completion;
+6. the exception and recovery path;
+7. remaining human review burden.
 
-An AI employee MUST have a stable platform identity independent of any one UI session, human user, or account membership.
+A tool catalog alone is not an employee.
 
-The system MUST separately represent:
+### STD-1.2 — Runtime, not wrapper
 
-- employee identity;
-- employing or owning entity, when one exists;
-- assigned organization, account, team, user, customer, or project;
-- supervisors and approval authorities;
-- service provider or managing operator;
-- payer and billing beneficiary;
-- data and resource scopes available within each assignment.
+AMTECH MUST add durable identity, assignment, context, policy, lifecycle, routing, observability, repair, and proof around model execution.
 
-An `employee_id` MUST NOT imply that every account or user who can access the employee owns it.
+### STD-1.3 — Protocol, not provider feature
 
-### AEP-1.1.2 — Assignment as the execution scope
+Cross-component and cross-provider behavior MUST use versioned, runtime-validated AMTECH contracts. Provider response shapes may be retained as evidence but MUST NOT become the product ontology.
 
-Every employee action MUST resolve through an explicit assignment, engagement, or access grant. The assignment MUST define at least:
+### STD-1.4 — Governance by default
 
-- employee;
-- organization and/or account scope;
-- authorized human principals or roles;
-- task, capability, resource, and connector scope;
-- memory and data partition;
+Consequential action requires provenance, assignment scope, authority evaluation, policy, durable effect state, and audit.
+
+### STD-1.5 — Workforce, not singleton
+
+The architecture MUST support multiple employees, humans, organizations, accounts, assignments, payers, beneficiaries, and explicitly shared labor relationships without collapsing them into one identifier.
+
+### STD-1.6 — One employee identity across surfaces
+
+A given assignment MUST project consistent work state, approvals, context, and proof across Web, SMS, signed Review, connected-system events, and future channels.
+
+### STD-1.7 — Lean-business native
+
+Owners MUST NOT need to understand Docker, Caddy, PostgreSQL, MCP, MCP Apps, AG-UI, OAuth internals, JSON Schema, webhooks, provider IDs, or environment variables. Those details remain inspectable by authorized operators.
+
+### STD-1.8 — Evidence before claims
+
+`planned`, `source-wired`, `locally-proven`, `ci-accepted`, `database-accepted`, `runtime-accepted`, `provider-accepted`, `browser/channel-accepted`, `commercial-accepted`, `live-accepted`, and `production-ready` are distinct states.
+
+### STD-1.9 — Moat definition
+
+AMTECH's defensibility MUST come from reusable, measured labor protocols:
+
+- assignment and authority graphs;
+- connector and capability manifests;
+- work-object grammars;
+- approval and effect policies;
+- provider and failure adapters;
+- recovery playbooks;
+- business-process context;
+- outcome and cost evidence.
+
+It MUST NOT depend on hiding provider-specific code, claiming a generic agent wrapper is proprietary, or binding the product to one model laboratory.
+
+---
+
+## 2. Agent Employment Protocol
+
+### AEP-2.1 — Stable employee identity
+
+An AI Employee MUST have a stable platform identity independent of a browser session, model provider, runtime container, account membership, or one customer's ownership claim.
+
+### AEP-2.2 — Assignment is execution scope
+
+Every employee action MUST resolve through an explicit assignment, engagement, or access grant defining:
+
+- employee and organization/account scope;
+- authorized human and system principals;
+- task, capability, resource, connector, and memory scope;
 - approval authority;
-- effective and expiration time;
-- revocation state;
-- billing attribution;
-- provenance and audit policy.
+- effective, expiration, suspension, and revocation state;
+- payer, beneficiary, pricing, provenance, and audit policy.
 
-Where the current code uses `account_id + employee_id` as the practical scope, that pair is a v0.1 assignment approximation, not the permanent ontology.
+### AEP-2.3 — Shared and fractional employees
 
-### AEP-1.1.3 — Multiple employees per account
+Shared access MUST be explicit, revocable, policy- or time-bounded, and resource-scoped. Memory, credentials, provider context, and work products MUST NOT cross assignments without an exact shared-resource grant.
 
-An account or organization MAY have multiple employees. Each employee MUST maintain separate runtime identity, credentials, profile, work queue, context, approvals, and audit trail unless a shared resource is explicitly declared.
+### AEP-2.4 — Per-employee turn lane
 
-Per-employee turn serialization MUST NOT prevent different employees from working concurrently.
+Only one state-mutating reasoning turn MAY execute for one employee at a time unless a future version specifies parallel sub-turns with deterministic merge semantics. Different employees MAY execute concurrently.
 
-### AEP-1.1.4 — Shared or fractional employees
+A turn MUST carry stable intent, turn/job ID, assignment, initiating principal, channel, idempotency key, run ID, claim and lease, attempt count, terminal state, and durable output or safe error.
 
-An employee MAY be accessible to multiple accounts, organizations, or users without belonging to them. Shared access MUST be explicit, revocable, time-bounded or policy-bounded, and resource-scoped.
+### AEP-2.5 — Duplicate suppression
 
-A shared employee MUST NOT merge business memory, customer data, credentials, work products, or provider context across assignments unless an explicit shared-resource grant authorizes that exact data class.
+Duplicate owner messages, provider events, approval resolutions, schedules, delegated tasks, and effect commits MUST converge on canonical durable records. Lost responses MUST NOT repeat irreversible effects.
 
-### AEP-1.1.5 — Cross-employee collaboration
+### AEP-2.6 — Session rotation and recovery
 
-Multiple employees MAY collaborate on one work object. Collaboration MUST preserve:
+Runtime restart, session rotation, channel change, delegation, and supervisor change MUST preserve a bounded handoff containing current scope, unresolved decisions, active work, latest authorized state, proof references, last completed step, and next safe action.
 
-- initiating employee and assignment;
-- delegated employee and assignment;
-- task boundary;
-- context subset transmitted;
-- authority inherited or not inherited;
-- output and proof returned;
-- separate run and tool provenance;
-- final accountable employee or supervisor.
+### AEP-2.7 — Work object and lifecycle
 
-Delegation MUST NOT silently transfer connector access, approval authority, secrets, or tenant memory.
+Material work MUST use a versioned `SurfaceEnvelope`, `WorkResource`, or compatible successor containing stable identity, assignment scope, semantic kind, state, timestamps, role-safe summary, render hints, actions, safety metadata, and proof references.
 
-### AEP-1.1.6 — Human labor analogy test
-
-Every new employee capability MUST answer:
-
-1. What human role or recurring duty does this replace or reduce?
-2. What information would a competent employee need?
-3. What work should the employee perform without interruption?
-4. What authority would a human employee not possess?
-5. What artifact, communication, decision, or system change proves completion?
-6. What happens when the employee is uncertain, unavailable, duplicated, or wrong?
-7. How much human review remains after deployment?
-
-A feature that only exposes model output without durable work, authority boundaries, or completion evidence fails this contract.
-
-## 1.2 Work Surface Contract
-
-### AEP-1.2.1 — Canonical SurfaceEnvelope
-
-Every materialized unit of employee work MUST use a canonical `SurfaceEnvelope` or versioned successor containing:
-
-- stable envelope ID and schema version;
-- employee identity;
-- assignment, account, and organization scope where applicable;
-- semantic kind;
-- owner-safe or role-safe title and summary;
-- state and timestamps;
-- render hints;
-- safety metadata;
-- proof references;
-- optional `WorkResource`;
-- optional scoped `WorkAction` set.
-
-### AEP-1.2.2 — Role-safe projection
-
-Raw provider payloads, secrets, bearer tokens, internal tool names, untrusted instructions, and unrelated tenant information MUST NOT reach a human surface.
-
-Materialization MUST be filtered for the viewing principal's relationship and role. Two authorized viewers MAY receive different projections of the same work object when their authority, privacy, or billing scope differs.
-
-### AEP-1.2.3 — WorkResource lifecycle
-
-A `WorkResource` MUST distinguish, where applicable:
+Lifecycle state derives from durable records, including as applicable:
 
 ```text
 observed | drafted
--> prepared
--> needs_information | needs_authority | needs_approval
--> approved | rejected | expired
--> committing
--> delivered | applied | completed
--> failed | ambiguous | superseded | cancelled
+→ prepared
+→ needs_information | needs_authority | needs_connection | needs_approval
+→ approved | rejected | expired
+→ committing
+→ delivered | applied | completed
+→ failed | ambiguous | superseded | cancelled
 ```
 
-Lifecycle state MUST derive from durable records, not UI state alone.
+### AEP-2.8 — Work actions
 
-### AEP-1.2.4 — WorkAction contract
+Every action MUST declare target, assignment, required actor, policy/approval requirement, expiration, revocation, idempotency, resulting transition, audit, and proof.
 
-Every `WorkAction` MUST declare:
+### AEP-2.9 — Role-safe projection
 
-- action type and human label;
-- target resource;
-- assignment and action scope;
-- required actor or role;
-- whether it is gated;
-- expiration and revocation;
-- idempotency and replay behavior;
-- resulting state transition;
-- audit and proof output.
-
-A rendering tier, generated UI, or agent-authored view MUST NOT expand action scope or relax a gate.
-
-### AEP-1.2.5 — Typed work-event grammar
-
-Work events MUST use a small typed grammar:
-
-- `notify` — useful information, no immediate decision;
-- `question` — one concrete missing fact or judgment;
-- `review` — an authorized decision is required;
-- `silent` — recorded but non-interruptive monitoring or work.
-
-Each event MUST carry employee and assignment context, safe copy, deliverable metadata, next action, and proof references.
-
-### AEP-1.2.6 — CapabilityGraphNode
-
-Every advertised capability MUST have:
-
-- stable key and version;
-- employee and assignment scope;
-- owner-facing label and summary;
-- category;
-- readiness status;
-- setup requirement;
-- source and trust level;
-- current executability;
-- required authority and approval class;
-- evidence.
-
-A tool name alone does not prove capability readiness.
-
-### AEP-1.2.7 — Generic work materialization
-
-The platform MUST support the long tail of tools through schema-driven generic materialization. Validated JSON Schema, bound input, safe result descriptors, proof, and actions MUST be sufficient to render an inspectable work object without bespoke UI.
-
-Native cards and MCP-UI MAY improve rendering but MUST preserve the same gates and durable state.
-
-## 1.3 Session, Turn, and Workforce Continuity Contract
-
-### AEP-1.3.1 — Per-employee brain lane
-
-Only one state-mutating reasoning turn MAY actively execute for one employee at a time unless a future protocol explicitly supports parallel sub-turns with deterministic merge semantics.
-
-Owner web turns, SMS turns, provider wakes, scheduled wakes, delegated tasks, and approval follow-ups MUST enter a durable per-employee lane.
-
-Different employees MAY execute concurrently.
-
-### AEP-1.3.2 — Turn atomicity
-
-A turn MUST include:
-
-- stable turn/job ID;
-- employee and assignment scope;
-- initiating principal;
-- turn kind and input;
-- idempotency key;
-- `run_id`;
-- claim owner and lease;
-- attempt count;
-- terminal state;
-- durable output or safe error.
-
-A stale claimant MUST NOT complete or overwrite a later attempt.
-
-### AEP-1.3.3 — Duplicate intent suppression
-
-Duplicate owner messages, provider events, approval resolutions, scheduled jobs, delegations, and effect commits MUST converge on a canonical record. Duplicate evidence MUST be retained.
-
-A retry caused by a lost response MUST NOT repeat an irreversible effect.
-
-### AEP-1.3.4 — Context dimensions
-
-The system MUST distinguish:
-
-- platform employee identity;
-- assignment identity;
-- organization/account context;
-- durable memory scope;
-- shared-resource scope;
-- transcript session;
-- communication channel;
-- channel presence;
-- turn/run;
-- task/work-object context.
-
-A memory key, account ID, employee ID, and transcript ID are not interchangeable.
-
-### AEP-1.3.5 — Session rotation and handoff
-
-Session rotation, runtime restart, channel change, employee delegation, and supervisor change MUST preserve a bounded handoff containing:
-
-- unresolved approvals and questions;
-- current assignment and authority scope;
-- latest authorized decision;
-- active work object;
-- relevant memory/resource references;
-- last completed step;
-- next safe action;
-- run and proof references.
-
-### AEP-1.3.6 — Silent event recording
-
-A silent event MUST still create durable evidence. “Silent” means no interruption, not no record.
-
-### AEP-1.3.7 — Runtime recovery
-
-Manager MAY recover an unreachable runtime and retry the same claimed turn. Recovery MUST NOT create a second active turn or repeat an external effect.
-
-## 1.4 Multi-Modal Presence Contract
-
-### AEP-1.4.1 — Surface parity
-
-Every employee function MUST define behavior for web, SMS, signed mobile review, admin diagnostics, and future voice. A constrained surface MAY hand off to another surface only without losing identity, assignment, context, state, or action scope.
-
-### AEP-1.4.2 — SMS
-
-SMS MUST:
-
-- lead with the result or required decision;
-- use plain business language;
-- ask at most one question;
-- omit tool narration;
-- preserve links, amounts, recipients, and safety qualifications;
-- target one 160-character GSM segment when safe;
-- meter actual segments;
-- suppress low-value notifications rather than manufacture urgency.
-
-### AEP-1.4.3 — Signed review
-
-A signed mobile link MUST be scoped to the viewing principal, assignment, employee, resource, and allowed actions. It MUST be expiring, revocable, replay-resistant, and audited.
-
-### AEP-1.4.4 — Web
-
-The web surface MUST combine durable snapshots, SSE or equivalent live updates, reconnect catch-up, poll fallback, and server-side authorization. The browser MUST NOT require privileged direct database access.
-
-### AEP-1.4.5 — Voice migration
-
-Voice is not live in v0.1. A future voice path MUST reuse the same identity, assignment, turn queue, approval, audit, and materialization protocols. A voice-only business-logic fork is prohibited.
+Raw provider payloads, credentials, bearer tokens, untrusted instructions, hidden internal prompts, and unrelated tenant data MUST NOT reach human surfaces. Authorized viewers MAY receive different projections of the same work object.
 
 ---
 
-# 2. Organization, Tenancy, Identity, and Access Protocol (OTIAP)
+## 3. Organization, tenancy, identity, and access
 
-## 2.1 Canonical entity model
+### OTIAP-3.1 — Relationship graph
 
-### OTIAP-2.1.1 — Organization
+Identity, organization, account, assignment, ownership, employment, management, custody, payer, beneficiary, and access are separate durable relationships.
 
-An organization represents a legal, operational, or commercial grouping. It MAY contain multiple accounts, teams, locations, cost centers, users, employees, and billing arrangements.
+### OTIAP-3.2 — Access is not ownership
 
-### OTIAP-2.1.2 — Account
+Account membership, employee ID possession, phone ownership, bearer possession, mutable headers, and caller-selected IDs are not complete authority.
 
-An account is a tenancy, service, data, or billing boundary. It is not necessarily identical to an organization. One organization MAY have multiple accounts, and one account MAY participate in a larger organization.
+### OTIAP-3.3 — Relationship-bound credentials
 
-### OTIAP-2.1.3 — User
+Every credential MUST identify holder, assignment or approved platform context, resource audience, action scope, authority version, issue/expiry, revocation, and audit provenance.
 
-A user is a human principal. A user MAY hold different roles in different organizations, accounts, teams, assignments, and work objects.
+### OTIAP-3.4 — Least relationship privilege
 
-### OTIAP-2.1.4 — Employee
+Authorization MUST evaluate the minimum applicable relationship and role. Viewer principals remain read-only. Support and platform authority are explicit, purpose-bound, and auditable.
 
-An employee is an AI labor principal with runtime identity and durable work history. Employment, ownership, access, assignment, and payment MUST be modeled separately.
+### OTIAP-3.5 — Partitioning
 
-### OTIAP-2.1.5 — Relationship graph
+Memory, work queues, connectors, artifacts, approvals, receipts, commercial attribution, and runtime resources are assignment-partitioned unless an exact shared grant exists.
 
-Authorization MUST be derived from explicit relationships, not assumed from identifier equality. At minimum, the graph MUST be able to represent:
+### OTIAP-3.6 — Database enforcement
 
-- organization membership;
-- account membership;
-- team membership;
-- employee ownership or management;
-- employee assignment;
-- user supervision;
-- approval authority;
-- shared-service access;
-- resource ownership and custody;
-- payer and beneficiary;
-- operator/support access.
+Authorization-sensitive invariants SHOULD be enforced in PostgreSQL constraints, RLS, grants, policies, or security-definer functions where practical. Browser projections and TypeScript checks are defense in depth, not substitutes.
 
-## 2.2 Access and authority
+### OTIAP-3.7 — Revocation
 
-### OTIAP-2.2.1 — Access is not ownership
-
-Permission to view, instruct, approve, audit, pay for, or benefit from an employee MUST NOT imply ownership of the employee or its entire memory.
-
-### OTIAP-2.2.2 — Relationship-bound credentials
-
-Privileged credentials MUST bind at least:
-
-- principal type and ID;
-- employee;
-- assignment/account/organization context;
-- capability/action scope;
-- credential version;
-- expiration;
-- policy version.
-
-Employee MCP and Model Gateway credentials MUST remain employee-scoped. Human sessions and signed actions MUST additionally bind the human principal and relationship context.
-
-### OTIAP-2.2.3 — Authority matrix
-
-The platform MUST support multiple authority roles, including:
-
-- business owner;
-- organization administrator;
-- account administrator;
-- team manager;
-- employee supervisor;
-- approver by action class;
-- finance approver;
-- security approver;
-- viewer or auditor;
-- AMTECH platform operator.
-
-Approval authority MAY vary by amount, recipient, system, resource, project, location, or task.
-
-### OTIAP-2.2.4 — Least relationship privilege
-
-A principal MUST receive only the minimum employee, resource, connector, and action scope granted through its current relationships.
-
-A broad account membership MUST NOT automatically grant access to every employee or every customer record.
-
-### OTIAP-2.2.5 — Explicit cross-account access
-
-Cross-account access is allowed only through an explicit grant. RLS and service logic MUST recognize the grant while preserving denial for unrelated accounts.
-
-The system MUST test both:
-
-- unauthorized cross-account denial;
-- authorized shared-employee access without data leakage.
-
-## 2.3 Data and memory partitioning
-
-### OTIAP-2.3.1 — Assignment memory boundary
-
-Employee memory MUST be partitioned by assignment or authorized shared-resource domain. Shared employees MUST NOT retrieve another assignment's facts merely because the platform employee identity is the same.
-
-### OTIAP-2.3.2 — Resource classification
-
-Every durable resource SHOULD declare:
-
-- owner;
-- custodian;
-- organization/account scope;
-- employee assignment scope;
-- sensitivity;
-- permitted viewers;
-- permitted writers;
-- retention policy;
-- export/deletion authority.
-
-### OTIAP-2.3.3 — Shared resources
-
-A resource MAY be shared across assignments only through an explicit shared-resource object or grant. The grant MUST specify fields, purpose, time, and allowed operations.
-
-### OTIAP-2.3.4 — Revocation
-
-Revoking an assignment or access grant MUST prevent new access immediately and trigger evaluation of cached context, active sessions, signed links, credentials, queued work, and retained materializations.
-
-## 2.4 Database enforcement
-
-### OTIAP-2.4.1 — RLS and grants
-
-New browser-readable tables or views MUST receive Data API exposure review, RLS, grants review, positive authorization tests, and negative isolation tests.
-
-Simple `account_id = current_account` policy is insufficient when explicit shared access is supported. Relationship-aware policies or trusted server projections are REQUIRED.
-
-### OTIAP-2.4.2 — Worker privilege
-
-Worker functions MUST use least privilege and `SECURITY INVOKER` by default. `SECURITY DEFINER` requires a threat model, fixed `search_path`, restricted grants, and tests.
-
-### OTIAP-2.4.3 — Support access
-
-AMTECH support access MUST require a platform role, reason, target scope, audit record, and redaction. Support access MUST NOT become invisible tenant membership.
+Relevant authority-version changes MUST fail closed across owner sessions, employee credentials, signed resources, connectors, approvals, runtime credentials, and queued consequential work.
 
 ---
 
-# 3. Trust & Governance Protocol (TGP)
+## 4. Trust, approval, effects, and provenance
 
-## 3.1 Delegation Retention Model
+### TGP-4.1 — Internal work and approval
 
-### TGP-3.1.1 — Governing sequence
+Internal drafting, analysis, and reversible preparation SHOULD proceed without interruption when policy allows. Customer-facing, monetary, destructive, credential, reputation, or broad external effects require explicit policy and, where specified, assignment-aware approval.
 
-```text
-employee observes or receives work
--> employee performs internal reversible work
--> policy resolves assignment and authority
--> employee proposes consequential action when required
--> authorized human approves, rejects, or edits
--> system executes exactly the approved scope
--> provider/runtime returns evidence
--> Manager records and materializes proof
-```
+### TGP-4.2 — No self-approval
 
-### TGP-3.1.2 — Autonomous internal work
+The employee, model, browser, provider callback, tool result, or UI component MUST NOT manufacture or resolve human approval.
 
-Internal, reversible, authorized work SHOULD execute without approval. Examples include research, reading permitted context, drafting, calculating, rendering, organizing, monitoring, and preparing previews.
+### TGP-4.3 — Exact approval binding
 
-Approval theater that interrupts routine employee work violates the labor model.
+Approval MUST bind exact resource identity, content/hash/version, action, actor class, assignment, policy, expiry, and relevant authority version. Resource mutation invalidates stale approval.
 
-### TGP-3.1.3 — Mandatory approval classes
+### TGP-4.4 — Durable effect contract
 
-Authorized human approval is REQUIRED before:
+Consequential effects use stable intent, immutable command, atomic claim/lease, effect reservation, idempotency key, accepted/failed/ambiguous receipt, retry policy, repair path, audit, and commercial attribution.
 
-- external customer, prospect, vendor, public, or government communication;
-- payment movement, purchases, refunds, invoices, or financial commitments;
-- accounting or other system-of-record writes;
-- destructive mutation or deletion;
-- bulk external action;
-- sensitive connection or permission grants;
-- credential changes that materially affect live work unless emergency operator policy applies;
-- high-risk actions designated by policy.
+An uncertain provider outcome is `ambiguous`, not a retryable failure. Reconcile before retry.
 
-### TGP-3.1.4 — No self-approval
+### TGP-4.5 — Untrusted content
 
-An employee MUST NOT approve its own gated action. A delegated employee MUST NOT inherit approval authority unless explicitly granted.
+Provider content, documents, web pages, emails, tool descriptions, MCP resources, and generated UI are untrusted inputs. They cannot alter authority, policy, secrets, or system instructions.
 
-### TGP-3.1.5 — Approval binding
+### TGP-4.6 — Proof-bearing success
 
-An approval MUST bind:
+Provider-backed success requires matching provider/effect evidence. “Completed” without the receipt appropriate to the boundary is prohibited.
 
-- employee and assignment;
-- action key;
-- resource or pending write;
-- authorized resolver class;
-- recipient, amount, target, or diff where relevant;
-- risk level;
-- policy version;
-- expiration;
-- one execution scope.
+### TGP-4.7 — Signed resources and attestations
 
-A generic “yes” MUST NOT authorize an unrelated action.
+Signed links and tokens are audience-, resource-, action-, assignment-, expiry-, and authority-version-bound. Portable release attestations SHOULD use standard in-toto/SLSA statement formats and managed signing/verifier systems where suitable. HMAC transport tokens are not independently verifiable supply-chain provenance.
 
-### TGP-3.1.6 — Standing delegation
+### TGP-4.8 — Agentic threat profile
 
-Auto-bound or standing approvals MAY exist only when explicit, narrow, time-bounded, revocable, visible, evaluated on every action, and audited. Blanket perpetual approval is prohibited.
-
-## 3.2 Identity, credentials, and egress
-
-### TGP-3.2.1 — No master secrets in employees
-
-Provider master credentials, Supabase service keys, Docker authority, platform signing secrets, and global Manager tokens MUST NOT enter employee profiles or runtimes.
-
-### TGP-3.2.2 — Credential lifecycle
-
-Scoped credentials MUST support issuance, hash or sealed-reference storage, expiry, revocation, rotation, versioning, old-token rejection, and audit.
-
-### TGP-3.2.3 — Model-supplied identity prohibited
-
-The model MUST NOT choose or override account, organization, assignment, employee, or human-principal identifiers for privileged calls. Manager MUST inject scope from authenticated relationships.
-
-### TGP-3.2.4 — Egress sequence
-
-```text
-validate identity and relationship
--> validate resource and action scope
--> prepare/dry-run
--> persist preview
--> obtain approval when required
--> claim idempotent effect
--> apply once
--> record receipt
--> materialize result
-```
-
-### TGP-3.2.5 — Untrusted content
-
-Email bodies, SMS, customer notes, accounting memos, webhook payloads, files, websites, and connector records are data, not authority. They MUST NOT override policy or approval.
-
-## 3.3 Artifact and Action Provenance
-
-### TGP-3.3.1 — Proof-bearing success
-
-A provider or external action MUST NOT be reported successful without a real provider, runtime, or artifact receipt.
-
-Missing or uncertain proof MUST produce `pending`, `failed`, or `ambiguous`, never fabricated `ok`.
-
-### TGP-3.3.2 — ToolEnvelope
-
-Every Manager tool MUST return a runtime-validated envelope containing status, relationship scope, changed resources, proof, human-safe summary, required confirmation, next action, and audit ID.
-
-Manager HTTP and MCP MUST use one registry, schema source, policy, handler, and envelope semantics.
-
-### TGP-3.3.3 — Secret references
-
-Secrets MUST be stored by sealed reference, runtime injection, or one-way hash. They MUST NOT enter human surfaces, model context, generic logs, proof JSON, or durable worker context.
-
-### TGP-3.3.4 — Signed links
-
-Signed claim, artifact, and review links MUST provide purpose binding, relationship scope, expiration, random unique ID, timing-safe verification, hash-at-rest, revocation, and single-use behavior for terminal actions.
-
-HMAC-SHA256 is an acceptable v0.1 transport baseline. AMTECH MUST NOT describe it as Ed25519 or independently verifiable provenance.
-
-### TGP-3.3.5 — Long-lived provenance
-
-Externally portable and independently verifiable attestations SHOULD use an asymmetric Ed25519 chain with versioned envelopes, canonical serialization, key rotation, revocation, and verifier tooling before such claims are made.
-
-### TGP-3.3.6 — End-to-end chain
-
-A completed work object SHOULD be traceable through:
-
-```text
-trigger principal
--> relationship and assignment
--> inbox/turn
--> employee run
--> Manager tool
--> approval
--> external effect receipt
--> artifact/resource
--> delivery decision
--> human-visible proof
--> billing attribution
-```
+Threat modeling and tests MUST cover goal hijack, prompt injection, tool misuse, excessive agency, identity/privilege abuse, memory poisoning, unsafe inter-agent communication, supply-chain compromise, cascading failure, resource exhaustion, and operator deception.
 
 ---
 
-# 4. Runtime Infrastructure Protocol (RIP)
+## 5. Runtime and fleet infrastructure
 
-## 4.1 Fleet Lifecycle Contract
+### RIP-5.1 — Manager/Hermes boundary
 
-### RIP-4.1.1 — Per-employee runtime isolation
+Hermes owns employee reasoning, runs, transcript/session continuity, runtime-local memory, tool use, and runtime recovery. Manager owns identity, assignments, authority, context resources, capability/tool contracts, connector custody, approvals, durable effects, commercial attribution, revocation, repair, and release proof.
 
-Each production employee MUST have an isolated runtime identity, scoped credentials, bounded resources, read-only canonical profile, no Docker socket, no database service key, no provider master key, and no unauthorized peer access.
+Do not create a parallel agent runtime when Hermes behavior can be constrained or adapted.
 
-### RIP-4.1.2 — Image pinning
+### RIP-5.2 — Per-employee isolation
 
-The v0.1 compatibility baseline is `hermes-agent:0.18.0`. Production MUST pin an approved version and SHOULD pin an immutable digest. Floating `latest` is prohibited.
+Each employee receives isolated runtime identity, profile, data root, workspace, network, credentials, queues, memory, and audit scope. Cross-employee access requires an explicit collaboration or shared-resource contract.
 
-### RIP-4.1.3 — Host authority separation
+### RIP-5.3 — Exact image pinning
 
-Manager MUST NOT own public arbitrary Docker authority. Host lifecycle operations MUST cross a private authenticated provisioner boundary with short expiry, nonce, idempotency, operation allowlist, fixed Docker arguments, and durable audit.
+The v0.2 Hermes baseline is `nousresearch/hermes-agent:v2026.7.1`. Release evidence MUST record the resolved immutable OCI digest. Floating tags such as `latest` cannot satisfy production acceptance.
 
-### RIP-4.1.4 — Desired-state reconciliation
+### RIP-5.4 — Host authority
 
-Fleet state MUST be reconstructed from durable desired state:
+Manager MUST NOT hold the Docker socket. Host Provisioner is the sole Docker-host authority behind the signed host-private boundary.
 
-```text
-claim
--> inspect
--> decide
--> apply one bounded effect
--> verify
--> persist
--> continue | retry | compensate | dead-letter | terminate
-```
+### RIP-5.5 — Desired-state reconciliation
 
-### RIP-4.1.5 — Provisioning order
+Provisioning, replacement, rotation, suspension, restoration, and teardown are desired-state reconciliation operations with durable steps, idempotency, bounded leases, health checks, compensation, and proof.
 
-```text
-requested
--> resources_reserved
--> credentials_minted
--> profile_rendered
--> runtime_started
--> runtime_healthy
--> routing_activated
--> channel_configured
--> welcome_sent
--> ready
-```
+### RIP-5.6 — Recovery and drift
 
-Provider binding and welcome effects MUST NOT precede runtime and route acceptance.
+Profile checksum, runtime revision, connector binding, Caddy state, networks, credentials, and desired resources MUST be observable and repairable. A failed partial transition cannot be presented as healthy.
 
-### RIP-4.1.6 — Recovery and drift
+### RIP-5.7 — Model Gateway
 
-The reconciler MUST detect and repair missing containers, networks, routes, profiles, checksum drift, unhealthy runtime, expired credentials, stuck jobs, and inconsistent bindings. Host restart MUST reconstruct desired ready employees.
-
-### RIP-4.1.7 — Multiple employees and shared workers
-
-Worker scheduling MUST remain safe with multiple employees, accounts, assignments, and Manager replicas. Claims MUST be atomic and relationship scope MUST be carried into every effect.
-
-### RIP-4.1.8 — Pod Alpha operator contract
-
-The first production operating unit MUST support scripted deploy, rollback, health, provision, suspend, resume, rotate, replace, reprovision, teardown, backup, restore, drift repair, capacity, egress review, and proof collection.
-
-## 4.2 Provider Abstraction Contract
-
-### RIP-4.2.1 — Business logic independence
-
-Approval, work materialization, assignment, audit, and owner surfaces MUST depend on AMTECH contracts, not provider response shapes.
-
-### RIP-4.2.2 — Model Gateway custody
-
-Employee runtimes MUST call a host-private OpenAI-compatible Model Gateway through employee-scoped credentials. The gateway MUST own provider keys, routing, allowlists, retries, timeouts, rate/spend policy, usage capture, and redacted audit.
-
-### RIP-4.2.3 — Structured output
-
-Machine-consumed model output MUST use strict `json_schema` when available. A `json_object` fallback MAY occur only after a recorded compatibility failure and MUST still pass the same runtime schema.
-
-Free-form text MUST NOT silently become structured state.
-
-### RIP-4.2.4 — Connector two-door invariant
-
-```text
-public provider request
--> authenticity verification
--> atomic durable inbox insertion
--> asynchronous business processing
-```
-
-The webhook handler MUST NOT perform the primary business effect before insertion.
-
-### RIP-4.2.5 — Ambiguous effects
-
-If an irreversible provider call may have succeeded without a reliable receipt, the effect MUST become `ambiguous` and require dead-letter or operator inspection. Blind retry is prohibited.
-
-## 4.3 Cost and Capacity Accounting
-
-### RIP-4.3.1 — Immutable usage facts
-
-Metering MUST record immutable facts and MUST remain distinct from authorization and final billing.
-
-### RIP-4.3.2 — Correlation
-
-`run_id` MUST thread through model calls, runtime runs, tools, provider APIs, SMS, artifacts, scheduler actions, delivery decisions, and billing attribution.
-
-### RIP-4.3.3 — Required dimensions
-
-Usage and cost attribution MUST support at least:
-
-1. organization;
-2. account;
-3. employee;
-4. assignment;
-5. user or triggering principal;
-6. conversation/session;
-7. run;
-8. task/work object;
-9. action/tool invocation;
-10. customer/job/resource when known;
-11. provider and feature;
-12. payer and beneficiary.
-
-### RIP-4.3.4 — Transactional limits
-
-Strict multi-replica rate, budget, or quota claims require shared transactional enforcement. Process-local counters MUST be labeled as a limited baseline.
+Employee model access is assignment-scoped and commercially attributable. Cumulative budgets, shared rate authority, provider ambiguity, payer/beneficiary resolution, and accounting receipts are release boundaries rather than optional analytics.
 
 ---
 
-# 5. Employee Capability Protocol (ECP)
+## 6. Connector, capability, MCP, and interaction protocols
 
-## 5.1 Profile Package Contract
+### CCIP-6.1 — Layered protocol model
 
-### ECP-5.1.1 — Base plus overlays
+AMTECH distinguishes:
 
-An employee profile MUST combine:
+1. **AMTECH labor protocol** — assignment, work object, authority, approval, effect, receipt, recovery, and commercial state.
+2. **MCP core** — tools, resources, prompts, capability negotiation, and remote authorization metadata.
+3. **MCP Apps** — negotiated interactive `ui://` resources associated with MCP tools and rendered by a compliant host.
+4. **AG-UI** — optional agent↔user event, lifecycle, message, tool-call, and state snapshot/delta transport.
+5. **AMTECH generated-view adapters** — typed `WorkResource`/`WorkAction` projections into native Web, SMS, signed Review, MCP Apps, AG-UI, or future clients.
 
-- vertical-agnostic employment core;
-- validated role or vertical package;
-- assignment-specific policy overlay;
-- business or organization context;
-- runtime and connector configuration;
-- explicit skills and resources.
+MCP, MCP Apps, and AG-UI are transports/extensions. They do not create assignment authority or durable business state.
 
-### ECP-5.1.2 — First package, not platform boundary
+### CCIP-6.2 — Capability transport classes
 
-`contractor_estimator` is the first optimized package. It MUST NOT become the platform's permanent role ontology.
+A capability MAY be exposed through:
 
-### ECP-5.1.3 — Deterministic rendering
+- `manager_mcp`: employee calls a Manager-owned governed tool;
+- `direct_mcp`: direct server access allowed only for explicitly proven read-only, non-money, non-customer-facing capability;
+- `runtime_native`: Hermes-native capability subject to exact runtime evidence and policy.
 
-Security-sensitive profile configuration MUST be rendered from validated schemas and templates, not free-form LLM output.
+Unknown or consequential connectors default to Manager-mediated custody.
 
-### ECP-5.1.4 — Fail-closed integrity
+### CCIP-6.3 — Transport-neutral capability descriptor
 
-Production rendering MUST fail on unresolved tokens, forbidden secret names or values, provider master-key slots, unsafe permissions, writable canonical files, checksum mismatch, invalid package schema, or unauthorized connector custody.
+Every discovered capability MUST preserve stable capability/server identity, transport, tool name, label, description, input/output contract, read/write behavior, risk, approval posture, connector binding, dependency/credential/network requirements, provenance, evidence freshness, and blockers.
 
-### ECP-5.1.5 — Assignment context
+Provider names and broad UI categories MUST NOT substitute for connector identity.
 
-The rendered or runtime-injected context MUST identify the active assignment and MUST exclude memory and resources from unrelated assignments.
+### CCIP-6.4 — Effective capability truth
 
-### ECP-5.1.6 — Business brain
+A capability is effective only when advertisement, exact runtime report, dependency, credential, network route, assignment policy, entitlement, connector health, and recent live probe all pass. Missing, skipped, stale, or failed evidence fails closed.
 
-Durable facts MUST carry source, confidence, assignment/resource scope, and provenance where possible. The employee MUST distinguish fact, inference, assumption, and unknown.
+### CCIP-6.5 — Native-level connector manifest
 
-## 5.2 Skill and Capability Discovery
+Every AMTECH-supported native connector MUST be described by a declarative setup manifest containing:
 
-### ECP-5.2.1 — Capability registry
+- canonical key, aliases, provider, category, and custody;
+- actual authorization protocol and setup flow;
+- Manager start tool and any descriptor-bound continuation;
+- requested scopes or permissions;
+- exact permitted authorization/onboarding hosts;
+- redirect proof fields;
+- credential storage, rotation, health, revocation, and evidence posture;
+- owner-safe “can” and “cannot” language.
 
-Manager MUST compile capabilities from Manager tools, MCP resources, profile skills, connectors, runtime health, entitlement, assignment, and policy.
+Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology. Unknown connectors remain discoverable but cannot infer a tool, scope, host, credential mode, or self-service setup.
 
-The employee MAY propose a capability, but Manager MUST validate it before advertising readiness.
+### CCIP-6.6 — Managed authorization
 
-### ECP-5.2.2 — MCP discovery
+AMTECH-managed authorization for native connectors MUST follow current OAuth security best practice and provider capabilities:
 
-Manager MCP MUST expose tool and resource discovery through authenticated employee-bound transport. Schemas MUST derive from runtime validation.
+- exact registered redirect URIs and no open redirectors;
+- state bound to provider, employee, assignment/work return path, and short expiry;
+- PKCE for authorization-code flows where supported and required by profile;
+- authorization-server and protected-resource metadata discovery for standards-compliant remote MCP/OAuth resources;
+- resource/audience binding where supported;
+- rich authorization details where permissions are transactional and supported;
+- sender-constrained tokens where supported and operationally justified;
+- least privilege, sealed Manager custody, rotation, revocation, health, and audit.
 
-### ECP-5.2.3 — ConnectionSurface
+Providers using hosted onboarding, API keys, service accounts, or operator installation use the same manifest/custody model with their actual protocol stated honestly rather than mislabeled OAuth.
 
-Connected systems MUST distinguish:
+### CCIP-6.7 — MCP authorization
 
-```text
-not_connected -> needs_you -> connected -> working
-```
+Remote protected MCP resources MUST use the current MCP authorization profile, OAuth 2.1 security posture, protected-resource metadata, authorization-server discovery, exact resource audience, and scope negotiation. Static bearer secrets and caller-selected authorization servers are not the default native integration model.
 
-OAuth completion alone does not prove `working`.
+### CCIP-6.8 — MCP Apps host contract
 
-### ECP-5.2.4 — Connector custody
+MCP Apps support MUST be explicitly negotiated. A compliant host MUST:
 
-Read-only direct connectors MAY be allowed by explicit policy. Write, money, customer-facing, or sensitive connectors MUST remain behind Manager policy and audit.
+- associate a tool with an approved `ui://` resource;
+- fetch UI only through the negotiated resource contract;
+- render in a sandboxed, opaque-origin iframe or equivalent isolation;
+- enforce declared CSP and permissions;
+- mediate JSON-RPC between UI and host;
+- intersect UI-requested actions with current assignment-scoped `WorkAction` authority;
+- prevent direct credential, database, MCP-server, or provider access from the UI;
+- retain audit and proof for consequential host calls.
 
-### ECP-5.2.5 — Resurfacing
+MCP Apps UI may explain or collect inputs. It cannot directly mutate AMTECH authority, approval, or effect records.
 
-Unfinished approvals, questions, failures, reminders, blocked connectors, runtime degradation, and assignment issues MUST materialize as deduplicated resurfacing obligations.
+### CCIP-6.9 — AG-UI adapter contract
 
-## 5.3 Tool Execution Contract
+An AG-UI adapter MAY expose run lifecycle, text, activity, tool-call, and state snapshot/delta events. It MUST project only role-safe AMTECH state, preserve event IDs and replay order, and map client-side actions back into authorized AMTECH commands.
 
-### ECP-5.3.1 — Single registry
+AG-UI shared state is a synchronized projection, not the source of durable authority.
 
-Manager HTTP and MCP MUST be transports over one registry, schema source, handler, policy layer, and envelope.
+### CCIP-6.10 — Generic owner connection surface
 
-### ECP-5.3.2 — Runtime validation
-
-Every tool input MUST be validated at runtime. Unknown, scheduler-only, unsupported, unauthorized, or invalid calls MUST return typed failure without side effect.
-
-### ECP-5.3.3 — Tool loop
-
-```text
-employee selects work
--> schema guides input
--> Manager injects relationship scope
--> Manager validates authority and policy
--> tool prepares or executes bounded work
--> Manager returns proof-bearing envelope
--> employee reports result and next move
-```
-
-### ECP-5.3.4 — Preview and commit
-
-Consequential writes MUST use preview, durable pending resource, approval, idempotent commit, provider receipt, and materialized result.
-
-### ECP-5.3.5 — Query paths
-
-Authorized read-only queries SHOULD NOT require approval but MUST enforce relationship scope, redaction, untrusted-content policy, audit, and metering.
-
-### ECP-5.3.6 — Repair tools
-
-Replay, relink, redeliver, suppress, regenerate, rotate, replace, reprovision, and drift repair MUST preserve original evidence and create new audit records.
+Owner setup UI is generated from the connector manifest. Browser code MUST NOT contain provider-specific scope, tool, or host selection logic. The browser may begin an approved setup and render status; Manager/provider custody performs authorization, token/onboarding handling, health, binding, revocation, and audit.
 
 ---
 
-# 6. Human Interface Protocol (HIP)
+## 7. Human interface protocol
 
-## 6.1 Human roles and work surfaces
+### HIP-7.1 — Human role
 
-### HIP-6.1.1 — Human is a supervisor, approver, participant, or operator
+The human acts as employer, supervisor, decision-maker, exception handler, and authority source—not a prompt engineer or infrastructure operator.
 
-The product MUST NOT assume every human is the singular owner. Surfaces MUST adapt to the human's actual role and relationship.
+### HIP-7.2 — Required functions
 
-### HIP-6.1.2 — Required work functions
+The interface MUST make current work, blocked work, needed information, approval decisions, connected capabilities, completed outcomes, proof, and recovery state understandable.
 
-Authorized human surfaces MUST provide equivalents of:
+### HIP-7.3 — Honest state
 
-- Home: employee/workforce state and current obligations;
-- Talk: direct conversation with an employee;
-- Proof: artifact and receipt review;
-- Connected: connector state;
-- Delegate: natural-language work assignment;
-- Needs your say: decisions for which this principal has authority;
-- Watching: silent monitoring;
-- Recent proof: completed work;
-- Workforce: employees, assignments, supervisors, and access;
-- Cost: usage, labor displacement, and billing attribution appropriate to role.
+Empty, loading, unauthorized, unavailable, degraded, ambiguous, failed, and completed are distinct. Infrastructure failure MUST NOT render as empty workforce or false success.
 
-### HIP-6.1.3 — Role-filtered obligations
+### HIP-7.4 — Generated UI
 
-A user MUST see only approvals, questions, employees, and resources authorized by their relationship graph. “Needs your say” MUST not show decisions the viewer cannot resolve.
+Generated UI uses bounded typed grammar and finite host intents. It is presentation, not authority. Model-authored executable browser code, raw HTML with ambient privilege, and hidden provider calls are prohibited.
 
-### HIP-6.1.4 — Exact approvals
+### HIP-7.5 — Web
 
-Approval views MUST show target, recipient, amount, resource/diff, assignment, risk, expiration, and resulting action.
+Web sessions are HttpOnly, assignment-authorized, authority-versioned, and role-safe. Browser-readable tokens and token-bearing SSE URLs are prohibited.
 
-### HIP-6.1.5 — Honest state copy
+### HIP-7.6 — SMS and signed Review
 
-The UI MUST distinguish drafted, pending connection, connected, working, awaiting approval, committing, sent, paid, failed, ambiguous, expired, revoked, and unavailable.
+SMS and Review resolve the same durable work and authority state as Web. Signed actions are exact-resource, exact-action, assignment, audience, expiry, and authority-version bound.
 
-### HIP-6.1.6 — Non-technical recovery
+### HIP-7.7 — Recovery language
 
-Human-facing failures MUST explain what is blocked, whether work was lost, what AMTECH is doing, and the single next human action if one exists. Protocol jargon belongs in operator diagnostics.
-
-## 6.2 SMS Ambient Inbox
-
-### HIP-6.2.1 — Direct relationship
-
-SMS MUST resolve the sender to a human principal and authorized employee assignment. A phone number alone MUST NOT imply authority over every employee in an account.
-
-### HIP-6.2.2 — Approval routing
-
-SMS MAY alert to approval, but resolution SHOULD use a scoped signed review unless SMS reply binding is equivalently specific and secure.
-
-### HIP-6.2.3 — Delivery decisions
-
-Every notification MUST record intent, assignment, chosen channel, reason, proof, and fallback.
-
-### HIP-6.2.4 — Consent
-
-SMS MUST use verified numbers, authorized sender identity, and applicable consent policy. Cold outbound is prohibited by default.
-
-## 6.3 Admin Operator Surface
-
-### HIP-6.3.1 — Platform roles
-
-Admin functions MUST enforce platform owner, operator, support, billing, and security roles server-side.
-
-### HIP-6.3.2 — Required operator functions
-
-The operator surface MUST support organization/account/user/employee relationships, fleet health, provisioning, assignments, access grants, repairs, proof inspection, redacted support, usage, billing, experiments, and validation vectors.
-
-### HIP-6.3.3 — Command-mediated mutation
-
-Admin lifecycle actions MUST enqueue durable commands or invoke bounded repair contracts. Browser handlers MUST NOT directly mutate Docker, Caddy, profile files, or terminal runtime state.
-
-### HIP-6.3.4 — Destructive confirmation
-
-Destructive operations MUST require exact target, environment, allowlist/scope, confirmation, actor, release binding, and redacted proof.
+Owner surfaces state what failed, what did not happen, whether retry is safe, what AMTECH is doing, and whether human intervention is required. Internal secrets and misleading infrastructure jargon remain hidden.
 
 ---
 
-# 7. Commercial, Billing, and Monetization Protocol (CBMP)
+## 8. Commercial and accounting protocol
 
-AMTECH monetization MUST reflect AI labor, not merely SaaS seats and feature flags.
+### CBMP-8.1 — Entity separation
 
-## 7.1 Commercial entity separation
+The system separately represents provider, platform, employer, operator, worker, customer, payer, beneficiary, and resource owner.
 
-### CBMP-7.1.1 — Payer, beneficiary, owner, and user
+### CBMP-8.2 — Canonical offer
 
-The system MUST separately represent:
+The canonical offer is Start Free, Managed AI Employee from $400/month, and Workforce at custom pricing. The public estimator is outdated and non-canonical.
 
-- payer;
-- invoice recipient;
-- employing or owning entity;
-- beneficiary organization/account;
-- accessing users;
-- managed employee or workforce;
-- AMTECH operator or reseller;
-- cost center or project.
+### CBMP-8.3 — Billable work
 
-The payer need not own or directly use the employee.
+Usage attribution binds employee, assignment, payer, beneficiary, price snapshot, provider usage/cost receipt, platform accounting receipt, and invoice/entitlement outcome.
 
-### CBMP-7.1.2 — Billing is not authorization
+### CBMP-8.4 — Claims
 
-Billing state, entitlement, access, authority, and tenant membership are separate. A paid invoice MUST NOT grant unauthorized data access. A temporary payment failure MUST follow explicit service policy rather than silently corrupt work or access state.
+Revenue, savings, replacement, autonomy, reliability, and capacity claims require measured codebase/product evidence and stated population, period, baseline, uncertainty, and exclusions.
 
-## 7.2 Labor-native monetization
+### CBMP-8.5 — Shared limits
 
-### CBMP-7.2.1 — Permitted commercial primitives
-
-AMTECH MAY price through combinations of:
-
-- free entry or trial;
-- managed employee base price;
-- employee or workforce capacity;
-- task package;
-- completed work object;
-- runtime/model/provider usage;
-- SMS or connector usage;
-- managed operations/support;
-- labor-displacement value band;
-- custom enterprise or multi-organization arrangement.
-
-The current canonical direction is free entry plus a managed AI Employee beginning at $400/month, with higher-volume workforce pricing custom. This is commercial configuration, not a frozen protocol constant.
-
-### CBMP-7.2.2 — Task-based billing
-
-A billable task MUST bind to a durable work object, assignment, completion state, proof, pricing-policy version, and payer. A model call or tool attempt alone MUST NOT be billed as a completed task unless the commercial policy explicitly says usage-based.
-
-### CBMP-7.2.3 — Outcome and labor-displacement claims
-
-Outcome-based or labor-displacement pricing MAY be tested only when the outcome is objectively defined, attributable, auditable, and not misleading.
-
-AMTECH MUST NOT convert speculative hours saved, revenue generated, or jobs replaced into billing or marketing claims without measured evidence and disclosed methodology.
-
-### CBMP-7.2.4 — Experimental pricing
-
-Pricing experiments MUST be versioned, explainable, reversible, and bounded by organization/account. The experiment assignment, offered terms, consent, effective period, and invoice calculation MUST be auditable.
-
-### CBMP-7.2.5 — Entitlements
-
-Entitlements MUST derive from a versioned commercial policy and MUST not be hand-coded at random call sites. Default-allow MVP behavior MUST be labeled and MUST NOT be represented as mature enforcement.
-
-## 7.3 Labor economics ledger
-
-### CBMP-7.3.1 — Required measures
-
-Where measurable, AMTECH SHOULD track:
-
-- tasks attempted and completed;
-- human review minutes;
-- exception and escalation rate;
-- rework rate;
-- time to usable result;
-- provider and runtime cost;
-- cost per completed work object;
-- estimated and validated human time displaced;
-- approval burden;
-- customer/business outcome where causally supportable.
-
-### CBMP-7.3.2 — No vanity displacement
-
-“Hours saved,” “employee replaced,” or “runs a company” MUST remain hypotheses until a declared measurement protocol passes. Marketing language MUST match the evidence tier.
+Budget and rate authority MUST be atomic and shared across replicas. Process-local counters cannot be the production commercial boundary.
 
 ---
 
-# 8. Research, Experimentation, and Plan Validation Protocol (REVP)
+## 9. Research, evaluation, and standard vector
 
-AMTECH is a research-driven system. Plans, architectures, autonomy claims, vector systems, generated interfaces, and monetization concepts MUST be auditable as hypotheses.
+### REVP-9.1 — Atomic claims
 
-## 8.1 Validation-vector model
+Each research or product claim declares metric, unit, population, baseline, test, pass/fail threshold, confidence/uncertainty, evidence location, and release relevance.
 
-### REVP-8.1.1 — Plan decomposition
+### REVP-9.2 — Validation vectors
 
-Every material plan MUST be decomposed into atomic claims. Each claim MUST identify:
+Evaluation separates authority, safety, privacy, correctness, recovery, usability, cost, latency, and capacity. A weighted score cannot override a failed hard gate.
 
-- hypothesis;
-- expected mechanism;
-- affected users, employees, assignments, and systems;
-- evidence class;
-- validation method;
-- pass/fail threshold;
-- failure consequence;
-- owner;
-- current status.
+### REVP-9.3 — Codebase measurement
 
-### REVP-8.1.2 — Validation vector
+Model or agent performance is measured on AMTECH tasks, failures, fixtures, live proofs, and operating traces. Public coding benchmarks are contextual research, not product acceptance.
 
-Each claim MUST be represented by a validation vector with dimensions appropriate to the work. The default vector is:
+### REVP-9.4 — Baselines
 
-```text
-V = [
-  labor_displacement,
-  task_completion,
-  authority_retention,
-  identity_and_tenancy,
-  governance,
-  protocol_integrity,
-  runtime_reliability,
-  recovery,
-  privacy_and_security,
-  multi_modal_continuity,
-  lean_business_usability,
-  cost_and_capacity,
-  commercial_validity,
-  research_evidence,
-  deployment_evidence
-]
-```
+Compare against current human workflow, deterministic automation, smaller/cheaper model, no-agent baseline, and prior deployed AMTECH version where applicable.
 
-Each dimension MUST carry:
+### REVP-9.5 — Negative evidence
 
-- `required | optional | not_applicable`;
-- `pass | fail | unknown | blocked`;
-- metric or invariant;
-- threshold;
-- evidence reference;
-- confidence;
-- validation date and release.
+Failures, skips, blocked environment, non-reproduction, and unknown states are retained. They cannot be converted to pass through omission.
 
-### REVP-8.1.3 — Hard-gate equation
+### REVP-9.6 — AI risk lifecycle
 
-A plan or release passes only when:
+AMTECH uses NIST AI RMF `Govern`, `Map`, `Measure`, and `Manage` as a risk-organization crosswalk, not certification. Agentic threat testing and release evidence cover intended use, foreseeable misuse, affected parties, measurement validity, monitoring, and incident response.
+
+### REVP-9.7 — Evolution vector
+
+The machine-readable vector maps original Standard clauses to ratified clauses, implementation/supersession references, motion direction, and velocity. Direction basis is:
 
 ```text
-PASS = all(required hard gates == pass)
-       AND no(required hard gate == fail)
-       AND every launch-critical unknown is resolved or explicitly waived
+[expansion, satisfaction, narrowing, destructive_modification, appendix, reorientation]
 ```
 
-A weighted vector score MAY rank alternatives that have already passed hard gates. It MUST NOT convert a safety, authority, privacy, accounting, or deployment failure into a pass.
-
-### REVP-8.1.4 — Plan-auditing matrix
-
-Every major plan MUST expose four separate vectors:
-
-1. **Theory vector** — whether the mechanism is coherent and supported by relevant research;
-2. **Implementation vector** — whether contracts and code exist;
-3. **Validation vector** — whether tests and benchmarks passed;
-4. **Deployment vector** — whether the exact release passed in the intended environment.
-
-Commercial plans SHOULD add a fifth **market vector** for willingness to pay, activation, retention, and real labor displacement.
-
-## 8.2 Evidence classes
-
-### REVP-8.2.1 — Evidence separation
-
-The system MUST distinguish:
-
-- theoretical plausibility;
-- peer-reviewed or established research evidence;
-- normative platform/provider behavior;
-- AMTECH engineering assumption or budget;
-- synthetic benchmark evidence;
-- local implementation evidence;
-- production-like evidence;
-- live provider/runtime evidence;
-- market/commercial evidence.
-
-A paper supporting HRR/VSA composition does not prove conversion lift, website performance, employee quality, or commercial value.
-
-### REVP-8.2.2 — Threshold provenance
-
-Every numeric threshold MUST state whether it comes from research, provider constraints, regulation, measured AMTECH data, or an engineering budget. Arbitrary thresholds MUST be labeled as hypotheses.
-
-### REVP-8.2.3 — Negative results
-
-Failed experiments, null results, and simpler baselines that outperform novel methods MUST be retained. Research notes MUST not become success-only narratives.
-
-## 8.3 Vector and HRR/VSA systems
-
-### REVP-8.3.1 — Experimental status
-
-HRR/VSA, graph propagation, vector retrieval, random projections, clustering, and generative experience compilation are experimental mechanisms unless separately accepted for the target use.
-
-They MUST NOT be treated as authority, identity, privacy, anonymization, or proof.
-
-### REVP-8.3.2 — Baseline comparison
-
-A vector or HRR/VSA method MUST be compared against appropriate simple baselines, including as applicable:
-
-- deterministic rules;
-- exact flat scan;
-- facet cosine;
-- keyword or structured filtering;
-- authored static UI/content;
-- no-personalization baseline;
-- human workflow baseline.
-
-Novel complexity is justified only if it beats the relevant baseline on declared metrics without failing hard gates.
-
-### REVP-8.3.3 — Determinism and reproducibility
-
-Reference implementations MUST support deterministic fixtures, stable seeds, canonical serialization, independent parsing, constraint validation, and output hashing where applicable.
-
-### REVP-8.3.4 — Synthetic data
-
-Synthetic datasets MUST be labeled, isolated from live inference, and prohibited from becoming hidden customer profiles or sensitive-trait targets.
-
-### REVP-8.3.5 — Privacy
-
-A hash, embedding, vector, or HRR transform of identifying data remains identifying. Mathematical transformation MUST NOT be described as anonymization.
-
-### REVP-8.3.6 — Uncertainty fallback
-
-Experimental selection or generation systems MUST return a generic, deterministic, or reviewed fallback on error, low confidence, policy conflict, or insufficient evidence.
-
-## 8.4 Experimental system protocol
-
-### REVP-8.4.1 — Experiment registry
-
-Experiments involving autonomy, generated UI, employee planning, pricing, assignment, content selection, or task routing MUST record:
-
-- experiment ID and version;
-- hypothesis;
-- eligible population and scope;
-- control and treatment;
-- allocation method;
-- metrics and guardrails;
-- pass/fail thresholds;
-- privacy classification;
-- rollback path;
-- start/end dates;
-- evidence and conclusion.
-
-### REVP-8.4.2 — Generated UI
-
-Generated UI MUST be schema-constrained, Manager-owned, sandboxed where required, explanation-bearing, approval-bound, accessible, and backed by a generic fallback.
-
-The UI MUST explain why it appeared, which authorized business facts were used, what decision is requested, and what action follows.
-
-### REVP-8.4.3 — Autonomy
-
-Autonomy claims MUST be measured as bounded task completion under policy, not conversational fluency. Increasing autonomy MUST not weaken approval, assignment, or proof requirements.
-
-### REVP-8.4.4 — Research-to-production gate
-
-A research artifact becomes a production dependency only after:
-
-- implementation exists;
-- deterministic tests pass;
-- relevant baselines are compared;
-- security/privacy review passes;
-- operational cost is measured;
-- failure fallback exists;
-- target-environment proof is retained;
-- operator approves the transition.
+Velocity is normalized `[0,1]` implementation motion since the original baseline. It is not a quality score or production-readiness score.
 
 ---
 
-# 9. Deployment Integrity Protocol (DIP)
+## 10. Database and test-driven evidence protocol
 
-## 9.1 Acceptance criteria
+### DTEP-10.1 — Development proof
 
-### DIP-9.1.1 — Exact reporting
+Database development uses production-shaped local/CI PostgreSQL as the normal inner loop, including full migration-from-blank, constraints, RLS/grants, security-definer behavior, concurrency/race tests, rollback transactions, seed/backfill compatibility, and negative isolation matrices.
 
-Validation reports MUST include branch, SHA, environment, commands/workflow, migrations, test counts, build targets, proof IDs, failures, skips, missing environment, and timestamp.
+A live Supabase project is not required for every schema or query edit. Repeated manual live testing is not a substitute for reproducible tests.
 
-### DIP-9.1.2 — Static and unit gate
+### DTEP-10.2 — Provider-specific database proof
 
-The release candidate MUST pass applicable shared, database, Manager, Hono, web, lint, unit, integration, acceptance-script, and production-image gates. A narrow workflow MUST not silently replace omitted product-wide validation.
+A real disposable Supabase/staging project is REQUIRED:
 
-### DIP-9.1.3 — Migration gate
+- before the first release using a new migration class or Data API surface;
+- when Supabase-specific Auth, Realtime, Storage, Edge, advisor, or platform behavior is material;
+- after security-sensitive RLS/grant/function changes;
+- for the final release candidate before deployment;
+- when local PostgreSQL cannot reproduce a suspected platform defect.
 
-All migrations MUST apply from blank production-shaped PostgreSQL and verify RLS, grants, constraints, leases, terminal claims, welcome gating, effect receipts, triggers, and existing-row compatibility.
+The proof is a release/staging gate, not the inner development loop.
 
-### DIP-9.1.4 — Real Supabase gate
+### DTEP-10.3 — Migration discipline
 
-Before live acceptance, migrations and relationship-aware authorization MUST pass on an actual Supabase preview, staging, or disposable project. PostgreSQL emulation is CI evidence, not Supabase acceptance.
+Applied migrations are immutable and ordered. Corrections use forward migrations. CI applies the full ledger from blank and tests existing-row compatibility. Release proof records migration IDs, file hashes, database target, exact SHA, timestamps, and mutation scope.
 
-### DIP-9.1.5 — Identity and isolation matrix
+### DTEP-10.4 — Test integrity
 
-Deployed tests MUST prove:
+Tests encode product contracts, not implementation accidents. A failing test may be corrected only when evidence shows the expectation is stale or wrong; the correction MUST strengthen or preserve the intended invariant. Changing an expectation merely to obtain green is prohibited.
 
-- unauthorized cross-employee denial;
-- unauthorized cross-account denial;
-- authorized shared-employee access;
-- no unrelated assignment-memory leakage;
-- malformed, expired, revoked, and wrong-scope credential rejection;
-- intended private reachability and prohibited host/service reachability.
+### DTEP-10.5 — Test pyramid for boundaries
 
-### DIP-9.1.6 — Rotation and recovery
+Use:
 
-A disposable employee test MUST prove credential rotation, old-token rejection, checksum change, runtime replacement, reboot reconstruction, drift repair, compensation, marker recovery, and convergence.
+1. pure contract/unit tests for schemas, policy, hashing, state transitions, and adapters;
+2. PostgreSQL integration tests for migrations, concurrency, RLS, and durable claims;
+3. compiled application/browser tests for role-safe surfaces;
+4. disposable target-host/provider/database acceptance for release boundaries;
+5. production monitoring and reconciliation for live operation.
 
-### DIP-9.1.7 — Provider ingress
+---
 
-A real provider test MUST prove verification, atomic insertion, duplicate evidence, ordering, retry, dead letter, effect receipt, replay, and ambiguous-effect protection.
+## 11. Deployment, supply chain, and observability
 
-### DIP-9.1.8 — Canonical onboarding
+### DIP-11.1 — Exact release
 
-The canonical launch path is:
+Reports include branch, SHA, environment, commands/workflows, migrations, image digests, test counts, proof IDs, failures, skips, missing environment, and timestamp.
+
+### DIP-11.2 — Canonical topology
+
+Production uses the canonical five-service topology and one source of Compose selection. Manager has no Docker socket; Host Provisioner owns Docker authority; Caddy, Web, Manager, Model Gateway, and Host Provisioner pass health; employee networks remain isolated.
+
+### DIP-11.3 — Supply-chain evidence
+
+Release artifacts SHOULD achieve at least SLSA Build L2-equivalent signed hosted provenance, with a documented path toward hardened L3 controls. SBOM, provenance, image digests, source SHA, builder identity, migration hashes, and deployment manifest MUST remain bound.
+
+Use standard in-toto/SLSA predicates and verification tooling where possible rather than inventing incompatible attestation formats.
+
+### DIP-11.4 — Observability
+
+Production boundaries answer what work was attempted, by which principal/assignment, under which release/policy, with what capability/provider, authority/approval, change/receipt, retry/repair state, payer, and beneficiary.
+
+AMTECH SHOULD map stable telemetry to current OpenTelemetry conventions. Experimental GenAI conventions are version-pinned adapters, not durable database schema.
+
+### DIP-11.5 — Live gates
+
+Production-ready requires, on one exact deployed release:
+
+- complete CI and build evidence;
+- database and migration acceptance;
+- target-host runtime/network acceptance;
+- identity and relationship isolation;
+- connector authorization, health, revocation, ingress, and reconciliation;
+- provider-backed work object through approval/effect/receipt/proof;
+- commercial reconciliation;
+- crash recovery and rollback;
+- accessibility and supported-browser acceptance;
+- capacity/fairness at the declared operating envelope;
+- signed release/deployment evidence.
+
+Fixtures, dev login, manually injected outcomes, historical proof, and the public estimator cannot satisfy these gates.
+
+---
+
+## 12. Engineering execution and document control
+
+### ENG-12.1 — Task contract
+
+Every engineering task MUST declare task ID, branch/repository, concise objective, verifiable success criteria, allowed/forbidden files, required tests, known blockers, and maximum commits when assigned.
+
+### ENG-12.2 — Branch safety
+
+Agents MUST NOT edit `main`. Work stays on the specified branch and integrates through the approved PR/base path.
+
+### ENG-12.3 — Execution loop
 
 ```text
-public origin
--> real create-employee flow
--> real identity/phone verification
--> real organization/account/user relationship creation
--> employee assignment
--> durable provisioning
--> isolated runtime
--> authorized human work surface
--> provider-backed employee reply
--> useful connected-tool proof
+Explore → Act with the smallest coherent change → Test → Commit → Verify exact head
 ```
 
-Fixtures, dev login, manually injected results, and the public estimator MUST be rejected as launch proof.
+No feature expansion occurs while a prerequisite P0 blocker is unresolved.
 
-### DIP-9.1.9 — Provider-backed work object
+### ENG-12.4 — Self-verification
 
-Live acceptance MUST include owner/human turn, employee runtime run, Model Gateway request, Manager envelope, approval and commit where required, provider/artifact receipt, materialization, audit, relationship scope, and billing attribution.
+Tests and required CI must pass before completion is reported. Untested code is unfinished. If CI becomes red after a change, stop downstream work and fix or escalate.
 
-### DIP-9.1.10 — Release-bound proof
+### ENG-12.5 — Three-attempt rule
 
-Proof MUST be redacted and bound to one release SHA and environment. Mixed-release, fixture-derived, missing-ID, or unredacted evidence MUST fail validation.
+After three failed attempts on the same concrete step, stop, preserve diagnostics, state assumptions, and escalate the blocker. Silent workarounds are prohibited.
 
-## 9.2 State discipline
+### ENG-12.6 — Commit and rationale
 
-### DIP-9.2.1 — Canonical states
+Every commit references its task ID. Every non-obvious code change includes a concise `why` comment at the invariant or boundary it protects; comments must not narrate obvious syntax.
+
+### ENG-12.7 — Scaffolding
+
+Schemas, fixtures, migrations, typed contracts, harnesses, diagnostics, proof capture, and operator runbooks are first-class implementation. A model cannot compensate for missing scaffolding.
+
+### ENG-12.8 — Document families
+
+- `STANDARD.md` — ratified non-waivable product and engineering requirements;
+- `CODEGRAPH.md` — current topology, source hubs, migration head, and evidence boundary;
+- `second-half-plan/` — one active production program plus explicitly historical predecessors;
+- `docs/architecture/` — explanatory structure and research disposition;
+- `memory/` — dated narrative handoffs, indexed only by `memory/MEMORY.md`;
+- `wiki/MVP/implementation-records/` — historical factual ledger;
+- source, migrations, tests, workflows, and proof — implementation and acceptance authority.
+
+A new active plan MUST supersede or absorb the previous active plan in the same transaction. Scattering “current” status among unindexed files is prohibited.
+
+### ENG-12.9 — Historical integrity
+
+Historical records remain point-in-time evidence and receive a supersession banner or index routing when misleading. They are not silently rewritten to appear current.
+
+---
+
+## 13. Approval and exception record
+
+### STD-13.1 — Ratification
+
+The AMTECH human operator directed finalization and production implementation of `AMTECH-P0-GOV-001` and `AMTECH-P0-DOC-002` on 2026-07-19. This constitutes approval of v0.2 subject to exact-head tests and CI.
+
+The ratification commit, final workflow matrix, vector hash, and active plan coordinates are recorded in draft PR #23 and the newest indexed memory handoff.
+
+### STD-13.2 — Exceptions
+
+An exception to a MUST records clause, scope, reason, threat/failure analysis, compensating control, owner, expiration, evidence, and human approval. An undocumented deviation is a gap.
+
+### STD-13.3 — Current release status
+
+Ratification makes this Standard effective. It does **not** make the product production-ready.
+
+Current implementation remains source-wired and exact-head CI-accepted through migration `0072`; database/provider/runtime/browser/commercial/recovery/rollback/deployment gates remain governed by the active production program and exact evidence.
+
+---
+
+## Appendix A — Status vocabulary
 
 | State | Meaning |
 |---|---|
 | `planned` | Designed, not implemented. |
-| `research-specified` | Research and validation design exist; implementation does not. |
+| `research-specified` | Research and validation design exist. |
 | `source-wired` | Source/schema/config and executable seams exist. |
-| `locally-proven` | Passed in local or fixture environment. |
-| `ci-accepted` | Exact head passed a named reproducible CI gate. |
-| `production-like` | Passed on production-shaped infrastructure with test credentials. |
+| `locally-proven` | Passed local deterministic or fixture proof. |
+| `ci-accepted` | Exact SHA passed a named reproducible CI gate. |
+| `database-accepted` | Approved disposable/staging database passed release-bound behavior proof. |
+| `runtime-accepted` | Exact target host/runtime/network proof exists. |
 | `provider-accepted` | Real provider IDs and receipts exist. |
-| `runtime-accepted` | Real employee runtime and host evidence exist. |
-| `commercially-validated` | Real market/payment/retention evidence satisfies declared criteria. |
-| `live-accepted` | Canonical end-to-end production behavior passed with retained proof. |
-| `pending` | Required work/proof missing or blocked. |
-| `failed` | Attempted gate failed. |
+| `browser/channel-accepted` | Fixture-free supported-channel proof exists. |
+| `commercial-accepted` | Cost, payer/beneficiary, usage, and invoice reconciliation passed. |
+| `live-accepted` | Canonical end-to-end deployed behavior passed with retained proof. |
+| `production-ready` | Every non-waivable release gate passes on the exact deployed SHA. |
+| `blocked` | A prerequisite is absent and the boundary fails closed. |
+| `failed` | An attempted gate failed. |
 
-“Production-ready” is prohibited unless the exact tier and remaining gates are named.
-
-### DIP-9.2.2 — No status inference
-
-Status MUST NOT be upgraded from architecture, mocks, fixtures, stale runs, old containers, synthetic data, papers, confidence, visual inspection, or provider calls without retained IDs.
-
-### DIP-9.2.3 — Built, tested, deployed, proven, accepted
-
-These terms MUST remain distinct and must identify the relevant validation vector.
-
-### DIP-9.2.4 — Fail-closed preflight
-
-Preflight MUST report exact missing environment, arguments, identifiers, grants, or proof files and exit nonzero. It MUST NOT invent IDs or silently select dev bypasses.
-
-### DIP-9.2.5 — Public estimator
-
-The public estimator is a non-canonical acquisition/regression aid. It MUST NOT define product UX, employee model, commercial standard, or launch acceptance.
-
-## 9.3 Phase gates
-
-### DIP-9.3.1 — Completion
-
-A phase is complete only when source, runtime validation, tests, documentation, required proof tier, and designated hard gates pass.
-
-### DIP-9.3.2 — Next-phase work
-
-Phase `N+1` MAY begin when Phase `N` interfaces are source-wired and stable. Phase `N` MUST NOT be called complete until its acceptance vector passes.
-
-### DIP-9.3.3 — Status integrity
-
-- pending is not complete;
-- blocked is not in progress;
-- research-specified is not implemented;
-- source-wired is not live;
-- a weighted score does not erase a hard fail;
-- a workaround does not erase a blocker;
-- an aspirational contract is not a capability.
-
----
-
-# 10. Cross-Cutting Conformance Rules
-
-## 10.1 Contract versioning
-
-Durable and wire protocols MUST define versions and compatibility policy, including envelopes, events, assignments, grants, proof manifests, signed tokens, profile packages, provider adapters, work objects, and pricing policies.
-
-## 10.2 Runtime schema enforcement
-
-Externally supplied, model-generated, persisted JSON, and cross-service payloads MUST be runtime-validated. Type assertions do not establish conformance.
-
-## 10.3 Idempotency
-
-Every retryable operation MUST define key scope, uniqueness, canonical replay result, retry/terminal behavior, ambiguous-effect behavior, and retention.
-
-## 10.4 Error and recovery semantics
-
-Errors MUST indicate safe retry, waiting dependency, permanent denial, pre-effect failure, post-effect failure, or ambiguity.
-
-## 10.5 Observability
-
-Production boundaries MUST answer:
-
-- what work was attempted;
-- by which human, employee, provider, or system principal;
-- under which organization/account/assignment;
-- under which release, policy, and experiment;
-- what authority and approval applied;
-- what changed;
-- what proof exists;
-- whether retry or repair is safe;
-- who pays and who benefits where commercially relevant.
-
-## 10.6 Lean-business abstraction
-
-Ordinary business users MUST NOT need Docker, Caddy, Supabase, MCP, Hono, Hermes, OAuth internals, JSON Schema, webhook, environment-variable, or provider-ID knowledge.
-
-Technical complexity MUST remain inspectable in operator and research surfaces.
-
-## 10.7 Exception process
-
-An exception to a MUST rule requires human-operator approval and must record clause, scope, reason, threat/failure analysis, compensating control, owner, expiration, and proof.
-
-An undocumented deviation is a gap.
-
----
-
-# 11. Required Phase 2 Audit Method
-
-After approval, the audit MUST:
-
-1. inspect every active file under scope;
-2. map each applicable clause to file-and-line evidence;
-3. map organization/account/user/employee/assignment relationships and identify collapsed concepts;
-4. rate each clause `conforming`, `partial`, `non-conforming`, `not implemented`, or `not applicable`;
-5. distinguish source, local, CI, production-like, provider, runtime, commercial, and live evidence;
-6. identify bypasses, alternate paths, missing runtime validation, and missing relationship enforcement;
-7. construct a validation vector for every P0/P1 boundary;
-8. assign severity using the approved P0-P4 definitions;
-9. produce remediation with owner, dependency, phase, validation method, pass/fail threshold, and proof tier;
-10. state explicitly if the architecture cannot support the infrastructure-for-AI-labor claim without a pivot or scope reduction.
-
-The audit MUST search aggressively, but it MUST NOT fabricate findings to satisfy a quota. A low P0/P1 count requires complete evidence, not optimism.
-
----
-
-# 12. Normative Source Map
+## Appendix B — Current normative source map
 
 Primary implementation evidence includes:
 
-- `packages/shared/src/envelope.ts`;
-- `packages/shared/src/work-events.ts`;
-- `packages/shared/src/preview-links.ts`;
-- `packages/shared/src/resource-payload.ts`;
-- `packages/shared/src/materialization.ts`;
-- `packages/shared/src/work-stream.ts`;
-- `packages/shared/src/channel-routing.ts`;
-- `packages/shared/src/tool-contracts.ts`;
-- `packages/shared/src/tool-schemas.ts`;
-- `packages/shared/src/approval-policy.ts`;
-- `packages/shared/src/model-gateway.ts`;
-- `packages/shared/src/profile-package.ts`;
-- `packages/shared/src/admin.ts`;
-- `apps/manager/src/lib/employee-stream.ts`;
-- `apps/manager/src/lib/materialization.ts`;
-- `apps/manager/src/lib/channel-router.ts`;
-- `apps/manager/src/lib/turn-queue.ts`;
-- `apps/manager/src/lib/runtime.ts`;
-- `apps/manager/src/lib/session-rotation.ts`;
-- `apps/manager/src/lib/mcp-server.ts`;
-- `apps/manager/src/lib/mcp-auth.ts`;
-- `apps/manager/src/lib/model-gateway.ts`;
-- `apps/manager/src/lib/model-gateway-http.ts`;
-- `apps/manager/src/lib/signed-links.ts`;
-- `apps/manager/src/lib/metering.ts`;
-- `apps/manager/src/lib/provisioning-state-machine.ts`;
-- `apps/manager/src/lib/provisioning-reconciler.ts`;
-- `apps/manager/src/lib/ambient-inbox.ts`;
-- `apps/manager/src/webhooks/`;
-- `apps/manager/src/provisioner.ts`;
-- `apps/manager/src/provisioner-host.ts`;
-- `packages/agent-template/`;
-- `packages/db/migrations/`;
-- `infra/deploy/`;
-- `infra/caddy/`;
-- `infra/scripts/`;
-- `infra/acceptance/production-boundary-live.json`;
-- `.github/workflows/employee-work-production-boundary.yml`;
-- `docs/production-normal-employee-live-deploy-runbook.md`;
-- `memory/MEMORY.md` and the current handoffs named in Section 0.3;
-- all active tests.
+- `packages/shared/src/relationship-contract.ts`
+- `packages/shared/src/assignment-resolver.ts`
+- `packages/shared/src/command-effect.ts`
+- `packages/shared/src/connector-registry.ts`
+- `packages/shared/src/connector-setup.ts`
+- `packages/shared/src/task-capabilities.ts`
+- `packages/shared/src/materialization.ts`
+- `packages/shared/src/tool-contracts.ts`
+- `packages/shared/src/tool-schemas.ts`
+- `packages/shared/src/release-evidence.ts`
+- `apps/manager/src/lib/owner-assignment-authority.ts`
+- `apps/manager/src/lib/durable-command-runtime.ts`
+- `apps/manager/src/lib/approval-authority.ts`
+- `apps/manager/src/lib/connector-custody.ts`
+- `apps/manager/src/lib/tool-capability-catalog.ts`
+- `apps/manager/src/lib/mcp-server.ts`
+- `apps/manager/src/lib/provisioning-reconciler.ts`
+- `apps/manager/src/provisioner-host.ts`
+- `apps/manager/src/lib/employee-stream-strict.ts`
+- `apps/manager/src/lib/operating-surface.ts`
+- `apps/web/app/agent/[employeeId]/`
+- `packages/db/migrations/0032*` through `packages/db/migrations/0072*`
+- `infra/deploy/docker-compose.production.yml`
+- `infra/scripts/production-topology.mjs`
+- `infra/scripts/acceptance/`
+- `.github/workflows/`
+- current tests and release proof.
 
-The organization, assignment, shared-employee, validation-vector, and labor-native commercial clauses are binding architectural requirements even where the current source has not implemented them. Phase 2 must classify those areas honestly rather than treating missing ontology as not applicable.
-
----
-
-# 13. Approval Record
-
-This standard is proposed and not yet approved.
-
-Human-operator approval SHOULD record:
-
-- approver;
-- approval date;
-- approved commit SHA;
-- accepted amendments;
-- authorization to begin Phase 2 and create `GAPS.md` and `REMEDIATION.md`.
-
-Until approval, this document may guide discussion but MUST NOT be represented as the accepted AMTECH production standard.
+The source map is navigational. Current source and proof decide conformance.
