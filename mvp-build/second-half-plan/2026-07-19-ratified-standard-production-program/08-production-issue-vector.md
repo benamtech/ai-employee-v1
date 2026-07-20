@@ -13,13 +13,13 @@ Scores are not an averaging mechanism. The JSON remains immutable evidence of th
 
 ## Current resolution summary
 
-On implementation evidence head `1460960f415fafc20582313b1dd2117b781a63f7`:
-
-- `ISS-001` through `ISS-006` are `source_ci_resolved`;
-- broad unit passes 106 files / 613 tests under the canonical Main Integration gate;
-- the Manager-only provider-authority control is `source_ci_accepted`;
-- that control does **not** resolve `ISS-007` through `ISS-011` because remote MCP, MCP Apps, AG-UI, persisted effective capabilities, and live connector lifecycle remain open;
-- `ISS-012` through `ISS-038` remain open;
+- `ISS-001` through `ISS-006` are source/CI resolved on WS-01 evidence head `1460960`;
+- WS-01 broad unit remains **106 files / 613 tests**;
+- `ISS-007` through `ISS-010` are source/CI resolved on hardened WS-02 implementation head `16dc18e`;
+- hardened WS-02 broad unit is **110 files / 635 tests** with Standard, Hermes review, source/type/lint/contracts, build, archaeology, and compiled Chromium green;
+- `ISS-011` remains open because live connector/provider and external protocol-host lifecycle evidence is absent;
+- WS-03 `ISS-012`–`ISS-014` remain open; their P0 frontier is prepared but implementation has not started;
+- `ISS-015` through `ISS-038` remain open;
 - `production_ready` remains false.
 
 ## Baseline issue register
@@ -32,14 +32,14 @@ On implementation evidence head `1460960f415fafc20582313b1dd2117b781a63f7`:
 | ISS-004 | WS-01 | P0 | .90 | .99 | .97 | Curated green gate cannot be reported as broad-suite proof | source/CI resolved |
 | ISS-005 | WS-01 | P1 | .62 | .94 | .82 | No canonical test-suite disposition map | source/CI resolved |
 | ISS-006 | WS-01 | P1 | .57 | 1.00 | .75 | Architecture register contains stale migration/current-state metadata | source/CI resolved |
-| ISS-007 | WS-02 | P0 | .94 | .96 | .93 | Remote protected MCP authorization absent | open |
-| ISS-008 | WS-02 | P0 | .92 | .97 | .89 | Official MCP Apps host contract absent | open |
-| ISS-009 | WS-02 | P1 | .68 | .94 | .66 | Versioned AG-UI projection/replay adapter absent | open |
-| ISS-010 | WS-02 | P0 | .86 | .92 | .92 | Effective capability graph not persisted/reconciled | open |
+| ISS-007 | WS-02 | P0 | .94 | .96 | .93 | Remote protected MCP authorization absent | source/CI resolved; live proof open |
+| ISS-008 | WS-02 | P0 | .92 | .97 | .89 | Official MCP Apps host contract absent | source/CI resolved; external host proof open |
+| ISS-009 | WS-02 | P1 | .68 | .94 | .66 | Versioned AG-UI projection/replay adapter absent | source/CI resolved; fixture-free client proof open |
+| ISS-010 | WS-02 | P0 | .86 | .92 | .92 | Effective capability graph not persisted/reconciled | source/CI resolved; live lifecycle open |
 | ISS-011 | WS-02 | P0 | .90 | .98 | .90 | Live connector health/revocation/failure proof absent | open |
-| ISS-012 | WS-03 | P0 | .98 | .99 | .99 | Approved database not release-proven through migration 0072 | open |
-| ISS-013 | WS-03 | P0 | .95 | .98 | .96 | RLS/grant/backfill/concurrency/rollback matrices incomplete | open |
-| ISS-014 | WS-03 | P0 | .82 | .97 | .79 | Managed Supabase trigger proof absent | open |
+| ISS-012 | WS-03 | P0 | .98 | .99 | .99 | Approved database not release-proven through migration 0072 | open; frontier prepared |
+| ISS-013 | WS-03 | P0 | .95 | .98 | .96 | RLS/grant/backfill/concurrency/rollback matrices incomplete | open; frontier prepared |
+| ISS-014 | WS-03 | P0 | .82 | .97 | .79 | Managed Supabase trigger proof absent | open; frontier prepared |
 | ISS-015 | WS-04 | P0 | .96 | .98 | .95 | Managed secret custody/rotation proof absent | open |
 | ISS-016 | WS-04 | P0 | .97 | .99 | .96 | Five-service/two-employee target-host proof absent | open |
 | ISS-017 | WS-04 | P0 | .89 | .96 | .88 | Runtime lifecycle and neighbor-safe repair proof incomplete | open |
@@ -67,8 +67,8 @@ On implementation evidence head `1460960f415fafc20582313b1dd2117b781a63f7`:
 
 ## Highest-leverage current conclusions
 
-1. **Repository and test truth is now stable.** Preserve the independent broad merge gate and exact-head evidence discipline.
-2. **Provider authority is locked, but commercial correctness is not.** Cumulative budgets, shared rates, and accepted-response-loss ambiguity remain P0.
-3. **Protocol work cannot reopen authority manufacture.** Remote MCP, MCP Apps, and AG-UI remain projections under Manager custody.
-4. **The architecture remains acceptance-poor outside source/CI.** Database, target host, provider, channels, commercial, recovery, accessibility, deployment, and pilot evidence remain open.
-5. **Pilot readiness remains a release program, not a marketing toggle.**
+1. Repository and test truth is stable; preserve the independent broad gate and exact-head discipline.
+2. WS-02 source authority is hardened, but `ISS-011` live lifecycle evidence still blocks workstream completion.
+3. Protocol adapters remain projections; current assignment/policy/version is re-derived before execution.
+4. WS-03 is the next prepared P0 frontier, not an inherited acceptance claim.
+5. Database, target host, live providers/channels, commercial, recovery, accessibility, deployment, and pilot evidence remain open.
