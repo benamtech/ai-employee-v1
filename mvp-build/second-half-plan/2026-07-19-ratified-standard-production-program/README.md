@@ -1,6 +1,7 @@
 # Ratified Standard Production Program
 
-Status: **active and canonical; post-cutover main baseline**  
+Status: **active and canonical**  
+Program state: **post-cutover main baseline**  
 Gate 0: **resolved for declared source/document/CI scope on final cutover head**  
 Updated: 2026-07-20  
 Task families: `AMTECH-P0-GOV-001`, `AMTECH-P0-DOC-002`, `AMTECH-P0-ONB-001`, `AMTECH-P0-PLAN-003`  
