@@ -56,7 +56,7 @@ if (!(await serverReady())) {
 await mkdir(screenshotDir, { recursive: true });
 const browser = await chromium.launch({ headless: process.env.UI_HEADLESS !== "0" });
 const evidence = {
-  schema_version: 1,
+  schema_version: 2,
   evidence_level: "compiled_fixture_interaction",
   generated_at: new Date().toISOString(),
   route: `/agent/${employeeId}`,
@@ -73,7 +73,10 @@ try {
     if (url.includes("/manager/mcp") || url.includes("tools/call")) directToolRequests.push(url);
   });
   await page.goto(`${baseUrl}/agent/${employeeId}`, { waitUntil: "networkidle", timeout: 90_000 });
+  await page.getByRole("textbox", { name: "Message Avery" }).waitFor({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Workspace", exact: true }).click();
   await page.getByRole("heading", { name: /Avery has \d+ decisions ready/ }).waitFor({ timeout: 20_000 });
+  evidence.checks.push("talk_first_workspace_entry");
 
   const launch = page.getByRole("button", { name: /Ways to move this work/ });
   await launch.waitFor({ timeout: 10_000 });
@@ -107,6 +110,9 @@ try {
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, reducedMotion: "reduce" });
   await mobile.goto(`${baseUrl}/agent/${employeeId}`, { waitUntil: "networkidle", timeout: 90_000 });
+  await mobile.getByRole("textbox", { name: "Message Avery" }).waitFor({ timeout: 20_000 });
+  await mobile.getByRole("button", { name: "Workspace", exact: true }).click();
+  await mobile.getByRole("button", { name: /Ways to move this work/ }).waitFor({ timeout: 20_000 });
   await mobile.getByRole("button", { name: /Ways to move this work/ }).click();
   const mobileDrawer = mobile.getByRole("complementary", { name: "Tools mapped to current work" });
   await mobileDrawer.waitFor({ state: "visible", timeout: 10_000 });
@@ -114,7 +120,7 @@ try {
   if (overflow > 1) throw new Error(`capability_drawer_mobile_horizontal_overflow:${overflow}`);
   await assertMinimumTargets(mobile, ".tc-drawer");
   await mobile.screenshot({ path: join(screenshotDir, "capability-drawer-mobile.png"), fullPage: true });
-  evidence.checks.push("mobile_no_overflow", "mobile_minimum_targets");
+  evidence.checks.push("mobile_workspace_entry", "mobile_no_overflow", "mobile_minimum_targets");
   await mobile.close();
 
   evidence.status = "PASS";
