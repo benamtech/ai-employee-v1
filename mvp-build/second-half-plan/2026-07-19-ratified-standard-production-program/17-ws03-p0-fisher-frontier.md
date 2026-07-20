@@ -1,8 +1,9 @@
 # WS-03 P0 Fisher-Adjacent Frontier
 
-Status: **prepared; implementation blocked until the final WS-02 exact head is green**  
+Status: **active; DB-P0-01 admitted after PR #31 exact-head green and merge**  
 Task family: `AMTECH-P0-WS03-000`  
-Merged base: `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`  
+Merged base: `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`  
+Final WS-02 evidence head: `e43f70a0e9a3afd4b87880b9d22089e6da2e94d0`  
 Migration head: `0072`
 
 ## Evidence-design model
@@ -34,7 +35,7 @@ The E-optimal check passes because the minimum eigenvalue is materially positive
 
 ## Mirror Cabinet result
 
-The prior WS-02 closure claim failed the structural and semantic checks because the current PR head was not the cited green ancestor and its exact-head Standard/Main Integration workflows were red. WS-03 implementation therefore remains blocked until the repaired exact head passes. This document prepares the next work without inheriting ancestor proof.
+PR #31 repaired the prior exact-head mismatch and merged after its final head passed Standard, Hermes review, Main Integration broad/source/build/archaeology, and compiled-browser gates. WS-03 may now begin, but acceptance remains dependency-ordered and cannot inherit source/CI evidence as database or managed-platform proof.
 
 ## Frontier graph
 
@@ -53,7 +54,7 @@ A node is admissible only when it has at least two Fisher-adjacent edges to test
 ## Dependency order
 
 ```text
-WS-02 exact-head green
+PR #31 exact-head green and merged
 → DB-P0-01 ledger/hash preflight
 → DB-P0-02 capability evidence constraints
 → DB-P0-03 RLS/grant isolation
@@ -78,10 +79,11 @@ WS-02 exact-head green
 
 ## Start condition
 
-Implementation may begin only when:
+DB-P0-01 implementation is admitted because:
 
 ```text
-final WS-02 PR head
+final WS-02 PR head green
+AND PR #31 merged into current main
 AND Standard/governance green
 AND broad aggregate green
 AND source/type/lint green
@@ -89,3 +91,5 @@ AND production build green
 AND compiled-browser regression green
 AND Hermes review green where watched paths apply
 ```
+
+Only ledger inventory, deterministic hashes, ordering checks, and blank-ledger preflight tests are in scope until DB-P0-01 is green.
