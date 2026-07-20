@@ -8,6 +8,7 @@ import {
 } from "@amtech/shared";
 import { sealSecret } from "./secrets.js";
 import { resolveCommercialScope } from "./commercial-attribution.js";
+import { resolveModelProviderRoute, type ModelProviderRoute } from "./model-provider-registry.js";
 
 const rateBuckets = new Map<string, { window_start: number; count: number }>();
 
@@ -35,6 +36,11 @@ function safeEqual(a: string, b: string): boolean {
   return ab.length === bb.length && timingSafeEqual(ab, bb);
 }
 
+function sameStringArray(left: unknown, right: readonly string[]): boolean {
+  if (!Array.isArray(left) || left.some((value) => typeof value !== "string")) return false;
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
 export function modelGatewayBaseUrl(): string {
   return (process.env.MODEL_GATEWAY_EMPLOYEE_BASE_URL ?? "http://host.docker.internal:8092/v1").replace(/\/$/, "");
 }
@@ -51,7 +57,12 @@ function defaultAllowedProviders(): string[] {
 }
 
 function defaultAllowedModels(): string[] {
-  return (process.env.MODEL_GATEWAY_ALLOWED_MODELS ?? process.env.MODEL_GATEWAY_MODEL_ALIAS ?? "amtech-primary")
+  return (
+    process.env.MODEL_GATEWAY_ALLOWED_MODELS
+      ?? process.env.MODEL_GATEWAY_UPSTREAM_MODEL
+      ?? process.env.MODEL_GATEWAY_MODEL_ALIAS
+      ?? "amtech-primary"
+  )
     .split(",")
     .map((value) => value.trim())
     .filter(Boolean);
@@ -162,6 +173,7 @@ export async function verifyModelGatewayCredential(
   if (claims.token_type !== "model_gateway") return null;
   if (!claims.account_id || !claims.employee_id || !claims.credential_id || !claims.assignment_id) return null;
   if (!claims.payer_relationship_id || !claims.beneficiary_relationship_id || !claims.price_version_id) return null;
+  if (!claims.model_alias || !Array.isArray(claims.allowed_providers) || !Array.isArray(claims.allowed_models)) return null;
   if (expected?.account_id && claims.account_id !== expected.account_id) return null;
   if (expected?.employee_id && claims.employee_id !== expected.employee_id) return null;
   if (expected?.assignment_id && claims.assignment_id !== expected.assignment_id) return null;
@@ -170,7 +182,7 @@ export async function verifyModelGatewayCredential(
 
   const row = await db
     .from("model_gateway_credentials")
-    .select("id,account_id,employee_id,assignment_id,payer_relationship_id,beneficiary_relationship_id,price_version_id,credential_version,token_hash,revoked_at,expires_at,gateway_url")
+    .select("id,account_id,employee_id,assignment_id,payer_relationship_id,beneficiary_relationship_id,price_version_id,credential_version,token_hash,revoked_at,expires_at,gateway_url,model_alias,allowed_providers,allowed_models,spend_limit_cents,rate_limit_per_minute")
     .eq("id", claims.credential_id)
     .eq("account_id", claims.account_id)
     .eq("employee_id", claims.employee_id)
@@ -179,6 +191,11 @@ export async function verifyModelGatewayCredential(
   if (row.error || !row.data) return null;
   if (row.data.revoked_at) return null;
   if (String(row.data.gateway_url) !== claims.gateway_url) return null;
+  if (String(row.data.model_alias) !== claims.model_alias) return null;
+  if (!sameStringArray(row.data.allowed_providers, claims.allowed_providers)) return null;
+  if (!sameStringArray(row.data.allowed_models, claims.allowed_models)) return null;
+  if (Number(row.data.spend_limit_cents) !== Number(claims.spend_limit_cents)) return null;
+  if (Number(row.data.rate_limit_per_minute) !== Number(claims.rate_limit_per_minute)) return null;
   if (String(row.data.payer_relationship_id ?? "") !== claims.payer_relationship_id) return null;
   if (String(row.data.beneficiary_relationship_id ?? "") !== claims.beneficiary_relationship_id) return null;
   if (String(row.data.price_version_id ?? "") !== claims.price_version_id) return null;
@@ -189,8 +206,8 @@ export async function verifyModelGatewayCredential(
 }
 
 export function enforceGatewayTokenPolicy(claims: ModelGatewayTokenClaims, requestedModel: string): { ok: true } | { ok: false; status: number; code: string } {
-  if (!claims.allowed_models.includes(requestedModel) && requestedModel !== claims.model_alias) {
-    return { ok: false, status: 403, code: "model_not_allowed" };
+  if (requestedModel !== claims.model_alias) {
+    return { ok: false, status: 403, code: "model_alias_required" };
   }
   if (claims.spend_limit_cents <= 0) return { ok: false, status: 402, code: "spend_limit_exhausted" };
   const now = Date.now();
@@ -204,12 +221,11 @@ export function enforceGatewayTokenPolicy(claims: ModelGatewayTokenClaims, reque
   return { ok: true };
 }
 
-export function resolveUpstreamModel(claims: ModelGatewayTokenClaims, requestedModel: string): { provider: string; model: string } {
-  const provider = process.env.MODEL_GATEWAY_PROVIDER ?? claims.allowed_providers[0] ?? "openai_compatible";
-  if (!claims.allowed_providers.includes(provider)) throw new Error("provider_not_allowed");
-  const model = process.env.MODEL_GATEWAY_UPSTREAM_MODEL ?? (requestedModel === claims.model_alias ? claims.allowed_models[0] : requestedModel);
-  if (!model) throw new Error("upstream_model_missing");
-  return { provider, model };
+export function resolveUpstreamModel(claims: ModelGatewayTokenClaims): ModelProviderRoute {
+  return resolveModelProviderRoute({
+    allowed_providers: claims.allowed_providers,
+    allowed_models: claims.allowed_models,
+  });
 }
 
 export async function recordModelGatewayUsage(db: SupabaseClient, usage: ModelGatewayUsageRecord): Promise<void> {
