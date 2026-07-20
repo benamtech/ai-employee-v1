@@ -19,11 +19,16 @@ Updated: 2026-07-20
 
 ## Current implementation state
 
-- Cutover branch: `employee-production-tuesday`; target/base `main`; draft PR `#23`.
-- Historical `research` is not current execution authority.
+- PR `#23` merged the reviewed cutover into `main` on 2026-07-20.
+- Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
+- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
+- New work starts on reviewed task branches from current `main`.
+- `employee-production-tuesday` and `research` are historical branch context.
 - Migration head: `0072`.
 - Standard: ratified v0.2.
 - Active program: `second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Current next phase: Phase 1.1 repository authority and test-contract truth.
+- Broad `npm run test:unit` is known red on the cutover evidence head; curated green gates do not prove it passes.
 - Canonical topology: `infra/scripts/production-topology.mjs` → `infra/deploy/docker-compose.production.yml`.
 
 ## Canonical boundary
@@ -76,11 +81,12 @@ npm run repo:verify:full
 Explore → smallest coherent action → test → commit → verify exact head
 ```
 
-- Work on a reviewed branch; `main` changes only through approved merge.
+- Work on a reviewed task branch from current `main`; `main` changes only through approved merge.
 - No feature expansion while a prerequisite P0 is unresolved.
 - Every commit references the task ID.
 - Stop downstream work on red CI.
 - Do not weaken tests merely to get green.
+- The curated main gate and broad unit aggregate are separate evidence claims.
 - Use `find`/`grep`, not guessed paths.
 - Add concise `why` comments at non-obvious boundaries.
 - After three failed attempts, retain diagnostics and escalate.
@@ -102,13 +108,14 @@ Before changing Hermes images, launchers, profiles, sessions, delegation, gatewa
 npm run hermes:upstream:check
 ```
 
-Review official `NousResearch/hermes-agent` current head, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active PRs. Upstream is intelligence, not authority; the production pin changes only through exact-image compatibility and release gates.
+Review official `NousResearch/hermes-agent` current head, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active PRs. Upstream is intelligence, not authority; the production pin changes only through exact-image compatibility and release gates. Do not run the check merely because a session starts.
 
 ## Document authority
 
 - `STANDARD.md` — normative requirements.
 - `CODEGRAPH.md` — current source topology, migration head, and evidence boundary.
 - `second-half-plan/README.md` — single active plan route.
+- active program files `04`, `08`, `09`, and `10` — roadmap, issue vector, workstreams, and test authority.
 - `docs/architecture/` — explanatory architecture/research disposition.
 - `memory/MEMORY.md` — sole handoff index.
-- source, migrations, tests, workflows, proof, and PR `#23` — implementation/acceptance authority.
+- source, migrations, tests, workflows, proof, and current PR — implementation/acceptance authority.

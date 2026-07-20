@@ -1,14 +1,16 @@
 # AMTECH AI Employee — Canonical Source-Backed Architecture
 
-Status: **current source map; live deployment acceptance incomplete**  
-Standard: ratified `../../STANDARD.md` v0.2  
-Active program: `../../second-half-plan/2026-07-19-ratified-standard-production-program/`
+Status: **current source map on merged main; live deployment acceptance incomplete**  
+Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`  
+Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`  
+Standard: ratified [`../../STANDARD.md`](../../STANDARD.md) v0.2  
+Active program: [`../../second-half-plan/2026-07-19-ratified-standard-production-program/`](../../second-half-plan/2026-07-19-ratified-standard-production-program/)
 
-This directory describes current source on `employee-production-tuesday`, separates implementation from acceptance, and records research/protocol disposition without claiming external certification.
+This directory describes current source on merged `main`, separates implementation from acceptance, and records research/protocol disposition without claiming external certification. The cutover branch and `research` are historical context.
 
 ## System boundary
 
-- **Web** presents owner, review, onboarding, and operator experiences.
+- **Web** presents owner, review, onboarding, public, billing, and operator experiences.
 - **Manager** owns identity, assignments, authority, context, capability/tool contracts, connector custody, approvals, events, work materialization, durable effects, receipts, metering, repair, and proof.
 - **Hermes** supplies per-employee reasoning, sessions/runs, tool use, memory, and runtime-local execution.
 - **Model Gateway** is the employee-scoped model/commercial boundary.
@@ -32,13 +34,20 @@ This directory describes current source on `employee-production-tuesday`, separa
 11. `12-document-control-memory-and-handoff-map.md`
 12. `15-artifact-workbench-runtime-capability-and-golden-employees.md`
 13. `16-standard-research-basis-and-protocol-disposition.md`
-14. `17-hermes-upstream-review-protocol.md` — official upstream head/path/PR review while preserving the production pin.
+14. `17-hermes-upstream-review-protocol.md`
+
+Current prioritization and execution detail live in the active program:
+
+- `04-dependency-ordered-production-plan.md` — Phases 1.1–1.9 and later release/pilot phases;
+- `08-production-issue-vector.json` — scored 38-issue source;
+- `09-workstream-execution-map.md` — nine dependency workstreams;
+- `10-test-suite-disposition.md` — current test authority.
 
 ## Protocol disposition
 
 - AMTECH labor protocol remains durable authority: identity, assignment, work, approval, effect, receipt, recovery, and commercial state.
 - MCP core is tool/resource/prompt and remote-authorization interoperability.
-- MCP Apps is the official negotiated interactive MCP target; current `ui://`/iframe machinery is compatibility groundwork.
+- MCP Apps is the official negotiated interactive MCP target; current `ui://`/iframe machinery is compatibility groundwork, not complete conformance.
 - AG-UI is an optional role-safe event/state adapter, not authority or generated-UI schema.
 - Generated views are typed AMTECH work projections adaptable to Web, MCP Apps, AG-UI, SMS, Review, and future clients.
 
@@ -46,24 +55,32 @@ This directory describes current source on `employee-production-tuesday`, separa
 
 Deployed proof → applied migrations/durable state → executable source/config → exact-SHA tests/workflows → Standard/active program → CODEGRAPH/architecture → newest indexed memory → history.
 
+## Current evidence state
+
+Final cutover head `d131dd09` passed Ratified Standard workflow `29717830698`, Hermes Upstream Review `29717830703`, and Main Integration Gates `29717830737`. Merge SHA `5e5b8d7` is the current `main` coordinate.
+
+The broad historical `npm run test:unit` aggregate remains red on that cutover head; PR `#23` reports 30 files and 112 failed tests from pre-ratification assignment/principal/fake-RPC/environment fixtures. Named curated suites are current source-contract evidence only and cannot be promoted into a broad or live pass.
+
 ## Subsystem map
 
 | Plane | Primary authority | Current state |
 |---|---|---|
-| identity/assignment | principals, assignments, grants, policies | source/CI accepted; broader live policy incomplete |
+| repository/test truth | contributor/governance contracts, active program, CI/test disposition | Phase 1.1; post-merge docs being reconciled; broad aggregate red |
+| identity/assignment | principals, assignments, grants, policies | source/CI accepted; fixture-free live policy incomplete |
 | command/effect | durable command, reservation, receipt, repair | source/CI accepted; provider ambiguity/recovery incomplete |
 | runtime provisioning | desired resources, signed provisioner, isolated networks | source-wired; target-host proof incomplete |
-| model/commercial | scoped gateway and accounting receipts | core accepted; cumulative budget/shared rate incomplete |
+| model/commercial | scoped gateway and accounting receipts | core source accepted; cumulative budget/shared rate/ambiguity/reconciliation incomplete |
 | provider ingress | verified event → ambient inbox | source/CI accepted; live reconciliation incomplete |
-| connector setup/custody | declarative registry/setup manifest | Gate 0 source/CI accepted; live health/revocation incomplete |
-| effective capabilities | runtime/dependency/credential/network/policy/connector/probe intersection | decision source-wired; release report incomplete |
-| artifact workbench | immutable revisions, exact approval, publication receipts | source/CI accepted; golden live proof incomplete |
+| connector setup/custody | declarative registry/setup manifest | source/CI accepted; remote MCP/live health/revocation incomplete |
+| effective capabilities | runtime/dependency/credential/network/policy/connector/probe intersection | decision source-wired; persistent release graph incomplete |
+| artifact workbench | immutable revisions, exact approval, publication receipts | source/CI accepted; golden live/parity/refinding proof incomplete |
 | generated UI | typed work view → sandboxed host intent | source/CI accepted; provider-backed proof incomplete |
-| MCP Apps | negotiated interactive resources and bounded host bridge | research-specified; conformance incomplete |
-| AG-UI | role-safe lifecycle/message/tool/state adapter | partial analogous source; conformance incomplete |
-| Hermes upstream intelligence | pinned baseline + scheduled/path-triggered review | governance source-wired; never automatic upgrade |
-| database evidence | local/CI PostgreSQL + selective managed Supabase | routine TDD source-wired; release proof environment-specific |
-| release evidence | audit, receipts, hashes, provenance | source/CI accepted; signed deployed manifest incomplete |
+| MCP Apps | negotiated interactive resources and bounded host bridge | research-specified; implementation/conformance incomplete |
+| AG-UI | role-safe lifecycle/message/tool/state adapter | partial analogous source; versioned conformance incomplete |
+| Hermes upstream intelligence | pinned baseline + scheduled/path-triggered review | cutover review accepted; never automatic upgrade |
+| database evidence | local/CI PostgreSQL + selective managed Supabase | routine TDD source-wired; full matrices/release platform proof open |
+| release evidence | audit, receipts, hashes, provenance | source/CI contracts accepted; signed deployed manifest incomplete |
+| human surface/pilot | supported channels, browser/a11y/capacity/operations | source/fixture foundations; release and controlled-pilot acceptance open |
 
 ## Non-negotiable invariants
 
@@ -79,3 +96,5 @@ Deployed proof → applied migrations/durable state → executable source/config
 10. A live database is not the routine TDD loop; local PostgreSQL does not waive platform proof.
 11. Artifacts persist work product, not a parallel authority engine.
 12. Hermes upstream drift triggers review; it never silently moves the production pin.
+13. Curated green suites do not conceal a broader red aggregate.
+14. Production-ready requires one exact signed deployed candidate to pass every non-waivable gate.

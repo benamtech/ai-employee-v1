@@ -1,194 +1,141 @@
 # 09 — Current Bug, Risk, and Production-Gap Register
 
-Status: **[VERIFIED] current source findings; [INFERRED] interaction risks; [HYPOTHESIS] explicitly testable failure modes**
+Status: **current architecture summary; scored execution authority lives in the active program**  
+Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`  
+Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`  
+Migration head: `0072`  
+Updated: 2026-07-20
 
-This register is ordered by the shortest production trajectory, not by file location. A row leaves the register only when source, tests, exact-head CI, and the required live evidence agree.
+This architecture document summarizes the source-backed production gap shape. Exact issue scores, dependencies, affected boundaries, evidence coordinates, acceptance tests, prerequisites, stop conditions, and completion definitions are maintained in the sole active program:
 
-## Closed during this archaeology pass
+- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json`](../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json)
+- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.md)
+- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md)
+- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md)
 
-### CLOSED-001 — production Caddy could not reach loopback employee gateways
+The predecessor version of this file correctly identified many runtime, commercial, and UX trajectories but carried stale current-state metadata, including migration head `0069` and an older production-ledger coordinate. Those coordinates are superseded by current source and the active program. Historical implementation facts remain in Git history and indexed handoffs.
 
-- [VERIFIED] Prior state: employee snippets reverse-proxied to `localhost:<port>` while production Caddy ran in a separate bridge namespace.
-- [VERIFIED] Interaction: Caddy namespace × host-loopback publishing.
-- [VERIFIED] Control: production Caddy now uses Linux host networking; Web and Manager upstream defaults are `127.0.0.1`; employee snippets keep `localhost:<port>`.
-- [VERIFIED] Tests: production-boundary source contracts assert host networking and loopback upstreams.
-- [INCOMPLETE] Live target-host DNS/TLS/upstream/reload/rollback evidence remains required.
+## Current verdict
 
-### CLOSED-002 — Manager and Model Gateway were not attached to employee networks
+**Not production-ready and not controlled-pilot ready.**
 
-- [VERIFIED] Prior state: Manager resolved Docker runtimes through `amtech-hermes-<id>` and rendered production Model Gateway URLs through `amtech-model-gateway`, but the launcher attached only the employee container to the employee bridge.
-- [VERIFIED] Interaction: runtime URL compilation × Docker DNS/network membership.
-- [VERIFIED] Control: one internal bridge per employee; Manager and Model Gateway attach with stable aliases; runtime probes both its own health and Model Gateway reachability.
-- [VERIFIED] Teardown detaches shared peers before removing the network.
-- [INCOMPLETE] Live multi-employee isolation and capacity proof remains required.
+PR `#23` merged the ratified cutover into `main`. Final cutover head `d131dd09` passed the named Ratified Standard, Hermes upstream, and Main Integration workflows. That proves the declared source/document/curated-CI boundary only.
 
-### CLOSED-003 — silent Manager MCP and business-brain reads
+The broad `npm run test:unit` aggregate remains red on the final cutover head. PR `#23` records 30 files and 112 failed tests caused by pre-ratification assignment, principal, fake-RPC, and environment fixtures. This is explicit Phase 1.1 work; the curated green gate is not broader proof.
 
-- [VERIFIED] Prior state: MCP used the non-strict snapshot builder; business-brain queries ignored database errors; operating-surface auxiliary reads used the normal client.
-- [VERIFIED] Interaction: database fault × agent context × owner UI.
-- [VERIFIED] Control: strict snapshot path for MCP, fail-closed business-brain queries/counts/facts, strict operating-surface auxiliary reads, mandatory source/unit tests.
+## Dependency-critical gap clusters
 
-### CLOSED-004 — Web could synthesize plausible production state after protocol drift
+### WS-01 — Repository authority and test-contract truth
 
-- [VERIFIED] Prior state: `AgentSurface` has a compatibility fallback when `operating_state` is missing.
-- [VERIFIED] Interaction: Manager protocol drift × client fallback.
-- [VERIFIED] Control: the production resources proxy now returns `503 operating_state_unavailable` when a successful Manager response omits `operating_state`; fixture mode retains its deterministic local state.
-- [VERIFIED] Test: `web-operating-snapshot-contract.test.ts` is included in UI and production-boundary gates.
+- post-merge authority documents still described PR `#23` as a draft cutover before this transaction;
+- active evidence matrices cited ancestor Gate 0 head `4be092f` rather than final cutover head `d131dd09` and current `main` merge coordinate;
+- broad unit aggregate is red while the main merge gate composes selected current suites;
+- no prior single test-disposition map classified current, incomplete, stale/migrating, overlapping, blocked, or unusable evidence.
 
-### CLOSED-005 — generated and repository artifacts
+This is the first dependency because false repository/test truth corrupts every downstream completion claim.
 
-- [VERIFIED] Removed tracked Python bytecode, orphaned worktree Gitlink, and superseded filesystem scanner.
-- [VERIFIED] Added ignore rules for Python caches and generated archaeology artifacts.
+### WS-02 — Connector, remote MCP, MCP Apps, AG-UI, and capability truth
 
-## P0 production blockers
+- native connector identity/setup/custody contracts are source-wired;
+- protected remote MCP metadata/authorization profile is not implemented and accepted;
+- official MCP Apps negotiation, `ui://` resource retrieval, sandbox/CSP/permission contract, bounded JSON-RPC bridge, and assignment-scoped action intersection are incomplete;
+- AG-UI lacks a complete versioned role-safe replay/reconnect adapter;
+- effective capability truth is not persisted as one hash-bound intersection;
+- live authorization, health, staleness, revocation, scope-change, outage, repair, and deletion proof remain open.
 
-### P0-001 — production database is not migrated to current head
+### WS-03 — Database authority and platform proof
 
-- [VERIFIED] Current repository migration head is `0069`.
-- [VERIFIED] Existing documentation records the approved production Supabase environment as stopping at `0031`.
-- [INFERRED] No exact-head application can safely exercise relationship, command/effect, ambient inbox, Model Gateway commercial scope, identity activation, or owner surface grants until `0032–0069` apply in order.
-- Control trajectory: identify approved staging branch/project → snapshot/backup → run exact-SHA migration proof → run security/performance advisors → run all PostgreSQL matrices → capture ledger and schema hash → only then promote deployment coordinates.
-- Bifurcation warning: applying application images before schema activation creates a hard protocol split between source and durable authority.
+- repository migration head is `0072`, but no final release-bound approved database proof through that ledger exists;
+- complete existing-row, backfill, RLS/grant/security-definer, negative-isolation, concurrency, race, compare-and-swap, ambiguity, and rollback matrices remain incomplete;
+- triggered disposable managed Supabase evidence remains open for security-sensitive and final-candidate behavior.
 
-### P0-002 — managed secret deployment and rotation proof absent
+### WS-04 — Secret custody, target host, and runtime lifecycle
 
-- [VERIFIED] Source defines required Manager, Model Gateway, provider, Caddy, Supabase, identity, Twilio, Stripe, Gmail, QuickBooks, and signing secrets.
-- [INFERRED] Local/example env structure does not prove production custody, access policy, rotation, audit, or rollback.
-- Control trajectory: produce secret inventory with owner/service/purpose → load through managed deployment mechanism → prove no secret in image/profile/browser/logs → rotate Manager/MCP/Model Gateway/provider credentials → verify old credential failure and new receipt continuity.
+- source defines the canonical five-service topology and Host Provisioner boundary;
+- managed secret custody, access, rotation, old-token denial, audit, and rollback are not accepted;
+- target-host Caddy/Web/Manager/Model Gateway/Host Provisioner health is not accepted;
+- two-employee network/data/workspace/memory/queue/credential/action isolation is not accepted;
+- replace, suspend, restore, rotate, restart, and teardown proof is incomplete;
+- the resolved immutable Hermes digest is not yet bound into a signed deployed release packet.
 
-### P0-003 — target-host network and container acceptance absent
+### WS-05 — Fixture-free identity, owner, connector, and channels
 
-- [VERIFIED] Source topology is Linux host-network Caddy + control bridge + one internal employee bridge per employee.
-- [INFERRED] CI source tests cannot prove host firewall, Docker forwarding, host-network support, filesystem ownership, Caddy permissions, or loopback reachability.
-- Control trajectory: deploy exact image digests on target host → create two employees → inspect network membership → prove employee-to-employee denial → prove employee-to-Manager/Model Gateway success → prove Internet denial → prove Caddy routes both employee gateways → remove/replace one runtime without affecting the other.
+- no exact-candidate real owner has completed verification, canonical activation, explicit assignment selection, runtime readiness, strict snapshot, first turn, connector setup, and recovery;
+- Web, SMS, and signed Review have not been accepted as projections of the same durable work/approval/proof state;
+- connection, consent, ready, degraded, stale, revoked, scope-changed, repair, and deletion UX need one finite lifecycle grammar.
 
-### P0-004 — fixture-free canonical activation is absent
+### WS-06 — Golden governed work, output parity, and proof refinding
 
-- [VERIFIED] Activation source and PostgreSQL matrices are green.
-- [INCOMPLETE] A real owner has not completed identity verification, activation, runtime readiness, owner surface entry, channel binding, and first proof on the current exact SHA.
-- Control trajectory: real Supabase Auth → live identity provider request/webhook → canonical activation → reconciler/provisioner → live owner login → strict snapshot → first owner turn → durable terminal proof.
+- no funded/provider-backed current candidate has completed artifact → immutable revision → validation → exact approval → durable command/effect → provider receipt → post-effect verification → owner-refindable proof → replay;
+- approved preview parity across HTML/PDF/email/signed-link/customer output is unproven;
+- proof queries and exports by assignment, job/customer, action, provider, time, state, and failure class remain immature.
 
-### P0-005 — provider-backed generated work object is absent
+### WS-07 — Commercial controls and provider ambiguity
 
-- [VERIFIED] Typed generation, Manager compilation, sandbox, action intersection, approval binding, and browser contracts exist.
-- [INCOMPLETE] No funded Hermes/provider run has emitted and completed the exact chain on this SHA.
-- Control trajectory: seed real or production-like business context → ask Hermes for a bounded multi-row proposal → Manager tool emits typed view → owner reviews in fixture-free Web → action resolves exact approval → provider effect executes → provider/accounting/command receipts render in Proof.
+Current executable source confirms three high-centrality defects:
 
-### P0-006 — cumulative Model Gateway spend is not enforced
+1. `apps/manager/src/lib/model-gateway.ts` stores rate buckets in a process-local `Map`, so restart resets limits and replicas multiply authority.
+2. Gateway policy only rejects `spend_limit_cents <= 0`; it does not atomically reserve and settle cumulative spend before provider dispatch.
+3. `apps/manager/src/lib/model-gateway-http.ts` retries provider transport/time-out exceptions without a generic upstream idempotency contract and records exhausted attempts as failed/provider-unavailable rather than durable ambiguous.
 
-- [VERIFIED] `spend_limit_cents` is stored in credentials and only checked for `<= 0` at request time.
-- [VERIFIED] Request audits store estimated cost after provider execution.
-- [INFERRED] A positive credential can exceed its intended cumulative budget indefinitely.
-- Control trajectory: add durable budget ledger/reservations keyed by assignment/credential/price period → atomically reserve worst-case request cost before dispatch → settle actual cost from receipt → release unused reservation → deny when settled + reserved exceeds limit → reconcile ambiguous provider calls.
-- Bifurcation warning: implementing only post-call aggregation preserves overspend under concurrency.
+Payer, beneficiary, assignment, price snapshot, entitlement, usage, cost, invoice, credit/refund, suspension, and reactivation also lack final exact-candidate reconciliation acceptance.
 
-### P0-007 — Model Gateway rate limiting is process-local
+### WS-08 — Crash repair, rollback, observability, and signed release
 
-- [VERIFIED] rate buckets are stored in an in-memory `Map` keyed by credential.
-- [INFERRED] restart resets limits and replicas enforce independent limits.
-- Control trajectory: database or Redis token bucket with atomic claim, per-credential and per-provider scopes, explicit refill/window state, bounded outage behavior, and audit metrics.
-- Bifurcation warning: horizontal scaling before shared rate state causes an N-replica multiplication of allowed traffic.
+- every partial durable/external transition lacks accepted deterministic compensation or explicit manual-repair terminal proof;
+- database/runtime/profile/Caddy/config/image/application rollback and backup/restore are not accepted on one candidate;
+- no signed deployment manifest binds SHA, image digests, migration/config hashes, resolved Hermes digest, SBOM, standard provenance, proof IDs, failures/skips, and rollback result;
+- production observability and incident runbooks do not yet prove complete principal-to-assignment-to-effect-to-receipt-to-repair-to-commercial lineage.
 
-### P0-008 — provider timeout retry can duplicate cost/effect
+### WS-09 — Human surfaces, accessibility, capacity, and controlled pilot
 
-- [VERIFIED] Model Gateway retries provider requests after timeout/error without an upstream idempotency key in the generic OpenAI-compatible path.
-- [INFERRED] The first request may be accepted while its response is lost; a retry may create a second billable completion.
-- Control trajectory: use provider idempotency key where supported; otherwise create one logical request reservation, mark timeout as ambiguous, query provider receipt/status when possible, and avoid blind replay for non-idempotent provider semantics.
+- public/create/claim/login/account/billing/admin/artifact/connector/approval/proof/recovery surfaces are not fully aligned;
+- WCAG 2.2 AA, screen reader, keyboard, focus, zoom/reflow, contrast, error announcement, and supported browser evidence are incomplete;
+- durable progress, exact-run interruption, reconnect, restart, ambiguity, and recovery UX are incomplete;
+- fleet admission, queue fairness, provider concurrency allocation, and noisy-neighbor controls are unproven;
+- controlled-pilot eligibility, entitlements, support/incident ownership, rollback, customer exit, thresholds, and stop authority are not operationalized.
 
-### P0-009 — compensation and deterministic repair are incomplete
+Shared/fractional employees, generic governed egress, and richer operator adapters remain P2 expansion boundaries and are not prerequisites for the initial bounded pilot unless pilot scope explicitly requires them.
 
-- [VERIFIED] desired resource graphs, drift inspection, retry classes, repair commands, effect receipts, and dead letters exist.
-- [INCOMPLETE] every partial provisioning/provider crash point does not yet have an accepted deterministic compensation or forward-repair proof.
-- Control trajectory: enumerate crash points → inject each failure → assert durable state → restart worker/process → run repair → verify exactly one final resource/effect → retain before/after evidence.
+## Closed source defects retained as context
 
-### P0-010 — release/deployment attestation is absent
+Current source includes controls for previously identified defects:
 
-- [VERIFIED] CI records source/build/test artifacts.
-- [INCOMPLETE] no release record binds final Git SHA, image digests, migration ledger, environment/secret manifest, runtime version, Caddy config hash, provider configuration, proof IDs, and rollback result.
-- Control trajectory: generate signed deployment manifest → deploy only referenced digests → run live acceptance bundle → attach evidence hashes → exercise rollback → mark release candidate only when all gates pass.
+- production Caddy host-network/loopback routing;
+- Manager/Model Gateway membership in employee networks with teardown support;
+- strict Manager MCP/business-brain/operating-surface reads;
+- Web rejection of successful Manager responses missing `operating_state`;
+- cleanup of tracked generated/orphaned repository artifacts.
 
-## P1 product and UX blockers
-
-### P1-001 — full cross-surface UX alignment is incomplete
-
-- [VERIFIED] owner surface, signed Review, and generated resources use the active Avery/light AMTECH system.
-- [VERIFIED] public/create/claim/login/account/billing/customer portal/admin/artifact surfaces are not fully aligned.
-- [INFERRED] divergent interaction grammar can reduce trust at handoff points even when authority is correct.
-- Control trajectory: inventory each critical journey → map every screen to shared typography, spacing, control, status, error, approval, proof, and navigation tokens → test complete production journeys rather than isolated screenshots.
-
-### P1-002 — context explanation is thin
-
-- [VERIFIED] context signals and layout rationale exist; the owner can inspect a context panel.
-- [INFERRED] a generated or reordered surface may feel arbitrary without a concise source/rationale explanation.
-- Control trajectory: attach bounded rationale codes and source labels to each region → render “why this is here” and “what happens next” without exposing prompts/private memory/implementation jargon → test comprehension.
-
-### P1-003 — proof refinding is immature
-
-- [VERIFIED] evidence and Proof surfaces exist.
-- [INFERRED] owners/operators cannot efficiently retrieve proof by job, customer, action, time, provider, or failure class at scale.
-- Control trajectory: define proof index fields → add strict query API → render filter/search with exact result counts and receipt lineage → test multi-tenant isolation and export.
-
-### P1-004 — connector setup and repair UX is inconsistent
-
-- [VERIFIED] connector cards/status and provider-specific flows exist.
-- [INFERRED] connection, consent, degraded, revoked, scope-changed, and repair states need one cross-provider grammar.
-- Control trajectory: normalize ConnectionSurface states/actions → ensure every provider maps to the finite lifecycle → test setup, token expiry, revocation, provider outage, repair, and deletion.
-
-### P1-005 — WYSIWYG/output parity is not proven
-
-- [VERIFIED] typed resources, HTML, PDF, signed links, email drafts, and customer-facing artifacts exist.
-- [INFERRED] owner approval can be misleading if the approved preview differs from the delivered output.
-- Control trajectory: canonical content model + render hashes → compare owner preview, PDF, email, signed link, and customer portal output → fail before approval when parity exceeds allowed transformations.
-
-### P1-006 — full accessibility evidence is incomplete
-
-- [VERIFIED] 44px controls, focus styling, no-overflow checks, reduced-motion foundations, and browser matrices exist.
-- [INCOMPLETE] screen-reader, focus-obscuration, complete keyboard order, zoom/reflow, contrast, error announcement, and manual WCAG 2.2 AA evidence are incomplete.
-- Control trajectory: automated axe + Playwright keyboard/focus/zoom tests → manual NVDA/VoiceOver critical journeys → retain exact-head reports and remediation records.
-
-### P1-007 — durable progress and interruption UX is incomplete
-
-- [VERIFIED] SSE progress verbs, accepted/ambiguous status, and snapshot recovery exist.
-- [INFERRED] long-running work needs exact run ownership, interruption semantics, recovery state, and no false completion.
-- Control trajectory: persist run progress checkpoints → expose owner-safe phase/next update → add exact-run interrupt behind command/effect authority → prove disconnect/reconnect/restart behavior.
-
-### P1-008 — effective capability graph is not persisted
-
-- [VERIFIED] runtime capabilities/toolsets, Manager tools, connectors, grants, policy, commercial scope, and runtime revision exist separately.
-- [INFERRED] UI/runtime can drift when one component changes between observations.
-- Control trajectory: compile and persist one timestamped/hash-bound intersection → use it for UI capability state, Hermes context, operator diagnostics, and release proof.
-
-## P2 scale and product-expansion trajectories
-
-### P2-001 — direct tool-agnostic egress/MCP proxy
-
-- [VERIFIED] current internal employee network denies arbitrary external egress.
-- [HYPOTHESIS] a controlled Manager-owned egress proxy can add connector-agnostic MCP while preserving isolation.
-- Required controls: SSRF/private-address denial, DNS policy, credential custody, assignment binding, schema/allowlist intersection, rate/spend limits, audit, receipts, revocation, and health.
-
-### P2-002 — shared/fractional employee policy
-
-- [VERIFIED] payer/beneficiary and assignment primitives exist.
-- [HYPOTHESIS] explicit context partitions, allocation, and policy can support managed/fractional employees.
-- Required controls: beneficiary isolation, per-assignment capability graph, commercial allocation, cross-organization approval, revocation, and proof.
-
-### P2-003 — fleet capacity and fairness
-
-- [VERIFIED] per-container CPU/memory/PID limits exist.
-- [INFERRED] those limits do not provide fleet admission control, queue fairness, provider concurrency allocation, or noisy-neighbor policy.
-- Control trajectory: capacity model → admission/reservation → per-account/employee queues → priority/fairness → saturation tests → graceful degradation and operator visibility.
-
-### P2-004 — richer operator adapter
-
-- [VERIFIED] Hermes TUI/HTTP/MCP research identifies useful operator control primitives.
-- [HYPOTHESIS] a Manager-mediated read-mostly adapter can improve exact-run diagnosis and recovery.
-- Required controls: platform authority, support lease/reason, tenant/runtime binding, read-only projection by default, C3 for control, redaction, cancellation semantics, immutable audit, runtime revision proof.
+These are source/CI controls, not target-host or live acceptance. Their live DNS/TLS/network/reload/isolation/recovery behavior remains part of WS-04 and later exact-candidate evidence.
 
 ## Non-bugs retained by design
 
-- [VERIFIED] fixture mode is retained for UI development but cannot satisfy live acceptance.
-- [VERIFIED] the public estimator is retained only as a separated regression/acquisition harness and is non-canonical.
-- [VERIFIED] Manager, not Hermes or generated UI, owns assignment and effect authority.
-- [VERIFIED] owner reads do not create command/effect rows solely for observation.
-- [VERIFIED] internal employee bridges intentionally deny direct arbitrary Internet access.
-- [VERIFIED] process-local SSE events are liveness hints; strict snapshots and durable receipts remain truth.
+- fixture mode remains useful for UI development but cannot satisfy live acceptance;
+- the public estimator remains separated and non-canonical;
+- Manager, not Hermes or generated UI, owns assignment/effect authority;
+- owner reads do not create command/effect rows solely for observation;
+- internal employee bridges intentionally deny arbitrary direct Internet access;
+- process-local SSE events are liveness hints; strict snapshots and durable receipts remain truth;
+- the pinned Hermes upstream review system is scheduled/path-triggered and does not auto-upgrade production.
+
+## Completion route
+
+Follow the active roadmap in dependency order:
+
+```text
+Phase 1.1 repository/test truth
+→ 1.2 protocols/capabilities
+→ 1.3 database
+→ 1.4 secrets/runtime
+→ 1.5 fixture-free owner/channels
+→ 1.6 golden work
+→ 1.7 commercial/ambiguity
+→ 1.8 recovery/signed release
+→ 1.9 human surface/capacity/pilot preparation
+→ frozen exact candidate
+→ controlled pilot
+→ measured expansion
+```
+
+A row leaves the active issue vector only when source, tests, exact-head CI, and the required database/runtime/provider/browser/commercial/recovery/deployment evidence agree.

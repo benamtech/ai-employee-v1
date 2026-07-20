@@ -1,18 +1,19 @@
 # Ratified Standard Production Program
 
 Status: **active and canonical**  
-Gate 0: **resolved for declared source/document/CI scope**  
+Program state: **post-cutover main baseline**  
+Gate 0: **resolved for declared source/document/CI scope on final cutover head**  
 Updated: 2026-07-20  
-Task family: `AMTECH-P0-GOV-001`, `AMTECH-P0-DOC-002`, `AMTECH-P0-ONB-001`  
-Branch: `employee-production-tuesday`  
-Target/base: `main`  
-PR: `#23`  
-Standard: `../../../STANDARD.md`  
-Evolution vector: `../../../validation/standard-v0.2-evolution-vector.json`
+Task families: `AMTECH-P0-GOV-001`, `AMTECH-P0-DOC-002`, `AMTECH-P0-ONB-001`, `AMTECH-P0-PLAN-003`  
+Current integration baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`  
+Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`  
+Historical cutover PR: merged `#23`  
+Standard: [`../../../STANDARD.md`](../../../STANDARD.md)  
+Evolution vector: [`../../../validation/standard-v0.2-evolution-vector.json`](../../../validation/standard-v0.2-evolution-vector.json)
 
 ## Authority
 
-This folder is the single active production program. Predecessor remediation, capability-closure, historical phase, and wiki plan files remain point-in-time evidence, not current execution authority.
+This folder is the single active production program. Predecessor remediation, capability-closure, historical phase, and wiki plan files remain point-in-time evidence, not current execution authority. The merged `employee-production-tuesday` branch is historical cutover context; new work starts on reviewed task branches from current `main`.
 
 ## Product target
 
@@ -20,70 +21,53 @@ AMTECH installs governed persistent AI Employees. The moat is the reusable labor
 
 Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.
 
-## Current state
+## Current evidence state
 
 - Standard v0.2 is ratified and migration head is `0072`.
-- Gate 0 governance/document authority passed exact-head CI.
+- PR `#23` merged the cutover into `main` at `5e5b8d7`; final reviewed head `d131dd09` passed:
+  - Ratified Standard and Production Plan Integrity — `29717830698`;
+  - Hermes Upstream Review — `29717830703`;
+  - Main Integration Gates — `29717830737`.
+- Gate 0 governance/document/contributor/source scope is CI-accepted on the final cutover head, not live-accepted.
 - Connector identity, custody, setup, tool ownership, and readiness are manifest-driven.
 - Direct MCP denies omitted or uncertain risk metadata.
-- Local/CI PostgreSQL is the database TDD loop; managed Supabase is selective platform/release evidence.
-- Contributor guide, task rubric, installable hooks, quick/full gates, PR template, governance validator, main integration workflow, and Hermes upstream intelligence are source-wired.
-- The broad historical `test:unit` aggregate still contains pre-ratification assignment/principal/RPC fixtures. Its red state is explicit P0 normalization work and is not hidden behind the ratified contract suites.
-- `research` is historical branch context, not an execution dependency.
+- Local/CI PostgreSQL is the routine database TDD loop; managed Supabase remains selective platform/release evidence.
+- The broad historical `npm run test:unit` aggregate remains explicitly red on the cutover evidence head: PR `#23` records 30 files and 112 failed tests from pre-ratification assignment, principal, fake-RPC, and environment fixtures. Curated green gates do not prove the broad aggregate.
+- Target-host, managed-platform, live connector/provider, fixture-free golden work, commercial, recovery, rollback, accessibility, capacity, deployment, and launch acceptance remain open.
 - The product is not launch-cleared.
 
-## Execution order
+## Canonical execution route
 
-1. **G0 — Ratification, repository authority, and contributor enforcement — COMPLETE for declared scope**
-   - Standard/evolution vector, one active program, one memory index;
-   - connector-agnostic setup/custody/readiness enforcement;
-   - executable contributor onboarding and merge-readiness gates;
-   - exact-head CI before cutover.
+1. [`04-dependency-ordered-production-plan.md`](04-dependency-ordered-production-plan.md) — sole phased roadmap: Phase 1.1 through 1.9, exact release candidate, controlled pilot, and measured expansion.
+2. [`08-production-issue-vector.json`](08-production-issue-vector.json) and [`08-production-issue-vector.md`](08-production-issue-vector.md) — scored issue source and human view.
+3. [`09-workstream-execution-map.md`](09-workstream-execution-map.md) — dependencies, acceptance evidence, tests, prerequisites, stop conditions, and completion definitions.
+4. [`10-test-suite-disposition.md`](10-test-suite-disposition.md) — current test authority and normalization contract.
+5. [`07-verification-and-handoff-matrix.md`](07-verification-and-handoff-matrix.md) — evidence state and exact candidate rules.
 
-2. **P0-A — Protocol and connector conformance**
-   - remote MCP protected-resource authorization;
-   - official MCP Apps host adapter;
-   - versioned AG-UI adapter after the MCP/connector boundary;
-   - unknown, stale, revoked, and underspecified connectors fail closed;
-   - managed-secret/service-account/operator adapters only through the manifest.
+## Current dependency order
 
-3. **P0-B — Database and test-contract closure**
-   - normalize the broad historical unit suite to current assignment, principal, fake-RPC, and environment fixtures until `npm run test:unit` is green;
-   - migration, RLS, existing-row, concurrency, race, and rollback matrices;
-   - managed Supabase only for named platform/release conditions;
-   - forward-only migrations.
-
-4. **P0-C — Target-host runtime proof**
-   - five-service health and Host Provisioner custody;
-   - two-employee network/data/action isolation;
-   - replace, recover, rotate, and teardown.
-
-5. **P0-D — Fixture-free golden owner journey**
-   - real identity/assignment and fresh capability evidence;
-   - connector authorization, health, revocation, and failure paths;
-   - approval → bounded effect → receipt → refindable proof;
-   - Website A, Contractor B, and Bookkeeping C.
-
-6. **P1 — Commercial and reliability closure**
-   - cumulative budgets, shared atomic rates, provider ambiguity;
-   - crash, repair, rollback, attestation, and signed deployment manifest.
-
-7. **P1/P2 — Browser, accessibility, capacity, and pilot**
-   - cross-browser/accessibility/visual gates;
-   - 100/250/500/700 employee measurements;
-   - controlled pilots only after non-waivable gates.
+1. **Phase 1.1 — repository authority and test-contract truth.** Repair post-merge metadata and the broad red aggregate before feature expansion.
+2. **Phase 1.2 — connector/protocol/capability truth.** Remote MCP authorization, MCP Apps, AG-UI, and effective capability reconciliation.
+3. **Phase 1.3 — database authority.** Migrations, RLS/grants, existing rows, concurrency, rollback, and managed-platform triggers.
+4. **Phase 1.4 — secret/runtime custody.** Target-host five-service and two-employee isolation/lifecycle proof.
+5. **Phase 1.5 — fixture-free owner/channels.** Real identity, assignment, connector, Web/SMS/Review, and recovery journey.
+6. **Phase 1.6 — golden governed work.** Three employee roles through approval/effect/receipt/parity/refindable proof.
+7. **Phase 1.7 — commercial and ambiguity controls.** Atomic budgets, shared rates, provider ambiguity, and invoice reconciliation.
+8. **Phase 1.8 — recovery and signed release.** Fault injection, rollback, observability, SBOM/provenance, and deployment manifest.
+9. **Phase 1.9 — human surfaces, capacity, and pilot preparation.** Accessibility, browsers, progress/recovery UX, fairness, and operating packet.
+10. **Phases 2–4.** Frozen exact candidate, bounded pilot, then measured 10/100/250/500/700 expansion.
 
 ## Stop rules
 
-- Work on reviewed branches and merge to `main` only after required checks.
+- Work on reviewed branches from current `main`; merge only after required checks.
 - No feature expansion ahead of an unresolved prerequisite P0.
-- Every task has success criteria, rubric, and task-ID commits.
+- Every task has success criteria, rubric, tests, blockers, and task-ID commits.
 - Tests are not weakened to obtain green.
 - After three failed attempts, preserve diagnostics and escalate.
-- Fixtures, local PostgreSQL, and ancestor SHAs cannot satisfy live boundaries they did not exercise.
+- Fixtures, local PostgreSQL, old hosts, manually injected outcomes, ancestor SHAs, and the public estimator cannot satisfy live boundaries they did not exercise.
 - Browser/protocol UI never creates authority.
 - Unknown/stale capability evidence fails closed.
-- Ambiguous consequential effects reconcile before retry.
+- Ambiguous consequential outcomes reconcile before retry.
 
 ## Files
 
@@ -94,3 +78,8 @@ Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector o
 - `05-database-tdd-and-release-proof.md`
 - `06-document-authority-and-archive-map.md`
 - `07-verification-and-handoff-matrix.md`
+- `08-production-issue-vector.json`
+- `08-production-issue-vector.md`
+- `09-workstream-execution-map.md`
+- `10-test-suite-disposition.md`
+- `11-task-contract.json`

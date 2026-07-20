@@ -2,7 +2,8 @@
 
 Status: active  
 Updated: 2026-07-20  
-Active integration/cutover branch: `employee-production-tuesday`; draft PR `#23` targets `main`; historical `research` is not an integration dependency
+Current integration baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`  
+Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`; PR `#23` merged; `employee-production-tuesday` and `research` are historical branch context
 
 ## Cold-session read order
 
@@ -62,20 +63,21 @@ trigger
 → audit, metering, commercial attribution, revocation, recovery, and release proof
 ```
 
-## Current integration headline
+## Current integration and evidence headline
 
-- Branch: `employee-production-tuesday`
-- Target/base: `main`
-- Draft cutover PR: `#23`
-- Historical `research`: retained branch history, not current authority
-- Migration head: `0072`
-- Standard: `mvp-build/STANDARD.md` v0.2, ratified and effective
-- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`
-- Contributor contract: `CONTRIBUTING.md`, six-point task rubric, installable hooks, and repository-governance checks
-- Main merge gate: `.github/workflows/main-integration-gates.yml`
-- Hermes upstream review: architecture document 17, pinned baseline, and scheduled/path-triggered CI
-- Canonical deployment authority: `mvp-build/infra/scripts/production-topology.mjs` → `mvp-build/infra/deploy/docker-compose.production.yml`
-- Product status: Gate 0 source/document/CI resolved; not launch-cleared
+- Current base for new work: current `main`; create reviewed task branches and integrate through PRs.
+- Merged cutover: PR `#23`, merge SHA `5e5b8d7`, final evidence head `d131dd09`.
+- Final cutover workflows: Ratified Standard `29717830698`, Hermes Upstream Review `29717830703`, Main Integration Gates `29717830737` — success on `d131dd09`.
+- Migration head: `0072`.
+- Standard: `mvp-build/STANDARD.md` v0.2, ratified and effective.
+- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Phase 1.1: post-merge repository authority and broad test-contract truth.
+- Broad `npm run test:unit`: known red on the cutover evidence head; PR `#23` records 30 files/112 tests from stale or migrating fixtures. Curated green gates do not prove the aggregate.
+- Contributor contract: `CONTRIBUTING.md`, six-point task rubric, installable hooks, and repository-governance checks.
+- Main merge gate: `.github/workflows/main-integration-gates.yml`.
+- Hermes upstream review: architecture document 17, pinned baseline, and scheduled/path-triggered CI. This planning pass does not move the pin or require an ad hoc upstream check.
+- Canonical deployment authority: `mvp-build/infra/scripts/production-topology.mjs` → `mvp-build/infra/deploy/docker-compose.production.yml`.
+- Product status: Gate 0 source/document/CI resolved; not database-, runtime-, provider-, browser/channel-, commercial-, live-, or production-accepted.
 
 ## Contributor verification
 
@@ -89,7 +91,7 @@ npm run repo:verify:quick
 npm run repo:verify:full
 ```
 
-Local hooks provide fast feedback. CI remains authoritative. PRs into `main` run governance, type/lint, unit, production-boundary, build, archaeology, and compiled browser gates.
+Local hooks provide fast feedback. CI remains authoritative. PRs into `main` run governance, type/lint, named unit/source contracts, production-boundary, build, archaeology, and compiled-browser gates. Phase 1.1 must normalize the separate broad historical unit aggregate before downstream completion claims.
 
 ## Core invariants
 
@@ -104,4 +106,4 @@ Local hooks provide fast feedback. CI remains authoritative. PRs into `main` run
 9. Ambiguous provider outcomes reconcile before retry.
 10. Applied migrations are immutable; corrections are forward migrations.
 11. Upstream Hermes drift triggers review, never an automatic production upgrade.
-12. Production-ready means every non-waivable Standard gate passes on the exact deployed SHA.
+12. Production-ready means every non-waivable Standard gate passes on the exact signed deployed SHA.

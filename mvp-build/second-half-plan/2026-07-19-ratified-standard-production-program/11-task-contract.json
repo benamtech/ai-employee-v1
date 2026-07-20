@@ -1,0 +1,61 @@
+{
+  "task_id": "AMTECH-P0-PLAN-003",
+  "repository": "benamtech/ai-employee-v1",
+  "branch": "agent/amtech-p0-plan-003-production-roadmap",
+  "objective": "Reconcile post-merge repository authority, audit current production gaps, classify test evidence, and update the sole active production program into a dependency-ordered roadmap without changing product runtime behavior.",
+  "success_criteria": [
+    "Every current authority document routes new work from merged main rather than draft PR #23.",
+    "One machine-readable issue vector and one human workstream map cover credible P0/P1/P2 boundaries.",
+    "The sole active roadmap defines phases 1.1 through 1.n and later release/pilot phases with exact gates.",
+    "The broad red unit aggregate is represented honestly and classified separately from curated green gates.",
+    "No competing current plan is created and no historical record is silently rewritten.",
+    "Applicable repository governance, Standard, plan, type/lint, and documentation archaeology checks pass on the final branch head."
+  ],
+  "allowed_files": [
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CODEGRAPH.md",
+    "CONTRIBUTING.md",
+    "mvp-build/README.md",
+    "mvp-build/AGENTS.md",
+    "mvp-build/CLAUDE.md",
+    "mvp-build/CODEGRAPH.md",
+    "mvp-build/second-half-plan/**",
+    "mvp-build/docs/architecture/README.md",
+    "mvp-build/docs/architecture/09-current-bug-risk-and-production-gap-register.md",
+    "mvp-build/memory/MEMORY.md",
+    "mvp-build/memory/2026-07-20-post-merge-production-roadmap-reconciliation.md",
+    "mvp-build/scripts/verify-repository-governance.mjs"
+  ],
+  "forbidden_files": [
+    "main branch direct edits",
+    "mvp-build/STANDARD.md normative clauses",
+    "mvp-build/packages/db/migrations/**",
+    "mvp-build/apps/** runtime behavior",
+    "mvp-build/packages/** runtime behavior",
+    "wiki historical bodies",
+    "Hermes image, baseline, launcher, profile, session, gateway, capability, or derived UI source"
+  ],
+  "required_tests": [
+    "npm run repo:rubric -- second-half-plan/2026-07-19-ratified-standard-production-program/11-task-contract.json",
+    "npm run repo:verify:quick",
+    "npm run repo:verify:full",
+    "npm run test:lane10-evidence",
+    "Main Integration Gates on the final pull-request head"
+  ],
+  "known_blockers": [
+    "The connected GitHub interface cannot execute local npm commands; final executable verification must come from GitHub Actions.",
+    "The broad npm run test:unit aggregate is known red on the cutover evidence head and is deliberately planned as Phase 1.1 implementation work rather than falsely reported green in this planning-only pass."
+  ],
+  "max_commits": 30,
+  "rubric": {
+    "authority": 0.96,
+    "completeness": 0.92,
+    "agility": 0.88,
+    "isolation": 0.95,
+    "provability": 0.88,
+    "moat": 0.90
+  },
+  "mitigations": []
+}
