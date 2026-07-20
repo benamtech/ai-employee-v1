@@ -1,0 +1,166 @@
+name: Main Integration Gates
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: main-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Contributor, Standard, type, and lint gates
+        run: npm run repo:verify:full
+      - name: Full unit and source contracts
+        run: npm run test:unit
+      - name: Production-boundary source contracts
+        run: npm run test:production-boundary
+      - name: Production build
+        run: npm run build
+
+  repository-archaeology:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build exact-head tracked-object archaeology
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p mvp-build/.artifacts/repository-archaeology
+          node mvp-build/scripts/repository-archaeology-v2.mjs > mvp-build/.artifacts/repository-archaeology/archaeology-run.log 2>&1
+          test -s mvp-build/.artifacts/repository-archaeology/repository-archaeology.json
+          test -s mvp-build/.artifacts/repository-archaeology/file-primitives.jsonl
+          test -s mvp-build/.artifacts/repository-archaeology/relationship-map.json
+          test -s mvp-build/.artifacts/repository-archaeology/effect-graph.json
+          test -s mvp-build/.artifacts/repository-archaeology/defect-audit.json
+      - name: Upload archaeology evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-integration-archaeology-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mvp-build/.artifacts/repository-archaeology/
+          if-no-files-found: error
+          retention-days: 30
+
+  compiled-browser:
+    needs: source-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - run: npm run build --workspace @amtech/shared
+      - name: Install Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Build compiled fixture Web candidate
+        env:
+          NEXT_PUBLIC_AMTECH_UI_FIXTURES: "1"
+          NODE_ENV: production
+          CI: "true"
+          AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
+          AMTECH_ENVIRONMENT_NAME: main-integration-ci
+        run: npm run build --workspace @amtech/web
+      - name: Run compiled adaptive and product-shell browser matrices
+        shell: bash
+        env:
+          UI_HEADLESS: "1"
+          UI_FIXTURE_LOGS: "1"
+          UI_FIXTURE_SERVER_MODE: production
+          UI_FIXTURE_BASE_URL: http://127.0.0.1:3200
+          NEXT_PUBLIC_AMTECH_UI_FIXTURES: "1"
+          NODE_ENV: production
+          CI: "true"
+          AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
+          AMTECH_ENVIRONMENT_NAME: main-integration-ci
+        run: |
+          set -euo pipefail
+          EVIDENCE_DIR="infra/.local/main-integration-ui"
+          STANDALONE_ROOT="apps/web/.next/standalone"
+          mkdir -p "$EVIDENCE_DIR"
+          SERVER_ENTRY="$(find "$STANDALONE_ROOT" -path '*/node_modules' -prune -o -type f -name server.js -print | sort | head -n 1)"
+          test -n "$SERVER_ENTRY"
+          APP_ROOT="$(dirname "$SERVER_ENTRY")"
+          mkdir -p "$APP_ROOT/.next"
+          rm -rf "$APP_ROOT/.next/static"
+          cp -R apps/web/.next/static "$APP_ROOT/.next/static"
+          if [ -d apps/web/public ]; then
+            rm -rf "$APP_ROOT/public"
+            cp -R apps/web/public "$APP_ROOT/public"
+          fi
+          (
+            cd "$APP_ROOT"
+            PORT=3200 HOSTNAME=127.0.0.1 node server.js
+          ) >"$GITHUB_WORKSPACE/mvp-build/$EVIDENCE_DIR/standalone-server.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true' EXIT
+          for _attempt in $(seq 1 60); do
+            curl --fail --silent "$UI_FIXTURE_BASE_URL/login" >/dev/null 2>&1 && break
+            kill -0 "$SERVER_PID" 2>/dev/null || { cat "$EVIDENCE_DIR/standalone-server.log"; exit 1; }
+            sleep 0.5
+          done
+          curl --fail --silent "$UI_FIXTURE_BASE_URL/login" >/dev/null
+          npm run ui:test 2>&1 | tee "$EVIDENCE_DIR/browser-test.log"
+          npm run ui:test:shell 2>&1 | tee "$EVIDENCE_DIR/product-shell-test.log"
+      - name: Upload compiled browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-integration-browser-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mvp-build/infra/.local/main-integration-ui/
+          if-no-files-found: error
+          retention-days: 14
+
+  integration-summary:
+    if: always()
+    needs: [source-contracts, repository-archaeology, compiled-browser]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish merge-readiness summary
+        shell: bash
+        run: |
+          echo "## Main integration gates" >> "$GITHUB_STEP_SUMMARY"
+          echo "Source/contracts: ${{ needs.source-contracts.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Archaeology: ${{ needs.repository-archaeology.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Compiled browser: ${{ needs.compiled-browser.result }}" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ needs.source-contracts.result }}" != success ] || \
+             [ "${{ needs.repository-archaeology.result }}" != success ] || \
+             [ "${{ needs.compiled-browser.result }}" != success ]; then
+            echo "❌ Main Integration Gates FAILED" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "✅ Main Integration Gates OK" | tee -a "$GITHUB_STEP_SUMMARY"
