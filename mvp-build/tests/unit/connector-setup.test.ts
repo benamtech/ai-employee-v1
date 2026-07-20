@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  custodyFor,
   ownerManagedConnectorSetups,
   resolveManagedSetupForCapability,
   resolveOwnerManagedConnectorSetup,
-} from "@amtech/shared";
+} from "../../packages/shared/src/connector-setup";
+import { custodyFor } from "../../packages/shared/src/connector-registry";
 
 describe("managed native connector setup protocol", () => {
   it("represents OAuth and provider onboarding through one fail-closed descriptor", () => {
