@@ -14,6 +14,8 @@ function esc(value: unknown): string {
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
 
+const MCP_APP_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'none'; connect-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'";
+
 const BASE_STYLE = `
   :root{color-scheme:light;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
   *{box-sizing:border-box}
@@ -138,7 +140,7 @@ export function compileDeliverableUiResource(d: WorkDeliverableDescriptor): UiRe
   if (!d.view) return undefined;
   const authority = authorityProjection(d);
   const inner = renderViewHtml(d.view, d, authority);
-  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><style>${BASE_STYLE}</style></head>`
+  const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta http-equiv="Content-Security-Policy" content="${MCP_APP_CSP}"><style>${BASE_STYLE}</style></head>`
     + `<body>${inner}${actionScript(authority)}</body></html>`;
   const resourceId = authority?.resource_id ?? d.refs?.approval_id ?? d.refs?.artifact_id ?? "view";
   const uri = `ui://amtech/${d.type}/${encodeURIComponent(resourceId)}` as `ui://${string}`;
