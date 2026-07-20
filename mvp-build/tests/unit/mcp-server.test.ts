@@ -83,7 +83,7 @@ describe("Manager MCP server discovery and execution boundary", () => {
   it("intercepts complete bound identities through effective capability authority before tool dispatch", async () => {
     const source = await readFile("apps/manager/src/lib/mcp-server.ts", "utf8");
     const identityCheck = source.indexOf("assignment_identity_required");
-    const capabilityCheck = source.indexOf("authorizeManagerMcpToolExecution");
+    const capabilityCheck = source.indexOf("const capability = await authorizeManagerMcpToolExecution", identityCheck);
     const toolDispatch = source.indexOf("const outcome = await runManagerTool", capabilityCheck);
     expect(identityCheck).toBeGreaterThan(0);
     expect(capabilityCheck).toBeGreaterThan(identityCheck);
