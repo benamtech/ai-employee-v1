@@ -13,20 +13,23 @@ This folder is the versioned narrative handoff layer for AMTECH AI Employee impl
 - `../second-half-plan/` — one active production program plus historical plan families.
 - `../docs/architecture/` — explanatory cross-system structure and research disposition.
 - `../../wiki/MVP/implementation-records/` — historical factual implementation/proof ledger.
-- source, migrations, tests, workflows, proof, and PR `#23` — implementation and acceptance authority.
+- source, migrations, tests, workflows, proof, merged PR `#23`, and the current task PR — implementation and acceptance authority.
 
 `MEMORY.md` is the sole index for this folder. Do not create another handoff index.
 
 ## Current branch note
 
-- Integration branch: `employee-production-tuesday`, based on `research`.
-- Draft PR: `#23`.
-- `main` is not an integration shortcut.
+- Current integration baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
+- PR `#23` merged the reviewed cutover on 2026-07-20.
+- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
+- New work starts on reviewed task branches from current `main`.
+- `employee-production-tuesday` and `research` are historical branch context.
 - Migration head: `0072` at `../packages/db/migrations/0072_artifact_revision_scope_guards.sql`.
 - Standard v0.2 is ratified and effective.
 - Active program: `../second-half-plan/2026-07-19-ratified-standard-production-program/`.
-- Gate 0 source/code/document authority head `4be092f009de` passed all eight required workflows; exact run IDs are in the newest handoff.
-- The later handoff/index metadata head must remain green; its final exact matrix is recorded in PR `#23` after branch movement stops.
+- Current roadmap begins with Phase 1.1 repository authority and test-contract truth.
+- Final cutover head passed Ratified Standard `29717830698`, Hermes Upstream Review `29717830703`, and Main Integration Gates `29717830737`.
+- The broad historical `npm run test:unit` aggregate remains failed/open: merged PR `#23` records 30 files and 112 tests from stale/migrating fixtures. Named curated green suites do not prove the aggregate.
 
 Current source/CI must not be promoted into live managed-database, target-runtime/network, identity/provider, MCP Apps/AG-UI conformance, fixture-free Web/SMS/Review, commercial, capacity, crash/repair, rollback, deployment, or launch acceptance.
 
@@ -42,10 +45,11 @@ The complete family map is `../docs/architecture/12-document-control-memory-and-
 
 ## Index — newest first
 
-### Current Standard, protocol, architecture, and production boundary
+### Current post-merge roadmap and production boundary
 
-- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Current handoff. Records human ratification, the 16-dimensional evolution vector, managed connector manifest, exact provider-tool ownership, direct-MCP default deny, MCP Apps/AG-UI disposition, database TDD boundary, Gate 0 workflow matrix, authority-document transaction, and remaining live gates.
-- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Historical immediate predecessor. Records the capability nullability repair, strict-read/migration acceptance corrections, migration `0072`, and predecessor plan packet. Its active-plan and pending-status claims are superseded.
+- [2026-07-20 — Post-merge production roadmap reconciliation](2026-07-20-post-merge-production-roadmap-reconciliation.md) — Current handoff. Records merged-main reconciliation, the 38-issue vector, nine workstreams, test-suite disposition, Phases 1.1–1.9, exact-candidate/pilot expansion, source-confirmed Model Gateway gaps, Hermes materiality decision, unresolved prerequisites, and pending final-branch CI.
+- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Ratification/cutover predecessor. Records human ratification, the 16-dimensional evolution vector, managed connector manifest, exact provider-tool ownership, direct-MCP default deny, MCP Apps/AG-UI disposition, database TDD boundary, and Gate 0 workflow matrix. Its draft-branch/current-plan coordinates are superseded by the post-merge handoff.
+- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Historical immediate predecessor. Records capability nullability repair, strict-read/migration acceptance corrections, migration `0072`, and predecessor plan packet. Its active-plan and pending-status claims are superseded.
 - [2026-07-19 — Final document authority, infra/test audit, and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md) — Historical predecessor. Its `0069` and legacy-selector claims are superseded.
 - [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Repository-wide documentation/code-review checkpoint.
 - [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Historical Hermes/MCP/UI predecessor; official MCP Apps disposition is now in architecture document 16.
@@ -96,7 +100,7 @@ Older handoffs remain historical evidence. Read them only after current source, 
 - `browser/channel-accepted` — fixture-free supported-channel proof exists.
 - `commercial-accepted` — usage/cost/payer/beneficiary/invoice reconciliation passed.
 - `live-accepted` — canonical deployed end-to-end behavior passed.
-- `production-ready` — every non-waivable Standard gate passes on the exact deployed SHA.
+- `production-ready` — every non-waivable Standard gate passes on the exact signed deployed SHA.
 - `blocked`, `failed`, `pending` — state exactly why.
 
 Never infer live acceptance from source shape, mocks, fixtures, manually injected events, old containers, the estimator, trajectory scores, or historical pass counts.
@@ -105,7 +109,7 @@ Never infer live acceptance from source shape, mocks, fixtures, manually injecte
 
 After substantial work, each handoff records:
 
-1. repository, branch, PR, date, and exact implementation SHA;
+1. repository, branch/base/PR, date, and exact implementation/evidence SHA;
 2. primary role and interacting systems;
 3. purpose and invariant;
 4. exact files/migrations/systems changed;
@@ -114,7 +118,7 @@ After substantial work, each handoff records:
 7. status using the vocabulary above;
 8. exact tests/workflows/proof or explicit validation not run;
 9. failed attempts and diagnostics where material;
-10. unresolved P0/P1 risks;
+10. unresolved P0/P1/P2 risks;
 11. next dependency-ordered move;
 12. Standard/vector/CODEGRAPH/architecture/plan/memory/wiki/PR synchronization.
 
