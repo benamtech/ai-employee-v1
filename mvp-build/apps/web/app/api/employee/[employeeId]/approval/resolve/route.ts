@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ employeeId: string }> },
 ) {
   const { employeeId } = await params;
-  const body = await req.json();
+  const body = await req.json().catch(() => ({}));
   const cookieStore = await cookies();
   const ownerSessionToken = cookieStore.get("amtech_owner_session")?.value;
   if (!ownerSessionToken) return NextResponse.json({ error: "owner_session_missing" }, { status: 401 });
@@ -27,6 +27,8 @@ export async function POST(
     approval_id: body.approval_id,
     owner_response: body.owner_response,
     channel: "web",
+    protocol_assignment_id: body.protocol_assignment_id,
+    protocol_authority_version: body.protocol_authority_version,
   });
   const json = await res.json().catch(() => ({}));
   return NextResponse.json(json, { status: res.status });
