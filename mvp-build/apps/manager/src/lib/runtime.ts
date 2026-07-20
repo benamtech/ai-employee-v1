@@ -6,7 +6,7 @@ import { runEmployeeTurn } from "./turn-queue.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation, startWorkRun } from "./metering.js";
 import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
 import { buildOwnerTurnSystemMessage } from "./owner-turn-context.js";
-import { publishProgress } from "./progress-bus.js";
+import { publishProgress, type ProgressScope } from "./progress-bus.js";
 import { recoverEmployeeRuntime } from "./runtime-recovery.js";
 
 async function sleep(ms: number): Promise<void> {
@@ -32,6 +32,11 @@ export async function deliverOwnerTurnToRuntime(
     account_id: params.account_id, employee_id: params.employee_id,
     trigger_type: "owner_message", trigger_ref: params.idempotency_key,
   });
+  const progressScope: ProgressScope = {
+    account_id: params.account_id,
+    employee_id: params.employee_id,
+    assignment_id: params.assignment_id,
+  };
   const startedAt = Date.now();
   async function executeOwnerTurn(runId: string) {
     const api = await resolveRuntimeApi(db, params.employee_id);
@@ -47,7 +52,7 @@ export async function deliverOwnerTurnToRuntime(
       work_run_id: runId,
     }, (event) => {
       if (event.kind === "assistant_delta") {
-        publishProgress(params.employee_id, {
+        publishProgress(progressScope, {
           kind: "assistant_delta",
           run_id: runId,
           message_id: messageId,
@@ -56,7 +61,7 @@ export async function deliverOwnerTurnToRuntime(
         });
         return;
       }
-      publishProgress(params.employee_id, {
+      publishProgress(progressScope, {
         kind: "work_progress",
         run_id: runId,
         verb: event.verb,
@@ -102,7 +107,7 @@ export async function deliverOwnerTurnToRuntime(
         turn = await executeOwnerTurn(runId);
       } catch (err) {
         if (String((err as Error).message ?? err) !== "runtime_unreachable") throw err;
-        publishProgress(params.employee_id, { kind: "work_progress", run_id: runId, verb: "Restarting employee", state: "started" });
+        publishProgress(progressScope, { kind: "work_progress", run_id: runId, verb: "Restarting employee", state: "started" });
         await recoverEmployeeRuntime(db, { account_id: params.account_id, employee_id: params.employee_id });
         turn = await executeOwnerTurnAfterRecovery(runId);
       }
@@ -116,7 +121,7 @@ export async function deliverOwnerTurnToRuntime(
   });
   if (result.status === "succeeded" || result.status === "duplicate") await finishWorkRun(db, runId, "succeeded");
   else if (result.status === "failed") await finishWorkRun(db, runId, "failed");
-  publishProgress(params.employee_id, { kind: "run_completed", run_id: runId, status: result.status });
+  publishProgress(progressScope, { kind: "run_completed", run_id: runId, status: result.status });
   return { status: result.status, job_id: result.job_id, reply: String(result.output?.reply ?? ""), error: result.error, run_id: runId };
 }
 
