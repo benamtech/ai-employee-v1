@@ -72,11 +72,78 @@ async function runtimeJson(path, init = {}) {
   return { response, json, port };
 }
 
+function object(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function string(value) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function boolean(value) {
+  return typeof value === "boolean" ? value : null;
+}
+
+function humanize(value) {
+  return String(value ?? "").replace(/[_:.\/-]+/g, " ").replace(/\b\w/g, (char) => char.toUpperCase()).trim();
+}
+
+function normalizeTool(value) {
+  if (typeof value === "string") return { name: value, label: humanize(value), description: null };
+  const row = object(value);
+  const name = string(row.name) ?? string(row.tool_name) ?? string(row.id);
+  if (!name) return null;
+  return {
+    name,
+    label: string(row.label) ?? string(row.title) ?? humanize(name),
+    description: string(row.description) ?? string(row.summary),
+    read_only: boolean(row.read_only) ?? boolean(row.readOnly),
+    risk: string(row.risk),
+    requires_approval: boolean(row.requires_approval) ?? boolean(row.requiresApproval),
+  };
+}
+
+function normalizeToolset(name, raw) {
+  const info = object(raw);
+  const rawTools = Array.isArray(info.tools)
+    ? info.tools
+    : Array.isArray(info.available_tools)
+      ? info.available_tools
+      : info.tools && typeof info.tools === "object"
+        ? Object.entries(info.tools).map(([toolName, metadata]) => ({ name: toolName, ...object(metadata) }))
+        : [];
+  const tools = rawTools.map(normalizeTool).filter(Boolean);
+  const source = `${string(info.transport) ?? ""} ${string(info.kind) ?? ""} ${string(info.source) ?? ""} ${string(info.provider) ?? ""}`.toLowerCase();
+  const transport = source.includes("mcp") || name.toLowerCase().includes("mcp") ? "direct_mcp" : "runtime_native";
+  const serverId = string(info.server_id)
+    ?? string(info.serverId)
+    ?? string(info.mcp_server)
+    ?? string(info.provider)
+    ?? `${transport === "direct_mcp" ? "mcp" : "hermes"}:${name}`;
+  return {
+    name,
+    info,
+    tools,
+    server_id: serverId,
+    server_label: string(info.server_label) ?? string(info.serverLabel) ?? string(info.display_name) ?? humanize(serverId),
+    transport,
+    category: string(info.category),
+    read_only: boolean(info.read_only) ?? boolean(info.readOnly),
+    risk: string(info.risk),
+    requires_approval: boolean(info.requires_approval) ?? boolean(info.requiresApproval),
+    connector_id: string(info.connector_id) ?? string(info.connectorId),
+    setup_requirement: string(info.setup_requirement) ?? string(info.setupRequirement),
+  };
+}
+
 function toolsetsFrom(value) {
   const raw = value?.toolsets;
-  if (Array.isArray(raw)) return raw.filter((item) => item?.name).map((item) => [String(item.name), item]);
-  if (raw && typeof raw === "object") return Object.entries(raw);
-  return [];
+  const entries = Array.isArray(raw)
+    ? raw.filter((item) => item?.name).map((item) => [String(item.name), item])
+    : raw && typeof raw === "object"
+      ? Object.entries(raw)
+      : [];
+  return entries.map(([name, info]) => normalizeToolset(name, info));
 }
 
 function substrateProbe() {
@@ -167,10 +234,17 @@ try {
   if (!health.response.ok) throw new Error(`runtime_health_failed:${health.response.status}`);
   const fileProbe = await fileToolProbe(capabilities.json);
   const rows = toolsetsFrom(toolsets.json);
-  const capabilityRows = rows.map(([name, info]) => {
-    const fileLike = name === "file" || (Array.isArray(info?.tools) && info.tools.some((tool) => /file|write|read/i.test(String(tool))));
+  const capabilityRows = rows.map((row) => {
+    const name = row.name;
+    const info = row.info;
+    const toolNames = row.tools.map((tool) => tool.name);
+    const fileLike = name === "file" || toolNames.some((tool) => /file|write|read/i.test(tool));
     const live = fileLike ? fileProbe.status : "skipped";
-    const credentialRequired = ["web", "search", "browser", "vision", "image_generation", "tts"].includes(name);
+    const credentialRequired = ["web", "search", "browser", "vision", "image_generation", "tts"].includes(name) || row.transport === "direct_mcp";
+    const toolDescriptions = Object.fromEntries(row.tools.filter((tool) => tool.description).map((tool) => [tool.name, tool.description]));
+    const toolLabels = Object.fromEntries(row.tools.map((tool) => [tool.name, tool.label]));
+    const commonReadOnly = row.read_only ?? (row.tools.length > 0 && row.tools.every((tool) => tool.read_only === true));
+    const commonRequiresApproval = row.requires_approval ?? row.tools.some((tool) => tool.requires_approval === true);
     return {
       capability_key: name,
       advertised: true,
@@ -179,14 +253,25 @@ try {
       credential_ready: credentialRequired ? false : true,
       network_ready: !credentialRequired,
       policy_ready: true,
-      connector_ready: true,
-      connector_required: false,
+      connector_ready: row.transport === "direct_mcp" ? false : true,
+      connector_required: row.transport === "direct_mcp",
       live_probe_status: live,
       evidence: {
-        reported_tools: info?.tools ?? [],
+        reported_tools: toolNames,
+        tool_descriptions: toolDescriptions,
+        tool_labels: toolLabels,
+        server_id: row.server_id,
+        server_label: row.server_label,
+        transport: row.transport,
+        category: row.category,
+        read_only: commonReadOnly,
+        risk: row.risk,
+        requires_approval: commonRequiresApproval,
+        connector_id: row.connector_id,
+        setup_requirement: row.setup_requirement,
         runtime_health: health.json,
         substrate,
-        ...(fileLike ? { file_tool_probe: fileProbe } : { reason: credentialRequired ? "provider_and_network_probe_required" : "capability_specific_live_probe_not_executed" }),
+        ...(fileLike ? { file_tool_probe: fileProbe } : { reason: credentialRequired ? "credential_network_connector_and_live_probe_required" : "capability_specific_live_probe_not_executed" }),
       },
     };
   });
@@ -208,7 +293,7 @@ try {
     account_id: accountId,
     assignment_id: assignmentId,
     billable_probe_enabled: allowBillable,
-    runtime: { health: health.json, capabilities: capabilities.json, toolsets: toolsets.json },
+    runtime: { health: health.json, capabilities: capabilities.json, toolsets: toolsets.json, normalized_toolsets: rows },
     substrate,
     file_tool_probe: fileProbe,
     persisted_report: persisted,
