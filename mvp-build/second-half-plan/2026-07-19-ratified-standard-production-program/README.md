@@ -18,7 +18,7 @@ This folder is the single active production program. Predecessor remediation, ca
 
 AMTECH installs governed persistent AI Employees. The moat is the reusable labor protocol joining identity/assignments, capability discovery, connector custody, work objects/generated views, approvals/effects, recovery/proof/commercial attribution, and bounded MCP, MCP Apps, AG-UI, Web, SMS, and signed-Review adapters.
 
-Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
+Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.
 
 ## Current state
 
