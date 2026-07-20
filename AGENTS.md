@@ -1,19 +1,20 @@
 # AGENTS.md — Repository Agent Rules
 
 Status: active  
-Updated: 2026-07-19
+Updated: 2026-07-20
 
 ## Mandatory read order
 
 1. `identity.md`
 2. this file or `CLAUDE.md`
 3. root `CODEGRAPH.md`
-4. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
-5. ratified `mvp-build/STANDARD.md`
-6. `mvp-build/second-half-plan/README.md` and its single active program
-7. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
-8. `mvp-build/docs/architecture/README.md`
-9. relevant source, migrations, tests, workflows, proof, release records, and current diff
+4. [`CONTRIBUTING.md`](CONTRIBUTING.md) for executable onboarding and verification
+5. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
+6. ratified `mvp-build/STANDARD.md`
+7. `mvp-build/second-half-plan/README.md` and its single active program
+8. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
+9. `mvp-build/docs/architecture/README.md`
+10. relevant source, migrations, tests, workflows, proof, release records, and current diff
 
 Authority order: deployed release proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests/acceptance → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
@@ -25,18 +26,17 @@ Authority order: deployed release proof → applied migrations/durable state →
 - Current architecture/research disposition: `mvp-build/docs/architecture/`.
 - Durable handoffs: `mvp-build/memory/`, indexed only by `mvp-build/memory/MEMORY.md`.
 - Historical factual ledger: `wiki/MVP/implementation-records/`.
-- Wiki plans/rationale are historical or explanatory unless routed by current root/scoped indexes.
 - Hyper Site lives in `benamtech/hyper-site`; do not recreate it here.
 - The public estimator is outdated and non-canonical.
 
 ## Current integration boundary
 
 - Repository: `benamtech/ai-employee-v1`.
-- Integration branch: `employee-production-tuesday`.
-- Base: `research`.
-- Draft PR: `#23`.
+- Integration/cutover branch: `employee-production-tuesday`.
+- Target/base: `main`.
+- Draft cutover PR: `#23`.
+- Historical `research` is not a current authority or future integration dependency.
 - Migration head: `0072`.
-- `main` is never the integration or release shortcut.
 - Standard v0.2 is ratified and effective.
 - Current source/CI does not imply database, target-host, provider, fixture-free browser/channel, commercial, recovery, rollback, capacity, deployment, or launch acceptance.
 
@@ -55,37 +55,59 @@ Authority order: deployed release proof → applied migrations/durable state →
 11. Ambiguous consequential provider outcomes reconcile before retry.
 12. Public and release claims never exceed evidence on the exact candidate.
 
+## Required contributor gate
+
+From `mvp-build/`:
+
+```bash
+npm ci
+npm run hooks:install
+npm run repo:verify:quick
+```
+
+Before editing, validate a bounded task contract and six-point rubric:
+
+```bash
+npm run repo:rubric -- ./task-contract.json
+```
+
+Before pushing:
+
+```bash
+npm run repo:verify:full
+```
+
+Local hooks provide fast feedback but are bypassable; CI is authoritative. Coverage is required for changed logic where the package has instrumentation, but no agent may invent a misleading repository-wide percentage without a measured baseline.
+
 ## Company engineering standards
 
-Every task must declare:
-
-- task ID, repository, branch, and concise objective;
-- verifiable success criteria;
-- allowed and forbidden files;
-- required tests;
-- known blockers;
-- maximum commits when assigned.
-
-Execution:
+Every task must declare task ID, repository, branch, objective, success criteria, allowed/forbidden files, required tests, blockers, maximum commits, and Authority/Completeness/Agility/Isolation/Provability/Moat scores with mitigations below `0.5`.
 
 ```text
 Explore → smallest coherent action → test → commit → verify exact head
 ```
 
-Rules:
-
-- Never edit `main`.
+- Work on the selected reviewed branch; `main` changes only through an approved merge.
 - No feature expansion while a prerequisite P0 is unresolved.
 - Every commit references the task ID.
-- If CI is red after the change, stop downstream work and fix or escalate.
-- If an applicable test fails after the change, treat it as the change's defect unless evidence proves the expectation stale.
+- Stop downstream work on red CI.
+- Treat a new applicable failure as the change's defect unless evidence proves the expectation stale.
 - Do not weaken tests merely to obtain green.
 - Use `find`/`grep` rather than guessing paths.
-- Run tests before reporting completion.
-- After three failed attempts on the same concrete step, preserve diagnostics and escalate.
-- Measure on this codebase and deployed product boundary, not public benchmark scores.
+- After three failed attempts on one concrete step, preserve diagnostics and escalate.
 - Schemas, fixtures, migrations, typed contracts, harnesses, diagnostics, proof capture, and runbooks are first-class implementation.
 - Add concise `why` comments at non-obvious authority, safety, failure, or compatibility boundaries.
+
+## Hermes upstream review
+
+Before changing Hermes integration, runtime launch, profiles, sessions, delegation, tool discovery, gateway behavior, or Hermes-derived UI, run:
+
+```bash
+cd mvp-build
+npm run hermes:upstream:check
+```
+
+Review the official `NousResearch/hermes-agent` repository, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active pull requests. Upstream is intelligence, not authority: AMTECH production remains pinned until exact-image compatibility and release gates pass.
 
 ## Database evidence policy
 
@@ -101,8 +123,7 @@ Disposable managed Supabase is required only for material platform-specific beha
 - `mvp-build/second-half-plan/README.md` owns the single active plan route.
 - `mvp-build/memory/MEMORY.md` is the sole handoff index.
 - Historical documents remain point-in-time evidence; route them through explicit supersession banners rather than silently rewriting facts.
-- A newer date or longer document does not automatically make a file authoritative.
 
 ## Git discipline
 
-Work only on the selected branch. Do not force-update shared branches without explicit approval and a recovery path. Merge only when required checks pass, current authority documents and proof agree, and no P0/P1 gate is hidden.
+`employee-production-tuesday` is the reviewed cutover branch for PR `#23` into `main`. Do not force-update shared branches without explicit approval and a recovery path. Merge only when required checks pass, current authority documents and proof agree, and no P0/P1 gate is hidden.
