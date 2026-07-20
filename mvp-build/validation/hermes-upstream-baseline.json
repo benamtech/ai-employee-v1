@@ -2,8 +2,8 @@
   "schema_version": 1,
   "upstream_repository": "NousResearch/hermes-agent",
   "default_branch": "main",
-  "reviewed_at": "2026-07-20T03:30:00Z",
-  "reviewed_main_sha": "7f56f897062111ae2a469e4389b2b85321b3fcb4",
+  "reviewed_at": "2026-07-20T04:18:00Z",
+  "reviewed_main_sha": "9c3ffcaae3681bbf4921ea9828b92f31f3810a4f",
   "production_runtime_pin": "nousresearch/hermes-agent:v2026.7.1",
   "review_window_days": 14,
   "watched_paths": {
@@ -15,6 +15,7 @@
     "Task recovery must clear every stale claim field in one transaction rather than reporting a partial unblock as success.",
     "Background delegation and transient UI disconnects must not transfer or destroy session ownership.",
     "Provider setup tests should wait for the actual post-setup affordance rather than treating an earlier header as readiness proof.",
-    "Credential drift across cloned runtime profiles is a first-class rotation and diagnostics risk."
+    "Credential drift across cloned runtime profiles is a first-class rotation and diagnostics risk.",
+    "Async UI tests should widen bounded wait deadlines under CI contention without adding arbitrary sleeps or slowing successful paths."
   ]
 }
