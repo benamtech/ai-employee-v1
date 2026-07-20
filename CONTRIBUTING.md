@@ -25,7 +25,7 @@ Then read progressively, stopping when the task is clear:
 5. the newest relevant entry in `mvp-build/memory/MEMORY.md`;
 6. only the source, migration, test, workflow, runbook, or proof files needed for the task.
 
-PR `#23` merged the cutover into `main` on 2026-07-20. The cutover branch and `research` are historical context. New production work starts on reviewed task branches from current `main`.
+PR `#29` merged the post-cutover roadmap into `main`. New production work starts on reviewed task branches from current `main`; the cutover and `research` branches are historical context.
 
 Do not concatenate historical plans or handoffs into working context. Current source, applied migrations, exact-SHA evidence, the ratified Standard, and the active program outrank older prose.
 
@@ -74,21 +74,23 @@ New or materially changed pure/business logic should maintain at least 80% focus
 ```bash
 npm run repo:verify:quick   # Standard, plan, connector, onboarding, and governance contracts
 npm run repo:verify:full    # quick gate + dependency-ordered typecheck + lint
-npm run test:unit           # broad historical aggregate; Phase 1.1 must normalize it
+npm run test:unit           # complete broad unit/source regression; builds shared/db first
 npm run test:integration    # PostgreSQL/environment-gated behavior when applicable
 npm run build               # production build boundary
 ```
 
-`Main Integration Gates` executes named ratified authority, onboarding, production-boundary, UI-contract, build, archaeology, and compiled-browser suites. It is the canonical merge-readiness gate for PRs into `main`, but it does not prove the broader aggregate passes.
+`Main Integration Gates` is the canonical merge-readiness gate for pull requests into `main`. It independently runs repository/source contracts, the broad unit aggregate, production build, archaeology, and compiled Chromium fixture regression, then fails the summary when any component is not successful.
 
-The broad `test:unit` aggregate was red on final cutover head `d131dd09`; merged PR `#23` records 30 files and 112 failed tests from pre-ratification assignment, principal, fake-RPC, and environment fixtures. This is explicit Phase 1.1 normalization work. No curated green suite may be reported as proof that the broad aggregate is green.
+WS-01 normalized the broad aggregate on implementation head `1460960`: **106 files and 613 tests passed**, with no excluded or quarantined files. Obsolete pre-assignment/account-owned/direct-provider suites were deleted only where current replacement contracts covered the surviving invariant. Broad and curated results remain separate evidence lines.
 
 The installed pre-commit hook runs the quick gate. The pre-push hook runs the full gate. CI remains authoritative because hooks can be skipped locally.
 
 ## Non-bypassable invariants
 
 - Manager owns assignment authority, connector and credential custody, approval, durable effects, commercial attribution, repair, and proof.
-- Hermes owns employee reasoning/runtime behavior but cannot choose account, assignment, payer, policy, approval, or provider credentials.
+- Hermes owns employee reasoning/runtime behavior but cannot choose account, assignment, payer, policy, approval, provider identity, endpoint, upstream model, or provider credentials.
+- Runtime model requests use only the stable AMTECH model alias; Manager resolves registered provider routing.
+- Caller-supplied provider, profile, endpoint, headers, tokens, or credentials fail before dispatch.
 - Unknown or stale connector/capability evidence fails closed.
 - Broad categories never select a provider, scope, tool, credential mode, account row, or authorization host.
 - Consequential success requires a matching durable accepted receipt; ambiguous provider outcomes reconcile before retry.
