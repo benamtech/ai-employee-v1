@@ -40,9 +40,11 @@ function recent(value: unknown, now: number, maxAgeMs: number): boolean {
 
 function relationshipCurrent(input: { status?: unknown; starts_at?: unknown; ends_at?: unknown }, now: number): boolean {
   if (String(input.status ?? "") !== "active") return false;
-  const startsAt = input.starts_at ? Date.parse(String(input.starts_at)) : Number.NEGATIVE_INFINITY;
-  const endsAt = input.ends_at ? Date.parse(String(input.ends_at)) : Number.POSITIVE_INFINITY;
-  return Number.isFinite(startsAt) && Number.isFinite(endsAt) && startsAt <= now && now < endsAt;
+  const startsAt = input.starts_at ? Date.parse(String(input.starts_at)) : null;
+  const endsAt = input.ends_at ? Date.parse(String(input.ends_at)) : null;
+  const startsCurrent = startsAt == null || (Number.isFinite(startsAt) && startsAt <= now);
+  const endsCurrent = endsAt == null || (Number.isFinite(endsAt) && now < endsAt);
+  return startsCurrent && endsCurrent;
 }
 
 export interface McpCapabilityAuthorityDecision {
