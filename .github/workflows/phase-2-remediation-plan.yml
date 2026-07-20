@@ -1,4 +1,4 @@
-name: Phase 2 Remediation Plan Integrity
+name: Ratified Standard and Production Plan Integrity
 
 on:
   workflow_dispatch:
@@ -6,32 +6,56 @@ on:
     branches:
       - employee-production-tuesday
     paths:
-      - "mvp-build/second-half-plan/phase-2-standard-remediation-execution.md"
-      - "mvp-build/validation/phase-2-remediation-vectors.json"
+      - "mvp-build/STANDARD.md"
+      - "mvp-build/second-half-plan/**"
+      - "mvp-build/docs/architecture/16-standard-research-basis-and-protocol-disposition.md"
+      - "mvp-build/validation/standard-v0.2-evolution-vector.json"
+      - "mvp-build/packages/shared/src/connector-setup.ts"
+      - "mvp-build/apps/manager/src/lib/artifact-workbench-routes.ts"
+      - "mvp-build/apps/web/app/api/employee/[employeeId]/connect/[connector]/route.ts"
+      - "mvp-build/apps/web/app/agent/[employeeId]/connect/[connector]/page.tsx"
+      - "mvp-build/apps/web/app/agent/[employeeId]/components/CapabilityDrawer.tsx"
+      - "mvp-build/tests/unit/standard-ratification-contract.test.ts"
+      - "mvp-build/tests/unit/connector-setup.test.ts"
+      - "mvp-build/tests/unit/capability-drawer-setup-contract.test.ts"
       - "mvp-build/tests/unit/remediation-plan-integrity.test.ts"
+      - "mvp-build/validation/phase-2-remediation-vectors.json"
       - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
       - ".github/workflows/phase-2-remediation-plan.yml"
   pull_request:
     branches:
       - research
     paths:
-      - "mvp-build/second-half-plan/phase-2-standard-remediation-execution.md"
-      - "mvp-build/validation/phase-2-remediation-vectors.json"
+      - "mvp-build/STANDARD.md"
+      - "mvp-build/second-half-plan/**"
+      - "mvp-build/docs/architecture/16-standard-research-basis-and-protocol-disposition.md"
+      - "mvp-build/validation/standard-v0.2-evolution-vector.json"
+      - "mvp-build/packages/shared/src/connector-setup.ts"
+      - "mvp-build/apps/manager/src/lib/artifact-workbench-routes.ts"
+      - "mvp-build/apps/web/app/api/employee/[employeeId]/connect/[connector]/route.ts"
+      - "mvp-build/apps/web/app/agent/[employeeId]/connect/[connector]/page.tsx"
+      - "mvp-build/apps/web/app/agent/[employeeId]/components/CapabilityDrawer.tsx"
+      - "mvp-build/tests/unit/standard-ratification-contract.test.ts"
+      - "mvp-build/tests/unit/connector-setup.test.ts"
+      - "mvp-build/tests/unit/capability-drawer-setup-contract.test.ts"
       - "mvp-build/tests/unit/remediation-plan-integrity.test.ts"
+      - "mvp-build/validation/phase-2-remediation-vectors.json"
       - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
       - ".github/workflows/phase-2-remediation-plan.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: phase-2-remediation-plan-${{ github.ref }}
+  group: ratified-standard-production-plan-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  plan-integrity:
+  standard-plan-integrity:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: mvp-build
@@ -43,7 +67,25 @@ jobs:
           cache: npm
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
-      - name: Validate remediation registry and dependency graph
+      - name: Validate ratified Standard, evolution vector, and connector protocol
+        run: npm run test:standard
+      - name: Validate predecessor remediation registry remains parseable
         run: npm run test:remediation-plan
-      - name: Parse machine-readable vectors independently
-        run: node -e "const fs=require('fs'); const p=JSON.parse(fs.readFileSync('validation/phase-2-remediation-vectors.json','utf8')); if(p.findings.length!==29) process.exit(1); console.log({plan:p.plan_id,findings:p.findings.length,contracts:p.contracts.length,lanes:p.lanes.length});"
+      - name: Parse evolution vector independently
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync('validation/standard-v0.2-evolution-vector.json', 'utf8'));
+          const basis = ['expansion','satisfaction','narrowing','destructive_modification','appendix','reorientation'];
+          if (p.standard_id !== 'amtech-standard-v0.2') process.exit(1);
+          if (JSON.stringify(p.direction_basis) !== JSON.stringify(basis)) process.exit(1);
+          if (p.summary.dimensions !== p.dimensions.length || p.dimensions.length < 12) process.exit(1);
+          if (p.summary.unapproved_destructive_modifications !== 0 || p.summary.production_ready !== false) process.exit(1);
+          for (const d of p.dimensions) {
+            if (!d.original_clauses?.length || !d.ratified_clauses?.length) process.exit(1);
+            if (!(d.implementation_refs?.length || d.supersession_refs?.length)) process.exit(1);
+            if (d.direction?.destructive_modification !== 0) process.exit(1);
+            for (const key of basis) if (!Number.isFinite(d.direction?.[key])) process.exit(1);
+          }
+          console.log({ standard: p.standard_id, dimensions: p.dimensions.length, dominant_motion: p.summary.dominant_motion });
+          NODE
