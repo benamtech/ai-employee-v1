@@ -16,6 +16,9 @@ export type ManagedConnectorSetupFlow =
   | "managed_operator"
   | "none";
 
+/** Which durable read model proves that a shipped provider adapter is connected. */
+export type ManagedConnectorReadinessSource = "connector_accounts" | "stripe_connections" | "operator_evidence";
+
 export interface ManagedConnectorContinuation {
   tool: ToolName;
   input_from_proof: {
@@ -30,8 +33,9 @@ export interface ManagedConnectorContinuation {
  * One owner-safe, transport-neutral setup contract for a native connector.
  *
  * Why: provider names are adapters, not AMTECH's authorization ontology. Keeping
- * scopes, start tools, redirect hosts, custody, and continuation steps in one
- * descriptor prevents a browser or caller from selecting a more powerful flow.
+ * scopes, governed tools, readiness evidence, redirect hosts, custody, and
+ * continuation steps in one descriptor prevents a browser or broad capability
+ * category from selecting a more powerful provider flow.
  */
 export interface OwnerManagedConnectorSetup {
   key: string;
@@ -43,6 +47,9 @@ export interface OwnerManagedConnectorSetup {
   authorization_protocol: ManagedConnectorAuthorizationProtocol;
   setup_flow: ManagedConnectorSetupFlow;
   start_tool: ToolName | null;
+  /** Exact Manager tools governed by this adapter. Categories never imply provider identity. */
+  managed_tool_names: ToolName[];
+  readiness_source: ManagedConnectorReadinessSource;
   continuation: ManagedConnectorContinuation | null;
   requested_scopes: string[];
   allowed_authorization_hosts: string[];
@@ -73,6 +80,14 @@ const OWNER_MANAGED_CONNECTORS: readonly OwnerManagedConnectorSetup[] = [
     authorization_protocol: "oauth2_authorization_code",
     setup_flow: "oauth_redirect",
     start_tool: "connect_email",
+    managed_tool_names: [
+      "connect_email",
+      "run_email_connector_test",
+      "create_email_draft",
+      "send_email_draft",
+      "start_email_listener",
+    ],
+    readiness_source: "connector_accounts",
     continuation: null,
     requested_scopes: [
       "https://www.googleapis.com/auth/gmail.modify",
@@ -109,6 +124,21 @@ const OWNER_MANAGED_CONNECTORS: readonly OwnerManagedConnectorSetup[] = [
     authorization_protocol: "oauth2_authorization_code",
     setup_flow: "oauth_redirect",
     start_tool: "connect_quickbooks",
+    managed_tool_names: [
+      "connect_quickbooks",
+      "run_quickbooks_connector_test",
+      "create_expense",
+      "create_bill",
+      "create_invoice",
+      "create_payment",
+      "commit_quickbooks_write",
+      "query_quickbooks",
+      "get_profit_and_loss",
+      "get_balance_sheet",
+      "get_aged_receivables",
+      "get_aged_payables",
+    ],
+    readiness_source: "connector_accounts",
     continuation: null,
     requested_scopes: ["com.intuit.quickbooks.accounting"],
     allowed_authorization_hosts: ["appcenter.intuit.com"],
@@ -142,6 +172,15 @@ const OWNER_MANAGED_CONNECTORS: readonly OwnerManagedConnectorSetup[] = [
     authorization_protocol: "provider_managed_onboarding",
     setup_flow: "provider_onboarding_redirect",
     start_tool: "connect_stripe",
+    managed_tool_names: [
+      "connect_stripe",
+      "create_stripe_account_link",
+      "complete_stripe_onboarding",
+      "create_deposit_invoice",
+      "send_deposit_invoice",
+      "get_stripe_connection_status",
+    ],
+    readiness_source: "stripe_connections",
     continuation: {
       tool: "create_stripe_account_link",
       input_from_proof: {
@@ -183,6 +222,7 @@ function cloneConnector(connector: OwnerManagedConnectorSetup): OwnerManagedConn
   return {
     ...connector,
     aliases: [...connector.aliases],
+    managed_tool_names: [...connector.managed_tool_names],
     continuation: connector.continuation
       ? {
           ...connector.continuation,
@@ -234,7 +274,8 @@ export function ownerOAuthConnectorSetups(): OwnerOAuthConnectorSetup[] {
 
 /**
  * Resolve owner setup from capability metadata without relying on category or
- * tool-name branches in the Web client.
+ * tool-name branches in the Web client. Exact manifest tool membership is data,
+ * not a broad domain-category inference.
  */
 export function resolveManagedSetupForCapability(input: {
   connector_id?: string | null;
@@ -242,13 +283,17 @@ export function resolveManagedSetupForCapability(input: {
   tool_name?: string | null;
   category?: CapabilityCategory | null;
 }): OwnerManagedConnectorSetup | null {
-  const candidates = [input.connector_id, input.server_id, input.tool_name];
+  const candidates = [input.connector_id, input.server_id];
   for (const candidate of candidates) {
     const direct = resolveOwnerManagedConnectorSetup(candidate);
     if (direct) return direct;
     const meta = resolveConnectorMeta(candidate);
     const viaMeta = meta.known ? resolveOwnerManagedConnectorSetup(meta.key) : null;
     if (viaMeta) return viaMeta;
+  }
+  if (input.tool_name) {
+    const byTool = OWNER_MANAGED_CONNECTORS.find((connector) => connector.managed_tool_names.includes(input.tool_name as ToolName));
+    if (byTool) return cloneConnector(byTool);
   }
   // Why: a broad domain category is not provider identity. Falling back from
   // `accounting` or `communication` to one vendor would silently recreate the
