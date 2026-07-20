@@ -42,11 +42,12 @@ Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector o
 ## Canonical execution route
 
 1. [`04-dependency-ordered-production-plan.md`](04-dependency-ordered-production-plan.md) — phased roadmap and exact-candidate sequence.
-2. [`08-production-issue-vector.json`](08-production-issue-vector.json) and [`08-production-issue-vector.md`](08-production-issue-vector.md) — baseline scored issue source.
-3. [`09-workstream-execution-map.md`](09-workstream-execution-map.md) — workstream contracts.
-4. [`10-test-suite-disposition.md`](10-test-suite-disposition.md) — current test authority and WS-01 closure.
-5. [`07-verification-and-handoff-matrix.md`](07-verification-and-handoff-matrix.md) — evidence state and exact-candidate rules.
-6. [`12-ws01-ws02-execution-contract.json`](12-ws01-ws02-execution-contract.json) — implementation contract for this closure pass.
+2. [`08-production-issue-vector.json`](08-production-issue-vector.json) and [`08-production-issue-vector.md`](08-production-issue-vector.md) — immutable baseline scored issue source.
+3. [`13-resolution-ledger.json`](13-resolution-ledger.json) — current issue and control resolution state.
+4. [`09-workstream-execution-map.md`](09-workstream-execution-map.md) — workstream contracts.
+5. [`10-test-suite-disposition.md`](10-test-suite-disposition.md) — current test authority and WS-01 closure.
+6. [`07-verification-and-handoff-matrix.md`](07-verification-and-handoff-matrix.md) — evidence state and exact-candidate rules.
+7. [`12-ws01-ws02-execution-contract.json`](12-ws01-ws02-execution-contract.json) — implementation contract for this closure pass.
 
 ## Current dependency order
 
@@ -87,3 +88,4 @@ Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector o
 - `10-test-suite-disposition.md`
 - `11-task-contract.json`
 - `12-ws01-ws02-execution-contract.json`
+- `13-resolution-ledger.json`
