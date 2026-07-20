@@ -136,25 +136,36 @@ check("GOV-13", issueVector.version === "2026-07-20.post-merge.1"
   && new Set(issueVector.issues.map((issue) => issue[1])).size === 9, "baseline machine issue vector remains immutable and contains 38 unique issues across nine workstreams");
 
 check("GOV-14", activePlan.includes("**106 files / 613 tests**")
-  && activePlan.includes("unverified until the final exact head passes")
-  && testDisposition.includes("curated and broad results are independently reported")
+  && activePlan.includes("Hardened WS-02 implementation evidence head")
+  && activePlan.includes("ISS-011")
+  && testDisposition.includes("110 test files / 635 tests")
+  && verificationMatrix.includes("110 files / 635 tests")
   && verificationMatrix.includes("Broad and curated suites are independently reported")
-  && !activePlan.includes("aggregate remains explicitly red"), "WS-01 evidence stays stable while current WS-02 exact-head repair remains explicit");
+  && !activePlan.includes("aggregate remains explicitly red"), "WS-01 history and hardened WS-02 evidence remain distinct while ISS-011 stays open");
 
 check("GOV-15", activePlan.includes("Caller-supplied provider")
-  && activePlan.includes("Remote MCP authorization, MCP Apps, AG-UI, effective-capability execution, and streaming Web are source implementations")
+  && activePlan.includes("Remote MCP authorization, MCP Apps, AG-UI, effective-capability execution, and streaming Web are source/CI accepted")
   && activePlan.includes("Phase 1.2 is not release-complete")
   && verificationMatrix.includes("Provider-authority lock")
-  && testDisposition.includes("obsolete suites were removed atomically rather than skipped"), "provider authority stays locked without promoting protocol source into live acceptance");
+  && testDisposition.includes("obsolete pre-ratification suites were removed atomically rather than skipped"), "provider and protocol authority are source/CI locked without promoting live connector or release acceptance");
 
-const resolvedIssueIds = new Set((resolutionLedger.issue_resolutions ?? []).filter((entry) => entry.state === "source_ci_resolved").map((entry) => entry.id));
-const providerControl = (resolutionLedger.control_resolutions ?? []).find((entry) => entry.id === "CTRL-WS02-PROVIDER-AUTHORITY");
+const resolvedIssueIds = new Set((resolutionLedger.issue_resolutions ?? [])
+  .filter((entry) => entry.state === "source_ci_resolved")
+  .map((entry) => entry.id));
+const providerControl = (resolutionLedger.control_resolutions ?? [])
+  .find((entry) => entry.id === "CTRL-WS02-PROVIDER-AUTHORITY");
+const protocolControl = (resolutionLedger.control_resolutions ?? [])
+  .find((entry) => entry.id === "CTRL-WS02-PROTOCOL-AUTHORITY");
 check("GOV-16", resolutionLedger.baseline_issue_vector === "08-production-issue-vector.json"
   && resolutionLedger.implementation_evidence_head === "1460960f415fafc20582313b1dd2117b781a63f7"
-  && ["ISS-001", "ISS-002", "ISS-003", "ISS-004", "ISS-005", "ISS-006"].every((id) => resolvedIssueIds.has(id))
+  && resolutionLedger.ws02_protocol_implementation_evidence_head === "16dc18e0535ac14f867875989dfe5aee596f89c0"
+  && ["ISS-001", "ISS-002", "ISS-003", "ISS-004", "ISS-005", "ISS-006", "ISS-007", "ISS-008", "ISS-009", "ISS-010"].every((id) => resolvedIssueIds.has(id))
+  && !resolvedIssueIds.has("ISS-011")
   && providerControl?.state === "source_ci_accepted"
   && providerControl?.does_not_resolve?.length === 5
-  && resolutionLedger.production_ready === false, "resolution ledger closes WS-01, records the bounded provider control, and preserves open production gates");
+  && protocolControl?.state === "source_ci_accepted"
+  && JSON.stringify(protocolControl?.does_not_resolve) === JSON.stringify(["ISS-011"])
+  && resolutionLedger.production_ready === false, "resolution ledger preserves WS-01 history, closes hardened WS-02 source controls, and keeps ISS-011/production gates open");
 
 const report = {
   generated_at: new Date().toISOString(),
