@@ -1,36 +1,34 @@
 # mvp-build durable memory — index and writing protocol
 
 Status: active  
-Updated: 2026-07-19
+Updated: 2026-07-20
 
 This folder is the versioned narrative handoff layer for the AMTECH AI Employee implementation. It records what changed, why, current status, unresolved risks, exact proof, and the next agent's starting point.
 
 ## Use the knowledge layers correctly
 
 - `memory/` — session narrative, architectural decisions, incidents, unresolved risks, and next-agent handoff.
-- `../CODEGRAPH.md` — current implementation topology, source hubs, migration head, and evidence boundary.
-- `../docs/architecture/` — current cross-system structure, effects, risks, agent roles, trajectory analysis, and infrastructure/test audit.
+- `../CODEGRAPH.md` — implementation topology, source hubs, migration head, and evidence boundary; verify its point-in-time status against current source and the newest handoff.
+- `../docs/architecture/` — cross-system structure, effects, risks, agent roles, trajectory analysis, and infrastructure/test audit.
 - `../../wiki/MVP/implementation-records/` — older factual implementation/proof ledger.
-- `../second-half-plan/` — active execution program plus historical plan family.
+- `../second-half-plan/` — active execution program, focused current companions, and historical plan family.
 - source, migrations, tests, workflows, and proof — implementation and acceptance authority.
 
 `MEMORY.md` is the sole index for this folder. Do not add a second competing handoff index.
 
 ## Current branch note
 
-The active integration branch is `employee-production-tuesday`, based on `research`, with draft PR `#23`; `main` is not the integration shortcut. Migration head is `0069`.
+The active integration branch is `employee-production-tuesday`, based on `research`, with draft PR `#23`; `main` is not the integration shortcut. Migration head is `0072` at `../packages/db/migrations/0072_artifact_revision_scope_guards.sql`.
 
-The complete green code/test evidence anchor for the current review session is `7492c52ba2dbb97ce57efcda4f8d4b7e839b39ec`. Later commits synchronize documentation and do not automatically inherit a complete workflow rerun.
+The primary capability-closure implementation anchor is `5b56e6a2249f4b5a650d81badbdd7b95cd6ea2bb`. Later plan/memory/document commits do not automatically inherit that anchor's complete workflow matrix. Exact final-head run IDs must be recorded after branch movement stops and every required workflow concludes.
 
-The current pass closes the established activation/generated-UI/bearer/strict-read findings; corrects production Caddy and per-employee network source topology; extends strict context reads; rejects missing production operating state; adds exhaustive tracked-object archaeology; creates the architecture, trajectory, agent-role, document-control, memory, infrastructure, deployment, UI-test, and validation maps; and synchronizes root/scoped control documents.
-
-The final infra audit also confirms that normal production, production-like, smoke, and rollback helpers still select the legacy Compose family. Do not deploy through those commands until they converge on `docker-compose.production.yml` and pass source plus target-host tests.
+The current pass closes the actual Web capability setup nullability failure, adds a regression contract, reconciles strict-read acceptance with capability enrichment, and makes migration-head acceptance follow the SQL ledger. It also records that canonical production Compose selection is now source-wired through `../infra/scripts/production-topology.mjs`; real target-host acceptance remains open.
 
 Do not infer real Supabase, target-runtime/network, live identity/provider, provider-backed browser action/effect, fixture-free Web/SMS/Review, commercial reconciliation, capacity, crash/repair, rollback, deployment, or launch acceptance from the current source/CI state.
 
 ## Read order inside memory
 
-1. Read root/scoped CODEGRAPH and architecture first.
+1. Read root/scoped CODEGRAPH and architecture first, but verify stale point-in-time headers against current source.
 2. Read the newest handoff relevant to the subsystem.
 3. Read predecessor handoffs only when they explain an inherited decision, incident, or proof.
 4. Verify every carried-forward claim against current source and exact-head proof.
@@ -42,16 +40,17 @@ The complete classification and document-family map is `../docs/architecture/12-
 
 ### Current architecture, UI/runtime, and production boundary
 
-- [2026-07-19 — Final document authority, infra/test audit, and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md) — Session-ground final handoff. Names the green code/test anchor, all major changes, document-authority bootstrap, canonical-versus-legacy deployment fork, UI/browser evidence boundary, production blockers, and next TDD sequence.
-- [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Documentation/code-review checkpoint. Maps the entire system, closes source-confirmed network/context/UI protocol defects, accounts for all document families and handoffs, and defines coding-agent roles and production trajectories.
-- [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Official Hermes programmatic surfaces, issue `#360`, MCP bridge patterns, Hermes WebUI architecture, protocol congruence, adaptive-planner authority, generated-view parity, production Next browser harness, and exact-SHA UI evidence predecessor.
+- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Current implementation handoff. Rejects the stale six-error premise, records the atomic connector setup action, regression contract, strict-read/migration acceptance repairs, migration head `0072`, canonical deploy source state, exact workflow boundaries, focused plan folder, and remaining live P0/P1 gates.
+- [2026-07-19 — Final document authority, infra/test audit, and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md) — Historical predecessor. Names the earlier green code/test anchor, document-authority bootstrap, then-current deploy fork finding, UI/browser evidence boundary, production blockers, and TDD sequence. Its `0069` and legacy-selector claims are superseded by current source and the 2026-07-20 handoff.
+- [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Documentation/code-review checkpoint. Maps the entire system, source-confirmed network/context/UI protocol defects, document families, and coding-agent roles.
+- [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Official Hermes programmatic surfaces, issue `#360`, MCP bridge patterns, protocol congruence, generated-view parity, production Next browser harness, and exact-SHA UI evidence predecessor.
 - [2026-07-19 — UI, Hermes, roles, assignments, and production-readiness handoff](2026-07-19-ui-runtime-production-readiness-handoff.md) — UI/runtime/role/session/shared-employee/public/operator analysis and production sequence predecessor.
 - [2026-07-18 — S2–S9 authority and runtime-boundary checkpoint](2026-07-18-s2-s9-authority-runtime-checkpoint.md) — Owner assignment, C3 owner-turn repair, connector custody, commercial attribution, approval, platform authority, revocation, signed-resource closure, generated Manager, and production-image predecessor.
 
 ### Standard remediation and integration history
 
 - [2026-07-18 — CI-green production plan digest](2026-07-18-ci-green-plan-digest.md) — Earlier Lane 1/Lane 3/Lane 10 checkpoint and 16-step path.
-- [2026-07-18 — Lane 1 scope inventory and Lane 10 evidence spine](2026-07-18-lane1-scope-lane10-evidence-spine.md) — Consequential-surface scope registry, migration `0042`, assignment tests, release-evidence schemas/generator, and integrated Lane 10 CI.
+- [2026-07-18 — Lane 1 scope inventory and Lane 10 evidence spine](2026-07-18-lane1-scope-lane10-evidence-spine.md) — Consequential-surface registry, migration `0042`, assignment tests, release-evidence schemas/generator, and integrated Lane 10 CI.
 - [2026-07-18 — Lane 3 integration and repository-boundary cleanup](2026-07-18-lane3-integration-and-repository-boundary-cleanup.md) — Scheduler harness correction, durable command/effect integration, Hyper Site workspace removal, and control-document routing repair.
 - [2026-07-18 — Standard remediation checkpoint: Lane 1 integrated, Lane 3 contract/red boundary](2026-07-18-standard-remediation-lane1-lane3-handoff.md) — Historical predecessor.
 - [2026-07-18 — AMTECH Phase 2 Standard Enforcement Audit](2026-07-18-amtech-phase-2-standard-enforcement-audit.md) — Standard enforcement, GAPS/REMEDIATION, and missing authority/custody/commercial foundations.
@@ -77,7 +76,7 @@ The complete classification and document-family map is `../docs/architecture/12-
 - [2026-07-17 01:30 — Final documentation sync](2026-07-17-0130-final-doc-sync-complete.md) — Historical UX documentation/implementation handoff.
 - [2026-07-17 00:30 — First-principles Web surface redesign](2026-07-17-0030-prod-ux-branch-start.md) — Historical Home/Talk/Proof/Connected direction; superseded by the adaptive operating surface.
 
-Older handoffs remain historical evidence. Read them only after current CODEGRAPH, architecture, this index, and the newest relevant handoff. Dedicated historical website-framework handoffs are not indexed because that project moved to `benamtech/hyper-site`.
+Older handoffs remain historical evidence. Read them only after current source, Standard, active plan, CODEGRAPH/architecture, this index, and the newest relevant handoff. Dedicated historical website-framework handoffs are not indexed because that project moved to `benamtech/hyper-site`.
 
 ## Status vocabulary
 
