@@ -154,9 +154,10 @@ beforeEach(() => {
   process.env.SECRET_REF_MASTER_KEY = "http-isolation-test-secret-ref-key";
   process.env.MODEL_GATEWAY_SIGNING_SECRET = "http-isolation-test-signing-key";
   process.env.MODEL_GATEWAY_EMPLOYEE_BASE_URL = "http://host.docker.internal:8092/v1";
+  process.env.MODEL_GATEWAY_PROVIDER_PROFILE = "openai_compatible";
   process.env.MODEL_GATEWAY_UPSTREAM_BASE_URL = "https://provider.example.test/v1";
   process.env.MODEL_GATEWAY_PROVIDER_API_KEY = "provider-master-key-never-returned";
-  process.env.MODEL_GATEWAY_ALLOWED_MODELS = "amtech-primary";
+  process.env.MODEL_GATEWAY_ALLOWED_MODELS = "provider-model";
   process.env.MODEL_GATEWAY_ALLOWED_PROVIDERS = "openai_compatible";
   process.env.MODEL_GATEWAY_UPSTREAM_MODEL = "provider-model";
   process.env.MODEL_GATEWAY_MAX_RETRIES = "0";
@@ -164,16 +165,16 @@ beforeEach(() => {
 
 afterEach(() => { process.env = { ...originalEnv }; });
 
-function request(employeeId: string, token: string): Request {
+function request(employeeId: string, token: string, body: Record<string, unknown> = {}): Request {
   return new Request(`http://gateway.test/v1/employees/${employeeId}/chat/completions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "amtech-primary", messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
+    body: JSON.stringify({ model: "amtech-primary", messages: [{ role: "user", content: "ping" }], max_tokens: 1, ...body }),
   });
 }
 
 describe("model gateway HTTP isolation", () => {
-  it("accepts only the assignment-bound credential and receipt-gates provider success", async () => {
+  it("accepts only the assignment-bound credential and resolves the alias through the Manager provider registry", async () => {
     const fake = new FakeSupabase();
     const db = fake as unknown as SupabaseClient;
     const employeeA = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
@@ -190,7 +191,7 @@ describe("model gateway HTTP isolation", () => {
     });
     await revokeModelGatewayCredential(db, revoked.credential_id);
 
-    const upstreamCalls: Array<{ url: string; authorization: string | null; assignment: string | null }> = [];
+    const upstreamCalls: Array<{ url: string; authorization: string | null; assignment: string | null; body: Record<string, unknown> }> = [];
     const app = buildModelGatewayApp({
       db: () => db,
       fetch: async (input, init) => {
@@ -199,6 +200,7 @@ describe("model gateway HTTP isolation", () => {
           url: String(input),
           authorization: headers.get("Authorization"),
           assignment: headers.get("X-Amtech-Assignment-Id"),
+          body: JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>,
         });
         return new Response(JSON.stringify({ id: "provider-response", usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 } }), {
           status: 200,
@@ -215,11 +217,17 @@ describe("model gateway HTTP isolation", () => {
     expect(response.amtech_gateway.provider_receipt_id).toBe("provider-request-alpha");
     expect(response.amtech_gateway.accounting_receipt_id).toMatch(/^usage_/);
     expect(upstreamCalls).toHaveLength(1);
-    expect(upstreamCalls[0]?.assignment).toBe("asn_emp_alpha");
-    expect(upstreamCalls[0]?.authorization).toBe("Bearer provider-master-key-never-returned");
+    expect(upstreamCalls[0]).toMatchObject({
+      url: "https://provider.example.test/v1/chat/completions",
+      assignment: "asn_emp_alpha",
+      authorization: "Bearer provider-master-key-never-returned",
+      body: { model: "provider-model", stream: false },
+    });
     expect(fake.rows("commercial_usage_receipts")).toHaveLength(1);
     expect(fake.rows("model_gateway_request_audit")[0]).toMatchObject({
       assignment_id: "asn_emp_alpha",
+      provider: "openai_compatible",
+      upstream_model: "provider-model",
       provider_receipt_id: "provider-request-alpha",
       status: "ok",
     });
@@ -235,6 +243,92 @@ describe("model gateway HTTP isolation", () => {
       expect(rejected.status, label).toBe(401);
     }
     expect(upstreamCalls).toHaveLength(1);
+  });
+
+  it("rejects upstream model names even when they are in the signed policy", async () => {
+    const fake = new FakeSupabase();
+    const db = fake as unknown as SupabaseClient;
+    const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
+    let upstreamCalls = 0;
+    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
+
+    const response = await app.fetch(request("emp_alpha", credential.token, { model: "provider-model" }));
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ error: { code: "model_alias_required" } });
+    expect(upstreamCalls).toBe(0);
+    expect(fake.rows("model_gateway_request_audit").at(-1)).toMatchObject({
+      provider: "none",
+      upstream_model: "provider-model",
+      error_code: "model_alias_required",
+      status: "failed",
+    });
+  });
+
+  it("rejects caller-supplied provider routing, endpoints, headers, and credentials before dispatch", async () => {
+    const forbiddenBodies = [
+      { provider: "attacker" },
+      { provider_profile: "attacker" },
+      { upstream_model: "attacker-model" },
+      { base_url: "https://attacker.test" },
+      { api_key: "attacker-key" },
+      { headers: { Authorization: "Bearer attacker" } },
+      { extra_headers: { Authorization: "Bearer attacker" } },
+      { extra_body: { provider: "attacker" } },
+      { endpoint: "https://attacker.test" },
+      { authorization: "Bearer attacker" },
+      { credential: "attacker" },
+      { token: "attacker" },
+      { routing: { provider: "attacker" } },
+    ];
+
+    const fake = new FakeSupabase();
+    const db = fake as unknown as SupabaseClient;
+    const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
+    let upstreamCalls = 0;
+    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
+
+    for (const body of forbiddenBodies) {
+      const response = await app.fetch(request("emp_alpha", credential.token, body));
+      expect(response.status, JSON.stringify(body)).toBe(400);
+      expect(await response.json()).toMatchObject({ error: { code: "provider_authority_fields_forbidden" } });
+    }
+    expect(upstreamCalls).toBe(0);
+    expect(fake.rows("model_gateway_request_audit")).toHaveLength(forbiddenBodies.length);
+    expect(fake.rows("model_gateway_request_audit").every((row) => row.provider === "none" && row.error_code === "provider_authority_fields_forbidden")).toBe(true);
+  });
+
+  it("invalidates a signed credential when its durable provider policy changes", async () => {
+    const fake = new FakeSupabase();
+    const db = fake as unknown as SupabaseClient;
+    const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
+    const row = fake.rows("model_gateway_credentials").find((candidate) => candidate.id === credential.credential_id);
+    expect(row).toBeDefined();
+    row!.allowed_models = ["different-provider-model"];
+
+    let upstreamCalls = 0;
+    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
+    const response = await app.fetch(request("emp_alpha", credential.token));
+    expect(response.status).toBe(401);
+    expect(upstreamCalls).toBe(0);
+  });
+
+  it("fails closed when deployment selects an unregistered or disallowed provider profile", async () => {
+    const fake = new FakeSupabase();
+    const db = fake as unknown as SupabaseClient;
+    const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
+    let upstreamCalls = 0;
+    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
+
+    process.env.MODEL_GATEWAY_PROVIDER_PROFILE = "not_registered";
+    const unknown = await app.fetch(request("emp_alpha", credential.token));
+    expect(unknown.status).toBe(503);
+    expect(await unknown.json()).toMatchObject({ error: { code: "model_gateway_route_unavailable" } });
+
+    process.env.MODEL_GATEWAY_PROVIDER_PROFILE = "xai";
+    const disallowed = await app.fetch(request("emp_alpha", credential.token));
+    expect(disallowed.status).toBe(503);
+    expect(await disallowed.json()).toMatchObject({ error: { code: "model_gateway_route_unavailable" } });
+    expect(upstreamCalls).toBe(0);
   });
 
   it("keeps legacy unbound OpenAI-compatible routes absent in production", async () => {

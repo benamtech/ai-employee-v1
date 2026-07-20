@@ -2,8 +2,8 @@
 
 Status: active  
 Updated: 2026-07-20  
-Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`  
-Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`; PR `#23` merged  
+Current baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`  
+WS-01/WS-02 implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
 Migration head: `0072`  
 Standard: v0.2 ratified and effective  
 Active program: `second-half-plan/2026-07-19-ratified-standard-production-program/`
@@ -43,15 +43,18 @@ trigger → authenticated principal → exact assignment/policy
 
 ## Current status
 
-**`standard_v0_2_ratified__migration_0072__cutover_merged_to_main__gate_0_final_head_ci_accepted__broad_unit_aggregate_red__phase_1_1_repository_and_test_truth_next__not_live_accepted__not_launch_cleared`**
+**`standard_v0_2_ratified__migration_0072__ws01_broad_106_files_613_tests_green__provider_authority_manager_locked__remote_protocol_and_live_gates_open__not_launch_cleared`**
 
-Final cutover head `d131dd09` passed Ratified Standard workflow `29717830698`, Hermes upstream review `29717830703`, and Main Integration Gates `29717830737`. Merge SHA `5e5b8d7` is the current `main` coordinate.
+Implementation head `1460960` passed Ratified Standard workflow `29725298168`, Hermes upstream review `29725298172`, and Main Integration Gates `29725298163`, including source contracts, broad unit, production build, archaeology, and compiled Chromium fixtures.
 
-The broad historical `npm run test:unit` aggregate is not green. PR `#23` records 30 files and 112 failed tests from stale/migrating assignment, principal, fake-RPC, and environment fixtures. Phase 1.1 must normalize that aggregate and repair any real defects without weakening current contracts.
+WS-01 is complete for source/CI scope. The full surviving aggregate passes 106 files and 613 tests without exclusions. Twenty-seven obsolete pre-assignment/account-owned/direct-provider suites were deleted atomically; reusable assertions were repaired to current contracts.
+
+The WS-02 provider-authority manufacture surface is locked for source/CI scope. Runtime callers use only the stable AMTECH alias. Manager resolves registered provider identity, endpoint, master credential, and upstream model. Caller-supplied routing or credential fields fail before dispatch, and signed claims must match the current durable credential policy.
 
 ## Active production map
 
-- Issue vector: `second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json`.
+- Baseline issue vector: `second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json`.
+- Resolution ledger: `.../13-resolution-ledger.json`.
 - Workstreams: `.../09-workstream-execution-map.md`.
 - Test authority: `.../10-test-suite-disposition.md`.
 - Roadmap: `.../04-dependency-ordered-production-plan.md`, Phases 1.1–1.9, frozen release candidate, controlled pilot, measured expansion.
@@ -60,25 +63,26 @@ The broad historical `npm run test:unit` aggregate is not green. PR `#23` record
 
 Public Caddy routes to loopback Web, Manager, and employee gateways. Manager reaches Host Provisioner over a signed Unix socket; only Host Provisioner has the Docker socket. Each employee has an isolated Hermes network/data/workspace plus scoped Manager and Model Gateway access.
 
-Canonical sources: `infra/deploy/docker-compose.production.yml`, `infra/scripts/production-topology.mjs`, `infra/caddy/production.Caddyfile`, provisioner host/client, profile renderer, and provisioning reconciler.
+Canonical sources: `infra/deploy/docker-compose.production.yml`, `infra/scripts/production-topology.mjs`, `infra/caddy/production.Caddyfile`, provisioner host/client, profile renderer, provisioning reconciler, Model Gateway, and the model-provider registry.
 
 ## Subsystem source hubs
 
 | Boundary | Primary hubs | Open acceptance |
 |---|---|---|
+| repository/test truth | contributor/governance contracts, active program, canonical broad merge gate | source/CI closed; preserve exact-head evidence discipline |
 | identity/assignment | relationship, assignment, authorization, authority-version contracts; owner authority/session; migrations `0039`–`0069`, `0071` | fixture-free live policy/role/channel proof |
 | command/effect/artifact | command-effect, durable command, approval, repair, artifact workbench; migrations `0041`, `0048`–`0054`, `0061`, `0070`–`0072` | provider ambiguity, output parity, crash repair, proof refinding |
 | connectors/events | connector registry/setup/custody, capability registry/catalog, event ingress, ambient inbox, webhooks; migrations `0032`–`0038`, `0043`–`0047` | remote MCP auth, MCP Apps, live authorization/health/revocation/reconciliation |
-| model/commercial | commercial attribution and Model Gateway core/HTTP/server | cumulative budget, shared rate, provider ambiguity, invoice reconciliation |
+| model/provider authority | Model Gateway core/HTTP/server and `model-provider-registry.ts` | source/CI lock accepted; provider-backed and target-host proof open |
+| model/commercial | commercial attribution and Model Gateway receipts | cumulative budget, shared rate, provider ambiguity, invoice reconciliation |
 | provisioning/runtime | reconciler, provisioner host/client, profile renderer/integrity, Caddy activation, topology | managed secrets, target-host isolation/lifecycle, rotation, rollback |
 | Hermes/context/MCP | Hermes client, Manager MCP, business brain, profile context, capability evidence; migration `0070` | persisted effective capability and release-bound reconciliation |
 | owner/generated UI | strict stream, operating surface, materialization, UI resources, AgentSurface and work renderers | fixture-free Web/SMS/Review, accessibility, supported browsers, recovery UX |
-| governance/tests | contributor contract, rubric/hooks/governance scripts, active roadmap, main integration workflow | post-merge metadata transaction and broad unit normalization |
 | release/operations | acceptance scripts, proof spine, deploy/rollback/backup/capacity | signed exact-candidate release, recovery, capacity, controlled pilot |
 
-Connector identity, risk, custody, exact tool ownership, readiness, setup protocol, scopes, hosts, and continuation are declarative. Unknown or stale evidence fails closed. Broad categories never select provider identity.
+Connector identity, risk, custody, exact tool ownership, readiness, setup protocol, scopes, hosts, and continuation are declarative. Unknown or stale evidence fails closed. Broad categories and caller payloads never select provider identity or credentials.
 
-Production Hermes remains pinned. `validation/hermes-upstream-baseline.json`, `scripts/check-hermes-upstream.mjs`, architecture document 17, and the upstream workflow provide review intelligence without automatic upgrades. Planning/document work outside watched Hermes boundaries does not require an ad hoc upstream run.
+Production Hermes remains pinned. `validation/hermes-upstream-baseline.json`, `scripts/check-hermes-upstream.mjs`, architecture document 17, and the upstream workflow provide review intelligence without automatic upgrades.
 
 ## Migration and database evidence
 
@@ -95,12 +99,12 @@ Evidence ladder:
 
 ## Not accepted yet
 
-- trustworthy green broad unit aggregate;
 - required managed-Supabase platform/final-candidate proof;
 - production secret custody and rotation;
 - target-host five-service and two-employee isolation/lifecycle;
-- remote MCP authorization, official MCP Apps, and full AG-UI conformance;
-- live identity/connector/provider and fixture-free Web/SMS/Review acceptance;
+- remote MCP authorization, official MCP Apps, persisted effective-capability truth, and full AG-UI conformance;
+- live connector authorization/health/revocation/failure-path proof;
+- live identity/provider and fixture-free Web/SMS/Review acceptance;
 - provider-backed generated UI through effect, parity, and refindable proof;
 - cumulative budgets, shared rates, provider ambiguity, and commercial reconciliation;
 - complete crash repair, backup/restore, and rollback;
@@ -108,15 +112,14 @@ Evidence ladder:
 
 ## Next dependency order
 
-1. Phase 1.1 repository authority and broad test-contract truth;
-2. Phase 1.2 connector/protocol/capability truth;
-3. Phase 1.3 database authority;
-4. Phase 1.4 secrets/target-host/runtime custody;
-5. Phase 1.5 fixture-free owner/channels;
-6. Phase 1.6 golden governed work;
-7. Phase 1.7 commercial/rate/ambiguity controls;
-8. Phase 1.8 crash/rollback/signed release;
-9. Phase 1.9 human surfaces/capacity/pilot preparation;
-10. frozen exact candidate, controlled pilot, measured fleet expansion.
+1. finish remaining Phase 1.2 remote protocol/capability/live connector work without reopening provider authority;
+2. Phase 1.3 database authority;
+3. Phase 1.4 secrets/target-host/runtime custody;
+4. Phase 1.5 fixture-free owner/channels;
+5. Phase 1.6 golden governed work;
+6. Phase 1.7 commercial/rate/ambiguity controls;
+7. Phase 1.8 crash/rollback/signed release;
+8. Phase 1.9 human surfaces/capacity/pilot preparation;
+9. frozen exact candidate, controlled pilot, measured fleet expansion.
 
 `STANDARD.md`, the active production program, and exact executable evidence decide whether a gate is closed.

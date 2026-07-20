@@ -1,17 +1,17 @@
 # AMTECH AI Employee — Canonical Source-Backed Architecture
 
-Status: **current source map on merged main; live deployment acceptance incomplete**  
-Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`  
-Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`  
+Status: **current source map; WS-01 source/CI closed; live deployment acceptance incomplete**  
+Current baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`  
+Implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
 Standard: ratified [`../../STANDARD.md`](../../STANDARD.md) v0.2  
 Active program: [`../../second-half-plan/2026-07-19-ratified-standard-production-program/`](../../second-half-plan/2026-07-19-ratified-standard-production-program/)
 
-This directory describes current source on merged `main`, separates implementation from acceptance, and records research/protocol disposition without claiming external certification. The cutover branch and `research` are historical context.
+This directory describes current source, separates implementation from acceptance, and records research/protocol disposition without claiming external certification. Cutover and `research` branches are historical context.
 
 ## System boundary
 
 - **Web** presents owner, review, onboarding, public, billing, and operator experiences.
-- **Manager** owns identity, assignments, authority, context, capability/tool contracts, connector custody, approvals, events, work materialization, durable effects, receipts, metering, repair, and proof.
+- **Manager** owns identity, assignments, authority, context, capability/tool contracts, connector and provider custody, approvals, events, work materialization, durable effects, receipts, metering, repair, and proof.
 - **Hermes** supplies per-employee reasoning, sessions/runs, tool use, memory, and runtime-local execution.
 - **Model Gateway** is the employee-scoped model/commercial boundary.
 - **Host Provisioner** alone owns Docker-host authority.
@@ -39,7 +39,8 @@ This directory describes current source on merged `main`, separates implementati
 Current prioritization and execution detail live in the active program:
 
 - `04-dependency-ordered-production-plan.md` — Phases 1.1–1.9 and later release/pilot phases;
-- `08-production-issue-vector.json` — scored 38-issue source;
+- `08-production-issue-vector.json` — immutable scored 38-issue baseline;
+- `13-resolution-ledger.json` — current closure/control state;
 - `09-workstream-execution-map.md` — nine dependency workstreams;
 - `10-test-suite-disposition.md` — current test authority.
 
@@ -50,6 +51,7 @@ Current prioritization and execution detail live in the active program:
 - MCP Apps is the official negotiated interactive MCP target; current `ui://`/iframe machinery is compatibility groundwork, not complete conformance.
 - AG-UI is an optional role-safe event/state adapter, not authority or generated-UI schema.
 - Generated views are typed AMTECH work projections adaptable to Web, MCP Apps, AG-UI, SMS, Review, and future clients.
+- Model provider routing is Manager-owned and cannot be selected by runtime/model/browser/protocol input.
 
 ## Source authority
 
@@ -57,18 +59,21 @@ Deployed proof → applied migrations/durable state → executable source/config
 
 ## Current evidence state
 
-Final cutover head `d131dd09` passed Ratified Standard workflow `29717830698`, Hermes Upstream Review `29717830703`, and Main Integration Gates `29717830737`. Merge SHA `5e5b8d7` is the current `main` coordinate.
+Implementation head `1460960` passed Ratified Standard workflow `29725298168`, Hermes Upstream Review `29725298172`, and Main Integration Gates `29725298163`.
 
-The broad historical `npm run test:unit` aggregate remains red on that cutover head; PR `#23` reports 30 files and 112 failed tests from pre-ratification assignment/principal/fake-RPC/environment fixtures. Named curated suites are current source-contract evidence only and cannot be promoted into a broad or live pass.
+The broad unit aggregate is current and green: 106 files / 613 tests. It is an independent required Main Integration job. Obsolete suites were deleted rather than skipped, while replacement assignment, approval, artifact, event, topology, isolation, and provider-authority contracts remain.
+
+The provider-authority manufacture surface is source/CI locked: requests use only the AMTECH alias; Manager resolves registered provider identity, endpoint, upstream model, and master credential; caller routing/credential fields fail before dispatch; signed claims must match durable current policy.
 
 ## Subsystem map
 
 | Plane | Primary authority | Current state |
 |---|---|---|
-| repository/test truth | contributor/governance contracts, active program, CI/test disposition | Phase 1.1; post-merge docs being reconciled; broad aggregate red |
+| repository/test truth | contributor/governance contracts, active program, broad merge gate | source/CI accepted; exact-head discipline preserved |
 | identity/assignment | principals, assignments, grants, policies | source/CI accepted; fixture-free live policy incomplete |
 | command/effect | durable command, reservation, receipt, repair | source/CI accepted; provider ambiguity/recovery incomplete |
 | runtime provisioning | desired resources, signed provisioner, isolated networks | source-wired; target-host proof incomplete |
+| model/provider authority | Model Gateway and registered provider profiles | source/CI locked; target-host/provider-backed proof incomplete |
 | model/commercial | scoped gateway and accounting receipts | core source accepted; cumulative budget/shared rate/ambiguity/reconciliation incomplete |
 | provider ingress | verified event → ambient inbox | source/CI accepted; live reconciliation incomplete |
 | connector setup/custody | declarative registry/setup manifest | source/CI accepted; remote MCP/live health/revocation incomplete |
@@ -77,7 +82,7 @@ The broad historical `npm run test:unit` aggregate remains red on that cutover h
 | generated UI | typed work view → sandboxed host intent | source/CI accepted; provider-backed proof incomplete |
 | MCP Apps | negotiated interactive resources and bounded host bridge | research-specified; implementation/conformance incomplete |
 | AG-UI | role-safe lifecycle/message/tool/state adapter | partial analogous source; versioned conformance incomplete |
-| Hermes upstream intelligence | pinned baseline + scheduled/path-triggered review | cutover review accepted; never automatic upgrade |
+| Hermes upstream intelligence | pinned baseline + scheduled/path-triggered review | gateway/profile review accepted; never automatic upgrade |
 | database evidence | local/CI PostgreSQL + selective managed Supabase | routine TDD source-wired; full matrices/release platform proof open |
 | release evidence | audit, receipts, hashes, provenance | source/CI contracts accepted; signed deployed manifest incomplete |
 | human surface/pilot | supported channels, browser/a11y/capacity/operations | source/fixture foundations; release and controlled-pilot acceptance open |
@@ -87,14 +92,15 @@ The broad historical `npm run test:unit` aggregate remains red on that cutover h
 1. Manager owns authority; Hermes reasons and executes only within bound capabilities.
 2. Reads are not effects; authoritative failure fails closed.
 3. Consequential work uses assignment-aware approval and effect boundaries.
-4. Provider master credentials stay outside employee profiles/runtimes.
-5. Capability discovery is broad; execution custody is conservative and evidence-backed.
-6. Unknown direct-MCP risk is denied.
-7. Generated UI and protocol adapters are presentation, not authority.
-8. Internal effects are idempotent and receipt-backed.
-9. Documentation and acceptance claims bind exact SHA and environment.
-10. A live database is not the routine TDD loop; local PostgreSQL does not waive platform proof.
-11. Artifacts persist work product, not a parallel authority engine.
-12. Hermes upstream drift triggers review; it never silently moves the production pin.
-13. Curated green suites do not conceal a broader red aggregate.
-14. Production-ready requires one exact signed deployed candidate to pass every non-waivable gate.
+4. Provider master credentials stay outside employee profiles, runtimes, and caller payloads.
+5. Runtime callers use only the stable AMTECH model alias; Manager resolves provider routing.
+6. Capability discovery is broad; execution custody is conservative and evidence-backed.
+7. Unknown direct-MCP risk is denied.
+8. Generated UI and protocol adapters are presentation, not authority.
+9. Internal effects are idempotent and receipt-backed.
+10. Documentation and acceptance claims bind exact SHA and environment.
+11. A live database is not the routine TDD loop; local PostgreSQL does not waive platform proof.
+12. Artifacts persist work product, not a parallel authority engine.
+13. Hermes upstream drift triggers review; it never silently moves the production pin.
+14. Broad and curated test results remain independently visible.
+15. Production-ready requires one exact signed deployed candidate to pass every non-waivable gate.

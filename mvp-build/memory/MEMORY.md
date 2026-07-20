@@ -13,25 +13,26 @@ This folder is the versioned narrative handoff layer for AMTECH AI Employee impl
 - `../second-half-plan/` — one active production program plus historical plan families.
 - `../docs/architecture/` — explanatory cross-system structure and research disposition.
 - `../../wiki/MVP/implementation-records/` — historical factual implementation/proof ledger.
-- source, migrations, tests, workflows, proof, merged PR `#23`, and the current task PR — implementation and acceptance authority.
+- source, migrations, tests, workflows, proof, merged PRs, and the current task PR — implementation and acceptance authority.
 
 `MEMORY.md` is the sole index for this folder. Do not create another handoff index.
 
 ## Current branch note
 
-- Current integration baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
-- PR `#23` merged the reviewed cutover on 2026-07-20.
-- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
+- Current integration baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`.
+- PR `#29` merged the post-cutover roadmap transaction.
+- WS-01/WS-02 implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`.
 - New work starts on reviewed task branches from current `main`.
-- `employee-production-tuesday` and `research` are historical branch context.
+- Cutover and `research` branches are historical context.
 - Migration head: `0072` at `../packages/db/migrations/0072_artifact_revision_scope_guards.sql`.
 - Standard v0.2 is ratified and effective.
 - Active program: `../second-half-plan/2026-07-19-ratified-standard-production-program/`.
-- Current roadmap begins with Phase 1.1 repository authority and test-contract truth.
-- Final cutover head passed Ratified Standard `29717830698`, Hermes Upstream Review `29717830703`, and Main Integration Gates `29717830737`.
-- The broad historical `npm run test:unit` aggregate remains failed/open: merged PR `#23` records 30 files and 112 tests from stale/migrating fixtures. Named curated green suites do not prove the aggregate.
+- WS-01 is source/CI accepted: broad unit passes 106 files / 613 tests under the canonical merge gate.
+- The WS-02 provider-authority manufacture surface is source/CI accepted: Manager alone resolves registered model provider routing and credentials.
+- Remaining WS-02 remote MCP, MCP Apps, AG-UI, effective-capability, and live connector lifecycle gates are open.
+- Implementation head passed Ratified Standard `29725298168`, Hermes Upstream Review `29725298172`, and Main Integration Gates `29725298163`.
 
-Current source/CI must not be promoted into live managed-database, target-runtime/network, identity/provider, MCP Apps/AG-UI conformance, fixture-free Web/SMS/Review, commercial, capacity, crash/repair, rollback, deployment, or launch acceptance.
+Current source/CI must not be promoted into managed-database, target-runtime/network, live identity/provider/connector, MCP Apps/AG-UI conformance, fixture-free Web/SMS/Review, commercial, capacity, crash/repair, rollback, deployment, pilot, or production acceptance.
 
 ## Read order inside memory
 
@@ -45,12 +46,13 @@ The complete family map is `../docs/architecture/12-document-control-memory-and-
 
 ## Index — newest first
 
-### Current post-merge roadmap and production boundary
+### Current WS-01/WS-02 and post-merge production boundary
 
-- [2026-07-20 — Post-merge roadmap CI closure](2026-07-20-post-merge-roadmap-ci-closure.md) — Exact-head evidence companion for PR `#29`. Retains the initial stable-status contract failure, the non-weakening fix, successful corrected-head Standard/governance/type/lint/build/browser runs, exact-head rule, and remaining Phase 1.1 boundary.
-- [2026-07-20 — Post-merge production roadmap reconciliation](2026-07-20-post-merge-production-roadmap-reconciliation.md) — Current planning handoff. Records merged-main reconciliation, the 38-issue vector, nine workstreams, test-suite disposition, Phases 1.1–1.9, exact-candidate/pilot expansion, source-confirmed Model Gateway gaps, Hermes materiality decision, unresolved prerequisites, and pending final-branch CI.
-- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Ratification/cutover predecessor. Records human ratification, the 16-dimensional evolution vector, managed connector manifest, exact provider-tool ownership, direct-MCP default deny, MCP Apps/AG-UI disposition, database TDD boundary, and Gate 0 workflow matrix. Its draft-branch/current-plan coordinates are superseded by the post-merge handoff.
-- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Historical immediate predecessor. Records capability nullability repair, strict-read/migration acceptance corrections, migration `0072`, and predecessor plan packet. Its active-plan and pending-status claims are superseded.
+- [2026-07-20 — WS-01 green and WS-02 provider-authority lock](2026-07-20-ws01-green-ws02-provider-authority-lock.md) — Current implementation handoff. Records broad-suite diagnosis, workspace-loader repair, atomic deletion of 27 obsolete suites, 106-file/613-test success, canonical CI de-bloat, Manager-only provider routing, caller-field denial, durable credential-policy binding, Hermes review, exact workflow evidence, and remaining protocol/live gates.
+- [2026-07-20 — Post-merge roadmap CI closure](2026-07-20-post-merge-roadmap-ci-closure.md) — Historical planning evidence companion for PR `#29`. Retains the initial stable-status contract failure and the non-weakening fix.
+- [2026-07-20 — Post-merge production roadmap reconciliation](2026-07-20-post-merge-production-roadmap-reconciliation.md) — Historical planning handoff. Records the baseline 38-issue vector, nine workstreams, initial test-suite disposition, Phases 1.1–1.9, and then-open broad suite.
+- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Ratification/cutover predecessor. Records human ratification, the 16-dimensional evolution vector, managed connector manifest, exact provider-tool ownership, direct-MCP default deny, MCP Apps/AG-UI disposition, database TDD boundary, and Gate 0 workflow matrix. Its branch/current-plan coordinates are superseded.
+- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Historical immediate predecessor. Records capability nullability repair, strict-read/migration acceptance corrections, migration `0072`, and predecessor plan packet.
 - [2026-07-19 — Final document authority, infra/test audit, and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md) — Historical predecessor. Its `0069` and legacy-selector claims are superseded.
 - [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Repository-wide documentation/code-review checkpoint.
 - [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Historical Hermes/MCP/UI predecessor; official MCP Apps disposition is now in architecture document 16.

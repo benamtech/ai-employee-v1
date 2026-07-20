@@ -18,16 +18,33 @@ export interface ModelGatewayHttpDependencies {
   fetch: typeof globalThis.fetch;
 }
 
-function upstreamBaseUrl(): string {
-  const value = process.env.MODEL_GATEWAY_UPSTREAM_BASE_URL;
-  if (!value) throw new Error("MODEL_GATEWAY_UPSTREAM_BASE_URL missing.");
-  return value.replace(/\/$/, "");
+const FORBIDDEN_PROVIDER_AUTHORITY_FIELDS = new Set([
+  "provider",
+  "providerprofile",
+  "modelprovider",
+  "upstreammodel",
+  "baseurl",
+  "apikey",
+  "endpoint",
+  "url",
+  "headers",
+  "extraheaders",
+  "extrabody",
+  "authorization",
+  "credential",
+  "token",
+  "routing",
+]);
+
+function normalizedFieldName(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-function upstreamApiKey(): string {
-  const value = process.env.MODEL_GATEWAY_PROVIDER_API_KEY;
-  if (!value) throw new Error("MODEL_GATEWAY_PROVIDER_API_KEY missing.");
-  return value;
+function forbiddenProviderAuthorityField(body: Record<string, unknown>): string | null {
+  for (const key of Object.keys(body)) {
+    if (FORBIDDEN_PROVIDER_AUTHORITY_FIELDS.has(normalizedFieldName(key))) return key;
+  }
+  return null;
 }
 
 function estimateCostCents(usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }): number {
@@ -83,13 +100,54 @@ async function commercialScopeForClaims(
     policy_key: "provider-cost-observation",
   });
   if (
-    scope.payer_relationship_id !== claims.payer_relationship_id ||
-    scope.beneficiary_relationship_id !== claims.beneficiary_relationship_id ||
-    scope.price_version_id !== claims.price_version_id
+    scope.payer_relationship_id !== claims.payer_relationship_id
+    || scope.beneficiary_relationship_id !== claims.beneficiary_relationship_id
+    || scope.price_version_id !== claims.price_version_id
   ) {
     throw new Error("model_gateway_commercial_scope_changed");
   }
   return scope;
+}
+
+async function recordDeniedRequest(db: SupabaseClient, input: {
+  request_id: string;
+  correlation_id: string;
+  started: number;
+  claims: {
+    credential_id: string;
+    account_id: string;
+    employee_id: string;
+    assignment_id: string;
+    payer_relationship_id: string;
+    beneficiary_relationship_id: string;
+    price_version_id: string;
+    model_alias: string;
+    credential_version: number;
+  };
+  code: string;
+  requested_model: string;
+}): Promise<void> {
+  await recordModelGatewayUsage(db, {
+    request_id: input.request_id,
+    credential_id: input.claims.credential_id,
+    account_id: input.claims.account_id,
+    employee_id: input.claims.employee_id,
+    ...usageScope(input.claims),
+    model_alias: input.claims.model_alias,
+    provider: "none",
+    upstream_model: input.requested_model,
+    credential_version: input.claims.credential_version,
+    latency_ms: Date.now() - input.started,
+    prompt_tokens: 0,
+    completion_tokens: 0,
+    total_tokens: 0,
+    estimated_cost_cents: 0,
+    status: input.code === "rate_limit_exceeded" ? "rate_limited" : "failed",
+    error_code: input.code,
+    correlation_id: input.correlation_id,
+    provider_receipt_id: null,
+    accounting_receipt_id: null,
+  });
 }
 
 async function proxyOpenAiCompatible(
@@ -109,7 +167,7 @@ async function proxyOpenAiCompatible(
     return c.json({
       error: {
         code: "model_gateway_unauthorized",
-        message: "Model gateway credential is invalid, expired, revoked, or not bound to this employee assignment.",
+        message: "Model gateway credential is invalid, expired, revoked, stale, or not bound to this employee assignment.",
       },
     }, 401);
   }
@@ -128,45 +186,54 @@ async function proxyOpenAiCompatible(
 
   let body: Record<string, any>;
   try {
-    body = await c.req.json();
+    const parsed = await c.req.json();
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("request_body_not_object");
+    body = parsed as Record<string, any>;
   } catch {
-    return c.json({ error: { code: "invalid_json", message: "Request body must be JSON." } }, 400);
+    return c.json({ error: { code: "invalid_json", message: "Request body must be a JSON object." } }, 400);
   }
+
+  const forbiddenField = forbiddenProviderAuthorityField(body);
+  if (forbiddenField) {
+    await recordDeniedRequest(db, {
+      request_id: requestId,
+      correlation_id: correlationId,
+      started,
+      claims,
+      code: "provider_authority_fields_forbidden",
+      requested_model: String(body.model ?? claims.model_alias),
+    });
+    return c.json({
+      error: {
+        code: "provider_authority_fields_forbidden",
+        message: `Provider routing and credentials are Manager-owned; request field ${forbiddenField} is not accepted.`,
+      },
+    }, 400);
+  }
+
   const requestedModel = String(body.model ?? claims.model_alias);
   const policy = enforceGatewayTokenPolicy(claims, requestedModel);
   if (!policy.ok) {
-    await recordModelGatewayUsage(db, {
+    await recordDeniedRequest(db, {
       request_id: requestId,
-      credential_id: claims.credential_id,
-      account_id: claims.account_id,
-      employee_id: claims.employee_id,
-      ...usageScope(claims),
-      model_alias: claims.model_alias,
-      provider: "none",
-      upstream_model: requestedModel,
-      credential_version: claims.credential_version,
-      latency_ms: Date.now() - started,
-      prompt_tokens: 0,
-      completion_tokens: 0,
-      total_tokens: 0,
-      estimated_cost_cents: 0,
-      status: policy.code === "rate_limit_exceeded" ? "rate_limited" : "failed",
-      error_code: policy.code,
       correlation_id: correlationId,
-      provider_receipt_id: null,
-      accounting_receipt_id: null,
+      started,
+      claims,
+      code: policy.code,
+      requested_model: requestedModel,
     });
     return c.json({ error: { code: policy.code, message: "Model gateway policy denied this request." } }, policy.status as any);
   }
 
-  let route: { provider: string; model: string };
+  let route: ReturnType<typeof resolveUpstreamModel>;
   try {
-    route = resolveUpstreamModel(claims, requestedModel);
+    route = resolveUpstreamModel(claims);
   } catch (err) {
     return c.json({ error: { code: "model_gateway_route_unavailable", message: redactError(err) } }, 503);
   }
 
-  const upstreamBody = { ...body, model: route.model, stream: false };
+  const { model: _requestedModel, stream: _requestedStream, ...requestPayload } = body;
+  const upstreamBody = { ...requestPayload, model: route.model, stream: false };
   const maxRetries = Math.max(0, Math.min(Number(process.env.MODEL_GATEWAY_MAX_RETRIES ?? 2), 4));
   const timeoutMs = Math.max(1_000, Math.min(Number(process.env.MODEL_GATEWAY_PROVIDER_TIMEOUT_MS ?? 30_000), 120_000));
   let lastError = "provider_unavailable";
@@ -175,10 +242,10 @@ async function proxyOpenAiCompatible(
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await deps.fetch(`${upstreamBaseUrl()}${upstreamPath}`, {
+      const response = await deps.fetch(`${route.base_url}${upstreamPath}`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${upstreamApiKey()}`,
+          Authorization: `Bearer ${route.api_key}`,
           "Content-Type": "application/json",
           "X-Amtech-Assignment-Id": claims.assignment_id,
           "X-Amtech-Correlation-Id": correlationId,
@@ -213,7 +280,7 @@ async function proxyOpenAiCompatible(
           amount_minor: costCents,
           currency: commercial.currency,
           correlation_id: correlationId,
-          evidence: { upstream_model: route.model, reason: "provider_success_without_receipt" },
+          evidence: { upstream_model: route.model, provider_profile: route.profile_key, reason: "provider_success_without_receipt" },
         });
         await recordModelGatewayUsage(db, {
           request_id: requestId,
@@ -255,7 +322,7 @@ async function proxyOpenAiCompatible(
         amount_minor: costCents,
         currency: commercial.currency,
         correlation_id: correlationId,
-        evidence: { upstream_model: route.model, http_status: response.status },
+        evidence: { upstream_model: route.model, provider_profile: route.profile_key, http_status: response.status },
       });
       await recordModelGatewayUsage(db, {
         request_id: requestId,
@@ -311,7 +378,7 @@ async function proxyOpenAiCompatible(
     amount_minor: 0,
     currency: commercial.currency,
     correlation_id: correlationId,
-    evidence: { upstream_model: route.model, error: lastError },
+    evidence: { upstream_model: route.model, provider_profile: route.profile_key, error: lastError },
   });
   await recordModelGatewayUsage(db, {
     request_id: requestId,

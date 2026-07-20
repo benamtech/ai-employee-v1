@@ -60,6 +60,35 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+  broad-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - name: Broad unit regression
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p infra/.local/main-integration-unit
+          npm run test:unit 2>&1 | tee infra/.local/main-integration-unit/broad-unit.log
+      - name: Upload broad-unit diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-integration-unit-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mvp-build/infra/.local/main-integration-unit/
+          if-no-files-found: error
+          retention-days: 14
+
   repository-archaeology:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -173,7 +202,7 @@ jobs:
 
   integration-summary:
     if: always()
-    needs: [source-contracts, repository-archaeology, compiled-browser]
+    needs: [source-contracts, broad-unit, repository-archaeology, compiled-browser]
     runs-on: ubuntu-latest
     steps:
       - name: Publish merge-readiness summary
@@ -181,9 +210,11 @@ jobs:
         run: |
           echo "## Main integration gates" >> "$GITHUB_STEP_SUMMARY"
           echo "Source/contracts: ${{ needs.source-contracts.result }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Broad unit: ${{ needs.broad-unit.result }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Archaeology: ${{ needs.repository-archaeology.result }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Compiled browser: ${{ needs.compiled-browser.result }}" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ needs.source-contracts.result }}" != success ] || \
+             [ "${{ needs.broad-unit.result }}" != success ] || \
              [ "${{ needs.repository-archaeology.result }}" != success ] || \
              [ "${{ needs.compiled-browser.result }}" != success ]; then
             echo "❌ Main Integration Gates FAILED" | tee -a "$GITHUB_STEP_SUMMARY"

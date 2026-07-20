@@ -25,6 +25,7 @@ const [
   workstreamMap,
   testDisposition,
   issueVectorText,
+  resolutionLedgerText,
   memoryIndex,
   verificationMatrix,
   packageJsonText,
@@ -47,6 +48,7 @@ const [
   read("second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md"),
   read("second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md"),
   read("second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json"),
+  read("second-half-plan/2026-07-19-ratified-standard-production-program/13-resolution-ledger.json"),
   read("memory/MEMORY.md"),
   read("second-half-plan/2026-07-19-ratified-standard-production-program/07-verification-and-handoff-matrix.md"),
   read("package.json"),
@@ -60,6 +62,7 @@ const [
 const packageJson = JSON.parse(packageJsonText);
 const hermesBaseline = JSON.parse(hermesBaselineText);
 const issueVector = JSON.parse(issueVectorText);
+const resolutionLedger = JSON.parse(resolutionLedgerText);
 const scripts = packageJson.scripts ?? {};
 
 check("GOV-01", standard.includes("# AMTECH Standard v0.2 — Ratified Production Standard")
@@ -83,8 +86,11 @@ check("GOV-05", [
 check("GOV-06", workflow.includes("npm run test:repo-governance")
   && workflow.includes("npm run typecheck")
   && workflow.includes("npm run lint")
-  && workflow.includes("github.event_name == 'push'")
-  && workflow.includes("Standard Integrity OK"), "ratification workflow differentiates PR/push and emits a clear summary");
+  && workflow.includes("Standard Integrity OK")
+  && !workflow.includes("npm run test:unit")
+  && !workflow.includes("npm run build")
+  && !workflow.includes("employee-production-tuesday")
+  && !workflow.includes("branches:\n      - research"), "ratification workflow owns governance only and carries no duplicate broad/build or historical branch gate");
 check("GOV-07", prTemplate.includes("## Six-point rubric")
   && prTemplate.includes("## TDD and verification")
   && prTemplate.includes("## Evidence boundary"), "pull-request template requires rubric, TDD, and evidence boundaries");
@@ -100,24 +106,26 @@ check("GOV-10", mainIntegrationWorkflow.includes("pull_request:")
   && mainIntegrationWorkflow.includes("branches: [main]")
   && mainIntegrationWorkflow.includes("npm run repo:verify:full")
   && mainIntegrationWorkflow.includes("npm run test:production-boundary")
-  && mainIntegrationWorkflow.includes("Main Integration Gates OK"), "main has a canonical merge-readiness gate");
+  && mainIntegrationWorkflow.includes("broad-unit:")
+  && mainIntegrationWorkflow.includes("npm run test:unit")
+  && mainIntegrationWorkflow.includes("Broad unit:")
+  && mainIntegrationWorkflow.includes("Main Integration Gates OK"), "main has one canonical merge gate including the broad aggregate");
 
 const currentAuthorityDocs = [rootReadme, contributing, rootAgents, rootCodegraph, scopedAgents, scopedCodegraph, planIndex, activePlan, memoryIndex];
-check("GOV-11", currentAuthorityDocs.every((doc) => doc.includes("main@5e5b8d7") || doc.includes("current `main`"))
-  && rootCodegraph.includes("PR `#23` merged")
-  && scopedCodegraph.includes("PR `#23` merged")
-  && memoryIndex.includes("PR `#23` merged")
+check("GOV-11", currentAuthorityDocs.every((doc) => doc.includes("current `main`") || doc.includes("main@5e5b8d7") || doc.includes("main@816aae3"))
+  && activePlan.includes("main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8")
   && !rootCodegraph.includes("Draft PR: `#23`")
   && !scopedCodegraph.includes("Draft PR: `#23`")
-  && !memoryIndex.includes("Draft PR: `#23`"), "current authority documents describe the merged-main baseline rather than a draft cutover");
+  && !memoryIndex.includes("Draft PR: `#23`"), "current authority documents describe reviewed work from current main rather than an active cutover branch");
 
 check("GOV-12", roadmap.includes("### Phase 1.1 — Repository authority and test-contract truth")
   && roadmap.includes("### Phase 1.9 — Human-surface acceptance, capacity, and pilot preparation")
   && roadmap.includes("## Phase 2 — Frozen exact release candidate")
   && workstreamMap.includes("## WS-01 — Repository authority and test-contract truth")
   && workstreamMap.includes("## WS-09 — Human-surface acceptance, capacity, and controlled pilot")
-  && testDisposition.includes("`npm run test:unit` | stale/migrating and currently red")
-  && verificationMatrix.includes("30 files and 112 tests"), "active program exposes the full phased roadmap and known broad-suite failure");
+  && testDisposition.includes("106 test files passed")
+  && testDisposition.includes("613 tests passed")
+  && verificationMatrix.includes("accepted: 106 files / 613 tests"), "active program records the full roadmap and authoritative WS-01 broad-suite closure");
 
 check("GOV-13", issueVector.version === "2026-07-20.post-merge.1"
   && issueVector.baseline?.merge_sha === "5e5b8d7c7a5e20490d58855ffb4450b13b53cd03"
@@ -125,11 +133,27 @@ check("GOV-13", issueVector.version === "2026-07-20.post-merge.1"
   && Array.isArray(issueVector.issues)
   && issueVector.issues.length === 38
   && new Set(issueVector.issues.map((issue) => issue[0])).size === 38
-  && new Set(issueVector.issues.map((issue) => issue[1])).size === 9, "machine issue vector binds current coordinates and contains 38 unique issues across nine workstreams");
+  && new Set(issueVector.issues.map((issue) => issue[1])).size === 9, "baseline machine issue vector remains immutable and contains 38 unique issues across nine workstreams");
 
-check("GOV-14", activePlan.includes("The broad historical `npm run test:unit` aggregate remains explicitly red")
-  && testDisposition.includes("Curated green suites do not imply the broad aggregate is green")
-  && verificationMatrix.includes("A curated green suite is proof only for its named contracts"), "test evidence boundaries prohibit curated-green/broad-green substitution");
+check("GOV-14", activePlan.includes("broad unit: **106 files / 613 tests**")
+  && testDisposition.includes("curated and broad results are independently reported")
+  && verificationMatrix.includes("Broad and curated suites are independently reported")
+  && !activePlan.includes("aggregate remains explicitly red"), "test evidence reports broad and curated boundaries independently without retaining a false current-red claim");
+
+check("GOV-15", activePlan.includes("Caller-supplied provider")
+  && activePlan.includes("Remote MCP authorization, MCP Apps host conformance, AG-UI replay mapping")
+  && verificationMatrix.includes("Provider-authority lock")
+  && verificationMatrix.includes("does not establish remote MCP authorization")
+  && testDisposition.includes("obsolete suites were removed atomically rather than skipped"), "provider authority is locked without overclaiming remote protocol or live acceptance, and obsolete tests are removed rather than hidden");
+
+const resolvedIssueIds = new Set((resolutionLedger.issue_resolutions ?? []).filter((entry) => entry.state === "source_ci_resolved").map((entry) => entry.id));
+const providerControl = (resolutionLedger.control_resolutions ?? []).find((entry) => entry.id === "CTRL-WS02-PROVIDER-AUTHORITY");
+check("GOV-16", resolutionLedger.baseline_issue_vector === "08-production-issue-vector.json"
+  && resolutionLedger.implementation_evidence_head === "1460960f415fafc20582313b1dd2117b781a63f7"
+  && ["ISS-001", "ISS-002", "ISS-003", "ISS-004", "ISS-005", "ISS-006"].every((id) => resolvedIssueIds.has(id))
+  && providerControl?.state === "source_ci_accepted"
+  && providerControl?.does_not_resolve?.length === 5
+  && resolutionLedger.production_ready === false, "resolution ledger closes WS-01, records the bounded provider control, and preserves open production gates");
 
 const report = {
   generated_at: new Date().toISOString(),

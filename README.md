@@ -31,7 +31,7 @@ npm run repo:rubric -- ./task-contract.json
 npm run repo:verify:quick
 ```
 
-Before pushing, run `npm run repo:verify:full`. Pull requests into `main` run the canonical main integration gate with governance, type/lint, named unit/source contracts, production-boundary, build, archaeology, and compiled browser proof.
+Before pushing, run `npm run repo:verify:full`. Pull requests into `main` run the canonical Main Integration gate with governance, type/lint, named source contracts, the complete broad unit aggregate, production build, archaeology, and compiled browser regression.
 
 ## Canonical product and offer
 
@@ -75,21 +75,23 @@ trigger
 
 ## Current integration state
 
-- PR `#23` merged the reviewed cutover into `main` on 2026-07-20.
-- Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
-- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
-- Final cutover workflows succeeded: Ratified Standard `29717830698`, Hermes Upstream Review `29717830703`, Main Integration Gates `29717830737`.
-- New work starts on reviewed task branches from current `main`; the cutover and `research` branches are historical context.
+- PR `#29` merged the post-cutover roadmap transaction into `main` on 2026-07-20.
+- Current integration baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`.
+- WS-01/WS-02 implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`.
+- Evidence workflows succeeded: Ratified Standard `29725298168`, Hermes Upstream Review `29725298172`, Main Integration Gates `29725298163`.
+- The broad aggregate is trustworthy and green: **106 files / 613 tests**, with no exclusions or quarantine.
+- Twenty-seven obsolete pre-assignment/account-owned/direct-provider suites were deleted atomically; reusable assertions were repaired to current contracts.
+- Model provider authority is Manager-owned: runtime/model/browser/MCP/AG-UI input may use only the AMTECH alias and cannot select provider identity, endpoint, upstream model, headers, or credentials.
+- New work starts on reviewed task branches from current `main`; cutover and `research` branches are historical context.
 - Migration head: `0072`.
 - Standard: ratified v0.2.
 - Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
-- Current next phase: Phase 1.1, repository authority and test-contract truth.
-- The broad `npm run test:unit` aggregate is known red on the cutover evidence head; PR `#23` records 30 files and 112 failed tests from pre-ratification fixtures. The curated green main gate does not prove the aggregate.
+- Current next dependency: complete the remaining WS-02 remote MCP, MCP Apps, AG-UI, effective-capability, and live connector lifecycle boundaries.
 - Canonical deployment selection: `mvp-build/infra/scripts/production-topology.mjs`.
 - Database inner loop: production-shaped local/CI PostgreSQL; managed Supabase only for named platform/release gates.
-- Product status: Gate 0 source/document/CI resolved; not database-, runtime-, provider-, browser/channel-, commercial-, live-, or production-accepted.
+- Product status: WS-01 source/CI and the WS-02 provider-authority lock are accepted; database, target-host, live provider/channel, commercial, recovery, accessibility, capacity, deployment, pilot, and production acceptance remain open.
 
-The active program now includes a 38-issue machine vector, nine dependency-ordered workstreams, a test-suite disposition, Phases 1.1–1.9, exact-candidate release acceptance, controlled pilot, and measured expansion.
+The active program includes a 38-issue baseline vector, resolution ledger, nine dependency-ordered workstreams, test-suite disposition, Phases 1.1–1.9, exact-candidate release acceptance, controlled pilot, and measured expansion.
 
 ## Hermes upstream intelligence
 

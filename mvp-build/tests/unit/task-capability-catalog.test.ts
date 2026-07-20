@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFile } from "node:fs/promises";
 import {
   matchTaskCapabilities,
-  resolveOwnerOAuthConnectorSetup,
+  resolveOwnerManagedConnectorSetup,
   type ToolCapabilityDescriptor,
 } from "../../packages/shared/src/index";
 
@@ -71,22 +71,30 @@ describe("task-aware capability matching", () => {
   });
 });
 
-describe("owner OAuth connector registry", () => {
-  it("binds shipped connectors to explicit tools, scopes, and authorization hosts", () => {
-    expect(resolveOwnerOAuthConnectorSetup("email")).toMatchObject({
+describe("owner managed connector registry", () => {
+  it("binds shipped connectors to explicit protocols, tools, scopes, and authorization hosts", () => {
+    expect(resolveOwnerManagedConnectorSetup("email")).toMatchObject({
       key: "gmail",
+      authorization_protocol: "oauth2_authorization_code",
       start_tool: "connect_email",
       allowed_authorization_hosts: ["accounts.google.com"],
     });
-    expect(resolveOwnerOAuthConnectorSetup("qbo")).toMatchObject({
+    expect(resolveOwnerManagedConnectorSetup("qbo")).toMatchObject({
       key: "quickbooks",
+      authorization_protocol: "oauth2_authorization_code",
       start_tool: "connect_quickbooks",
       allowed_authorization_hosts: ["appcenter.intuit.com"],
     });
+    expect(resolveOwnerManagedConnectorSetup("stripe")).toMatchObject({
+      key: "stripe",
+      authorization_protocol: "provider_managed_onboarding",
+      start_tool: "connect_stripe",
+      allowed_authorization_hosts: ["connect.stripe.com"],
+    });
   });
 
-  it("fails closed for an unknown MCP or OAuth connector", () => {
-    expect(resolveOwnerOAuthConnectorSetup("arbitrary-mcp-server")).toBeNull();
+  it("fails closed for an unknown MCP or connector identity", () => {
+    expect(resolveOwnerManagedConnectorSetup("arbitrary-mcp-server")).toBeNull();
   });
 });
 
@@ -108,13 +116,13 @@ describe("product source contracts", () => {
     expect(drawer).not.toContain("tools/call");
   });
 
-  it("uses one shared OAuth descriptor for copy, tool selection, scopes, and host validation", async () => {
+  it("uses one shared managed descriptor for copy, tool selection, scopes, and host validation", async () => {
     const manager = await readFile("apps/manager/src/lib/artifact-workbench-routes.ts", "utf8");
     const web = await readFile("apps/web/app/api/employee/[employeeId]/connect/[connector]/route.ts", "utf8");
     const consent = await readFile("apps/web/app/agent/[employeeId]/connect/[connector]/page.tsx", "utf8");
-    expect(manager).toContain("resolveOwnerOAuthConnectorSetup");
-    expect(web).toContain("resolveOwnerOAuthConnectorSetup");
-    expect(consent).toContain("resolveOwnerOAuthConnectorSetup");
+    expect(manager).toContain("resolveOwnerManagedConnectorSetup");
+    expect(web).toContain("resolveOwnerManagedConnectorSetup");
+    expect(consent).toContain("resolveOwnerManagedConnectorSetup");
     expect(web).toContain("allowed_authorization_hosts");
   });
 });
