@@ -101,7 +101,7 @@ export async function GET(
           if (!nextScope) continue;
           if (!scope) scope = nextScope;
           else if (!sameScope(scope, nextScope)) throw new Error("ag_ui_authority_scope_drift");
-          const events = projectWorkStreamEventToAgUi(raw as AssignmentScopedWorkStreamEvent, {
+          const events = projectWorkStreamEventToAgUi(raw as unknown as AssignmentScopedWorkStreamEvent, {
             account_id: scope.account_id,
             employee_id: scope.employee_id,
             assignment_id: scope.assignment_id,
