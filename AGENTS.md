@@ -11,18 +11,19 @@ Updated: 2026-07-20
 4. root `CODEGRAPH.md`
 5. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
 6. ratified `mvp-build/STANDARD.md`
-7. `mvp-build/second-half-plan/README.md` and its single active program
+7. `mvp-build/production-readiness-program/README.md`
 8. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
 9. `mvp-build/docs/architecture/README.md`
-10. relevant source, migrations, tests, workflows, proof, release records, and current diff
+10. relevant source, migrations, tests, workflows, proof, release records, PRs, and current diff
 
-Authority order: deployed release proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests/acceptance → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
+Authority order: deployed release proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests/acceptance → ratified Standard/current production-readiness program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
 ## Repository routing
 
 - AI Employee implementation and production authority: `mvp-build/`.
 - Ratified requirements: `mvp-build/STANDARD.md`.
-- Single active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Single active program: `mvp-build/production-readiness-program/`.
+- Historical plans: `mvp-build/second-half-plan/`; non-canonical.
 - Current architecture: `mvp-build/docs/architecture/`.
 - Sole handoff index: `mvp-build/memory/MEMORY.md`.
 - Historical factual ledger: `wiki/MVP/implementation-records/`.
@@ -31,12 +32,11 @@ Authority order: deployed release proof → applied migrations/durable state →
 
 ## Current integration boundary
 
-- New work starts on reviewed branches from current `main`.
-- WS-01 and the Model Gateway provider-authority lock are merged in PR `#30` at `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`.
-- WS-02 protocol implementation evidence head: `6f792eabe44a9ca1e9635fd4fe5329fa7daca6c4` in PR `#31`.
-- That head passed Standard `29731384034`, Hermes review `29731384166`, and Main Integration `29731384039`, including broad **109 files / 630 tests**, build, archaeology, and compiled Chromium.
-- Migration head remains `0072`; Standard v0.2 remains ratified.
-- Remote MCP, MCP Apps, AG-UI, effective capability, and streaming Web are accepted only for source/CI scope. Live connector authorization/revocation, third-party host conformance, managed database, target host, provider, fixture-free channels, commercial, recovery, deployment, pilot, and production acceptance remain open.
+- Current `main` baseline for this work is `48b917389ed85b9652eca43a8e4a8f60b52e917b`.
+- PR #33/source/tests are newer authority than stale plan-status prose, but establish only their exact lifecycle/source/test evidence.
+- Remote MCP, MCP Apps, AG-UI, effective capability, and streaming Web retain only their exact source/test evidence.
+- Live connector authorization/revocation, third-party host conformance, managed database, target host, provider, fixture-free Web/SMS/Review, commercial, recovery, deployment, pilot, and production acceptance remain distinct and open unless exact current evidence closes them.
+- WS-05 and WS-06 may use WS-07/08/09 only as read-only dependencies or future frontier nodes.
 
 ## Product and protocol invariants
 
@@ -48,10 +48,11 @@ Authority order: deployed release proof → applied migrations/durable state →
 6. MCP core, MCP Apps, AG-UI, Web, SMS, and signed Review are interoperability/presentation layers, not authority.
 7. Generated UI and shared state cannot invent work, actions, approval, credentials, provider routing, or effects.
 8. Harmless Hermes text/activity should stream immediately; authority gates apply when crossing into commands, credentials, approvals, or external effects.
-9. Unknown, stale, revoked, or unprobed connector/capability evidence fails closed.
+9. Unknown, stale, revoked, cross-account, mismatched, or unprobed evidence fails closed.
 10. Provider master credentials and connector tokens never enter employee profiles, Hermes runtimes, browser payloads, or generated UI.
 11. Consequential effects reserve once and terminate with accepted, failed, or ambiguous durable receipts; ambiguous reconciles before retry.
-12. Public and release claims never exceed exact-candidate evidence.
+12. Reconnect never resubmits accepted owner intent.
+13. Public and release claims never exceed exact-candidate evidence.
 
 ## Required contributor gate
 
@@ -66,7 +67,7 @@ npm run repo:verify:full
 npm run test:unit
 ```
 
-CI is authoritative. Do not weaken tests, hide blocked evidence, or promote fixtures into live acceptance.
+CI is authoritative only when an exact run exists for the exact claimed SHA. Do not weaken tests, hide blocked evidence, or promote fixtures into live acceptance.
 
 ## Hermes upstream review
 
@@ -74,4 +75,4 @@ Before changing Hermes integration, launch, sessions, tool discovery, streaming,
 
 ## Git discipline
 
-Create a reviewed task branch from current `main`. Every commit references the task ID. Stop downstream work on red CI. Merge only when required checks pass and source, plan, memory, and PR evidence agree.
+Create a reviewed task branch from current `main`. Every commit references the task ID. Stop downstream work on red CI. Merge only when required checks pass and source, program, memory, and PR evidence agree.

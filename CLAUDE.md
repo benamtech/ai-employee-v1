@@ -5,18 +5,15 @@ Updated: 2026-07-20
 
 Read `identity.md` first. Root `AGENTS.md` is the complete tool-agnostic contract. Use `CONTRIBUTING.md` for executable setup, hooks, task rubric, and verification. The nearest scoped `CLAUDE.md`, `AGENTS.md`, and `CODEGRAPH.md` govern their subtree.
 
-## Current branch state
+## Current authority
 
-- PR `#31` merged the hardened WS-02 source/CI boundary into `main` on 2026-07-20.
 - Current integration baseline: `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`.
-- Final WS-02 exact evidence head: `e43f70a0e9a3afd4b87880b9d22089e6da2e94d0`.
 - New work starts on reviewed task branches from current `main`.
-- `employee-production-tuesday` and `research` are historical context, not current integration dependencies.
-- Migration head: `0072`.
-- Standard v0.2 is ratified and effective.
-- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
-- WS-01 and the WS-02 source/CI boundary are green. `ISS-011` live provider/protocol-host evidence remains open.
-- WS-03 P0 may begin from current `main`, starting with DB-P0-01 ledger/hash preflight only.
+- Standard v0.2 is ratified and effective; migration head remains `0072` unless current source proves otherwise.
+- Active program: `mvp-build/production-readiness-program/`.
+- `mvp-build/second-half-plan/` is historical and non-canonical.
+- PR #33, current source, and executable tests supersede stale plan-status prose. They establish only their exact evidence, not CI/live/provider/channel/database/target-host/pilot/production acceptance.
+- WS-05 and WS-06 are active but incomplete without exact fixture-free owner, channel, cross-account, work/effect/receipt/recovery/proof evidence.
 
 ## Canonical boundary
 
@@ -36,36 +33,34 @@ npm run repo:verify:quick
 npm run repo:verify:full
 ```
 
-The task contract includes Authority, Completeness, Agility, Isolation, Provability, and Moat scores. A score below `0.5` requires a named mitigation.
-
 ## Engineering rules
 
-- Work on a reviewed task branch from current `main`; `main` changes only through approved merge.
-- Inspect before editing; use `find`/`grep` rather than invented paths.
+- Inspect before editing; use repository search rather than invented paths.
 - No feature expansion while a prerequisite P0 is unresolved.
 - Every commit references the task ID.
-- Run applicable tests and exact-head CI before completion.
-- Stop downstream work on red CI.
-- Do not weaken expectations merely to get green.
-- The named curated main gate and the broad `npm run test:unit` aggregate are separate claims; never substitute one for the other.
+- Run applicable executable tests and exact-head CI before claiming completion.
+- Stop downstream work on red CI and never weaken expectations for green.
+- Curated suites, broad aggregates, source wiring, fixtures, local PostgreSQL, managed-platform proof, provider proof, browser/channel proof, and production proof are separate claims.
+- Preserve exact account, employee, assignment, authority, work revision, approval snapshot, effect, receipt, recovery, and proof identity.
+- Reconnect must not replay accepted owner intent; ambiguous consequential outcomes reconcile before retry.
 - After three failed attempts on one concrete step, retain diagnostics and escalate.
-- Treat scaffolding, tests, migrations, proof capture, and runbooks as first-class implementation.
 
 ## Hermes upstream review
 
-For Hermes integration, runtime, profile, session, delegation, tool-discovery, gateway, or Hermes-derived UI changes, run `npm run hermes:upstream:check` and review the official repository, `hermes_cli/`, `web/src/App.tsx`, recent commits, and active PRs. Upstream changes never auto-upgrade the pinned production runtime. Do not run the check merely because a session starts; require repository policy, watched-path drift, pin mismatch, or a material Hermes-boundary workstream.
+For Hermes integration, runtime, profile, session, delegation, tool-discovery, gateway, or Hermes-derived UI changes, run `npm run hermes:upstream:check` when repository policy, watched-path drift, pin mismatch, or a material Hermes-boundary workstream requires it. Upstream changes never auto-upgrade the pinned production runtime.
 
 ## Database and evidence policy
 
 Production-shaped local/CI PostgreSQL is the normal TDD loop for migrations, constraints, RLS/grants/functions, negative isolation, concurrency, backfills, and rollback. Disposable managed Supabase is a platform-specific and release-candidate gate, not routine schema development. Production is never a test target.
 
-`planned`, `source-wired`, `locally-proven`, `ci-accepted`, `database-accepted`, `runtime-accepted`, `provider-accepted`, `browser/channel-accepted`, `commercial-accepted`, `live-accepted`, and `production-ready` are distinct. Source wiring, fixtures, local PostgreSQL, documentation, old proof, or an ancestor SHA cannot satisfy a live boundary they did not exercise.
+`planned`, `source-wired`, `locally-proven`, `ci-accepted`, `database-accepted`, `runtime-accepted`, `provider-accepted`, `browser/channel-accepted`, `commercial-accepted`, `live-accepted`, and `production-ready` are distinct.
 
 ## Document authority
 
 - root `CODEGRAPH.md`: repository routing/current integration headline;
 - `mvp-build/CODEGRAPH.md`: source topology/migration/evidence boundary;
 - `mvp-build/STANDARD.md`: ratified normative requirements;
-- `mvp-build/second-half-plan/README.md`: single active plan route;
+- `mvp-build/production-readiness-program/`: single active production-readiness route;
+- `mvp-build/second-half-plan/`: historical non-canonical plans;
 - `mvp-build/memory/MEMORY.md`: sole handoff index;
 - current source, migrations, tests, workflows, and proof: implementation/acceptance authority.

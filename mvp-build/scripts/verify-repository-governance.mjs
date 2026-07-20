@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-import { access, readFile, readdir } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 // Validate durable structure only. Evidence values such as SHAs, run IDs, counts,
 // and prose status belong in the resolution ledger, not in validator source.
 const root = process.cwd();
-const program = "second-half-plan/2026-07-19-ratified-standard-production-program";
+const program = "production-readiness-program";
+const historicalPlans = "second-half-plan";
 const passes = [];
 const failures = [];
 const record = (id, ok, detail) => (ok ? passes : failures).push({ id, detail });
@@ -24,7 +25,7 @@ const sameSet = (a, b) => a.size === b.size && [...a].every((value) => b.has(val
 
 const required = [
   "../identity.md", "../README.md", "../AGENTS.md", "../CLAUDE.md", "../CONTRIBUTING.md", "../CODEGRAPH.md",
-  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "STANDARD.md", "memory/MEMORY.md", "second-half-plan/README.md",
+  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "STANDARD.md", "memory/MEMORY.md", `${historicalPlans}/README.md`,
   `${program}/README.md`, `${program}/04-dependency-ordered-production-plan.md`, `${program}/07-verification-and-handoff-matrix.md`,
   `${program}/08-production-issue-vector.json`, `${program}/09-workstream-execution-map.md`, `${program}/10-test-suite-disposition.md`,
   `${program}/13-resolution-ledger.json`, `${program}/17-ws03-p0-fisher-frontier.md`, `${program}/18-ws03-p0-task-contract.json`,
@@ -37,12 +38,12 @@ record("GOV-01", missing.length === 0, `required files exist; missing: ${missing
 
 const [
   rootReadme, rootCodegraph, scopedCodegraph, contributing, rootAgents, scopedAgents,
-  standard, planIndex, activePlan, roadmap, workstreamsDoc, testsDoc, verificationDoc,
+  standard, historicalIndex, activePlan, roadmap, workstreamsDoc, testsDoc, verificationDoc,
   memoryIndex, packageText, issuesText, ledgerText, ws03Text, governanceWorkflow,
   mainWorkflow, prTemplate, hermesProtocol, hermesBaselineText,
 ] = await Promise.all([
   read("../README.md"), read("../CODEGRAPH.md"), read("CODEGRAPH.md"), read("../CONTRIBUTING.md"),
-  read("../AGENTS.md"), read("AGENTS.md"), read("STANDARD.md"), read("second-half-plan/README.md"),
+  read("../AGENTS.md"), read("AGENTS.md"), read("STANDARD.md"), read(`${historicalPlans}/README.md`),
   read(`${program}/README.md`), read(`${program}/04-dependency-ordered-production-plan.md`),
   read(`${program}/09-workstream-execution-map.md`), read(`${program}/10-test-suite-disposition.md`),
   read(`${program}/07-verification-and-handoff-matrix.md`), read("memory/MEMORY.md"), read("package.json"),
@@ -58,21 +59,18 @@ const ws03 = parse("ws03-contract", ws03Text);
 const hermes = parse("hermes-baseline", hermesBaselineText);
 
 record("GOV-02", standard.includes("Status: **ratified and effective**"), "ratified Standard remains canonical");
-const dirs = await readdir(resolve(root, "second-half-plan"), { withFileTypes: true });
-const active = [];
-for (const entry of dirs) {
-  if (!entry.isDirectory() || !(await exists(`second-half-plan/${entry.name}/README.md`))) continue;
-  if ((await read(`second-half-plan/${entry.name}/README.md`)).includes("Status: **active and canonical**")) active.push(entry.name);
-}
-record("GOV-03", active.length === 1 && active[0] === "2026-07-19-ratified-standard-production-program", `one active program: ${active.join(", ") || "none"}`);
+record("GOV-03",
+  activePlan.includes("Status: **active and canonical**")
+    && historicalIndex.includes("historical and non-canonical")
+    && !(await exists(`${historicalPlans}/2026-07-19-ratified-standard-production-program`)),
+  "one root-level active program; second-half plans are historical");
 record("GOV-04",
-  rootReadme.includes("mvp-build/second-half-plan/README.md")
-    && rootCodegraph.includes("single active production program")
-    && scopedCodegraph.includes("second-half-plan/2026-07-19-ratified-standard-production-program")
-    && planIndex.includes("2026-07-19-ratified-standard-production-program/README.md")
+  rootReadme.includes("mvp-build/production-readiness-program")
+    && rootCodegraph.includes("mvp-build/production-readiness-program")
+    && scopedCodegraph.includes("production-readiness-program")
     && activePlan.includes("New work starts on reviewed task branches from current `main`")
     && memoryIndex.includes("Index — newest first"),
-  "entrypoints route to one active program and current-main task branches");
+  "entrypoints route to the root-level active program and current-main task branches");
 record("GOV-05", contributing.includes("Six-point rubric") && rootAgents.includes("Required contributor gate") && scopedAgents.includes("Hermes upstream review"), "contributor gates remain routed");
 
 const scripts = pkg.scripts ?? {};
@@ -140,7 +138,7 @@ record("GOV-14", roadmap.includes("### Phase 1.1") && roadmap.includes("### Phas
   && activePlan.includes("13-resolution-ledger.json") && activePlan.includes("17-ws03-p0-fisher-frontier.md") && activePlan.includes("18-ws03-p0-task-contract.json")
   && testsDoc.includes("A suite is evidence only for the boundary it exercises") && verificationDoc.includes("Source/CI evidence boundary"), "roadmap and evidence routes are connected");
 
-const report = { generated_at: new Date().toISOString(), validator_version: "2.1.0-structural", status: failures.length ? "fail" : "pass", pass_count: passes.length, fail_count: failures.length, passes, failures };
+const report = { generated_at: new Date().toISOString(), validator_version: "2.2.0-root-program", status: failures.length ? "fail" : "pass", pass_count: passes.length, fail_count: failures.length, passes, failures };
 console.log(JSON.stringify(report, null, 2));
 if (failures.length) { console.error("❌ AMTECH repository governance failed"); process.exitCode = 1; }
 else console.log("✅ AMTECH repository governance OK");
