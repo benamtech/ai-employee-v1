@@ -40,6 +40,10 @@ describe("WS-04 host lifecycle authority", () => {
     expect(source).toContain('args: ["restart", container], expected_stdout: container');
     expect(source).toContain('args: ["network", "rm", network], expected_stdout: network');
     expect(source).toContain("const removed = await removeRuntime(req);");
+    expect(source).toContain("docker_destructive_partial_failure");
+    expect(source).toContain("accepted_steps_before_failure");
+    expect(source).toContain("restart_runtime_verification_ambiguous");
+    expect(source).toContain("_after_remove_ambiguous");
     expect(source).toContain('outcome: result.outcome ?? "failed"');
     expect(source).toContain("evidence: result.evidence ?? null");
   });
