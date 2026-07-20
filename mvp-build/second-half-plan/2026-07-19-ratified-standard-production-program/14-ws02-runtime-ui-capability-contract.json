@@ -4,28 +4,30 @@
   "branch": "agent/ws02-runtime-ui-capability-boundary",
   "objective": "Complete WS-02 source and CI boundaries for streaming Hermes-derived Web, MCP Apps, AG-UI, remote MCP authorization, connector custody, and effective capability truth without allowing presentation or runtime surfaces to manufacture Manager authority.",
   "success_criteria": [
-    "Hermes text and activity stream to clients without avoidable Manager buffering; consequential execution remains Manager-authorized.",
-    "Remote protected MCP metadata, audience, PKCE, state, redirect, token custody, and staleness fail closed.",
-    "MCP Apps run in an opaque-origin sandbox and invoke only current assignment-scoped WorkActions through a mediated bridge.",
-    "AG-UI events are versioned, ordered, replayable, role-safe projections; client actions become authorized AMTECH commands.",
-    "Effective capability truth requires fresh runtime, dependency, credential, network, assignment, entitlement, connector, probe, and authority-version evidence.",
-    "Web, MCP Apps, AG-UI, Hermes, models, and connector payloads cannot select tools, scopes, hosts, credential modes, tokens, or authority versions.",
-    "Focused contracts, broad unit, production boundary, UI contracts, build, Hermes review, and Main Integration Gates pass on the exact head."
+    "Hermes text and activity stream without avoidable Manager buffering; consequential execution remains Manager-authorized.",
+    "Remote MCP metadata, audience, PKCE, state, redirect, token custody, and staleness fail closed.",
+    "MCP Apps use opaque-origin sandboxing and current WorkAction mediation.",
+    "AG-UI events are versioned, ordered, replayable role-safe projection; client actions become authorized commands.",
+    "Effective capability requires fresh runtime, dependency, credential, network, policy, entitlement, connector, probe, and authority-version evidence.",
+    "Exact-head Standard, broad, source, build, Hermes, archaeology, and compiled browser gates pass."
   ],
   "allowed_files": [
     ".github/workflows/**",
-    "mvp-build/apps/manager/src/**",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "CODEGRAPH.md",
+    "mvp-build/AGENTS.md",
+    "mvp-build/CODEGRAPH.md",
+    "mvp-build/apps/manager/**",
     "mvp-build/apps/web/**",
     "mvp-build/packages/shared/src/**",
     "mvp-build/tests/**",
     "mvp-build/scripts/**",
     "mvp-build/package.json",
+    "mvp-build/second-half-plan/README.md",
     "mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/**",
     "mvp-build/docs/architecture/**",
-    "mvp-build/memory/**",
-    "mvp-build/CODEGRAPH.md",
-    "CODEGRAPH.md",
-    "CONTRIBUTING.md"
+    "mvp-build/memory/**"
   ],
   "forbidden_files": [
     "mvp-build/STANDARD.md",
@@ -33,27 +35,9 @@
     "wiki historical bodies",
     "Hermes image pin or upstream source"
   ],
-  "required_tests": [
-    "npm run hermes:upstream:check",
-    "npm run test:unit",
-    "npm run test:standard",
-    "npm run test:production-boundary",
-    "npm run test:ui:contracts",
-    "npm run repo:verify:full",
-    "npm run build",
-    "Main Integration Gates"
-  ],
+  "required_tests": ["hermes:upstream:check","test:unit","test:standard","test:production-boundary","test:ui:contracts","repo:verify:full","build","Main Integration Gates"],
   "known_blockers": [],
   "max_commits": 60,
-  "rubric": {
-    "authority": 0.99,
-    "completeness": 0.95,
-    "agility": 0.91,
-    "isolation": 0.98,
-    "provability": 0.95,
-    "moat": 0.96
-  },
-  "mitigations": [
-    "The GitHub contents API creates one commit per file update. The reviewed ceiling was raised from 40 to 60 before further implementation, and the final pull request will be squash-merged into one main commit."
-  ]
+  "rubric": {"authority":0.99,"completeness":0.95,"agility":0.91,"isolation":0.98,"provability":0.95,"moat":0.96},
+  "mitigations": ["Connector-native contents writes create one commit per file; the final PR is squash-merged. Live external acceptance remains explicitly open."]
 }

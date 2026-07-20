@@ -3,119 +3,72 @@
 Status: active  
 Updated: 2026-07-20
 
-> Tool-agnostic implementation contract. Root rules and `../CONTRIBUTING.md` also apply.
+Root rules and `../CONTRIBUTING.md` apply.
 
 ## Mandatory read order
 
 1. `../identity.md`
-2. root `../AGENTS.md` or `../CLAUDE.md`, `../CONTRIBUTING.md`, and `../CODEGRAPH.md`
-3. this file or `CLAUDE.md`
-4. `CODEGRAPH.md`
-5. ratified `STANDARD.md`
-6. `second-half-plan/README.md` and its single active production program
-7. `memory/MEMORY.md`, then the newest relevant handoff
-8. `docs/architecture/README.md`
-9. applicable source, migrations, tests, workflows, proof, and current diff
+2. root agent rules, CONTRIBUTING, CODEGRAPH
+3. this file and scoped CODEGRAPH
+4. ratified `STANDARD.md`
+5. single active production program
+6. newest relevant indexed handoff
+7. architecture index
+8. applicable source, migrations, tests, workflows, proof, and diff
 
 ## Current implementation state
 
-- PR `#23` merged the reviewed cutover into `main` on 2026-07-20.
-- Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
-- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
-- New work starts on reviewed task branches from current `main`.
-- `employee-production-tuesday` and `research` are historical branch context.
-- Migration head: `0072`.
-- Standard: ratified v0.2.
-- Active program: `second-half-plan/2026-07-19-ratified-standard-production-program/`.
-- Current next phase: Phase 1.1 repository authority and test-contract truth.
-- Broad `npm run test:unit` is known red on the cutover evidence head; curated green gates do not prove it passes.
-- Canonical topology: `infra/scripts/production-topology.mjs` → `infra/deploy/docker-compose.production.yml`.
+- New work starts on reviewed branches from current `main`.
+- Merged baseline: PR `#30`, `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`.
+- WS-02 implementation evidence: `6f792eabe44a9ca1e9635fd4fe5329fa7daca6c4`, Standard `29731384034`, Hermes `29731384166`, Main Integration `29731384039`.
+- Broad regression: **109 files / 630 tests**. Migration head: `0072`. Standard: ratified v0.2.
+- Source/CI accepted: streaming-first Hermes/Web, assignment/version-scoped stream, Remote MCP authorization contracts, sealed token custody, MCP Apps host boundary, AG-UI projection/transport, persisted effective capability, and MCP execution interceptor.
+- Live connector/provider, managed database, target-host, fixture-free channel, commercial, recovery, deployment, pilot, and production acceptance remain open.
 
 ## Canonical boundary
 
 ```text
-trigger
-→ authenticated principal
-→ explicit assignment or approved platform/system context
-→ current relationship, grant, policy, entitlement, and authority version
-→ durable intent, command, event, or work object
-→ Hermes reasoning or deterministic work
-→ evidence-backed capability selection
-→ approval when required
-→ one idempotent effect reservation
-→ accepted | failed | ambiguous durable receipt
-→ role-safe materialization
-→ audit, commercial attribution, recovery, and proof
+trigger → principal → assignment/current authority
+→ durable intent/work → Hermes/deterministic processing
+→ broad discovery + current effective capability
+→ approval → one effect reservation
+→ accepted | failed | ambiguous receipt
+→ replay/repair → role-safe stream/materialization
 ```
 
-Hermes owns employee reasoning/runtime behavior. Manager owns authority, connector/tool custody, approvals, durable effects, commercial attribution, repair, and release proof. Do not build a parallel runtime or authority plane.
+Hermes owns reasoning, runs, sessions, memory, and runtime-local tool use. Manager owns identity, assignment, authority, connector/token custody, approval, effects, commercial attribution, repair, and proof.
 
 ## Connector and protocol rules
 
-- `packages/shared/src/connector-registry.ts` owns connector identity, risk axes, and custody.
-- `packages/shared/src/connector-setup.ts` owns setup protocol, exact tool ownership, permissions, hosts, continuation, readiness, and owner-safe copy.
-- Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
-- Unknown or underspecified connectors default to Manager mediation.
-- Direct MCP requires write, money, and customer-facing risk axes explicitly false.
-- Broad categories never select a provider.
-- MCP Apps and AG-UI are bounded adapters, not authority or durable state.
-- Browser/protocol UI cannot access raw credentials, choose provider tools/scopes/hosts, resolve approval, or perform business effects.
-
-## Database policy
-
-Routine schema/query work uses production-shaped local/CI PostgreSQL for the full ledger, constraints, triggers, indexes, RLS, grants, functions, negative isolation, existing rows/backfills, concurrency, compare-and-swap, rollback, and proof hashes.
-
-Disposable managed Supabase is required only for material platform-specific Auth/Realtime/Storage/Data API/advisor behavior, security-sensitive platform boundaries, suspected platform differences, new release migration classes, and final release candidates. Production is never the routine test target.
+- Declarative connector registry/setup owns identity, risk, custody, tools, scopes, hosts, continuation, and owner-safe copy.
+- Unknown/consequential connectors default to Manager custody.
+- Remote protected MCP uses discovered metadata, exact audience, PKCE/state/redirect binding, and sealed Manager token custody.
+- `tools/list` may be broad; `tools/call` is re-authorized using current effective-capability evidence.
+- MCP Apps and AG-UI are bounded projections. They cannot access raw credentials, databases, providers, or direct effects.
+- Harmless text/activity streams immediately. Consequential actions re-enter Manager commands and existing approval/effect boundaries.
 
 ## Engineering execution
 
-Every task declares task ID, branch/repository, objective, success criteria, allowed/forbidden files, tests, blockers, maximum commits, and six rubric scores.
+Every task declares ID, branch, objective, success criteria, files, tests, blockers, commit ceiling, and six rubric scores.
 
 ```bash
 npm run repo:rubric -- ./task-contract.json
 npm run repo:verify:quick
 npm run repo:verify:full
+npm run test:unit
 ```
 
-```text
-Explore → smallest coherent action → test → commit → verify exact head
-```
-
-- Work on a reviewed task branch from current `main`; `main` changes only through approved merge.
-- No feature expansion while a prerequisite P0 is unresolved.
-- Every commit references the task ID.
-- Stop downstream work on red CI.
-- Do not weaken tests merely to get green.
-- The curated main gate and broad unit aggregate are separate evidence claims.
-- Use `find`/`grep`, not guessed paths.
-- Add concise `why` comments at non-obvious boundaries.
-- After three failed attempts, retain diagnostics and escalate.
-- Treat migrations, schemas, fixtures, contracts, harnesses, diagnostics, proof, and runbooks as first-class code.
-
-Install fast-feedback hooks once per clone:
-
-```bash
-npm run hooks:install
-```
-
-Hooks are bypassable; exact-head CI remains authoritative. Maintain focused coverage for changed logic where instrumentation exists; do not fabricate a repository-wide percentage.
+Do not weaken tests. Stop on red CI. Use forward migrations. Treat schemas, fixtures, contracts, harnesses, diagnostics, proof, and runbooks as first-class code.
 
 ## Hermes upstream review
 
-Before changing Hermes images, launchers, profiles, sessions, delegation, gateway/client behavior, tool discovery, runtime-native capabilities, or Hermes-derived UI:
-
-```bash
-npm run hermes:upstream:check
-```
-
-Review official `NousResearch/hermes-agent` current head, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active PRs. Upstream is intelligence, not authority; the production pin changes only through exact-image compatibility and release gates. Do not run the check merely because a session starts.
+Before changing Hermes images, launchers, sessions, streaming, tool discovery, runtime capabilities, gateway behavior, or Hermes-derived UI, run `npm run hermes:upstream:check`. Production remains pinned until exact-image release gates pass.
 
 ## Document authority
 
 - `STANDARD.md` — normative requirements.
-- `CODEGRAPH.md` — current source topology, migration head, and evidence boundary.
-- `second-half-plan/README.md` — single active plan route.
-- active program files `04`, `08`, `09`, and `10` — roadmap, issue vector, workstreams, and test authority.
-- `docs/architecture/` — explanatory architecture/research disposition.
+- `CODEGRAPH.md` — current topology/evidence boundary.
+- `second-half-plan/README.md` — sole active-plan route.
+- active program — roadmap, issue vector, resolution ledger, workstreams, test authority, WS-02 manifold/closure.
 - `memory/MEMORY.md` — sole handoff index.
-- source, migrations, tests, workflows, proof, and current PR — implementation/acceptance authority.
+- executable source and exact evidence decide implementation/acceptance.
