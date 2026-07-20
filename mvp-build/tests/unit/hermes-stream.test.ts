@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parseSseFrames } from "../../apps/manager/src/lib/hermes-client";
+import { supportsLiveRunEvents, supportsLiveRuns } from "../../apps/manager/src/lib/hermes-live-turn";
 import { workVerbForTool, isSafeWorkVerb } from "../../apps/manager/src/lib/work-verbs";
 
 function streamOf(chunks: string[]): ReadableStream<Uint8Array> {
@@ -37,6 +38,35 @@ describe("parseSseFrames", () => {
   it("handles CRLF line endings", async () => {
     const frames = await collect(streamOf(["event: tool.completed\r\ndata: {}\r\n\r\n"]));
     expect(frames[0]!.event).toBe("tool.completed");
+  });
+});
+
+describe("current Hermes capability negotiation", () => {
+  it("recognizes the official object-valued runs and run_events_sse capability shape", () => {
+    const capabilities = {
+      features: {
+        run_submission: true,
+        run_status: true,
+        run_events_sse: true,
+        session_key_header: "X-Hermes-Session-Key",
+      },
+      endpoints: {
+        runs: { method: "POST", path: "/v1/runs" },
+        run_status: { method: "GET", path: "/v1/runs/{run_id}" },
+        run_events: { method: "GET", path: "/v1/runs/{run_id}/events" },
+      },
+    } as never;
+    expect(supportsLiveRuns(capabilities)).toBe(true);
+    expect(supportsLiveRunEvents(capabilities)).toBe(true);
+  });
+
+  it("still recognizes the older flat endpoint aliases", () => {
+    const capabilities = {
+      features: { runs: true, run_events: true },
+      endpoints: { runs: "/v1/runs", run_events: "/v1/runs/{id}/events" },
+    } as never;
+    expect(supportsLiveRuns(capabilities)).toBe(true);
+    expect(supportsLiveRunEvents(capabilities)).toBe(true);
   });
 });
 
