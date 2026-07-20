@@ -44,7 +44,7 @@
     "Main Integration Gates"
   ],
   "known_blockers": [],
-  "max_commits": 40,
+  "max_commits": 60,
   "rubric": {
     "authority": 0.99,
     "completeness": 0.95,
@@ -53,5 +53,7 @@
     "provability": 0.95,
     "moat": 0.96
   },
-  "mitigations": []
+  "mitigations": [
+    "The GitHub contents API creates one commit per file update. The reviewed ceiling was raised from 40 to 60 before further implementation, and the final pull request will be squash-merged into one main commit."
+  ]
 }
