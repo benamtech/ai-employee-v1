@@ -6,7 +6,7 @@ import { inspectMigrationLedger, inspectRepositoryMigrationLedger } from "../../
 
 const temporaryDirectories: string[] = [];
 
-function makeLedger(count = 72) {
+function makeLedger(count = 73) {
   const directory = mkdtempSync(join(tmpdir(), "amtech-migrations-"));
   temporaryDirectories.push(directory);
   for (let number = 1; number <= count; number += 1) {
@@ -23,13 +23,13 @@ afterEach(() => {
 });
 
 describe("DB-P0-01 migration ledger preflight", () => {
-  it("inventories the repository ledger through immutable head 0072 including approved historical supplements", () => {
+  it("inventories the repository ledger through immutable head 0073 including approved historical supplements", () => {
     const ledger = inspectRepositoryMigrationLedger();
-    expect(ledger.appliedHead).toBe(72);
-    expect(ledger.migrationCount).toBeGreaterThan(72);
+    expect(ledger.appliedHead).toBe(73);
+    expect(ledger.migrationCount).toBeGreaterThan(73);
     expect(ledger.entries[0]?.number).toBe(1);
     expect(ledger.entries.some((entry) => entry.name === "0044b_connector_compatibility_timestamps.sql" && entry.number === 44 && entry.suffix === "b")).toBe(true);
-    expect(ledger.entries.some((entry) => entry.number === 72)).toBe(true);
+    expect(ledger.entries.some((entry) => entry.name === "0073_turn_claim_assignment_scope.sql" && entry.number === 73)).toBe(true);
     expect(ledger.historicalSupplementalSequences).toEqual([31, 44, 57, 58, 59]);
     expect(ledger.ledgerSha256).toMatch(/^[a-f0-9]{64}$/);
     expect(ledger.entries.every((entry) => /^[a-f0-9]{64}$/.test(entry.sha256))).toBe(true);
@@ -41,14 +41,14 @@ describe("DB-P0-01 migration ledger preflight", () => {
   });
 
   it("rejects a missing applied migration", () => {
-    const directory = makeLedger(71);
-    expect(() => inspectMigrationLedger(directory)).toThrow("missing applied migration: 0072");
+    const directory = makeLedger(72);
+    expect(() => inspectMigrationLedger(directory)).toThrow("missing applied migration: 0073");
   });
 
   it("rejects an unapproved duplicate migration sequence", () => {
     const directory = makeLedger();
-    writeFileSync(join(directory, "0072_duplicate.sql"), "select 72;\n");
-    expect(() => inspectMigrationLedger(directory)).toThrow("unapproved duplicate migration sequence: 0072");
+    writeFileSync(join(directory, "0073_duplicate.sql"), "select 73;\n");
+    expect(() => inspectMigrationLedger(directory)).toThrow("unapproved duplicate migration sequence: 0073");
   });
 
   it("does not accept a lookalike supplemental file outside the immutable historical allowlist", () => {
