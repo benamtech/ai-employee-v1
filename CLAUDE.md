@@ -3,23 +3,44 @@
 Status: active  
 Updated: 2026-07-19
 
-Read `identity.md` first. Root `AGENTS.md` contains the tool-agnostic mirror of these repository rules. The nearest scoped `CLAUDE.md`, `AGENTS.md`, and `CODEGRAPH.md` govern work inside a subtree.
+Read `identity.md` first. Root `AGENTS.md` is the tool-agnostic mirror and contains the complete company engineering rules. The nearest scoped `CLAUDE.md`, `AGENTS.md`, and `CODEGRAPH.md` govern their subtree.
 
 ## Repository purpose
 
 This repository contains:
 
-1. the AMTECH AI Employee product implementation in `mvp-build/`;
-2. the company/product brain and historical rationale in `wiki/`;
-3. supporting product, design, and operating documents in `docs/`.
+1. the AI Employee product implementation under `mvp-build/`;
+2. historical rationale and implementation records under `wiki/`;
+3. supporting company/product/design documents under `docs/`.
 
-The former `GTM-RESEARCH/website-framework/` workspace moved to the independent `benamtech/hyper-site` repository. It is not part of AI Employee architecture, execution, CI, release proof, or documentation authority.
+Hyper Site moved to `benamtech/hyper-site` and is not AI Employee source or release authority.
+
+## Mandatory product-work read order
+
+1. `identity.md`
+2. root `AGENTS.md` and `CODEGRAPH.md`
+3. `mvp-build/AGENTS.md` or `mvp-build/CLAUDE.md`
+4. `mvp-build/CODEGRAPH.md`
+5. ratified `mvp-build/STANDARD.md`
+6. `mvp-build/second-half-plan/README.md` and its single active program
+7. `mvp-build/memory/MEMORY.md` and newest relevant handoff
+8. `mvp-build/docs/architecture/README.md`
+9. applicable source, migrations, tests, workflows, proof, and current diff
+
+## Current branch state
+
+- Integration branch: `employee-production-tuesday`.
+- Base: `research`.
+- Draft PR: `#23`.
+- Migration head: `0072`.
+- `main` is not an integration or release shortcut.
+- Standard v0.2 is ratified and effective.
+- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Exact current proof head and workflow IDs belong in PR `#23` and the newest indexed handoff after branch movement stops.
 
 ## Canonical product and offer
 
-AMTECH installs persistent AI Employees for owner-operated small businesses. The owner experiences one employee through governed web, SMS, signed review, and connected-system events. Voice is a future extension, not a launch gate.
-
-Canonical offer:
+AMTECH installs governed persistent AI Employees for owner-operated businesses. Canonical offer:
 
 - Start Free;
 - Managed AI Employee from $400/month;
@@ -27,71 +48,50 @@ Canonical offer:
 
 The public estimator is outdated and non-canonical.
 
-## Mandatory product-work read order
+The product moat is the reusable labor protocol connecting identity, assignments, capabilities, connector manifests, work objects, approvals, durable effects, receipts, recovery, and commercial attribution. Gmail, QuickBooks, and Stripe are adapters rather than the connector ontology.
 
-1. `identity.md`
-2. root `CODEGRAPH.md`
-3. `mvp-build/AGENTS.md` or `mvp-build/CLAUDE.md`
-4. `mvp-build/CODEGRAPH.md`
-5. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
-6. `mvp-build/STANDARD.md`
-7. `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`
-8. `mvp-build/docs/architecture/README.md`
-9. `mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`
-10. applicable UX, deployment, source, migrations, tests, workflow, proof, and release files
+## Runtime and protocol rule
 
-Source, applied migrations, executable proof, and newest scoped memory outrank stale prose.
+Hermes owns employee reasoning, runs, transcript/session continuity, memory, tool use, and runtime-local recovery. Manager owns identity, assignments, authority, capability/tool contracts, connector/credential custody, approvals, durable effects, commercial attribution, revocation, repair, and release proof.
 
-## Current branch state
+MCP core, MCP Apps, and AG-UI are bounded interoperability layers. They do not create assignment authority, durable business state, approval, or external-effect permission.
 
-- Integration branch: `employee-production-tuesday`.
-- Base: `research`.
-- Integration PR: draft `#23`.
-- Migration head: `0069`.
-- `main` is not the integration or release shortcut.
-- Current exact proof anchor and workflow IDs live in root/scoped CODEGRAPH, the newest handoff, and PR `#23`.
-- Real Supabase, live runtime, provider, fixture-free browser/SMS/Review, commercial reconciliation, capacity/fairness, crash recovery, rollback, deployment attestation, and production acceptance remain separate live gates unless exact evidence says otherwise.
+Unknown or consequential connectors default to Manager mediation. Direct MCP requires explicitly declared read-only, non-money, non-customer-facing risk axes. Owner setup is generated from the managed connector manifest rather than provider/category branches in Web code.
 
-## Runtime architecture rule
+## Engineering rules
 
-Stay as close to Hermes runtime as possible. Hermes remains the agent substrate for execution, transcript/session continuity, streaming, recovery, rotation, materialization, and memory behavior. Manager adds identity/assignment authority, durable command/effect semantics, credential custody, approval, revocation, accounting provenance, repair, and release proof. Do not build a parallel agent runtime when an existing Hermes capability can be constrained or adapted.
+- Follow the task contract and `AGENTS.md` standards.
+- Never edit `main`.
+- Inspect before editing; use `find`/`grep` rather than invented paths.
+- No feature expansion while a prerequisite P0 is unresolved.
+- Every commit references the task ID.
+- Add concise `why` comments at non-obvious authority/safety/failure boundaries.
+- Run applicable tests and exact-head CI before completion.
+- Stop downstream work on red CI.
+- Do not weaken expectations merely to get green.
+- After three failed attempts on one concrete step, retain diagnostics and escalate.
+- Measure product behavior on this codebase and declared environments, not public coding benchmarks.
+- Treat scaffolding, tests, migrations, proof capture, and runbooks as first-class implementation.
 
-## Agent-role rule
+## Database policy
 
-For substantial work, name one primary role and its interacting subsystems using `mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`. A role defines the source hubs, invariants, and validation surface; it does not grant authority to ignore neighboring systems.
+Production-shaped local/CI PostgreSQL is the normal TDD loop for migrations, constraints, RLS/grants/functions, negative isolation, concurrency, backfills, and rollback semantics.
 
-Trajectory artifacts in `mvp-build/docs/architecture/trajectories/` are useful only for dependency ordering, interaction analysis, hard-wall checks, and testable bifurcation warnings. They do not override source, grant runtime authority, or promote production acceptance.
+Disposable managed Supabase is a platform-specific and release-candidate gate, not the routine schema-development loop. Production is never a test target.
 
-## Working rules
+## Evidence vocabulary
 
-- Inspect before editing.
-- Correct a flawed acceptance contract before implementing against it.
-- Keep specialist lanes narrow and dependency-ordered.
-- Preserve existing production-like Manager, Hermes, reconciler, inbox, provider, owner-surface, materialization, session, recovery, and deployment machinery; adapt it to shared contracts rather than rebuilding parallel platforms.
-- Every consequential path resolves principal, assignment or approved platform/system context, policy, bounded effect, durable receipt, and audit/commercial provenance.
-- Never claim acceptance from source wiring, fixtures, old runs, confidence, trajectory scores, or documentation-only SHAs.
-- Update the nearest CODEGRAPH and durable memory after substantial architectural or implementation work.
-- Keep public claims synchronized with the exact deployed and proven SHA.
+`planned`, `source-wired`, `locally-proven`, `ci-accepted`, `database-accepted`, `runtime-accepted`, `provider-accepted`, `browser/channel-accepted`, `commercial-accepted`, `live-accepted`, and `production-ready` are distinct.
 
-## Validation vocabulary
+Source wiring, fixtures, local PostgreSQL, documentation, old proof, or an ancestor SHA cannot satisfy a live boundary they did not exercise.
 
-- `source-wired`: code/schema/config exists; name the checks that ran.
-- `ci-accepted`: the named CI gate passed on the named SHA and scope.
-- `real-supabase-accepted`: the approved database target passed migration and behavior checks.
-- `runtime-accepted`: real host/runtime proof exists.
-- `provider-accepted`: real external provider IDs exist.
-- `browser/channel-accepted`: fixture-free web/SMS/signed-review proof exists.
-- `commercial-accepted`: usage, payer/beneficiary, provider cost, and invoice reconciliation passed.
-- `production-ready`: every non-waivable Standard gate is green on the exact deployed SHA.
+## Document authority
 
-## Documentation and memory
+- root `CODEGRAPH.md`: repository routing/current integration headline;
+- `mvp-build/CODEGRAPH.md`: source topology/migration/evidence boundary;
+- `mvp-build/STANDARD.md`: ratified normative requirements;
+- `mvp-build/second-half-plan/README.md`: single active plan route;
+- `mvp-build/memory/MEMORY.md`: sole handoff index;
+- current source, migrations, tests, workflows, and proof: implementation/acceptance authority.
 
-- Root `CODEGRAPH.md` owns repository-level current state and routing.
-- `mvp-build/CODEGRAPH.md` owns implementation topology, migration head, current proof boundary, and next dependency gates.
-- `mvp-build/memory/MEMORY.md` is the sole handoff index.
-- `mvp-build/docs/architecture/12-document-control-memory-and-handoff-map.md` defines document families and synchronization rules.
-- Historical handoffs and implementation records remain point-in-time evidence; do not silently repeat them as current state.
-
-## Git discipline
-
-Work only on the explicitly selected branch. Preserve lane scope, avoid force updates, and merge through the integration branch only after required checks pass and current documentation/proof is synchronized.
+Work only on the explicitly selected branch and merge through the approved integration path after required checks and document/proof synchronization.
