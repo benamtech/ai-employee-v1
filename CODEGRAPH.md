@@ -11,45 +11,41 @@ Active integration branch: `employee-production-tuesday`, based on `research`; d
 3. this file
 4. [`mvp-build/AGENTS.md`](mvp-build/AGENTS.md) or [`mvp-build/CLAUDE.md`](mvp-build/CLAUDE.md)
 5. [`mvp-build/CODEGRAPH.md`](mvp-build/CODEGRAPH.md)
-6. [`mvp-build/memory/MEMORY.md`](mvp-build/memory/MEMORY.md), then the newest relevant handoff
-7. [`mvp-build/STANDARD.md`](mvp-build/STANDARD.md)
-8. [`mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`](mvp-build/second-half-plan/phase-2-standard-remediation-execution.md)
+6. ratified [`mvp-build/STANDARD.md`](mvp-build/STANDARD.md)
+7. [`mvp-build/second-half-plan/README.md`](mvp-build/second-half-plan/README.md) and its one active program
+8. [`mvp-build/memory/MEMORY.md`](mvp-build/memory/MEMORY.md), then the newest relevant handoff
 9. [`mvp-build/docs/architecture/README.md`](mvp-build/docs/architecture/README.md)
-10. [`mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`](mvp-build/docs/architecture/11-agent-orientation-and-role-map.md)
-11. [`mvp-build/docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md`](mvp-build/docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md)
-12. relevant UX, deployment, source, migrations, scripts, tests, workflows, proof, release records, and current diff
+10. relevant source, migrations, scripts, tests, workflows, proof, release records, and current diff
 
-Source, applied migrations, executable proof, and newest scoped memory outrank older documentation.
+Authority order: deployed release-bound proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests and acceptance → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
 ## Repository boundary
 
-This repository contains the AMTECH company/product brain and the implementation home for the AI Employee product.
+This repository contains the AMTECH company/product brain and implementation home for the AI Employee product.
 
-- `mvp-build/` — product code, contracts, database migrations, Hermes integration, Manager, Web, connectors, security, tests, deployment, proof, and active production remediation.
-- `wiki/` — strategy, market/product evidence, historical plans, research, and factual implementation records.
+- `mvp-build/` — product code, contracts, migrations, Hermes integration, Manager, Web, connectors, security, tests, deployment, proof, Standard, and active production program.
+- `wiki/` — strategy, rationale, research, and historical implementation records; it is not current implementation authority.
 - `docs/` — supporting company/product/design/operating documents.
 - `local-prod/` and `scripts/local-prod/` — exact-SHA local-production evidence orchestration.
-- `.github/workflows/` — lane, product, repository-archaeology, and release CI gates.
+- `.github/workflows/` — lane, product, archaeology, and release CI gates.
 
-The former `GTM-RESEARCH/website-framework/` workspace moved to `benamtech/hyper-site`. Hyper Site source, plans, tests, and release state are not AI Employee authority.
+The former Hyper Site workspace moved to `benamtech/hyper-site`. Hyper Site source, plans, tests, and release state are not AI Employee authority.
 
 ## Canonical product truth
 
-AMTECH installs persistent AI Employees for owner-operated small businesses. The owner experiences one employee through governed Web, SMS, signed Review, and connected-system events.
+AMTECH installs persistent AI Employees for owner-operated businesses. Manager is the labor control plane; Hermes is the reasoning/runtime substrate.
 
-Manager is the invisible control plane. Hermes is the managed agent/runtime substrate.
+The moat is a reusable governed-labor protocol spanning identity, assignments, capability and connector manifests, work objects, approval, durable effects, provider receipts, recovery, commercial attribution, and protocol/channel adapters.
 
-Hermes remains responsible for reasoning/execution, sessions/runs, transcript continuity, streaming, memory, recovery, rotation, and employee-local runtime behavior. Manager supplies identity/assignment authority, business context/resources, tool schemas, connector/credential custody, approval, command/effect, commercial provenance, revocation, repair, and release proof.
-
-AMTECH is not primarily an estimator, chatbot, CRM, automation builder, model marketplace, website framework, or collection of disconnected AI tools.
+MCP core, MCP Apps, AG-UI, OAuth providers, models, runtimes, and SaaS systems are replaceable mechanisms. Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
 
 ## Canonical offer
 
 - **Start Free:** one bounded useful AI Employee.
-- **Managed AI Employee:** from **$400/month** for managed connections, recovery, scheduled/event-driven work, higher capacity, and support.
+- **Managed AI Employee:** from **$400/month**.
 - **Workforce:** custom pricing for multiple roles, locations, approval structures, or higher volume.
 
-The public estimator is outdated and non-canonical. Older pricing ladders are superseded where they conflict with this offer.
+The public estimator is outdated and non-canonical.
 
 ## Canonical execution boundary
 
@@ -57,94 +53,99 @@ The public estimator is outdated and non-canonical. Older pricing ladders are su
 trigger
 → authenticated principal
 → exact assignment or approved platform/system context
-→ current relationship, role, grant, policy, and authority version
-→ stable durable intent
-→ immutable command and atomic claim
-→ Hermes or deterministic work
+→ current relationship, role, grant, policy, entitlement, and authority version
+→ stable durable intent, command, event, or work object
+→ Hermes reasoning or deterministic processing
+→ bounded capability selection and runtime validation
 → approval when required
-→ one reserved bounded external effect
-→ accepted, failed, or ambiguous durable receipt
-→ deterministic replay or repair
-→ role-safe Web, SMS, signed-Review, or connected-system surface
-→ audit, metering, commercial attribution, revocation propagation, and release proof
+→ one reserved idempotent external effect
+→ accepted | failed | ambiguous durable receipt
+→ deterministic replay, reconciliation, or repair
+→ role-safe channel/protocol projection
+→ audit, metering, commercial attribution, revocation, recovery, and release proof
 ```
-
-For the production-shaped normal-employee path, use `mvp-build/docs/production-normal-employee-live-deploy-runbook.md`. Fixtures, `/api/dev/login`, local `live:*`, public-estimator scripts, manually injected provider results, and trajectory scores are diagnostics/review aids only.
 
 ## Current integration headline
 
 - Branch: `employee-production-tuesday`
 - Base: `research`
 - Draft PR: `#23`
-- Migration head: `0069`
-- Complete green code/test evidence anchor: `7492c52ba2dbb97ce57efcda4f8d4b7e839b39ec`
-- Canonical current handoff: `mvp-build/memory/2026-07-19-final-document-authority-infra-test-production-handoff.md`
-- Branch status: source/CI remediation accepted on the named anchor; later documentation commits do not imply full workflow rerun; not real-Supabase accepted, not target-runtime accepted, not provider/channel/commercial accepted, not deployed, not launch-cleared
+- Migration head: `0072`
+- Standard: `mvp-build/STANDARD.md` v0.2, ratified and effective
+- Evolution vector: `mvp-build/validation/standard-v0.2-evolution-vector.json`
+- Active production program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`
+- Canonical deployment authority: `mvp-build/infra/scripts/production-topology.mjs` → `mvp-build/infra/deploy/docker-compose.production.yml`
+- Exact current head and final workflow matrix: PR `#23` plus the newest indexed handoff after branch movement stops
+- Product status: source-wired and predecessor exact-head CI accepted; not launch-cleared
 
-Current branch source includes:
+Current source includes:
 
 - relationships, principals, assignments, grants, policies, and authority versions;
-- durable C3 command/effect, ambiguity, and repair;
-- connector custody and ambient inbox;
+- durable command/effect, ambiguity, approvals, and repair;
+- generic connector registry, managed setup manifest, and risk-derived custody;
+- Manager MCP, explicitly safe direct MCP, runtime-native capability evidence, and task mapping;
+- OAuth and provider-hosted onboarding through Manager custody;
 - commercial payer/beneficiary/price attribution and Model Gateway receipts;
-- approval authority and platform support authority;
-- onboarding identity and activation through migration `0069`;
-- scoped owner sessions, previews, artifacts, and Manager MCP credentials;
-- desired resource reconciliation, Host Provisioner, profile checksums, employee networks, and Caddy routing;
+- artifact revision/validation/publication grammar through migration `0072`;
+- desired-resource reconciliation, Host Provisioner, profile checksums, employee networks, and Caddy routing;
 - strict owner/employee/context reads;
-- task-agnostic operating surface, typed generated UI, sandboxed action routing, and compiled production Web tests;
-- exact-head repository archaeology and documentation/effect/relationship ledgers.
+- typed operating surface, generated views, sandboxed action routing, and compiled Web tests;
+- exact-head archaeology and release-evidence machinery.
 
-## Critical production warning
+## Connector and protocol authority
 
-The canonical deployment topology is `mvp-build/infra/deploy/docker-compose.production.yml`, but the normal production, production-like, smoke, and rollback helpers still select or default to the legacy `docker-compose.yml` family. The legacy stack mounts Docker socket into Manager, lacks the separate Model Gateway/Host Provisioner shape, and uses bridge-network Caddy. Close this deploy fork with red source tests before running production commands.
+- `mvp-build/packages/shared/src/connector-registry.ts` owns connector identity, risk axes, and custody derivation.
+- `mvp-build/packages/shared/src/connector-setup.ts` owns native managed setup protocols, exact tool ownership, scopes/permissions, allowed hosts, continuation, readiness evidence, and owner copy.
+- Unknown and underspecified connectors are representable but fail closed.
+- Direct MCP requires every risk axis to be explicitly declared false.
+- Broad categories such as `accounting` or `communication` never select a provider.
+- MCP Apps is the official negotiated interactive MCP extension target; current MCP-UI-shaped code is compatibility groundwork until the named conformance matrix passes.
+- AG-UI is an optional event/state adapter over durable AMTECH state, not authority or a generated-UI schema.
+
+## Database evidence policy
+
+Routine database development uses production-shaped local/CI PostgreSQL:
+
+- complete migration-from-blank;
+- constraints, grants, RLS, functions, concurrency, races, and negative isolation;
+- seed/backfill/existing-row compatibility;
+- deterministic, repeatable TDD.
+
+Disposable managed Supabase is required only when platform-specific Auth, Realtime, Storage, Data API, advisors, or release-candidate behavior is material. Production is never the routine test target.
 
 ## Source-of-truth routing
 
 | Question | Authority |
 |---|---|
 | What is the repository/product boundary? | this file and root agent instructions |
-| What is actually implemented now? | `mvp-build/CODEGRAPH.md`, source, migrations, tests, proof |
-| What is the production standard? | `mvp-build/STANDARD.md` |
-| What is the active dependency order? | active second-half remediation execution program and vector registry |
-| What is the current cross-system architecture? | `mvp-build/docs/architecture/README.md` |
-| What are current P0/P1/P2 gaps? | architecture risk register and infrastructure/test audit |
-| How should coding agents orient and select roles? | architecture agent role map |
-| How are CODEGRAPH, memory, plans, records, and Markdown organized? | architecture document-control map |
-| What is the newest handoff? | `mvp-build/memory/MEMORY.md` and newest relevant entry |
-| What records historical factual implementation? | `wiki/MVP/implementation-records/` |
-| How is the normal employee intended to deploy? | normal-employee live deploy runbook plus canonical production Compose; entry scripts require reconciliation |
+| What is actually implemented? | `mvp-build/CODEGRAPH.md`, source, migrations, tests, proof |
+| What is the production standard? | ratified `mvp-build/STANDARD.md` |
+| How did the Standard change? | `mvp-build/validation/standard-v0.2-evolution-vector.json` |
+| What is the active dependency order? | `mvp-build/second-half-plan/README.md` and its active program |
+| What is the architecture/research disposition? | `mvp-build/docs/architecture/README.md` and document 16 |
+| What is the newest handoff? | `mvp-build/memory/MEMORY.md` |
+| What is historical factual evidence? | `wiki/MVP/implementation-records/` |
+| How does normal employee deployment work? | scoped CODEGRAPH and production runbook, verified against canonical topology source |
 | What is canonical UX doctrine? | `mvp-build/docs/ux/` |
-| What is the offer? | this file and current GTM strategy docs |
-| Where does Hyper Site live? | `benamtech/hyper-site`; not authority here |
-
-## Document-family rules
-
-- Root CODEGRAPH owns repository-level purpose, current integration headline, and routing.
-- `mvp-build/CODEGRAPH.md` owns executable topology, migration head, current proof boundary, and next gates.
-- `mvp-build/memory/MEMORY.md` is the sole handoff index.
-- `wiki/MVP/implementation-records/README.md` indexes historical factual records.
-- Architecture and UX documents explain current source; they do not override it or establish live acceptance.
-- Trajectory artifacts require at least two source-backed dimensions, explicit state/assumptions, a control intervention, blockers, and an executable acceptance predicate. They never promote current state.
-- Historical Markdown stays in place unless every inbound reference is rewritten and an archive/index path is retained.
+| Where does Hyper Site live? | `benamtech/hyper-site` |
 
 ## Evidence boundary
 
-Current source/CI state does **not** by itself claim:
+Current source/CI state does **not** by itself establish:
 
-- convergence of all deploy/smoke/rollback entrypoints on the canonical production Compose;
-- application of migrations `0032–0069` to the approved real Supabase target;
-- managed production secret custody and rotation acceptance;
-- target-host Caddy/Docker/employee-network acceptance;
-- live identity-provider and canonical activation packets;
-- live provider-backed generated work object and external receipt;
-- cumulative Model Gateway budget and replica-safe shared rate enforcement;
-- full compensation/deterministic repair and crash-point acceptance;
-- fixture-free owner Web, SMS, and signed Review proof;
-- commercial reconciliation against real provider costs/invoices;
-- shared/fractional employee policy or complete role perspectives;
-- 100–700 employee fleet capacity/fairness;
-- rollback, SBOM/attestation, signed deployment manifest, or production readiness.
+- disposable managed-Supabase platform/release acceptance;
+- target-host Caddy/Docker/Unix-socket/two-employee acceptance;
+- live identity and connector authorization/revocation;
+- official MCP Apps or full AG-UI conformance;
+- fixture-free provider-backed generated work through effect and receipt;
+- cumulative Model Gateway budget and replica-safe rate enforcement;
+- full compensation/crash repair and rollback;
+- fixture-free Web, SMS, and signed Review;
+- real commercial reconciliation;
+- shared/fractional live policy;
+- 100–700 employee capacity/fairness;
+- signed SBOM/provenance/deployment manifest;
+- production readiness.
 
 ## Repository-wide release invariants
 
@@ -152,12 +153,12 @@ Current source/CI state does **not** by itself claim:
 2. Unauthorized access or action count is zero.
 3. One stable intent cannot create conflicting commands or duplicate irreversible effects.
 4. Consequential success without a matching durable accepted receipt is zero.
-5. Session, connector, signed-resource, assignment, and runtime credential revocation propagate within the declared bound.
+5. Revocation propagates across sessions, connectors, signed resources, approvals, runtime credentials, and queued work.
 6. Billable work identifies assignment, payer, beneficiary, price version, provider receipt, and accounting receipt.
-7. Hermes remains the execution substrate; Manager does not duplicate runtime/session machinery without a verified gap.
-8. Provider master credentials never enter employee profiles/runtimes.
-9. Generated UI is typed presentation and cannot invent actions or durable resources.
-10. Public workloads remain isolated and within accepted capacity limits.
+7. Hermes remains the execution substrate; Manager owns authority, effect, custody, repair, and proof.
+8. Provider master credentials never enter employee profiles or runtimes.
+9. Capability discovery is broad; execution custody is conservative and evidence-backed.
+10. Generated UI and interoperability adapters cannot invent actions, authority, or durable resources.
 11. Capacity, recovery, rollback, migration, provider, browser/channel, commercial, and release proof bind to the exact deployed SHA.
 12. Unsupported production or marketing claims are forbidden.
-13. `main` is not used as a shortcut around integration and release gates.
+13. `main` is never used as a shortcut around integration and release gates.
