@@ -6,11 +6,15 @@ on:
     - cron: "17 13 * * 1"
   push:
     branches:
-      - employee-production-tuesday
       - main
     paths:
       - "mvp-build/infra/**"
       - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/apps/manager/src/lib/model-gateway.ts"
+      - "mvp-build/apps/manager/src/lib/model-gateway-http.ts"
+      - "mvp-build/apps/manager/src/lib/model-provider-registry.ts"
+      - "mvp-build/apps/manager/src/lib/profile-renderer.ts"
+      - "mvp-build/packages/shared/src/model-gateway.ts"
       - "mvp-build/packages/agent-template/**"
       - "mvp-build/packages/profiles/**"
       - "mvp-build/docs/architecture/04-hermes-context-capabilities-and-power-user-operation.md"
@@ -21,10 +25,14 @@ on:
   pull_request:
     branches:
       - main
-      - research
     paths:
       - "mvp-build/infra/**"
       - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/apps/manager/src/lib/model-gateway.ts"
+      - "mvp-build/apps/manager/src/lib/model-gateway-http.ts"
+      - "mvp-build/apps/manager/src/lib/model-provider-registry.ts"
+      - "mvp-build/apps/manager/src/lib/profile-renderer.ts"
+      - "mvp-build/packages/shared/src/model-gateway.ts"
       - "mvp-build/packages/agent-template/**"
       - "mvp-build/packages/profiles/**"
       - "mvp-build/docs/architecture/04-hermes-context-capabilities-and-power-user-operation.md"
