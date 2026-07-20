@@ -1,0 +1,57 @@
+{
+  "task_id": "AMTECH-P0-WS02-002",
+  "repository": "benamtech/ai-employee-v1",
+  "branch": "agent/ws02-runtime-ui-capability-boundary",
+  "objective": "Complete WS-02 source and CI boundaries for streaming Hermes-derived Web, MCP Apps, AG-UI, remote MCP authorization, connector custody, and effective capability truth without allowing presentation or runtime surfaces to manufacture Manager authority.",
+  "success_criteria": [
+    "Hermes text and activity stream to clients without avoidable Manager buffering; consequential execution remains Manager-authorized.",
+    "Remote protected MCP metadata, audience, PKCE, state, redirect, token custody, and staleness fail closed.",
+    "MCP Apps run in an opaque-origin sandbox and invoke only current assignment-scoped WorkActions through a mediated bridge.",
+    "AG-UI events are versioned, ordered, replayable, role-safe projections; client actions become authorized AMTECH commands.",
+    "Effective capability truth requires fresh runtime, dependency, credential, network, assignment, entitlement, connector, probe, and authority-version evidence.",
+    "Web, MCP Apps, AG-UI, Hermes, models, and connector payloads cannot select tools, scopes, hosts, credential modes, tokens, or authority versions.",
+    "Focused contracts, broad unit, production boundary, UI contracts, build, Hermes review, and Main Integration Gates pass on the exact head."
+  ],
+  "allowed_files": [
+    ".github/workflows/**",
+    "mvp-build/apps/manager/src/**",
+    "mvp-build/apps/web/**",
+    "mvp-build/packages/shared/src/**",
+    "mvp-build/tests/**",
+    "mvp-build/scripts/**",
+    "mvp-build/package.json",
+    "mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/**",
+    "mvp-build/docs/architecture/**",
+    "mvp-build/memory/**",
+    "mvp-build/CODEGRAPH.md",
+    "CODEGRAPH.md",
+    "CONTRIBUTING.md"
+  ],
+  "forbidden_files": [
+    "mvp-build/STANDARD.md",
+    "mvp-build/packages/db/migrations/0001_init.sql through 0072_artifact_revision_scope_guards.sql",
+    "wiki historical bodies",
+    "Hermes image pin or upstream source"
+  ],
+  "required_tests": [
+    "npm run hermes:upstream:check",
+    "npm run test:unit",
+    "npm run test:standard",
+    "npm run test:production-boundary",
+    "npm run test:ui:contracts",
+    "npm run repo:verify:full",
+    "npm run build",
+    "Main Integration Gates"
+  ],
+  "known_blockers": [],
+  "max_commits": 40,
+  "rubric": {
+    "authority": 0.99,
+    "completeness": 0.95,
+    "agility": 0.91,
+    "isolation": 0.98,
+    "provability": 0.95,
+    "moat": 0.96
+  },
+  "mitigations": []
+}
