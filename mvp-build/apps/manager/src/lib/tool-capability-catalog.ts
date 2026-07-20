@@ -90,6 +90,7 @@ const ARTIFACT_CAPABILITIES: Array<{
 ];
 
 const VALID_RISKS = new Set<ToolCapabilityRisk>(["read", "write", "money", "customer_facing", "unknown"]);
+const DEFAULT_EVIDENCE_MAX_AGE_MS = 30 * 60 * 1000;
 
 function stableId(serverId: string, toolName: string): string {
   return `toolcap:${slug(serverId)}:${slug(toolName)}`;
@@ -164,8 +165,18 @@ function evidenceRisk(value: unknown): ToolCapabilityRisk {
   return candidate && VALID_RISKS.has(candidate) ? candidate : "unknown";
 }
 
+export function capabilityEvidenceAge(checkedAt: string, now = Date.now()): { age_seconds: number | null; stale: boolean } {
+  const checked = Date.parse(checkedAt);
+  if (!Number.isFinite(checked)) return { age_seconds: null, stale: true };
+  const ageMs = Math.max(0, now - checked);
+  const configured = Number(process.env.AMTECH_CAPABILITY_EVIDENCE_MAX_AGE_MS ?? DEFAULT_EVIDENCE_MAX_AGE_MS);
+  const maxAgeMs = Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_EVIDENCE_MAX_AGE_MS;
+  return { age_seconds: Math.floor(ageMs / 1000), stale: ageMs > maxAgeMs };
+}
+
 function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt: string, reportId: string): ToolCapabilityDescriptor[] {
   const out: ToolCapabilityDescriptor[] = [];
+  const freshness = capabilityEvidenceAge(checkedAt);
   for (const decision of decisions) {
     const evidence = decision.evidence ?? {};
     const rawTools = Array.isArray(evidence.reported_tools) ? evidence.reported_tools.map(String).filter(Boolean) : [];
@@ -180,8 +191,10 @@ function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt:
       const description = evidenceString(descriptions[toolName]) ?? `Discovered from ${serverLabel}; availability is based on the latest persisted evidence report.`;
       const readOnlyEvidence = evidenceBoolean(evidence.read_only);
       const readOnly = readOnlyEvidence ?? false;
-      const availability = reportAvailability(decision);
+      const provedAvailability = reportAvailability(decision);
+      const availability: ToolCapabilityAvailability = freshness.stale && provedAvailability === "ready" ? "unverified" : provedAvailability;
       const endpointId = evidenceString(evidence.runtime_endpoint_id);
+      const failedDimensions = [...decision.failed_dimensions, ...(freshness.stale ? ["evidence_fresh"] : [])];
       out.push({
         id: stableId(serverId, toolName),
         capability_key: decision.capability_key,
@@ -197,13 +210,19 @@ function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt:
         read_only: readOnly,
         risk: readOnly ? "read" : evidenceRisk(evidence.risk),
         requires_approval: !readOnly && evidenceBoolean(evidence.requires_approval) !== false,
-        setup_requirement: availability === "ready" ? null : evidenceString(evidence.setup_requirement) ?? decision.failed_dimensions.map(humanize).join(" · "),
+        setup_requirement: availability === "ready"
+          ? null
+          : freshness.stale
+            ? "Refresh the live capability evidence before using this tool."
+            : evidenceString(evidence.setup_requirement) ?? failedDimensions.map(humanize).join(" · "),
         connector_id: evidenceString(evidence.connector_id),
         evidence: {
-          level: decision.effective ? "live_proof" : decision.runtime_reported ? "runtime_report" : "advertised_only",
+          level: decision.effective && !freshness.stale ? "live_proof" : decision.runtime_reported ? "runtime_report" : "advertised_only",
           checked_at: checkedAt,
           report_id: reportId,
-          failed_dimensions: [...decision.failed_dimensions],
+          age_seconds: freshness.age_seconds,
+          stale: freshness.stale,
+          failed_dimensions: failedDimensions,
           source_refs: [
             `effective_capability_evidence:${reportId}:${decision.capability_key}`,
             ...(endpointId ? [`runtime_endpoint:${endpointId}`] : []),
@@ -249,6 +268,8 @@ function managerDescriptors(snapshot: EmployeeSnapshot): ToolCapabilityDescripto
         level: "control_plane_contract",
         checked_at: snapshot.runtime_health?.checked_at ?? null,
         report_id: null,
+        age_seconds: null,
+        stale: false,
         failed_dimensions: availability === "needs_connection" ? ["connector_ready"] : availability === "degraded" ? ["runtime_health"] : [],
         source_refs: [`manager_mcp:tools/${toolName}`, `tool_schema:${toolName}`],
       },
@@ -283,6 +304,8 @@ function artifactDescriptors(snapshot: EmployeeSnapshot): ToolCapabilityDescript
         level: "control_plane_contract",
         checked_at: snapshot.runtime_health?.checked_at ?? null,
         report_id: null,
+        age_seconds: null,
+        stale: false,
         failed_dimensions: runtimeUnavailable ? ["runtime_health"] : [],
         source_refs: [`manager_mcp:tools/${item.tool_name}`, `artifact_workbench:${item.tool_name}`],
       },
