@@ -6,6 +6,8 @@ function redactFixture(): Record<string, unknown> {
     import { redact } from './infra/scripts/acceptance/production-proof-lib.mjs';
     const digest = 'nousresearch/hermes-agent@sha256:' + 'a'.repeat(64);
     const body = redact({
+      kind: 'hermes_exact_image_filesystem',
+      status: 'passed',
       git_sha: 'b'.repeat(40),
       resolved_digest: digest,
       content_sha256: 'sha256:' + 'c'.repeat(64),
@@ -22,8 +24,10 @@ function redactFixture(): Record<string, unknown> {
 }
 
 describe("production proof redaction", () => {
-  it("keeps exact public hashes and OCI digests while redacting credentials and arbitrary long values", () => {
+  it("keeps exact public metadata, hashes, and OCI digests while redacting credentials and arbitrary long values", () => {
     const result = redactFixture();
+    expect(result.kind).toBe("hermes_exact_image_filesystem");
+    expect(result.status).toBe("passed");
     expect(result.git_sha).toBe("b".repeat(40));
     expect(result.resolved_digest).toBe(`nousresearch/hermes-agent@sha256:${"a".repeat(64)}`);
     expect(result.content_sha256).toBe(`sha256:${"c".repeat(64)}`);
