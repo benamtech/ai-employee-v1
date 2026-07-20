@@ -70,12 +70,23 @@ export async function waitFor(label, fn, options = {}) {
 }
 
 const REDACT_KEY = /(secret|token|authorization|password|api[_-]?key|cookie|phone_e164|email_address)/i;
+const PUBLIC_HASH_KEY = /(?:^|_)(?:git_sha|sha(?:256)?|hash|digest|image_id)(?:$|_)/i;
 const REDACT_VALUE = /(?:Bearer\s+)?[A-Za-z0-9_=-]{28,}/g;
+const PUBLIC_HASH_VALUE = /^(?:(?:[A-Za-z0-9._/-]+)@)?sha256:[a-f0-9]{64}$/i;
+const PUBLIC_GIT_SHA_VALUE = /^[a-f0-9]{7,64}$/i;
+
+function isPublicHash(value) {
+  return typeof value === "string" && (PUBLIC_HASH_VALUE.test(value) || PUBLIC_GIT_SHA_VALUE.test(value));
+}
 
 export function redact(value) {
   if (Array.isArray(value)) return value.map(redact);
   if (value && typeof value === "object") {
-    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, REDACT_KEY.test(key) ? "[REDACTED]" : redact(item)]));
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => {
+      if (REDACT_KEY.test(key)) return [key, "[REDACTED]"];
+      if (PUBLIC_HASH_KEY.test(key) && isPublicHash(item)) return [key, item];
+      return [key, redact(item)];
+    }));
   }
   if (typeof value === "string") return value.replace(REDACT_VALUE, "[REDACTED]");
   return value;
