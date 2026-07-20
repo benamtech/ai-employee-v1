@@ -1,14 +1,7 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
 
 const [action, employeeId] = process.argv.slice(2);
-
-function docker(args) {
-  const result = spawnSync("docker", args, { encoding: "utf8" });
-  if (result.status !== 0) throw new Error(`${result.stdout ?? ""}${result.stderr ?? ""}`.trim() || `docker ${args.join(" ")} failed`);
-  return String(result.stdout ?? "").trim();
-}
 
 function required(name) {
   const value = process.env[name];
@@ -18,6 +11,7 @@ function required(name) {
 
 function requireEmployee() {
   if (!employeeId) throw new Error("employee id required");
+  if (!/^[A-Za-z0-9:_-]{8,220}$/.test(employeeId)) throw new Error("invalid employee id");
 }
 
 async function accountIdForEmployee() {
@@ -31,7 +25,9 @@ async function accountIdForEmployee() {
 }
 
 const commandByAction = {
+  inspect: "inspect_drift",
   restart: "restore",
+  restore: "restore",
   stop: "suspend",
   repair: "repair_drift",
   reprovision: "reprovision",
@@ -39,6 +35,12 @@ const commandByAction = {
   teardown: "teardown",
   rotate: "rotate_model_gateway_credential",
 };
+
+function operationKey(commandType) {
+  const explicit = process.env.AMTECH_LIFECYCLE_IDEMPOTENCY_KEY;
+  if (explicit) return explicit;
+  return `employee-lifecycle:${commandType}:${employeeId}:op:${crypto.randomUUID()}`;
+}
 
 async function queueLifecycleCommand(commandType) {
   const accountId = await accountIdForEmployee();
@@ -51,8 +53,8 @@ async function queueLifecycleCommand(commandType) {
       employee_id: employeeId,
       command_type: commandType,
       requested_by: "employee-lifecycle-cli",
-      idempotency_key: `employee-lifecycle:${commandType}:${employeeId}:${Date.now()}`,
-      payload: { source: "infra/scripts/employee-lifecycle.mjs" },
+      idempotency_key: operationKey(commandType),
+      payload: { source: "infra/scripts/employee-lifecycle.mjs", requested_action: action },
     }),
     signal: AbortSignal.timeout(15_000),
   });
@@ -63,19 +65,14 @@ async function queueLifecycleCommand(commandType) {
 
 try {
   if (!action || action === "help" || action === "--help") {
-    console.log("Usage: node infra/scripts/employee-lifecycle.mjs <inspect|restart|stop|repair|reprovision|replace|teardown|rotate> <employee_id>");
+    console.log("Usage: node infra/scripts/employee-lifecycle.mjs <inspect|restart|restore|stop|repair|reprovision|replace|teardown|rotate> <employee_id>");
     process.exit(0);
   }
   requireEmployee();
-  if (action === "inspect") {
-    console.log(docker(["inspect", `amtech-hermes-${employeeId}`, "--format", "{{json .State}}"]));
-  } else if (action === "gc") {
-    throw new Error("direct runtime GC is disabled; use reconciler drift inspection and repair");
-  } else {
-    const commandType = commandByAction[action];
-    if (!commandType) throw new Error(`unknown action ${action}`);
-    await queueLifecycleCommand(commandType);
-  }
+  if (action === "gc") throw new Error("direct runtime GC is disabled; use reconciler drift inspection and repair");
+  const commandType = commandByAction[action];
+  if (!commandType) throw new Error(`unknown action ${action}`);
+  await queueLifecycleCommand(commandType);
 } catch (err) {
   console.error(`employee-lifecycle:${String(err?.message ?? err)}`);
   process.exit(1);
