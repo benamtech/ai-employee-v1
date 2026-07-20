@@ -110,13 +110,17 @@ jobs:
       - name: Install Chromium runtime
         run: npx playwright install --with-deps chromium
       - name: Build compiled fixture Web candidate
+        shell: bash
         env:
           NEXT_PUBLIC_AMTECH_UI_FIXTURES: "1"
           NODE_ENV: production
           CI: "true"
           AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
-          AMTECH_ENVIRONMENT_NAME: main-integration-ci
-        run: npm run build --workspace @amtech/web
+          AMTECH_ENVIRONMENT_NAME: main-integration-fixture-ci
+        run: |
+          set -o pipefail
+          mkdir -p infra/.local/main-integration-ui
+          npm run build --workspace @amtech/web 2>&1 | tee infra/.local/main-integration-ui/web-build.log
       - name: Run compiled adaptive and product-shell browser matrices
         shell: bash
         env:
@@ -128,7 +132,7 @@ jobs:
           NODE_ENV: production
           CI: "true"
           AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
-          AMTECH_ENVIRONMENT_NAME: main-integration-ci
+          AMTECH_ENVIRONMENT_NAME: main-integration-fixture-ci
         run: |
           set -euo pipefail
           EVIDENCE_DIR="infra/.local/main-integration-ui"
