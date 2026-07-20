@@ -30,13 +30,34 @@ jobs:
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
       - name: Contributor, Standard, type, and lint gates
-        run: npm run repo:verify:full
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p infra/.local/main-integration-source
+          npm run repo:verify:full 2>&1 | tee infra/.local/main-integration-source/repository-governance.log
       - name: Full unit and source contracts
-        run: npm run test:unit
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:unit 2>&1 | tee infra/.local/main-integration-source/unit-contracts.log
       - name: Production-boundary source contracts
-        run: npm run test:production-boundary
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:production-boundary 2>&1 | tee infra/.local/main-integration-source/production-boundary.log
       - name: Production build
-        run: npm run build
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee infra/.local/main-integration-source/production-build.log
+      - name: Upload source diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-integration-source-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mvp-build/infra/.local/main-integration-source/
+          if-no-files-found: error
+          retention-days: 14
 
   repository-archaeology:
     runs-on: ubuntu-24.04
