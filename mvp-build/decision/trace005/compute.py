@@ -16,26 +16,44 @@ Z_SPACES={"work","commercial","provider","authority","failure","proof","operator
 WORKSTREAMS={"WS06","WS07","WS08_g"}
 EPS=1e-9
 
-def load(name):
-    data=json.loads((ROOT/name).read_text())
-    if data.get("encoding")!="zlib+base64":
+_BUNDLE_CACHE={}
+def _decode(data):
+    encoding=data.get("encoding")
+    if encoding not in ("zlib+base64","zlib+base64-parts"):
         return data
-    raw=zlib.decompress(base64.b64decode(data["payload"]))
+    if encoding=="zlib+base64-parts":
+        payload="".join((ROOT/name).read_text() for name in data["parts"])
+        assert hashlib.sha256(payload.encode()).hexdigest()==data["payload_sha256"]
+    else:
+        payload=data["payload"]
+    raw=zlib.decompress(base64.b64decode(payload))
     assert hashlib.sha256(raw).hexdigest()==data["uncompressed_sha256"]
     assert len(raw)==data["uncompressed_bytes"]
     return json.loads(raw)
+
+def load(name):
+    data=json.loads((ROOT/name).read_text())
+    if data.get("schema")=="amtech.trace005.pointer.v1":
+        bundle_name=data["bundle"]
+        if bundle_name not in _BUNDLE_CACHE:
+            _BUNDLE_CACHE[bundle_name]=_decode(json.loads((ROOT/bundle_name).read_text()))
+        value=_BUNDLE_CACHE[bundle_name][data["key"]]
+        encoded=json.dumps(value,separators=(",",":"),sort_keys=True).encode()
+        assert hashlib.sha256(encoded).hexdigest()==data["value_sha256"]
+        return value
+    return _decode(data)
 
 TASK=load("task_state.json")
 POP=load("candidate_population.json")
 SCORES=load("candidate_scores.json")
 GRAPH=load("hypergraph.json")
-COMPARE=json.loads((ROOT/"selection_comparison.json").read_text())
-EXPLORE=json.loads((ROOT/"selected_exploration.json").read_text())
-IMPLEMENT=json.loads((ROOT/"selected_implementation.json").read_text())
-TEMPLATES=json.loads((ROOT/"thought_templates.json").read_text())
-COUNTER=json.loads((ROOT/"counterexample_matrix.json").read_text())
-CONTRACT=json.loads((ROOT/"implementation_contract.json").read_text())
-VERIFY=json.loads((ROOT/"verification_plan.json").read_text())
+COMPARE=load("selection_comparison.json")
+EXPLORE=load("selected_exploration.json")
+IMPLEMENT=load("selected_implementation.json")
+TEMPLATES=load("thought_templates.json")
+COUNTER=load("counterexample_matrix.json")
+CONTRACT=load("implementation_contract.json")
+VERIFY=load("verification_plan.json")
 
 C={c["id"]:c for c in POP}
 SC={s["id"]:s for s in SCORES}
@@ -79,8 +97,6 @@ for cid,c in C.items():
     q=float(WEIGHTS@np.array([got[k] for k in R_DIMS]))
     assert abs(q-SC[cid]["q"])<1e-7
 
-# Rebuild the normalized hypergraph Laplacian from the committed incidence
-# matrix and ordered edge weights. Named edge groups are independently checked.
 named_edges=[e for arity in ("2","3","4","5","6") for e in GRAPH["edges_by_arity"][arity]]
 for e in named_edges:
     assert e["arity"]==len(e["members"]) and 2<=e["arity"]<=6
@@ -124,8 +140,7 @@ def metrics(sel):
     qbar=float(np.mean([SC[x]["q"] for x in sel]))
     qd=len(cells)/len(allcells)
     J=.30*qbar+.20*coverage+.10*covered+.10*sep_min+.10*sep_mean+.10*vne+.10*qd-.15*redundancy
-    return {"q_bar":qbar,"C_Omega":coverage,"C_H":covered,"Sep_min":sep_min,"Sep_mean":sep_mean,
-            "VNE":vne,"QD":qd,"Redundancy":redundancy,"J":J}
+    return {"q_bar":qbar,"C_Omega":coverage,"C_H":covered,"Sep_min":sep_min,"Sep_mean":sep_mean,"VNE":vne,"QD":qd,"Redundancy":redundancy,"J":J}
 
 for key in ("joint","utility_only","diversity_only"):
     expected=COMPARE[key]["metrics"]; got=metrics(COMPARE[key]["selected_ids"])
@@ -142,10 +157,4 @@ assert all(case["behavioral_test_required"] for case in COUNTER["cases"])
 assert CONTRACT["selected_trajectories"]==IMPLEMENT["selected_ids"]
 assert VERIFY["promotion_rule"].startswith("No evidence class promotes")
 
-print(json.dumps({
- "trace":"trace005","candidate_count":len(C),"basis":TASK["basis"]["task_vector_summary"],
- "selected_templates":TEMPLATES["selected_ids"],"exploration":EXPLORE["selected_ids"],
- "implementation":IMPLEMENT["selected_ids"],"joint_metrics":metrics(EXPLORE["selected_ids"]),
- "graph_diversity_terms":COMPARE["materiality"]["graph_diversity_terms"],
- "feasible_random_selections":COMPARE["random"]["feasible_samples"],
-},indent=2))
+print(json.dumps({"trace":"trace005","candidate_count":len(C),"basis":TASK["basis"]["task_vector_summary"],"selected_templates":TEMPLATES["selected_ids"],"exploration":EXPLORE["selected_ids"],"implementation":IMPLEMENT["selected_ids"],"joint_metrics":metrics(EXPLORE["selected_ids"]),"graph_diversity_terms":COMPARE["materiality"]["graph_diversity_terms"],"feasible_random_selections":COMPARE["random"]["feasible_samples"]},indent=2))
