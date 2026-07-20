@@ -1,64 +1,91 @@
 # Artifact Workbench, Runtime Capability Evidence, and Golden Employees
 
-Status: **[VERIFIED] source implementation; [INCOMPLETE] target-host and provider-backed acceptance**
+Status: **source implementation; target-host and provider-backed acceptance incomplete**  
+Standard: v0.2 ratified  
+Active program: `../../second-half-plan/2026-07-19-ratified-standard-production-program/`
 
-This slice does not introduce a new workflow engine, agent authority plane, or lifecycle launcher. It composes the existing Manager assignment, approval, durable command, effect receipt, work-resource, generated-view, connector-custody, and Hermes runtime boundaries into one artifact-centered owner journey.
+This slice does not introduce a new workflow engine, authority plane, or lifecycle launcher. It composes existing assignment, approval, durable command/effect, work-resource, generated-view, connector-custody, and Hermes runtime boundaries into artifact-centered owner journeys.
 
 ## Production sequence
 
 1. Run the exact pinned Hermes image filesystem proof.
-2. Collect effective-capability evidence from runtime reporting, dependencies, credentials, network reachability, connector health, policy, and a live probe.
+2. Collect effective-capability evidence from runtime reporting, dependencies, credentials, network, connector health, policy/entitlement, and a recent live probe.
 3. Create an assignment-scoped artifact and immutable revision.
 4. Revise the same artifact; the canonical `artifacts` row points to the current immutable revision.
 5. Validate only the current revision and retain validator evidence.
-6. Render revision metadata, before/after diff, validation evidence, and receipts through the existing `WorkResource` and Manager-owned `WorkView` grammar.
-7. Request approval for the exact current revision. The existing approval snapshot hashes the revision content and source manifest.
+6. Render revision metadata, diff, validation, approval, effect, publication, and verification through the existing work-resource/generated-view grammar.
+7. Request approval for the exact current revision/hash.
 8. Resolve approval through an authorized human assignment principal.
-9. Publish through the existing durable command/effect execution path.
-10. Verify the observed sandbox target and retain the post-publish receipt.
+9. Publish through the existing durable command/effect path.
+10. Verify the observed target and retain the post-publish receipt.
 
 ## Runtime filesystem contract
 
-The rendered profile remains immutable at `/opt/amtech/profile:ro`. Hermes receives an employee-scoped writable data root at `/opt/data` for native sessions, memory, checkpoints, caches, lazy dependencies, and plugins. The employee workspace remains writable at `/workspace`.
+The rendered profile remains immutable at `/opt/amtech/profile:ro`. Hermes receives an employee-scoped writable data root at `/opt/data` and writable `/workspace`.
 
 `infra/scripts/acceptance/hermes-exact-image-filesystem-proof.mjs` pins `nousresearch/hermes-agent:v2026.7.1`, records the resolved OCI digest, and proves:
 
-- `/opt/data` and `/workspace` are writable and persistent across container recreation;
+- `/opt/data` and `/workspace` are writable and persistent across recreation;
 - `/opt/amtech/profile` and the root filesystem are read-only;
 - package plugins are visible inside the employee data root;
 - session, memory, checkpoint, and workspace markers survive a second container.
 
-The normal launcher materializes only the selected profile package's plugins into the employee data root. It does not expose a host-global plugin directory and does not remove runtime-installed plugins.
+The launcher materializes only the selected profile package's plugins. It does not expose a host-global plugin directory or erase runtime-installed plugins.
 
 ## Effective capability truth
 
-A capability is effective only when all of these dimensions pass:
+A capability is effective only when all dimensions pass:
 
-- advertised by the selected profile or product surface;
+- advertised by selected profile/product surface;
 - reported by the exact running Hermes runtime;
-- required dependency installed/configured;
-- credential present through an approved custody path;
-- provider/network route reachable from the employee runtime;
-- assignment policy and entitlement allow the capability;
+- dependency installed/configured;
+- credential present through approved custody;
+- provider/network route reachable;
+- assignment policy and entitlement allow it;
 - required connector is healthy;
-- a recent capability-specific live probe passed.
+- recent capability-specific live probe passed.
 
-Profile YAML and host environment-key presence are evidence inputs, never a sufficient decision. Unknown, skipped, or failed live probes remain ineffective. `effective_capability_evidence` retains each dimension and the failed-dimension list for one assignment/report.
+Profile YAML, environment-key presence, tool discovery, or provider branding alone is not truth. Unknown, skipped, stale, or failed evidence remains ineffective.
 
-## Connector consent return
+## Connector and authorization protocol
 
-The owner consent surface keeps the existing permission language. Its Connect action now enters the existing Manager `connect_email` tool through an owner-authenticated route. OAuth state is HMAC-signed, employee/provider-bound, short-lived, and optionally includes only a safe relative owner-web return path. The provider callback uses the existing token exchange, secret sealing, health/binding, and audit path, then returns to the initiating work path with an explicit connected/error result. Absolute or protocol-relative return URLs are rejected.
+Owner setup is generated from the shared managed connector manifest. The manifest declares canonical identity/aliases, actual authorization protocol, setup flow, exact Manager tools, readiness source, permissions/scopes, permitted hosts, continuation, credential posture, and owner-safe language.
+
+Current adapters:
+
+- Gmail — OAuth authorization code;
+- QuickBooks — OAuth authorization code;
+- Stripe — provider-hosted Connect onboarding;
+- reviewed read-only MCP — direct only when every risk axis is explicitly false;
+- unknown or consequential connector — discoverable but Manager-mediated and fail-closed for self-service.
+
+The browser starts an approved setup through an assignment-authorized Manager route. It does not choose a Manager tool, permission scope, credential mode, authorization host, or provider continuation.
+
+OAuth state is HMAC-bound to employee/provider and a safe relative return path. Provider onboarding/authorization hosts are exact HTTPS allowlists. Tokens and platform credentials remain in Manager/provider custody.
+
+## Capability-to-provider binding
+
+Broad categories such as `communication`, `accounting`, or `money` organize owner UX and task matching. They are not provider identity.
+
+Exact managed-tool ownership and readiness source come from `packages/shared/src/connector-setup.ts`. `capability-registry.ts` and `tool-capability-catalog.ts` consume the manifest, so another accounting connector cannot silently inherit QuickBooks scopes, account rows, or setup behavior.
 
 ## Artifact data model
 
-`artifacts` remains the canonical identity and current-head projection. Additive tables provide immutable evidence:
+`artifacts` remains canonical identity/current-head projection. Additive tables provide immutable evidence:
 
-- `artifact_revisions`: parent link, revision number, payload, content SHA-256, source manifest, storage reference, creator/run provenance;
-- `artifact_validations`: validator key, status, summary, evidence, revision binding;
-- existing `approvals`, durable commands, effect receipts, audit records, and work resources remain the authority/effect system;
+- `artifact_revisions` — parent, revision number, payload, SHA-256, source manifest, storage reference, creator/run provenance;
+- `artifact_validations` — validator, status, summary, evidence, revision binding;
+- existing approvals, durable commands, effects, audits, and work resources remain the authority/effect system;
 - `effective_capability_evidence` records capability decisions separately from artifact state.
 
-Revision updates use compare-and-swap against the current head. Validation rejects a stale revision. Publish approval snapshots the current revision hash. Any later revision changes the snapshot and invalidates execution through the existing approval-authority assertion.
+Revision updates use compare-and-swap. Validation rejects stale revisions. Publish approval snapshots the current revision hash. Later revision invalidates stale execution through existing approval authority.
+
+## Protocol adapters
+
+- AMTECH generated views remain typed work projections with bounded host intents.
+- Current `ui://`/iframe code is compatibility groundwork for official negotiated MCP Apps; it is not yet a full conformance claim.
+- Current strict snapshot/SSE/work-event code is analogous groundwork for a versioned AG-UI adapter; shared state remains projection, not authority.
+- Browser, MCP Apps, and AG-UI clients cannot directly mutate authority, approval, connector custody, or provider state.
 
 ## Golden employee scenarios
 
@@ -66,7 +93,7 @@ All scenarios use `amtech-artifact-v1`, the same revision/validation/approval/pu
 
 ### Website Employee A
 
-Produces one responsive webpage project with initial and revised HTML/CSS, a generated diff, semantic/responsive/keyboard/external-dependency validation, exact-revision approval, sandbox publish, post-publish verification, replay/idempotency proof, and owner receipts.
+Produces one responsive webpage project with initial/revised HTML/CSS, generated diff, semantic/responsive/keyboard/external-dependency validation, exact-revision approval, sandbox publish, post-publish verification, replay/idempotency proof, and owner receipts.
 
 ### Contractor Office Employee B
 
@@ -74,11 +101,9 @@ Produces one job packet with customer/site, labor/material math, assumptions/exc
 
 ### Bookkeeping Employee C
 
-Produces one bounded monthly review packet with reconciliation, exception provenance, proposed-versus-observed write separation, sensitive-data scan, and an uncommitted approval-gated accounting proposal. No payroll, tax filing, bank transfer, or QuickBooks write is performed by the artifact journey.
+Produces one bounded monthly review packet with reconciliation, exception provenance, proposed-versus-observed write separation, sensitive-data scan, and uncommitted approval-gated accounting proposal. No payroll, tax filing, bank transfer, or QuickBooks write is performed by the artifact journey.
 
 ## Acceptance commands
-
-These extend existing acceptance families; they are not stack launchers:
 
 ```text
 npm run prod:boundary:hermes-filesystem
@@ -88,15 +113,16 @@ npm run acceptance:golden:contractor
 npm run acceptance:golden:bookkeeping
 ```
 
-The capability and golden scripts write exact-SHA JSON evidence under `AMTECH_PROOF_DIR`. The golden journeys require a live current assignment, employee MCP credential, owner session, and Manager internal credential. A source or unit-test pass is not a substitute for those target-host proofs.
+Capability and golden scripts write exact-SHA JSON evidence under `AMTECH_PROOF_DIR`. A source/unit pass is not target-host/provider acceptance.
 
 ## Release gate
 
-Launch clearance requires all of the following against the same deployed SHA and pinned Hermes digest:
+Launch clearance requires, on the same deployed SHA and pinned Hermes digest:
 
-- exact-image filesystem proof passes;
-- effective capability report contains no capability advertised as effective without a passing live probe;
-- real Gmail consent starts, completes, binds to the initiating employee, and returns to the initiating work path;
-- Website A passes manually before its automated journey is accepted;
-- automated Website A, Contractor B, and Bookkeeping C journeys pass with revision, validation, approval snapshot, effect receipt, publication reference, verification receipt, and idempotent replay evidence;
-- viewer principals retain read-only surface grants and cannot connect, revise, validate, approve, or publish.
+- exact-image filesystem proof;
+- no advertised capability marked effective without complete fresh evidence and a passing live probe;
+- real managed connector setup, health, assignment binding, owner return, revocation, and failure-path proof for the adapters used by the journey;
+- Website A passes manually before automated acceptance;
+- Website A, Contractor B, and Bookkeeping C pass with revision, validation, approval snapshot, effect receipt, publication reference, verification receipt, and idempotent replay;
+- viewer principals remain read-only and cannot connect, revise, validate, approve, or publish;
+- protocol/channel adapters do not create authority.
