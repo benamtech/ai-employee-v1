@@ -1,10 +1,19 @@
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
 const source = (path: string) => readFile(join(root, path), "utf8");
+
+async function currentMigrationHead(): Promise<string> {
+  const files = (await readdir(join(root, "packages/db/migrations")))
+    .filter((file) => /^\d{4}[a-z]?_.+\.sql$/.test(file))
+    .sort((left, right) => left.localeCompare(right));
+  const head = files.at(-1)?.match(/^(\d{4})/)?.[1];
+  if (!head) throw new Error("migration_head_not_found");
+  return head;
+}
 
 describe("target-host production topology acceptance", () => {
   it("keeps replacement and teardown behind governed lifecycle commands", async () => {
@@ -32,9 +41,10 @@ describe("target-host production topology acceptance", () => {
     expect(harness).toContain("employee B changed during A teardown");
   });
 
-  it("binds staging migration proof to the complete current migration range through head 0072", async () => {
+  it("binds staging migration proof to the complete current migration range", async () => {
     const proof = await source("infra/scripts/acceptance/migration-staging-live-proof.mjs");
-    expect(proof).toContain('const migrationHead = "0072"');
+    const migrationHead = await currentMigrationHead();
+    expect(proof).toContain(`const migrationHead = "${migrationHead}"`);
     expect(proof).toContain("readdir");
     expect(proof).toContain("migration_head: migrationHead");
     expect(proof).toContain("migration_count: migrations.length");
