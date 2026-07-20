@@ -20,8 +20,9 @@
  *
  * Doctrine held: money / customer-facing / write connectors stay Manager-mediated
  * behind the approval gate + egress default-deny (the QuickBooks posture). Only
- * read-only connectors may be wired directly into the employee's `config.yaml`
- * `mcp_servers`. Unknown connectors DEFAULT-DENY to Manager-mediated.
+ * explicitly declared read-only connectors may be wired directly into the
+ * employee's `config.yaml` `mcp_servers`. Unknown or underspecified connectors
+ * DEFAULT-DENY to Manager-mediated.
  */
 
 import type { CapabilityCategory } from "./materialization.js";
@@ -179,21 +180,29 @@ export interface DirectMcpConnectorSpec {
   name: string;
   /** MCP server URL. */
   url: string;
+  /** Must be explicitly false for direct custody; omission is unknown and denied. */
   writes?: boolean;
+  /** Must be explicitly false for direct custody; omission is unknown and denied. */
   money?: boolean;
+  /** Must be explicitly false for direct custody; omission is unknown and denied. */
   customer_facing?: boolean;
 }
 
 /**
  * Filter a requested set of direct-MCP connectors down to the ones actually allowed
- * a direct path. DEFAULT-DENY enforcement point for render time: any connector that
- * writes / moves money / touches customers is refused (dropped) — it must go through
- * Manager mediation instead. Returns only the safe read-only connectors.
+ * a direct path. DEFAULT-DENY enforcement point for render time: every risk axis must
+ * be explicitly declared false. Missing metadata is uncertainty, not evidence of
+ * read-only behavior, so underspecified connectors are dropped for Manager review.
  */
 export function renderableDirectMcpConnectors(specs: DirectMcpConnectorSpec[]): DirectMcpConnectorSpec[] {
-  return specs.filter((s) =>
-    connectorAllowsDirectMcp({ writes: !!s.writes, money: !!s.money, customer_facing: !!s.customer_facing }),
-  );
+  return specs.filter((spec) => {
+    // Why: coercing omitted flags with `!!` turned unknown risk into false and
+    // contradicted the registry's stated default-deny custody contract.
+    const explicitlyReadOnly = spec.writes === false
+      && spec.money === false
+      && spec.customer_facing === false;
+    return explicitlyReadOnly && connectorAllowsDirectMcp(spec as Pick<ConnectorMeta, "writes" | "money" | "customer_facing">);
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ import {
   renderableDirectMcpConnectors,
   resolveConnectorMeta,
   resolveContextPolicy,
-} from "@amtech/shared";
+} from "../../packages/shared/src/connector-registry";
 
 describe("CE-4 connector registry", () => {
   it("resolves the real connectors by provider or connector_key hints", () => {
@@ -53,13 +53,22 @@ describe("CE-4 connector registry", () => {
     expect(custodyFor({ writes: false, money: false, customer_facing: true })).toBe("manager_mediated");
   });
 
-  it("render-time direct MCP filtering only keeps read-only specs", () => {
+  it("render-time direct MCP filtering requires every risk axis to be explicitly false", () => {
+    const explicitReadOnly = {
+      name: "catalog",
+      url: "http://catalog.test/mcp",
+      writes: false,
+      money: false,
+      customer_facing: false,
+    };
     expect(renderableDirectMcpConnectors([
-      { name: "catalog", url: "http://catalog.test/mcp" },
-      { name: "stripe_direct", url: "http://stripe.test/mcp", money: true },
-      { name: "mailer", url: "http://mail.test/mcp", customer_facing: true },
-      { name: "writer", url: "http://writer.test/mcp", writes: true },
-    ])).toEqual([{ name: "catalog", url: "http://catalog.test/mcp" }]);
+      explicitReadOnly,
+      // Why: omitted flags are unknown risk, not evidence that a server is read-only.
+      { name: "undeclared", url: "http://undeclared.test/mcp" },
+      { name: "stripe_direct", url: "http://stripe.test/mcp", writes: false, money: true, customer_facing: false },
+      { name: "mailer", url: "http://mail.test/mcp", writes: false, money: false, customer_facing: true },
+      { name: "writer", url: "http://writer.test/mcp", writes: true, money: false, customer_facing: false },
+    ])).toEqual([explicitReadOnly]);
   });
 
   it("empty/nullish input still resolves to a safe generic meta", () => {

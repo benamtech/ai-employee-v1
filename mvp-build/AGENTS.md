@@ -1,111 +1,114 @@
-# AGENTS.md — AI Employee MVP build home
+# AGENTS.md — AI Employee Implementation Rules
 
-> Tool-agnostic agent guide. This mirrors `CLAUDE.md`; keep both files in sync.
+Status: active  
+Updated: 2026-07-20
 
-This is `mvp-build/`, the implementation home for AMTECH's AI Employee. The owner talks to one employee; Manager is invisible backend infrastructure.
+> Tool-agnostic implementation contract. Root rules and `../CONTRIBUTING.md` also apply.
 
-## Read order
+## Mandatory read order
 
 1. `../identity.md`
-2. `CODEGRAPH.md`
-3. `memory/MEMORY.md`, then the newest relevant handoff
-4. this file / `CLAUDE.md`
-5. `docs/production-normal-employee-live-deploy-runbook.md` for live/deploy work
-6. `../wiki/MVP/second-half-current-and-future-state.md`
-7. `../wiki/MVP/implementation-records/README.md`
-8. relevant source, migrations, scripts, and proofs
+2. root `../AGENTS.md` or `../CLAUDE.md`, `../CONTRIBUTING.md`, and `../CODEGRAPH.md`
+3. this file or `CLAUDE.md`
+4. `CODEGRAPH.md`
+5. ratified `STANDARD.md`
+6. `second-half-plan/README.md` and its single active production program
+7. `memory/MEMORY.md`, then the newest relevant handoff
+8. `docs/architecture/README.md`
+9. applicable source, migrations, tests, workflows, proof, and current diff
 
-Source, migrations, scripts, proof artifacts, and newest memory outrank stale docs.
+## Current implementation state
 
-## Current status
+- Cutover branch: `employee-production-tuesday`; target/base `main`; draft PR `#23`.
+- Historical `research` is not current execution authority.
+- Migration head: `0072`.
+- Standard: ratified v0.2.
+- Active program: `second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Canonical topology: `infra/scripts/production-topology.mjs` → `infra/deploy/docker-compose.production.yml`.
 
-- Branch: `research`, rebased onto latest `main` through GitHub rebase PR #14.
-- Overall: `source-wired_not_accepted` after WS1/WS2.
-- WS1 model gateway custody + profile integrity: source-wired.
-- WS2 resource graph/state-machine/retry/drift/rotation/compensation foundations: source-wired; true reconciler worker pending.
-- WS3 ambient inbox: schema groundwork only; provider ingress migration pending.
-- Owner surfaces and existing product systems: source-wired; current live acceptance must be established by fresh proof, not inferred from code or historical runs.
-
-## Canonical launch path
+## Canonical boundary
 
 ```text
-public DNS / Cloudflare Tunnel
--> Caddy
--> production Web + Manager
--> real /create-ai-employee
--> Twilio Verify
--> account creation
--> Start Employee
--> isolated Hermes runtime
--> owner web client
--> provider-backed reply
--> useful connected-tool proof
+trigger
+→ authenticated principal
+→ explicit assignment or approved platform/system context
+→ current relationship, grant, policy, entitlement, and authority version
+→ durable intent, command, event, or work object
+→ Hermes reasoning or deterministic work
+→ evidence-backed capability selection
+→ approval when required
+→ one idempotent effect reservation
+→ accepted | failed | ambiguous durable receipt
+→ role-safe materialization
+→ audit, commercial attribution, recovery, and proof
 ```
 
-Use `docs/production-normal-employee-live-deploy-runbook.md`.
+Hermes owns employee reasoning/runtime behavior. Manager owns authority, connector/tool custody, approvals, durable effects, commercial attribution, repair, and release proof. Do not build a parallel runtime or authority plane.
 
-The public estimator, `prod-like:public-estimator:*`, fixtures, `/api/dev/login`, host `live:*`, and manually injected provider events are diagnostics/regression aids only. They are not normal-employee launch proof.
+## Connector and protocol rules
 
-## Acceptance vocabulary
+- `packages/shared/src/connector-registry.ts` owns connector identity, risk axes, and custody.
+- `packages/shared/src/connector-setup.ts` owns setup protocol, exact tool ownership, permissions, hosts, continuation, readiness, and owner-safe copy.
+- Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
+- Unknown or underspecified connectors default to Manager mediation.
+- Direct MCP requires write, money, and customer-facing risk axes explicitly false.
+- Broad categories never select a provider.
+- MCP Apps and AG-UI are bounded adapters, not authority or durable state.
+- Browser/protocol UI cannot access raw credentials, choose provider tools/scopes/hosts, resolve approval, or perform business effects.
 
-- `source-wired`: code/schema/config exists; name the static/local checks actually run.
-- `provider-accepted`: real provider IDs exist.
-- `runtime-accepted`: real host/runtime proof artifacts exist.
-- `planned`: designed, not implemented.
-- `pending`: blocked, unattempted, or missing proof.
+## Database policy
 
-Never upgrade status from architecture, mocks, fixtures, old containers, or confidence.
+Routine schema/query work uses production-shaped local/CI PostgreSQL for the full ledger, constraints, triggers, indexes, RLS, grants, functions, negative isolation, existing rows/backfills, concurrency, compare-and-swap, rollback, and proof hashes.
 
-## Non-negotiables
+Disposable managed Supabase is required only for material platform-specific Auth/Realtime/Storage/Data API/advisor behavior, security-sensitive platform boundaries, suspected platform differences, new release migration classes, and final release candidates. Production is never the routine test target.
 
-1. No faked proof. Real acceptance needs real IDs/artifacts.
-2. Provider master credentials never enter employee profiles or containers. Employee runtimes receive only scoped Manager MCP and Model Gateway credentials.
-3. Customer-, money-, and reputation-affecting actions cross owner approval policy.
-4. Webhooks verify provider authenticity before durable insertion; asynchronous workers own processing/retry/dead-letter behavior.
-5. Manager public/API authority and host Docker authority remain separated by the signed Unix-socket provisioner boundary.
-6. Every employee runtime is isolated; peer/control-service access is denied except explicitly scoped routes.
-7. Rendered profiles fail closed on forbidden secret slots/values, unresolved tokens, unsafe permissions, and checksum drift.
-8. Twilio/provider bindings and welcome effects happen only after runtime and route acceptance.
-9. No new browser-readable Supabase table/view without reviewing Data API exposure, RLS, and grants.
-10. The public estimator remains non-canonical.
+## Engineering execution
 
-## Working rules
-
-- Inspect source before editing docs that describe it.
-- Prefer docs-only changes for reconciliation sessions. Make source changes only for an obvious, bounded defect in scope.
-- Do not run the full build/test suite unless requested. Use targeted static inspection and state exactly what was not run.
-- For code sessions, the normal baseline remains:
+Every task declares task ID, branch/repository, objective, success criteria, allowed/forbidden files, tests, blockers, maximum commits, and six rubric scores.
 
 ```bash
-npm run typecheck
-npm run test:unit
-npm run build
-npm run lint
-npm run test:integration   # env-gated
+npm run repo:rubric -- ./task-contract.json
+npm run repo:verify:quick
+npm run repo:verify:full
 ```
 
-Do not repeat old pass counts as current proof unless rerun.
+```text
+Explore → smallest coherent action → test → commit → verify exact head
+```
 
-## Active now-to-live priorities
+- Work on a reviewed branch; `main` changes only through approved merge.
+- No feature expansion while a prerequisite P0 is unresolved.
+- Every commit references the task ID.
+- Stop downstream work on red CI.
+- Do not weaken tests merely to get green.
+- Use `find`/`grep`, not guessed paths.
+- Add concise `why` comments at non-obvious boundaries.
+- After three failed attempts, retain diagnostics and escalate.
+- Treat migrations, schemas, fixtures, contracts, harnesses, diagnostics, proof, and runbooks as first-class code.
 
-- Apply/review migrations `0031`–`0033` on a disposable production-shaped DB.
-- Typecheck shared exports, Hono gateway entry, Supabase row shapes, and provisioner result contracts.
-- Prove host-private model-gateway reachability from employee containers and non-reachability from public ingress.
-- Prove profile integrity and credential rotation/revocation.
-- Implement the DB-backed reconciler worker and fleet drift repair.
-- Move provider ingress to `ambient_event_inbox` leased workers.
-- Route admin lifecycle actions through `provisioning_commands` + reconciler.
-- Run a fresh canonical public onboarding with real provider/runtime/tool proof IDs.
+Install fast-feedback hooks once per clone:
 
-## Memory protocol
+```bash
+npm run hooks:install
+```
 
-After substantial multi-file work, phase completion, production incident, or architectural/product-direction change:
+Hooks are bypassable; exact-head CI remains authoritative. Maintain focused coverage for changed logic where instrumentation exists; do not fabricate a repository-wide percentage.
 
-1. create/update a dated handoff in `memory/`;
-2. update `memory/MEMORY.md` newest-first;
-3. record exact validation run or explicitly not run;
-4. keep factual code/proof state in `../wiki/MVP/implementation-records/`.
+## Hermes upstream review
 
-## Git
+Before changing Hermes images, launchers, profiles, sessions, delegation, gateway/client behavior, tool discovery, runtime-native capabilities, or Hermes-derived UI:
 
-Work only on the explicitly requested branch. Preserve `main`. Do not silently merge or push to another branch. End with exact changed files, unresolved risks, and validation not run.
+```bash
+npm run hermes:upstream:check
+```
+
+Review official `NousResearch/hermes-agent` current head, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active PRs. Upstream is intelligence, not authority; the production pin changes only through exact-image compatibility and release gates.
+
+## Document authority
+
+- `STANDARD.md` — normative requirements.
+- `CODEGRAPH.md` — current source topology, migration head, and evidence boundary.
+- `second-half-plan/README.md` — single active plan route.
+- `docs/architecture/` — explanatory architecture/research disposition.
+- `memory/MEMORY.md` — sole handoff index.
+- source, migrations, tests, workflows, proof, and PR `#23` — implementation/acceptance authority.

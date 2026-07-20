@@ -17,6 +17,12 @@ export interface ToolContext {
   db: SupabaseClient;
   account_id?: string | null;
   employee_id?: string | null;
+  /** Canonical execution scope. account_id/employee_id remain compatibility projections only. */
+  assignment_id?: string | null;
+  /** Authenticated principal supplied by the transport, never by model input. */
+  principal_id?: string | null;
+  principal_class?: "human" | "employee" | "service" | "platform" | null;
+  authenticated_by?: string | null;
   actor: "front_door" | "employee" | "manager" | "owner" | "scheduler";
 }
 
@@ -29,6 +35,7 @@ export function stub(name: ToolName): ToolHandler {
     const audit_id = await writeAudit(ctx.db, {
       account_id: ctx.account_id ?? null,
       employee_id: ctx.employee_id ?? null,
+      assignment_id: ctx.assignment_id ?? null,
       actor: ctx.actor,
       action: `tool:${name}`,
       result: "failed",
@@ -37,6 +44,7 @@ export function stub(name: ToolName): ToolHandler {
     return notImplemented(name, {
       account_id: ctx.account_id ?? null,
       employee_id: ctx.employee_id ?? null,
+      assignment_id: ctx.assignment_id ?? null,
       audit_id,
     });
   };

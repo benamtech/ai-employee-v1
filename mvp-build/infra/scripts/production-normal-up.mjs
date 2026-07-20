@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { cpus, hostname, totalmem } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  PRODUCTION_COMPOSE_FILE,
+  PRODUCTION_CONTROL_SERVICES,
+  productionComposeArgs,
+} from "./production-topology.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const proofDir = process.env.AMTECH_PROOF_DIR ?? "infra/proofs";
@@ -46,13 +51,23 @@ function run(name, command, argsList, options = {}) {
   };
 }
 
-async function httpCheck(name, url, attempts = 30, headers = {}) {
+function compose(name, argsList, options = {}) {
+  return run(name, "docker", productionComposeArgs(argsList), options);
+}
+
+async function httpCheck(name, url, attempts = 30) {
   let last = null;
-  for (let i = 0; i < attempts; i += 1) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
     const started = Date.now();
     try {
-      const res = await fetch(url, { headers, signal: AbortSignal.timeout(5000), redirect: "manual" });
-      last = { name, status: res.status >= 200 && res.status < 400 ? "pass" : "fail", http_status: res.status, url, ms: Date.now() - started };
+      const response = await fetch(url, { signal: AbortSignal.timeout(5000), redirect: "manual" });
+      last = {
+        name,
+        status: response.status >= 200 && response.status < 400 ? "pass" : "fail",
+        http_status: response.status,
+        url,
+        ms: Date.now() - started,
+      };
       if (last.status === "pass") return last;
     } catch (err) {
       last = { name, status: "fail", url, error: String(err?.message ?? err), ms: Date.now() - started };
@@ -60,22 +75,6 @@ async function httpCheck(name, url, attempts = 30, headers = {}) {
     await new Promise((resolveDelay) => setTimeout(resolveDelay, 2000));
   }
   return last ?? { name, status: "fail", url, error: "not_checked" };
-}
-
-function curlCheck(name, url, extraArgs = []) {
-  const result = spawnSync("curl", ["-sS", "-o", "/dev/null", "-w", "%{http_code}", "--max-time", "10", ...extraArgs, url], {
-    cwd: root,
-    encoding: "utf8",
-  });
-  const statusCode = Number((result.stdout ?? "").trim());
-  return {
-    name,
-    status: result.status === 0 && statusCode >= 200 && statusCode < 400 ? "pass" : "fail",
-    http_status: Number.isFinite(statusCode) ? statusCode : null,
-    url,
-    exit_code: result.status,
-    output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim().slice(0, 5000),
-  };
 }
 
 function writeProof(proof) {
@@ -105,17 +104,6 @@ function hardwareCheck() {
   };
 }
 
-function compose(argsList, options = {}) {
-  return run("compose", "docker", [
-    "compose",
-    "-f",
-    "infra/deploy/docker-compose.yml",
-    "--env-file",
-    "infra/deploy/.env.production",
-    ...argsList,
-  ], options);
-}
-
 async function runLocalTunnel() {
   const forwarded = [
     "infra/scripts/prod-like-normal-employee-up.mjs",
@@ -126,7 +114,6 @@ async function runLocalTunnel() {
     `--api-origin=${apiOrigin}`,
   ];
   const result = run("prod_like_normal_up", "node", forwarded, { stdio: "inherit" });
-  const checks = [result];
   const proof = {
     kind: "production_normal_up",
     target,
@@ -134,13 +121,15 @@ async function runLocalTunnel() {
     checked_at: new Date().toISOString(),
     host: hostname(),
     git_sha: gitSha(),
+    compose_files: [PRODUCTION_COMPOSE_FILE],
+    control_services: PRODUCTION_CONTROL_SERVICES,
     delegated_script: "infra/scripts/prod-like-normal-employee-up.mjs",
     command: `node ${forwarded.join(" ")}`,
     notes: {
-      shape: "Local production-like: Cloudflare named tunnel -> Caddy tunnel origin -> Web/Manager production containers -> Docker employee fleet.",
-      acceptance: "This starts the stack. Launch proof still requires real onboarding, Verify, account creation, employee provisioning, and provider-backed reply.",
+      shape: "Local production-like: Cloudflare named tunnel -> host-network Caddy -> loopback Web/Manager -> canonical control plane -> isolated Hermes employee networks.",
+      acceptance: "This starts and smokes the canonical stack. Launch proof still requires real onboarding, provider-backed work, channels, commercial reconciliation, recovery, and rollback evidence.",
     },
-    checks,
+    checks: [result],
   };
   const proofPath = writeProof(proof);
   console.log(`proof_json:${proofPath}`);
@@ -148,8 +137,7 @@ async function runLocalTunnel() {
 }
 
 async function runVps() {
-  const checks = [];
-  checks.push(hardwareCheck());
+  const checks = [hardwareCheck()];
   checks.push(run("deploy_env_prepare", "node", [
     "infra/scripts/prod-like-normal-employee-up.mjs",
     "--skip-compose",
@@ -157,19 +145,15 @@ async function runVps() {
     `--web-origin=${webOrigin}`,
     `--api-origin=${apiOrigin}`,
   ]));
-  checks.push(run("docker_network_create", "docker", ["network", "create", "amtech_runtime"]));
-  if (checks.at(-1)?.status === "fail" && /already exists/i.test(checks.at(-1)?.output ?? "")) {
-    checks[checks.length - 1].status = "pass";
-  }
-  if (downFirst) checks.push(compose(["down"]));
+  checks.push(compose("compose_config", ["config", "--quiet"]));
+  if (downFirst) checks.push(compose("compose_down", ["down"]));
   const upArgs = ["up", "-d"];
   if (!noBuild) upArgs.push("--build");
-  checks.push(compose(upArgs, { stdio: "inherit" }));
-  checks.push(await httpCheck("manager_health", "http://127.0.0.1:8080/health"));
-  checks.push(await httpCheck("web_health", "http://127.0.0.1:3000/create-ai-employee"));
-  checks.push(curlCheck("caddy_agent_route", "http://agent.amtechai.com/create-ai-employee", ["--resolve", "agent.amtechai.com:80:127.0.0.1"]));
-  checks.push(curlCheck("caddy_api_route", "http://api.amtechai.com/health", ["--resolve", "api.amtechai.com:80:127.0.0.1"]));
-  checks.push(compose(["exec", "-T", "caddy", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]));
+  checks.push(compose("compose_up", upArgs, { stdio: "inherit" }));
+  checks.push(run("canonical_deploy_smoke", "node", ["infra/scripts/deploy-smoke.mjs"], {
+    stdio: "inherit",
+    env: { WRITE_PROOF_JSON: "0" },
+  }));
   checks.push(await httpCheck("public_agent_route", `${webOrigin.replace(/\/$/, "")}/create-ai-employee`, 15));
   checks.push(await httpCheck("public_api_health", `${apiOrigin.replace(/\/$/, "")}/health`, 15));
 
@@ -183,12 +167,13 @@ async function runVps() {
     git_sha: gitSha(),
     public_origin: webOrigin,
     public_api_origin: apiOrigin,
-    compose_files: ["infra/deploy/docker-compose.yml"],
+    compose_files: [PRODUCTION_COMPOSE_FILE],
+    control_services: PRODUCTION_CONTROL_SERVICES,
     vps_target: { cores: 8, memory_gb: 64 },
     notes: {
-      shape: "VPS production: public DNS -> Caddy production origin with ACME -> Web/Manager production containers -> Docker employee fleet.",
-      prerequisites: "DNS for agent.amtechai.com/api.amtechai.com points at the VPS, ports 80/443 are open, and infra/deploy/.env.production contains real production secrets.",
-      acceptance: "This starts the stack. Launch proof still requires real onboarding, Verify, account creation, employee provisioning, and provider-backed reply.",
+      shape: "VPS production: public DNS -> host-network Caddy -> loopback Web/Manager/Model Gateway -> signed Unix-socket Host Provisioner -> isolated Hermes employee networks.",
+      prerequisites: "DNS points at the VPS, ports 80/443 are open, and infra/deploy/.env.production contains managed production coordinates and secrets.",
+      acceptance: "Stack startup and smoke are not launch acceptance; exact-SHA live database, provider, browser/channel, commercial, recovery, rollback, and attestation gates remain separate.",
     },
     checks,
   };
@@ -198,7 +183,7 @@ async function runVps() {
   if (failed) process.exit(1);
 }
 
-if (!["local-tunnel", "vps"].includes(target)) {
+if (!['local-tunnel', 'vps'].includes(target)) {
   console.error("Unsupported --target. Use --target=local-tunnel or --target=vps.");
   process.exit(2);
 }

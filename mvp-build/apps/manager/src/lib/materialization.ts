@@ -91,7 +91,22 @@ function workResourceFromEnvelope(e: SurfaceEnvelope): WorkResource | null {
   return null;
 }
 
+function normalizeOwnerTasks(snapshot: EmployeeSnapshot): NonNullable<EmployeeSnapshot["tasks"]> {
+  const quietObserveTaskIds = new Set(
+    snapshot.work_events
+      .filter((event) => event.work_event_descriptor?.move === "observe")
+      .map((event) => `work:${event.id}`),
+  );
+  return (snapshot.tasks ?? []).filter((task) => !quietObserveTaskIds.has(task.id));
+}
+
 export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): MaterializedWork {
+  // `buildEmployeeSnapshot` derives resurfacing immediately after materialization.
+  // Normalize the shared read model here so quiet observation remains durable and
+  // visible as a system change without becoming false active work or an obligation.
+  const ownerTasks = normalizeOwnerTasks(snapshot);
+  snapshot.tasks = ownerTasks;
+
   const capabilities = buildCapabilityRegistry(snapshot);
   const envelopes: SurfaceEnvelope[] = [];
 
@@ -208,15 +223,23 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
     const d = event.work_event_descriptor;
     const deliverable = d?.deliverable;
     const isTool = deliverable?.type === "tool_activity";
+    const uiResource = deliverable?.ui_resource;
+    const approvalId = deliverable?.refs.approval_id;
+    const resourceType: WorkResource["resource_type"] = approvalId ? "approval" : "work_event";
+    const actions = approvalId
+      ? defaultActionsFor("approval", deliverable)
+      : defaultActionsFor("work_event", deliverable).filter((action) => action.action === "respond" || action.action === "acknowledge");
+    const bodyKind: WorkResource["body_kind"] = uiResource ? "structured" : "text";
     envelopes.push(envelope({
       account_id: snapshot.account_id,
+      assignment_id: snapshot.assignment_id,
       employee_id: snapshot.employee_id,
       kind: isTool ? "tool_activity" : "work_event",
       title: d?.title ?? event.event_type,
       summary: d?.summary,
       status: event.status,
       created_at: event.created_at,
-      render_hints: { tier: deliverable?.ui_resource ? "mcp_ui" : "generic", component: isTool ? "tool_activity" : "work_event", body_kind: "text" },
+      render_hints: { tier: uiResource ? "mcp_ui" : "generic", component: isTool ? "tool_activity" : "work_event", body_kind: bodyKind },
       safety: baseSafety({
         trust_level: isTool ? "manager_mcp" : "runtime",
         requires_approval: workDeliverableNeedsGate(deliverable),
@@ -224,12 +247,27 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
         money_involved: deliverable?.money?.involved ?? false,
       }),
       proof: proof("inbound_events", event.id, {
+        assignment_id: snapshot.assignment_id,
         inbound_event_id: event.id,
-        approval_id: deliverable?.refs.approval_id ?? null,
+        approval_id: approvalId ?? null,
         artifact_id: deliverable?.refs.artifact_id ?? null,
         run_id: d?.proof?.run_id ?? null,
       }),
-      actions: defaultActionsFor("work_event", deliverable),
+      actions,
+      resource: {
+        resource_type: resourceType,
+        resource_id: approvalId ?? event.id,
+        assignment_id: snapshot.assignment_id,
+        title: d?.title ?? event.event_type,
+        subtitle: deliverable?.type ? humanKind(deliverable.type) : undefined,
+        summary: d?.summary,
+        risk: workDeliverableNeedsGate(deliverable)
+          ? deliverable?.money?.involved ? "high" : "medium"
+          : "low",
+        body_kind: bodyKind,
+        ui_resource: uiResource,
+        actions,
+      },
     }));
   }
 
@@ -265,6 +303,6 @@ export function materializeEmployeeSnapshot(snapshot: EmployeeSnapshot): Materia
     work_actions,
     abilities: abilitiesFromCapabilities(capabilities),
     outputs: snapshot.outputs ?? [],
-    tasks: snapshot.tasks ?? [],
+    tasks: ownerTasks,
   };
 }

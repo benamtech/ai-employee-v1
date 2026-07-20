@@ -1,55 +1,121 @@
-# mvp-build durable memory — index + writing protocol
+# mvp-build durable memory — index and writing protocol
 
-Status: active
+Status: active  
+Updated: 2026-07-20
 
-This folder is the versioned narrative handoff layer for the AMTECH AI Employee MVP. It records what changed, why, current status, unresolved risks, and the next agent's starting point.
+This folder is the versioned narrative handoff layer for AMTECH AI Employee implementation. It records what changed, why, exact proof, unresolved risks, and the next agent's starting point.
 
-Use the three layers correctly:
+## Knowledge layers
 
-- `memory/`: session narrative, decisions, risks, and pointers.
-- `../../wiki/MVP/implementation-records/`: factual source/proof ledger.
-- `../second-half-plan/`: active forward-plan family.
+- `memory/` — dated narrative decisions, incidents, unresolved risks, and handoffs.
+- `../CODEGRAPH.md` — current implementation topology, migration head, source hubs, and evidence boundary.
+- `../STANDARD.md` — ratified normative product and engineering requirements.
+- `../second-half-plan/` — one active production program plus historical plan families.
+- `../docs/architecture/` — explanatory cross-system structure and research disposition.
+- `../../wiki/MVP/implementation-records/` — historical factual implementation/proof ledger.
+- source, migrations, tests, workflows, proof, and PR `#23` — implementation and acceptance authority.
 
-**Current branch note (2026-07-17):** active coordinated work is on `research`, based on current `main`. The earlier `prod-ux` branch work has already been merged and is historical context, not the current branch instruction.
+`MEMORY.md` is the sole index for this folder. Do not create another handoff index.
+
+## Current branch note
+
+- Integration branch: `employee-production-tuesday`, based on `research`.
+- Draft PR: `#23`.
+- `main` is not an integration shortcut.
+- Migration head: `0072` at `../packages/db/migrations/0072_artifact_revision_scope_guards.sql`.
+- Standard v0.2 is ratified and effective.
+- Active program: `../second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Gate 0 source/code/document authority head `4be092f009de` passed all eight required workflows; exact run IDs are in the newest handoff.
+- The later handoff/index metadata head must remain green; its final exact matrix is recorded in PR `#23` after branch movement stops.
+
+Current source/CI must not be promoted into live managed-database, target-runtime/network, identity/provider, MCP Apps/AG-UI conformance, fixture-free Web/SMS/Review, commercial, capacity, crash/repair, rollback, deployment, or launch acceptance.
+
+## Read order inside memory
+
+1. Read root/scoped CODEGRAPH, ratified Standard, active program, and architecture first.
+2. Read the newest handoff relevant to the subsystem.
+3. Read predecessor handoffs only when they explain an inherited decision, incident, or proof.
+4. Verify every carried-forward claim against current source and exact-head evidence.
+5. Do not concatenate every historical handoff into one undifferentiated prompt.
+
+The complete family map is `../docs/architecture/12-document-control-memory-and-handoff-map.md` and the active archive routing is `../second-half-plan/2026-07-19-ratified-standard-production-program/06-document-authority-and-archive-map.md`.
 
 ## Index — newest first
 
-- [2026-07-17 — website framework Phase 1 closure](2026-07-17-website-framework-phase-1-closure.md) — Closed the adaptive experience compiler research/specification phase: scoped identity/instructions/codegraph, software category, distributed content/design/generative UI model, competitor and complexity synthesis, synthetic benchmark generator, and new compiler/autonomy validation gates. Implementation and runtime validation pending.
-- [2026-07-17 — holographic website framework and v0.1 Request Mirror Lab](2026-07-17-holographic-website-framework-v0.1.md) — Established the research-grounded HRR/VSA + graph materialization framework, explicit feature/pass-fail vectors, privacy/SEO boundaries, and the plain noindex Cloudflare Request Mirror Lab as v0.1. No build/deploy run.
-- [2026-07-17 — WS1/WS2 documentation reconciliation and website frontier](2026-07-17-ws1-ws2-doc-reconciliation-and-website-frontier.md) — Rebased `research` onto latest `main`, reconciled canonical docs to the source-wired production-boundary state, recorded static risks and validation not run, and staged the first-principles AMTECH website rewrite.
-- [2026-07-16 — WS1/WS2 production boundary pass](2026-07-16-ws1-ws2-production-boundary-pass.md) — Model gateway credential custody, profile integrity, durable provisioning/reconciler foundations, credential rotation, drift operations, and WS3 ambient inbox schema groundwork. Source-wired only; no live acceptance.
-- [2026-07-17 01:45 — leverage and method distilled](2026-07-17-0145-leverage-and-method-distilled.md) — Distilled the prod-UX implementation method and measured agent leverage.
-- [2026-07-17 01:30 — final documentation sync](2026-07-17-0130-final-doc-sync-complete.md) — UX documentation and implementation handoff merged to `main`.
-- [2026-07-17 00:30 — first-principles web surface redesign](2026-07-17-0030-prod-ux-branch-start.md) — Introduced the current Home/Talk/Proof/Connected owner-product direction and validation framework.
-- [2026-07-16 20:00 — production overlay system](2026-07-16-2000-prod-env-overlay-system.md) — Added local production env overlay and named-tunnel helpers.
-- [2026-07-16 16:45 — documentation freeze and reconciliation](2026-07-16-1645-documentation-freeze-reconciliation.md) — Declared `second-half-plan/` the active forward-plan family and tightened live-proof vocabulary.
-- [2026-07-16 13:23 — web runtime recovery](2026-07-16-1323-web-message-runtime-recovery.md) — Recovered an exited employee runtime on the owner message path and recorded provider-backed web-turn proof for that point-in-time stack.
-- [2026-07-16 08:12 — owner resource safety and xAI runtime proof](2026-07-16-0812-owner-resource-safety-and-xai-runtime-proof.md) — Hardened owner-safe projections and recorded a point-in-time provider-backed Manager web turn.
-- [2026-07-16 07:19 — Twilio webhook and API tunnel fix](2026-07-16-0719-provisioner-twilio-webhook-and-api-tunnel-fix.md) — Corrected public Twilio webhook routing and added public API tunnel proof.
-- [2026-07-16 05:38 — full live production run handoff](2026-07-16-0538-provisioner-failure-live-production-handoff.md) — Canonical normal-employee live-run goal, blocker IDs, and first repair targets.
-- [2026-07-16 03:35 — production runbook default](2026-07-16-0335-production-normal-employee-runbook-default-handoff.md) — Made the normal-employee runbook the default and excluded fixture/public-estimator tooling from launch proof.
+### Current Standard, protocol, architecture, and production boundary
 
-Older handoffs remain in this folder and are historical evidence. Read them only after the current CODEGRAPH, this index, and the newest relevant handoff.
+- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Current handoff. Records human ratification, the 16-dimensional evolution vector, managed connector manifest, exact provider-tool ownership, direct-MCP default deny, MCP Apps/AG-UI disposition, database TDD boundary, Gate 0 workflow matrix, authority-document transaction, and remaining live gates.
+- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Historical immediate predecessor. Records the capability nullability repair, strict-read/migration acceptance corrections, migration `0072`, and predecessor plan packet. Its active-plan and pending-status claims are superseded.
+- [2026-07-19 — Final document authority, infra/test audit, and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md) — Historical predecessor. Its `0069` and legacy-selector claims are superseded.
+- [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Repository-wide documentation/code-review checkpoint.
+- [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Historical Hermes/MCP/UI predecessor; official MCP Apps disposition is now in architecture document 16.
+- [2026-07-19 — UI, Hermes, roles, assignments, and production-readiness handoff](2026-07-19-ui-runtime-production-readiness-handoff.md) — Historical UI/runtime/role/session analysis.
+- [2026-07-18 — S2–S9 authority and runtime-boundary checkpoint](2026-07-18-s2-s9-authority-runtime-checkpoint.md) — Authority/runtime predecessor.
+
+### Standard remediation and integration history
+
+- [2026-07-18 — CI-green production plan digest](2026-07-18-ci-green-plan-digest.md)
+- [2026-07-18 — Lane 1 scope inventory and Lane 10 evidence spine](2026-07-18-lane1-scope-lane10-evidence-spine.md)
+- [2026-07-18 — Lane 3 integration and repository-boundary cleanup](2026-07-18-lane3-integration-and-repository-boundary-cleanup.md)
+- [2026-07-18 — Standard remediation checkpoint](2026-07-18-standard-remediation-lane1-lane3-handoff.md)
+- [2026-07-18 — AMTECH Phase 2 Standard Enforcement Audit](2026-07-18-amtech-phase-2-standard-enforcement-audit.md)
+- [2026-07-18 — AMTECH Standard v0.1 Draft 2](2026-07-18-amtech-standard-v0.1-draft-2.md) — Historical draft; ratified `../STANDARD.md` v0.2 is current.
+
+### Runtime, deployment, event, and production-boundary history
+
+- [2026-07-17 — Employee-work production-boundary reconciler pass](2026-07-17-employee-work-production-boundary-reconciler-pass.md)
+- [2026-07-17 — Production next sequence and generative UI reconciliation](2026-07-17-production-next-sequence-and-generative-ui-reconciliation.md)
+- [2026-07-17 — WS1/WS2 documentation reconciliation and website frontier](2026-07-17-ws1-ws2-documentation-reconciliation-and-website-frontier.md)
+- [2026-07-16 — WS1/WS2 production boundary pass](2026-07-16-ws1-ws2-production-boundary-pass.md)
+- [2026-07-16 20:00 — Production overlay system](2026-07-16-2000-prod-env-overlay-system.md)
+- [2026-07-16 16:45 — Documentation freeze and reconciliation](2026-07-16-1645-documentation-freeze-reconciliation.md)
+- [2026-07-16 13:23 — Web runtime recovery](2026-07-16-1323-web-message-runtime-recovery.md)
+- [2026-07-16 08:12 — Owner resource safety and xAI runtime proof](2026-07-16-0812-owner-resource-safety-and-xai-runtime-proof.md)
+- [2026-07-16 07:19 — Twilio webhook and API tunnel fix](2026-07-16-0719-provisioner-twilio-webhook-and-api-tunnel-fix.md)
+- [2026-07-16 05:38 — Full live production run handoff](2026-07-16-0538-provisioner-failure-live-production-handoff.md)
+- [2026-07-16 03:35 — Production normal-employee runbook default](2026-07-16-0335-production-normal-employee-runbook-default-handoff.md)
+
+### UX and engineering-method history
+
+- [2026-07-17 01:45 — Leverage and method distilled](2026-07-17-0145-leverage-and-method-distilled.md)
+- [2026-07-17 01:30 — Final documentation sync](2026-07-17-0130-final-doc-sync-complete.md)
+- [2026-07-17 00:30 — First-principles Web surface redesign](2026-07-17-0030-prod-ux-branch-start.md)
+
+Older handoffs remain historical evidence. Read them only after current source, ratified Standard, active plan, CODEGRAPH/architecture, this index, and the newest relevant handoff.
 
 ## Status vocabulary
 
-- `source-wired`: source or schema exists; state exactly what static/local checks, if any, actually ran.
-- `provider-accepted`: real external provider proof IDs exist.
-- `runtime-accepted`: real employee runtime/host proof artifacts exist.
-- `planned`: designed but not implemented.
-- `pending`: blocked, unattempted, or missing proof.
+- `planned` — designed, not implemented.
+- `research-specified` — research and validation design exist.
+- `source-wired` — source/schema/config exists; name checks run.
+- `locally-proven` — deterministic local/fixture proof passed.
+- `ci-accepted` — named exact-SHA CI gate passed.
+- `database-accepted` — required disposable/staging database behavior proof passed.
+- `runtime-accepted` — exact target-host runtime/network proof exists.
+- `provider-accepted` — real provider proof IDs/receipts exist.
+- `browser/channel-accepted` — fixture-free supported-channel proof exists.
+- `commercial-accepted` — usage/cost/payer/beneficiary/invoice reconciliation passed.
+- `live-accepted` — canonical deployed end-to-end behavior passed.
+- `production-ready` — every non-waivable Standard gate passes on the exact deployed SHA.
+- `blocked`, `failed`, `pending` — state exactly why.
 
-Never infer provider/runtime acceptance from code shape, mocks, fixtures, manually injected events, old containers, or the public estimator.
+Never infer live acceptance from source shape, mocks, fixtures, manually injected events, old containers, the estimator, trajectory scores, or historical pass counts.
 
 ## Writing protocol
 
-Create or update a dated handoff after substantial multi-file work, a phase completion, a production incident, or an architectural/product-direction decision. Every handoff must include:
+After substantial work, each handoff records:
 
-1. branch and date;
-2. exact files/systems changed;
-3. status using the vocabulary above;
-4. proof IDs or an explicit statement that validation did not run;
-5. unresolved risks;
-6. the next concrete move.
+1. repository, branch, PR, date, and exact implementation SHA;
+2. primary role and interacting systems;
+3. purpose and invariant;
+4. exact files/migrations/systems changed;
+5. behavior before and after;
+6. side effects and external boundaries;
+7. status using the vocabulary above;
+8. exact tests/workflows/proof or explicit validation not run;
+9. failed attempts and diagnostics where material;
+10. unresolved P0/P1 risks;
+11. next dependency-ordered move;
+12. Standard/vector/CODEGRAPH/architecture/plan/memory/wiki/PR synchronization.
 
-Keep this index newest-first. Do not duplicate implementation records; point to them.
+Keep this index newest-first. Do not duplicate implementation records; point to them. Distinguish implementation proof SHAs from later documentation-only commits unless the full required workflow matrix reruns on the newer head.

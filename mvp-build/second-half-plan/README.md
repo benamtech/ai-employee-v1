@@ -1,82 +1,83 @@
-# AMTECH AI Employee Second-Half Plan
+# AMTECH AI Employee Production Plan Index
 
-Status: active
+Status: **one active production program; Gate 0 resolved**  
+Updated: 2026-07-19
 
-Date: 2026-07-09
+## Active authority
 
-This folder is the fresh forward plan for taking the current Hermes-backed AMTECH AI Employee from a source-wired prototype to free trials and paid pilots.
+The single active production program is:
 
-The core correction: the backend now has meaningful Hermes, MCP, Manager-tool, artifact, event, runtime, and metering seams, but the owner web and SMS surfaces are not close to the product AMTECH intends to sell. The next half must make AMTECH the small-business interface layer over Hermes, not a hardcoded estimate app and not a developer dashboard.
+[`2026-07-19-ratified-standard-production-program/README.md`](2026-07-19-ratified-standard-production-program/README.md)
 
-Deep GUI/runtime research from Hermes Workspace, Hermes WebUI, Hermes Desktop, and Hermes Agent internals is captured in [Hermes Surface Research And Materialization Strategy](surface-research-hermes-gui-and-materialization.md). Treat that document as the surface/materialization companion to the phase plan.
+It is governed by:
 
-## Product Thesis
+- `../STANDARD.md` — ratified normative requirements;
+- `../validation/standard-v0.2-evolution-vector.json` — original-to-ratified clause/implementation motion;
+- `../CODEGRAPH.md` — current source topology, migration head, and evidence boundary;
+- `../memory/MEMORY.md` — sole narrative handoff index;
+- current source, migrations, tests, workflows, proof, and draft PR `#23`.
 
-AMTECH packages Hermes Agent by Nous Research into an AI employee for small-business owners. Hermes supplies the agent substrate: skills, memory, toolsets, Runs/Sessions/Jobs, MCP, terminal/file/browser/web/media tools, messaging gateways, and learning loops. AMTECH supplies the business-safe product layer: tenancy, provisioning, connector custody, approval gates, artifacts, SMS/web surfaces, operator controls, metering, billing, and trust.
+No other file or folder in `second-half-plan/` is current execution authority.
 
-The wedge remains contractor estimates because it creates immediate proof. The product is broader: an employee that can help start or operate a small business across website creation, estimates, parts ordering, invoices, follow-ups, bookkeeping-like organization, marketing campaigns, reminders, and connected-system work, while asking before anything leaves the business or spends money.
+## Read order
 
-## Phase Index
+1. `../../identity.md`
+2. root/scoped `AGENTS.md` or `CLAUDE.md` and `CODEGRAPH.md`
+3. `../STANDARD.md`
+4. the active production program above
+5. `../memory/MEMORY.md` and newest relevant handoff
+6. `../docs/architecture/README.md`
+7. applicable source, migrations, tests, workflows, proof, and current diff
 
-| Phase | File | Outcome |
-|---|---|---|
-| 0 | [Current State Handoff](phase-00-current-state-handoff.md) | A large handoff describing what exists, what is dirty, what is missing, and what the new plan inherits. |
-| 1 | [Preserve And Close Live Gate](phase-01-preserve-and-close-live-gate.md) | Stabilize interrupted work, preserve the tool-enabled employee path, rerun local gates, and capture live runtime proof. |
-| 2 | [Owner Work Surface Redesign](phase-02-owner-work-surface-redesign.md) | Replace the skeletal web UI with a real small-business employee desk inspired by Hermes Desktop/WebUI/Workspace. |
-| 3 | [SMS Ambient Inbox And Link Previews](phase-03-sms-ambient-inbox-and-link-previews.md) | Make SMS a complete owner surface with signed previews, approvals, artifacts, and task state. |
-| 4 | [Tool-Agnostic Capability And Renderer Layer](phase-04-tool-agnostic-capability-and-renderer-layer.md) | Generalize capabilities and rendering across Hermes skills/toolsets, Manager tools, MCP tools, artifacts, and deliverables. |
-| 5 | [Trial Operations, Admin, Billing](phase-05-trial-operations-admin-billing.md) | Make the factory operable for many employee instances with admin, support, health, metering, and billing controls. |
-| 6 | [Free Trial And Paid Pilot Readiness](phase-06-free-trial-and-paid-pilot-readiness.md) | Finish the proof, policy, UX, and ops gates needed to hand this to real owners and charge. |
+## Current execution state
 
-## UI Research Coverage
+- Branch: `employee-production-tuesday`, based on `research`; draft PR `#23`.
+- `main` is not the integration shortcut.
+- Migration head: `0072`.
+- Standard v0.2 is ratified and effective.
+- Gate 0 governance/document resolution is accepted on source/code/document head `4be092f009de`, with all eight required workflows green.
+- Final post-evidence metadata-head workflow IDs are recorded in PR `#23` after the branch freezes.
+- Connector identity, custody, setup protocol, exact tool ownership, and capability readiness are manifest-driven.
+- Native setup supports OAuth and provider-hosted onboarding without treating provider names as ontology.
+- Direct MCP requires explicit read-only/non-money/non-customer-facing declarations; uncertainty fails closed.
+- MCP Apps and AG-UI directions are ratified; complete conformance remains active P0/P1 work.
+- Canonical production Compose selection is source-wired.
+- Local/CI PostgreSQL is the database TDD inner loop; disposable managed Supabase remains a platform-specific and release-candidate proof boundary.
+- Target-host, live connector/provider, fixture-free golden work, commercial, recovery, rollback, accessibility, capacity, deployment, and launch acceptance remain open.
 
-The Hermes GUI research is not a separate idea parked after the plan. It is embedded across all seven phases:
+## Historical plan families
 
-- Phase 0 names the current product gap: backend seams exist, but web/SMS are not yet credible owner surfaces.
-- Phase 1 preserves the live tool-enabled employee path and records ids/proof needed for later surface materialization.
-- Phase 2 turns the web client into an employee desk: navigation, persistent conversation, live timeline, preview rail, output library, connector center, capabilities/abilities, queue/stop/edit/retry patterns, and mobile review flows.
-- Phase 3 makes SMS a first-class ambient inbox with notify/question/review/failure/receipt grammar, signed previews, scoped actions, text fallbacks, and delivery repair.
-- Phase 4 introduces the surface contracts: `SurfaceEnvelope`, `WorkResource`, `WorkAction`, `EmployeeEventStream`, capability registry/cache, generic renderer tiers, schema-derived views, generic artifacts, and approval invariants.
-- Phase 5 adds the operator version of the desk: fleet/admin health, repair, billing, cost, delivery receipts, materialization inspector, and raw provenance.
-- Phase 6 gates launch on proof that web, SMS, generic non-estimate resources, admin, connector repair, billing, and live provider/runtime paths work together.
+The following are retained as point-in-time evidence and subsystem history:
 
-## Parallel Workstream: Context Engineering
+- `phase-2-standard-remediation-execution.md` — predecessor remediation program;
+- `2026-07-20-capability-production-closure/` — predecessor capability/CI closure packet;
+- `phase-00-*` through `phase-06-*` — historical phase family;
+- `surface-research-hermes-gui-and-materialization.md` — historical runtime/UI research;
+- `context-engineering/` — historical context-engineering workstream.
 
-The [Context-Engineering workstream](context-engineering/README.md) (Phases CE-1..CE-4) is authored
-alongside these phases. It makes each employee a real *business brain* — seeding Hermes-native durable
-memory (MEMORY.md/USER.md) from onboarding, injecting a reference-shaped live-state primer cache-safely,
-tuning compression + tool-output hooks, rotating sessions before compaction with handoff notes, and
-keeping trivial/background work off the owner turn. It does not reopen the production infra slice.
+When historical material conflicts with the ratified Standard, active program, current source, applied migrations, exact-SHA proof, or current CODEGRAPH, current authority wins. Historical facts are not silently rewritten.
 
-## Remaining Work – Billing + Admin Live Validation
+## Implementation rules
 
-**Current focus (2026-07-16):** Only two workstreams remain active:
+- Preserve Hermes as the employee runtime and Manager as the authority/effect plane.
+- Use shared connector/capability/work/action contracts rather than bespoke provider UI ontology.
+- Treat MCP core, MCP Apps, and AG-UI as bounded interoperability adapters, not execution authority.
+- Keep Web, SMS, and signed Review as role-safe projections of the same durable work.
+- Keep customer-facing, monetary, destructive, credential, and broad external changes behind assignment-aware policy, approval, effects, and receipts.
+- Never promote source, fixture, local PostgreSQL, or ancestor-SHA evidence into a live acceptance state it did not exercise.
+- No feature expansion while a prerequisite P0 is unresolved.
 
-1. **Live Production Deploy Baseline** — A clean, running production-grade employee reachable via `agent.amtechai.com` using live Twilio, Gmail, Stripe, Supabase, and xAI/Grok credentials. Must produce real proof IDs for onboarding, `provision_employee` with scoped MCP, owner web replies, at least one functional connector, and one full owner turn with tool + artifact.
-2. **Admin Portal Live Testing** — Exercise the internal `/admin` console and all `/manager/admin/*` routes against the live production stack with real operator credentials (suspend/resume/disable, MCP credential rotate/revoke, event repair, readiness reports, redacted diagnostics, audit trail). Must confirm `AMTECH_ADMIN_BROWSER_TOKEN` gate + production RLS.
+## Plan update transaction
 
-Billing implementation follows immediately after the above two gates are green. All other phases and workstreams are declared complete/source-wired.
+When dependency order or a release gate changes:
 
----
+1. update the active program or one subordinate task file;
+2. update the Standard vector if clause satisfaction/direction changed;
+3. update source/tests when implementation changed;
+4. update scoped/root CODEGRAPH and architecture indexes;
+5. update one dated memory handoff and the sole memory index;
+6. update wiki/root routing when stale readers could be misled;
+7. stop branch movement and obtain exact-head workflow evidence;
+8. update PR `#23`.
 
-## Implementation Rules
-
-- Do not rewrite Hermes. Package and surface it.
-- Do not build one bespoke connector UI per service. Use capability discovery, MCP, JSON Schema, generic renderers, approval primitives, and connector status.
-- Keep Manager invisible to owners. Owners talk to their employee.
-- Keep developer vocabulary out of owner-facing surfaces: no MCP, API, token, JSON, config, stack trace, tool catalog, or raw tool log language.
-- Treat SMS and web as two renderings of the same employee state.
-- Treat estimates as the wedge, not the ceiling.
-- Keep customer-facing sends, money movement, broad external changes, deletes, and credential changes behind approval gates.
-- Never mark provider or runtime acceptance without proof ids.
-
-## External References Used
-
-- Hermes Agent repo: https://github.com/nousresearch/hermes-agent
-- Hermes API Server docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server
-- Hermes MCP docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp
-- Hermes Skills docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/skills
-- Hermes Tools docs: https://hermes-agent.nousresearch.com/docs/user-guide/features/tools
-- Hermes Desktop source: https://github.com/NousResearch/hermes-agent/tree/main/apps/desktop
-- Hermes WebUI source: https://github.com/nesquena/hermes-webui
-- Hermes Workspace source: https://github.com/outsourc-e/hermes-workspace
+Creating another competing “current plan” without superseding this index in the same transaction is prohibited.

@@ -21,6 +21,7 @@ export async function deliverOwnerTurnToRuntime(
   params: {
     account_id: string;
     employee_id: string;
+    assignment_id: string;
     body: string;
     channel: "sms" | "web";
     idempotency_key: string;
@@ -69,14 +70,13 @@ export async function deliverOwnerTurnToRuntime(
     {
       account_id: params.account_id,
       employee_id: params.employee_id,
+      assignment_id: params.assignment_id,
       kind: params.channel === "sms" ? "owner_sms_chat" : "owner_web_chat",
       idempotency_key: params.idempotency_key,
       input: { body: params.body, channel: params.channel },
       run_id: runId,
     },
     async () => {
-      // CE-3: rotate the transcript BEFORE the turn if the prior turn filled it,
-      // so this turn runs fresh and re-primes; both calls run under the turn lock.
       await rotateSessionIfNeeded(db, { account_id: params.account_id, employee_id: params.employee_id });
       let turn: Awaited<ReturnType<typeof executeOwnerTurn>>;
       try {

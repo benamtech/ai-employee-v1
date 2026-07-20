@@ -53,7 +53,7 @@ export interface ProvisioningTransitionInput {
   provisioning_job_id: string;
   account_id: string;
   employee_id?: string | null;
-  expected_state: ProvisioningState | "running" | "success";
+  expected_state: ProvisioningState | "running" | "queued";
   to_state: ProvisioningState;
   attempt?: number;
   retry_class?: RetryClass | string | null;
@@ -76,6 +76,42 @@ export interface ProvisioningLease {
   attempt_count: number;
 }
 
+const NEXT_STATE: Partial<Record<ProvisioningState | "running" | "queued", ProvisioningState>> = {
+  queued: "resources_reserved",
+  running: "resources_reserved",
+  requested: "resources_reserved",
+  resources_reserved: "credentials_minted",
+  credentials_minted: "profile_rendered",
+  profile_rendered: "runtime_started",
+  runtime_started: "runtime_healthy",
+  runtime_healthy: "routing_activated",
+  routing_activated: "channel_configured",
+  channel_configured: "welcome_sent",
+  welcome_sent: "ready",
+  compensating: "compensated",
+};
+
+export function assertOrderedProvisioningTransition(from: ProvisioningTransitionInput["expected_state"], to: ProvisioningState): void {
+  if (to === "failed" || to === "compensating") return;
+  if (NEXT_STATE[from] !== to) throw new Error(`invalid_provisioning_transition:${from}->${to}`);
+}
+
+export function freshProvisioningOperationKey(input: {
+  command_type: ProvisioningCommandType;
+  account_id: string;
+  employee_id?: string | null;
+  retry_of?: string | null;
+}): string {
+  const employee = input.employee_id ?? "unbound";
+  const retry = input.retry_of ? `:retry-of:${input.retry_of}` : "";
+  return `${input.command_type}:${input.account_id}:${employee}${retry}:op:${randomUUID()}`;
+}
+
+export function provisioningRetryDelayMs(attempt: number): number {
+  const bounded = Math.max(1, Math.min(attempt, 8));
+  return Math.min(15 * 60_000, 1_000 * (2 ** (bounded - 1)));
+}
+
 export function canonicalProvisioningGraph(input: { account_id: string; employee_id: string; manifest_id: string }): ProvisioningResourceSpec[] {
   const base = `acct:${input.account_id}:emp:${input.employee_id}:man:${input.manifest_id}`;
   return [
@@ -85,22 +121,23 @@ export function canonicalProvisioningGraph(input: { account_id: string; employee
     { resource_key: "rendered_profile", resource_type: "rendered_profile", desired_state: "checksum_verified_frozen", idempotency_key: `${base}:rendered_profile` },
     { resource_key: "employee_network", resource_type: "employee_network", desired_state: "isolated", idempotency_key: `${base}:employee_network` },
     { resource_key: "runtime", resource_type: "runtime", desired_state: "started", idempotency_key: `${base}:runtime` },
-    { resource_key: "gateway_routing", resource_type: "gateway_routing", desired_state: "loopback_route_active", idempotency_key: `${base}:gateway_routing` },
-    { resource_key: "channel_provider_bindings", resource_type: "channel_provider_bindings", desired_state: "configured_after_runtime", idempotency_key: `${base}:channel_provider_bindings` },
     { resource_key: "health_acceptance", resource_type: "health_acceptance", desired_state: "accepted", idempotency_key: `${base}:health_acceptance` },
-    { resource_key: "welcome_ready", resource_type: "welcome_ready", desired_state: "idempotent_business_effect_ready", idempotency_key: `${base}:welcome_ready` },
+    { resource_key: "gateway_routing", resource_type: "gateway_routing", desired_state: "loopback_route_active", idempotency_key: `${base}:gateway_routing` },
+    { resource_key: "channel_provider_bindings", resource_type: "channel_provider_bindings", desired_state: "configured_after_runtime_and_route", idempotency_key: `${base}:channel_provider_bindings` },
+    { resource_key: "welcome_ready", resource_type: "welcome_ready", desired_state: "idempotent_business_effect_ready_after_binding", idempotency_key: `${base}:welcome_ready` },
   ];
 }
 
 export function classifyProvisioningError(err: unknown): RetryClass {
   const message = String((err as Error).message ?? err).toLowerCase();
-  if (/timeout|temporar|econn|rate|429|503|unavailable|lease|in_progress/.test(message)) return "retryable";
+  if (/timeout|temporar|econn|rate|429|503|unavailable|lease|in_progress|reboot/.test(message)) return "retryable";
   if (/missing|misconfigured|credential|secret|permission|operator|dns|caddy|migration/.test(message)) return "operator-action-required";
   if (/compensat|orphan|drift|partial/.test(message)) return "compensating";
   return "permanent";
 }
 
 export async function transitionProvisioning(db: SupabaseClient, input: ProvisioningTransitionInput): Promise<{ applied: boolean; transition_version?: number }> {
+  assertOrderedProvisioningTransition(input.expected_state, input.to_state);
   const current = await db.from("provisioning_jobs").select("state,transition_version").eq("id", input.provisioning_job_id).maybeSingle();
   if (current.error) throw current.error;
   if (!current.data || current.data.state !== input.expected_state) return { applied: false };
@@ -109,7 +146,7 @@ export async function transitionProvisioning(db: SupabaseClient, input: Provisio
   const now = new Date().toISOString();
   const updated = await db
     .from("provisioning_jobs")
-    .update({ state: input.to_state, transition_version: nextVersion, last_transition_at: now, retry_class: input.retry_class ?? undefined })
+    .update({ state: input.to_state, transition_version: nextVersion, last_transition_at: now, retry_class: input.retry_class ?? undefined, lease_token: null, lease_expires_at: null })
     .eq("id", input.provisioning_job_id)
     .eq("state", input.expected_state)
     .eq("transition_version", previousVersion)
@@ -156,6 +193,37 @@ export async function claimProvisioningLease(db: SupabaseClient, input: { provis
   return { job_id: String(claimed.data.id), lease_token, lease_expires_at, attempt_count: Number(claimed.data.attempt_count ?? 1) };
 }
 
+export async function queueProvisioningCommand(db: SupabaseClient, input: {
+  account_id: string;
+  employee_id?: string | null;
+  command_type: ProvisioningCommandType;
+  requested_by: string;
+  payload?: Record<string, unknown>;
+  idempotency_key?: string;
+}): Promise<{ command_id: string; duplicate: boolean }> {
+  const commandId = `pcmd_${randomUUID()}`;
+  const idempotencyKey = input.idempotency_key ?? freshProvisioningOperationKey({
+    command_type: input.command_type,
+    account_id: input.account_id,
+    employee_id: input.employee_id,
+  });
+  const inserted = await db.from("provisioning_commands").insert({
+    id: commandId,
+    account_id: input.account_id,
+    employee_id: input.employee_id ?? null,
+    command_type: input.command_type,
+    idempotency_key: idempotencyKey,
+    requested_by: input.requested_by,
+    status: "requested",
+    payload: input.payload ?? {},
+  });
+  if (!inserted.error) return { command_id: commandId, duplicate: false };
+  if ((inserted.error as { code?: string }).code !== "23505") throw inserted.error;
+  const existing = await db.from("provisioning_commands").select("id").eq("idempotency_key", idempotencyKey).maybeSingle();
+  if (existing.error || !existing.data) throw existing.error ?? new Error("provisioning_command_dedupe_lookup_failed");
+  return { command_id: String(existing.data.id), duplicate: true };
+}
+
 export async function persistProvisioningResourceGraph(db: SupabaseClient, input: { provisioning_job_id: string; account_id: string; employee_id: string; resources: ProvisioningResourceSpec[] }): Promise<void> {
   const rows = input.resources.map((resource) => ({
     id: `prs_${randomUUID()}`,
@@ -176,7 +244,7 @@ export async function recordProvisioningResource(db: SupabaseClient, input: { pr
   const now = new Date().toISOString();
   const updated = await db
     .from("provisioning_resource_states")
-    .update({ observed_state: input.observed_state, evidence: input.evidence ?? {}, error: input.error ?? null, retry_class: input.retry_class ?? null, last_inspected_at: now, updated_at: now })
+    .update({ observed_state: input.observed_state, evidence: input.evidence ?? {}, error: input.error ?? null, retry_class: input.retry_class ?? null, last_inspected_at: now, last_verified_at: input.error ? null : now, updated_at: now })
     .eq("provisioning_job_id", input.provisioning_job_id)
     .eq("resource_key", input.resource_key);
   if (updated.error) throw updated.error;

@@ -4,13 +4,19 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { hostname } from "node:os";
 import { join } from "node:path";
+import {
+  PRODUCTION_COMPOSE_FILE,
+  PRODUCTION_CONTAINER_NAMES,
+  PRODUCTION_CONTROL_SERVICES,
+  productionComposeArgs,
+} from "./production-topology.mjs";
 
 const baseManager = process.env.MANAGER_SMOKE_URL ?? "http://127.0.0.1:8080";
+const baseModelGateway = process.env.MODEL_GATEWAY_SMOKE_URL ?? "http://127.0.0.1:8092";
 const baseWeb = process.env.WEB_SMOKE_URL ?? "http://127.0.0.1:3000";
 const baseCaddy = process.env.CADDY_SMOKE_URL ?? "http://127.0.0.1";
-const composeFile = process.env.COMPOSE_FILE ?? "infra/deploy/docker-compose.yml";
 const proofDir = process.env.AMTECH_PROOF_DIR ?? "infra/proofs";
-const employeeAlias = process.env.EMPLOYEE_DNS_ALIAS;
+const employeeId = process.env.EMPLOYEE_ID;
 const writeProof = process.env.WRITE_PROOF_JSON !== "0";
 
 function nowStamp() {
@@ -18,20 +24,33 @@ function nowStamp() {
 }
 
 function dockerCompose(args) {
-  return spawnSync("docker", ["compose", "-f", composeFile, ...args], { encoding: "utf8" });
+  return spawnSync("docker", productionComposeArgs(args), { encoding: "utf8" });
+}
+
+function composeConfig() {
+  const result = dockerCompose(["config", "--quiet"]);
+  return {
+    name: "compose:config",
+    status: result.status === 0 ? "pass" : "fail",
+    output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim().slice(0, 4000),
+  };
 }
 
 async function httpCheck(name, url, { web = false, proxy = false } = {}) {
   const started = Date.now();
   try {
-    // `redirect: "manual"` so a reverse proxy that enforces HTTPS (Caddy answers
-    // :80 with a 308 -> https) counts as REACHABLE. Following the redirect would
-    // chase into the HTTPS leg, whose cert can't be provisioned on a host without
-    // public DNS (ACME NXDOMAIN) — a TLS failure that says nothing about whether
-    // Caddy is up and routing. A 3xx from the proxy is itself proof it is.
-    const res = await fetch(url, { signal: AbortSignal.timeout(10_000), redirect: proxy ? "manual" : "follow" });
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10_000),
+      redirect: proxy ? "manual" : "follow",
+    });
     const ok = res.ok || ((web || proxy) && res.status < 500) || (proxy && res.type === "opaqueredirect");
-    return { name, status: ok ? "pass" : "fail", http_status: res.status || (res.type === "opaqueredirect" ? 308 : 0), url, ms: Date.now() - started };
+    return {
+      name,
+      status: ok ? "pass" : "fail",
+      http_status: res.status || (res.type === "opaqueredirect" ? 308 : 0),
+      url,
+      ms: Date.now() - started,
+    };
   } catch (err) {
     return { name, status: "fail", url, error: String(err?.message ?? err), ms: Date.now() - started };
   }
@@ -40,36 +59,96 @@ async function httpCheck(name, url, { web = false, proxy = false } = {}) {
 function composeHealth(service) {
   const ps = dockerCompose(["ps", "-q", service]);
   if (ps.status !== 0 || !ps.stdout.trim()) {
-    return { name: `compose:${service}`, status: "fail", error: `${ps.stdout}${ps.stderr}`.trim() || "container_not_found" };
+    return {
+      name: `compose:${service}`,
+      status: "fail",
+      error: `${ps.stdout ?? ""}${ps.stderr ?? ""}`.trim() || "container_not_found",
+    };
   }
   const id = ps.stdout.trim().split("\n")[0];
-  const inspect = spawnSync("docker", ["inspect", id, "--format", "{{.State.Status}}\t{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}"], { encoding: "utf8" });
+  const inspect = spawnSync(
+    "docker",
+    ["inspect", id, "--format", "{{.State.Status}}\t{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}"],
+    { encoding: "utf8" },
+  );
   if (inspect.status !== 0) {
-    return { name: `compose:${service}`, status: "fail", container_id: id, error: `${inspect.stdout}${inspect.stderr}`.trim() };
+    return {
+      name: `compose:${service}`,
+      status: "fail",
+      container_id: id,
+      error: `${inspect.stdout ?? ""}${inspect.stderr ?? ""}`.trim(),
+    };
   }
   const [container_state, health] = inspect.stdout.trim().split("\t");
   const ok = container_state === "running" && (health === "healthy" || health === "none");
   return { name: `compose:${service}`, status: ok ? "pass" : "fail", container_id: id, container_state, health };
 }
 
-function caddyValidate() {
-  const res = dockerCompose(["exec", "-T", "caddy", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]);
+function provisionerSocket() {
+  const result = dockerCompose([
+    "exec",
+    "-T",
+    "host-provisioner",
+    "test",
+    "-S",
+    "/run/amtech-provisioner/provisioner.sock",
+  ]);
   return {
-    name: "caddy:validate",
-    status: res.status === 0 ? "pass" : "fail",
-    output: `${res.stdout}${res.stderr}`.trim().slice(0, 4000),
+    name: "host-provisioner:unix-socket",
+    status: result.status === 0 ? "pass" : "fail",
+    output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim().slice(0, 4000),
   };
 }
 
-function dockerDns(alias) {
-  if (!alias) return { name: "docker-dns:employee-alias", status: "skip", reason: "EMPLOYEE_DNS_ALIAS not set" };
-  const res = dockerCompose(["exec", "-T", "caddy", "getent", "hosts", alias]);
+function caddyValidate() {
+  const result = dockerCompose(["exec", "-T", "caddy", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]);
   return {
-    name: "docker-dns:employee-alias",
-    status: res.status === 0 ? "pass" : "fail",
-    alias,
-    output: `${res.stdout}${res.stderr}`.trim().slice(0, 4000),
+    name: "caddy:validate",
+    status: result.status === 0 ? "pass" : "fail",
+    output: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim().slice(0, 4000),
   };
+}
+
+function employeeNetworkTopology() {
+  if (!employeeId) {
+    return { name: "employee-network:topology", status: "skip", reason: "EMPLOYEE_ID not set" };
+  }
+  const network = `amtech-employee-${employeeId}`;
+  const result = spawnSync("docker", ["network", "inspect", network], { encoding: "utf8" });
+  if (result.status !== 0) {
+    return {
+      name: "employee-network:topology",
+      status: "fail",
+      network,
+      error: `${result.stdout ?? ""}${result.stderr ?? ""}`.trim() || "network_not_found",
+    };
+  }
+  try {
+    const [inspection] = JSON.parse(result.stdout);
+    const names = Object.values(inspection?.Containers ?? {})
+      .map((entry) => entry?.Name)
+      .filter(Boolean)
+      .sort();
+    const expected = [
+      PRODUCTION_CONTAINER_NAMES.manager,
+      PRODUCTION_CONTAINER_NAMES.modelGateway,
+      `amtech-hermes-${employeeId}`,
+    ];
+    const unexpectedEmployees = names.filter(
+      (name) => name.startsWith("amtech-hermes-") && name !== `amtech-hermes-${employeeId}`,
+    );
+    const ok = expected.every((name) => names.includes(name)) && unexpectedEmployees.length === 0;
+    return {
+      name: "employee-network:topology",
+      status: ok ? "pass" : "fail",
+      network,
+      containers: names,
+      expected,
+      unexpected_employee_containers: unexpectedEmployees,
+    };
+  } catch (err) {
+    return { name: "employee-network:topology", status: "fail", network, error: `invalid_inspect_json:${String(err)}` };
+  }
 }
 
 function gitSha() {
@@ -81,14 +160,19 @@ function gitSha() {
 }
 
 const checks = [
+  composeConfig(),
   await httpCheck("manager-health", `${baseManager.replace(/\/$/, "")}/health`),
+  await httpCheck("model-gateway-health", `${baseModelGateway.replace(/\/$/, "")}/health`),
   await httpCheck("web", baseWeb, { web: true }),
   await httpCheck("caddy", baseCaddy, { proxy: true }),
   composeHealth("manager"),
+  composeHealth("model-gateway"),
+  composeHealth("host-provisioner"),
   composeHealth("web"),
   composeHealth("caddy"),
+  provisionerSocket(),
   caddyValidate(),
-  dockerDns(employeeAlias),
+  employeeNetworkTopology(),
 ];
 
 for (const check of checks) {
@@ -98,11 +182,12 @@ for (const check of checks) {
 
 const proof = {
   kind: "deploy_smoke",
-  status: checks.some((c) => c.status === "fail") ? "fail" : "pass",
+  status: checks.some((check) => check.status === "fail") ? "fail" : "pass",
   checked_at: new Date().toISOString(),
   host: hostname(),
   git_sha: gitSha(),
-  compose_file: composeFile,
+  compose_file: PRODUCTION_COMPOSE_FILE,
+  control_services: PRODUCTION_CONTROL_SERVICES,
   checks,
 };
 

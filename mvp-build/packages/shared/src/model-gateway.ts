@@ -3,9 +3,10 @@
  *
  * Employee runtimes never receive provider master credentials. They receive only an
  * employee-scoped gateway credential whose claims bind the request to one account,
- * one employee, one credential version, and an allowed model/provider policy. The
- * Manager/host-private gateway owns provider selection, retries, usage capture,
- * cost attribution, circuit breaking, and redacted audit.
+ * one employee, one assignment, one commercial attribution scope, one credential
+ * version, and an allowed model/provider policy. The Manager/host-private gateway
+ * owns provider selection, retries, usage capture, cost attribution, circuit
+ * breaking, and redacted audit.
  */
 
 export const MODEL_GATEWAY_TOKEN_PREFIX = "mgw_";
@@ -23,7 +24,14 @@ export interface ModelGatewayPolicy {
   credential_version: number;
 }
 
-export interface ModelGatewayTokenClaims extends ModelGatewayPolicy {
+export interface ModelGatewayCommercialScope {
+  assignment_id: string;
+  payer_relationship_id: string;
+  beneficiary_relationship_id: string;
+  price_version_id: string;
+}
+
+export interface ModelGatewayTokenClaims extends ModelGatewayPolicy, ModelGatewayCommercialScope {
   token_type: "model_gateway";
   credential_id: string;
   account_id: string;
@@ -37,7 +45,7 @@ export interface ModelGatewayCredentialRecord extends ModelGatewayTokenClaims {
   rotated_from_credential_id?: string | null;
 }
 
-export interface ModelGatewayUsageRecord {
+export interface ModelGatewayUsageRecord extends ModelGatewayCommercialScope {
   request_id: string;
   credential_id: string;
   account_id: string;
@@ -51,9 +59,11 @@ export interface ModelGatewayUsageRecord {
   completion_tokens: number;
   total_tokens: number;
   estimated_cost_cents: number;
-  status: "ok" | "failed" | "rate_limited" | "provider_unavailable" | "unauthorized";
+  status: "ok" | "failed" | "rate_limited" | "provider_unavailable" | "unauthorized" | "ambiguous";
   error_code?: string | null;
   correlation_id?: string | null;
+  provider_receipt_id?: string | null;
+  accounting_receipt_id?: string | null;
 }
 
 export function modelGatewayPolicySummary(policy: ModelGatewayPolicy): Record<string, unknown> {

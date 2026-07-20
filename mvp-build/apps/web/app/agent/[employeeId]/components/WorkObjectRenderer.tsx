@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { WorkAction, WorkResource } from "@amtech/shared";
+import { McpUiResource, type McpUiIntent } from "./McpUiResource";
 
 export type WorkObjectActionHandler = (action: WorkAction["action"], note?: string) => Promise<void> | void;
 
@@ -20,13 +21,14 @@ export function WorkObjectRenderer({
 
   async function handleAction(action: WorkAction) {
     if (action.action === "view") return;
+    if (!onAction) return;
     if (action.action === "respond" || action.action === "edit") {
       setReplying(true);
       return;
     }
     setWorkingAction(action.action);
     try {
-      await onAction?.(action.action);
+      await onAction(action.action);
     } finally {
       setWorkingAction(null);
     }
@@ -34,10 +36,10 @@ export function WorkObjectRenderer({
 
   async function submitNote() {
     const trimmed = note.trim();
-    if (!trimmed) return;
+    if (!trimmed || !onAction) return;
     setWorkingAction("respond");
     try {
-      await onAction?.("respond", trimmed);
+      await onAction("respond", trimmed);
       setNote("");
       setReplying(false);
     } finally {
@@ -45,8 +47,36 @@ export function WorkObjectRenderer({
     }
   }
 
+  async function handleUiIntent(intent: McpUiIntent, payload: Record<string, unknown>) {
+    const action: WorkAction["action"] = intent === "accept" || intent === "accept_all"
+      ? "approve"
+      : intent;
+    if (!onAction || !resource.actions.some((candidate) => candidate.action === action)) return;
+
+    let responseNote: string | undefined;
+    if (action === "respond") {
+      const fields = payload.fields && typeof payload.fields === "object"
+        ? payload.fields as Record<string, unknown>
+        : {};
+      responseNote = Object.entries(fields)
+        .map(([key, value]) => `${key}: ${String(value ?? "")}`)
+        .join(", ")
+        .trim();
+      if (!responseNote) return;
+    }
+
+    setWorkingAction(action);
+    try {
+      await onAction(action, responseNote);
+    } finally {
+      setWorkingAction(null);
+    }
+  }
+
+  const gated = resource.actions.some((action) => action.gated);
+
   return (
-    <article className={compact ? "wo-root compact" : "wo-root"}>
+    <article id={`work-${resource.resource_id}`} className={compact ? "wo-root compact" : "wo-root"}>
       <style>{WORK_OBJECT_CSS}</style>
       <header className="wo-head">
         <div>
@@ -70,6 +100,13 @@ export function WorkObjectRenderer({
             </div>
           ))}
         </dl>
+      ) : null}
+
+      {resource.ui_resource ? (
+        <McpUiResource
+          resource={resource.ui_resource}
+          onIntent={(intent, _approvalId, payload) => { void handleUiIntent(intent, payload); }}
+        />
       ) : null}
 
       {resource.body_html ? (
@@ -111,32 +148,47 @@ export function WorkObjectRenderer({
         </section>
       ) : null}
 
+      {gated && !resource.expired ? (
+        <div className="wo-consequence">
+          <strong>Held for your decision</strong>
+          <span>Nothing customer-facing, financial, or high-impact proceeds until an authorized owner action is accepted.</span>
+        </div>
+      ) : null}
+
       {resource.expired ? (
-        <div className="wo-expired">This work item is already handled. Nothing else is waiting on this link.</div>
+        <div className="wo-expired">This work item is already handled or no longer authorized. No action is waiting on this object.</div>
       ) : null}
 
       {!resource.expired && resource.actions.length ? (
-        <footer className={resource.actions.some((action) => action.gated) ? "wo-actions gated" : "wo-actions"}>
+        <footer className={gated ? "wo-actions gated" : "wo-actions"}>
           {replying ? (
             <div className="wo-reply">
+              <label htmlFor={`wo-note-${resource.resource_id}`}>Tell your employee what to change, answer, or check</label>
               <textarea
+                id={`wo-note-${resource.resource_id}`}
                 value={note}
                 onChange={(event) => setNote(event.target.value)}
                 rows={3}
                 autoFocus
-                placeholder="Tell Avery what to change, answer, or check..."
+                placeholder="Add the missing detail or revision."
               />
               <div>
                 <button type="button" className="wo-button" onClick={() => setReplying(false)}>Cancel</button>
-                <button type="button" className="wo-button primary" disabled={!note.trim() || workingAction === "respond"} onClick={() => void submitNote()}>
-                  Send to Avery
+                <button type="button" className="wo-button primary" disabled={!note.trim() || workingAction === "respond" || !onAction} onClick={() => void submitNote()}>
+                  {workingAction === "respond" ? "Sending…" : "Send revision"}
                 </button>
               </div>
             </div>
           ) : (
             resource.actions.map((action) => (
               action.action === "view" && resource.open_url ? (
-                <a key={action.action} className={buttonClass(action)} href={resource.open_url} target="_blank" rel="noreferrer">
+                <a
+                  key={action.action}
+                  className={buttonClass(action)}
+                  href={resource.open_url}
+                  target={isExternalHref(resource.open_url) ? "_blank" : undefined}
+                  rel={isExternalHref(resource.open_url) ? "noreferrer" : undefined}
+                >
                   {action.label}
                 </a>
               ) : (
@@ -144,10 +196,10 @@ export function WorkObjectRenderer({
                   key={action.action}
                   type="button"
                   className={buttonClass(action)}
-                  disabled={Boolean(workingAction)}
+                  disabled={!onAction || Boolean(workingAction)}
                   onClick={() => void handleAction(action)}
                 >
-                  {workingAction === action.action ? "Working..." : action.label}
+                  {workingAction === action.action ? "Working…" : action.label}
                 </button>
               )
             ))
@@ -168,7 +220,7 @@ function labelResourceType(type: WorkResource["resource_type"]): string {
 }
 
 function riskLabel(risk: NonNullable<WorkResource["risk"]>): string {
-  if (risk === "high") return "Money or high impact";
+  if (risk === "high") return "High impact";
   if (risk === "medium") return "Needs your say";
   return "Low risk";
 }
@@ -177,110 +229,20 @@ function isHref(value: string): boolean {
   return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("/") || value.startsWith("#");
 }
 
+function isExternalHref(value: string): boolean {
+  return value.startsWith("http://") || value.startsWith("https://");
+}
+
 const WORK_OBJECT_CSS = `
-  .wo-root {
-    --wo-ink: #111717;
-    --wo-paper: #fffdf8;
-    --wo-wash: #f4f1e9;
-    --wo-line: rgba(62,76,72,.18);
-    --wo-muted: #687777;
-    --wo-blue: #276b82;
-    --wo-blue-soft: #dceff4;
-    --wo-green: #23734d;
-    --wo-green-soft: #e4f3e9;
-    --wo-amber: #a86a12;
-    --wo-amber-soft: #fff2cf;
-    --wo-danger: #b4323a;
-    --wo-danger-soft: #ffe5e8;
-    --wo-font: var(--font-inter), Inter, -apple-system, "Helvetica Neue", Arial, sans-serif;
-    display: grid;
-    gap: 15px;
-    color: var(--wo-ink);
-    background: transparent;
-    font-family: var(--wo-font);
-  }
-  .wo-root.compact { gap: 10px; }
-  .wo-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: start; }
-  .wo-eyebrow, .wo-receipts > p {
-    margin: 0 0 5px;
-    font-size: 11px;
-    line-height: 1.2;
-    text-transform: uppercase;
-    font-weight: 760;
-    color: var(--wo-muted);
-  }
-  .wo-head h2 { margin: 0; font-size: 25px; line-height: 1.08; letter-spacing: 0; font-weight: 840; }
-  .wo-root.compact .wo-head h2 { font-size: 18px; }
-  .wo-summary { margin: 8px 0 0; color: var(--wo-muted); font-size: 14px; line-height: 1.55; max-width: 68ch; }
-  .wo-meta { display: grid; gap: 4px; justify-items: end; min-width: 94px; }
-  .wo-meta strong { font-size: 24px; line-height: 1; font-weight: 800; white-space: nowrap; }
-  .wo-meta span { color: var(--wo-muted); font-size: 12px; text-align: right; }
-  .wo-risk {
-    border: 1px solid var(--wo-line);
-    padding: 5px 9px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 760;
-    text-transform: uppercase;
-  }
-  .wo-risk.medium { border-color: rgba(160,90,0,.28); background: var(--wo-amber-soft); color: var(--wo-amber); }
-  .wo-risk.high { background: var(--wo-danger-soft); border-color: rgba(181,29,42,.3); color: var(--wo-danger); }
-  .wo-fields { border: 1px solid var(--wo-line); margin: 0; border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.62); }
-  .wo-fields div, .wo-receipts a, .wo-receipts div {
-    display: grid;
-    grid-template-columns: minmax(110px, 0.42fr) minmax(0, 1fr);
-    gap: 12px;
-    padding: 10px 12px;
-    border-top: 1px solid var(--wo-line);
-    align-items: baseline;
-  }
-  .wo-fields div:first-child, .wo-receipts a:first-of-type, .wo-receipts div:first-of-type { border-top: 0; }
-  .wo-fields dt, .wo-receipts span {
-    margin: 0;
-    color: var(--wo-muted);
-    font-size: 11px;
-    font-weight: 760;
-    text-transform: uppercase;
-  }
-  .wo-fields dd, .wo-receipts strong { margin: 0; font-weight: 650; text-align: right; overflow-wrap: anywhere; }
-  .wo-frame { width: 100%; min-height: 420px; border: 1px solid var(--wo-line); background: #ffffff; border-radius: 16px; box-shadow: inset 0 1px 0 rgba(255,255,255,.9); }
-  .wo-media { margin: 0; border: 1px solid var(--wo-line); background: var(--wo-wash); border-radius: 16px; overflow: hidden; }
-  .wo-media img, .wo-media video { width: 100%; display: block; }
-  .wo-media figcaption { padding: 9px 12px; color: var(--wo-muted); font-size: 12px; border-top: 1px solid var(--wo-line); }
-  .wo-receipts { border: 1px solid rgba(35,115,77,.18); background: rgba(228,243,233,.48); border-radius: 16px; overflow: hidden; }
-  .wo-receipts > p { padding: 10px 12px; margin: 0; border-bottom: 1px solid var(--wo-line); color: var(--wo-green); }
-  .wo-receipts a { color: inherit; text-decoration: none; }
-  .wo-receipts a:hover strong { color: var(--wo-green); }
-  .wo-expired { border: 1px solid var(--wo-line); border-radius: 14px; background: rgba(255,255,255,.54); padding: 12px; color: var(--wo-muted); font-size: 13px; }
-  .wo-actions { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid var(--wo-line); padding-top: 12px; }
-  .wo-actions.gated { border-top-color: rgba(168,106,18,.28); }
-  .wo-button {
-    min-height: 44px;
-    border: 1px solid var(--wo-line);
-    background: rgba(255,255,255,.78);
-    color: var(--wo-ink);
-    padding: 0 16px;
-    border-radius: 999px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    cursor: pointer;
-    font: 760 14px/1 var(--wo-font);
-  }
-  .wo-button.primary { background: linear-gradient(180deg, #2d7991, #1f5f75); border-color: transparent; color: #ffffff; box-shadow: 0 12px 24px rgba(31,95,117,.22), inset 0 1px 0 rgba(255,255,255,.32); }
-  .wo-button.primary:hover { filter: brightness(.96); }
-  .wo-button.danger { border-color: rgba(181,29,42,.35); background: var(--wo-danger-soft); color: var(--wo-danger); }
-  .wo-button:disabled { cursor: not-allowed; color: var(--wo-muted); background: var(--wo-wash); }
-  .wo-reply { width: 100%; display: grid; gap: 8px; }
-  .wo-reply textarea { width: 100%; min-height: 92px; border: 1px solid var(--wo-line); border-radius: 14px; padding: 12px; resize: vertical; font: 500 15px/1.45 var(--wo-font); }
-  .wo-reply div { display: flex; justify-content: flex-end; gap: 8px; }
-  @media (max-width: 640px) {
-    .wo-head { grid-template-columns: 1fr; }
-    .wo-meta { justify-items: start; }
-    .wo-fields div, .wo-receipts a, .wo-receipts div { grid-template-columns: 1fr; gap: 4px; }
-    .wo-fields dd, .wo-receipts strong { text-align: left; }
-    .wo-button { flex: 1 1 42%; min-height: 48px; }
-    .wo-frame { min-height: 360px; }
-  }
+  .wo-root{display:grid;gap:16px;color:var(--amtech-ink);font-family:var(--amtech-font);scroll-margin-top:72px}
+  .wo-root.compact{gap:12px}.wo-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start}.wo-eyebrow,.wo-receipts>p{margin:0 0 6px;font-size:11px;line-height:1.2;text-transform:uppercase;letter-spacing:.11em;font-weight:750;color:var(--amtech-muted)}
+  .wo-head h2{margin:0;font-size:clamp(20px,3vw,28px);line-height:1.08;letter-spacing:-.025em;font-weight:840}.wo-root.compact .wo-head h2{font-size:19px}.wo-summary{margin:8px 0 0;color:var(--amtech-muted);font-size:14px;line-height:1.55;max-width:68ch}
+  .wo-meta{display:grid;gap:6px;justify-items:end;min-width:110px}.wo-meta strong{font-size:24px;line-height:1;font-weight:820;white-space:nowrap}.wo-meta>span:not(.wo-risk){color:var(--amtech-muted);font-size:12px;text-align:right}.wo-risk{padding:5px 10px;border:1px solid var(--amtech-line-strong);border-radius:999px;font-size:11px;font-weight:750}.wo-risk.medium{border-color:rgba(37,99,235,.25);background:var(--amtech-blue-soft);color:var(--amtech-blue)}.wo-risk.high{border-color:rgba(225,29,42,.25);background:var(--amtech-danger-soft);color:var(--amtech-red)}.wo-risk.low{border-color:rgba(22,138,87,.2);background:var(--amtech-green-soft);color:var(--amtech-green)}
+  .wo-fields,.wo-receipts{margin:0;border:1px solid var(--amtech-line);border-radius:16px;overflow:hidden;background:rgba(255,255,255,.76)}.wo-fields div,.wo-receipts a,.wo-receipts div{display:grid;grid-template-columns:minmax(110px,.42fr) minmax(0,1fr);gap:12px;padding:11px 13px;border-top:1px solid var(--amtech-line);align-items:baseline}.wo-fields div:first-child,.wo-receipts a:first-of-type,.wo-receipts div:first-of-type{border-top:0}.wo-fields dt,.wo-receipts span{margin:0;color:var(--amtech-muted);font-size:11px;font-weight:720;text-transform:uppercase;letter-spacing:.04em}.wo-fields dd,.wo-receipts strong{margin:0;font-weight:680;text-align:right;overflow-wrap:anywhere}
+  .wo-frame{width:100%;min-height:420px;border:1px solid var(--amtech-line);border-radius:16px;background:#fff}.wo-media{margin:0;border:1px solid var(--amtech-line);border-radius:16px;overflow:hidden;background:var(--amtech-canvas)}.wo-media img,.wo-media video{width:100%;display:block}.wo-media figcaption{padding:10px 13px;color:var(--amtech-muted);font-size:12px;border-top:1px solid var(--amtech-line)}
+  .wo-receipts{border-color:rgba(22,138,87,.18);background:var(--amtech-green-soft)}.wo-receipts>p{padding:11px 13px;margin:0;border-bottom:1px solid var(--amtech-line);color:var(--amtech-green)}.wo-receipts a{color:inherit;text-decoration:none}.wo-receipts a:hover strong{color:var(--amtech-green)}
+  .wo-consequence{padding:12px 14px;display:grid;gap:4px;border:1px solid rgba(37,99,235,.2);border-radius:14px;background:var(--amtech-blue-soft);color:var(--amtech-blue)}.wo-consequence strong{font-size:13px}.wo-consequence span{font-size:12px;line-height:1.45}.wo-expired{padding:12px 14px;border:1px solid var(--amtech-line);border-radius:14px;background:rgba(255,255,255,.58);color:var(--amtech-muted);font-size:13px}
+  .wo-actions{display:flex;gap:8px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--amtech-line)}.wo-actions.gated{border-top-color:rgba(225,29,42,.18)}.wo-button{min-height:44px;padding:0 17px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--amtech-line-strong);border-radius:999px;background:#fff;color:var(--amtech-ink);text-decoration:none;font-weight:760}.wo-button.primary{background:var(--amtech-red);border-color:var(--amtech-red);color:#fff}.wo-button.danger{border-color:rgba(225,29,42,.34);background:#fff;color:var(--amtech-red)}.wo-button:hover:not(:disabled){transform:translateY(-1px)}.wo-button:disabled{opacity:.45;cursor:not-allowed}
+  .wo-reply{width:100%;display:grid;gap:8px}.wo-reply label{font-size:13px;font-weight:750}.wo-reply textarea{width:100%;min-height:96px;padding:12px 14px;resize:vertical;border:1px solid var(--amtech-line-strong);border-radius:14px;background:#fff;outline:none}.wo-reply textarea:focus{border-color:var(--amtech-blue);box-shadow:0 0 0 4px var(--amtech-blue-soft)}.wo-reply div{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+  @media(max-width:640px){.wo-head{grid-template-columns:1fr}.wo-meta{justify-items:start}.wo-fields div,.wo-receipts a,.wo-receipts div{grid-template-columns:1fr}.wo-fields dd,.wo-receipts strong{text-align:left}.wo-actions .wo-button{flex:1 1 140px}}
 `;

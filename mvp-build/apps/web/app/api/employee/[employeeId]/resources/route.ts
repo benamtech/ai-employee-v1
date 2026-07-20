@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
-import { MANAGER_API } from "@amtech/shared";
-import { proxyJson } from "../../../_lib/manager";
+import { NextResponse } from "next/server";
+import { managerPost } from "../../../_lib/manager";
 
 export async function POST(
   _req: Request,
@@ -8,7 +8,13 @@ export async function POST(
 ) {
   const { employeeId } = await params;
   const cookieStore = await cookies();
-  return proxyJson(MANAGER_API.employeeResources(employeeId), {
+  const response = await managerPost(`/manager/employee/${employeeId}/operating-snapshot`, {
     owner_session_token: cookieStore.get("amtech_owner_session")?.value,
   });
+  const json = await response.json().catch(() => ({})) as Record<string, unknown>;
+  if (!response.ok) return NextResponse.json(json, { status: response.status });
+  if (!json.operating_state) {
+    return NextResponse.json({ error: "operating_state_unavailable" }, { status: 503 });
+  }
+  return NextResponse.json(json, { status: response.status });
 }

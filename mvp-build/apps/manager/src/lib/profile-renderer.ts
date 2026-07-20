@@ -260,7 +260,12 @@ export async function renderProfilePackage(req: ProvisionerRequest): Promise<{
   return { profile_id, profile_checksum: integrity.checksum, generated_path, workspace_dir: params.workspace_dir, validation_output, deployed_plugins };
 }
 
-export async function rotateRenderedModelGatewayCredential(req: ProvisionerRequest): Promise<{ profile_id: string; generated_path: string; profile_checksum: string }> {
+export async function rotateRenderedModelGatewayCredential(req: ProvisionerRequest): Promise<{
+  profile_id: string;
+  generated_path: string;
+  profile_checksum: string;
+  runtime_reload_output: string;
+}> {
   const params = buildParams(req);
   const hermesHome = process.env.HERMES_HOME;
   if (!hermesHome) throw new Error("HERMES_HOME missing.");
@@ -282,7 +287,11 @@ export async function rotateRenderedModelGatewayCredential(req: ProvisionerReque
     // config.yaml is authoritative for Hermes; .env token is diagnostic and best-effort.
   }
   const integrity = await assertProfileTreeIntegrity(generated_path);
-  return { profile_id, generated_path, profile_checksum: integrity.checksum };
+  // Docker restart does not recreate env-file values. Re-run the fixed runtime
+  // launcher so the live container is replaced from the rotated, checksummed
+  // profile and must pass the in-container model-gateway reachability probe.
+  const runtime_reload_output = await runRuntimeStart(generated_path);
+  return { profile_id, generated_path, profile_checksum: integrity.checksum, runtime_reload_output };
 }
 
 export async function inspectRenderedProfile(params: ProfileBuildParams): Promise<{ profile_id: string; generated_path: string; profile_checksum: string | null; exists: boolean }> {

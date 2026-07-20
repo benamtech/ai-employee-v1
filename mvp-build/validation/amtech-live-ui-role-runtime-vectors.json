@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "version": "2026-07-19",
+  "status_values": ["pass", "fail", "blocked", "not_run", "warning"],
+  "authority": [
+    "STANDARD.md",
+    "STANDARD_UI_RUNTIME_AMENDMENT_2026-07-19.md",
+    "../docs/AMTECH_AGENT_INTERFACE_STANDARD.md",
+    "../docs/AMTECH_UI_VALIDATION_STANDARD.md",
+    "../docs/ui/AMTECH_AI_EMPLOYEE_UI_RUNTIME_DEEP_DIVE_2026-07-19.md"
+  ],
+  "release_rule": "Every required vector must pass on the exact deployed SHA. Fixture, blocked, warning, or not_run never count as pass.",
+  "test_topology": {
+    "allowed": [
+      "account_a_owner_to_employee_a1_distinct_runtime",
+      "account_a_owner_to_employee_a2_distinct_runtime",
+      "account_b_owner_to_employee_b1_distinct_runtime",
+      "exact_signed_review_resolver",
+      "separate_platform_operator_session"
+    ],
+    "blocked": [
+      "one_employee_runtime_shared_across_accounts",
+      "general_manager_viewer_finance_browser_perspectives",
+      "public_visitor_inherits_owner_context"
+    ]
+  },
+  "vectors": [
+    {
+      "id": "LUI-AUTH-01",
+      "gate": "identity_and_account",
+      "name": "real_login_binds_one_account",
+      "required": true,
+      "current_status": "not_run",
+      "pass": [
+        "real credential authentication",
+        "explicit account selection when user has multiple accounts",
+        "owner session binds one account, human principal, session version, and authority version",
+        "dashboard lists only employees authorized through current assignment/grants"
+      ],
+      "fail": [
+        "account selected only by route or query string",
+        "employees from multiple accounts merge",
+        "revoked authority version remains usable"
+      ],
+      "evidence": ["browser packet", "Manager authorization decision", "database rows", "audit record"]
+    },
+    {
+      "id": "LUI-AUTH-02",
+      "gate": "cross_account_isolation",
+      "name": "cross_account_employee_denial",
+      "required": true,
+      "current_status": "not_run",
+      "pass": [
+        "owner_a denied employee_b1 snapshot",
+        "owner_a denied employee_b1 SSE stream",
+        "owner_a denied employee_b1 command",
+        "owner_a denied employee_b1 artifact and signed review",
+        "no Hermes or provider request occurs"
+      ],
+      "fail": ["any data frame, command, runtime call, or effect crosses account/assignment"],
+      "evidence": ["HTTP packets", "Manager logs", "runtime request absence", "audit/denial evidence"]
+    },
+    {
+      "id": "LUI-AUTH-03",
+      "gate": "stream_authority",
+      "name": "stream_reauthorization_and_revocation",
+      "required": true,
+      "current_status": "warning",
+      "source_evidence": [
+        "apps/web/app/api/employee/[employeeId]/events/route.ts"
+      ],
+      "pass": [
+        "stream terminates or reauthorizes after session/principal/assignment/grant authority change",
+        "reconnect performs fresh Manager authorization",
+        "no deltas arrive after revocation acceptance"
+      ],
+      "fail": ["revoked viewer receives deltas indefinitely"],
+      "note": "Next proxy currently bounds stream lifetime; immediate Manager-side authority change termination remains pending."
+    },
+    {
+      "id": "LUI-ROLE-01",
+      "gate": "role_projection",
+      "name": "owner_projection",
+      "required": true,
+      "current_status": "not_run",
+      "pass": ["owner sees business consequence, decision, current work, saves, evidence, and safe context"],
+      "fail": ["raw runtime internals or unrelated resources visible"]
+    },
+    {
+      "id": "LUI-ROLE-02",
+      "gate": "role_projection",
+      "name": "admin_projection",
+      "required": true,
+      "current_status": "not_run",
+      "pass": ["real account admin session exists", "assignment grants determine materialization/actions", "owner-only resources remain hidden when not granted"],
+      "fail": ["account admin role implies every assignment action"]
+    },
+    {
+      "id": "LUI-ROLE-03",
+      "gate": "role_projection",
+      "name": "manager_viewer_finance_roles",
+      "required": false,
+      "current_status": "blocked",
+      "pass": ["real relationship-role session", "role-specific positive and negative projections", "no route-derived authority"],
+      "blocked_reason": "ordinary browser session minting currently admits account owner/admin only"
+    },
+    {
+      "id": "LUI-ROLE-04",
+      "gate": "signed_review",
+      "name": "exact_resolver_projection",
+      "required": true,
+      "current_status": "not_run",
+      "pass": [
+        "link binds exact assignment, employee, resource, resolver, actions, expiry, and authority version",
+        "one atomic resolution",
+        "replay and revoked authority fail closed",
+        "follow-up uses same assignment"
+      ]
+    },
+    {
+      "id": "LUI-STATE-01",
+      "gate": "snapshot_delta",
+      "name": "snapshot_delta_convergence",
+      "required": true,
+      "current_status": "warning",
+      "pass": [
+        "validated initial snapshot establishes state and cursor/version",
+        "ordered deltas apply once",
+        "divergence triggers fresh snapshot",
+        "reconnect never replays command"
+      ],
+      "warning": "AgentSurface currently ignores snapshot payload and schedules a second resource fetch."
+    },
+    {
+      "id": "LUI-STATE-02",
+      "gate": "work_event_grammar",
+      "name": "observe_is_evidence_not_work",
+      "required": true,
+      "current_status": "source_wired",
+      "source_evidence": [
+        "apps/manager/src/lib/materialization.ts",
+        "tests/unit/observe-work-event-projection.test.ts"
+      ],
+      "pass": ["observe envelope remains visible", "no active task", "no active save/resurface obligation"],
+      "fail": ["ambient event becomes in-progress work solely because it exists"]
+    },
+    {
+      "id": "LUI-STATE-03",
+      "gate": "intent_idempotency",
+      "name": "owner_retry_does_not_duplicate_turn",
+      "required": true,
+      "current_status": "not_run",
+      "pass": ["same browser intent_id reused after uncertain response", "one C3 command/effect", "terminal replay returns canonical result"],
+      "fail": ["retry creates second runtime turn or provider effect"]
+    },
+    {
+      "id": "LUI-RUNTIME-01",
+      "gate": "runtime_state",
+      "name": "started_state_is_distinguishable",
+      "required": true,
+      "current_status": "not_run",
+      "pass": ["not_started", "accepted_started", "working", "stalled", "recovering", "terminal_receipt_backed"],
+      "fail": ["generic spinner hides acceptance ambiguity", "progress implies completion"]
+    },
+    {
+      "id": "LUI-RUNTIME-02",
+      "gate": "recovery",
+      "name": "recovery_preserves_one_intent",
+      "required": true,
+      "current_status": "not_run",
+      "pass": ["runtime interruption after accepted start", "same work_run and intent", "no second effect", "reconciled terminal receipt"],
+      "fail": ["browser resends automatically", "runtime recovery invokes a second external effect"]
+    },
+    {
+      "id": "LUI-RUNTIME-03",
+      "gate": "capability_reconciliation",
+      "name": "capability_probe_lifecycle",
+      "required": true,
+      "current_status": "source_wired",
+      "source_evidence": ["apps/manager/src/lib/hermes-client.ts"],
+      "pass": [
+        "probe after provisioning/restart/session/upgrade or protocol mismatch",
+        "cache by runtime endpoint",
+        "runtime support only narrows effective Manager capability graph"
+      ],
+      "fail": ["capability polling used as authority", "toolset availability grants assignment scope"]
+    },
+    {
+      "id": "LUI-RUNTIME-04",
+      "gate": "progress_transport",
+      "name": "progress_is_best_effort_or_shared",
+      "required": true,
+      "current_status": "warning",
+      "pass": ["progress explicitly best-effort and snapshots remain authoritative", "or shared bounded progress bus passes multi-replica tests"],
+      "warning": "current progress bus is Manager-process-local"
+    },
+    {
+      "id": "LUI-SHARED-01",
+      "gate": "assignment_partitioning",
+      "name": "shared_employee_end_to_end_partition",
+      "required": false,
+      "current_status": "blocked",
+      "pass": [
+        "assignment-keyed profile/context/memory/session",
+        "assignment-keyed connectors/credentials/capabilities",
+        "assignment-keyed runtime/sandbox/network/filesystem",
+        "assignment-keyed work/evidence/metering/recovery/deletion",
+        "cross-assignment negative retrieval tests"
+      ],
+      "blocked_reason": "context and runtime paths remain partly employee-global or account+employee scoped"
+    },
+    {
+      "id": "LUI-SHARED-02",
+      "gate": "assignment_partitioning",
+      "name": "shared_employee_fails_closed",
+      "required": true,
+      "current_status": "not_run",
+      "pass": ["multiple active business assignments on one unpartitioned runtime are rejected"],
+      "fail": ["system accepts shared runtime while memory/context/session classes are ambiguous"]
+    },
+    {
+      "id": "LUI-OPERATOR-01",
+      "gate": "operator_tui",
+      "name": "manager_mediated_tui_adapter",
+      "required": false,
+      "current_status": "planned",
+      "pass": [
+        "platform operator principal and reason",
+        "exact employee/assignment/runtime/session target",
+        "method allowlist",
+        "read-only first phase",
+        "state changes use C3 and receipts",
+        "redacted durable evidence"
+      ],
+      "fail": ["direct browser WebSocket to Hermes", "arbitrary cli.exec or command.dispatch", "model/config/secret bypass"]
+    },
+    {
+      "id": "LUI-PUBLIC-01",
+      "gate": "public_employee_surface",
+      "name": "public_assignment_isolation",
+      "required": false,
+      "current_status": "blocked",
+      "pass": ["public assignment", "public context only", "allowlisted intents", "rate/cost/abuse policy", "owner handoff and proof"],
+      "fail": ["visitor inherits owner session or private business brain"]
+    },
+    {
+      "id": "LUI-UX-01",
+      "gate": "product_shell",
+      "name": "login_dashboard_operating_review_coherence",
+      "required": true,
+      "current_status": "source_wired",
+      "source_evidence": [
+        "apps/web/app/login/page.tsx",
+        "apps/web/app/dashboard/page.tsx",
+        "apps/web/app/agent/[employeeId]/AgentSurface.tsx",
+        "scripts/validate-ui-system.mjs"
+      ],
+      "pass": ["canonical Inter/light/soft system", "48px critical controls", "focus visible", "reduced motion", "mobile no overflow"],
+      "fail": ["superseded mono/black shell", "sub-44px critical actions", "inconsistent adjacent routes"]
+    },
+    {
+      "id": "LUI-UX-02",
+      "gate": "comprehension",
+      "name": "decision_and_recovery_comprehension",
+      "required": true,
+      "current_status": "not_run",
+      "metrics": [
+        "time_to_identify_highest_priority_decision",
+        "approval_consequence_error_rate",
+        "duplicate_command_rate_after_disconnect",
+        "wrong_account_navigation_rate",
+        "evidence_discovery_rate",
+        "recovery_resend_rate"
+      ]
+    },
+    {
+      "id": "LUI-PERF-01",
+      "gate": "performance",
+      "name": "production_ui_budget",
+      "required": true,
+      "current_status": "not_run",
+      "measure": ["route_js_bytes", "initial_snapshot_bytes", "event_rate", "layout_latency", "reconnect_count", "font_bytes", "image_bytes"],
+      "pass_rule": "budgets declared and met on representative real employee state"
+    },
+    {
+      "id": "LUI-LIVE-01",
+      "gate": "fixture_free",
+      "name": "three_distinct_employee_live_packet",
+      "required": true,
+      "current_status": "not_run",
+      "topology": ["account_a_employee_a1", "account_a_employee_a2", "account_b_employee_b1"],
+      "pass": [
+        "exact deployed SHA",
+        "real accounts/principals/assignments",
+        "real containers/networks/profiles/runtime credentials",
+        "real owner turns",
+        "one gated effect and accepted receipt",
+        "cross-account denial",
+        "browser/runtime/database/provider/audit evidence"
+      ]
+    }
+  ]
+}

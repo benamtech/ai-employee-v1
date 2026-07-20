@@ -1,0 +1,66 @@
+name: Repository Documentation Archaeology
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - employee-production-tuesday
+  pull_request:
+    branches:
+      - research
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repository-archaeology-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - id: archaeology
+        name: Read every tracked Git object and build archaeology bundle
+        shell: bash
+        run: |
+          mkdir -p mvp-build/.artifacts/repository-archaeology
+          set +e
+          node mvp-build/scripts/repository-archaeology-v2.mjs > mvp-build/.artifacts/repository-archaeology/archaeology-run.log 2>&1
+          status=$?
+          set -e
+          cat mvp-build/.artifacts/repository-archaeology/archaeology-run.log
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Verify exhaustive ledger exists
+        if: steps.archaeology.outputs.status == '0'
+        run: |
+          test -s mvp-build/.artifacts/repository-archaeology/repository-archaeology.json
+          test -s mvp-build/.artifacts/repository-archaeology/file-primitives.jsonl
+          test -s mvp-build/.artifacts/repository-archaeology/relationship-map.json
+          test -s mvp-build/.artifacts/repository-archaeology/effect-graph.json
+          test -s mvp-build/.artifacts/repository-archaeology/defect-audit.json
+          test -s mvp-build/.artifacts/repository-archaeology/README.md
+
+      - name: Upload exact-SHA archaeology evidence and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: repository-archaeology-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mvp-build/.artifacts/repository-archaeology/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail when traversal failed
+        if: steps.archaeology.outputs.status != '0'
+        run: exit 1

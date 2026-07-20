@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { appendFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { appendFile, mkdir, rm } from "node:fs/promises";
+import { dirname } from "node:path";
 import type { ProvisionerOperation, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import {
   failureResult,
@@ -12,10 +12,14 @@ import {
   writeAndActivateCaddySnippet,
 } from "./lib/profile-renderer.js";
 import { runCommandString } from "./lib/command-runner.js";
+import { createProvisionerIdempotencyStore } from "./lib/provisioner-idempotency.js";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 const MAX_TTL_MS = 60_000;
 const ALLOWED_OPERATIONS = new Set<ProvisionerOperation>([
+  "render_profile",
+  "start_runtime",
+  "activate_routing",
   "ensure_runtime",
   "remove_runtime",
   "inspect_runtime",
@@ -23,6 +27,7 @@ const ALLOWED_OPERATIONS = new Set<ProvisionerOperation>([
   "repair_drift",
   "rotate_model_gateway_credential",
   "suspend_runtime",
+  "restart_runtime",
   "replace_runtime",
   "restore_runtime",
 ]);
@@ -49,6 +54,13 @@ function stateRoot(): string {
 
 function safeId(value: unknown): string {
   if (typeof value !== "string" || !/^[A-Za-z0-9:_-]{8,220}$/.test(value)) throw new Error("invalid_identifier");
+  return value;
+}
+
+function optionalContainerName(name: string): string | null {
+  const value = process.env[name];
+  if (!value) return null;
+  if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(value)) throw new Error(`${name}_invalid`);
   return value;
 }
 
@@ -90,37 +102,33 @@ function validateRequest(input: unknown): HostProvisionerRequest {
   if (issued > now + 5_000 || expires <= now || expires - issued > MAX_TTL_MS) throw new Error("request_expired");
   if (req.params.account_id !== req.account_id || req.params.employee_id !== req.employee_id) throw new Error("binding_mismatch");
   if (req.params.runtime_backend !== "docker") throw new Error("runtime_backend_not_allowed");
-  if (["ensure_runtime", "replace_runtime", "restore_runtime", "rotate_model_gateway_credential"].includes(req.operation) && !req.render_secrets?.model_gateway_token) {
+  if (["render_profile", "ensure_runtime", "replace_runtime", "restore_runtime", "rotate_model_gateway_credential"].includes(req.operation) && !req.render_secrets?.model_gateway_token) {
     throw new Error("model_gateway_token_required");
   }
   return { ...req, request_id, nonce, idempotency_key } as HostProvisionerRequest;
 }
 
-async function claimOnce(kind: "nonce" | "idempotency", key: string): Promise<boolean> {
-  const dir = join(stateRoot(), kind);
-  await mkdir(dir, { recursive: true, mode: 0o700 });
-  const path = join(dir, encodeURIComponent(key));
-  try {
-    await writeFile(path, new Date().toISOString(), { flag: "wx", mode: 0o600 });
-    return true;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "EEXIST") return false;
-    throw err;
-  }
+function idempotencyStore() {
+  return createProvisionerIdempotencyStore({
+    root: stateRoot(),
+    staleMs: Math.max(30_000, Number(process.env.PROVISIONER_IDEMPOTENCY_STALE_MS ?? 10 * 60_000)),
+  });
 }
 
 async function cachedResult(key: string): Promise<ProvisionerResult | null> {
-  try {
-    return JSON.parse(await readFile(join(stateRoot(), "results", encodeURIComponent(key) + ".json"), "utf8"));
-  } catch {
-    return null;
-  }
+  return idempotencyStore().cachedResult(key);
+}
+
+async function claimOnce(kind: "nonce" | "idempotency", key: string): Promise<boolean> {
+  return idempotencyStore().claim(kind, key);
+}
+
+async function releaseFailedIdempotencyClaim(key: string): Promise<void> {
+  return idempotencyStore().releaseFailedIdempotencyClaim(key);
 }
 
 async function storeResult(key: string, result: ProvisionerResult): Promise<void> {
-  const dir = join(stateRoot(), "results");
-  await mkdir(dir, { recursive: true, mode: 0o700 });
-  await writeFile(join(dir, encodeURIComponent(key) + ".json"), JSON.stringify(result), { mode: 0o600 });
+  return idempotencyStore().storeResult(key, result);
 }
 
 async function audit(entry: Record<string, unknown>): Promise<void> {
@@ -154,18 +162,8 @@ async function inspectRuntime(req: HostProvisionerRequest): Promise<Record<strin
   };
 }
 
-async function removeRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
-  const container = `amtech-hermes-${req.employee_id}`;
-  const network = `amtech-employee-${req.employee_id}`;
-  const removedContainer = await bestEffortCommand(`docker rm -f ${container}`, "remove runtime");
-  const removedNetwork = await bestEffortCommand(`docker network rm ${network}`, "remove runtime network");
-  return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, network_name: network, logs: [`container:${removedContainer}`, `network:${removedNetwork}`] };
-}
-
-async function ensureRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+async function renderProfile(req: HostProvisionerRequest): Promise<ProvisionerResult> {
   const rendered = await renderProfilePackage(req);
-  const runtime = await runRuntimeStart(rendered.generated_path);
-  const caddy = await writeAndActivateCaddySnippet(req.params);
   return {
     status: "ok",
     request_id: req.request_id,
@@ -174,22 +172,92 @@ async function ensureRuntime(req: HostProvisionerRequest): Promise<ProvisionerRe
     profile_checksum: rendered.profile_checksum,
     generated_path: rendered.generated_path,
     workspace_dir: rendered.workspace_dir,
+    validation_status: "passed",
+    validation_output: rendered.validation_output,
+    model_gateway_credential_version: req.params.model_gateway.credential_version,
+    logs: [`profile_checksum:${rendered.profile_checksum}`],
+  };
+}
+
+async function startRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  const profile = await inspectRenderedProfile(req.params);
+  if (!profile.exists) throw new Error("rendered_profile_missing");
+  const runtime = await runRuntimeStart(profile.generated_path);
+  return {
+    status: "ok",
+    request_id: req.request_id,
+    operation: req.operation,
+    profile_id: profile.profile_id,
+    profile_checksum: profile.profile_checksum ?? undefined,
+    generated_path: profile.generated_path,
     network_name: `amtech-employee-${req.employee_id}`,
     container_name: `amtech-hermes-${req.employee_id}`,
+    gateway_port: req.params.gateway_port,
+    smoke_output: runtime,
+    logs: [`runtime:${runtime}`],
+  };
+}
+
+async function activateRouting(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  const caddy = await writeAndActivateCaddySnippet(req.params);
+  return {
+    status: "ok",
+    request_id: req.request_id,
+    operation: req.operation,
     webchat_api_url: `http://127.0.0.1:${req.params.gateway_port}`,
     api_base_url: `http://127.0.0.1:${req.params.gateway_port}`,
     api_session_id: "amtech-owner-thread",
     public_web_route: `/agent/${req.employee_id}`,
     gateway_port: req.params.gateway_port,
-    validation_status: "passed",
-    validation_output: rendered.validation_output,
-    smoke_output: runtime,
-    model_gateway_credential_version: req.params.model_gateway.credential_version,
-    logs: [`profile_checksum:${rendered.profile_checksum}`, `runtime:${runtime}`, `caddy:${caddy}`],
+    logs: [`caddy:${caddy}`],
+  };
+}
+
+async function removeRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  const container = `amtech-hermes-${req.employee_id}`;
+  const network = `amtech-employee-${req.employee_id}`;
+  const managerContainer = optionalContainerName("MANAGER_CONTAINER_NAME");
+  const modelGatewayContainer = optionalContainerName("MODEL_GATEWAY_CONTAINER_NAME");
+  const removedContainer = await bestEffortCommand(`docker rm -f ${container}`, "remove runtime");
+  const detachedManager = managerContainer
+    ? await bestEffortCommand(`docker network disconnect -f ${network} ${managerContainer}`, "detach manager from runtime network")
+    : "manager_detach:not_configured";
+  const detachedGateway = modelGatewayContainer
+    ? await bestEffortCommand(`docker network disconnect -f ${network} ${modelGatewayContainer}`, "detach model gateway from runtime network")
+    : "model_gateway_detach:not_configured";
+  const removedNetwork = await bestEffortCommand(`docker network rm ${network}`, "remove runtime network");
+  return {
+    status: "ok",
+    request_id: req.request_id,
+    operation: req.operation,
+    container_name: container,
+    network_name: network,
+    logs: [
+      `container:${removedContainer}`,
+      `manager:${detachedManager}`,
+      `model_gateway:${detachedGateway}`,
+      `network:${removedNetwork}`,
+    ],
+  };
+}
+
+async function ensureRuntime(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  const rendered = await renderProfile(req);
+  const runtime = await startRuntime(req);
+  const routing = await activateRouting(req);
+  return {
+    ...rendered,
+    ...runtime,
+    ...routing,
+    operation: req.operation,
+    logs: [...(rendered.logs ?? []), ...(runtime.logs ?? []), ...(routing.logs ?? [])],
   };
 }
 
 async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> {
+  if (req.operation === "render_profile") return renderProfile(req);
+  if (req.operation === "start_runtime") return startRuntime(req);
+  if (req.operation === "activate_routing") return activateRouting(req);
   if (req.operation === "inspect_runtime" || req.operation === "inspect_drift") {
     const drift = await inspectRuntime(req);
     return { status: "ok", request_id: req.request_id, operation: req.operation, gateway_port: req.params.gateway_port, api_base_url: `http://127.0.0.1:${req.params.gateway_port}`, drift, logs: ["inspect_runtime_completed"] };
@@ -200,9 +268,29 @@ async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> 
     const stopped = await bestEffortCommand(`docker stop ${container}`, "suspend runtime");
     return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, logs: [`stop:${stopped}`] };
   }
+  if (req.operation === "restart_runtime") {
+    const container = `amtech-hermes-${req.employee_id}`;
+    const restarted = await bestEffortCommand(`docker restart ${container}`, "restart runtime");
+    if (restarted.startsWith("failed:")) throw new Error(restarted);
+    return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, drift: await inspectRuntime(req), smoke_output: restarted, logs: [`restart:${restarted}`] };
+  }
   if (req.operation === "rotate_model_gateway_credential") {
     const rotated = await rotateRenderedModelGatewayCredential(req);
-    return { status: "ok", request_id: req.request_id, operation: req.operation, profile_id: rotated.profile_id, generated_path: rotated.generated_path, profile_checksum: rotated.profile_checksum, model_gateway_credential_version: req.params.model_gateway.credential_version, logs: [`rotated_model_gateway_credential:${req.params.model_gateway.credential_version}`] };
+    const container = `amtech-hermes-${req.employee_id}`;
+    const drift = await inspectRuntime(req);
+    return {
+      status: "ok",
+      request_id: req.request_id,
+      operation: req.operation,
+      profile_id: rotated.profile_id,
+      generated_path: rotated.generated_path,
+      profile_checksum: rotated.profile_checksum,
+      container_name: container,
+      model_gateway_credential_version: req.params.model_gateway.credential_version,
+      smoke_output: rotated.runtime_reload_output,
+      drift,
+      logs: [`rotated_model_gateway_credential:${req.params.model_gateway.credential_version}`, `recreate:${rotated.runtime_reload_output}`],
+    };
   }
   if (req.operation === "repair_drift") {
     const before = await inspectRuntime(req);
@@ -240,6 +328,7 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     await audit({ request_id: parsed.request_id, idempotency_key: parsed.idempotency_key, nonce: parsed.nonce, account_id: parsed.account_id, employee_id: parsed.employee_id, operation: parsed.operation, result: result.status, evidence: { profile_checksum: result.profile_checksum ?? null, drift: result.drift ?? null } });
     return send(res, 200, result);
   } catch (err) {
+    if (parsed?.idempotency_key) await releaseFailedIdempotencyClaim(parsed.idempotency_key).catch(() => {});
     const result = failureResult("host_provisioner_failed", err);
     await audit({ request_id: parsed?.request_id ?? null, account_id: parsed?.account_id ?? null, employee_id: parsed?.employee_id ?? null, operation: parsed?.operation ?? null, result: "failed", error: String((err as Error).message ?? err) });
     return send(res, 400, result);

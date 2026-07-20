@@ -1,253 +1,137 @@
 # AMTECH AI Employee v1
 
-> **2026-07-16 launch-run note:** For normal employee live deploy work, the
-> default execution path is
-> `mvp-build/docs/production-normal-employee-live-deploy-runbook.md`. Do not
-> treat local `live:*`, fixture/browser harnesses, `/api/dev/login`, or
-> `prod-like:public-estimator:*` as launch proof. The proof path is public
-> DNS/Cloudflare Tunnel -> Caddy -> real `/create-ai-employee` -> Twilio Verify
-> -> account creation -> Start Employee -> live owner web client ->
-> provider-backed reply.
+AMTECH builds persistent AI Employees for owner-operated businesses. Owners experience accountable labor through governed Web, SMS, signed Review, and connected-system events. Manager is the control plane; Hermes is the managed reasoning/runtime substrate.
 
-This repository is the AMTECH company brain plus the build home for the AMTECH AI Employee MVP.
+This repository contains the AI Employee implementation and company/product brain. Hyper Site lives independently in `benamtech/hyper-site`.
 
-AMTECH AI is building a pro-human, owner-operated SMB AI Employee: a textable, always-on office worker that can receive events from the tools a business already uses, understand them against the company's own context, do the safe work, and ask the owner for judgment only when it matters. The first beachhead is owner-operated painting and landscaping contractors, but the architecture is built for vertical employees across many SMB back-office roles.
+## Start here
 
-The repo has two major jobs:
+1. [`identity.md`](identity.md)
+2. [`AGENTS.md`](AGENTS.md) or [`CLAUDE.md`](CLAUDE.md)
+3. [`CONTRIBUTING.md`](CONTRIBUTING.md)
+4. root [`CODEGRAPH.md`](CODEGRAPH.md)
+5. scoped [`mvp-build/AGENTS.md`](mvp-build/AGENTS.md) or [`mvp-build/CLAUDE.md`](mvp-build/CLAUDE.md)
+6. [`mvp-build/CODEGRAPH.md`](mvp-build/CODEGRAPH.md)
+7. ratified [`mvp-build/STANDARD.md`](mvp-build/STANDARD.md)
+8. [`mvp-build/second-half-plan/README.md`](mvp-build/second-half-plan/README.md) and its one active program
+9. [`mvp-build/memory/MEMORY.md`](mvp-build/memory/MEMORY.md), then only the newest relevant handoff
+10. relevant source, migrations, scripts, tests, workflows, proof, and current diff
 
-1. **Company brain:** the strategy, market evidence, product decisions, pricing, sales motion, architecture, and operating doctrine live in `wiki/` and the root orientation files.
-2. **Product build:** the software for the flagship AI Employee product lives in `mvp-build/`.
+Current source, applied migrations, executable proof, and exact-head evidence outrank prose. Historical plans and wiki records remain context, not current execution order.
 
-Start every agent session with:
+## Fifteen-minute contributor setup
 
-1. `identity.md`
-2. `CLAUDE.md`
-3. `CODEGRAPH.md`
-
-Those files define the operating identity, repo rules, canonical facts, and navigation graph.
-
-## Product Summary
-
-The AMTECH AI Employee is a managed vertical worker for small businesses: one textable employee that receives work from the owner, connected tools, webhooks, scheduled jobs, and future systems; reasons over that work against the business brain; does the safe parts; and brings only the real decisions back to the owner.
-
-For a contractor, that can mean turning job notes, photos, email threads, past pricing, and customer replies into estimates, follow-ups, deposit invoices, reminders, and next-step recommendations. For another business, the same pattern can become a bookkeeping employee, a back-office coordinator, a customer follow-up worker, or any vertical office role where the hard part is not one isolated task but the ongoing flow of events across tools.
-
-The product is not "an estimate generator." It is an **event-driven AI office**:
-
-```text
-any source of work
-  -> normalized message to the employee
-  -> business-brain context
-  -> Hermes employee reasoning / skill / Job / tool call
-  -> typed work event or artifact
-  -> owner surface: SMS, web Work Surface, future voice
-  -> approval / edit / reply / acknowledgement
-  -> action taken
-  -> new events feed back into the same employee
+```bash
+git fetch origin
+git switch -c task/<task-id> origin/main
+cd mvp-build
+npm ci
+npm run hooks:install
+npm run repo:rubric -- ./task-contract.json
+npm run repo:verify:quick
 ```
 
-The owner experiences one relationship: one employee, one number, one thread. The connected systems become sources that talk to the employee, not dashboards the owner has to monitor. The employee can receive an email reply, a paid invoice, a due reminder, a completed background Job, or an inbound owner message as the same primitive: a message to the agent. The employee then decides whether to notify, batch, ignore, ask, draft, prepare, or escalate.
+Before pushing, run `npm run repo:verify:full`. Pull requests into `main` run the canonical main integration gate with governance, type/lint, unit, production-boundary, build, archaeology, and compiled browser proof.
 
-The power of the product is the **tool-agnostic task flow**:
+## Canonical product and offer
 
-- Sources are pluggable: Gmail, Stripe, QuickBooks, Twilio, Supabase, scheduler ticks, internal Jobs, owner messages, and future connectors can all become event sources.
-- Work is type-driven: documents, outbound messages, money movement, schedule mutations, structured record writes, recommendations, job folders, and other deliverables share one preview and approval grammar.
-- The gate is structural: customer-facing and money-touching actions require owner approval; internal reversible work can be done and reported.
-- The surface follows the owner: SMS for ambient updates, web Work Surface for review and artifacts, future voice for urgent or hands-busy work.
-- The business brain compounds: pricing, customers, preferences, assumptions, and repeated workflows become durable context.
+- **Start Free:** one bounded useful AI Employee.
+- **Managed AI Employee:** from **$400/month**.
+- **Workforce:** custom pricing for multiple roles, locations, approval structures, or higher volume.
 
-The contractor Estimate workflow is the beachhead and proof object, not the ceiling. It proves the product can capture business-specific context, produce a real artifact, ask for approval, send through a real connector, receive the downstream event, and continue the job loop. The broader product is the connected employee that keeps doing this across tasks and tools.
+The public estimator is outdated and non-canonical.
 
-The minimum engineering acceptance path is deliberately narrower than the product promise. The team uses a contractor estimate sequence - signup/claim, live employee, estimate PDF, approved Gmail send, real Gmail reply, approved Stripe test-mode deposit invoice, internal reminder - as the basic "all rails are alive" test before putting pilots live. That sequence proves the foundation works; it should not be mistaken for the full capability model.
+## Product moat
 
-## UI And Surface Work
+AMTECH's defensibility is the reusable labor protocol joining:
 
-The current product frontier is the owner surface: making the power of the Hermes-backed employee legible to a nontechnical business owner. The backend now has meaningful Manager, MCP, artifact, approval, event, runtime, scheduler, and metering seams. UI work turns that raw power into an employee desk the owner can understand and trust.
+- stable employee identity and explicit assignments;
+- role- and relationship-scoped authority;
+- transport-neutral capability and connector manifests;
+- Manager MCP, explicitly safe direct MCP, and runtime-native capabilities;
+- AMTECH-managed OAuth, provider-hosted onboarding, managed secrets/service accounts, and operator installation;
+- typed work objects, generated views, approvals, effects, receipts, repair, and commercial attribution;
+- bounded adapters for MCP Apps, AG-UI, Web, SMS, signed Review, and future channels.
 
-For UI contributors, start at `mvp-build/docs/ux/`, then read the active owner-surface packet at
-`mvp-build/ui-redesign/`. Those are the current UX sources for:
+Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology. Unknown or underspecified connectors remain discoverable but fail closed for setup and execution.
 
-- the Avery-first owner MVP direction;
-- the source-wired Home / Talk / Proof / Connected implementation;
-- current fixture-guarded screenshots;
-- the UX research ledger, implementation coverage audit, and fixture/production policy;
-- the generative-UI frontier and post-release UI roadmap.
+## Canonical execution boundary
 
-The older `mvp-build/ui-handoff/` packet has been moved to
-`mvp-build/docs/archive/ui-handoff-2026-07-14/`. Treat it as historical reference only, not as a
-starting point or source of current design direction.
+```text
+trigger
+→ authenticated principal
+→ exact assignment or approved platform/system context
+→ current relationship, grant, policy, entitlement, and authority version
+→ stable durable intent, command, event, or work object
+→ Hermes reasoning or deterministic work
+→ bounded capability selection and runtime validation
+→ approval when required
+→ one reserved idempotent external effect
+→ accepted, failed, or ambiguous durable receipt
+→ deterministic replay, reconciliation, or repair
+→ role-safe channel/protocol projection
+→ audit, metering, commercial attribution, revocation, recovery, and release proof
+```
 
-The immediate UI priority is the web Work Surface. SMS, signed preview links, media/video previews, admin, and future desktop clients should be designed as renderers of the same underlying work/resources/actions, but the web client is the richest and most urgent place to make the product understandable.
+## Current integration state
 
-UI contributors can work without full infrastructure:
+- Cutover branch: `employee-production-tuesday`
+- Target/base: `main`
+- Draft PR: `#23`
+- Historical `research`: retained history, not current authority
+- Migration head: `0072`
+- Standard: ratified v0.2
+- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`
+- Canonical deployment selection: `mvp-build/infra/scripts/production-topology.mjs`
+- Database inner loop: production-shaped local/CI PostgreSQL; managed Supabase only for named platform/release gates
+- Product status: Gate 0 source/document/CI resolved; not live accepted or launch-cleared
+
+## Hermes upstream intelligence
+
+Production remains pinned to an approved Hermes image and immutable digest. Before Hermes runtime, profile, session, gateway, tool-discovery, or Hermes-derived UI work:
 
 ```bash
 cd mvp-build
-npm run ui:dev          # fixture-backed web client
-npm run ui:browser      # headed browser for visual work
-npm run ui:test         # UI-only Playwright smoke
+npm run hermes:upstream:check
 ```
 
-These commands use representative local fixture data and do not require Manager, Supabase, Docker, Hermes containers, provider credentials, or model calls. They are for UI development, not provider/runtime acceptance.
-The browser smoke warms the fixture Work Surface route and writes desktop/mobile screenshots to `mvp-build/infra/.local/ui-fixtures/`.
+The scheduled/path-triggered check records official upstream head, watched `hermes_cli/` and `web/src/App.tsx` blobs, and active PR themes. It never upgrades production automatically.
 
-## How The Repo Is Organized
+## Repository layout
 
 ```text
 .
-├── identity.md                    # required operating identity for AMTECH work
-├── CLAUDE.md                      # root agent operating instructions
-├── CODEGRAPH.md                   # root workspace map and canonical facts
-├── index.html                     # local browser explorer for the brain/codebase
-├── wiki/                          # AMTECH strategy, evidence, product plans, build plans
-└── mvp-build/                     # AI Employee MVP software build home
+├── CONTRIBUTING.md              executable contributor and agent entrypoint
+├── AGENTS.md / CLAUDE.md        repository-wide rules
+├── CODEGRAPH.md                 repository current map
+├── .github/workflows/           governance, main integration, subsystem, and release gates
+├── wiki/                        strategy, research, and historical records
+└── mvp-build/
+    ├── apps/web/                owner, review, onboarding, public, admin surfaces
+    ├── apps/manager/            control plane, tools, events, runtime, gateway, provisioning
+    ├── packages/shared/         contracts and connector/capability manifests
+    ├── packages/db/             migrations, clients, generated types
+    ├── infra/                   Docker, Caddy, deploy, lifecycle, acceptance, release scripts
+    ├── tests/                   unit/source, PostgreSQL, and browser matrices
+    ├── validation/              Standard, rubric, upstream, and evidence artifacts
+    ├── docs/architecture/       source-backed architecture and research disposition
+    ├── memory/                  dated handoffs; MEMORY.md is sole index
+    ├── second-half-plan/        one active production program plus history
+    ├── STANDARD.md              ratified non-waivable production standard
+    └── CODEGRAPH.md             implementation graph and evidence boundary
 ```
 
-### Root Documents
+## Core invariants
 
-- `identity.md` establishes the AMTECH operating self-image and voice.
-- `CLAUDE.md` explains how agents should work in this repo.
-- `CODEGRAPH.md` is the authoritative orientation map for the whole workspace.
-- `index.html` is a local explorer for browsing the wiki and selected source files.
-
-### `wiki/`
-
-`wiki/` is the living operating brain. It contains the beachhead decision, market evidence, sales motion, product strategy, build plans, implementation records, and phase docs.
-
-High-value starting points:
-
-- `wiki/00-decision.md` - current beachhead, offer, pricing, pitch, and execution decision.
-- `wiki/product-ai-employee-context.md` - product mechanics and employee thesis.
-- `wiki/product-agent-platform-architecture.md` - AMTECH-owned platform layer around Hermes.
-- `wiki/MVP/second-half-current-and-future-state.md` - current build state: what is source-wired vs. the operational/live-proof gap.
-- `wiki/MVP/build-plan-current/` - module map + dependency graph (the second-half plan is the active sequence).
-- `wiki/MVP/implementation-records/` - factual record of what is actually wired in `mvp-build/`.
-- `wiki/MVP/agent-inbox-and-channel-architecture.md` - current session/channel architecture decision.
-
-Treat the wiki as current truth, not an archive. If a product or strategy fact changes, update every affected page rather than leaving stale history in place.
-
-Use the wiki to understand **why** the product exists, what it should become, what the owner should feel, and what strategic constraints matter. The wiki contains product vision and planning; it does not prove a feature is already implemented.
-
-### `mvp-build/`
-
-`mvp-build/` is the TypeScript/Node monorepo for the AI Employee MVP. It is the software product inside the company brain.
-
-It contains:
-
-- `apps/web/` - Next.js web front door, claim/login routes, owner Work Surface, artifact routes.
-- `apps/manager/` - backend Manager control plane, tools, webhooks, orchestrator, provisioner, runtime delivery.
-- `packages/shared/` - shared contracts for tools, IDs, manifests, routes, profile packages, and work events.
-- `packages/db/` - Supabase clients and SQL migrations.
-- `packages/agent-template/` - AMTECH-authored Hermes profile package and employee workspace.
-- `infra/` - Caddy, Hermes runbook, acceptance scripts, ops scripts.
-- `tests/` - unit, integration, and golden-path acceptance docs.
-- `docs/` - active UX system, admin and metering architecture, the QuickBooks connector design, production deploy readiness review, and archived docs.
-- `memory/` - durable agent handoffs and implementation decisions.
-- `ui-redesign/` - active owner MVP UI redesign packet and screenshots.
-
-Use `mvp-build/` to understand **what is actually wired**, what commands to run, what source files to edit, and what proof exists. If the wiki vision and source reality differ, check `mvp-build/CODEGRAPH.md`, `mvp-build/memory/MEMORY.md`, newest memory notes, tests, and source before claiming status.
-
-Current state (2026-07-14): the second-half plan in `mvp-build/second-half-plan/` is the active forward plan, and its product surfaces are `source-wired` — built and green against the local test suites, i.e. operational within the test harness, not vaporware: the Avery-first owner UI (Phase 2), SMS ambient inbox + signed mobile Review page (Phase 3), tool-agnostic materialization/capability layer with Connector Center and resurfacing projection (Phase 4), Gmail/Stripe/**QuickBooks** connectors, MCP-UI generative cards, context-engineering substrate, and an internal operator admin console (Phase 5). The production orchestration substrate is now **proven on a real Docker host**: the docker-compose core (`manager`/`web`/`caddy`) builds/starts/healthchecks, and per-employee Hermes containers provision/teardown/reinstate and run concurrently with Docker-DNS + Caddy routing across the fleet (captured `infra/proofs/*.json`: `deploy-smoke` 8/8, `caddy-proof`, `capacity` tier 5, `egress` dry-run, lifecycle). What remains before real owners is **the real VPS run plus live proof**, not more features: crash/reboot auto-recovery on the VPS, durability/observability, egress `--apply`, a real capacity number, and live provider/runtime acceptance with real proof IDs (incl. the LLM tool loop, which closes on a funded provider-backed model). The current declarative progress update is `mvp-build/docs/state-of-progress-2026-07-14.md`; admin-panel polish and billing are deliberately **parked** behind live proof.
-
-## Hermes Agent Boundary
-
-The AI Employee uses **Hermes agent from Nous Research** as the underlying open-source agent substrate. Hermes provides the profile/runtime/agent substrate. AMTECH owns the product layer around it:
-
-- provisioning and profile rendering;
-- the invisible Manager backend control plane;
-- account/session/approval boundaries;
-- web and SMS owner surfaces;
-- Gmail, Stripe, QuickBooks, Twilio, Supabase, scheduler, repair, and event-mesh integration;
-- Work Surface rendering;
-- admin, metering, and operations plans.
-
-Important architecture rule: the owner should not experience "Hermes" or "Manager." The owner experiences their employee.
-
-The current major product/software priority is **taking the proven orchestration substrate to the real VPS, then live proof of the core loop**. Deployability and self-sustenance are now demonstrated on a real Docker host (compose core supervision + healthchecks; version-pinned employee-container launch, teardown, and reinstatement; Caddy activation with reload/rollback; Docker-DNS routing per employee). What remains is the VPS itself — crash/reboot auto-recovery there (`--restart=unless-stopped` is set and verified, but a sandboxed dev daemon does not fire restart-on-kill), durability/observability, egress `--apply`, a real capacity benchmark — and proving the source-wired owner → tool → artifact/approval loop against a live model/runtime, before any further admin or billing work. The session model — one employee, one number, one continuous thread across SMS/web/future voice, with a Manager-owned Channel/Session/Presence router deciding where output lands — is already source-wired.
-
-## How Agents Should Navigate This Repo
-
-### 1. Use The Root Codegraph First
-
-Read `CODEGRAPH.md` before making decisions. It tells agents:
-
-- what the whole repo is;
-- which facts are canonical;
-- which files are highest value;
-- how root docs, wiki pages, implementation records, and `mvp-build/` relate;
-- what must be updated when a fact changes.
-
-Use the root codegraph when you are answering:
-
-- "What is this repo?"
-- "What is the current AMTECH decision?"
-- "Where is the source of truth?"
-- "Which docs should be updated if this changes?"
-- "How does the company brain connect to the product code?"
-
-### 2. Use The Wiki For Product, Strategy, Evidence, And Build Plans
-
-Use `wiki/` when you need intent, rationale, scope, or current product truth. The wiki answers why the product exists, who it is for, what the offer is, what the MVP bar is, and how the next phases should be sequenced.
-
-For implementation work, do not start from source alone. Read:
-
-1. `mvp-build/second-half-plan/README.md` - the active forward plan, plus its re-sequenced roadmap `production-runtime-and-deploy-roadmap-2026-07-11.md`.
-2. `wiki/MVP/second-half-current-and-future-state.md` - current build state.
-3. `wiki/MVP/build-plan-current/` and `phases/` - module map + dependency graph (not the immediate sequence).
-4. `wiki/MVP/implementation-records/README.md` and the latest relevant implementation record.
-
-The original whole-product packet remains in `wiki/MVP/old-build-plan/`; use it for mechanics, not current sequencing.
-
-### 3. Use The MVP Build Codegraph For Software Work
-
-Read `mvp-build/CODEGRAPH.md` before editing source in `mvp-build/`. It maps:
-
-- user-facing workflows to code paths;
-- web routes to Manager routes;
-- Manager tools to shared contracts and migrations;
-- Hermes profile files to provisioning and runtime code;
-- provider/event flows to webhooks, event delivery, work events, and Work Surface rendering;
-- current source-wired features versus planned/pending phases.
-
-Use it when you are answering:
-
-- "Where is this feature implemented?"
-- "Which files are involved in onboarding/provisioning/Gmail/Stripe/reminders/session routing?"
-- "What is source-wired versus provider-accepted?"
-- "How does `mvp-build/` use Hermes?"
-- "Where should the next phase plug in?"
-
-## Development Notes
-
-Inside `mvp-build/`, baseline checks are:
-
-```bash
-npm run typecheck
-npm run test:unit
-npm run build
-npm run lint
-npm run test:integration
-npm run acceptance:preflight
-npm run acceptance:report
-```
-
-Integration and acceptance checks are environment-gated. Do not claim provider or runtime acceptance unless the run leaves real proof IDs.
-
-Generated/local folders should not be committed:
-
-- `.claude/`, `.agents/`, `.codex/`
-- nested `.git/` directories
-- `node_modules/`
-- `.next/`
-- `dist/`
-- acceptance report outputs
-
-## Rule Of Thumb
-
-Root `CODEGRAPH.md` tells you how the whole AMTECH brain fits together.
-
-`wiki/` tells you what AMTECH believes, sells, plans, and has proven.
-
-`mvp-build/CODEGRAPH.md` tells you how the AI Employee software is wired.
-
-When in doubt, read in that order before touching code.
+1. Every consequential action is assignment-scoped or explicitly approved platform/system work.
+2. Account membership, bearer possession, caller-selected IDs, mutable headers, and phone ownership are incomplete authority.
+3. Stable retries do not duplicate irreversible effects.
+4. Consequential success requires a matching durable accepted receipt.
+5. Provider master credentials never enter employee profiles or runtimes.
+6. Hermes remains runtime; Manager owns authority, effect, custody, repair, and proof.
+7. Capability discovery is broad; execution custody is conservative and evidence-backed.
+8. Generated UI and protocol adapters are presentation, not authority.
+9. Ambiguous outcomes reconcile before retry.
+10. `main` changes only through reviewed merge; tests are not weakened to obtain green.
+11. Upstream Hermes drift triggers review, never an automatic production upgrade.
+12. Production-ready means every non-waivable Standard gate passes on one exact deployed release.

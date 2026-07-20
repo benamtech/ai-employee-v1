@@ -1,111 +1,61 @@
-# CLAUDE.md — AI Employee MVP build home
+# CLAUDE.md — AI Employee Implementation Rules
 
-> Tool-agnostic mirror: `AGENTS.md`. Keep both files identical except for this heading note.
+Status: active  
+Updated: 2026-07-20
 
-This is `mvp-build/`, the implementation home for AMTECH's AI Employee. The owner talks to one employee; Manager is invisible backend infrastructure.
+> Tool-specific mirror of `AGENTS.md`. Root rules and `../CONTRIBUTING.md` also apply.
 
-## Read order
+## Required start
 
-1. `../identity.md`
-2. `CODEGRAPH.md`
-3. `memory/MEMORY.md`, then the newest relevant handoff
-4. this file / `AGENTS.md`
-5. `docs/production-normal-employee-live-deploy-runbook.md` for live/deploy work
-6. `../wiki/MVP/second-half-current-and-future-state.md`
-7. `../wiki/MVP/implementation-records/README.md`
-8. relevant source, migrations, scripts, and proofs
-
-Source, migrations, scripts, proof artifacts, and newest memory outrank stale docs.
-
-## Current status
-
-- Branch: `research`, rebased onto latest `main` through GitHub rebase PR #14.
-- Overall: `source-wired_not_accepted` after WS1/WS2.
-- WS1 model gateway custody + profile integrity: source-wired.
-- WS2 resource graph/state-machine/retry/drift/rotation/compensation foundations: source-wired; true reconciler worker pending.
-- WS3 ambient inbox: schema groundwork only; provider ingress migration pending.
-- Owner surfaces and existing product systems: source-wired; current live acceptance must be established by fresh proof, not inferred from code or historical runs.
-
-## Canonical launch path
-
-```text
-public DNS / Cloudflare Tunnel
--> Caddy
--> production Web + Manager
--> real /create-ai-employee
--> Twilio Verify
--> account creation
--> Start Employee
--> isolated Hermes runtime
--> owner web client
--> provider-backed reply
--> useful connected-tool proof
-```
-
-Use `docs/production-normal-employee-live-deploy-runbook.md`.
-
-The public estimator, `prod-like:public-estimator:*`, fixtures, `/api/dev/login`, host `live:*`, and manually injected provider events are diagnostics/regression aids only. They are not normal-employee launch proof.
-
-## Acceptance vocabulary
-
-- `source-wired`: code/schema/config exists; name the static/local checks actually run.
-- `provider-accepted`: real provider IDs exist.
-- `runtime-accepted`: real host/runtime proof artifacts exist.
-- `planned`: designed, not implemented.
-- `pending`: blocked, unattempted, or missing proof.
-
-Never upgrade status from architecture, mocks, fixtures, old containers, or confidence.
-
-## Non-negotiables
-
-1. No faked proof. Real acceptance needs real IDs/artifacts.
-2. Provider master credentials never enter employee profiles or containers. Employee runtimes receive only scoped Manager MCP and Model Gateway credentials.
-3. Customer-, money-, and reputation-affecting actions cross owner approval policy.
-4. Webhooks verify provider authenticity before durable insertion; asynchronous workers own processing/retry/dead-letter behavior.
-5. Manager public/API authority and host Docker authority remain separated by the signed Unix-socket provisioner boundary.
-6. Every employee runtime is isolated; peer/control-service access is denied except explicitly scoped routes.
-7. Rendered profiles fail closed on forbidden secret slots/values, unresolved tokens, unsafe permissions, and checksum drift.
-8. Twilio/provider bindings and welcome effects happen only after runtime and route acceptance.
-9. No new browser-readable Supabase table/view without reviewing Data API exposure, RLS, and grants.
-10. The public estimator remains non-canonical.
-
-## Working rules
-
-- Inspect source before editing docs that describe it.
-- Prefer docs-only changes for reconciliation sessions. Make source changes only for an obvious, bounded defect in scope.
-- Do not run the full build/test suite unless requested. Use targeted static inspection and state exactly what was not run.
-- For code sessions, the normal baseline remains:
+1. Read root/scoped `AGENTS.md`, `CODEGRAPH.md`, ratified `STANDARD.md`, and the active program.
+2. Read only the newest relevant handoff and source/test/proof needed for the task.
+3. Validate the task contract, then run the quick gate before editing.
 
 ```bash
-npm run typecheck
-npm run test:unit
-npm run build
-npm run lint
-npm run test:integration   # env-gated
+npm run repo:rubric -- ./task-contract.json
+npm run repo:verify:quick
 ```
 
-Do not repeat old pass counts as current proof unless rerun.
+Current cutover branch is `employee-production-tuesday`, targeting `main` through draft PR `#23`. Historical `research` is not current execution authority. Migration head is `0072`.
 
-## Active now-to-live priorities
+## Boundary
 
-- Apply/review migrations `0031`–`0033` on a disposable production-shaped DB.
-- Typecheck shared exports, Hono gateway entry, Supabase row shapes, and provisioner result contracts.
-- Prove host-private model-gateway reachability from employee containers and non-reachability from public ingress.
-- Prove profile integrity and credential rotation/revocation.
-- Implement the DB-backed reconciler worker and fleet drift repair.
-- Move provider ingress to `ambient_event_inbox` leased workers.
-- Route admin lifecycle actions through `provisioning_commands` + reconciler.
-- Run a fresh canonical public onboarding with real provider/runtime/tool proof IDs.
+Hermes owns employee reasoning/runtime behavior. Manager owns identity, assignment authority, capability/tool contracts, connector and credential custody, approvals, durable effects, commercial attribution, revocation, repair, and proof.
 
-## Memory protocol
+Unknown or stale connector/capability evidence fails closed. Direct MCP requires explicit read-only, non-money, non-customer-facing evidence. Provider categories never select provider identity, tools, scopes, credentials, or hosts. MCP Apps, AG-UI, Web, SMS, and signed Review are projections, not authority.
 
-After substantial multi-file work, phase completion, production incident, or architectural/product-direction change:
+## Execution
 
-1. create/update a dated handoff in `memory/`;
-2. update `memory/MEMORY.md` newest-first;
-3. record exact validation run or explicitly not run;
-4. keep factual code/proof state in `../wiki/MVP/implementation-records/`.
+- Work on a reviewed branch; `main` changes only through approved merge.
+- No feature expansion while a prerequisite P0 is unresolved.
+- Use Red → Green → Refactor for one behavior at a time.
+- Every commit references the task ID.
+- Stop on red CI and do not weaken tests to obtain green.
+- After three failed attempts on one concrete step, preserve diagnostics and escalate.
+- Treat schemas, migrations, fixtures, contracts, harnesses, diagnostics, proof, and runbooks as implementation.
 
-## Git
+Before pushing:
 
-Work only on the explicitly requested branch. Preserve `main`. Do not silently merge or push to another branch. End with exact changed files, unresolved risks, and validation not run.
+```bash
+npm run repo:verify:full
+```
+
+Install local fast-feedback hooks once per clone with `npm run hooks:install`. Hooks are bypassable; exact-head CI remains authoritative.
+
+## Hermes upstream review
+
+Before changing Hermes images, launchers, profiles, sessions, delegation, gateway/client behavior, tool discovery, runtime-native capabilities, or Hermes-derived UI, run `npm run hermes:upstream:check` and review the official repository, `hermes_cli/`, `web/src/App.tsx`, recent commits, and active PRs. Upstream never auto-upgrades the production pin.
+
+## Database and evidence
+
+Use production-shaped local/CI PostgreSQL for routine migration, RLS, grant, function, negative-isolation, concurrency, backfill, and rollback work. Use disposable managed Supabase only for material platform-specific or release-candidate proof. Production is never the routine test target.
+
+Source, fixture, local database, documentation, old proof, and ancestor-SHA evidence cannot satisfy a live boundary they did not exercise. `production-ready` requires every non-waivable Standard gate on one exact deployed release.
+
+## Authority files
+
+- `STANDARD.md` — normative requirements.
+- `CODEGRAPH.md` — source topology, migration head, and evidence boundary.
+- `second-half-plan/README.md` — single active plan route.
+- `memory/MEMORY.md` — sole handoff index.
+- source, migrations, tests, workflows, and proof — implementation and acceptance authority.

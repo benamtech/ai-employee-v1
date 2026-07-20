@@ -2,11 +2,13 @@
  * Typed work-event descriptors for the Work Surface.
  *
  * This is the small contract from wiki/MVP/phase-3-generative-ui-reframe.md:
- * provider/tool events become typed notify/question/review work events, and
- * surfaces render known components from this descriptor instead of raw payloads.
+ * provider/tool events become typed observe/notify/question/review work events,
+ * and surfaces render known components from this descriptor instead of raw
+ * payloads. `observe` is quiet ambient state; it never creates authority or an
+ * external effect.
  */
 
-export type WorkMove = "notify" | "question" | "review";
+export type WorkMove = "observe" | "notify" | "question" | "review";
 
 export type DeliverableType =
   | "document"
@@ -248,8 +250,8 @@ export function assertWorkEventDescriptor(descriptor: WorkEventDescriptor): Work
 
 /**
  * Grammar-aware SMS trailer for a link. `review` prompts approval, `question`
- * prompts an answer, `notify`/receipt links are quiet context. Kept here (not in
- * preview-links) to avoid a value import cycle with this module.
+ * prompts an answer, and `observe`/`notify`/receipt links remain quiet context.
+ * Kept here (not in preview-links) to avoid a value import cycle with this module.
  */
 export function smsGrammarSuffix(move: WorkMove, hasLink: boolean): string {
   if (!hasLink) return "";
@@ -258,6 +260,7 @@ export function smsGrammarSuffix(move: WorkMove, hasLink: boolean): string {
       return "Review and approve here:";
     case "question":
       return "Open to answer:";
+    case "observe":
     case "notify":
     default:
       return "Details:";

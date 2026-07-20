@@ -2,18 +2,19 @@
  * The employee Work Surface read-model. Manager builds it
  * (apps/manager/src/lib/employee-stream.ts `buildEmployeeSnapshot`) and the web
  * surface consumes it. Rendering is descriptor-driven — never raw provider
- * payloads (wiki/MVP/phase-3-generative-ui-reframe.md). Shared so the Manager
- * snapshot builder and the browser agree on one shape.
+ * payloads. Shared so Manager and browser agree on one owner-safe shape.
  */
 import type { WorkEventDescriptor } from "./work-events.js";
 import type { CapabilityCategory, CapabilityGraphNode, ProofEnvelope, SurfaceEnvelope } from "./materialization.js";
+import type { OperatingSurfaceState } from "./operating-system.js";
+import type { TaskCapabilityMatch, ToolCapabilityCatalog, ToolCapabilityDescriptor } from "./task-capabilities.js";
 
 export interface ArtifactRow {
   id: string;
   kind: string;
   mime_type?: string | null;
   storage_ref?: string | null;
-  payload?: { customer_name?: string; job_description?: string; recommended_total?: number };
+  payload?: { customer_name?: string; job_description?: string; recommended_total?: number; project?: Record<string, unknown> };
   created_at: string;
 }
 
@@ -169,6 +170,7 @@ export interface ResurfaceItem {
 
 export interface ResourcePayload {
   account_id: string;
+  assignment_id?: string;
   employee_id?: string;
   employee?: EmployeeSummary;
   runtime_health?: RuntimeHealthSummary | null;
@@ -182,9 +184,14 @@ export interface ResourcePayload {
   work_events: WorkEventRow[];
   abilities?: AbilitySummary[];
   capabilities?: CapabilityGraphNode[];
+  /** Transport-neutral owner-safe tools. Presence never grants execution. */
+  tool_catalog?: ToolCapabilityCatalog;
+  tool_capabilities?: ToolCapabilityDescriptor[];
+  task_capability_matches?: TaskCapabilityMatch[];
   surface_envelopes?: SurfaceEnvelope[];
   connection_surfaces?: ConnectionSurface[];
   resurface_items?: ResurfaceItem[];
   outputs?: WorkOutput[];
   tasks?: WorkTask[];
+  operating_state?: OperatingSurfaceState;
 }

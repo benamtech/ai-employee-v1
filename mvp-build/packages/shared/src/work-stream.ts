@@ -9,6 +9,12 @@ import type { ResourcePayload, WorkEventRow } from "./resource-payload.js";
 
 export type WorkProgressState = "started" | "step" | "completed";
 
+export interface WorkStreamAssignmentScope {
+  assignment_id: string;
+  account_id: string;
+  employee_id: string;
+}
+
 export type WorkStreamEvent =
   /** Full read-model — sent on connect and on reconnect catch-up gaps. */
   | { kind: "snapshot"; snapshot: ResourcePayload }
@@ -21,7 +27,13 @@ export type WorkStreamEvent =
   /** A wake/turn run reached a terminal state. */
   | { kind: "run_completed"; run_id: string; status: string };
 
+export type AssignmentScopedWorkStreamEvent = WorkStreamEvent & WorkStreamAssignmentScope;
+
 /** SSE `event:` name used on the wire for a given stream event. */
 export function workStreamEventName(event: WorkStreamEvent): string {
   return event.kind;
+}
+
+export function withAssignmentStreamScope(event: WorkStreamEvent, scope: WorkStreamAssignmentScope): AssignmentScopedWorkStreamEvent {
+  return { ...event, ...scope };
 }

@@ -1,169 +1,107 @@
-# CODEGRAPH.md — AMTECH workspace map
+# CODEGRAPH.md — AMTECH AI Employee repository map
 
-Status: active
-Updated: 2026-07-17
-Active integration branch: `research`, based on current `main`
+Status: active  
+Updated: 2026-07-20  
+Active integration/cutover branch: `employee-production-tuesday`; draft PR `#23` targets `main`; historical `research` is not an integration dependency
 
-## Read first
+## Cold-session read order
 
-1. `identity.md`
-2. `AGENTS.md`
-3. this file
-4. the nearest scoped `identity.md`, `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
-5. newest relevant memory/handoff
-6. source, migrations, scripts, proofs, tests, and current plan/wiki documents
+1. [`identity.md`](identity.md)
+2. [`AGENTS.md`](AGENTS.md) or [`CLAUDE.md`](CLAUDE.md)
+3. [`CONTRIBUTING.md`](CONTRIBUTING.md)
+4. this file
+5. [`mvp-build/AGENTS.md`](mvp-build/AGENTS.md) or [`mvp-build/CLAUDE.md`](mvp-build/CLAUDE.md)
+6. [`mvp-build/CODEGRAPH.md`](mvp-build/CODEGRAPH.md)
+7. ratified [`mvp-build/STANDARD.md`](mvp-build/STANDARD.md)
+8. [`mvp-build/second-half-plan/README.md`](mvp-build/second-half-plan/README.md) and its one active program
+9. [`mvp-build/memory/MEMORY.md`](mvp-build/memory/MEMORY.md), then the newest relevant handoff
+10. [`mvp-build/docs/architecture/README.md`](mvp-build/docs/architecture/README.md)
+11. relevant source, migrations, scripts, tests, workflows, proof, release records, and current diff
 
-When documentation conflicts, verified source + migrations + scripts + proof artifacts + newest scoped memory win.
+Authority order: deployed release-bound proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests and acceptance → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
-## What this repository is
+## Repository boundary
 
-This repository is the AMTECH company brain and implementation home for the flagship AI Employee and its public experience infrastructure.
+- `mvp-build/` — AI Employee product code, contracts, migrations, Hermes integration, Manager, Web, connectors, security, tests, deployment, proof, Standard, and active program.
+- `wiki/` — strategy, rationale, research, and historical records; not current implementation authority.
+- `docs/` — supporting product/design/operating documents.
+- `local-prod/` and `scripts/local-prod/` — exact-SHA local-production evidence orchestration.
+- `.github/workflows/` — subsystem, archaeology, upstream-intelligence, main-integration, and release gates.
 
-- `mvp-build/`: product code, runtime, provisioning, owner surfaces, connectors, security, tests, runbooks, and active forward plans.
-- `wiki/`: durable product, market, architecture, research, and implementation records.
-- `docs/`: root product, design, website, and interaction strategy.
-- `GTM-RESEARCH/website-framework/`: hyper-targeted publishing compiler, first-class hyper-vector space, corpus optimizer, agent generation harness, semantic UI contract, edge resolver research, and field-distribution validation.
+Hyper Site lives in `benamtech/hyper-site` and is not AI Employee authority.
 
 ## Canonical product truth
 
-AMTECH installs always-on intelligent software workers for owner-operated American small businesses. The first beachhead is painting, landscaping, and adjacent service contractors, with professional offices and software/technical operators as extensible use cases.
+AMTECH installs persistent AI Employees for owner-operated businesses. Manager is the labor control plane; Hermes is the reasoning/runtime substrate.
 
-The employee notices work, remembers business facts, prepares deliverables and communication, follows up, organizes proof, and asks before actions that touch customers, money, reputation, or destructive system boundaries. The owner texts or talks to one employee. Manager remains invisible infrastructure.
-
-AMTECH is not primarily an estimator, chatbot, CRM, automation builder, model marketplace, or collection of AI tools.
+The moat is a reusable governed-labor protocol spanning identity, assignments, capability and connector manifests, work objects, approval, durable effects, provider receipts, recovery, commercial attribution, and protocol/channel adapters. MCP core, MCP Apps, AG-UI, OAuth providers, models, runtimes, and SaaS systems are replaceable mechanisms. Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
 
 ## Canonical offer
 
-- **Start free:** one useful employee with bounded usage and no enterprise rollout.
-- **Managed AI Employee:** from **$400/month** for managed connections, recovery, scheduled/event-driven work, higher capacity, and support.
+- **Start Free:** one bounded useful AI Employee.
+- **Managed AI Employee:** from **$400/month**.
 - **Workforce:** custom pricing for multiple roles, locations, approval structures, or higher volume.
 
-Older $750 setup + $1,000/$1,500 monthly ladder language is superseded where it conflicts with this strategy.
+The public estimator is outdated and non-canonical.
 
-## Canonical normal-employee path
-
-```text
-public DNS / Cloudflare Tunnel
--> Caddy
--> production Web + Manager
--> real /create-ai-employee
--> Twilio Verify
--> account creation
--> Start Employee
--> isolated employee runtime
--> owner web client
--> provider-backed reply
--> useful connected-tool proof
-```
-
-Authority: `mvp-build/docs/production-normal-employee-live-deploy-runbook.md`.
-
-The public estimator is outdated and non-canonical. It may remain as an acquisition/regression harness, but it is not product UX, pricing, profile, or launch acceptance. Fixture mode, dev login, local `live:*`, and manually injected provider results are not launch proof.
-
-## Current product implementation state
-
-**Overall: source-wired, not live-accepted after the WS1/WS2 production-boundary pass.**
-
-- Owner product: Home / Talk / Proof / Connected, persisted conversation, approvals, signed review resources, owner-safe materialization, and connected-capability surfaces are source-wired.
-- WS1: model-gateway credential custody and rendered-profile integrity are source-wired.
-- WS2: durable provisioning resource graph, transitions, leases, commands, retry/drift/rotation/compensation foundations are source-wired; the true reconciler worker remains pending.
-- WS3: `ambient_event_inbox` schema exists; provider ingress migration is not complete.
-- Production runtime boundary: host-private provisioner and per-employee isolation exist in source, but hostile/runtime proof is pending.
-- Live provider/runtime acceptance requires fresh production credentials, real provider IDs, runtime proof artifacts, and a normal-employee run through the canonical path.
-
-Detailed authority: `mvp-build/CODEGRAPH.md`.
-
-## Website-framework state
-
-Primary category: **agent-first hyper-targeted search-distribution compiler and vector information server**.
-
-Current reality:
-
-- Phase 1 specifications exist.
-- A TypeScript research package implements HRR/VSA controls, corpus optimizers, semantic IR, packed vectors/CSR graph, deterministic neutral emissions, synthetic scale fixtures, and runtime scaffolds.
-- `GTM-RESEARCH/website-framework/site-manifest.yaml` is now the single declarative corpus authority.
-- `reference/src/manifest.ts` compiles feature atoms and prototype sets before page emissions, derives vector neighbors/links, and feeds `SiteSource -> PageIR`.
-- The old five-slice Request Mirror is a noindex profile inside the same compiler, not a separate framework.
-- The hyper-aware agent harness and UI-scaffold plan are source-wired.
-
-Not accepted:
-
-- production UI renderer or functioning public website framework;
-- deployed/indexed 200–2,000-page corpus;
-- search ranking/citation or conversion/revenue lift;
-- Zig/Wasm or Cloudflare runtime performance;
-- browser, accessibility, Core Web Vitals, or load acceptance.
-
-The prior 2,000-page result is a synthetic compiler benchmark, not a deployed SEO corpus.
-
-Framework authority:
-
-- `GTM-RESEARCH/website-framework/identity.md`
-- `GTM-RESEARCH/website-framework/AGENTS.md`
-- `GTM-RESEARCH/website-framework/CODEGRAPH.md`
-- `GTM-RESEARCH/website-framework/README.md`
-- `GTM-RESEARCH/website-framework/16-unified-hypervector-manifest-agent-harness.md`
-- `GTM-RESEARCH/website-framework/site-manifest.yaml`
-- newest scoped research and memory notes
-
-## Source-of-truth map
-
-| Question | Authority |
-|---|---|
-| What are we building? | `identity.md`, this file, `docs/amtech-website-rewrite-brief.md` |
-| How should agents operate? | root `AGENTS.md` plus nearest scoped instructions |
-| What is actually wired? | `mvp-build/CODEGRAPH.md`, source, migrations, implementation records |
-| What is the current handoff? | `mvp-build/memory/MEMORY.md` and newest relevant memory |
-| How is a normal employee launched? | `mvp-build/docs/production-normal-employee-live-deploy-runbook.md` |
-| What are the security/runtime boundaries? | `mvp-build/docs/security/host-private-runtime-hardening-plan.md` |
-| What is the GTM/pricing strategy? | `mvp-build/docs/gtm/free-infrastructure-managed-workforce-strategy.md` |
-| What remains now-to-live? | `mvp-build/CODEGRAPH.md`, runbook, wiki current/future state |
-| What is the public website product/copy brief? | `docs/amtech-website-rewrite-brief.md` |
-| What is the visual system? | `docs/AMTECH_WEB_DESIGN_SYSTEM.md` |
-| How do agentic/generative web interfaces work? | `docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md` |
-| What controls the website corpus and vector space? | `GTM-RESEARCH/website-framework/site-manifest.yaml`, scoped CODEGRAPH, file `16` |
-| What feeds the first UI pass? | `reference/src/ui-scaffold.ts`, `reference/UI-DESIGN-SYSTEM-HANDOFF.md` |
-| How do agents propose pages? | `reference/src/agent-harness.ts`, `reference/src/manifest.ts` |
-| How is search/commercial evidence measured? | `reference/src/distribution.ts`, files `15` and `16` |
-
-## Non-negotiable invariants
-
-1. Read the applicable identities and instructions before acting.
-2. Do not claim provider/runtime acceptance without real proof IDs/artifacts.
-3. The owner experiences one employee; Manager remains invisible.
-4. Provider master credentials never enter employee profiles/runtimes.
-5. Customer-, money-, reputation-, and destructive-action gates require owner approval.
-6. The public estimator is non-canonical.
-7. `mvp-build/second-half-plan/` is the active product forward-plan family; older plans are historical unless explicitly revived.
-8. Every major session updates durable memory and keeps current docs contradiction-free.
-9. Public copy leads with owner pain, work, proof, control, and value—not generic AI or architecture.
-10. Website materialization is research until explicit correctness, relevance, compiler, performance, SEO, privacy, security, accessibility, experiment, autonomy, and truth gates pass.
-11. The website framework must not become a named customer dossier, covert fingerprint, identity graph, or sensitive/financial/household/lifestyle inference engine.
-12. Canonical pages remain complete without resolver, JavaScript, consent, vectors, databases, or experiments.
-13. HRR/VSA is classical computation. Quantum language must remain technically bounded.
-14. Generated content and design are typed, deterministic, versioned, reversible, and evidence-bounded.
-15. Feature atoms and prototype geometry precede page emissions; HTML is never canonical source truth.
-16. Agent-generated pages enter noindex research state and cannot bypass the unified manifest or publication gate.
-
-## Next major frontiers
-
-### Product
-
-Close the normal-employee P0 now-to-live checklist and produce real provider/runtime proof through the canonical path.
-
-### Public experience
+## Canonical execution boundary
 
 ```text
-unified manifest + passing CI
--> ingest supplied design system
--> derive and implement semantic renderer superset
--> browser/accessibility/metadata/JS-disabled validation
--> generate first hyper-aware agent page proposals
--> review 20–40 field candidates
--> publish matched cohorts only after explicit gate
--> measure indexing, compatible discovery, qualified pipeline, gross profit, and lifecycle return
+trigger
+→ authenticated principal
+→ exact assignment or approved platform/system context
+→ current relationship, role, grant, policy, entitlement, and authority version
+→ stable durable intent, command, event, or work object
+→ Hermes reasoning or deterministic processing
+→ bounded capability selection and runtime validation
+→ approval when required
+→ one reserved idempotent external effect
+→ accepted | failed | ambiguous durable receipt
+→ deterministic replay, reconciliation, or repair
+→ role-safe channel/protocol projection
+→ audit, metering, commercial attribution, revocation, recovery, and release proof
 ```
 
-## Validation state
+## Current integration headline
 
-The coordinated website-framework implementation is in PR #16 on `agent/phase-2-materialization-engine-plan`. Local TypeScript reference tests and synthetic scale evidence exist. The unified manifest/composer, CI, and UI-readiness update require a passing branch workflow before merge. Environment-dependent product/runtime and public-search acceptance remain pending unless explicitly recorded by a later proof artifact.
+- Branch: `employee-production-tuesday`
+- Target/base: `main`
+- Draft cutover PR: `#23`
+- Historical `research`: retained branch history, not current authority
+- Migration head: `0072`
+- Standard: `mvp-build/STANDARD.md` v0.2, ratified and effective
+- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`
+- Contributor contract: `CONTRIBUTING.md`, six-point task rubric, installable hooks, and repository-governance checks
+- Main merge gate: `.github/workflows/main-integration-gates.yml`
+- Hermes upstream review: architecture document 17, pinned baseline, and scheduled/path-triggered CI
+- Canonical deployment authority: `mvp-build/infra/scripts/production-topology.mjs` → `mvp-build/infra/deploy/docker-compose.production.yml`
+- Product status: Gate 0 source/document/CI resolved; not launch-cleared
+
+## Contributor verification
+
+From `mvp-build/`:
+
+```bash
+npm ci
+npm run hooks:install
+npm run repo:rubric -- ./task-contract.json
+npm run repo:verify:quick
+npm run repo:verify:full
+```
+
+Local hooks provide fast feedback. CI remains authoritative. PRs into `main` run governance, type/lint, unit, production-boundary, build, archaeology, and compiled browser gates.
+
+## Core invariants
+
+1. Manager owns authority; Hermes reasons and executes only within bound capabilities.
+2. Account membership is not employee assignment authority.
+3. Reads do not create effects; authoritative failures fail closed.
+4. Stable retries do not duplicate irreversible effects.
+5. Consequential success requires a durable accepted receipt.
+6. Provider master credentials stay outside employee profiles/runtimes.
+7. Capability discovery is broad; execution custody is conservative and evidence-backed.
+8. Generated UI and protocol adapters are presentation, not authority.
+9. Ambiguous provider outcomes reconcile before retry.
+10. Applied migrations are immutable; corrections are forward migrations.
+11. Upstream Hermes drift triggers review, never an automatic production upgrade.
+12. Production-ready means every non-waivable Standard gate passes on the exact deployed SHA.

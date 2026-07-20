@@ -28,9 +28,9 @@ export function FreeEstimatorClient() {
   const canAct = Boolean(visitorSessionId && draft);
 
   const createSession = useCallback(async () => {
-    const res = await fetch("/api/public-estimator/session", { method: "POST" });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    const response = await fetch("/api/public-estimator/session", { method: "POST" });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
       setStatus(json.message ?? "Avery is not available right now.");
       return;
     }
@@ -40,9 +40,9 @@ export function FreeEstimatorClient() {
 
   const refreshDraft = useCallback(async (sessionId = visitorSessionId) => {
     if (!sessionId) return;
-    const res = await fetch(`/api/public-estimator/current-draft?visitor_session_id=${encodeURIComponent(sessionId)}`);
-    const json = await res.json().catch(() => ({}));
-    if (res.ok && json.current_draft) setDraft(json.current_draft);
+    const response = await fetch(`/api/public-estimator/current-draft?visitor_session_id=${encodeURIComponent(sessionId)}`);
+    const json = await response.json().catch(() => ({}));
+    if (response.ok && json.current_draft) setDraft(json.current_draft);
   }, [visitorSessionId]);
 
   useEffect(() => { void createSession(); }, [createSession]);
@@ -54,22 +54,22 @@ export function FreeEstimatorClient() {
     setInput("");
     setBusy(true);
     const pendingId = `visitor:${Date.now()}`;
-    setMessages((m) => [...m, { id: pendingId, role: "visitor", body: text, status: "sending" }]);
+    setMessages((current) => [...current, { id: pendingId, role: "visitor", body: text, status: "sending" }]);
     setStatus("Avery is drafting.");
-    const res = await fetch("/api/public-estimator/message", {
+    const response = await fetch("/api/public-estimator/message", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ visitor_session_id: visitorSessionId, message: text }),
     });
-    const json = await res.json().catch(() => ({}));
+    const json = await response.json().catch(() => ({}));
     setBusy(false);
-    if (!res.ok) {
-      setMessages((m) => m.map((msg) => msg.id === pendingId ? { ...msg, status: "failed" } : msg));
+    if (!response.ok) {
+      setMessages((current) => current.map((message) => message.id === pendingId ? { ...message, status: "failed" } : message));
       setStatus(json.message ?? "Avery could not finish that.");
       return;
     }
-    setMessages((m) => [
-      ...m.map((msg) => msg.id === pendingId ? { ...msg, status: undefined } : msg),
+    setMessages((current) => [
+      ...current.map((message) => message.id === pendingId ? { ...message, status: undefined } : message),
       ...(json.reply ? [{ id: `employee:${Date.now()}`, role: "employee" as const, body: String(json.reply) }] : []),
     ]);
     if (json.current_draft) setDraft(json.current_draft);
@@ -78,13 +78,13 @@ export function FreeEstimatorClient() {
 
   async function action(actionName: "copy" | "download" | "trial_intent") {
     if (!visitorSessionId) return;
-    const res = await fetch("/api/public-estimator/action", {
+    const response = await fetch("/api/public-estimator/action", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ visitor_session_id: visitorSessionId, action: actionName }),
     });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) {
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
       setStatus(json.message ?? "That action is not available.");
       return;
     }
@@ -94,10 +94,10 @@ export function FreeEstimatorClient() {
     } else if (actionName === "download") {
       const blob = new Blob([String(json.body ?? "")], { type: String(json.mime_type ?? "text/html") });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = String(json.filename ?? "amtech-estimate-draft.html");
-      a.click();
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = String(json.filename ?? "amtech-estimate-draft.html");
+      anchor.click();
       URL.revokeObjectURL(url);
       setStatus("Draft downloaded.");
     } else {
@@ -109,14 +109,14 @@ export function FreeEstimatorClient() {
   async function sendEmail() {
     if (!visitorSessionId || emailBusy) return;
     setEmailBusy(true);
-    const res = await fetch("/api/public-estimator/email", {
+    const response = await fetch("/api/public-estimator/email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ visitor_session_id: visitorSessionId, email }),
     });
-    const json = await res.json().catch(() => ({}));
+    const json = await response.json().catch(() => ({}));
     setEmailBusy(false);
-    setStatus(res.ok ? "Draft email recorded." : json.message ?? "Email is not available.");
+    setStatus(response.ok ? "Draft email recorded." : json.message ?? "Email is not available.");
   }
 
   const transcript = useMemo(() => messages.length ? messages : [
@@ -137,23 +137,24 @@ export function FreeEstimatorClient() {
       <section className="pe-shell">
         <div className="pe-chat">
           <div className="pe-head">
-            <p>Free estimator employee</p>
-            <h1>Try Avery on one real job.</h1>
-            <span>{status}</span>
+            <p>Non-canonical preview · free estimator</p>
+            <h1>Try one constrained employee task.</h1>
+            <span>{status} This preview does not represent the production operating surface or launch proof.</span>
           </div>
           <div className="pe-thread" aria-live="polite">
-            {transcript.map((m) => (
-              <div key={m.id} className={`pe-msg ${m.role}`}>
-                <span>{m.role === "visitor" ? "You" : "Avery"}</span>
-                <p>{m.body}</p>
-                {m.status === "sending" && <em>Sending</em>}
-                {m.status === "failed" && <em>Failed</em>}
+            {transcript.map((message) => (
+              <div key={message.id} className={`pe-msg ${message.role}`}>
+                <span>{message.role === "visitor" ? "You" : "Avery"}</span>
+                <p>{message.body}</p>
+                {message.status === "sending" ? <em>Sending</em> : null}
+                {message.status === "failed" ? <em>Failed</em> : null}
               </div>
             ))}
           </div>
           <div className="pe-compose">
-            <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={5} />
-            <button type="button" onClick={send} disabled={!visitorSessionId || busy}>{busy ? "Drafting" : "Send to Avery"}</button>
+            <label htmlFor="estimator-job-note">Job details</label>
+            <textarea id="estimator-job-note" value={input} onChange={(event) => setInput(event.target.value)} rows={5} />
+            <button type="button" onClick={() => void send()} disabled={!visitorSessionId || busy}>{busy ? "Drafting" : "Send to Avery"}</button>
           </div>
         </div>
 
@@ -177,16 +178,16 @@ export function FreeEstimatorClient() {
             </div>
           )}
           <div className="pe-email">
-            <label>
+            <label htmlFor="estimator-email">
               Email this draft to me
-              <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="owner@company.com" />
+              <input id="estimator-email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="owner@company.com" />
             </label>
-            <button type="button" onClick={sendEmail} disabled={!canAct || emailBusy}>{emailBusy ? "Sending" : "Send draft"}</button>
+            <button type="button" onClick={() => void sendEmail()} disabled={!canAct || emailBusy}>{emailBusy ? "Sending" : "Send draft"}</button>
           </div>
           <div className="pe-trial">
-            <p>Want this estimator to remember your pricing, format, materials, service area, and follow-up rules?</p>
+            <p>The production employee remembers business context, carries active saves, delegates work, and returns decisions and evidence.</p>
             <Link onClick={() => void action("trial_intent")} href="/create-ai-employee">
-              {trialClicked ? "Continue setup" : "Start the free trial"}
+              {trialClicked ? "Continue setup" : "Create an employee"}
             </Link>
           </div>
         </aside>
@@ -196,18 +197,13 @@ export function FreeEstimatorClient() {
 }
 
 const CSS = `
-  .pe-root{min-height:100vh;background:#fff;color:#0a0a0a;font-family:var(--font-inter),Inter,-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}
-  .pe-top{height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(10,10,10,.12);padding:0 20px}
-  .pe-logo{font-family:var(--font-plex-mono),'IBM Plex Mono',ui-monospace,monospace;text-decoration:none;color:#0a0a0a;font-weight:700;letter-spacing:.09em}
-  .pe-logo span{color:#e11d2a}.pe-top nav{display:flex;gap:16px}.pe-top nav a{font-family:var(--font-plex-mono),'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#0a0a0a;text-decoration:none}.pe-top nav a:hover{color:#e11d2a}
-  .pe-shell{display:grid;grid-template-columns:minmax(320px,440px) 1fr;min-height:calc(100vh - 58px)}
-  .pe-chat{border-right:1px solid rgba(10,10,10,.12);display:grid;grid-template-rows:auto 1fr auto;min-height:calc(100vh - 58px)}
-  .pe-head{padding:22px 20px;border-bottom:1px solid rgba(10,10,10,.08)}.pe-head p,.pe-draft-bar p{font-family:var(--font-plex-mono),'IBM Plex Mono',ui-monospace,monospace;font-size:10px;color:#e11d2a;text-transform:uppercase;letter-spacing:.08em;margin:0 0 8px}.pe-head h1{font-size:30px;line-height:1.05;margin:0 0 12px;font-weight:900;letter-spacing:0}.pe-head span{font-size:14px;color:rgba(10,10,10,.58)}
-  .pe-thread{padding:18px 20px;display:flex;flex-direction:column;gap:12px;overflow:auto}.pe-msg{border-left:3px solid rgba(10,10,10,.18);padding:10px 12px;background:#fafafa}.pe-msg.visitor{border-left-color:#e11d2a;background:#fff}.pe-msg span{font-family:var(--font-plex-mono),'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(10,10,10,.55)}.pe-msg p{margin:5px 0 0;line-height:1.5;font-size:15px}.pe-msg em{display:block;margin-top:6px;font-style:normal;font-size:12px;color:#e11d2a}
-  .pe-compose{border-top:1px solid rgba(10,10,10,.12);padding:14px;display:grid;gap:10px}.pe-compose textarea{width:100%;resize:vertical;border:1px solid rgba(10,10,10,.18);padding:12px;font:inherit;line-height:1.45}.pe-compose button,.pe-actions button,.pe-email button,.pe-trial a{height:42px;border:1px solid #e11d2a;background:#e11d2a;color:#fff;font-family:var(--font-plex-mono),'IBM Plex Mono',ui-monospace,monospace;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:0 14px}.pe-compose button:disabled,.pe-actions button:disabled,.pe-email button:disabled{opacity:.45;cursor:not-allowed}.pe-actions button{background:#fff;color:#e11d2a}
-  .pe-draft{display:grid;grid-template-rows:auto 1fr auto auto;min-height:calc(100vh - 58px);background:#f7f7f7}.pe-draft-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;border-bottom:1px solid rgba(10,10,10,.12);background:#fff}.pe-draft-bar strong{font-size:18px}.pe-actions{display:flex;gap:8px;flex-wrap:wrap}
-  .pe-draft iframe{width:100%;height:100%;border:0;background:#fff}.pe-empty{padding:28px;align-self:start}.pe-empty strong{font-size:20px}.pe-empty p{color:rgba(10,10,10,.6);line-height:1.5;max-width:420px}
-  .pe-email{display:flex;gap:10px;align-items:end;padding:14px 18px;background:#fff;border-top:1px solid rgba(10,10,10,.12)}.pe-email label{flex:1;font-family:var(--font-plex-mono),'IBM Plex Mono',ui-monospace,monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:rgba(10,10,10,.62)}.pe-email input{display:block;width:100%;height:42px;margin-top:6px;border:1px solid rgba(10,10,10,.18);font:14px var(--font-inter),Inter,sans-serif;padding:0 10px;text-transform:none;letter-spacing:0}
-  .pe-trial{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:16px 18px;background:#e11d2a;color:#fff}.pe-trial p{margin:0;line-height:1.45;font-weight:700;max-width:700px}.pe-trial a{background:#fff;color:#e11d2a;border-color:#fff;white-space:nowrap}
-  @media(max-width:900px){.pe-shell{grid-template-columns:1fr}.pe-chat{border-right:0;border-bottom:1px solid rgba(10,10,10,.12);min-height:auto}.pe-draft{min-height:70vh}.pe-top nav{display:none}.pe-email,.pe-trial,.pe-draft-bar{align-items:stretch;flex-direction:column}.pe-actions{width:100%}.pe-actions button,.pe-email button,.pe-trial a{width:100%}}
+  .pe-root{min-height:100vh;background:radial-gradient(circle at 8% 0%,rgba(223,246,255,.88),transparent 28rem),var(--amtech-canvas);color:var(--amtech-ink);font-family:var(--amtech-font)}
+  .pe-top{min-height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--amtech-line);padding:0 20px;background:rgba(255,255,255,.86);backdrop-filter:blur(26px)}.pe-logo{text-decoration:none;color:var(--amtech-ink);font-weight:850;letter-spacing:.04em}.pe-logo span{color:var(--amtech-red)}.pe-top nav{display:flex;gap:16px}.pe-top nav a{font-size:12px;font-weight:720;color:var(--amtech-ink);text-decoration:none}.pe-top nav a:hover{color:var(--amtech-red)}
+  .pe-shell{display:grid;grid-template-columns:minmax(320px,460px) 1fr;min-height:calc(100vh - 64px);gap:1px;background:var(--amtech-line)}.pe-chat{display:grid;grid-template-rows:auto 1fr auto;min-height:calc(100vh - 64px);background:rgba(255,255,255,.92)}
+  .pe-head{padding:24px 22px;border-bottom:1px solid var(--amtech-line)}.pe-head p,.pe-draft-bar p{font-size:10px;color:var(--amtech-blue);text-transform:uppercase;letter-spacing:.1em;font-weight:780}.pe-head h1{margin:8px 0 12px;font-size:36px;line-height:1.02;font-weight:860;letter-spacing:-.04em}.pe-head span{display:block;font-size:13px;color:var(--amtech-muted);line-height:1.55}
+  .pe-thread{padding:20px;display:flex;flex-direction:column;gap:12px;overflow:auto}.pe-msg{padding:12px 14px;border:1px solid var(--amtech-line);border-radius:16px;background:var(--amtech-canvas)}.pe-msg.visitor{align-self:flex-end;max-width:88%;border-color:rgba(37,99,235,.16);background:var(--amtech-cyan)}.pe-msg span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--amtech-muted);font-weight:760}.pe-msg p{margin-top:5px;line-height:1.5;font-size:15px}.pe-msg em{display:block;margin-top:6px;font-style:normal;font-size:12px;color:var(--amtech-red)}
+  .pe-compose{border-top:1px solid var(--amtech-line);padding:16px;display:grid;gap:9px}.pe-compose label{font-size:12px;font-weight:740}.pe-compose textarea{width:100%;resize:vertical;border:1px solid var(--amtech-line-strong);border-radius:14px;padding:12px;font:inherit;line-height:1.45;outline:none}.pe-compose textarea:focus{border-color:var(--amtech-blue);box-shadow:0 0 0 4px var(--amtech-blue-soft)}.pe-compose button,.pe-actions button,.pe-email button,.pe-trial a{min-height:44px;border:1px solid var(--amtech-red);border-radius:999px;background:var(--amtech-red);color:#fff;font-size:12px;font-weight:780;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:0 16px}.pe-compose button:disabled,.pe-actions button:disabled,.pe-email button:disabled{opacity:.45;cursor:not-allowed}.pe-actions button{background:#fff;color:var(--amtech-red)}
+  .pe-draft{display:grid;grid-template-rows:auto 1fr auto auto;min-height:calc(100vh - 64px);background:var(--amtech-canvas)}.pe-draft-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--amtech-line);background:#fff}.pe-draft-bar strong{font-size:18px}.pe-actions{display:flex;gap:8px;flex-wrap:wrap}.pe-draft iframe{width:100%;height:100%;border:0;background:#fff}.pe-empty{padding:32px;align-self:start}.pe-empty strong{font-size:20px}.pe-empty p{margin-top:6px;color:var(--amtech-muted);line-height:1.5;max-width:420px}
+  .pe-email{display:flex;gap:10px;align-items:end;padding:16px 20px;background:#fff;border-top:1px solid var(--amtech-line)}.pe-email label{flex:1;font-size:11px;font-weight:740;color:var(--amtech-muted)}.pe-email input{display:block;width:100%;height:44px;margin-top:6px;border:1px solid var(--amtech-line-strong);border-radius:12px;font:14px var(--amtech-font);padding:0 12px}.pe-trial{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 20px;background:var(--amtech-blue);color:#fff}.pe-trial p{line-height:1.45;font-weight:680;max-width:700px}.pe-trial a{background:#fff;color:var(--amtech-blue);border-color:#fff;white-space:nowrap}
+  @media(max-width:900px){.pe-shell{grid-template-columns:1fr}.pe-chat{min-height:auto}.pe-draft{min-height:70vh}.pe-top nav{display:none}.pe-email,.pe-trial,.pe-draft-bar{align-items:stretch;flex-direction:column}.pe-actions{width:100%}.pe-actions button,.pe-email button,.pe-trial a{width:100%}}
 `;

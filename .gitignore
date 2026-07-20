@@ -8,10 +8,18 @@ coverage/
 .turbo/
 .vercel/
 hermes-data/
+mvp-build/apps/manager/src/server.generated.ts
+mvp-build/.artifacts/
+local-prod/reports/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
 
 # Secrets / env
 .env
 .env.*
+!/.env.example
 !mvp-build/.env.local.example
 !mvp-build/apps/web/.env.local.example
 

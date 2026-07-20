@@ -26,6 +26,7 @@ import { materializeEmployeeSnapshot } from "./materialization.js";
 
 export type EmployeeSnapshot = ResourcePayload & {
   employee_id: string;
+  assignment_id: string;
   stripe_connections: Array<Record<string, unknown>>;
 };
 
@@ -552,7 +553,46 @@ function buildTasks(input: {
   return [...approvalTasks, ...eventTasks, ...runtimeTask, ...connectorTasks, ...reminderTasks, ...jobTasks];
 }
 
-export async function buildEmployeeSnapshot(db: SupabaseClient, employeeId: string, accountId: string): Promise<EmployeeSnapshot> {
+async function resolveSnapshotAssignment(
+  db: SupabaseClient,
+  employeeId: string,
+  accountId: string,
+  explicitAssignmentId?: string | null,
+): Promise<string> {
+  if (explicitAssignmentId) {
+    const scoped = await db.from("employee_assignments")
+      .select("id,account_id,status,employee_principals!inner(employee_id)")
+      .eq("id", explicitAssignmentId)
+      .eq("account_id", accountId)
+      .eq("employee_principals.employee_id", employeeId)
+      .maybeSingle();
+    if (scoped.error) throw scoped.error;
+    if (!scoped.data?.id || scoped.data.status !== "active") throw new Error("snapshot_assignment_invalid");
+    return String(scoped.data.id);
+  }
+  const rpc = (db as any).rpc;
+  if (typeof rpc !== "function") throw new Error("snapshot_assignment_required");
+  const result = await rpc.call(db, "amtech_default_assignment_for_employee_account", {
+    p_employee_id: employeeId,
+    p_account_id: accountId,
+  });
+  if (result.error) throw result.error;
+  const assignmentId = typeof result.data === "string"
+    ? result.data
+    : Array.isArray(result.data)
+      ? String(result.data[0] ?? "")
+      : String(result.data ?? "");
+  if (!assignmentId) throw new Error("snapshot_assignment_not_unique");
+  return assignmentId;
+}
+
+export async function buildEmployeeSnapshot(
+  db: SupabaseClient,
+  employeeId: string,
+  accountId: string,
+  explicitAssignmentId?: string | null,
+): Promise<EmployeeSnapshot> {
+  const assignmentId = await resolveSnapshotAssignment(db, employeeId, accountId, explicitAssignmentId);
   const { data: employeeRaw } = await db
     .from("employees")
     .select("id,name,status,profile_id,web_route,created_at")
@@ -562,68 +602,70 @@ export async function buildEmployeeSnapshot(db: SupabaseClient, employeeId: stri
   const { data: artifacts } = await db
     .from("artifacts")
     .select("id,kind,mime_type,storage_ref,payload,created_at")
-    .eq("employee_id", employeeId).eq("account_id", accountId)
+    .eq("employee_id", employeeId).eq("account_id", accountId).eq("assignment_id", assignmentId)
     .order("created_at", { ascending: false }).limit(10);
   const { data: approvals } = await db
     .from("approvals")
     .select("id,action_key,summary,risk_level,refs,resolution,expires_at,created_at")
-    .eq("employee_id", employeeId).eq("account_id", accountId)
+    .eq("employee_id", employeeId).eq("account_id", accountId).eq("assignment_id", assignmentId)
     .is("resolution", null)
     .order("created_at", { ascending: false }).limit(10);
   const { data: messages } = await db
     .from("employee_messages")
     .select("id,direction,source,channel,body,provider_id,status,created_at")
-    .eq("employee_id", employeeId)
+    .eq("employee_id", employeeId).eq("assignment_id", assignmentId)
     .order("created_at", { ascending: false }).limit(20);
   const { data: connectors } = await db
     .from("connector_accounts")
     .select("id,connector_key,provider,status,external_email,external_label,last_connector_test_at,last_error,created_at")
-    .eq("employee_id", employeeId).eq("account_id", accountId);
+    .eq("employee_id", employeeId).eq("account_id", accountId).eq("assignment_id", assignmentId);
   const { data: stripeConnections } = await db
     .from("stripe_connections")
     .select("id,connected_account_id,onboarding_status,charges_enabled,payouts_enabled,created_at")
-    .eq("employee_id", employeeId).eq("account_id", accountId);
+    .eq("employee_id", employeeId).eq("account_id", accountId).eq("assignment_id", assignmentId);
   const stripeConnectionIds = (stripeConnections ?? []).map((row: { id: string }) => row.id);
   const { data: stripeInvoices } = stripeConnectionIds.length
     ? await db
       .from("stripe_invoices")
       .select("id,stripe_connection_id,estimate_id,stripe_invoice_id,deposit_amount,hosted_invoice_url,invoice_pdf,status,created_at")
-      .in("stripe_connection_id", stripeConnectionIds)
+      .in("stripe_connection_id", stripeConnectionIds).eq("assignment_id", assignmentId)
       .order("created_at", { ascending: false }).limit(10)
     : { data: [] };
   const { data: reminders } = await db
     .from("reminders")
     .select("id,job_id,scheduled_at,channel,status,message,sent_at,provider_id,created_at")
-    .eq("employee_id", employeeId).eq("account_id", accountId)
+    .eq("employee_id", employeeId).eq("account_id", accountId).eq("assignment_id", assignmentId)
     .order("scheduled_at", { ascending: true }).limit(20);
   const { data: jobCommitments } = await db
     .from("job_commitments")
     .select("id,estimate_id,customer_ref,start_at,start_window,notes,source_ref,created_at")
-    .eq("employee_id", employeeId).eq("account_id", accountId)
+    .eq("employee_id", employeeId).eq("account_id", accountId).eq("assignment_id", assignmentId)
     .order("created_at", { ascending: false }).limit(20);
   const { data: inboundEvents } = await db
     .from("inbound_events")
     .select("id,source,event_type,provider_id,normalized_payload,status,trace,created_at")
     .eq("account_id", accountId)
     .eq("employee_id", employeeId)
+    .eq("assignment_id", assignmentId)
     .order("created_at", { ascending: false }).limit(50);
   const { data: runtimeRaw } = await db
     .from("runtime_endpoints")
     .select("id,backend_type,health,sms_number_e164")
-    .eq("employee_id", employeeId)
+    .eq("employee_id", employeeId).eq("assignment_id", assignmentId)
     .maybeSingle();
   const runtime = runtimeRaw as RuntimeEndpointRow | null;
   const { data: latestHealthRaw } = runtime?.id
     ? await db
       .from("runtime_health_checks")
       .select("status,checked_at,backend_type,details")
-      .eq("runtime_endpoint_id", runtime.id)
+      .eq("runtime_endpoint_id", runtime.id).eq("assignment_id", assignmentId)
       .order("checked_at", { ascending: false }).limit(1).maybeSingle()
     : { data: null };
   const latestHealth = latestHealthRaw as RuntimeHealthRow | null;
 
   const snapshotBase = {
     employee_id: employeeId,
+    assignment_id: assignmentId,
     account_id: accountId,
     employee: {
       id: employee.id,
@@ -712,13 +754,21 @@ export function cursorFromSnapshot(snapshot: EmployeeSnapshot): TupleCursor {
 /** New work events + approvals created after the stable `(created_at,id)` cursor.
  *  Rows at the exact cursor timestamp are over-fetched and filtered here so a
  *  reconnect cannot miss same-millisecond rows or duplicate the last delivered id. */
-export async function fetchWorkEventsSince(db: SupabaseClient, employeeId: string, accountId: string, cursor: TupleCursor | string): Promise<WorkEventDelta> {
+export async function fetchWorkEventsSince(
+  db: SupabaseClient,
+  employeeId: string,
+  accountId: string,
+  cursor: TupleCursor | string,
+  explicitAssignmentId?: string | null,
+): Promise<WorkEventDelta> {
+  const assignmentId = await resolveSnapshotAssignment(db, employeeId, accountId, explicitAssignmentId);
   const c = normalizeCursor(cursor);
   const { data: inboundEvents } = await db
     .from("inbound_events")
     .select("id,source,event_type,provider_id,normalized_payload,status,trace,created_at")
     .eq("account_id", accountId)
     .eq("employee_id", employeeId)
+    .eq("assignment_id", assignmentId)
     .gte("created_at", c.created_at)
     .order("created_at", { ascending: true }).limit(50);
   const rows = ((inboundEvents ?? []) as Array<Record<string, unknown> & { id?: string; created_at?: string }>)
@@ -728,7 +778,7 @@ export async function fetchWorkEventsSince(db: SupabaseClient, employeeId: strin
   const { data: newApprovals } = await db
     .from("approvals")
     .select("id,resolution,created_at")
-    .eq("employee_id", employeeId).eq("account_id", accountId)
+    .eq("employee_id", employeeId).eq("account_id", accountId).eq("assignment_id", assignmentId)
     .gte("created_at", c.created_at)
     .order("created_at", { ascending: true }).limit(20);
   const approvalRows = ((newApprovals ?? []) as Array<{ id: string; resolution: string | null; created_at?: string }>)

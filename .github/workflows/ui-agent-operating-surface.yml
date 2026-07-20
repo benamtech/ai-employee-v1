@@ -1,0 +1,238 @@
+name: Agent Operating Surface Standard
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [employee-production-tuesday]
+    paths:
+      - "docs/AMTECH_*"
+      - "docs/ui/**"
+      - "mvp-build/STANDARD_UI_RUNTIME_AMENDMENT_2026-07-19.md"
+      - "mvp-build/docs/ux/**"
+      - "mvp-build/apps/web/**"
+      - "mvp-build/apps/manager/src/lib/operating-surface.ts"
+      - "mvp-build/apps/manager/src/lib/materialization.ts"
+      - "mvp-build/apps/manager/src/lib/employee-stream.ts"
+      - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/apps/manager/src/lib/ui-resources.ts"
+      - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
+      - "mvp-build/packages/shared/src/**"
+      - "mvp-build/infra/scripts/ui/**"
+      - "mvp-build/scripts/validate-ui-system.mjs"
+      - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
+      - "mvp-build/tests/unit/ui-resources.test.ts"
+      - "mvp-build/tests/unit/ui-fixture-guard.test.ts"
+      - "mvp-build/tests/unit/observe-work-event-projection.test.ts"
+      - "mvp-build/validation/amtech-agent-ui-vectors.json"
+      - "mvp-build/validation/amtech-live-ui-role-runtime-vectors.json"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/ui-agent-operating-surface.yml"
+  pull_request:
+    branches: [research]
+    paths:
+      - "docs/AMTECH_*"
+      - "docs/ui/**"
+      - "mvp-build/STANDARD_UI_RUNTIME_AMENDMENT_2026-07-19.md"
+      - "mvp-build/docs/ux/**"
+      - "mvp-build/apps/web/**"
+      - "mvp-build/apps/manager/src/lib/operating-surface.ts"
+      - "mvp-build/apps/manager/src/lib/materialization.ts"
+      - "mvp-build/apps/manager/src/lib/employee-stream.ts"
+      - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/apps/manager/src/lib/ui-resources.ts"
+      - "mvp-build/apps/manager/src/lib/onboarding-identity-routes.ts"
+      - "mvp-build/packages/shared/src/**"
+      - "mvp-build/infra/scripts/ui/**"
+      - "mvp-build/scripts/validate-ui-system.mjs"
+      - "mvp-build/tests/unit/amtech-agent-ui-contract.test.ts"
+      - "mvp-build/tests/unit/ui-resources.test.ts"
+      - "mvp-build/tests/unit/ui-fixture-guard.test.ts"
+      - "mvp-build/tests/unit/observe-work-event-projection.test.ts"
+      - "mvp-build/validation/amtech-agent-ui-vectors.json"
+      - "mvp-build/validation/amtech-live-ui-role-runtime-vectors.json"
+      - "mvp-build/package.json"
+      - "mvp-build/package-lock.json"
+      - ".github/workflows/ui-agent-operating-surface.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-operating-surface-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - run: npm run generate:production-sources
+      - run: npm run build --workspace @amtech/shared
+      - run: npm run typecheck --workspace @amtech/shared
+      - run: npm run build --workspace @amtech/db
+      - run: npm run typecheck --workspace @amtech/db
+      - name: Typecheck Manager
+        shell: bash
+        run: |
+          set +e
+          npm run typecheck --workspace @amtech/manager 2>&1 | tee "$RUNNER_TEMP/manager-typecheck.log"
+          exit ${PIPESTATUS[0]}
+      - name: Upload Manager typecheck diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manager-ui-typecheck-${{ github.sha }}
+          path: ${{ runner.temp }}/manager-typecheck.log
+          if-no-files-found: error
+          retention-days: 7
+      - name: Typecheck web
+        shell: bash
+        run: |
+          set +e
+          npm run typecheck --workspace @amtech/web 2>&1 | tee "$RUNNER_TEMP/web-typecheck.log"
+          exit ${PIPESTATUS[0]}
+      - name: Upload web typecheck diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-ui-typecheck-${{ github.sha }}
+          path: ${{ runner.temp }}/web-typecheck.log
+          if-no-files-found: error
+          retention-days: 7
+      - name: Validate UI source contracts
+        shell: bash
+        run: |
+          set +e
+          npm run ui:validate 2>&1 | tee "$RUNNER_TEMP/ui-source-validation.json"
+          exit ${PIPESTATUS[0]}
+      - name: Upload UI source diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-source-validation-${{ github.sha }}
+          path: ${{ runner.temp }}/ui-source-validation.json
+          if-no-files-found: error
+          retention-days: 7
+      - run: npm run test:ui:contracts
+      - run: npm run build --workspace @amtech/web
+
+  browser-fixture:
+    needs: source-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - run: npm ci
+      - run: npm run build --workspace @amtech/shared
+      - name: Install Chromium runtime
+        run: npx playwright install --with-deps chromium
+      - name: Build compiled fixture web candidate
+        env:
+          NEXT_PUBLIC_AMTECH_UI_FIXTURES: "1"
+          NODE_ENV: "production"
+          CI: "true"
+          AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
+          AMTECH_ENVIRONMENT_NAME: "ui-fixture-ci"
+        run: npm run build --workspace @amtech/web
+      - name: Run compiled adaptive fixture and product-shell browser matrices
+        shell: bash
+        env:
+          UI_HEADLESS: "1"
+          UI_FIXTURE_LOGS: "1"
+          UI_FIXTURE_SERVER_MODE: "production"
+          UI_FIXTURE_BASE_URL: "http://127.0.0.1:3200"
+          NEXT_PUBLIC_AMTECH_UI_FIXTURES: "1"
+          NODE_ENV: "production"
+          CI: "true"
+          AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
+          AMTECH_ENVIRONMENT_NAME: "ui-fixture-ci"
+        run: |
+          set -euo pipefail
+          EVIDENCE_DIR="infra/.local/ui-fixtures"
+          STANDALONE_ROOT="apps/web/.next/standalone"
+          mkdir -p "$EVIDENCE_DIR"
+
+          SERVER_ENTRY="$(find "$STANDALONE_ROOT" -path '*/node_modules' -prune -o -type f -name server.js -print | sort | head -n 1)"
+          if [ -z "$SERVER_ENTRY" ]; then
+            echo "No standalone Next server.js found under $STANDALONE_ROOT." >&2
+            find "$STANDALONE_ROOT" -maxdepth 5 -type f -print >&2 || true
+            exit 1
+          fi
+          APP_ROOT="$(dirname "$SERVER_ENTRY")"
+          mkdir -p "$APP_ROOT/.next"
+          rm -rf "$APP_ROOT/.next/static"
+          cp -R apps/web/.next/static "$APP_ROOT/.next/static"
+          if [ -d apps/web/public ]; then
+            rm -rf "$APP_ROOT/public"
+            cp -R apps/web/public "$APP_ROOT/public"
+          fi
+
+          (
+            cd "$APP_ROOT"
+            PORT=3200 HOSTNAME=127.0.0.1 node server.js
+          ) >"$GITHUB_WORKSPACE/mvp-build/$EVIDENCE_DIR/standalone-server.log" 2>&1 &
+          SERVER_PID=$!
+          cleanup() {
+            kill "$SERVER_PID" 2>/dev/null || true
+            wait "$SERVER_PID" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          READY=0
+          for _attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error "$UI_FIXTURE_BASE_URL/login" >/dev/null 2>&1; then
+              READY=1
+              break
+            fi
+            if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+              echo "Standalone server exited before readiness." >&2
+              cat "$EVIDENCE_DIR/standalone-server.log" >&2 || true
+              exit 1
+            fi
+            sleep 0.5
+          done
+          if [ "$READY" -ne 1 ]; then
+            echo "Standalone server did not become ready." >&2
+            cat "$EVIDENCE_DIR/standalone-server.log" >&2 || true
+            exit 1
+          fi
+
+          set +e
+          npm run ui:test 2>&1 | tee "$EVIDENCE_DIR/browser-test.log"
+          FIXTURE_STATUS=${PIPESTATUS[0]}
+          if [ "$FIXTURE_STATUS" -eq 0 ]; then
+            npm run ui:test:shell 2>&1 | tee "$EVIDENCE_DIR/product-shell-test.log"
+            SHELL_STATUS=${PIPESTATUS[0]}
+          else
+            SHELL_STATUS=1
+          fi
+          set -e
+          if [ "$FIXTURE_STATUS" -ne 0 ]; then exit "$FIXTURE_STATUS"; fi
+          exit "$SHELL_STATUS"
+      - name: Upload adaptive browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-operating-browser-${{ github.sha }}
+          path: mvp-build/infra/.local/ui-fixtures
+          if-no-files-found: error
+          retention-days: 14

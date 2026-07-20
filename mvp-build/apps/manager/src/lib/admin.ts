@@ -170,68 +170,18 @@ export function redactAdminPayload<T>(value: T): T {
 }
 
 export async function requirePlatformRole(
-  db: SupabaseClient,
-  input: { platform_user_id?: string | null; minimum?: PlatformRole },
+  _db: SupabaseClient,
+  _input: { platform_user_id?: string | null; minimum?: PlatformRole },
 ): Promise<{ ok: true; actor: AdminActor } | { ok: false; status: number; error: string }> {
-  const userId = String(input.platform_user_id ?? "").trim();
-  if (!userId) return { ok: false, status: 401, error: "platform_user_required" };
-
-  const { data: user } = await db.from("platform_users").select("*").eq("id", userId).eq("status", "active").maybeSingle();
-  if (!user) {
-    if (process.env.ALLOW_ADMIN_BOOTSTRAP === "1" && process.env.NODE_ENV !== "production") {
-      return { ok: true, actor: { platform_user_id: userId, role: "platform_owner" } };
-    }
-    return { ok: false, status: 403, error: "platform_user_denied" };
-  }
-
-  const { data: roleRows } = await db.from("platform_user_roles").select("role").eq("platform_user_id", userId);
-  const roles = asRows<{ role?: string }>(roleRows).flatMap((r) => {
-    const role = safeRole(r.role);
-    return role ? [role] : [];
-  });
-  const role = strongestRole(roles);
-  if (!role) return { ok: false, status: 403, error: "platform_role_required" };
-  const minimum = input.minimum ?? "support_readonly";
-  if (ROLE_RANK[role] < ROLE_RANK[minimum]) return { ok: false, status: 403, error: "platform_role_insufficient" };
-  return { ok: true, actor: { platform_user_id: userId, role } };
+  return { ok: false, status: 403, error: "legacy_platform_authority_disabled" };
 }
 
 export async function recordSupportAccess(
-  db: SupabaseClient,
-  actor: AdminActor,
-  input: { account_id: string; reason?: string | null; action: string; employee_id?: string | null },
+  _db: SupabaseClient,
+  _actor: AdminActor,
+  _input: { account_id: string; reason?: string | null; action: string; employee_id?: string | null },
 ): Promise<{ ok: true; audit_id: string } | { ok: false; status: number; error: string }> {
-  const reason = String(input.reason ?? "").trim();
-  if (reason.length < 8) return { ok: false, status: 400, error: "support_reason_required" };
-  const supportId = newId(ID_PREFIX.supportAccess);
-  await db.from("support_access_sessions").insert({
-    id: supportId,
-    platform_user_id: actor.platform_user_id,
-    account_id: input.account_id,
-    role: actor.role,
-    reason,
-    expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-  });
-  await db.from("admin_action_events").insert({
-    id: newId(ID_PREFIX.adminAction),
-    platform_user_id: actor.platform_user_id,
-    role: actor.role,
-    account_id: input.account_id,
-    employee_id: input.employee_id ?? null,
-    action: `support_access:${input.action}`,
-    reason,
-    result: "ok",
-    proof: { support_access_session_id: supportId },
-  });
-  const audit_id = await writeAudit(db, {
-    account_id: input.account_id,
-    employee_id: input.employee_id ?? null,
-    actor: "manager",
-    action: `admin:support_access:${input.action}`,
-    result: "ok",
-    details: { platform_user_id: actor.platform_user_id, role: actor.role, reason, support_access_session_id: supportId },
-  });
-  return { ok: true, audit_id };
+  return { ok: false, status: 403, error: "legacy_support_session_disabled" };
 }
 
 function employeeHealth(employee: Record<string, unknown>, runtime: Record<string, unknown> | undefined, pendingApprovals: number, repairs: number): HealthState {
@@ -445,6 +395,10 @@ async function writeAdminAction(
   await db.from("admin_action_events").insert({
     id,
     platform_user_id: actor.platform_user_id,
+    platform_principal_id: actor.platform_principal_id ?? null,
+    platform_session_id: actor.platform_session_id ?? null,
+    support_lease_id: actor.support_lease_id ?? null,
+    assignment_id: actor.assignment_id ?? null,
     role: actor.role,
     account_id: input.account_id,
     employee_id: input.employee_id ?? null,
@@ -456,6 +410,7 @@ async function writeAdminAction(
   await writeAudit(db, {
     account_id: input.account_id,
     employee_id: input.employee_id ?? null,
+    assignment_id: actor.assignment_id ?? null,
     actor: "manager",
     action: `admin:${input.action}`,
     result: input.result,
@@ -465,7 +420,13 @@ async function writeAdminAction(
 }
 
 export async function runAdminSupportAction(db: SupabaseClient, actor: AdminActor, input: AdminSupportActionInput): Promise<AdminSupportActionResult> {
-  if (!input.reason || input.reason.trim().length < 8) {
+  if (!actor.platform_principal_id || !actor.platform_session_id || !actor.support_lease_id || !actor.assignment_id || !actor.authenticated_by) {
+    return { status: "denied", action: input.action, changed_resources: [], proof: { reason: "durable_platform_authority_required" }, user_facing_summary_hint: "Durable platform authority is required." };
+  }
+  if (actor.assignment_id !== input.assignment_id) {
+    return { status: "denied", action: input.action, changed_resources: [], proof: { reason: "platform_assignment_scope_mismatch" }, user_facing_summary_hint: "The support lease does not cover this assignment." };
+  }
+  if (!input.reason || input.reason.trim().length < 8 || input.reason !== actor.support_reason) {
     return { status: "denied", action: input.action, changed_resources: [], proof: {}, user_facing_summary_hint: "Support reason is required." };
   }
   if (ROLE_RANK[actor.role] < ROLE_RANK.platform_operator && input.action !== "rerun_runtime_health") {
@@ -507,7 +468,7 @@ export async function runAdminSupportAction(db: SupabaseClient, actor: AdminActo
     await db.from("employee_mcp_credentials").update({ status: "revoked", revoked_at: nowIso(), updated_at: nowIso() }).eq("employee_id", input.employee_id).eq("status", "active");
     changed.push(`mcp_credentials:${input.employee_id}`);
     if (input.action === "rotate_mcp_credential") {
-      const minted = await mintEmployeeMcpCredential(db, { account_id: input.account_id, employee_id: input.employee_id! });
+      const minted = await mintEmployeeMcpCredential(db, { account_id: input.account_id, employee_id: input.employee_id!, assignment_id: input.assignment_id });
       proof.new_credential_id = minted.credential_id;
       proof.token_prefix = minted.token_prefix;
       proof.raw_token_returned = false;
@@ -523,7 +484,13 @@ export async function runAdminSupportAction(db: SupabaseClient, actor: AdminActo
     changed.push(`runtime_health:${input.employee_id}`);
     summary = "Runtime health check completed.";
   } else if (input.action === "redeliver_event") {
-    const outcome = await runManagerTool("redeliver_employee_event", { event_id: input.event_id, channel: "sms" }, { actor: "manager" });
+    const outcome = await runManagerTool("redeliver_employee_event", { event_id: input.event_id, channel: "sms" }, {
+      actor: "manager",
+      assignment_id: input.assignment_id,
+      principal_id: actor.platform_principal_id,
+      principal_class: "platform",
+      authenticated_by: actor.authenticated_by,
+    });
     if (outcome.kind !== "ok" || outcome.envelope.status !== "ok") {
       proof.tool_status = outcome.kind === "ok" ? outcome.envelope.status : outcome.kind;
       const audit_id = await writeAdminAction(db, actor, { action: input.action, account_id: input.account_id, employee_id: input.employee_id, reason: input.reason, result: "failed", proof });
@@ -533,7 +500,13 @@ export async function runAdminSupportAction(db: SupabaseClient, actor: AdminActo
     Object.assign(proof, outcome.envelope.proof ?? {});
     summary = "Event redelivered.";
   } else if (input.action === "suppress_event_source") {
-    const outcome = await runManagerTool("suppress_event_source", { account_id: input.account_id, source: input.source, event_type: input.event_type, reason: input.reason, expires_at: input.expires_at }, { actor: "manager" });
+    const outcome = await runManagerTool("suppress_event_source", { account_id: input.account_id, source: input.source, event_type: input.event_type, reason: input.reason, expires_at: input.expires_at }, {
+      actor: "manager",
+      assignment_id: input.assignment_id,
+      principal_id: actor.platform_principal_id,
+      principal_class: "platform",
+      authenticated_by: actor.authenticated_by,
+    });
     if (outcome.kind !== "ok" || outcome.envelope.status !== "ok") {
       proof.tool_status = outcome.kind === "ok" ? outcome.envelope.status : outcome.kind;
       const audit_id = await writeAdminAction(db, actor, { action: input.action, account_id: input.account_id, employee_id: input.employee_id, reason: input.reason, result: "failed", proof });

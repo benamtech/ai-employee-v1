@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@amtech/db";
 import { OnboardingManifest } from "@amtech/shared";
 import type { EmployeeSnapshot } from "./employee-stream.js";
 import { buildProfileContext } from "./profile-context.js";
+import { orThrow } from "./db.js";
 
 export const BUSINESS_BRAIN_RESOURCES = {
   brain: "amtech://manager/business-brain",
@@ -23,6 +24,7 @@ export async function countRows(db: SupabaseClient, table: string, input: {
     .select("id", { count: "exact", head: true })
     .eq("account_id", input.account_id)
     .eq("employee_id", input.employee_id);
+  if (result.error) throw result.error;
   return Number((result as { count?: number | null }).count ?? 0);
 }
 
@@ -31,35 +33,47 @@ export async function buildBusinessBrainIndex(db: SupabaseClient, input: {
   employee_id: string;
   snapshot?: EmployeeSnapshot;
 }) {
-  const { data: employee } = await db
-    .from("employees")
-    .select("id,profile_package_key,status,profile_id")
-    .eq("account_id", input.account_id)
-    .eq("id", input.employee_id)
-    .maybeSingle();
-  const { data: manifestRow } = await db
-    .from("employee_manifests")
-    .select("manifest,profile_package_key")
-    .eq("employee_id", input.employee_id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const { data: buildRow } = await db
-    .from("employee_profile_builds")
-    .select("generated_path,install_status,validation_status,package_key,updated_at")
-    .eq("account_id", input.account_id)
-    .eq("employee_id", input.employee_id)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const employee = orThrow(
+    await db
+      .from("employees")
+      .select("id,profile_package_key,status,profile_id")
+      .eq("account_id", input.account_id)
+      .eq("id", input.employee_id)
+      .maybeSingle(),
+    "business_brain.employee",
+  ) as { id: string; profile_package_key?: string | null; status?: string | null; profile_id?: string | null } | null;
+  if (!employee?.id) throw new Error("business_brain_employee_not_found");
+
+  const manifestRow = orThrow(
+    await db
+      .from("employee_manifests")
+      .select("manifest,profile_package_key")
+      .eq("employee_id", input.employee_id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    "business_brain.manifest",
+  ) as { manifest?: unknown; profile_package_key?: string | null } | null;
+
+  const buildRow = orThrow(
+    await db
+      .from("employee_profile_builds")
+      .select("generated_path,install_status,validation_status,package_key,updated_at")
+      .eq("account_id", input.account_id)
+      .eq("employee_id", input.employee_id)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    "business_brain.profile_build",
+  ) as { generated_path?: string | null; install_status?: string | null; validation_status?: string | null; package_key?: string | null; updated_at?: string | null } | null;
 
   const packageKey = String(
-    (buildRow as { package_key?: string } | null)?.package_key ??
-    (employee as { profile_package_key?: string } | null)?.profile_package_key ??
-    (manifestRow as { profile_package_key?: string } | null)?.profile_package_key ??
+    buildRow?.package_key ??
+    employee.profile_package_key ??
+    manifestRow?.profile_package_key ??
     "contractor_estimator",
   );
-  const parsedManifest = OnboardingManifest.safeParse((manifestRow as { manifest?: unknown } | null)?.manifest);
+  const parsedManifest = OnboardingManifest.safeParse(manifestRow?.manifest);
   const profileContext = parsedManifest.success
     ? buildProfileContext({ packageKey, manifest: parsedManifest.data })
     : null;
@@ -81,14 +95,14 @@ export async function buildBusinessBrainIndex(db: SupabaseClient, input: {
   return {
     brain_index: {
       profile_package: packageKey,
-      employee_status: (employee as { status?: string } | null)?.status ?? "unknown",
+      employee_status: employee.status ?? "unknown",
       context_slots: contextSlots,
       native_memory: {
-        status: (buildRow as { install_status?: string } | null)?.install_status === "installed" ? "rendered" : "pending",
+        status: buildRow?.install_status === "installed" ? "rendered" : "pending",
         memory_md: "memories/MEMORY.md",
         user_md: "memories/USER.md",
-        generated_path: (buildRow as { generated_path?: string | null } | null)?.generated_path ?? null,
-        validation_status: (buildRow as { validation_status?: string | null } | null)?.validation_status ?? null,
+        generated_path: buildRow?.generated_path ?? null,
+        validation_status: buildRow?.validation_status ?? null,
       },
       live_state_pointers: [
         BUSINESS_BRAIN_RESOURCES.connector_status,
@@ -118,12 +132,15 @@ export async function readBusinessFactsResource(db: SupabaseClient, input: {
   account_id: string;
   employee_id: string;
 }) {
-  const { data } = await db
-    .from("business_brain_facts")
-    .select("id,fact_key,fact_value,category,source,confidence,updated_at")
-    .eq("account_id", input.account_id)
-    .eq("employee_id", input.employee_id)
-    .order("updated_at", { ascending: false })
-    .limit(100);
-  return { facts: data ?? [] };
+  const facts = orThrow(
+    await db
+      .from("business_brain_facts")
+      .select("id,fact_key,fact_value,category,source,confidence,updated_at")
+      .eq("account_id", input.account_id)
+      .eq("employee_id", input.employee_id)
+      .order("updated_at", { ascending: false })
+      .limit(100),
+    "business_brain.facts",
+  );
+  return { facts: facts ?? [] };
 }

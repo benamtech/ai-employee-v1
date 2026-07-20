@@ -20,6 +20,20 @@ function token(len = 22): string {
 }
 
 export const ID_PREFIX = {
+  organization: "org",
+  relationship: "rel",
+  humanPrincipal: "hpr",
+  employeePrincipal: "epr",
+  assignment: "asn",
+  assignmentPrincipal: "aspr",
+  resourceGrant: "grant",
+  authorityPolicy: "apol",
+  commercialRelationship: "crel",
+  commandIntent: "intent",
+  durableCommand: "cmd",
+  effectAttempt: "eff",
+  effectReceipt: "erec",
+  replayResponse: "replay",
   account: "acct",
   user: "user",
   membership: "mem",

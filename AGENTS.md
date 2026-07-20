@@ -1,52 +1,129 @@
 # AGENTS.md — Repository Agent Rules
 
-Status: active
-Updated: 2026-07-17
+Status: active  
+Updated: 2026-07-20
 
-## Read order
+## Mandatory read order
 
 1. `identity.md`
-2. `CODEGRAPH.md`
-3. the nearest scoped `AGENTS.md`, `CLAUDE.md`, `CODEGRAPH.md`, and `identity.md`
-4. newest relevant memory/handoff
-5. source, migrations, scripts, proofs, and tests
+2. this file or `CLAUDE.md`
+3. root `CODEGRAPH.md`
+4. [`CONTRIBUTING.md`](CONTRIBUTING.md) for executable onboarding and verification
+5. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
+6. ratified `mvp-build/STANDARD.md`
+7. `mvp-build/second-half-plan/README.md` and its single active program
+8. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
+9. `mvp-build/docs/architecture/README.md`
+10. relevant source, migrations, tests, workflows, proof, release records, and current diff
 
-When instructions conflict, the narrowest scoped file governs its subtree unless it contradicts verified source or an explicit user instruction.
+Authority order: deployed release proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests/acceptance → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
-## Scope routing
+## Repository routing
 
-- Product/runtime work under `mvp-build/`: read `mvp-build/AGENTS.md`, `mvp-build/CLAUDE.md`, and `mvp-build/CODEGRAPH.md`.
-- Holographic website framework work under `GTM-RESEARCH/website-framework/`: read its `identity.md`, `AGENTS.md`, and `CODEGRAPH.md`.
-- Public website copy/design: read `docs/amtech-website-rewrite-brief.md`, `docs/AMTECH_WEB_DESIGN_SYSTEM.md`, and `docs/AMTECH_AGENTIC_GENERATIVE_WEB_DESIGN_ADDENDUM.md`.
-- Durable product truth: use current source, implementation records, runbooks, GTM strategy, and newest memory rather than stale historical plans.
+- AI Employee implementation and production authority: `mvp-build/`.
+- Ratified product/engineering requirements: `mvp-build/STANDARD.md`.
+- Single active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Current architecture/research disposition: `mvp-build/docs/architecture/`.
+- Durable handoffs: `mvp-build/memory/`, indexed only by `mvp-build/memory/MEMORY.md`.
+- Historical factual ledger: `wiki/MVP/implementation-records/`.
+- Hyper Site lives in `benamtech/hyper-site`; do not recreate it here.
+- The public estimator is outdated and non-canonical.
 
-## Repository invariants
+## Current integration boundary
 
-1. Never claim live provider/runtime acceptance without real proof artifacts.
-2. Keep the normal AI Employee deployment path intact.
-3. Treat the public estimator as outdated and non-canonical.
-4. Preserve Start Free, Managed AI Employee from $400, and Workforce custom pricing unless explicitly changed.
-5. Keep owner approval at customer, money, reputation, and destructive-action gates.
-6. Do not place provider master credentials in employee profiles or runtimes.
-7. Do not convert adaptive website research into covert identity profiling, fingerprinting, or sensitive-trait inference.
-8. Canonical pages remain complete without personalization, JavaScript, consent, vector infrastructure, or experimentation services.
-9. Every generated or adaptive claim must remain bounded by its evidence level.
-10. Record validation not run. Source-wired is not live-accepted.
+- Repository: `benamtech/ai-employee-v1`.
+- Integration/cutover branch: `employee-production-tuesday`.
+- Target/base: `main`.
+- Draft cutover PR: `#23`.
+- Historical `research` is not a current authority or future integration dependency.
+- Migration head: `0072`.
+- Standard v0.2 is ratified and effective.
+- Current source/CI does not imply database, target-host, provider, fixture-free browser/channel, commercial, recovery, rollback, capacity, deployment, or launch acceptance.
 
-## Working method
+## Product and protocol invariants
 
-- Inspect before editing.
-- Prefer the smallest coherent change set that resolves the actual invariant or contradiction.
-- Keep schemas, generated artifacts, tests, docs, and memory synchronized.
-- Use deterministic generation and versioned manifests for generated content or vectors.
-- Benchmark elegant machinery against simpler baselines.
-- Fail safely to the canonical baseline.
-- Update the nearest CODEGRAPH and durable handoff when architecture or source-of-truth paths change.
+1. AMTECH is governed AI labor, not a generic chat or tool wrapper.
+2. Every consequential path resolves an authenticated principal plus explicit assignment or approved platform/system context.
+3. Identity, ownership, employment, access, authority, custody, payer, and beneficiary remain separate relationships.
+4. Hermes remains the reasoning/runtime substrate; Manager owns assignment authority, capability/tool contracts, connector custody, approvals, durable effects, commercial attribution, revocation, repair, and proof.
+5. MCP core, MCP Apps, and AG-UI are interoperability layers, not execution authority.
+6. Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
+7. Unknown/consequential connectors fail closed to Manager mediation; direct MCP requires explicit read-only, non-money, non-customer-facing evidence.
+8. Generated UI and adaptive layout are presentation systems; browser state cannot invent work, actions, approval, credentials, or effects.
+9. Customer-facing, monetary, destructive, credential, and broad external actions use assignment-aware policy, approval where required, durable effect state, and receipts.
+10. Provider master credentials never enter employee profiles or runtimes.
+11. Ambiguous consequential provider outcomes reconcile before retry.
+12. Public and release claims never exceed evidence on the exact candidate.
+
+## Required contributor gate
+
+From `mvp-build/`:
+
+```bash
+npm ci
+npm run hooks:install
+npm run repo:verify:quick
+```
+
+Before editing, validate a bounded task contract and six-point rubric:
+
+```bash
+npm run repo:rubric -- ./task-contract.json
+```
+
+Before pushing:
+
+```bash
+npm run repo:verify:full
+```
+
+Local hooks provide fast feedback but are bypassable; CI is authoritative. Coverage is required for changed logic where the package has instrumentation, but no agent may invent a misleading repository-wide percentage without a measured baseline.
+
+## Company engineering standards
+
+Every task must declare task ID, repository, branch, objective, success criteria, allowed/forbidden files, required tests, blockers, maximum commits, and Authority/Completeness/Agility/Isolation/Provability/Moat scores with mitigations below `0.5`.
+
+```text
+Explore → smallest coherent action → test → commit → verify exact head
+```
+
+- Work on the selected reviewed branch; `main` changes only through an approved merge.
+- No feature expansion while a prerequisite P0 is unresolved.
+- Every commit references the task ID.
+- Stop downstream work on red CI.
+- Treat a new applicable failure as the change's defect unless evidence proves the expectation stale.
+- Do not weaken tests merely to obtain green.
+- Use `find`/`grep` rather than guessing paths.
+- After three failed attempts on one concrete step, preserve diagnostics and escalate.
+- Schemas, fixtures, migrations, typed contracts, harnesses, diagnostics, proof capture, and runbooks are first-class implementation.
+- Add concise `why` comments at non-obvious authority, safety, failure, or compatibility boundaries.
+
+## Hermes upstream review
+
+Before changing Hermes integration, runtime launch, profiles, sessions, delegation, tool discovery, gateway behavior, or Hermes-derived UI, run:
+
+```bash
+cd mvp-build
+npm run hermes:upstream:check
+```
+
+Review the official `NousResearch/hermes-agent` repository, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active pull requests. Upstream is intelligence, not authority: AMTECH production remains pinned until exact-image compatibility and release gates pass.
+
+## Database evidence policy
+
+Routine database work uses production-shaped local/CI PostgreSQL TDD: complete ledger, constraints, RLS/grants/functions, negative isolation, concurrency, backfills, and rollback behavior.
+
+Disposable managed Supabase is required only for material platform-specific behavior, security-sensitive browser/Data API boundaries, suspected platform differences, new release migration classes, and the final release candidate. Production is never the routine test target.
+
+## Documentation discipline
+
+- Root `CODEGRAPH.md` owns repository routing and the integration headline.
+- `mvp-build/CODEGRAPH.md` owns implementation topology, migration head, source hubs, and evidence boundary.
+- `mvp-build/STANDARD.md` owns normative requirements.
+- `mvp-build/second-half-plan/README.md` owns the single active plan route.
+- `mvp-build/memory/MEMORY.md` is the sole handoff index.
+- Historical documents remain point-in-time evidence; route them through explicit supersession banners rather than silently rewriting facts.
 
 ## Git discipline
 
-- Work on the user-specified branch.
-- Inspect divergence and mergeability before publishing.
-- Do not force-update shared branches unless explicitly required and safely backed up.
-- Run available static/unit/build checks before merge; document unavailable environment-dependent checks.
-- Merge only when the target branch is current, conflicts are resolved, review threads are clear, and no known P0 gate is being hidden.
+`employee-production-tuesday` is the reviewed cutover branch for PR `#23` into `main`. Do not force-update shared branches without explicit approval and a recovery path. Merge only when required checks pass, current authority documents and proof agree, and no P0/P1 gate is hidden.

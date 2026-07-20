@@ -1,10 +1,6 @@
 /**
- * Work Surface design tokens — the AMTECH layer.
- * Two text/background modes only: near-black ink on white, and white on AMTECH
- * red. Red accents white surfaces (labels, active borders, alerts, key CTAs);
- * everything else is ink, hairlines, and the light-gray wash. Corners are
- * sharp, borders are 1px, spacing sits on a 3px grid, there are no shadows.
- * Inter carries display/body text; IBM Plex Mono carries operational labels.
+ * Work Surface compatibility tokens. The current adaptive owner surface uses the
+ * canonical AMTECH globals; these values remain for legacy descriptor cards.
  */
 export const tokens = {
   color: {
@@ -16,11 +12,11 @@ export const tokens = {
     text: "#0a0a0a",
     textMuted: "rgba(10,10,10,0.62)",
     textFaint: "rgba(10,10,10,0.62)",
-    accent: "#e11d2a", // AMTECH red — the only accent hue
+    accent: "#e11d2a",
     accentSoft: "#f4f4f4",
-    success: "#0a0a0a", // completion is stated in ink + glyph, not a new hue
+    success: "#0a0a0a",
     successSoft: "#f4f4f4",
-    warning: "#e11d2a", // "needs you" is red
+    warning: "#e11d2a",
     warningSoft: "#ffffff",
     danger: "#e11d2a",
     dangerSoft: "rgba(225,29,42,0.30)",
@@ -43,8 +39,12 @@ export const tokens = {
   },
 } as const;
 
-/** Move-type accents (notify = calm, question = needs you, review = decision). */
+/**
+ * Presentation grammar only. `observe` is quiet ambient state, `notify` is a
+ * deliberate heads-up, and question/review are owner-attention moves.
+ */
 export const moveStyle = {
+  observe: { label: "Observed", color: tokens.color.textMuted, soft: tokens.color.surfaceMuted, bar: tokens.color.border },
   notify: { label: "Heads up", color: tokens.color.textMuted, soft: tokens.color.surfaceMuted, bar: tokens.color.borderStrong },
   question: { label: "Needs you", color: tokens.color.accent, soft: "#ffffff", bar: tokens.color.accent },
   review: { label: "Your call", color: tokens.color.text, soft: tokens.color.surfaceMuted, bar: tokens.color.text },

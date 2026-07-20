@@ -10,7 +10,13 @@ export type BillingState = "free_mvp" | "trialing" | "active" | "past_due" | "ca
 export type HealthState = "green" | "yellow" | "red" | "gray";
 
 export interface AdminActor {
+  /** Compatibility projection only. Durable authority uses platform_principal_id/session_id. */
   platform_user_id: string;
+  platform_principal_id?: string;
+  platform_session_id?: string;
+  support_lease_id?: string | null;
+  assignment_id?: string | null;
+  authenticated_by?: string;
   role: PlatformRole;
   support_reason?: string;
 }
@@ -111,7 +117,12 @@ export type AdminSupportAction =
 export interface AdminSupportActionInput {
   action: AdminSupportAction;
   account_id: string;
-  employee_id?: string;
+  employee_id: string;
+  /** Canonical S8 scope. Account and employee are compatibility projections. */
+  assignment_id: string;
+  /** Stable caller intent; retries with changed payload are rejected by C3. */
+  idempotency_key: string;
+  /** Compatibility input only; live S8 uses the durable support-lease reason. */
   reason: string;
   event_id?: string;
   source?: string;

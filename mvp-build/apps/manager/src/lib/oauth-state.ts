@@ -18,12 +18,21 @@ export interface OAuthStatePayload {
   provider: "gmail" | "stripe" | "quickbooks";
   nonce: string;
   exp: number; // epoch seconds
+  /** Owner-web relative path only. Never an absolute URL. */
+  return_to?: string;
+}
+
+export function safeOAuthReturnPath(value: unknown): string | undefined {
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) return undefined;
+  if (/[\u0000-\u001f\u007f]/.test(value) || value.length > 500) return undefined;
+  return value;
 }
 
 export function mintOAuthState(
   employee_id: string,
   provider: "gmail" | "stripe" | "quickbooks",
   ttlSeconds = 600,
+  options: { return_to?: string } = {},
 ): string {
   const payload: OAuthStatePayload = {
     employee_id,
@@ -31,6 +40,8 @@ export function mintOAuthState(
     nonce: randomBytes(12).toString("hex"),
     exp: Math.floor(Date.now() / 1000) + ttlSeconds,
   };
+  const returnTo = safeOAuthReturnPath(options.return_to);
+  if (returnTo) payload.return_to = returnTo;
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const sig = createHmac("sha256", key()).update(body).digest("base64url");
   return `${body}.${sig}`;
@@ -43,7 +54,13 @@ export function verifyOAuthState(token: string): OAuthStatePayload | null {
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as OAuthStatePayload;
+  let payload: OAuthStatePayload;
+  try {
+    payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as OAuthStatePayload;
+  } catch {
+    return null;
+  }
   if (payload.exp < Math.floor(Date.now() / 1000)) return null;
+  if (payload.return_to && !safeOAuthReturnPath(payload.return_to)) return null;
   return payload;
 }

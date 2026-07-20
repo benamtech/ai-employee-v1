@@ -19,18 +19,22 @@ function esc(value: unknown): string {
 }
 
 const BASE_STYLE = `
-  :root{color-scheme:light dark;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  body{margin:0;padding:12px;font-size:14px;color:#1a1a1a;background:#fff}
-  @media(prefers-color-scheme:dark){body{color:#eee;background:#111}}
+  :root{color-scheme:light;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;padding:16px;font-size:14px;line-height:1.45;color:#111;background:#fff}
   table{border-collapse:collapse;width:100%;font-size:13px}
-  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #8883}
-  th{font-weight:600;color:#666}
-  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
-  .k{color:#888;font-size:12px}
-  button{font:inherit;padding:7px 14px;border-radius:8px;border:1px solid #8884;cursor:pointer;background:#f4f4f5}
-  button.primary{background:#2563eb;color:#fff;border-color:#2563eb}
-  label{display:block;margin:6px 0 2px;font-size:12px;color:#888}
-  input,select{font:inherit;padding:6px 8px;border:1px solid #8886;border-radius:6px;width:100%;box-sizing:border-box}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #d9e0ea;vertical-align:top}
+  th{font-weight:650;color:#4a5568;background:#f7f9fc}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+  .k{color:#637083;font-size:12px}
+  button{min-height:44px;font:inherit;font-weight:650;padding:10px 16px;border-radius:10px;border:1px solid #c9d2df;cursor:pointer;background:#fff;color:#111}
+  button:hover{background:#f7f9fc}
+  button.primary{background:#e11d2a;color:#fff;border-color:#e11d2a}
+  button.primary:hover{background:#bd1722;border-color:#bd1722}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+  label{display:block;margin:10px 0 4px;font-size:12px;font-weight:650;color:#4a5568}
+  input,select{min-height:44px;font:inherit;padding:9px 10px;border:1px solid #aeb9c8;border-radius:8px;width:100%;color:#111;background:#fff}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}}
 `;
 
 /** The postMessage bridge. Every action is a single owner-safe `intent` envelope
@@ -81,23 +85,29 @@ function diffHtml(v: Extract<WorkView, { kind: "diff" }>, d: WorkDeliverableDesc
 
 function formHtml(v: Extract<WorkView, { kind: "form" }>): string {
   const fields = v.fields.map((f) => {
+    const required = f.required ? " required" : "";
     if (f.type === "select" && f.options?.length) {
       const opts = f.options.map((o) => `<option ${o === f.value ? "selected" : ""}>${esc(o)}</option>`).join("");
-      return `<label>${esc(f.label)}</label><select data-field="${esc(f.name)}">${opts}</select>`;
+      return `<label>${esc(f.label)}</label><select data-field="${esc(f.name)}"${required}>${opts}</select>`;
     }
-    return `<label>${esc(f.label)}</label><input data-field="${esc(f.name)}" type="${esc(f.type ?? "text")}" value="${esc(f.value ?? "")}"/>`;
+    return `<label>${esc(f.label)}</label><input data-field="${esc(f.name)}" type="${esc(f.type ?? "text")}" value="${esc(f.value ?? "")}"${required}/>`;
   }).join("");
   return `<form onsubmit="return false">${fields}<div class="row"><button class="primary" data-intent="respond">Send</button></div></form>`;
 }
 
+type WorkViewRenderer = (view: WorkView, deliverable: WorkDeliverableDescriptor) => string;
+
+const VIEW_RENDERERS: Record<WorkView["kind"], WorkViewRenderer> = {
+  table: (view, deliverable) => tableHtml(view as Extract<WorkView, { kind: "table" }>, deliverable),
+  schedule: (view, deliverable) => scheduleHtml(view as Extract<WorkView, { kind: "schedule" }>, deliverable),
+  diff: (view, deliverable) => diffHtml(view as Extract<WorkView, { kind: "diff" }>, deliverable),
+  form: (view) => formHtml(view as Extract<WorkView, { kind: "form" }>),
+};
+
+export const SUPPORTED_WORK_VIEW_KINDS = Object.freeze(Object.keys(VIEW_RENDERERS) as WorkView["kind"][]);
+
 function renderViewHtml(view: WorkView, d: WorkDeliverableDescriptor): string {
-  switch (view.kind) {
-    case "table": return tableHtml(view, d);
-    case "schedule": return scheduleHtml(view, d);
-    case "diff": return diffHtml(view, d);
-    case "form": return formHtml(view);
-    default: return "";
-  }
+  return VIEW_RENDERERS[view.kind](view, d);
 }
 
 /** Compile a deliverable's `view` into an MCP-UI resource. Returns undefined when

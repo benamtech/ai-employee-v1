@@ -1,4 +1,6 @@
+ARG AMTECH_GIT_SHA=unknown
 FROM node:22-bookworm-slim AS build
+ARG AMTECH_GIT_SHA
 WORKDIR /app
 
 COPY package*.json ./
@@ -7,16 +9,35 @@ COPY apps/web/package.json apps/web/package.json
 COPY packages/shared/package.json packages/shared/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/agent-template/package.json packages/agent-template/package.json
+
+# Root npm prepare generates the canonical Manager server. Copy its complete,
+# hash-pinned input closure before npm ci so lifecycle scripts cannot fail or
+# silently generate from a partial source tree.
+COPY apps/manager/scripts/generate-production-server.mjs apps/manager/scripts/generate-production-server.mjs
+COPY apps/manager/scripts/production-admin-block.mjs apps/manager/scripts/production-admin-block.mjs
+COPY apps/manager/src/server.template.ts apps/manager/src/server.template.ts
 RUN npm ci
 
 COPY . .
 RUN npm run build --workspace @amtech/shared \
   && npm run build --workspace @amtech/db \
-  && npm run build --workspace @amtech/manager
+  && npm run build --workspace @amtech/manager \
+  && test -f apps/manager/dist/server.generated.js \
+  && test -f apps/manager/dist/model-gateway-server.js \
+  && test -f apps/manager/dist/lib/model-gateway-http.js \
+  && test -f apps/manager/dist/lib/provisioner-idempotency.js \
+  && test -f apps/manager/dist/lib/provisioning-reconciler.js \
+  && test -f apps/manager/dist/lib/ambient-inbox.js \
+  && test -f apps/manager/dist/typeproofs/production-boundary.js
 
 FROM node:22-bookworm-slim AS runtime
+ARG AMTECH_GIT_SHA
+LABEL org.opencontainers.image.title="AMTECH Manager" \
+      org.opencontainers.image.revision="${AMTECH_GIT_SHA}" \
+      ai.amtech.runtime="manager"
 WORKDIR /app
 ENV NODE_ENV=production
+ENV AMTECH_GIT_SHA=${AMTECH_GIT_SHA}
 
 RUN apt-get update \
   && apt-get install -y --no-install-recommends bash ca-certificates \
@@ -28,5 +49,13 @@ COPY --from=build /app/apps/manager ./apps/manager
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/infra ./infra
 
+RUN test -f apps/manager/dist/server.generated.js \
+  && test -f apps/manager/dist/model-gateway-server.js \
+  && test -f apps/manager/dist/lib/model-gateway-http.js \
+  && test -f apps/manager/dist/lib/provisioner-idempotency.js \
+  && test -f apps/manager/dist/lib/provisioning-reconciler.js \
+  && test -f apps/manager/dist/lib/ambient-inbox.js \
+  && test -f apps/manager/dist/typeproofs/production-boundary.js
+
 EXPOSE 8080
-CMD ["node", "apps/manager/dist/server.js"]
+CMD ["node", "apps/manager/dist/server.generated.js"]

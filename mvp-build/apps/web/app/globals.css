@@ -1,47 +1,61 @@
-/*
- * AMTECH global foundation.
- * Two text/background modes only: near-black ink on white, white on AMTECH red.
- * Inter for display/body, IBM Plex Mono for operational labels. Sharp corners,
- * hairline borders, spacing on a 3px grid. No shadows, no gradients, no emoji.
- */
+/* AMTECH canonical light interface foundation. */
 :root {
-  --ink: #0a0a0a;
-  --paper: #ffffff;
-  --wash: #f4f4f4;
-  --red: #e11d2a;
-  --red-bright: #ff1a2b;
-  --hair-5: rgba(10, 10, 10, 0.05);
-  --hair-10: rgba(10, 10, 10, 0.1);
-  --hair-15: rgba(10, 10, 10, 0.15);
-  --ink-muted: rgba(10, 10, 10, 0.62);
-  --font-body: var(--font-inter), Inter, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: var(--font-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --amtech-ink: #111111;
+  --amtech-white: #ffffff;
+  --amtech-canvas: #f7f9fc;
+  --amtech-red: #e11d2a;
+  --amtech-blue: #2563eb;
+  --amtech-cyan: #dff6ff;
+  --amtech-green: #168a57;
+  --amtech-line: rgba(17, 17, 17, 0.08);
+  --amtech-line-strong: rgba(17, 17, 17, 0.14);
+  --amtech-muted: rgba(17, 17, 17, 0.62);
+  --amtech-glass: rgba(255, 255, 255, 0.84);
+  --amtech-danger-soft: rgba(225, 29, 42, 0.08);
+  --amtech-blue-soft: rgba(37, 99, 235, 0.08);
+  --amtech-green-soft: rgba(22, 138, 87, 0.08);
+  --amtech-space-half: 4px;
+  --amtech-space-1: 8px;
+  --amtech-space-2: 16px;
+  --amtech-space-3: 24px;
+  --amtech-space-4: 32px;
+  --amtech-space-5: 40px;
+  --amtech-space-6: 48px;
+  --amtech-radius-control: 999px;
+  --amtech-radius-nested: 14px;
+  --amtech-radius-card: 20px;
+  --amtech-radius-panel: 24px;
+  --amtech-shadow-card: 0 14px 38px rgba(30, 48, 80, 0.08);
+  --amtech-shadow-float: 0 20px 60px rgba(30, 48, 80, 0.12);
+  --amtech-font: var(--font-inter), Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-  border-radius: 0;
 }
 
 html {
   -webkit-text-size-adjust: 100%;
+  background: var(--amtech-canvas);
 }
 
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-body);
+  min-width: 320px;
+  background: var(--amtech-canvas);
+  color: var(--amtech-ink);
+  font-family: var(--amtech-font);
   font-size: 15px;
-  line-height: 1.6;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--red);
-  color: #ffffff;
+  background: var(--amtech-red);
+  color: var(--amtech-white);
 }
 
 button,
@@ -50,6 +64,22 @@ textarea,
 select {
   font: inherit;
   color: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
 }
 
 a {
@@ -71,6 +101,81 @@ video {
 }
 
 :focus-visible {
-  outline: 2px solid var(--red);
-  outline-offset: 0;
+  outline: 3px solid color-mix(in srgb, var(--amtech-blue) 82%, white);
+  outline-offset: 3px;
+}
+
+.amtech-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.amtech-card {
+  background: var(--amtech-glass);
+  border: 1px solid var(--amtech-line);
+  border-radius: var(--amtech-radius-card);
+  box-shadow: var(--amtech-shadow-card);
+  backdrop-filter: blur(28px);
+}
+
+.amtech-button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--amtech-space-1);
+  padding: 0 20px;
+  border: 1px solid transparent;
+  border-radius: var(--amtech-radius-control);
+  background: var(--amtech-red);
+  color: var(--amtech-white);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, background 200ms ease;
+}
+
+.amtech-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(225, 29, 42, 0.18);
+}
+
+.amtech-button.secondary {
+  background: var(--amtech-white);
+  color: var(--amtech-ink);
+  border-color: var(--amtech-line-strong);
+  box-shadow: none;
+}
+
+.amtech-button:disabled {
+  opacity: 0.48;
+}
+
+/* Capability workbench controls are high-frequency operational targets. Keep the
+ * full interactive hit area accessible even when the component's compact visual
+ * style uses smaller typography. */
+.tc-drawer .tc-head > button,
+.tc-drawer .tc-card-actions button,
+.tc-drawer .tc-card-actions a,
+.tc-drawer .tc-compose-actions button,
+.tc-drawer .tc-state button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -1,26 +1,23 @@
 /**
- * HMAC signed tokens — two consumers:
- *   1. Single-use claim links for the SMS front door (Phase 1): inbound SMS proves
- *      phone ownership; we mint `/claim?t=<token>` to finish account setup on web.
- *   2. Signed artifact links (Phase 2): owner-safe links to ./output artifacts;
- *      `tokenHash()` is what gets stored in artifact_links.token_hash (never the raw).
- *
- * Built in Phase 0 as a shared seam so both flows just call it.
+ * HMAC signed tokens for claim links, artifact links, and principal-bound preview
+ * links. Signed possession is never sufficient by itself; preview consumers must
+ * load the durable row and revalidate assignment, resolver principal, policy,
+ * snapshot, expiry, revocation, and single-use state.
  */
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 
 function key(): string {
-  const k = process.env.SIGNING_SECRET;
-  if (!k || k.length < 16) throw new Error("SIGNING_SECRET missing or too short.");
-  return k;
+  const value = process.env.SIGNING_SECRET;
+  if (!value || value.length < 16) throw new Error("SIGNING_SECRET missing or too short.");
+  return value;
 }
 
 export type SignedPurpose = "claim_link" | "artifact_link" | "preview_link";
 
 export interface SignedPayload {
   purpose: SignedPurpose;
-  subject: string; // e.g. phone_e164 for claim, artifact_id for artifact
-  jti: string; // unique id, enables single-use tracking by the caller
+  subject: string;
+  jti: string;
   exp: number;
   extra?: Record<string, string>;
 }
@@ -34,29 +31,22 @@ export function mintSignedToken(
   const payload: SignedPayload = {
     purpose,
     subject,
-    jti: randomBytes(12).toString("hex"), // 24 hex chars, CSPRNG (not Math.random)
+    jti: randomBytes(12).toString("hex"),
     exp: Math.floor(Date.now() / 1000) + ttlSeconds,
     ...(extra ? { extra } : {}),
   };
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-  const sig = createHmac("sha256", key()).update(body).digest("base64url");
-  return `${body}.${sig}`;
+  const signature = createHmac("sha256", key()).update(body).digest("base64url");
+  return `${body}.${signature}`;
 }
 
-/**
- * Verify signature + purpose (timing-safe) WITHOUT rejecting on expiry, returning
- * the payload plus an `expired` flag. Mirrors how JWT libraries surface a
- * TokenExpiredError distinctly from a signature error, so callers can show an
- * owner-friendly "expired, get a fresh link" path instead of a generic denial.
- * Returns null only for a malformed / forged / wrong-purpose token.
- */
 export function decodeSignedToken(token: string, purpose: SignedPurpose): { payload: SignedPayload; expired: boolean } | null {
-  const [body, sig] = token.split(".");
-  if (!body || !sig) return null;
+  const [body, signature] = token.split(".");
+  if (!body || !signature) return null;
   const expected = createHmac("sha256", key()).update(body).digest("base64url");
-  const a = Buffer.from(sig);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return null;
+  const suppliedBytes = Buffer.from(signature);
+  const expectedBytes = Buffer.from(expected);
+  if (suppliedBytes.length !== expectedBytes.length || !timingSafeEqual(suppliedBytes, expectedBytes)) return null;
   let payload: SignedPayload;
   try {
     payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as SignedPayload;
@@ -69,21 +59,13 @@ export function decodeSignedToken(token: string, purpose: SignedPurpose): { payl
 
 export function verifySignedToken(token: string, purpose: SignedPurpose): SignedPayload | null {
   const decoded = decodeSignedToken(token, purpose);
-  if (!decoded || decoded.expired) return null;
-  return decoded.payload;
+  return !decoded || decoded.expired ? null : decoded.payload;
 }
 
-/** What to store for an artifact link (never store the raw token). */
 export function tokenHash(token: string): string {
   return createHmac("sha256", key()).update(token).digest("hex");
 }
 
-/**
- * Phase 3 signed preview/action link. The token is the auth for a mobile review
- * page: `subject` is the resource id; `extra` binds the account, employee, resource
- * type, and the comma-joined scoped actions so a forged or cross-account token can
- * never widen scope. Reuses the same HMAC as claim/artifact links.
- */
 export interface PreviewTokenClaims {
   account_id: string;
   employee_id: string;
@@ -91,6 +73,10 @@ export interface PreviewTokenClaims {
   resource_id: string;
   actions: string[];
   ttlSeconds: number;
+  assignment_id?: string | null;
+  resolver_principal_id?: string | null;
+  policy_version?: string | null;
+  approval_snapshot_hash?: string | null;
 }
 
 export interface VerifiedPreviewToken {
@@ -99,7 +85,11 @@ export interface VerifiedPreviewToken {
   resource_type: string;
   resource_id: string;
   actions: string[];
-  /** True when the signature is valid but the token's `exp` has passed. */
+  assignment_id: string | null;
+  resolver_principal_id: string | null;
+  policy_version: string | null;
+  approval_snapshot_hash: string | null;
+  jti: string;
   expired: boolean;
 }
 
@@ -109,6 +99,10 @@ export function mintPreviewToken(claims: PreviewTokenClaims): string {
     employee_id: claims.employee_id,
     resource_type: claims.resource_type,
     actions: claims.actions.join(","),
+    ...(claims.assignment_id ? { assignment_id: claims.assignment_id } : {}),
+    ...(claims.resolver_principal_id ? { resolver_principal_id: claims.resolver_principal_id } : {}),
+    ...(claims.policy_version ? { policy_version: claims.policy_version } : {}),
+    ...(claims.approval_snapshot_hash ? { approval_snapshot_hash: claims.approval_snapshot_hash } : {}),
   });
 }
 
@@ -122,6 +116,11 @@ export function verifyPreviewToken(token: string): VerifiedPreviewToken | null {
     resource_type: extra.resource_type,
     resource_id: decoded.payload.subject,
     actions: extra.actions ? extra.actions.split(",").filter(Boolean) : [],
+    assignment_id: extra.assignment_id ?? null,
+    resolver_principal_id: extra.resolver_principal_id ?? null,
+    policy_version: extra.policy_version ?? null,
+    approval_snapshot_hash: extra.approval_snapshot_hash ?? null,
+    jti: decoded.payload.jti,
     expired: decoded.expired,
   };
 }

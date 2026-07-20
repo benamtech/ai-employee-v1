@@ -1,154 +1,122 @@
 # AMTECH Web Design System — Implementation Status
 
-**Branch:** `research`  
-**Updated:** 2026-07-17  
-**Status:** canonical design system established; owner surface implemented; public website and remaining surfaces pending
+**Branch:** `employee-production-tuesday`  
+**Updated:** 2026-07-19  
+**Status:** canonical adaptive operating-surface foundation implemented; exact-head login and browser acceptance incomplete
 
-This document tracks implementation of `AMTECH_WEB_DESIGN_SYSTEM.md` across public AMTECH surfaces. The canonical visual system is already established. Individual surfaces remain at different implementation and proof levels.
+## Authority
 
-## Canonical rules
+1. `AMTECH_WEB_DESIGN_SYSTEM.md` — visual tokens and presentation language.
+2. `AMTECH_AGENT_INTERFACE_STANDARD.md` — operating primitives, adaptive layout, delegation, AG-UI, MCP Apps, authority, and evidence.
+3. `AMTECH_UI_VALIDATION_STANDARD.md` — pass/fail release gates and required artifact set.
+4. This file — implementation ledger only; it cannot redefine the first three documents.
 
-- Light surfaces only: white and `canvas` backgrounds with restrained cool gradients.
-- `ink` for primary text and high contrast.
+Historical fixed-tab, Home/Talk/Proof/Connected, square-corner, dark-panel, 3px-grid, or provider-dashboard directions are superseded.
+
+## Current product grammar
+
+The owner product is an assignment-scoped operating surface, not a fixed navigation shell.
+
+Canonical primitives:
+
+- work loops;
+- active saves with explicit return conditions;
+- owner decisions;
+- meaningful system changes;
+- delegated work units attached to parent outcomes;
+- evidence, receipts, artifacts, and recovery state;
+- an anchored contextual command.
+
+Manager emits owner-safe operating state and an adaptive layout plan. The browser renders registered regions/components and never reconstructs authority from raw provider events.
+
+## Visual implementation rules
+
+- Light surfaces only: `white` and `canvas`.
+- `ink` for primary text.
 - AMTECH red for brand and primary action.
-- Blue for systems/information.
-- Green for verified/success states.
-- No orange, gold, beige, rainbow palette, generic purple-AI treatment, or dark mode.
-- Inter/system sans typography.
-- One eyebrow maximum per section.
-- Strong hierarchy, wide alignment, generous space, and an 8px rhythm.
-- Glass, borders, radii, shadows, and motion remain restrained and operational.
-- Every element must improve hierarchy, comprehension, trust, or action.
+- Blue for systems and information.
+- Green for verified success and accepted outcomes.
+- No orange, amber, gold, beige, rainbow, generic purple-AI treatment, or dark mode.
+- Inter/system typography.
+- 8px spacing rhythm, 16–24px cards, visible focus, reduced motion, mobile-first controls.
+- Every visible object must improve hierarchy, comprehension, trust, action, return-condition awareness, or evidence.
 
-## Implemented owner-product direction
+## Surface implementation inventory
 
-The owner web client established the current product grammar:
+| Surface | Source | Current state | Evidence level | Blocking gap |
+|---|---|---|---|---|
+| Owner operating surface | `mvp-build/apps/web/app/agent/[employeeId]/AgentSurface.tsx` | Adaptive regions replace permanent tabs; work loops, saves, decisions, delegation, changes, evidence, and command are represented | `ci_accepted` at prior green SHA; current head unaccepted | Current merge-ref Manager type failure blocks exact-head UI proof |
+| Operating context compiler | `mvp-build/apps/manager/src/lib/operating-surface.ts` | Compiles owner-safe manifest/profile/runtime/session/connector/materialized-work signals into deterministic state and layout rationale | `ci_accepted` at prior green SHA | Current head regression rerun required |
+| Owner login API | `mvp-build/apps/web/app/api/auth/login/route.ts` | Supabase password auth delegates owner-session minting to Manager and sets HttpOnly cookie | `source_wired` | Visible login form is not connected; multi-account selection not rendered |
+| Owner login form | `mvp-build/apps/web/app/login/page.tsx` | Static placeholder | `concept` | Must submit credentials, handle explicit account selection, and redirect only after durable session creation |
+| Business identity onboarding | `BusinessIdentityControl.tsx`; `OnboardingIdentityGate.tsx`; Manager identity routes | Provider-backed identity gate exists and activation fails closed until verified | `source_wired` | Exact-head typecheck currently blocked by owner-session contract drift |
+| Signed Review | `review/ReviewClient.tsx` | Light authority-aware review behavior exists | `source_wired` | Browser/mobile/expired/revoked/ambiguous acceptance matrix incomplete |
+| MCP Apps resource | `components/McpUiResource.tsx` | Sandboxed registered resource boundary with fallback | `source_wired` | Compatible-host browser evidence incomplete |
+| Adaptive browser fixture | `mvp-build/infra/scripts/ui/fixture-browser.mjs` | Existing script requires replacement because deleted tab selectors are invalid | `not_run` | New guided/standard/expert matrix required |
+| Research-browser employee | Shared operating primitives support research loops, sources, contradictions, monitoring saves, delegation, synthesis, and evidence | Contract-level only | `concept` | Rendered browser fixture required |
+| Ecommerce/growth employees | Generic primitives support orders, inventory, campaigns, thresholds, changes, and evidence | Contract-level only | `concept` | Browser fixtures required |
+| Public estimator | `mvp-build/apps/web/app/free-estimator/**` | Explicitly non-canonical diagnostic/acquisition surface | `fixture_demonstration` | Must not be presented as flagship product UI |
+| Admin/operator | Manager/admin and platform-authority surfaces | Authority foundation exists | `source_wired` | Production UI inventory and support-action confirmation incomplete |
 
-- Home / Talk / Proof / Connected;
-- “Tell Avery” command language;
-- “Needs your say” approval language;
-- calm Working/Watching states;
-- proof and work resources rather than dashboard metrics;
-- light operational surfaces with red action, blue system, and green success states;
-- mobile-first review and approval behavior.
+## Adaptive planning behavior
 
-Primary implementation reference:
+Deterministic priority:
 
-- `mvp-build/apps/web/app/agent/[employeeId]/AgentSurface.tsx`
+1. revoked, failed, ambiguous, or blocked authority/effect state;
+2. owner decisions;
+3. active work loops and material delegation;
+4. active-save return conditions;
+5. meaningful system changes;
+6. evidence and connection detail.
 
-This source direction is current, but screenshots or local fixture output do not by themselves establish provider/runtime acceptance.
+High-volume ingress uses bounded logarithmic contribution. Event count may refine ordering inside a region but cannot displace an owner decision or active work loop.
 
-## Public website direction
+## Delegation implementation
 
-The public AMTECH website should use the same visual grammar while teaching the category through concrete work rather than reproducing the internal owner application.
+Subagents, tools, services, connected systems, and humans are first-class execution state and one-and-a-half-class routine presentation state.
 
-Product/copy brief:
+Default owner presentation includes:
 
-- `docs/amtech-website-rewrite-brief.md`
+- delegated goal;
+- parent work-loop purpose;
+- state;
+- material result or block;
+- effect on confidence, cost, risk, progress, or next owner action.
 
-Experimental website framework and v0.1 lab:
+Default owner presentation excludes internal prompt trees, chain-of-thought, secret-bearing topology, and decorative agent avatars.
 
-- `GTM-RESEARCH/website-framework/README.md`
-- `GTM-RESEARCH/website-framework/07-v0.1-request-mirror-lab.md`
+## Current exact-head blocker
 
-The first framework implementation is intentionally a plain, noindex Request Mirror Lab. Its Web-1 diagnostic appearance is an explicit research exception and must not be mistaken for the final AMTECH marketing design.
+PR merge validation resolves a `mintOwnerSession` contract from `research` that returns `{ token, expires_at }`, while the branch implementation exposes `{ session_id, token, expires_at }`. `onboarding-identity-routes.ts` reads `ownerSession.session_id`, causing Manager `TS2339` on the PR merge ref and preventing downstream web, UI, PostgreSQL, image, and release-evidence jobs.
 
-## Surface status
+Required finite correction:
 
-| Surface | Current status | Next design work |
-|---|---|---|
-| Owner web client | implemented direction; current acceptance depends on live product proof | Continue consistency/accessibility/performance audit as product changes. |
-| Signed Review surface | source exists; current design/proof state requires direct inspection | Align with current approval/proof grammar and mobile behavior. |
-| Front-door onboarding | canonical product path; design state requires direct inspection | Apply the design system without weakening the real onboarding flow. |
-| Public estimator | outdated and non-canonical | Preserve only as a clearly separated regression/acquisition harness where still useful; do not redesign it as the flagship. |
-| Public marketing site | implementation pending | Build from `docs/amtech-website-rewrite-brief.md` after the v0.1 framework lab proves the resolver assumptions. |
-| Request Mirror Lab | specification only | Implement as an intentionally plain diagnostic surface under `GTM-RESEARCH/website-framework/`. |
-| Admin/billing | internal/operator surface; not the public-site priority | Apply tokens and hierarchy where useful without confusing operator and owner audiences. |
+- remove the login audit dependency on a return property unavailable in the base contract, or intentionally version the shared contract in a merge-compatible change;
+- connect the authored login form to `/api/auth/login`;
+- replace deleted-tab browser acceptance;
+- add the research-browser rendered fixture;
+- rerun all exact-head gates.
 
-## Component guidance
+## Evidence rules
 
-### Navigation
-
-- White/glass shell.
-- AMTECH red for the primary action or active state.
-- No dark navigation treatment.
-
-### Buttons
-
-- Primary: red fill, white text, clear label, appropriate radius.
-- Secondary: neutral/glass surface with dark text.
-- Status actions use semantic green, blue, or red only when their meaning warrants it.
-
-### Forms
-
-- Large fields and tap targets.
-- Explicit labels.
-- Visible validation.
-- Minimal steps.
-- No ornamental form chrome.
-
-### Work and proof surfaces
-
-Prioritize:
-
-1. what happened or was requested;
-2. what the employee prepared;
-3. what needs the owner's decision;
-4. what action occurred;
-5. the resulting proof.
-
-Avoid generic KPI tiles when a concrete work object communicates more.
-
-## Copy implementation
-
-Required tone:
-
-- direct;
-- specific;
-- calm;
-- human;
-- operational;
-- evidence-aware.
-
-Preferred structure:
-
-```text
-owner situation
--> work performed
--> concrete result
--> approval/control
--> proof or next action
-```
-
-Avoid “unlock,” “empower,” “revolutionize,” “AI-powered solutions,” unsupported superlatives, fake metrics, and repeated explanations of the same benefit.
-
-## Evidence and claim rule
-
-Visual polish must not inflate acceptance.
-
-Every public proof object should carry one of:
+Each surface must carry one evidence level:
 
 - `live_production_proof`;
-- `product_demonstration`;
-- `source_wired_preview`;
+- `provider_accepted`;
+- `browser_channel_accepted`;
+- `ci_accepted`;
+- `source_wired`;
+- `fixture_demonstration`;
 - `concept`.
 
-The interface must never imply that a source-wired preview or controlled demonstration is current live provider/customer proof.
+Fixture, source-wired, or concept content must never imply live provider/customer acceptance.
 
-## Validation expectations
+## Deferred production gates
 
-For each migrated surface, record:
-
-- exact source files;
-- route and audience;
-- desktop/mobile screenshots;
-- keyboard and reduced-motion behavior;
-- contrast/accessibility results;
-- performance impact;
-- copy/claim review;
-- provider/runtime evidence where relevant;
-- anything not run.
-
-## Enforcement
-
-`AMTECH_WEB_DESIGN_SYSTEM.md` remains the visual authority. This implementation-status document must be updated when a surface materially changes. Deviations require an explicit rationale, scope, and review record.
+- approved staging database and migrations through the branch head;
+- environment security/performance advisor acceptance;
+- real Supabase owner login;
+- real identity verification callback;
+- verified activation and accepted C3 receipt;
+- real Hermes work loop, active-save return, delegated work, signed Review, provider effect, and durable evidence on one deployment SHA;
+- capacity, recovery, rollback, attestation, and deployment-manifest closure.

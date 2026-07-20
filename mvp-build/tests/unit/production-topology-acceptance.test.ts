@@ -1,0 +1,66 @@
+import { readdir, readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+const root = process.cwd();
+const source = (path: string) => readFile(join(root, path), "utf8");
+
+async function currentMigrationHead(): Promise<string> {
+  const files = (await readdir(join(root, "packages/db/migrations")))
+    .filter((file) => /^\d{4}[a-z]?_.+\.sql$/.test(file))
+    .sort((left, right) => left.localeCompare(right));
+  const head = files.at(-1)?.match(/^(\d{4})/)?.[1];
+  if (!head) throw new Error("migration_head_not_found");
+  return head;
+}
+
+describe("target-host production topology acceptance", () => {
+  it("keeps replacement and teardown behind governed lifecycle commands", async () => {
+    const lifecycle = await source("infra/scripts/employee-lifecycle.mjs");
+    expect(lifecycle).toContain('replace: "replace_runtime"');
+    expect(lifecycle).toContain('teardown: "teardown"');
+    expect(lifecycle).toContain("/manager/provisioning/commands");
+    expect(lifecycle).not.toContain('docker(["rm"');
+    expect(lifecycle).not.toContain('docker(["network", "rm"');
+  });
+
+  it("defines a two-employee isolation, replacement, and teardown gate with a disposable-target wall", async () => {
+    const harness = await source("infra/scripts/acceptance/target-host-two-employee-isolation.mjs");
+    expect(harness).toContain("EMPLOYEE_A_ID");
+    expect(harness).toContain("EMPLOYEE_B_ID");
+    expect(harness).toContain("AMTECH_ALLOW_DESTRUCTIVE_ISOLATION_TEST");
+    expect(harness).toContain("AMTECH_DISPOSABLE_EMPLOYEE_IDS");
+    expect(harness).toContain("assertCrossEmployeeDenial(employeeA, employeeB)");
+    expect(harness).toContain("assertCrossEmployeeDenial(employeeB, employeeA)");
+    expect(harness).toContain("assertInternetEgressDenied(employeeA)");
+    expect(harness).toContain("assertInternetEgressDenied(employeeB)");
+    expect(harness).toContain('queueLifecycle("replace", employeeA)');
+    expect(harness).toContain('queueLifecycle("teardown", employeeA)');
+    expect(harness).toContain("employee B changed during A replacement");
+    expect(harness).toContain("employee B changed during A teardown");
+  });
+
+  it("binds staging migration proof to the complete current migration range", async () => {
+    const proof = await source("infra/scripts/acceptance/migration-staging-live-proof.mjs");
+    const migrationHead = await currentMigrationHead();
+    expect(proof).toContain(`const migrationHead = "${migrationHead}"`);
+    expect(proof).toContain("readdir");
+    expect(proof).toContain("migration_head: migrationHead");
+    expect(proof).toContain("migration_count: migrations.length");
+    expect(proof).not.toContain("number <= 38");
+  });
+
+  it("parses as executable Node source", () => {
+    for (const path of [
+      "infra/scripts/acceptance/target-host-two-employee-isolation.mjs",
+      "infra/scripts/acceptance/migration-staging-live-proof.mjs",
+    ]) {
+      const result = spawnSync("node", ["--check", path], {
+        cwd: root,
+        encoding: "utf8",
+      });
+      expect(result.status, `${path}\n${result.stdout ?? ""}\n${result.stderr ?? ""}`).toBe(0);
+    }
+  });
+});
