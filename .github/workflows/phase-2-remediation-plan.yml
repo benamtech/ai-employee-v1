@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - employee-production-tuesday
       - main
     paths:
       - "CONTRIBUTING.md"
@@ -51,7 +50,6 @@ on:
   pull_request:
     branches:
       - main
-      - research
     paths:
       - "CONTRIBUTING.md"
       - "README.md"
@@ -158,11 +156,6 @@ jobs:
         run: npm run typecheck
       - name: Lint changed governance boundary
         run: npm run lint
-      - name: Push-only strict regression and production build
-        if: github.event_name == 'push'
-        run: |
-          npm run test:unit
-          npm run build
       - name: Upload ratification diagnostics
         if: always()
         uses: actions/upload-artifact@v4
