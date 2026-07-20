@@ -70,14 +70,38 @@ try {
   const activeUrl = `${baseUrl}/agent/${employeeId}`;
   const page = await browser.newPage({ viewport: { width: 1440, height: 960 }, reducedMotion: "reduce" });
   await openRoute(page, activeUrl);
+
+  // The production owner experience is Talk-first. Prove immediate fixture intent,
+  // response rendering, and the absence of the old fixed-tab shell before entering
+  // the richer operating workspace.
+  const talkBox = page.getByRole("textbox", { name: "Message Avery" });
+  await talkBox.waitFor({ timeout: 20_000 });
+  await page.getByRole("button", { name: "Talk", exact: true }).waitFor({ timeout: 10_000 });
+  await page.getByRole("button", { name: "Workspace", exact: true }).waitFor({ timeout: 10_000 });
+  assertCount(await page.locator('[role="tablist"]').count(), 0, "fixed_tablist_present");
+  for (const obsolete of ["Home", "Connected", "Proof"]) {
+    assertCount(await page.getByRole("button", { name: obsolete, exact: true }).count(), 0, `obsolete_${obsolete.toLowerCase()}_button_present`);
+  }
+  await talkBox.fill("Give me the fastest useful update and move durable work into the workspace.");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await page.getByText(/I picked that up\. I’ll keep the conversation fast/).waitFor({ timeout: 10_000 });
+  await assertNoHorizontalOverflow(page, "talk_surface_desktop");
+  await assertReducedMotion(page, ".nextgen-conversation");
+  await page.screenshot({ path: join(screenshotDir, "talk-surface-desktop.png"), fullPage: true });
+  matrix.push({
+    id: "talk-first-desktop",
+    route: `/agent/${employeeId}`,
+    viewport: "1440x960",
+    checks: ["talk_default", "optimistic_owner_intent", "assistant_response", "workspace_switch", "reduced_motion", "no_horizontal_overflow", "no_fixed_tabs"],
+    status: "PASS",
+  });
+
+  await page.getByRole("button", { name: "Workspace", exact: true }).click();
   await page.getByRole("heading", { name: /Avery has \d+ decisions ready/ }).waitFor({ timeout: 20_000 });
   for (const heading of ["Needs you", "Current work", "Held for return", "What changed", "Evidence and outcomes"]) {
     await page.getByRole("heading", { name: heading, exact: true }).waitFor({ timeout: 10_000 });
   }
-  assertCount(await page.locator('[role="tablist"]').count(), 0, "fixed_tablist_present");
-  for (const obsolete of ["Home", "Talk", "Connected", "Proof"]) {
-    assertCount(await page.getByRole("button", { name: obsolete, exact: true }).count(), 0, `obsolete_${obsolete.toLowerCase()}_button_present`);
-  }
+  assertCount(await page.locator('[role="tablist"]').count(), 0, "workspace_fixed_tablist_present");
 
   const runtimeToggle = page.locator(".os-runtime");
   await runtimeToggle.focus();
@@ -105,7 +129,7 @@ try {
     id: "adaptive-active-desktop",
     route: `/agent/${employeeId}`,
     viewport: "1440x960",
-    checks: ["guidance", "attention", "work_loops", "active_saves", "system_changes", "evidence", "context", "command", "keyboard_context", "minimum_targets", "reduced_motion", "no_fixed_tabs"],
+    checks: ["talk_to_workspace", "guidance", "attention", "work_loops", "active_saves", "system_changes", "evidence", "context", "command", "keyboard_context", "minimum_targets", "reduced_motion", "no_fixed_tabs"],
     status: "PASS",
   });
 
@@ -113,9 +137,12 @@ try {
   const firstRun = await browser.newPage({ viewport: { width: 1024, height: 768 } });
   await openRoute(firstRun, firstRunUrl);
   await firstRun.getByRole("heading", { name: "Avery is ready", exact: true }).waitFor({ timeout: 20_000 });
+  await firstRun.getByRole("textbox", { name: "Message Avery" }).waitFor({ timeout: 10_000 });
+  assertCount(await firstRun.locator('[role="tablist"]').count(), 0, "first_run_fixed_tablist_present");
+  await firstRun.getByRole("button", { name: "Workspace", exact: true }).click();
+  await firstRun.getByRole("heading", { name: "Avery is ready", exact: true }).waitFor({ timeout: 20_000 });
   await firstRun.getByRole("textbox", { name: "Command Avery" }).waitFor({ timeout: 10_000 });
   assertCount(await firstRun.getByRole("heading", { name: "Current work", exact: true }).count(), 0, "first_run_empty_work_region_present");
-  assertCount(await firstRun.locator('[role="tablist"]').count(), 0, "first_run_fixed_tablist_present");
   await assertMinimumTargets(firstRun, ".os-root");
   await firstRun.screenshot({ path: join(screenshotDir, "operating-surface-first-run.png"), fullPage: true });
   await firstRun.close();
@@ -123,12 +150,17 @@ try {
     id: "adaptive-first-run",
     route: `/agent/${employeeId}-new`,
     viewport: "1024x768",
-    checks: ["guided_empty_state", "empty_regions_hidden", "contextual_command", "minimum_targets", "no_fixed_tabs"],
+    checks: ["talk_first_run", "workspace_first_run", "guided_empty_state", "empty_regions_hidden", "contextual_command", "minimum_targets", "no_fixed_tabs"],
     status: "PASS",
   });
 
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, reducedMotion: "reduce" });
   await openRoute(mobile, activeUrl);
+  await mobile.getByRole("textbox", { name: "Message Avery" }).waitFor({ timeout: 20_000 });
+  await assertNoHorizontalOverflow(mobile, "talk_surface_mobile");
+  await assertReducedMotion(mobile, ".nextgen-conversation");
+  await mobile.screenshot({ path: join(screenshotDir, "talk-surface-mobile.png"), fullPage: true });
+  await mobile.getByRole("button", { name: "Workspace", exact: true }).click();
   await mobile.getByRole("heading", { name: /Avery has \d+ decisions ready/ }).waitFor({ timeout: 20_000 });
   await mobile.getByRole("textbox", { name: "Command Avery" }).waitFor({ timeout: 10_000 });
   await assertNoHorizontalOverflow(mobile, "operating_surface_mobile");
@@ -140,7 +172,7 @@ try {
     id: "adaptive-active-mobile",
     route: `/agent/${employeeId}`,
     viewport: "390x844",
-    checks: ["guidance", "command", "minimum_targets", "reduced_motion", "no_horizontal_overflow"],
+    checks: ["talk_default", "talk_no_horizontal_overflow", "workspace_switch", "guidance", "command", "minimum_targets", "reduced_motion", "workspace_no_horizontal_overflow"],
     status: "PASS",
   });
 
