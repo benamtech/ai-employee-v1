@@ -8,6 +8,12 @@ import {
   openRemoteMcpAccessToken,
   sealRemoteMcpTokenSet,
 } from "../../apps/manager/src/lib/remote-mcp-token-custody";
+import {
+  publishProgress,
+  subscribeProgress,
+  type ProgressEvent,
+  type ProgressScope,
+} from "../../apps/manager/src/lib/progress-bus";
 
 beforeAll(() => {
   process.env.SECRET_REF_MASTER_KEY = "unit-test-master-key-0123456789abcdef";
@@ -69,7 +75,7 @@ describe("remote MCP discovery and token custody", () => {
     )).toThrow("remote_mcp_resource_metadata_cross_origin");
   });
 
-  it("seals tokens in Manager custody and rejects audience drift", () => {
+  it("seals tokens in the current Manager envelope backend and rejects audience drift", () => {
     const sealed = sealRemoteMcpTokenSet({
       token: {
         access_token: "access-secret-value",
@@ -93,27 +99,52 @@ describe("remote MCP discovery and token custody", () => {
   });
 });
 
+describe("assignment-scoped low-latency projection", () => {
+  it("never delivers one assignment's progress to another assignment", () => {
+    const scopeA: ProgressScope = { account_id: "acct_1", employee_id: "emp_1", assignment_id: "asn_a" };
+    const scopeB: ProgressScope = { account_id: "acct_1", employee_id: "emp_1", assignment_id: "asn_b" };
+    const received: ProgressEvent[] = [];
+    const unsubscribe = subscribeProgress(scopeA, (event) => received.push(event));
+    publishProgress(scopeB, { run_id: "run_b", verb: "Working", state: "step" });
+    publishProgress(scopeA, { run_id: "run_a", verb: "Working", state: "step" });
+    publishProgress("emp_1", { run_id: "legacy", verb: "Legacy", state: "step" });
+    unsubscribe();
+    expect(received.map((event) => event.run_id)).toEqual(["run_a"]);
+  });
+});
+
 describe("streaming protocol HTTP surfaces", () => {
-  it("binds Manager stream frames to assignment authority before AG-UI projection", async () => {
-    const [patch, route] = await Promise.all([
+  it("binds Manager stream frames and subscriptions to assignment authority before AG-UI projection", async () => {
+    const [patch, route, bus] = await Promise.all([
       readFile("apps/manager/scripts/patch-production-stream.mjs", "utf8"),
       readFile("apps/web/app/api/employee/[employeeId]/ag-ui/route.ts", "utf8"),
+      readFile("apps/manager/src/lib/progress-bus.ts", "utf8"),
     ]);
     expect(patch).toContain('scope_type", "employee_assignment"');
-    expect(patch).toContain("authority_version");
+    expect(patch).toContain("subscribeProgress(streamScope");
     expect(patch).toContain("...streamScope, ...p");
+    expect(bus).toContain("account_id");
+    expect(bus).toContain("assignment_id");
     expect(route).toContain("ag_ui_authority_scope_drift");
     expect(route).toContain("projectWorkStreamEventToAgUi");
-    expect(route).toContain('"X-Accel-Buffering": "no"');
+    expect(route).toContain('message: "ag_ui_stream_interrupted"');
+    expect(route).not.toContain("message: String((error as Error).message");
   });
 
-  it("limits protocol actions to existing approval and owner-message authority routes", async () => {
-    const route = await readFile("apps/web/app/api/employee/[employeeId]/protocol-action/route.ts", "utf8");
+  it("routes MCP App actions through existing effects with current assignment/version interception", async () => {
+    const [route, card, patch] = await Promise.all([
+      readFile("apps/web/app/api/employee/[employeeId]/protocol-action/route.ts", "utf8"),
+      readFile("apps/web/app/agent/[employeeId]/components/WorkCard.tsx", "utf8"),
+      readFile("apps/manager/scripts/patch-production-stream.mjs", "utf8"),
+    ]);
     expect(route).toContain("validateAgUiClientCommandShape");
     expect(route).toContain('command.resource_type === "approval"');
     expect(route).toContain('/manager/tools/resolve_approval');
     expect(route).toContain('/manager/employee/${employeeId}/message');
-    expect(route).toContain("protocol_action_not_supported");
+    expect(card).toContain('/api/employee/${employeeId}/protocol-action');
+    expect(card).toContain('profile: "amtech.mcp-app.v1"');
+    expect(patch).toContain("protocol_assignment_mismatch");
+    expect(patch).toContain("protocol_authority_version_stale");
     for (const forbidden of ["api.stripe.com", "quickbooks.api.intuit.com", "accounts.google.com", "Authorization: Bearer"]) {
       expect(route).not.toContain(forbidden);
     }
