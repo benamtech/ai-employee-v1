@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   validateMcpAppSecurityMetadata,
+  type AuthorityProjection,
   type McpAppSecurityMetadata,
   type UiResourceEnvelope,
 } from "@amtech/shared";
@@ -20,16 +21,22 @@ async function sha256(value: string): Promise<string> {
 }
 
 /**
- * MCP Apps host boundary. The iframe has an opaque origin and no ambient network,
- * cookie, credential, database, provider, or parent authority. It may return only
- * one finite JSON-RPC intent that the native host and Manager re-authorize.
+ * MCP Apps host boundary. The iframe has an opaque origin and an in-document CSP
+ * that denies ambient network, nested frames, forms, and external resources. It may
+ * return only one finite JSON-RPC intent plus the exact projected authority that the
+ * native host forwards for fresh Manager reauthorization.
  */
 export function McpUiResource({
   resource,
   onIntent,
 }: {
   resource: UiResourceEnvelope;
-  onIntent: (intent: McpUiIntent, approvalId: string | undefined, payload: Record<string, unknown>) => void;
+  onIntent: (
+    intent: McpUiIntent,
+    approvalId: string | undefined,
+    payload: Record<string, unknown>,
+    authority: AuthorityProjection,
+  ) => void;
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const envelope = resource as McpAppEnvelope;
@@ -69,11 +76,11 @@ export function McpUiResource({
   }, [envelope._meta, html]);
 
   useEffect(() => {
-    function onMessage(e: MessageEvent) {
-      if (!ref.current || e.source !== ref.current.contentWindow || e.origin !== "null") return;
+    function onMessage(event: MessageEvent) {
+      if (!ref.current || event.source !== ref.current.contentWindow || event.origin !== "null") return;
       const metadata = envelope._meta;
       if (!metadata || !validateMcpAppSecurityMetadata(metadata).ok) return;
-      const message = e.data as {
+      const message = event.data as {
         jsonrpc?: string;
         method?: string;
         params?: {
@@ -89,16 +96,18 @@ export function McpUiResource({
       if (!metadata.host_methods.includes("tools/call")) return;
       const args = message.params.arguments;
       const intent = args?.intent as McpUiIntent;
-      if (!(["accept", "accept_all", "reject", "respond"] as string[]).includes(intent)) return;
+      if (!( ["accept", "accept_all", "reject", "respond"] as string[]).includes(intent)) return;
       const returned = args?.authority;
       if (!returned
+        || returned.protocol_version !== metadata.authority.protocol_version
+        || returned.protocol !== metadata.authority.protocol
         || returned.assignment_id !== metadata.authority.assignment_id
         || returned.authority_version !== metadata.authority.authority_version
         || returned.resource_type !== metadata.authority.resource_type
         || returned.resource_id !== metadata.authority.resource_id) return;
       if (!metadata.authority.allowed_actions.includes(projectedAction(intent))) return;
       const approvalId = metadata.authority.resource_type === "approval" ? metadata.authority.resource_id : undefined;
-      onIntent(intent, approvalId, args?.payload ?? {});
+      onIntent(intent, approvalId, args?.payload ?? {}, metadata.authority);
     }
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
