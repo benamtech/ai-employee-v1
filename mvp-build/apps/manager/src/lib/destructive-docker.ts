@@ -51,6 +51,9 @@ export function classifyDestructiveDockerObservation(
   if (observation.spawn_error) {
     return { ...base, outcome: "failed", failure_state: "docker_destructive_spawn_failed", output_verified: false };
   }
+  if (observation.signal !== null) {
+    return { ...base, outcome: "ambiguous", failure_state: "docker_destructive_signal_termination", output_verified: false };
+  }
   if (observation.exit_code === null) {
     return { ...base, outcome: "ambiguous", failure_state: "docker_destructive_exit_unknown", output_verified: false };
   }
@@ -74,7 +77,7 @@ export function classifyDestructiveDockerObservation(
 export class DestructiveDockerFailure extends Error {
   readonly outcome: Exclude<DestructiveDockerOutcome, "accepted">;
   readonly failure_state: string;
-  readonly evidence: Record<string, unknown>;
+  evidence: Record<string, unknown>;
 
   constructor(evidence: DestructiveDockerEvidence) {
     const outcome = evidence.outcome === "accepted" ? "ambiguous" : evidence.outcome;
@@ -88,7 +91,8 @@ export class DestructiveDockerFailure extends Error {
 }
 
 export async function runDestructiveDockerStep(spec: DestructiveDockerSpec): Promise<DestructiveDockerEvidence> {
-  const timeoutMs = Math.max(1_000, spec.timeout_ms ?? 30_000);
+  const configuredTimeout = Number(spec.timeout_ms ?? 30_000);
+  const timeoutMs = Number.isFinite(configuredTimeout) ? Math.max(1_000, configuredTimeout) : 30_000;
   const observation = await new Promise<DestructiveDockerObservation>((resolve) => {
     const child = spawn("docker", spec.args, { shell: false, env: process.env });
     let stdout = "";
