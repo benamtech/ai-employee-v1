@@ -5,16 +5,28 @@ on:
   push:
     branches:
       - employee-production-tuesday
+      - main
     paths:
+      - "CONTRIBUTING.md"
       - "README.md"
+      - "AGENTS.md"
+      - "CLAUDE.md"
       - "CODEGRAPH.md"
+      - ".github/pull_request_template.md"
       - "wiki/MVP/**"
       - "mvp-build/README.md"
+      - "mvp-build/AGENTS.md"
+      - "mvp-build/CLAUDE.md"
       - "mvp-build/CODEGRAPH.md"
       - "mvp-build/STANDARD.md"
       - "mvp-build/second-half-plan/**"
       - "mvp-build/memory/**"
       - "mvp-build/docs/architecture/**"
+      - "mvp-build/scripts/agent-task-rubric.mjs"
+      - "mvp-build/scripts/install-git-hooks.mjs"
+      - "mvp-build/scripts/verify-repository-governance.mjs"
+      - "mvp-build/scripts/check-hermes-upstream.mjs"
+      - "mvp-build/validation/hermes-upstream-baseline.json"
       - "mvp-build/validation/standard-v0.2-evolution-vector.json"
       - "mvp-build/packages/shared/src/connector-registry.ts"
       - "mvp-build/packages/shared/src/connector-setup.ts"
@@ -34,19 +46,33 @@ on:
       - "mvp-build/package.json"
       - "mvp-build/package-lock.json"
       - ".github/workflows/phase-2-remediation-plan.yml"
+      - ".github/workflows/hermes-upstream-watch.yml"
+      - ".github/workflows/main-integration-gates.yml"
   pull_request:
     branches:
+      - main
       - research
     paths:
+      - "CONTRIBUTING.md"
       - "README.md"
+      - "AGENTS.md"
+      - "CLAUDE.md"
       - "CODEGRAPH.md"
+      - ".github/pull_request_template.md"
       - "wiki/MVP/**"
       - "mvp-build/README.md"
+      - "mvp-build/AGENTS.md"
+      - "mvp-build/CLAUDE.md"
       - "mvp-build/CODEGRAPH.md"
       - "mvp-build/STANDARD.md"
       - "mvp-build/second-half-plan/**"
       - "mvp-build/memory/**"
       - "mvp-build/docs/architecture/**"
+      - "mvp-build/scripts/agent-task-rubric.mjs"
+      - "mvp-build/scripts/install-git-hooks.mjs"
+      - "mvp-build/scripts/verify-repository-governance.mjs"
+      - "mvp-build/scripts/check-hermes-upstream.mjs"
+      - "mvp-build/validation/hermes-upstream-baseline.json"
       - "mvp-build/validation/standard-v0.2-evolution-vector.json"
       - "mvp-build/packages/shared/src/connector-registry.ts"
       - "mvp-build/packages/shared/src/connector-setup.ts"
@@ -66,6 +92,8 @@ on:
       - "mvp-build/package.json"
       - "mvp-build/package-lock.json"
       - ".github/workflows/phase-2-remediation-plan.yml"
+      - ".github/workflows/hermes-upstream-watch.yml"
+      - ".github/workflows/main-integration-gates.yml"
 
 permissions:
   contents: read
@@ -77,7 +105,7 @@ concurrency:
 jobs:
   standard-plan-integrity:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: mvp-build
@@ -89,11 +117,52 @@ jobs:
           cache: npm
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
+      - name: Publish ratified Standard context
+        run: |
+          echo "## Ratified Standard integrity" >> "$GITHUB_STEP_SUMMARY"
+          echo "Canonical source: [mvp-build/STANDARD.md](https://github.com/${{ github.repository }}/blob/${{ github.sha }}/mvp-build/STANDARD.md)" >> "$GITHUB_STEP_SUMMARY"
+          echo "Event: ${{ github.event_name }}; SHA: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
       - name: Validate ratified Standard, evolution vector, and connector protocol
         run: |
-          # Why: governance failures must retain exact assertions before another change is attempted.
           set -o pipefail
           npm run test:standard 2>&1 | tee ratified-standard-test.log
+      - name: Validate contributor onboarding and repository governance
+        run: |
+          set -o pipefail
+          npm run test:repo-governance 2>&1 | tee -a ratified-standard-test.log
+      - name: Validate predecessor remediation registry remains parseable
+        run: |
+          set -o pipefail
+          npm run test:remediation-plan 2>&1 | tee -a ratified-standard-test.log
+      - name: Parse evolution vector independently and fail fast
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const p = JSON.parse(fs.readFileSync('validation/standard-v0.2-evolution-vector.json', 'utf8'));
+          const fail = (message) => { console.error(`❌ Evolution vector: ${message}`); process.exit(1); };
+          const basis = ['expansion','satisfaction','narrowing','destructive_modification','appendix','reorientation'];
+          if (p.standard_id !== 'amtech-standard-v0.2') fail('wrong standard_id');
+          if (JSON.stringify(p.direction_basis) !== JSON.stringify(basis)) fail('direction basis changed');
+          if (p.summary.dimensions !== p.dimensions.length || p.dimensions.length < 12) fail('dimension count is inconsistent');
+          if (p.summary.unapproved_destructive_modifications !== 0) fail('unapproved destructive modification recorded');
+          if (p.summary.production_ready !== false) fail('vector cannot claim production readiness');
+          for (const d of p.dimensions) {
+            if (!d.original_clauses?.length || !d.ratified_clauses?.length) fail(`${d.id}: missing clause crosswalk`);
+            if (!(d.implementation_refs?.length || d.supersession_refs?.length)) fail(`${d.id}: missing implementation/supersession refs`);
+            if (d.direction?.destructive_modification !== 0) fail(`${d.id}: destructive motion requires separate human approval`);
+            for (const key of basis) if (!Number.isFinite(d.direction?.[key])) fail(`${d.id}: ${key} is not finite`);
+          }
+          console.log(`✅ Evolution vector OK: ${p.dimensions.length} dimensions; ${p.summary.dominant_motion}`);
+          NODE
+      - name: Typecheck governance consumers
+        run: npm run typecheck
+      - name: Lint changed governance boundary
+        run: npm run lint
+      - name: Push-only strict regression and production build
+        if: github.event_name == 'push'
+        run: |
+          npm run test:unit
+          npm run build
       - name: Upload ratification diagnostics
         if: always()
         uses: actions/upload-artifact@v4
@@ -102,23 +171,14 @@ jobs:
           path: mvp-build/ratified-standard-test.log
           if-no-files-found: error
           retention-days: 7
-      - name: Validate predecessor remediation registry remains parseable
-        run: npm run test:remediation-plan
-      - name: Parse evolution vector independently
+      - name: Standard integrity summary
+        if: always()
         run: |
-          node - <<'NODE'
-          const fs = require('node:fs');
-          const p = JSON.parse(fs.readFileSync('validation/standard-v0.2-evolution-vector.json', 'utf8'));
-          const basis = ['expansion','satisfaction','narrowing','destructive_modification','appendix','reorientation'];
-          if (p.standard_id !== 'amtech-standard-v0.2') process.exit(1);
-          if (JSON.stringify(p.direction_basis) !== JSON.stringify(basis)) process.exit(1);
-          if (p.summary.dimensions !== p.dimensions.length || p.dimensions.length < 12) process.exit(1);
-          if (p.summary.unapproved_destructive_modifications !== 0 || p.summary.production_ready !== false) process.exit(1);
-          for (const d of p.dimensions) {
-            if (!d.original_clauses?.length || !d.ratified_clauses?.length) process.exit(1);
-            if (!(d.implementation_refs?.length || d.supersession_refs?.length)) process.exit(1);
-            if (d.direction?.destructive_modification !== 0) process.exit(1);
-            for (const key of basis) if (!Number.isFinite(d.direction?.[key])) process.exit(1);
-          }
-          console.log({ standard: p.standard_id, dimensions: p.dimensions.length, dominant_motion: p.summary.dominant_motion });
-          NODE
+          if [ "${{ job.status }}" = "success" ]; then
+            echo "✅ Standard Integrity OK"
+            echo "✅ Standard Integrity OK" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "❌ Standard Integrity FAILED"
+            echo "❌ Standard Integrity FAILED — inspect the retained diagnostic artifact." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
