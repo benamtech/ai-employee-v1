@@ -106,4 +106,6 @@ Review the official repository, `hermes_cli/`, `web/src/App.tsx`, recent merged 
 
 Use `.github/pull_request_template.md`. A PR must include the task contract, rubric, Standard clauses, verification, evidence state, and any Hermes upstream review. `source-wired`, `ci-accepted`, `runtime-accepted`, `provider-accepted`, and `production-ready` are distinct claims.
 
+`Main Integration Gates` is the canonical required check for pull requests into `main`; subsystem workflows remain diagnostic and release-evidence companions.
+
 PR #23 is the integration/cutover PR from `employee-production-tuesday` to `main`. New production work continues on reviewed branches from the post-cutover `main`; the historical `research` branch is not an authority layer.
