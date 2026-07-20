@@ -1,11 +1,19 @@
 import { createHmac, randomBytes, randomUUID } from "node:crypto";
 import { request as httpRequest } from "node:http";
 import type { Hono } from "hono";
-import type { ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
+import type { ProvisionerOperation, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import { serviceClient } from "@amtech/db";
 import { queueProvisioningCommand, PROVISIONING_COMMAND_TYPES, type ProvisioningCommandType } from "./lib/provisioning-state-machine.js";
 import { startProvisioningReconciler } from "./lib/provisioning-reconciler.js";
 import { replayAmbientDeadLetter, startAmbientInboxWorker } from "./lib/ambient-inbox.js";
+
+const DESTRUCTIVE_PROVISIONER_OPERATIONS = new Set<ProvisionerOperation>([
+  "remove_runtime",
+  "suspend_runtime",
+  "restart_runtime",
+  "replace_runtime",
+  "restore_runtime",
+]);
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -30,6 +38,10 @@ function socketPath(): string {
   return process.env.PROVISIONER_SOCKET_PATH ?? "/run/amtech-provisioner/provisioner.sock";
 }
 
+export function isDestructiveProvisionerOperation(operation: ProvisionerOperation | undefined): boolean {
+  return Boolean(operation && DESTRUCTIVE_PROVISIONER_OPERATIONS.has(operation));
+}
+
 export function signedProvisionerEnvelope(req: ProvisionerRequest): ProvisionerRequest {
   const issued = new Date();
   const expires = new Date(issued.getTime() + 30_000);
@@ -42,6 +54,10 @@ export function signedProvisionerEnvelope(req: ProvisionerRequest): ProvisionerR
     nonce: randomBytes(24).toString("base64url"),
     idempotency_key: req.idempotency_key ?? `runtime:${req.employee_id}:${req.manifest_id}`,
   };
+}
+
+function ambiguousProvisionerBody(failureState: string, evidence: Record<string, unknown>, logs: string[] = []): ProvisionerResult {
+  return { status: "failed", outcome: "ambiguous", failure_state: failureState, evidence, logs };
 }
 
 export async function callHostProvisioner(input: ProvisionerRequest): Promise<{ status: number; body: ProvisionerResult }> {
@@ -67,9 +83,17 @@ export async function callHostProvisioner(input: ProvisionerRequest): Promise<{ 
         const text = Buffer.concat(chunks).toString("utf8");
         let body: ProvisionerResult;
         try {
-          body = JSON.parse(text || "{}") as ProvisionerResult;
-        } catch {
-          body = { status: "failed", failure_state: "host_provisioner_invalid_json", logs: [text.slice(0, 500)] };
+          const parsed = JSON.parse(text || "{}") as Partial<ProvisionerResult>;
+          if (!parsed || (parsed.status !== "ok" && parsed.status !== "failed")) {
+            body = ambiguousProvisionerBody("host_provisioner_malformed_result", { raw_body: text.slice(0, 500) });
+          } else {
+            body = parsed as ProvisionerResult;
+          }
+        } catch (err) {
+          body = ambiguousProvisionerBody("host_provisioner_invalid_json", {
+            raw_body: text.slice(0, 500),
+            parse_error: String((err as Error).message ?? err),
+          });
         }
         resolve({ status: res.statusCode ?? 500, body });
       });
@@ -80,14 +104,65 @@ export async function callHostProvisioner(input: ProvisionerRequest): Promise<{ 
   });
 }
 
+async function markDestructiveProjectionUnhealthy(input: ProvisionerRequest): Promise<Record<string, unknown>> {
+  if (!isDestructiveProvisionerOperation(input.operation)) return { applied: false, reason: "operation_not_destructive" };
+  try {
+    const updated = await serviceClient()
+      .from("employees")
+      .update({ status: "failed", needs_reprovision: true })
+      .eq("id", input.employee_id)
+      .eq("account_id", input.account_id);
+    if (updated.error) {
+      return { applied: false, reason: "projection_update_failed", error: String(updated.error.message ?? updated.error) };
+    }
+    return { applied: true, status: "failed", needs_reprovision: true };
+  } catch (err) {
+    return { applied: false, reason: "projection_update_exception", error: String((err as Error).message ?? err) };
+  }
+}
+
 export async function requireHostProvisioner(input: ProvisionerRequest): Promise<ProvisionerResult> {
-  const result = await callHostProvisioner(input);
-  if (result.status >= 400 || result.body.status !== "ok") {
-    const err = new Error(result.body.failure_state ?? `host_provisioner_${result.status}`);
-    Object.assign(err, { provisioner_result: result.body, http_status: result.status });
+  let result: { status: number; body: ProvisionerResult };
+  try {
+    result = await callHostProvisioner(input);
+  } catch (err) {
+    const message = String((err as Error).message ?? err);
+    result = {
+      status: 503,
+      body: ambiguousProvisionerBody(
+        message.includes("timeout") ? "host_provisioner_timeout" : "host_provisioner_unavailable",
+        { transport_error: message, socket_path: socketPath() },
+        [message],
+      ),
+    };
+  }
+
+  let body = result.body;
+  if (isDestructiveProvisionerOperation(input.operation) && body.status === "ok" && body.outcome !== "accepted") {
+    body = ambiguousProvisionerBody("host_provisioner_destructive_success_unverified", {
+      received_status: body.status,
+      received_outcome: body.outcome ?? null,
+      received_evidence: body.evidence ?? null,
+    }, body.logs ?? []);
+  }
+
+  if (result.status >= 400 || body.status !== "ok") {
+    const projectionGuard = await markDestructiveProjectionUnhealthy(input);
+    body = {
+      ...body,
+      evidence: { ...(body.evidence ?? {}), manager_projection_guard: projectionGuard },
+    };
+    const durableSummary = {
+      failure_state: body.failure_state ?? `host_provisioner_${result.status}`,
+      outcome: body.outcome ?? "failed",
+      http_status: result.status,
+      evidence: body.evidence ?? {},
+    };
+    const err = new Error(`host_provisioner_failure:${JSON.stringify(durableSummary)}`);
+    Object.assign(err, { provisioner_result: body, http_status: result.status });
     throw err;
   }
-  return result.body;
+  return body;
 }
 
 function startWorkersWhenServing(): void {
@@ -118,7 +193,7 @@ export function registerProvisionerRoutes(app: Hono): void {
 
   app.post("/provision", async (c) => {
     if (!authorized(c.req.header("Authorization"))) {
-      return c.json({ status: "failed", failure_state: "unauthorized" }, 401);
+      return c.json({ status: "failed", outcome: "failed", failure_state: "unauthorized" }, 401);
     }
     try {
       const req = (await c.req.json()) as ProvisionerRequest;
@@ -127,7 +202,9 @@ export function registerProvisionerRoutes(app: Hono): void {
     } catch (err) {
       return c.json({
         status: "failed",
+        outcome: "ambiguous",
         failure_state: "host_provisioner_unavailable",
+        evidence: { transport_error: String((err as Error).message ?? err) },
         logs: [String((err as Error).message ?? err)],
       }, 503);
     }
