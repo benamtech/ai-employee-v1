@@ -89,6 +89,8 @@ const ARTIFACT_CAPABILITIES: Array<{
   { tool_name: "verify_artifact_publication", label: "Verify the published result", summary: "Observe the approved sandbox target and attach a verification receipt.", read_only: true, requires_approval: false },
 ];
 
+const VALID_RISKS = new Set<ToolCapabilityRisk>(["read", "write", "money", "customer_facing", "unknown"]);
+
 function stableId(serverId: string, toolName: string): string {
   return `toolcap:${slug(serverId)}:${slug(toolName)}`;
 }
@@ -157,6 +159,11 @@ function evidenceBoolean(value: unknown): boolean | null {
   return typeof value === "boolean" ? value : null;
 }
 
+function evidenceRisk(value: unknown): ToolCapabilityRisk {
+  const candidate = evidenceString(value) as ToolCapabilityRisk | null;
+  return candidate && VALID_RISKS.has(candidate) ? candidate : "unknown";
+}
+
 function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt: string, reportId: string): ToolCapabilityDescriptor[] {
   const out: ToolCapabilityDescriptor[] = [];
   for (const decision of decisions) {
@@ -174,6 +181,7 @@ function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt:
       const readOnlyEvidence = evidenceBoolean(evidence.read_only);
       const readOnly = readOnlyEvidence ?? false;
       const availability = reportAvailability(decision);
+      const endpointId = evidenceString(evidence.runtime_endpoint_id);
       out.push({
         id: stableId(serverId, toolName),
         capability_key: decision.capability_key,
@@ -187,7 +195,7 @@ function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt:
         availability,
         can_run_now: availability === "ready",
         read_only: readOnly,
-        risk: readOnly ? "read" : evidenceString(evidence.risk) as ToolCapabilityRisk ?? "unknown",
+        risk: readOnly ? "read" : evidenceRisk(evidence.risk),
         requires_approval: !readOnly && evidenceBoolean(evidence.requires_approval) !== false,
         setup_requirement: availability === "ready" ? null : evidenceString(evidence.setup_requirement) ?? decision.failed_dimensions.map(humanize).join(" · "),
         connector_id: evidenceString(evidence.connector_id),
@@ -198,7 +206,7 @@ function runtimeDescriptors(decisions: EffectiveCapabilityDecision[], checkedAt:
           failed_dimensions: [...decision.failed_dimensions],
           source_refs: [
             `effective_capability_evidence:${reportId}:${decision.capability_key}`,
-            ...(evidenceString(evidence.runtime_endpoint_id) ? [`runtime_endpoint:${evidenceString(evidence.runtime_endpoint_id)}`] : []),
+            ...(endpointId ? [`runtime_endpoint:${endpointId}`] : []),
           ],
         },
       });
@@ -278,7 +286,7 @@ function artifactDescriptors(snapshot: EmployeeSnapshot): ToolCapabilityDescript
         failed_dimensions: runtimeUnavailable ? ["runtime_health"] : [],
         source_refs: [`manager_mcp:tools/${item.tool_name}`, `artifact_workbench:${item.tool_name}`],
       },
-    };
+    } satisfies ToolCapabilityDescriptor;
   });
 }
 
