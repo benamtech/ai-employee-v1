@@ -48,9 +48,11 @@ replaceOne(
   "event_kind",
 );
 replaceOne(
-  `        await writeSse({ event: "snapshot", data: JSON.stringify({ kind: "snapshot", snapshot }) });`,
-  `        await writeSse({ event: "snapshot", data: JSON.stringify({ ...streamScope, kind: "snapshot", snapshot }) });`,
-  "snapshot_scope",
+  `        await writeSse({ event: "snapshot", data: JSON.stringify({ kind: "snapshot", snapshot }) });
+        let cursor = cursorFromSnapshot(snapshot);`,
+  `        let cursor = cursorFromSnapshot(snapshot);
+        await writeSse({ event: "snapshot", data: JSON.stringify({ ...streamScope, kind: "snapshot", snapshot, cursor }) });`,
+  "snapshot_scope_cursor",
 );
 replaceOne(
   `            await writeSse({ event: "work_event", data: JSON.stringify({ kind: "work_event", event }) });`,
@@ -136,6 +138,8 @@ for (const marker of [
   "authority_versions",
   "streamScope",
   "authority_version",
+  "cursorFromSnapshot(snapshot)",
+  "snapshot, cursor",
   "const event = p.kind",
   "subscribeProgress(streamScope",
   "protocol_assignment_mismatch",
@@ -149,6 +153,7 @@ console.log(JSON.stringify({
   output: outputPath,
   stream_events: "typed",
   stream_scope: "account-employee-assignment-authority-version",
+  snapshot_cursor: "explicit-tuple-cursor-before-deltas",
   protocol_actions: "current-assignment-authority-version",
   owner_session_transport: "private_header",
 }));

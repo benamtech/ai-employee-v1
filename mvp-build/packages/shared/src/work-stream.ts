@@ -8,6 +8,11 @@ import type { ResourcePayload, WorkEventRow } from "./resource-payload.js";
 
 export type WorkProgressState = "started" | "step" | "completed";
 
+export interface WorkStreamCursor {
+  created_at: string;
+  id: string;
+}
+
 export interface WorkStreamAssignmentScope {
   assignment_id: string;
   account_id: string;
@@ -17,8 +22,8 @@ export interface WorkStreamAssignmentScope {
 
 export type WorkStreamEvent =
   /** Full read-model — sent on connect and on reconnect catch-up gaps. */
-  | { kind: "snapshot"; snapshot: ResourcePayload }
-  /** A newly persisted work event (delta merged by id). */
+  | { kind: "snapshot"; snapshot: ResourcePayload; cursor: WorkStreamCursor }
+  /** A newly persisted work event (delta merged only after scope + tuple-cursor validation). */
   | { kind: "work_event"; event: WorkEventRow }
   /** Live "doing it now" — a safe work-verb, never a raw tool name. */
   | { kind: "work_progress"; run_id: string; verb: string; state: WorkProgressState }
