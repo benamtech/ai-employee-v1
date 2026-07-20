@@ -1,0 +1,77 @@
+{
+  "version": "2026-07-20.post-merge.1",
+  "repository": "benamtech/ai-employee-v1",
+  "baseline": {
+    "branch": "main",
+    "merge_sha": "5e5b8d7c7a5e20490d58855ffb4450b13b53cd03",
+    "cutover_head": "d131dd09e216fc9dcf0444afd1eb1494194f52eb",
+    "migration_head": "0072",
+    "standard": "v0.2"
+  },
+  "score_scale": "0.0-1.0; higher means more severe, more certain, more central, or wider impact",
+  "schema": [
+    "id",
+    "workstream",
+    "priority",
+    "production_blocking",
+    "evidence_confidence",
+    "user_impact",
+    "authority_safety_risk",
+    "dependency_centrality",
+    "blast_radius",
+    "reversibility_risk",
+    "maintainability_drag",
+    "production_readiness_gap",
+    "title",
+    "affected_boundaries",
+    "evidence"
+  ],
+  "issues": [
+    ["ISS-001","WS-01","P0",0.95,1.00,0.45,0.72,1.00,0.92,0.20,0.90,0.95,"Authority documents still describe merged PR #23 as an active draft cutover",["repository-governance","document-control","contributor-routing"],["PR #23 merged 2026-07-20","root/scoped CODEGRAPH and agent instructions on main"]],
+    ["ISS-002","WS-01","P0",0.91,1.00,0.35,0.82,0.98,0.88,0.30,0.88,0.92,"Active evidence matrices cite ancestor Gate 0 head instead of the final cutover head and merged-main coordinate",["release-evidence","document-control","exact-SHA-claims"],["PR #23 final head d131dd09","active program verification matrix cites 4be092f"]],
+    ["ISS-003","WS-01","P0",0.96,0.99,0.72,0.88,1.00,0.96,0.35,0.95,0.97,"Broad npm run test:unit aggregate is red with pre-ratification fixtures",["tests","assignment-authority","RPC-fixtures","environment-fixtures"],["PR #23 reports 30 files and 112 failed tests","package.json test:unit runs the broad Vitest aggregate"]],
+    ["ISS-004","WS-01","P0",0.90,0.99,0.58,0.85,0.97,0.93,0.30,0.91,0.92,"Canonical main merge gate composes curated suites and does not prove the broader red aggregate",["CI","tests","release-claims"],[".github/workflows/main-integration-gates.yml","CONTRIBUTING.md evidence boundary"]],
+    ["ISS-005","WS-01","P1",0.62,0.94,0.35,0.46,0.82,0.74,0.25,0.82,0.68,"Test suites lack one current disposition map for authoritative, incomplete, migrating, overlapping, blocked, and unusable evidence",["tests","developer-experience","release-evidence"],["package.json named suites","active plan and PR #23 describe only part of the disposition"]],
+    ["ISS-006","WS-01","P1",0.57,1.00,0.22,0.50,0.75,0.68,0.15,0.78,0.61,"Current architecture gap register still claims migration head 0069 and production ledger 0031",["architecture","database","document-control"],["docs/architecture/09-current-bug-risk-and-production-gap-register.md","current head is 0072"]],
+
+    ["ISS-007","WS-02","P0",0.94,0.96,0.66,0.98,0.93,0.91,0.55,0.80,0.96,"Remote protected MCP authorization profile is not implemented",["MCP","OAuth","connector-custody","authorization"],["active protocol program P0-C2 unchecked","repository search finds requirements/research but no implementation"]],
+    ["ISS-008","WS-02","P0",0.92,0.97,0.63,0.96,0.89,0.88,0.55,0.78,0.94,"Official MCP Apps host negotiation, sandbox, CSP, and bounded JSON-RPC bridge are absent",["MCP-Apps","generated-UI","browser-security","work-actions"],["active protocol program P0-C3 unchecked","architecture marks conformance incomplete"]],
+    ["ISS-009","WS-02","P1",0.68,0.94,0.48,0.78,0.66,0.71,0.45,0.67,0.72,"Versioned AG-UI projection and replay adapter are absent",["AG-UI","events","role-safe-projection","replay"],["active protocol program P1-C4 unchecked","repository search returns plans/research only"]],
+    ["ISS-010","WS-02","P0",0.86,0.92,0.67,0.91,0.92,0.89,0.48,0.86,0.89,"Effective capability truth is not persisted as one hash-bound intersection",["capabilities","connectors","policy","runtime","entitlements"],["architecture gap P1-008","CODEGRAPH marks release reconciliation incomplete"]],
+    ["ISS-011","WS-02","P0",0.90,0.98,0.76,0.94,0.90,0.90,0.42,0.79,0.92,"Live connector authorization, health, revocation, staleness, and failure-path evidence are absent",["connectors","OAuth","health","revocation","owner-UI"],["active plan and verification matrix mark open","no provider-accepted proof on current main"]],
+
+    ["ISS-012","WS-03","P0",0.98,0.99,0.85,0.99,0.99,1.00,0.70,0.84,0.99,"No release-bound proof that the approved database is migrated through 0072",["database","migrations","durable-authority","deployment"],["migration head 0072","active verification matrix database release gate open"]],
+    ["ISS-013","WS-03","P0",0.95,0.98,0.72,0.99,0.96,0.97,0.55,0.89,0.96,"Full RLS, grants, security-definer, existing-row, concurrency, race, and rollback matrices are incomplete",["database","RLS","authorization","concurrency","rollback"],["active roadmap P0-2","STANDARD DTEP-10"]],
+    ["ISS-014","WS-03","P0",0.82,0.97,0.60,0.96,0.79,0.84,0.45,0.66,0.85,"Disposable managed Supabase acceptance is absent for security-sensitive and final-candidate triggers",["Supabase","Auth","Data-API","RLS","release-evidence"],["STANDARD DTEP-10.2","verification matrix gate open"]],
+
+    ["ISS-015","WS-04","P0",0.96,0.98,0.83,1.00,0.95,1.00,0.72,0.72,0.98,"Managed secret custody, access policy, rotation, revocation, and rollback proof are absent",["secrets","credentials","deployment","connectors","model-gateway"],["architecture gap P0-002","source defines broad secret inventory but no live custody proof"]],
+    ["ISS-016","WS-04","P0",0.97,0.99,0.82,0.98,0.96,1.00,0.68,0.77,0.98,"Target-host five-service health and two-employee network/data/action isolation are unproven",["Docker","Caddy","Host-Provisioner","network-isolation","runtime"],["active roadmap P0-3","verification matrix target-host gate open"]],
+    ["ISS-017","WS-04","P0",0.89,0.96,0.73,0.94,0.88,0.93,0.60,0.81,0.91,"Replace, suspend, restore, rotate, teardown, and neighbor-safe lifecycle proof are incomplete",["provisioning","runtime-lifecycle","reconciliation","isolation"],["active roadmap P0-3","architecture gap P0-009"]],
+    ["ISS-018","WS-04","P1",0.71,0.99,0.45,0.80,0.79,0.76,0.40,0.62,0.76,"Release evidence does not bind the resolved immutable Hermes digest to the deployed candidate",["Hermes","supply-chain","runtime","release-evidence"],["STANDARD RIP-5.3","CODEGRAPH says exact digest proof remains open"]],
+
+    ["ISS-019","WS-05","P0",0.96,0.99,0.91,0.97,0.93,0.98,0.50,0.73,0.97,"Fixture-free canonical owner identity, activation, assignment selection, and first work proof are absent",["identity","assignment","onboarding","owner-session","runtime"],["architecture gap P0-004","active roadmap P0-4"]],
+    ["ISS-020","WS-05","P0",0.90,0.97,0.87,0.92,0.84,0.92,0.48,0.74,0.92,"Fixture-free Web, SMS, and signed Review parity for the same durable work is absent",["Web","SMS","Review","role-safe-projection","channels"],["CODEGRAPH not-accepted list","STANDARD HIP-7.6"]],
+    ["ISS-021","WS-05","P1",0.64,0.93,0.80,0.61,0.63,0.70,0.30,0.72,0.68,"Connector setup, degraded, revoked, scope-change, repair, and deletion UX lacks one lifecycle grammar",["UX","connectors","recovery-language","owner-surface"],["architecture gap P1-004","active protocol program owner-safe setup/status requirement"]],
+
+    ["ISS-022","WS-06","P0",0.95,0.99,0.92,0.94,0.91,0.96,0.54,0.76,0.96,"No fixture-free provider-backed generated work-object journey reaches receipt and refindable proof",["Hermes","generated-UI","approval","effects","provider-receipts","proof"],["architecture gap P0-005","active roadmap P0-5"]],
+    ["ISS-023","WS-06","P1",0.66,0.92,0.86,0.72,0.73,0.77,0.38,0.75,0.70,"Approved preview and delivered HTML/PDF/email/signed-link output parity are unproven",["artifacts","approval","rendering","customer-output"],["architecture gap P1-005","STANDARD exact approval binding"]],
+    ["ISS-024","WS-06","P1",0.58,0.90,0.77,0.53,0.64,0.69,0.25,0.70,0.63,"Proof refinding by job, customer, action, provider, time, and failure class is immature",["proof","audit","operator-UX","owner-UX"],["architecture gap P1-003"]],
+
+    ["ISS-025","WS-07","P0",0.99,1.00,0.92,0.96,0.98,0.99,0.62,0.82,0.99,"Model Gateway cumulative spend limit is not enforced",["model-gateway","budgets","commercial","database"],["apps/manager/src/lib/model-gateway.ts only denies spend_limit_cents <= 0","usage is recorded after provider execution"]],
+    ["ISS-026","WS-07","P0",0.97,1.00,0.84,0.85,0.96,0.97,0.45,0.78,0.97,"Model Gateway rate limiting is process-local and resets or multiplies across replicas",["model-gateway","rate-limits","scaling","availability"],["apps/manager/src/lib/model-gateway.ts rateBuckets Map"]],
+    ["ISS-027","WS-07","P0",0.99,1.00,0.83,0.95,0.97,0.96,0.70,0.80,0.99,"Provider timeout and transport errors are blindly retried and finally recorded as failed rather than ambiguous",["model-gateway","provider-effects","idempotency","commercial-reconciliation"],["apps/manager/src/lib/model-gateway-http.ts retry loop","no upstream idempotency key on generic path"]],
+    ["ISS-028","WS-07","P0",0.88,0.96,0.85,0.89,0.89,0.94,0.55,0.78,0.91,"Payer, beneficiary, usage, provider cost, entitlement, and invoice reconciliation are not release-accepted",["commercial","billing","entitlements","accounting"],["STANDARD CBMP-8","active plan commercial gate open"]],
+
+    ["ISS-029","WS-08","P0",0.94,0.97,0.83,0.96,0.91,0.96,0.58,0.84,0.95,"Crash-point compensation and deterministic forward repair are incomplete",["recovery","effects","provisioning","connectors","workers"],["architecture gap P0-009","active roadmap P1-2"]],
+    ["ISS-030","WS-08","P0",0.95,0.99,0.80,0.94,0.92,0.98,0.61,0.76,0.96,"Database, runtime, profile, Caddy, and release rollback are not proven on one exact candidate",["rollback","database","runtime","deployment"],["STANDARD DIP-11.5","active roadmap P1-2"]],
+    ["ISS-031","WS-08","P0",0.92,0.98,0.65,0.88,0.91,0.95,0.40,0.70,0.94,"No signed deployment manifest binds SHA, image digests, migrations, SBOM/provenance, config, proof, and rollback",["supply-chain","deployment","release-evidence"],["repository search finds no cosign/Sigstore/SLSA implementation","architecture gap P0-010"]],
+    ["ISS-032","WS-08","P1",0.62,0.88,0.62,0.68,0.74,0.74,0.35,0.72,0.69,"Production observability and incident diagnostics do not yet prove complete principal-to-receipt-to-repair lineage",["observability","audit","incident-response","commercial"],["STANDARD DIP-11.4","active plan marks release observability incomplete"]],
+
+    ["ISS-033","WS-09","P1",0.60,0.94,0.82,0.45,0.55,0.68,0.22,0.76,0.64,"Critical public, account, billing, admin, artifact, and employee surfaces are not fully aligned",["UI","UX","trust","navigation"],["architecture gap P1-001"]],
+    ["ISS-034","WS-09","P1",0.72,0.97,0.90,0.67,0.72,0.80,0.31,0.70,0.77,"WCAG 2.2 AA, screen-reader, keyboard, zoom, reflow, focus, and supported-browser evidence are incomplete",["accessibility","browser","UI","release-evidence"],["architecture gap P1-006","active roadmap human-surface gate"]],
+    ["ISS-035","WS-09","P1",0.59,0.90,0.73,0.58,0.61,0.66,0.28,0.69,0.63,"Long-running work lacks fully proven durable progress, interruption, reconnect, and restart semantics",["UX","SSE","runs","recovery"],["architecture gap P1-007"]],
+    ["ISS-036","WS-09","P2",0.42,0.92,0.70,0.48,0.61,0.74,0.45,0.71,0.61,"Fleet admission, queue fairness, provider concurrency allocation, and noisy-neighbor controls are unproven",["capacity","fairness","queues","model-gateway","runtime"],["architecture gap P2-003","active plan 100/250/500/700 sequence"]],
+    ["ISS-037","WS-09","P1",0.67,0.96,0.84,0.66,0.69,0.78,0.32,0.62,0.72,"Controlled-pilot canary, rollback, support, incident, entitlement, and customer-exit criteria are not operationalized",["pilot","operations","commercial","support","release"],["active program allows pilot only after non-waivable gates","no exact pilot packet exists"]],
+    ["ISS-038","WS-09","P2",0.25,0.86,0.35,0.61,0.36,0.42,0.55,0.46,0.44,"Shared/fractional employee, governed egress proxy, and richer operator adapter remain deferred expansion boundaries",["shared-employees","egress","operator-tools","future-capabilities"],["architecture gap P2-001/P2-002/P2-004","not required for initial controlled pilot"]]
+  ]
+}
