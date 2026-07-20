@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@amtech/db";
 import {
   buildEffectiveCapabilityReport,
@@ -100,7 +101,7 @@ export async function authorizeManagerMcpToolExecution(
   }
 
   const report = buildEffectiveCapabilityReport({
-    report_id: `caprep_mcp_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`,
+    report_id: `caprep_mcp_${randomUUID().replace(/-/g, "").slice(0, 20)}`,
     account_id: identity.account_id,
     employee_id: identity.employee_id,
     assignment_id: identity.assignment_id,
