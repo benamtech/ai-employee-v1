@@ -6,12 +6,15 @@ async function script(path: string): Promise<string> {
 }
 
 describe("Pod Alpha operator proof scripts", () => {
-  it("deploy smoke emits JSON proof and checks core services plus Caddy/Docker DNS", async () => {
+  it("deploy smoke emits JSON proof and checks core services plus employee network topology", async () => {
     const src = await script("infra/scripts/deploy-smoke.mjs");
     expect(src).toContain("deploy_smoke");
     expect(src).toContain("manager-health");
     expect(src).toContain("caddy:validate");
-    expect(src).toContain("docker-dns:employee-alias");
+    expect(src).toContain("employee-network:topology");
+    expect(src).toContain("PRODUCTION_CONTAINER_NAMES.manager");
+    expect(src).toContain("PRODUCTION_CONTAINER_NAMES.modelGateway");
+    expect(src).toContain("unexpected_employee_containers");
     expect(src).toContain("proof_json:");
   });
 
