@@ -1,9 +1,8 @@
 /**
- * The Work Surface live-stream vocabulary (Phase 5). A small, AG-UI-shaped event
- * union that the Manager SSE endpoint emits and web/SMS/voice render as thin
- * clients. Intentionally ~5 events, not the full AG-UI 16 — MVP scope, room to
- * grow. Everything owner-facing here is already safe (descriptors + work-verbs);
- * raw provider payloads and tool names never enter these frames.
+ * The Work Surface live-stream vocabulary. Manager emits this transport-neutral,
+ * owner-safe union and Web/AG-UI/MCP hosts project it without becoming authority.
+ * Raw provider payloads, credentials, tool arguments, and hidden prompts never enter
+ * these frames.
  */
 import type { ResourcePayload, WorkEventRow } from "./resource-payload.js";
 
@@ -20,8 +19,10 @@ export type WorkStreamEvent =
   | { kind: "snapshot"; snapshot: ResourcePayload }
   /** A newly persisted work event (delta merged by id). */
   | { kind: "work_event"; event: WorkEventRow }
-  /** Live "doing it now" — a safe work-verb, never a tool name. */
+  /** Live "doing it now" — a safe work-verb, never a raw tool name. */
   | { kind: "work_progress"; run_id: string; verb: string; state: WorkProgressState }
+  /** First-token streaming from Hermes. Deltas are presentation only. */
+  | { kind: "assistant_delta"; run_id: string; message_id: string; sequence: number; delta: string }
   /** An approval was bound or resolved. */
   | { kind: "approval_update"; approval_id: string; resolution: string | null }
   /** A wake/turn run reached a terminal state. */
