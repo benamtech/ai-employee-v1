@@ -1,95 +1,81 @@
-# AMTECH AI Employee Second-Half Plan
+# AMTECH AI Employee Production Plan Index
 
-Status: active standard-remediation execution  
-Updated: 2026-07-20
+Status: **one active production program**  
+Updated: 2026-07-19
 
-The active execution authority is [`phase-2-standard-remediation-execution.md`](phase-2-standard-remediation-execution.md), backed by `../validation/phase-2-remediation-vectors.json`, command-board issue `#25`, draft integration PR `#23`, `../STANDARD.md`, and exact-head proof on `employee-production-tuesday`.
+## Active authority
 
-The focused capability/OAuth/operating-surface closure companion is [`2026-07-20-capability-production-closure/README.md`](2026-07-20-capability-production-closure/README.md). It records current implementation, standardized execution output, exact repo references, the verification matrix, and the next P0/P1 proof sequence. It does not replace the active remediation execution authority.
+The single active production program is:
 
-## Read before using this plan family
+[`2026-07-19-ratified-standard-production-program/README.md`](2026-07-19-ratified-standard-production-program/README.md)
+
+It is governed by:
+
+- `../STANDARD.md` — ratified normative requirements;
+- `../validation/standard-v0.2-evolution-vector.json` — original-to-ratified clause/implementation motion;
+- `../CODEGRAPH.md` — current source topology, migration head, and evidence boundary;
+- `../memory/MEMORY.md` — sole narrative handoff index;
+- current source, migrations, tests, workflows, proof, and draft PR `#23`.
+
+No other file or folder in `second-half-plan/` is current execution authority.
+
+## Read order
 
 1. `../../identity.md`
-2. root and scoped CODEGRAPH
-3. `../memory/MEMORY.md` and newest relevant handoff
-4. `../STANDARD.md`
-5. the active remediation execution program
-6. the focused current execution companion when working on capability/owner-surface production closure
-7. `../docs/architecture/README.md`
-8. `../docs/architecture/09-current-bug-risk-and-production-gap-register.md`
-9. current source, migrations, tests, workflows, proof, and PR diff
-
-The trajectory packet under `../docs/architecture/trajectories/` can order interacting prerequisites and bifurcation controls, but it cannot modify plan status or satisfy a release gate.
+2. root/scoped `AGENTS.md` or `CLAUDE.md` and `CODEGRAPH.md`
+3. `../STANDARD.md`
+4. the active production program above
+5. `../memory/MEMORY.md` and newest relevant handoff
+6. `../docs/architecture/README.md`
+7. applicable source, migrations, tests, workflows, proof, and current diff
 
 ## Current execution state
 
-- Integration branch: `employee-production-tuesday`, based on `research`; draft PR `#23` targets `research`.
-- Migration head: `0072` at `../packages/db/migrations/0072_artifact_revision_scope_guards.sql`.
-- Primary capability-closure implementation anchor: `5b56e6a2249f4b5a650d81badbdd7b95cd6ea2bb`; later documentation commits do not automatically inherit its workflow evidence.
-- Lane 1 relationship/authorization, Lane 3 C3 command/effect, connector custody, commercial attribution, approval authority, platform authority, authority-version revocation, onboarding identity/activation, generated UI, strict context/snapshot reads, canonical production Compose selection, capability evidence/catalog presentation, artifact revision/policy/scope guards, and repository archaeology are source-wired on the integration branch.
-- `../infra/scripts/production-topology.mjs` is the canonical Compose selector for normal-up, prod-like, smoke, and rollback source paths. Target-host runtime/network acceptance remains open.
-- The active architecture/risk map is `../docs/architecture/README.md` plus `../docs/architecture/09-current-bug-risk-and-production-gap-register.md`.
-- Until all current control documents are synchronized, exact implementation references and the current production sequence are maintained in the focused closure packet and `../memory/2026-07-20-capability-surface-ci-closure-and-next-plan.md`, then verified against source and exact-head workflows.
-- The approved production database still requires application of `0032–0072` and exact-SHA advisor/behavior proof.
-- Target-host network/runtime, managed secrets, live identity/provider, provider-backed generated work object, cumulative budgets/shared rate limits, ambiguous provider reconciliation, compensation/repair, fleet capacity/fairness, fixture-free channel evidence, rollback, attestation, deployment, and launch acceptance remain open production gates.
+- Branch: `employee-production-tuesday`, based on `research`; draft PR `#23`.
+- `main` is not the integration shortcut.
+- Migration head: `0072`.
+- Standard v0.2 is ratified.
+- Connector custody and capability discovery are transport-neutral.
+- Native owner setup is manifest-driven across OAuth and provider-managed onboarding; Gmail, QuickBooks, and Stripe are adapters, not the connector ontology.
+- Canonical production Compose selection is source-wired.
+- Local/CI PostgreSQL is the database TDD inner loop; disposable Supabase remains a platform-specific and release-candidate proof boundary.
+- The connector/protocol implementation checkpoint `701936ab1ded` passed all eight required workflows.
+- Final Gate 0 authority-head workflow evidence must be recorded after documentation synchronization stops moving the branch.
+- Target-host, live connector/provider, fixture-free golden work, commercial, recovery, rollback, accessibility, capacity, deployment, and launch acceptance remain open.
 
-The canonical normal-employee path and Start Free + $400 managed-workforce offer remain unchanged. The public estimator remains non-canonical.
+## Historical plan families
 
-## Plan-family authority
+The following are retained as point-in-time evidence and subsystem history:
 
-### Active
+- `phase-2-standard-remediation-execution.md` — predecessor remediation program;
+- `2026-07-20-capability-production-closure/` — predecessor capability/CI closure packet;
+- `phase-00-*` through `phase-06-*` — historical phase family;
+- `surface-research-hermes-gui-and-materialization.md` — historical runtime/UI research;
+- `context-engineering/` — historical context-engineering workstream.
 
-- [`phase-2-standard-remediation-execution.md`](phase-2-standard-remediation-execution.md) — dependency-ordered standard remediation and production execution program.
-- [`2026-07-20-capability-production-closure/README.md`](2026-07-20-capability-production-closure/README.md) — current focused implementation/proof companion; subordinate to the active execution program and Standard.
-- `../validation/phase-2-remediation-vectors.json` — machine-readable finding ownership, dependencies, gates, and failure conditions.
-- `../STANDARD.md` — non-waivable production requirements.
-
-### Current explanatory companions
-
-- `../CODEGRAPH.md` — implementation and proof boundary; verify stale headers/status against the newest handoff and source until its synchronization transaction completes.
-- `../docs/architecture/README.md` — cross-system live map.
-- `../docs/architecture/09-current-bug-risk-and-production-gap-register.md` — current P0/P1/P2 register.
-- `../docs/architecture/trajectories/` — source-grounded dependency/bifurcation analysis.
-- `../docs/ux/` — owner UX doctrine and validation.
-- `../memory/MEMORY.md` — newest-first handoff index.
-
-### Historical phase family
-
-This folder began as the forward plan for taking the Hermes-backed AMTECH AI Employee from a source-wired prototype to free trials and paid pilots. The older phase documents remain subsystem history. When they conflict with the Standard remediation program, current source, migrations, proof, CODEGRAPH, architecture, or newest memory, the current layers win.
-
-| Phase | File | Historical purpose |
-|---|---|---|
-| 0 | [`phase-00-current-state-handoff.md`](phase-00-current-state-handoff.md) | Inherited state, dirty work, missing boundaries, and original plan context. |
-| 1 | [`phase-01-preserve-and-close-live-gate.md`](phase-01-preserve-and-close-live-gate.md) | Preserve the tool-enabled employee path and capture early runtime proof. |
-| 2 | [`phase-02-owner-work-surface-redesign.md`](phase-02-owner-work-surface-redesign.md) | Historical owner-surface redesign direction. Current UX authority is `../docs/ux/`. |
-| 3 | [`phase-03-sms-ambient-inbox-and-link-previews.md`](phase-03-sms-ambient-inbox-and-link-previews.md) | SMS ambient inbox, signed previews, approvals, artifacts, and task state. |
-| 4 | [`phase-04-tool-agnostic-capability-and-renderer-layer.md`](phase-04-tool-agnostic-capability-and-renderer-layer.md) | Capability discovery and generic rendering across tools and artifacts. |
-| 5 | [`phase-05-trial-operations-admin-billing.md`](phase-05-trial-operations-admin-billing.md) | Admin, support, health, metering, billing, and multi-instance operations. |
-| 6 | [`phase-06-free-trial-and-paid-pilot-readiness.md`](phase-06-free-trial-and-paid-pilot-readiness.md) | Historical trial/pilot readiness plan. Current acceptance is Standard/exact-SHA evidence. |
-
-Deep Hermes GUI/runtime research is retained in [`surface-research-hermes-gui-and-materialization.md`](surface-research-hermes-gui-and-materialization.md). The [`context-engineering/`](context-engineering/) workstream remains historical context for business-brain and session-continuity design. Current implementation consumes the current relationship, authorization, command/effect, protocol, provider, UX, and proof contracts.
+When historical material conflicts with the ratified Standard, active program, current source, applied migrations, exact-SHA proof, or current CODEGRAPH, current authority wins. Historical facts are not silently rewritten.
 
 ## Implementation rules
 
-- Do not rewrite Hermes. Package, constrain, and surface it.
-- Do not build one bespoke connector UI per service. Use capability discovery, shared schemas, generic work resources, approval primitives, and connector status.
-- Keep Manager invisible to owners. Owners talk to their employee.
-- Keep developer vocabulary out of owner surfaces.
-- Treat SMS, Web, and signed Review as renderings of the same durable work/resources/actions.
-- Treat estimates as a wedge, not the product ceiling.
-- Keep customer-facing sends, money movement, broad external changes, deletes, and credential changes behind assignment-aware approval and durable effects.
-- Never mark provider, runtime, browser/channel, commercial, or production acceptance without release-bound proof IDs.
-- Never use account membership, bearer possession, caller-selected identity, fixture evidence, trajectory scores, or historical handoffs as complete authority or launch proof.
+- Preserve Hermes as the employee runtime and Manager as the authority/effect plane.
+- Use shared connector/capability/work/action contracts rather than bespoke provider UI ontology.
+- Treat MCP, MCP Apps, and AG-UI as interoperability adapters, not execution authority.
+- Keep Web, SMS, and signed Review as role-safe projections of the same durable work.
+- Keep customer-facing, monetary, destructive, credential, and broad external changes behind assignment-aware policy, approval, effects, and receipts.
+- Never promote source, fixture, local PostgreSQL, or ancestor-SHA evidence into a live acceptance state it did not exercise.
+- No feature expansion while a prerequisite P0 is unresolved.
 
 ## Plan update transaction
 
-When dependency order, a finding, or a gate changes:
+When dependency order or a release gate changes:
 
-1. update the active execution program or add a subordinate focused companion without creating competing authority;
-2. update the machine vector registry and integrity tests when finding ownership/dependencies change;
-3. update current source/tests if implementation changed;
-4. update `../CODEGRAPH.md` and the architecture risk register;
-5. write/update the dated memory handoff and memory index;
-6. update PR `#23` and exact-head workflow evidence.
+1. update the active program or one subordinate task file;
+2. update the Standard vector if clause satisfaction/direction changed;
+3. update source/tests when implementation changed;
+4. update scoped/root CODEGRAPH and architecture indexes;
+5. update one dated memory handoff and the sole memory index;
+6. update wiki/root routing when stale readers could be misled;
+7. stop branch movement and obtain exact-head workflow evidence;
+8. update PR `#23`.
 
-Historical phase files are not rewritten to look current unless their own status banner is explicitly changed and all inbound references remain valid.
+Creating another competing “current plan” without superseding this index in the same transaction is prohibited.
