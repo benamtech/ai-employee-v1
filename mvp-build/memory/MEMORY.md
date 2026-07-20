@@ -7,7 +7,7 @@ This folder is the versioned narrative handoff layer. `MEMORY.md` is the sole in
 
 ## Current branch note
 
-- New work starts on reviewed branches from current `main`.
+- New work starts on reviewed branches from current `main` or an explicitly named stacked dependency.
 - Merged baseline: current `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`.
 - PR `#31` merged on 2026-07-20. Final WS-02 exact evidence head: `e43f70a0e9a3afd4b87880b9d22089e6da2e94d0`.
 - WS-01 evidence: `1460960f415fafc20582313b1dd2117b781a63f7`, broad 106/613.
@@ -15,7 +15,8 @@ This folder is the versioned narrative handoff layer. `MEMORY.md` is the sole in
 - Broad final WS-02 aggregate: **110 files / 635 tests**. Migration head: `0072`. Standard: ratified v0.2.
 - Source/CI accepted: WS-01, provider authority, assignment-scoped streaming Web, remote MCP auth/custody, MCP Apps CSP/host mediation, AG-UI, persisted effective capability, and final MCP policy/version execution revalidation.
 - Remaining WS-02: live connector/provider lifecycle and external protocol-host evidence (`ISS-011`).
-- WS-03 P0 is active on `agent/ws03-database-authority-p0`; DB-P0-01 ledger/hash preflight is the only admitted first step.
+- WS-03 is not complete: PR `#32` contains DB-P0-01 ledger/hash preflight only; DB-P0-02 through DB-P0-07 remain open.
+- WS-04 source hardening is stacked from PR #32 on `agent/ws04-target-host-lifecycle`: lifecycle CLI host authority is routed through Manager, and secret-custody/runtime-digest contracts plus focused tests are added. Exact-head CI and live target-host acceptance remain pending.
 - Current source/CI must not be promoted into managed database, target host, fixture-free channel, commercial, recovery, deployment, pilot, or production acceptance.
 
 ## Read order
@@ -26,6 +27,7 @@ Read CODEGRAPH, Standard, active program, architecture, then the newest relevant
 
 ### Current production boundary
 
+- [2026-07-20 — WS-04 source hardening and decision pass](2026-07-20-ws04-source-hardening-decision-pass.md) — Public spectral/proxy decision model, exact WS-03 correction, Manager-only lifecycle CLI, secret custody/rotation contracts, immutable runtime digest evidence, focused tests, and explicit live-proof boundary.
 - [2026-07-20 — WS-02 Mirror Cabinet hardening and WS-03 frontier](2026-07-20-ws02-mirror-cabinet-hardening-ws03-frontier.md) — Exact-head correction, assignment-scoped live projection, current authority revalidation, MCP App CSP/protocol mediation, AG-UI error hardening, 110/635 evidence, documentation ownership map, and guarded WS-03 P0 preparation.
 - [2026-07-20 — WS-02 streaming and protocol source/CI closure](2026-07-20-ws02-streaming-protocol-source-ci-closure.md) — Original streaming employee OS, Remote MCP authorization/custody, MCP Apps, AG-UI, effective capability, manifold, and source/CI evidence record; superseded for hardening details by the entry above.
 - [2026-07-20 — WS-01 green and WS-02 provider-authority lock](2026-07-20-ws01-green-ws02-provider-authority-lock.md) — Broad-suite normalization, CI de-bloat, and Model Gateway authority lock.
@@ -42,7 +44,7 @@ Read CODEGRAPH, Standard, active program, architecture, then the newest relevant
 ### Standard remediation and integration history
 
 - [2026-07-18 — CI-green production plan digest](2026-07-18-ci-green-plan-digest.md)
-- [2026-07-18 — Lane 1 scope and Lane 10 evidence](2026-07-18-lane1-scope-lane10-evidence-spine.md)
+- [2026-07-18 — Lane 1 scope and Lane 10 integrated CI](2026-07-18-lane1-scope-lane10-evidence-spine.md)
 - [2026-07-18 — Lane 3 integration cleanup](2026-07-18-lane3-integration-and-repository-boundary-cleanup.md)
 - [2026-07-18 — Standard remediation checkpoint](2026-07-18-standard-remediation-lane1-lane3-handoff.md)
 - [2026-07-18 — Standard enforcement audit](2026-07-18-amtech-phase-2-standard-enforcement-audit.md)
