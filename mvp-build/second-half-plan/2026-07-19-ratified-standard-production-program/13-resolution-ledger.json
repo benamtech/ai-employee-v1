@@ -1,5 +1,5 @@
 {
-  "version": "2026-07-20.ws02-hardened.2",
+  "version": "2026-07-20.ws02-hardened.3",
   "updated_at": "2026-07-20",
   "baseline_issue_vector": "08-production-issue-vector.json",
   "implementation_evidence_head": "1460960f415fafc20582313b1dd2117b781a63f7",
@@ -33,7 +33,7 @@
       "state": "source_ci_accepted",
       "evidence_head": "1460960f415fafc20582313b1dd2117b781a63f7",
       "scope": "Manager-only model provider/profile/endpoint/upstream-model/master-credential resolution",
-      "does_not_resolve": ["ISS-007","ISS-008","ISS-009","ISS-010","ISS-011"]
+      "does_not_resolve": ["ISS-011"]
     },
     {
       "id": "CTRL-WS02-PROTOCOL-AUTHORITY",
