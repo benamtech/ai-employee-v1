@@ -63,7 +63,7 @@
     "local:browser-install": "playwright install chromium",
     "ui:dev": "NEXT_PUBLIC_AMTECH_UI_FIXTURES=1 next dev apps/web -p 3000 -H 127.0.0.1",
     "ui:browser": "node infra/scripts/ui/fixture-browser.mjs --headed --keep-open",
-    "ui:test": "node infra/scripts/ui/fixture-browser.mjs",
+    "ui:test": "node infra/scripts/ui/fixture-browser.mjs && node infra/scripts/ui/capability-drawer-browser.mjs",
     "ui:test:shell": "node infra/scripts/ui/product-shell-browser.mjs",
     "ui:test:headed": "node infra/scripts/ui/fixture-browser.mjs --headed",
     "smoke:hermes": "node infra/scripts/hermes-smoke.mjs",
