@@ -56,7 +56,7 @@ export async function authorizeManagerMcpToolExecution(
 ): Promise<McpCapabilityAuthorityDecision> {
   const checkedAt = new Date().toISOString();
   const now = Date.parse(checkedAt);
-  const setup = resolveManagedSetupForCapability(toolName);
+  const setup = resolveManagedSetupForCapability({ tool_name: toolName });
   const bootstrap = CONNECTOR_BOOTSTRAP_TOOLS.has(toolName)
     || setup?.start_tool === toolName
     || setup?.continuation?.tool === toolName;
