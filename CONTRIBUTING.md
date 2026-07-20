@@ -71,11 +71,13 @@ New or materially changed pure/business logic should maintain at least 80% focus
 
 ```bash
 npm run repo:verify:quick   # Standard, plan, connector, onboarding, and governance contracts
-npm run repo:verify:full    # quick gate + typecheck + lint
-npm run test:unit           # affected unit/source contracts
+npm run repo:verify:full    # quick gate + dependency-ordered typecheck + lint
+npm run test:unit           # broad historical aggregate; run for touched areas and normalization work
 npm run test:integration    # PostgreSQL/environment-gated behavior when applicable
 npm run build               # production build boundary
 ```
+
+`Main Integration Gates` executes the named ratified authority, onboarding, production-boundary, UI-contract, build, archaeology, and compiled-browser suites. The broader historical `test:unit` aggregate currently contains stale pre-ratification fixtures and remains explicit P0 normalization work; no green curated suite may be reported as proof that this aggregate is green.
 
 The installed pre-commit hook runs the quick gate. The pre-push hook runs the full gate. CI remains authoritative because hooks can be skipped locally.
 
