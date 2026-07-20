@@ -27,9 +27,9 @@ function healthPassed(status: unknown): boolean {
 }
 
 /**
- * Collect reported/runtime evidence only. Live probes remain `unknown`, therefore
- * no capability becomes effective merely because Hermes advertises it or a host
- * environment variable exists.
+ * Collect runtime-reported evidence. Unless the caller also provides current
+ * credential, entitlement, authority-version, and live-probe evidence, the report
+ * remains denied. Advertisement alone never becomes execution truth.
  */
 export async function collectRuntimeCapabilityEvidence(
   db: SupabaseClient,
@@ -37,7 +37,13 @@ export async function collectRuntimeCapabilityEvidence(
     account_id: string;
     employee_id: string;
     assignment_id: string;
+    authority_version?: string;
     advertised_toolsets?: string[];
+    entitlement_ready?: boolean;
+    authority_version_matches?: boolean;
+    credential_ready?: boolean;
+    live_probe_status?: CapabilityEvidenceInput["live_probe_status"];
+    evidence_max_age_ms?: number;
   },
 ): Promise<EffectiveCapabilityReport> {
   const api = await resolveRuntimeApi(db, input.employee_id);
@@ -46,6 +52,7 @@ export async function collectRuntimeCapabilityEvidence(
     getCapabilities(api),
     getToolsets(api),
   ]);
+  const checkedAt = new Date().toISOString();
   const networkReady = healthPassed(health.status);
   const advertised = new Set(input.advertised_toolsets ?? []);
   const rows = toolsetRows(toolsets);
@@ -58,19 +65,24 @@ export async function collectRuntimeCapabilityEvidence(
       advertised: advertised.has(capability_key),
       runtime_reported: Boolean(runtime),
       dependency_ready: Boolean(runtime && runtime.enabled !== false && runtime.configured !== false),
-      credential_ready: false,
+      credential_ready: input.credential_ready === true,
       network_ready: networkReady,
       policy_ready: true,
+      entitlement_ready: input.entitlement_ready === true,
+      authority_version_matches: input.authority_version_matches === true,
       connector_ready: true,
       connector_required: false,
-      live_probe_status: "unknown",
+      live_probe_status: input.live_probe_status ?? "unknown",
+      evidence_checked_at: checkedAt,
+      max_evidence_age_ms: input.evidence_max_age_ms ?? 5 * 60_000,
       evidence: {
         runtime_endpoint_id: api.runtime_endpoint_id,
         runtime_health: health.status ?? "unknown",
         runtime_platform: capabilities?.platform ?? null,
         runtime_model: capabilities?.model ?? null,
         reported_tools: runtime?.tools ?? [],
-        reason: "live_probe_required_before_effective",
+        authority_version: input.authority_version ?? null,
+        reason: input.live_probe_status === "passed" ? "runtime_live_probe_passed" : "live_probe_required_before_effective",
       },
     };
   });
@@ -79,6 +91,8 @@ export async function collectRuntimeCapabilityEvidence(
     account_id: input.account_id,
     employee_id: input.employee_id,
     assignment_id: input.assignment_id,
+    authority_version: input.authority_version,
+    checked_at: checkedAt,
     capabilities: evidence,
   });
 }
@@ -104,7 +118,16 @@ export async function persistEffectiveCapabilityReport(
     connector_ready: item.connector_ready,
     live_probe_status: item.live_probe_status,
     effective: item.effective,
-    evidence: { ...(item.evidence ?? {}), failed_dimensions: item.failed_dimensions },
+    evidence: {
+      ...(item.evidence ?? {}),
+      authority_version: report.authority_version,
+      entitlement_ready: item.entitlement_ready,
+      authority_version_matches: item.authority_version_matches,
+      evidence_checked_at: item.evidence_checked_at,
+      max_evidence_age_ms: item.max_evidence_age_ms,
+      evidence_fresh: item.evidence_fresh,
+      failed_dimensions: item.failed_dimensions,
+    },
     checked_at: report.checked_at,
   }));
   const inserted = await db.from("effective_capability_evidence").insert(rows);
@@ -134,30 +157,43 @@ export async function latestEffectiveCapabilityReport(
   const rows = result.data ?? [];
   const first = rows[0];
   if (!first) return null;
+  const firstEvidence = first.evidence && typeof first.evidence === "object" ? first.evidence as Record<string, unknown> : {};
   return {
     report_id: String(first.report_id),
     account_id: String(first.account_id),
     employee_id: String(first.employee_id),
     assignment_id: String(first.assignment_id),
+    authority_version: String(firstEvidence.authority_version ?? "unbound"),
     checked_at: String(first.checked_at),
-    capabilities: rows.map((row) => ({
-      capability_key: String(row.capability_key),
-      advertised: Boolean(row.advertised),
-      runtime_reported: Boolean(row.runtime_reported),
-      dependency_ready: Boolean(row.dependency_ready),
-      credential_ready: Boolean(row.credential_ready),
-      network_ready: Boolean(row.network_ready),
-      policy_ready: Boolean(row.policy_ready),
-      connector_ready: Boolean(row.connector_ready),
-      live_probe_status: row.live_probe_status,
-      effective: Boolean(row.effective),
-      failed_dimensions: Array.isArray(row.evidence?.failed_dimensions) ? row.evidence.failed_dimensions.map(String) : [],
-      evidence: row.evidence ?? {},
-    })),
+    capabilities: rows.map((row) => {
+      const evidence = row.evidence && typeof row.evidence === "object" ? row.evidence as Record<string, unknown> : {};
+      return {
+        capability_key: String(row.capability_key),
+        advertised: Boolean(row.advertised),
+        runtime_reported: Boolean(row.runtime_reported),
+        dependency_ready: Boolean(row.dependency_ready),
+        credential_ready: Boolean(row.credential_ready),
+        network_ready: Boolean(row.network_ready),
+        policy_ready: Boolean(row.policy_ready),
+        entitlement_ready: evidence.entitlement_ready === true,
+        authority_version_matches: evidence.authority_version_matches === true,
+        connector_ready: Boolean(row.connector_ready),
+        live_probe_status: row.live_probe_status,
+        evidence_checked_at: String(evidence.evidence_checked_at ?? row.checked_at ?? ""),
+        max_evidence_age_ms: Number(evidence.max_evidence_age_ms ?? 0),
+        evidence_fresh: evidence.evidence_fresh === true,
+        effective: Boolean(row.effective),
+        failed_dimensions: Array.isArray(evidence.failed_dimensions) ? evidence.failed_dimensions.map(String) : [],
+        evidence,
+      };
+    }),
     effective_toolsets: rows.filter((row) => row.effective).map((row) => String(row.capability_key)),
-    denied_toolsets: rows.filter((row) => !row.effective).map((row) => ({
-      capability_key: String(row.capability_key),
-      failed_dimensions: Array.isArray(row.evidence?.failed_dimensions) ? row.evidence.failed_dimensions.map(String) : [],
-    })),
+    denied_toolsets: rows.filter((row) => !row.effective).map((row) => {
+      const evidence = row.evidence && typeof row.evidence === "object" ? row.evidence as Record<string, unknown> : {};
+      return {
+        capability_key: String(row.capability_key),
+        failed_dimensions: Array.isArray(evidence.failed_dimensions) ? evidence.failed_dimensions.map(String) : [],
+      };
+    }),
   };
 }

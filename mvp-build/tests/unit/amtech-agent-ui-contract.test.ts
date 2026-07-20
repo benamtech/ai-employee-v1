@@ -206,11 +206,14 @@ describe("context compiler", () => {
 });
 
 describe("MCP Apps boundary", () => {
-  it("keeps generated UI sandboxed and allowlisted", async () => {
+  it("keeps generated UI sandboxed, content-bound, and host-mediated", async () => {
     const mcp = await source("apps/web/app/agent/[employeeId]/components/McpUiResource.tsx");
     expect(mcp).toContain('sandbox="allow-scripts"');
     expect(mcp).toContain("e.source !== ref.current.contentWindow");
-    expect(mcp).toContain("amtech-mcp-ui");
+    expect(mcp).toContain('e.origin !== "null"');
+    expect(mcp).toContain("validateMcpAppSecurityMetadata");
+    expect(mcp).toContain("metadata.resource_hash");
+    expect(mcp).toContain('message.method !== "tools/call"');
     expect(mcp).not.toContain("allow-same-origin");
   });
 });

@@ -1,7 +1,7 @@
 /**
- * Manager control plane, exposed to the Hermes employee as a native MCP server.
- * The verified MCP credential supplies employee principal and assignment context;
- * model arguments can neither choose nor override that authority.
+ * Manager control plane, exposed to Hermes as a native MCP server. The verified MCP
+ * credential supplies employee principal and assignment context; model arguments can
+ * neither choose nor override authority or effective capability truth.
  */
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
@@ -18,12 +18,13 @@ import { runManagerTool, SCHEDULER_ONLY_TOOLS } from "./run-tool.js";
 import { buildEmployeeSnapshotStrict as buildEmployeeSnapshot } from "./employee-stream-strict.js";
 import { buildBusinessBrainIndex, readBusinessFactsResource } from "./business-brain.js";
 import { buildToolCapabilityCatalog } from "./tool-capability-catalog.js";
+import { authorizeManagerMcpToolExecution } from "./mcp-capability-authority.js";
 import {
   ARTIFACT_WORKBENCH_TOOL_NAMES,
   getArtifactWorkbenchToolSchema,
 } from "../tools/artifact-workbench-tools.js";
 
-const SERVER_INFO = { name: "amtech-manager", version: "0.1.0" } as const;
+const SERVER_INFO = { name: "amtech-manager", version: "0.2.0" } as const;
 
 const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
   get_business_brain: "Read the business brain index and resource map; use business-facts only for explicit fact details.",
@@ -92,6 +93,7 @@ export interface McpIdentity {
   assignment_id?: string;
   principal_id?: string;
   policy_version?: string;
+  authority_version?: number;
   credential_id?: string;
 }
 
@@ -145,6 +147,7 @@ async function readManagerResource(uri: string, identity: McpIdentity) {
     });
     return jsonResource(uri, {
       assignment_id: identity.assignment_id,
+      authority_version: identity.authority_version ?? null,
       capabilities: snapshot.capabilities ?? [],
       abilities: snapshot.abilities ?? [],
       tool_catalog: catalog,
@@ -171,12 +174,17 @@ export function isRealMcpToolExecutionResult(value: unknown): boolean {
 
 export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
   const server = new Server(SERVER_INFO, { capabilities: { tools: {}, resources: {} } });
+  const callable = new Set(employeeCallableTools());
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: employeeCallableTools().map((name) => ({
       name,
       description: ARTIFACT_TOOL_DESCRIPTIONS[String(name)] ?? TOOL_DESCRIPTIONS[name] ?? `Manager tool: ${name}`,
       inputSchema: inputSchemaFor(name),
+      _meta: {
+        "amtech/discovery": "broad",
+        "amtech/executionAuthority": "manager-current-effective-capability",
+      },
     })),
   }));
 
@@ -197,15 +205,47 @@ export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const name = request.params.name as ToolName;
+    if (!callable.has(name)) {
+      return { content: [{ type: "text", text: `unknown_tool: ${name}` }], isError: true };
+    }
+    if (!identity.account_id || !identity.employee_id || !identity.assignment_id || !identity.principal_id
+      || !identity.policy_version || !identity.authority_version || !identity.credential_id) {
+      return { content: [{ type: "text", text: "assignment_identity_required" }], isError: true };
+    }
+    const db = serviceClient();
+    const capability = await authorizeManagerMcpToolExecution(db, {
+      account_id: identity.account_id,
+      employee_id: identity.employee_id,
+      assignment_id: identity.assignment_id,
+      principal_id: identity.principal_id,
+      policy_version: identity.policy_version,
+      authority_version: identity.authority_version,
+      credential_id: identity.credential_id,
+    }, name);
+    if (!capability.ok) {
+      return {
+        content: [{ type: "text", text: `capability_not_effective: ${name}` }],
+        structuredContent: {
+          status: "denied",
+          error: "capability_not_effective",
+          capability_key: capability.capability.capability_key,
+          failed_dimensions: capability.capability.failed_dimensions,
+          report_id: capability.report_id,
+          proof: { effective_capability_report_id: capability.report_id },
+        },
+        isError: true,
+      };
+    }
+
     const args = { ...((request.params.arguments ?? {}) as Record<string, unknown>) };
-    if (identity.account_id) args.account_id = identity.account_id;
-    if (identity.employee_id) args.employee_id = identity.employee_id;
+    args.account_id = identity.account_id;
+    args.employee_id = identity.employee_id;
     const outcome = await runManagerTool(name, args, {
       actor: "employee",
-      assignment_id: identity.assignment_id ?? null,
-      principal_id: identity.principal_id ?? null,
-      principal_class: identity.principal_id ? "employee" : null,
-      authenticated_by: identity.credential_id ? `employee_mcp_credential:${identity.credential_id}` : null,
+      assignment_id: identity.assignment_id,
+      principal_id: identity.principal_id,
+      principal_class: "employee",
+      authenticated_by: `employee_mcp_credential:${identity.credential_id}`,
     });
 
     if (outcome.kind === "unknown_tool") {

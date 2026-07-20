@@ -5,7 +5,7 @@
   "type": "module",
   "main": "./dist/server.generated.js",
   "scripts": {
-    "generate:production-server": "node scripts/generate-production-server.mjs",
+    "generate:production-server": "node scripts/generate-production-server.mjs && node scripts/patch-production-stream.mjs",
     "predev": "npm run generate:production-server",
     "dev": "tsx watch src/server.generated.ts",
     "start": "node dist/server.generated.js",

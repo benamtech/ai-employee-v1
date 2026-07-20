@@ -1,106 +1,105 @@
 # AMTECH AI Employee — Canonical Source-Backed Architecture
 
-Status: **current source map; WS-01 source/CI closed; live deployment acceptance incomplete**  
-Current baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`  
-Implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
-Standard: ratified [`../../STANDARD.md`](../../STANDARD.md) v0.2  
-Active program: [`../../second-half-plan/2026-07-19-ratified-standard-production-program/`](../../second-half-plan/2026-07-19-ratified-standard-production-program/)
+Status: **current source map; WS-01 and hardened WS-02 source/CI accepted; live acceptance incomplete**  
+Merged baseline: current `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`  
+Hardened WS-02 implementation evidence head: `16dc18e0535ac14f867875989dfe5aee596f89c0`  
+Standard: ratified v0.2  
+Active program: `../../second-half-plan/2026-07-19-ratified-standard-production-program/`
 
-This directory describes current source, separates implementation from acceptance, and records research/protocol disposition without claiming external certification. Cutover and `research` branches are historical context.
+This directory describes executable architecture and separates source implementation from live acceptance.
 
 ## System boundary
 
-- **Web** presents owner, review, onboarding, public, billing, and operator experiences.
-- **Manager** owns identity, assignments, authority, context, capability/tool contracts, connector and provider custody, approvals, events, work materialization, durable effects, receipts, metering, repair, and proof.
-- **Hermes** supplies per-employee reasoning, sessions/runs, tool use, memory, and runtime-local execution.
-- **Model Gateway** is the employee-scoped model/commercial boundary.
-- **Host Provisioner** alone owns Docker-host authority.
-- **PostgreSQL/Supabase** is durable authority, event, commercial, evidence, and reconciliation state.
-- **Caddy** is public ingress and employee reverse-proxy surface.
-- **Provider/protocol adapters** connect systems without replacing AMTECH assignment, work, approval, effect, and proof authority.
+- **Web:** employee operating environment—durable workspace plus streaming conversation/activity, connected apps, approvals, artifacts, proof, and recovery.
+- **Manager:** identity, assignment, authority, context, capability/tool contracts, connector/OAuth custody, approvals, effects, receipts, metering, repair, proof.
+- **Hermes:** per-employee reasoning, runs, sessions, memory, runtime-local tool use and recovery.
+- **Model Gateway:** employee-scoped model/commercial boundary.
+- **PostgreSQL/Supabase:** durable authority, evidence, idempotency, and reconciliation state.
+- **Protocol adapters:** replaceable projections and transports that never become authority.
 
 ## Reading order
 
-1. `01-product-business-and-system-context.md`
-2. `02-network-container-and-runtime-topology.md`
-3. `03-ingress-events-ambient-inbox-and-egress.md`
-4. `04-hermes-context-capabilities-and-power-user-operation.md`
-5. `05-web-client-work-surfaces-and-tool-agnostic-ag-ui.md`
-6. `06-effect-graphs-failure-semantics-and-observability.md`
-7. `07-emergent-product-capability-and-use-case-manifold.md`
-8. `08-repository-archaeology-audit-and-cleanup.md`
-9. `09-current-bug-risk-and-production-gap-register.md`
-10. `11-agent-orientation-and-role-map.md`
-11. `12-document-control-memory-and-handoff-map.md`
-12. `15-artifact-workbench-runtime-capability-and-golden-employees.md`
-13. `16-standard-research-basis-and-protocol-disposition.md`
-14. `17-hermes-upstream-review-protocol.md`
+1. product/system context
+2. network/runtime topology
+3. ingress/egress
+4. Hermes context/capabilities
+5. Web/work surfaces/AG-UI
+6. effects/failure/observability
+7. capability manifold
+8. archaeology/audit
+9. current risk register
+10. role/document maps
+11. artifact workbench
+12. Standard research/protocol disposition
+13. Hermes upstream review
+14. `18-streaming-remote-mcp-mcp-apps-ag-ui-and-effective-capability.md`
+15. active-program WS-03 frontier/task contract
 
-Current prioritization and execution detail live in the active program:
+## Current protocol disposition
 
-- `04-dependency-ordered-production-plan.md` — Phases 1.1–1.9 and later release/pilot phases;
-- `08-production-issue-vector.json` — immutable scored 38-issue baseline;
-- `13-resolution-ledger.json` — current closure/control state;
-- `09-workstream-execution-map.md` — nine dependency workstreams;
-- `10-test-suite-disposition.md` — current test authority.
+- AMTECH labor protocol is durable authority.
+- MCP core supplies discovery/resources/tools and protected-resource authorization.
+- MCP Apps supplies content-bound isolated contextual UI.
+- AG-UI supplies optional ordered run/message/activity/state transport.
+- Generated views, live deltas, and shared state are role-safe projection.
+- Discovery may be broad; execution is re-derived from current Manager policy/version/evidence immediately before dispatch.
+- Streaming is latency-sensitive presentation, not an authority bypass.
 
-## Protocol disposition
+## Current evidence
 
-- AMTECH labor protocol remains durable authority: identity, assignment, work, approval, effect, receipt, recovery, and commercial state.
-- MCP core is tool/resource/prompt and remote-authorization interoperability.
-- MCP Apps is the official negotiated interactive MCP target; current `ui://`/iframe machinery is compatibility groundwork, not complete conformance.
-- AG-UI is an optional role-safe event/state adapter, not authority or generated-UI schema.
-- Generated views are typed AMTECH work projections adaptable to Web, MCP Apps, AG-UI, SMS, Review, and future clients.
-- Model provider routing is Manager-owned and cannot be selected by runtime/model/browser/protocol input.
+Implementation head `16dc18e` passed Standard `29735429854`, Hermes `29735429873`, and Main Integration `29735429859`, including broad **110 files / 635 tests**, source/type/lint/contracts, build, archaeology, and compiled Chromium.
 
-## Source authority
+| Plane | Current state |
+|---|---|
+| repository/test truth | source/CI accepted |
+| provider authority | source/CI locked |
+| streaming Web/Work Stream | account/employee/assignment-scoped projection accepted; fixture-free latency/parity open |
+| Remote MCP authorization | source/CI accepted; live AS/provider open |
+| MCP Apps | CSP/content/hash/host mediation accepted; external host/provider open |
+| AG-UI | ordered assignment/version projection and finite return path accepted; third-party client proof open |
+| effective capabilities | final current policy/version/provider-verification gate accepted; live lifecycle open |
+| connector setup/custody | source accepted; `ISS-011` live lifecycle open |
+| database | WS-03 frontier prepared; ledger/RLS/concurrency/rollback/platform proof open |
+| target host/channels/commercial/recovery/release | acceptance open |
 
-Deployed proof → applied migrations/durable state → executable source/config → exact-SHA tests/workflows → Standard/active program → CODEGRAPH/architecture → newest indexed memory → history.
+## Hardened interception points
 
-## Current evidence state
+1. protected-resource metadata retrieval;
+2. authorization-server selection;
+3. OAuth redirect/state/PKCE/resource/scope validation;
+4. token sealing and adapter access;
+5. MCP credential verification;
+6. final current assignment/policy/authority-version/effective-capability check before `tools/call` dispatch;
+7. MCP App metadata and content-hash verification before render;
+8. iframe source/origin/method/authority verification;
+9. first-party protocol-action route;
+10. current Manager assignment/version check before approval or owner-message command;
+11. assignment-scoped live-stream subscription and AG-UI projection;
+12. durable approval/effect reservation and receipt boundary.
 
-Implementation head `1460960` passed Ratified Standard workflow `29725298168`, Hermes Upstream Review `29725298172`, and Main Integration Gates `29725298163`.
+## WS-03 architecture frontier
 
-The broad unit aggregate is current and green: 106 files / 613 tests. It is an independent required Main Integration job. Obsolete suites were deleted rather than skipped, while replacement assignment, approval, artifact, event, topology, isolation, and provider-authority contracts remain.
+WS-03 is prepared, not started. Its dependency order is:
 
-The provider-authority manufacture surface is source/CI locked: requests use only the AMTECH alias; Manager resolves registered provider identity, endpoint, upstream model, and master credential; caller routing/credential fields fail before dispatch; signed claims must match durable current policy.
+```text
+blank ledger and migration hashes
+→ effective-capability evidence constraints
+→ RLS/grant/security-definer negative isolation
+→ authority-version revocation races
+→ command/effect reservation concurrency
+→ existing-row/backfill/rollback compatibility
+→ disposable managed-Supabase trigger proof
+```
 
-## Subsystem map
-
-| Plane | Primary authority | Current state |
-|---|---|---|
-| repository/test truth | contributor/governance contracts, active program, broad merge gate | source/CI accepted; exact-head discipline preserved |
-| identity/assignment | principals, assignments, grants, policies | source/CI accepted; fixture-free live policy incomplete |
-| command/effect | durable command, reservation, receipt, repair | source/CI accepted; provider ambiguity/recovery incomplete |
-| runtime provisioning | desired resources, signed provisioner, isolated networks | source-wired; target-host proof incomplete |
-| model/provider authority | Model Gateway and registered provider profiles | source/CI locked; target-host/provider-backed proof incomplete |
-| model/commercial | scoped gateway and accounting receipts | core source accepted; cumulative budget/shared rate/ambiguity/reconciliation incomplete |
-| provider ingress | verified event → ambient inbox | source/CI accepted; live reconciliation incomplete |
-| connector setup/custody | declarative registry/setup manifest | source/CI accepted; remote MCP/live health/revocation incomplete |
-| effective capabilities | runtime/dependency/credential/network/policy/connector/probe intersection | decision source-wired; persistent release graph incomplete |
-| artifact workbench | immutable revisions, exact approval, publication receipts | source/CI accepted; golden live/parity/refinding proof incomplete |
-| generated UI | typed work view → sandboxed host intent | source/CI accepted; provider-backed proof incomplete |
-| MCP Apps | negotiated interactive resources and bounded host bridge | research-specified; implementation/conformance incomplete |
-| AG-UI | role-safe lifecycle/message/tool/state adapter | partial analogous source; versioned conformance incomplete |
-| Hermes upstream intelligence | pinned baseline + scheduled/path-triggered review | gateway/profile review accepted; never automatic upgrade |
-| database evidence | local/CI PostgreSQL + selective managed Supabase | routine TDD source-wired; full matrices/release platform proof open |
-| release evidence | audit, receipts, hashes, provenance | source/CI contracts accepted; signed deployed manifest incomplete |
-| human surface/pilot | supported channels, browser/a11y/capacity/operations | source/fixture foundations; release and controlled-pilot acceptance open |
+Applied migrations `0001`–`0072` are immutable. Local PostgreSQL is the routine TDD loop; managed-platform acceptance requires the named disposable-project evidence.
 
 ## Non-negotiable invariants
 
-1. Manager owns authority; Hermes reasons and executes only within bound capabilities.
-2. Reads are not effects; authoritative failure fails closed.
-3. Consequential work uses assignment-aware approval and effect boundaries.
-4. Provider master credentials stay outside employee profiles, runtimes, and caller payloads.
-5. Runtime callers use only the stable AMTECH model alias; Manager resolves provider routing.
-6. Capability discovery is broad; execution custody is conservative and evidence-backed.
-7. Unknown direct-MCP risk is denied.
-8. Generated UI and protocol adapters are presentation, not authority.
-9. Internal effects are idempotent and receipt-backed.
-10. Documentation and acceptance claims bind exact SHA and environment.
-11. A live database is not the routine TDD loop; local PostgreSQL does not waive platform proof.
-12. Artifacts persist work product, not a parallel authority engine.
-13. Hermes upstream drift triggers review; it never silently moves the production pin.
-14. Broad and curated test results remain independently visible.
-15. Production-ready requires one exact signed deployed candidate to pass every non-waivable gate.
+1. Manager owns authority and custody.
+2. Hermes reasons within bound capabilities.
+3. Harmless stream projection should be terminal-fast; effect gates remain strict.
+4. Browser/protocol/runtime content cannot select providers, scopes, hosts, credentials, authority versions, or approvals.
+5. Unknown, stale, revoked, mismatched, or unprobed evidence fails closed.
+6. Consequential effects reserve once and end in accepted/failed/ambiguous receipt.
+7. Applied migrations are immutable and forward changes are hash-recorded.
+8. Exact-candidate evidence controls every production claim.

@@ -21,21 +21,52 @@ afterEach(() => {
   else process.env.SIGNING_SECRET = originalSigningSecret;
 });
 
+const checkedAt = "2026-07-19T00:00:00.000Z";
+const freshAt = "2026-07-19T00:01:00.000Z";
+
+function completeEvidence(overrides: Record<string, unknown> = {}) {
+  return {
+    advertised: true,
+    runtime_reported: true,
+    dependency_ready: true,
+    credential_ready: true,
+    network_ready: true,
+    policy_ready: true,
+    entitlement_ready: true,
+    authority_version_matches: true,
+    live_probe_status: "passed" as const,
+    evidence_checked_at: checkedAt,
+    max_evidence_age_ms: 5 * 60_000,
+    now: freshAt,
+    ...overrides,
+  };
+}
+
 describe("effective capability evidence", () => {
   it("never treats advertisement or runtime reporting as effective without every evidence dimension and a live probe", () => {
     const decision = decideEffectiveCapability({
       capability_key: "browser",
-      advertised: true,
-      runtime_reported: true,
-      dependency_ready: true,
-      credential_ready: false,
-      network_ready: true,
-      policy_ready: true,
-      connector_ready: true,
-      live_probe_status: "unknown",
+      ...completeEvidence({
+        credential_ready: false,
+        live_probe_status: "unknown",
+        authority_version_matches: false,
+      }),
     });
     expect(decision.effective).toBe(false);
-    expect(decision.failed_dimensions).toEqual(expect.arrayContaining(["credential_ready", "live_probe_passed"]));
+    expect(decision.failed_dimensions).toEqual(expect.arrayContaining([
+      "credential_ready",
+      "authority_version_matches",
+      "live_probe_passed",
+    ]));
+  });
+
+  it("fails closed when otherwise-valid evidence is stale", () => {
+    const decision = decideEffectiveCapability({
+      capability_key: "file",
+      ...completeEvidence({ now: "2026-07-19T01:00:00.000Z" }),
+    });
+    expect(decision.effective).toBe(false);
+    expect(decision.failed_dimensions).toContain("evidence_fresh");
   });
 
   it("reports only fully proved toolsets as effective", () => {
@@ -44,32 +75,29 @@ describe("effective capability evidence", () => {
       account_id: "acct_test",
       employee_id: "emp_test",
       assignment_id: "asn_test",
-      checked_at: "2026-07-19T00:00:00.000Z",
+      authority_version: "authv_7",
+      checked_at: freshAt,
       capabilities: [
         {
           capability_key: "file",
-          advertised: true,
-          runtime_reported: true,
-          dependency_ready: true,
-          credential_ready: true,
-          network_ready: true,
-          policy_ready: true,
-          live_probe_status: "passed",
+          ...completeEvidence(),
         },
         {
           capability_key: "web",
-          advertised: true,
-          runtime_reported: true,
-          dependency_ready: true,
-          credential_ready: false,
-          network_ready: false,
-          policy_ready: true,
-          live_probe_status: "skipped",
+          ...completeEvidence({
+            credential_ready: false,
+            network_ready: false,
+            live_probe_status: "skipped",
+          }),
         },
       ],
     });
+    expect(report.authority_version).toBe("authv_7");
     expect(report.effective_toolsets).toEqual(["file"]);
-    expect(report.denied_toolsets).toEqual([{ capability_key: "web", failed_dimensions: ["credential_ready", "network_ready", "live_probe_passed"] }]);
+    expect(report.denied_toolsets).toEqual([{
+      capability_key: "web",
+      failed_dimensions: ["credential_ready", "network_ready", "live_probe_passed"],
+    }]);
   });
 });
 

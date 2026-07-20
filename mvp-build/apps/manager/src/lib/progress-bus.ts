@@ -1,48 +1,54 @@
-/**
- * In-process live-progress bus (Phase 5). A wake/turn runs inside a webhook or
- * scheduler handler, decoupled from whatever SSE stream the owner has open. This
- * EventEmitter bridges them: the wake publishes owner-safe work-verbs keyed by
- * employee, and any open Work Surface stream for that employee relays them as
- * `work_progress` frames.
- *
- * Scope: single Manager instance (one VPS) — an EventEmitter does not cross
- * processes. The seam to a Postgres LISTEN/NOTIFY (or Realtime) fan-out is
- * publish/subscribe-shaped here so multi-instance is a drop-in later.
- */
 import { EventEmitter } from "node:events";
 import type { WorkProgressState } from "@amtech/shared";
 
+export interface ProgressScope {
+  account_id: string;
+  employee_id: string;
+  assignment_id: string;
+}
+
+/**
+ * Ephemeral low-latency projection. Durable state remains authoritative on reconnect.
+ * Every owner-visible frame is keyed by account, employee, and assignment so a shared
+ * employee identity cannot leak activity across assignments.
+ */
 export interface ProgressEvent {
+  kind?: "work_progress" | "assistant_delta" | "run_completed";
   run_id: string;
-  verb: string;
-  state: WorkProgressState;
+  verb?: string;
+  state?: WorkProgressState;
+  message_id?: string;
+  sequence?: number;
+  delta?: string;
+  status?: string;
 }
 
 const bus = new EventEmitter();
-bus.setMaxListeners(0); // many concurrent owner streams
+bus.setMaxListeners(0);
 
-function channel(employeeId: string): string {
-  return `progress:${employeeId}`;
+function progressChannel(scope: ProgressScope): string {
+  return `progress:${scope.account_id}:${scope.employee_id}:${scope.assignment_id}`;
 }
 
-export function publishProgress(employeeId: string, event: ProgressEvent): void {
-  bus.emit(channel(employeeId), event);
+/** Publish only assignment-scoped owner-visible progress. */
+export function publishProgress(scope: ProgressScope, event: ProgressEvent): void;
+/**
+ * Compatibility boundary for legacy producers that do not yet possess assignment
+ * authority. Their progress is deliberately not broadcast; durable work remains visible.
+ */
+export function publishProgress(employeeId: string, event: ProgressEvent): void;
+export function publishProgress(scopeOrEmployee: ProgressScope | string, event: ProgressEvent): void {
+  if (typeof scopeOrEmployee === "string") return;
+  const normalized: ProgressEvent = { ...event, kind: event.kind ?? "work_progress" };
+  bus.emit(progressChannel(scopeOrEmployee), normalized);
 }
 
-/** Subscribe to an employee's progress; returns an unsubscribe fn. */
-export function subscribeProgress(employeeId: string, handler: (e: ProgressEvent) => void): () => void {
-  const ch = channel(employeeId);
-  bus.on(ch, handler);
-  return () => { bus.off(ch, handler); };
+/** Subscribe to one exact owner/employee assignment projection. */
+export function subscribeProgress(scope: ProgressScope, handler: (event: ProgressEvent) => void): () => void {
+  const channel = progressChannel(scope);
+  bus.on(channel, handler);
+  return () => { bus.off(channel, handler); };
 }
-
-// ---------------------------------------------------------------------------
-// Change signal — the wake side of the Work Surface stream. This is the testable
-// realization of the "Supabase Realtime / LISTEN-NOTIFY" decision: an in-process
-// NOTIFY. A writer signals after persisting; an open stream loop wakes immediately
-// (low latency) and otherwise falls back to a timed re-query. Swap `signal`/`wait`
-// for Postgres LISTEN/NOTIFY or Supabase Realtime to go multi-instance.
-// ---------------------------------------------------------------------------
 
 function changeChannel(employeeId: string): string {
   return `change:${employeeId}`;
@@ -52,13 +58,13 @@ export function signalEmployeeChange(employeeId: string): void {
   bus.emit(changeChannel(employeeId));
 }
 
-/** Resolve when the employee next changes, or after `timeoutMs` (fallback poll). */
+/** Resolve when durable employee state changes, or after timeout for catch-up polling. */
 export function waitForEmployeeChange(employeeId: string, timeoutMs: number): Promise<void> {
   return new Promise((resolve) => {
-    const ch = changeChannel(employeeId);
+    const channel = changeChannel(employeeId);
     const onChange = () => { cleanup(); resolve(); };
     const timer = setTimeout(() => { cleanup(); resolve(); }, timeoutMs);
-    function cleanup() { bus.off(ch, onChange); clearTimeout(timer); }
-    bus.on(ch, onChange);
+    function cleanup() { bus.off(channel, onChange); clearTimeout(timer); }
+    bus.on(channel, onChange);
   });
 }

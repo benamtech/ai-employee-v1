@@ -1,152 +1,120 @@
 # 09 — Current Bug, Risk, and Production-Gap Register
 
 Status: **current architecture summary; scored execution authority lives in the active program**  
-Current baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`  
-Implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
+Merged baseline: current `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`  
+WS-01 evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
+Hardened WS-02 implementation evidence head: `16dc18e0535ac14f867875989dfe5aee596f89c0`  
 Migration head: `0072`  
 Updated: 2026-07-20
 
-This document summarizes the source-backed production gap shape. Exact baseline scores, dependencies, evidence, acceptance tests, prerequisites, stop conditions, completion definitions, and current resolutions are maintained in the sole active program:
-
-- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json`](../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json)
-- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/13-resolution-ledger.json`](../../second-half-plan/2026-07-19-ratified-standard-production-program/13-resolution-ledger.json)
-- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md)
-- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md)
+Exact scores, dependencies, acceptance tests, prerequisites, stop conditions, and current resolutions live in the single active program: issue vector, resolution ledger, workstream map, test disposition, and verification matrix.
 
 ## Current verdict
 
 **Not production-ready and not controlled-pilot ready.**
 
-WS-01 is complete for repository/test source-and-CI scope. Implementation head `1460960` passed Ratified Standard, Hermes upstream, and Main Integration workflows, including 106 broad test files and 613 tests, production build, archaeology, and compiled Chromium fixtures.
+WS-01 is complete for repository/test source-and-CI scope. Hardened WS-02 source controls passed Standard `29735429854`, Hermes Review `29735429873`, and Main Integration `29735429859`, including broad **110 files / 635 tests**, source/type/lint/contracts, build, archaeology, and compiled Chromium.
 
-The WS-02 provider-authority manufacture surface is source/CI locked. That does not establish remote MCP authorization, MCP Apps/AG-UI conformance, persisted effective-capability truth, live connector lifecycle, target-host, or provider acceptance.
+`ISS-007`–`ISS-010` are source/CI resolved. `ISS-011` live connector/provider lifecycle and external protocol-host evidence remains open, so Phase 1.2 is not release-complete.
 
 ## Dependency-critical gap clusters
 
-### WS-01 — Repository authority and test-contract truth — source/CI resolved
+### WS-01 — Repository/test truth — source/CI resolved
 
-Resolved controls:
+- one active program and exact-head evidence discipline;
+- independent broad merge gate;
+- **106 files / 613 tests** on the WS-01 evidence head;
+- no exclusions/quarantine;
+- current broad/curated/browser/database/provider/live evidence classes remain distinct.
 
-- current authority documents route work from reviewed branches based on current `main`;
-- Main Integration requires the broad aggregate as an independent job;
-- `test:unit` builds shared/database workspace dependencies before Vitest;
-- obsolete pre-assignment/account-owned/direct-provider suites were deleted atomically rather than skipped;
-- reusable assertions were repaired to current capability, topology, and managed-connector contracts;
-- 106 test files / 613 tests passed on implementation evidence head `1460960`;
-- broad, curated, browser-fixture, database, provider, and live evidence remain distinct.
+### WS-02 — Protocol and capability authority — hardened source/CI; live gate open
 
-### WS-02 — Connector, remote MCP, MCP Apps, AG-UI, capability, and provider authority
+Resolved source controls:
 
-Source/CI control now present:
+- caller/model/runtime cannot select model provider identity, endpoint, upstream model, headers, tokens, or credentials;
+- owner-visible live progress is account/employee/assignment scoped;
+- a started Hermes stream falls back to polling the same run;
+- Remote MCP authorization derives protected-resource metadata, issuer, resource audience, redirect, scopes, S256 PKCE, and state under Manager custody;
+- MCP Apps use content-bound resources, opaque origin, document CSP, bounded host methods, and first-party protocol-action mediation;
+- AG-UI is ordered assignment/version projection with finite command return path and stable public failure codes;
+- MCP execution re-reads current assignment relationship/policy and authority version immediately before dispatch;
+- connector-backed execution requires current binding and fresh provider-verification evidence.
 
-- runtime callers use only the stable AMTECH model alias;
-- Manager-owned registered profiles resolve provider identity, endpoint, master API key, and upstream model;
-- caller-supplied provider/profile/model/endpoint/header/token/credential/routing fields fail before dispatch and are audited;
-- signed gateway claims must match the current durable credential policy;
-- legacy unbound production routes remain absent.
+Still open (`ISS-011`):
 
-Still open:
+- live remote MCP/OAuth and shipped-connector authorization;
+- provider-backed health, stale/scope-change, revocation, outage, repair, deletion;
+- external MCP Apps host and AG-UI client conformance;
+- exact provider receipts and release-candidate evidence.
 
-- protected remote MCP metadata/authorization profile;
-- official MCP Apps negotiation, `ui://` retrieval, sandbox/CSP/permission contract, bounded JSON-RPC bridge, and assignment-scoped action intersection;
-- complete versioned role-safe AG-UI replay/reconnect adapter;
-- one persisted hash-bound effective-capability intersection;
-- live authorization, health, staleness, revocation, scope-change, outage, repair, and deletion proof.
+### WS-03 — Database authority and platform proof — prepared, not started
 
-### WS-03 — Database authority and platform proof
+Prepared nodes:
 
-- repository migration head is `0072`, but no final release-bound approved database proof through that ledger exists;
-- complete existing-row, backfill, RLS/grant/security-definer, negative-isolation, concurrency, race, compare-and-swap, ambiguity, and rollback matrices remain incomplete;
-- triggered disposable managed Supabase evidence remains open for security-sensitive and final-candidate behavior.
+1. blank migration ledger and hashes;
+2. effective-capability evidence constraints/current selection;
+3. RLS, grants, security-definer, and negative-isolation matrix;
+4. authority-version revocation races;
+5. command/effect reservation concurrency and ambiguity;
+6. existing-row/backfill/rollback compatibility;
+7. disposable managed-Supabase trigger/advisor proof.
+
+Applied migrations `0001`–`0072` remain immutable. No approved release-bound database proof exists yet.
 
 ### WS-04 — Secret custody, target host, and runtime lifecycle
 
-- source defines the canonical five-service topology and Host Provisioner boundary;
-- managed secret custody, access, rotation, old-token denial, audit, and rollback are not accepted;
-- target-host Caddy/Web/Manager/Model Gateway/Host Provisioner health is not accepted;
-- two-employee network/data/workspace/memory/queue/credential/action isolation is not accepted;
-- replace, suspend, restore, rotate, restart, and teardown proof is incomplete;
-- the resolved immutable Hermes digest is not yet bound into a signed deployed release packet.
+- current remote MCP secret storage is a Manager encrypted-envelope backend, not managed KMS/secret-manager acceptance;
+- production access/rotation/old-token denial/audit/rollback remain open;
+- target-host five-service health and two-employee isolation/lifecycle remain open;
+- immutable Hermes digest is not yet bound into a signed deployed release packet.
 
 ### WS-05 — Fixture-free identity, owner, connector, and channels
 
-- no exact-candidate real owner has completed verification, canonical activation, explicit assignment selection, runtime readiness, strict snapshot, first turn, connector setup, and recovery;
-- Web, SMS, and signed Review have not been accepted as projections of the same durable work/approval/proof state;
-- connection, consent, ready, degraded, stale, revoked, scope-changed, repair, and deletion UX need one finite lifecycle grammar.
+Real owner activation, assignment, first turn, connector setup, failure matrix, and Web/SMS/signed-Review parity remain unaccepted.
 
 ### WS-06 — Golden governed work, output parity, and proof refinding
 
-- no funded/provider-backed current candidate has completed artifact → immutable revision → validation → exact approval → durable command/effect → provider receipt → post-effect verification → owner-refindable proof → replay;
-- approved preview parity across HTML/PDF/email/signed-link/customer output is unproven;
-- proof queries and exports by assignment, job/customer, action, provider, time, state, and failure class remain immature.
+No current provider-backed candidate has completed artifact → revision → validation → approval → effect → receipt → verification → refindable proof → replay for all three employee roles.
 
 ### WS-07 — Commercial controls and provider ambiguity
 
-Current executable source confirms three high-centrality defects:
+P0 source gaps remain:
 
-1. `apps/manager/src/lib/model-gateway.ts` stores rate buckets in a process-local `Map`, so restart resets limits and replicas multiply authority.
-2. Gateway policy only rejects `spend_limit_cents <= 0`; it does not atomically reserve and settle cumulative spend before provider dispatch.
-3. `apps/manager/src/lib/model-gateway-http.ts` still retries provider transport/time-out exceptions without a generic upstream idempotency contract and records exhausted attempts as failed/provider-unavailable rather than durable ambiguous.
-
-Payer, beneficiary, assignment, price snapshot, entitlement, usage, cost, invoice, credit/refund, suspension, and reactivation also lack final exact-candidate reconciliation acceptance.
+1. cumulative Model Gateway spend is not atomically reserved/settled;
+2. rate authority remains process-local;
+3. provider accepted-response-loss is not generically recorded/reconciled as durable ambiguous;
+4. payer/beneficiary/usage/cost/invoice/refund/suspension reconciliation is not accepted.
 
 ### WS-08 — Crash repair, rollback, observability, and signed release
 
-- every partial durable/external transition lacks accepted deterministic compensation or explicit manual-repair terminal proof;
-- database/runtime/profile/Caddy/config/image/application rollback and backup/restore are not accepted on one candidate;
-- no signed deployment manifest binds SHA, image digests, migration/config hashes, resolved Hermes digest, SBOM, standard provenance, proof IDs, failures/skips, and rollback result;
-- production observability and incident runbooks do not yet prove complete principal-to-assignment-to-effect-to-receipt-to-repair-to-commercial lineage.
+Fault compensation, backup/restore, rollback, end-to-end lineage, SBOM/provenance, and independently verifiable signed deployment manifest remain open.
 
-### WS-09 — Human surfaces, accessibility, capacity, and controlled pilot
+### WS-09 — Human surface, accessibility, capacity, and pilot
 
-- public/create/claim/login/account/billing/admin/artifact/connector/approval/proof/recovery surfaces are not fully aligned;
-- WCAG 2.2 AA, screen reader, keyboard, focus, zoom/reflow, contrast, error announcement, and supported browser evidence are incomplete;
-- durable progress, exact-run interruption, reconnect, restart, ambiguity, and recovery UX are incomplete;
-- fleet admission, queue fairness, provider concurrency allocation, and noisy-neighbor controls are unproven;
-- controlled-pilot eligibility, entitlements, support/incident ownership, rollback, customer exit, thresholds, and stop authority are not operationalized.
-
-Shared/fractional employees, generic governed egress, and richer operator adapters remain P2 expansion boundaries and are not prerequisites for the initial bounded pilot unless pilot scope explicitly requires them.
-
-## Closed source defects retained as context
-
-Current source includes controls for previously identified defects:
-
-- production Caddy host-network/loopback routing;
-- Manager/Model Gateway membership in employee networks with teardown support;
-- strict Manager MCP/business-brain/operating-surface reads;
-- Web rejection of successful Manager responses missing `operating_state`;
-- cleanup of tracked generated/orphaned repository artifacts;
-- trustworthy broad unit execution and required CI gating;
-- Manager-only model provider routing and credential custody.
-
-These are source/CI controls, not target-host or live acceptance.
+Fixture Chromium is green, but fixture-free browser/channel behavior, WCAG 2.2 AA, screen readers, durable interruption/recovery UX, fairness/noisy-neighbor controls, and pilot entry/exit/incident authority remain open.
 
 ## Non-bugs retained by design
 
-- fixture mode remains useful for UI development but cannot satisfy live acceptance;
-- the public estimator remains separated and non-canonical;
-- Manager, not Hermes or generated UI, owns assignment/effect/provider authority;
-- owner reads do not create command/effect rows solely for observation;
-- internal employee bridges intentionally deny arbitrary direct Internet access;
-- process-local SSE events are liveness hints; strict snapshots and durable receipts remain truth;
-- the pinned Hermes upstream review system is scheduled/path-triggered and does not auto-upgrade production.
+- fixture mode is development evidence, not live acceptance;
+- public estimator is non-canonical;
+- Manager owns authority; Hermes and generated UI do not;
+- owner reads do not create effects solely for observation;
+- internal bridges deny arbitrary direct Internet access;
+- live stream events are liveness projection; durable snapshots/receipts are truth;
+- Hermes upstream review does not auto-upgrade production.
 
 ## Completion route
 
-Follow the active roadmap in dependency order:
-
 ```text
-remaining Phase 1.2 protocols/capabilities/connectors
-→ 1.3 database
-→ 1.4 secrets/runtime
-→ 1.5 fixture-free owner/channels
-→ 1.6 golden work
-→ 1.7 commercial/ambiguity
-→ 1.8 recovery/signed release
-→ 1.9 human surface/capacity/pilot preparation
-→ frozen exact candidate
-→ controlled pilot
-→ measured expansion
+ISS-011 live connector/protocol lifecycle
+→ WS-03 database authority
+→ WS-04 target-host/runtime custody
+→ WS-05 fixture-free owner/channels
+→ WS-06 golden work
+→ WS-07 commercial/ambiguity
+→ WS-08 recovery/signed release
+→ WS-09 human surface/capacity/pilot preparation
+→ frozen candidate → controlled pilot → measured expansion
 ```
 
-A baseline issue is marked resolved only in the resolution ledger when source, tests, exact-head CI, and the evidence class actually required for that issue agree.
+An issue is resolved only when source, tests, exact-head CI, and the evidence class actually required for that issue agree.

@@ -1,11 +1,12 @@
 import type { SupabaseClient } from "@amtech/db";
 import { assertWorkEventDescriptor, type WorkEventDescriptor } from "@amtech/shared";
-import { executeHermesTurnStreaming, resolveRuntimeApi } from "./hermes-client.js";
+import { resolveRuntimeApi } from "./hermes-client.js";
+import { executeHermesTurnLive } from "./hermes-live-turn.js";
 import { runEmployeeTurn } from "./turn-queue.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation, startWorkRun } from "./metering.js";
 import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
 import { buildOwnerTurnSystemMessage } from "./owner-turn-context.js";
-import { publishProgress } from "./progress-bus.js";
+import { publishProgress, type ProgressScope } from "./progress-bus.js";
 import { recoverEmployeeRuntime } from "./runtime-recovery.js";
 
 async function sleep(ms: number): Promise<void> {
@@ -31,6 +32,11 @@ export async function deliverOwnerTurnToRuntime(
     account_id: params.account_id, employee_id: params.employee_id,
     trigger_type: "owner_message", trigger_ref: params.idempotency_key,
   });
+  const progressScope: ProgressScope = {
+    account_id: params.account_id,
+    employee_id: params.employee_id,
+    assignment_id: params.assignment_id,
+  };
   const startedAt = Date.now();
   async function executeOwnerTurn(runId: string) {
     const api = await resolveRuntimeApi(db, params.employee_id);
@@ -39,11 +45,29 @@ export async function deliverOwnerTurnToRuntime(
       employee_id: params.employee_id,
       channel: params.channel,
     });
-    const turn = await executeHermesTurnStreaming(api, {
+    const messageId = `assistant:${runId}`;
+    const turn = await executeHermesTurnLive(api, {
       input: params.body,
       system_message: systemMessage,
       work_run_id: runId,
-    }, (p) => publishProgress(params.employee_id, { run_id: runId, verb: p.verb, state: p.state }));
+    }, (event) => {
+      if (event.kind === "assistant_delta") {
+        publishProgress(progressScope, {
+          kind: "assistant_delta",
+          run_id: runId,
+          message_id: messageId,
+          sequence: event.sequence,
+          delta: event.delta,
+        });
+        return;
+      }
+      publishProgress(progressScope, {
+        kind: "work_progress",
+        run_id: runId,
+        verb: event.verb,
+        state: event.state,
+      });
+    });
     await recordExternalRuntimeRun(db, runId, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
     await recordSessionOccupancy(db, {
       account_id: params.account_id, employee_id: params.employee_id,
@@ -83,7 +107,7 @@ export async function deliverOwnerTurnToRuntime(
         turn = await executeOwnerTurn(runId);
       } catch (err) {
         if (String((err as Error).message ?? err) !== "runtime_unreachable") throw err;
-        publishProgress(params.employee_id, { run_id: runId, verb: "Restarting employee", state: "started" });
+        publishProgress(progressScope, { kind: "work_progress", run_id: runId, verb: "Restarting employee", state: "started" });
         await recoverEmployeeRuntime(db, { account_id: params.account_id, employee_id: params.employee_id });
         turn = await executeOwnerTurnAfterRecovery(runId);
       }
@@ -97,6 +121,7 @@ export async function deliverOwnerTurnToRuntime(
   });
   if (result.status === "succeeded" || result.status === "duplicate") await finishWorkRun(db, runId, "succeeded");
   else if (result.status === "failed") await finishWorkRun(db, runId, "failed");
+  publishProgress(progressScope, { kind: "run_completed", run_id: runId, status: result.status });
   return { status: result.status, job_id: result.job_id, reply: String(result.output?.reply ?? ""), error: result.error, run_id: runId };
 }
 

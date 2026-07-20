@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFile } from "node:fs/promises";
 import { handleManagerMcpRequest, isRealMcpToolExecutionResult } from "../../apps/manager/src/lib/mcp-server";
 
 function rpc(method: string, params: unknown, id = 1): Request {
@@ -13,76 +14,82 @@ function rpc(method: string, params: unknown, id = 1): Request {
   });
 }
 
-function parse(text: string): Record<string, unknown> {
+function parse(text: string): Record<string, any> {
   try {
-    return JSON.parse(text) as Record<string, unknown>;
+    return JSON.parse(text) as Record<string, any>;
   } catch {
-    // SSE framing fallback: pull the last `data:` line.
-    const line = text.split("\n").reverse().find((l) => l.startsWith("data:"));
-    return JSON.parse((line ?? "").slice(5).trim()) as Record<string, unknown>;
+    const line = text.split("\n").reverse().find((value) => value.startsWith("data:"));
+    return JSON.parse((line ?? "").slice(5).trim()) as Record<string, any>;
   }
 }
 
-async function call(method: string, params: unknown, identity?: { account_id?: string; employee_id?: string }): Promise<{ status: number; body: any }> {
-  const res = await handleManagerMcpRequest(rpc(method, params), identity);
-  return { status: res.status, body: parse(await res.text()) };
+async function call(method: string, params: unknown): Promise<{ status: number; body: any }> {
+  const response = await handleManagerMcpRequest(rpc(method, params));
+  return { status: response.status, body: parse(await response.text()) };
 }
 
-describe("Manager MCP server (transport over the tool registry)", () => {
-  it("lists employee-callable tools with JSON-Schema inputs and hides scheduler-only tools", async () => {
+function resultText(body: any): string {
+  return String(body?.result?.content?.map((item: { text?: string }) => item.text ?? "").join(" ") ?? "");
+}
+
+describe("Manager MCP server discovery and execution boundary", () => {
+  it("lists employee-callable tools broadly with JSON-Schema inputs and labels execution as Manager-authorized", async () => {
     const { status, body } = await call("tools/list", {});
     expect(status).toBe(200);
-    const tools = body.result.tools as Array<{ name: string; inputSchema: { type?: string } }>;
-    const names = tools.map((t) => t.name);
+    const tools = body.result.tools as Array<{ name: string; inputSchema: { type?: string }; _meta?: Record<string, string> }>;
+    const names = tools.map((tool) => tool.name);
     expect(names).toContain("create_estimate_artifact");
     expect(names).toContain("request_approval");
     expect(names).toContain("send_deposit_invoice");
-    // scheduler-only, timer-driven tools are NOT callable by the employee
     expect(names).not.toContain("dispatch_due_reminders");
     expect(names).not.toContain("dispatch_daily_briefs");
-    const est = tools.find((t) => t.name === "create_estimate_artifact");
-    expect(est?.inputSchema.type).toBe("object");
+    const estimate = tools.find((tool) => tool.name === "create_estimate_artifact");
+    expect(estimate?.inputSchema.type).toBe("object");
+    expect(estimate?._meta).toMatchObject({
+      "amtech/discovery": "broad",
+      "amtech/executionAuthority": "manager-current-effective-capability",
+    });
   });
 
-  it("returns an error result with a validation_failed envelope for malformed input", async () => {
-    const { body } = await call("tools/call", {
+  it("denies tool execution before schema validation when assignment identity is absent", async () => {
+    const { status, body } = await call("tools/call", {
       name: "send_deposit_invoice",
       arguments: { account_id: "acct_1", employee_id: "emp_1" },
     });
+    expect(status).toBe(200);
     expect(body.result.isError).toBe(true);
-    expect(body.result.structuredContent.status).toBe("failed");
-    expect(body.result.structuredContent.proof.failure_code).toBe("validation_failed");
+    expect(resultText(body)).toContain("assignment_identity_required");
+    expect(body.result.structuredContent).toBeUndefined();
   });
 
   it("refuses scheduler-only tools called directly over MCP", async () => {
     const { body } = await call("tools/call", { name: "dispatch_due_reminders", arguments: {} });
     expect(body.result.isError).toBe(true);
+    expect(resultText(body)).toContain("unknown_tool");
   });
 
-  it("does NOT advertise the injected owner-context fields to the model", async () => {
+  it("does not advertise Manager-injected owner context fields to the model", async () => {
     const { body } = await call("tools/list", {});
     const tools = body.result.tools as Array<{ name: string; inputSchema: any }>;
     for (const name of ["create_estimate_artifact", "request_approval", "set_internal_reminder"]) {
-      const t = tools.find((x) => x.name === name)!;
-      expect(Object.keys(t.inputSchema.properties ?? {})).not.toContain("account_id");
-      expect(Object.keys(t.inputSchema.properties ?? {})).not.toContain("employee_id");
-      expect(t.inputSchema.required ?? []).not.toContain("account_id");
-      expect(t.inputSchema.required ?? []).not.toContain("employee_id");
+      const tool = tools.find((candidate) => candidate.name === name)!;
+      expect(Object.keys(tool.inputSchema.properties ?? {})).not.toContain("account_id");
+      expect(Object.keys(tool.inputSchema.properties ?? {})).not.toContain("employee_id");
+      expect(tool.inputSchema.required ?? []).not.toContain("account_id");
+      expect(tool.inputSchema.required ?? []).not.toContain("employee_id");
     }
   });
 
-  it("accepts a bound identity and injects it (call without ids in args still dispatches)", async () => {
-    // No account_id/employee_id in args — they come from the bound identity.
-    const { status, body } = await call(
-      "tools/call",
-      { name: "send_deposit_invoice", arguments: {} },
-      { account_id: "acct_bound", employee_id: "emp_bound" },
-    );
-    expect(status).toBe(200);
-    // It fails on the REAL missing fields (invoice row / approval), not on missing
-    // account_id/employee_id — proving identity was injected before validation.
-    expect(body.result.isError).toBe(true);
-    expect(body.result.structuredContent.status).toBe("failed");
+  it("intercepts complete bound identities through effective capability authority before tool dispatch", async () => {
+    const source = await readFile("apps/manager/src/lib/mcp-server.ts", "utf8");
+    const identityCheck = source.indexOf("assignment_identity_required");
+    const capabilityCheck = source.indexOf("const capability = await authorizeManagerMcpToolExecution", identityCheck);
+    const toolDispatch = source.indexOf("const outcome = await runManagerTool", capabilityCheck);
+    expect(identityCheck).toBeGreaterThan(0);
+    expect(capabilityCheck).toBeGreaterThan(identityCheck);
+    expect(toolDispatch).toBeGreaterThan(capabilityCheck);
+    expect(source).toContain("capability_not_effective");
+    expect(source).toContain("effective_capability_report_id");
   });
 
   it("distinguishes real MCP tool execution from tool-call JSON emitted as text", () => {

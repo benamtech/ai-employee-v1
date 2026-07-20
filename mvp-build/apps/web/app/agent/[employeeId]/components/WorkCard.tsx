@@ -2,16 +2,29 @@
 
 /**
  * A single piece of owner-safe work rendered as a coworker card, not a raw log
- * line. `observe` and `notify` remain quiet unless the descriptor explicitly
- * supplies an acceptance action; `question` and `review` may open the bounded
- * response loop. Approval still resolves through the host authority path.
+ * line. Native actions and MCP App actions both return through Manager-owned
+ * assignment and authority-version checks.
  */
 import { useState } from "react";
-import type { WorkEventDescriptor } from "@amtech/shared";
+import type { AuthorityProjection, WorkEventDescriptor } from "@amtech/shared";
 import { moveStyle, tokens } from "../surface.tokens";
 import { Deliverable } from "./deliverables";
 import { McpUiResource, type McpUiIntent } from "./McpUiResource";
 import { Receipt } from "./Receipt";
+
+function payloadFingerprint(value: unknown): string {
+  const text = JSON.stringify(value ?? {});
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function protocolAction(intent: McpUiIntent): string {
+  return intent === "accept" || intent === "accept_all" ? "approve" : intent;
+}
 
 export function WorkCard({
   descriptor,
@@ -27,6 +40,7 @@ export function WorkCard({
   const [composing, setComposing] = useState(false);
   const [draft, setDraft] = useState("");
   const [done, setDone] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const move = moveStyle[descriptor.move] ?? moveStyle.notify;
   const acceptance = descriptor.deliverable?.acceptance ?? [];
@@ -55,14 +69,32 @@ export function WorkCard({
   }
 
   const uiResource = descriptor.deliverable?.ui_resource;
-  function onUiIntent(intent: McpUiIntent, intentApprovalId: string | undefined, payload: Record<string, unknown>) {
-    if (intent === "accept" || intent === "accept_all") { void resolve("approved"); return; }
-    if (intent === "reject") { void resolve("rejected"); return; }
-    if (intent === "respond") {
-      const fields = (payload.fields as Record<string, string> | undefined) ?? {};
-      const text = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join(", ");
-      if (text) { onRespond(text); setDone(true); }
+  async function onUiIntent(
+    intent: McpUiIntent,
+    _intentApprovalId: string | undefined,
+    payload: Record<string, unknown>,
+    authority: AuthorityProjection,
+  ) {
+    const action = protocolAction(intent);
+    const idempotencyKey = `mcpui:${authority.resource_id}:${action}:${authority.authority_version}:${payloadFingerprint(payload)}`;
+    setActionError(null);
+    const response = await fetch(`/api/employee/${employeeId}/protocol-action`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        profile: "amtech.mcp-app.v1",
+        authority,
+        action,
+        idempotency_key: idempotencyKey,
+        payload,
+      }),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({})) as { error?: string };
+      setActionError(body.error ?? "The employee could not verify that action. Refresh and try again.");
+      return;
     }
+    setDone(true);
   }
 
   return (
@@ -95,6 +127,7 @@ export function WorkCard({
         ) : null}
 
         <Receipt proof={descriptor.proof} />
+        {actionError ? <p role="alert" style={{ margin: `${tokens.space.md}px 0 0`, color: tokens.color.danger }}>{actionError}</p> : null}
 
         {done ? (
           <p style={{ margin: `${tokens.space.md}px 0 0`, fontFamily: tokens.font.mono, fontSize: tokens.font.small, color: tokens.color.text }}>✓ Sent to your employee.</p>
@@ -103,8 +136,8 @@ export function WorkCard({
             <input
               autoFocus
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => { if (event.key === "Enter") submit(); }}
               placeholder="No — tweak this: tell your employee what to change…"
               style={{ flex: 1, padding: `0 ${tokens.space.md}px`, minHeight: 44, border: `1px solid ${tokens.color.borderStrong}`, fontSize: tokens.font.small, fontFamily: tokens.font.family, outline: "none" }}
             />

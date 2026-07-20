@@ -1,4 +1,4 @@
-import { AgentSurface } from "./AgentSurface";
+import { LiveEmployeeOperatingShell } from "./LiveEmployeeOperatingShell";
 import { CapabilityDrawer } from "./components/CapabilityDrawer";
 import { uiFixtureMode } from "../../_lib/ui-fixtures";
 
@@ -13,7 +13,7 @@ export default async function AgentPage({
   const fixtureMode = uiFixtureMode();
   return (
     <>
-      <AgentSurface employeeId={employeeId} fixtureMode={fixtureMode} />
+      <LiveEmployeeOperatingShell employeeId={employeeId} fixtureMode={fixtureMode} />
       <CapabilityDrawer employeeId={employeeId} fixtureMode={fixtureMode} />
     </>
   );

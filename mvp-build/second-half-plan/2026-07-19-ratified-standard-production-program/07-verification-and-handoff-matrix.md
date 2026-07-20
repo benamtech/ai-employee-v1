@@ -1,76 +1,68 @@
 # Verification and Handoff Matrix
 
-Status: **active evidence checklist; WS-01 normalized and provider-authority lock accepted for source/CI**  
-Current integration baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`  
-Implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
-Task families: `AMTECH-P0-WS01-001`, `AMTECH-P0-WS02-001`
+Status: **active evidence checklist; WS-01 normalized and hardened WS-02 controls accepted for source/CI**  
+Current merged baseline: current `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`  
+WS-01 evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
+Hardened WS-02 implementation evidence head: `16dc18e0535ac14f867875989dfe5aee596f89c0`
 
 ## Gate matrix
 
-| Gate | Required verification | Accepted evidence | Current state |
+| Gate | Accepted evidence | Current state |
+|---|---|---|
+| Ratified Standard/governance | `29735429854` on `16dc18e` | accepted for source/document scope |
+| Hermes streaming/UI review | `29735429873` on `16dc18e` | accepted; pin unchanged |
+| Source/type/lint/contracts | Main Integration `29735429859` | accepted |
+| Current broad regression | Main Integration `29735429859` | accepted: **110 files / 635 tests** |
+| WS-01 historical broad closure | Main Integration `29725298163` | **accepted: 106 files / 613 tests** |
+| Production build | `29735429859` | accepted for compilability |
+| Repository archaeology | `29735429859` | accepted |
+| Compiled browser regression | `29735429859` | accepted as fixture Chromium regression |
+| Provider-authority lock | alias-only registered Manager route and caller-field denial | accepted source/CI |
+| Assignment-scoped live projection | account/employee/assignment channel plus authority-version stream scope | accepted source/CI |
+| Remote MCP authorization | metadata/audience/redirect/PKCE/state/token-custody contracts | accepted source/CI; live AS/provider open |
+| MCP Apps | content-bound resource, opaque origin, document CSP, host mediation, protocol return path | accepted source/CI; external host/provider open |
+| AG-UI | ordered scope, stable error projection, finite command return path | accepted source/CI; fixture-free client open |
+| Effective capability | persisted decision plus final current policy/version/provider-verification gate | accepted source/CI; live lifecycle open |
+| Live connector lifecycle | authorization, health, revocation, staleness, outage, repair, deletion | open (`ISS-011`) |
+| WS-03 database authority | guarded frontier/task contract | prepared; implementation not started |
+| Target host/channels/golden work/commercial/recovery/human surface/capacity/signed release | exact release packets | open |
+
+## Mirror Cabinet findings and repairs
+
+| Conjugate surface | Before | Repair | DEF |
 |---|---|---|---|
-| Ratified Standard, plan, and governance | Standard/governance/type/lint workflow | `29725298168` on `1460960` | accepted for implementation source/document scope |
-| Hermes gateway/profile review | path-aware pinned-baseline check | `29725298172` on `1460960` | accepted; pin unchanged |
-| Ordered typecheck/lint/source hygiene | `npm run repo:verify:full` | Main Integration `29725298163` | accepted |
-| Current authority/source contracts | onboarding, assignment, release, production, UI suites | Main Integration `29725298163` | accepted for named source/unit contracts |
-| Broad unit regression | complete surviving Vitest aggregate after workspace builds | Main Integration `29725298163` | **accepted: 106 files / 613 tests** |
-| Production build | workspace build | Main Integration `29725298163` | accepted for compilability |
-| Repository archaeology | exact-head archaeology artifacts | Main Integration `29725298163` | accepted |
-| Compiled browser regression | production-compiled Chromium fixture matrices | Main Integration `29725298163` | accepted as fixture regression, not fixture-free acceptance |
-| Provider-authority lock | alias-only request, registered host-private route, forbidden routing fields, durable policy binding | `model-gateway-http-isolation.test.ts` in broad and production suites | accepted for source/CI boundary |
-| Database platform release | full PostgreSQL matrix plus triggered disposable Supabase proof | migration/advisor/behavior packet | open |
-| Target-host runtime | five-service and two-employee isolation/lifecycle harness | exact host/image/network packet | open |
-| Remote MCP / MCP Apps / AG-UI | authorization profile, sandbox bridge, replay mapping, effective capability truth | protocol/provider/browser packet | open |
-| Live connector lifecycle | authorization, health, revocation, staleness, outage, repair, deletion | provider/browser packet | open |
-| Fixture-free owner/channels | real identity/assignment, Web/SMS/Review parity and failure matrix | exact session/work/proof IDs | open |
-| Golden work | provider-backed approval/effect/receipt/parity/refinding/replay | provider/effect/accounting/proof IDs | open |
-| Commercial controls | budget reservation, shared rate, ambiguity, payer/beneficiary/invoice reconciliation | concurrency/provider/billing packet | open |
-| Recovery/rollback | crash injection, repair, backup/restore, exact rollback | recovery packet | open |
-| Human surface | supported browsers, WCAG 2.2 AA, visual and recovery UX | exact candidate reports | open |
-| Capacity/pilot | declared 1/10/100/250/500/700 envelopes and pilot packet | load, cost, fairness, incident evidence | open |
-| Signed release/deployment | SBOM, in-toto/SLSA provenance, digests, migration/config hashes, verifier | signed exact-candidate manifest | open |
+| exact head vs cited ancestor | later documentation head was red while closure cited ancestor | current implementation evidence isolated and final docs forced through exact-head CI | DEF-003 |
+| employee-wide progress channel | two assignments could subscribe to one employee channel | account/employee/assignment-scoped bus; legacy unscoped progress does not broadcast | DEF-001 |
+| projected-action drift | MCP App UI could call native callbacks; Manager ignored returned version fields | first-party protocol-action route plus current assignment/version check before command | DEF-001, DEF-003 |
+| declarative no-network claim | metadata denied connect domains but document could still request resources | resource-domain denial plus enforceable in-document CSP | DEF-002, DEF-003 |
+| MCP dispatch TOCTOU | credential was current at authentication but final interceptor trusted carried policy/version | current assignment relationship/policy and authority version re-read before dispatch | DEF-001 |
+| AG-UI failure detail | raw error message could reach client | stable public error code; bounded server log | DEF-002 |
 
-## WS-01 failure and repair evidence
+## Source/CI evidence boundary
 
-Initial canonical run `29724969995` reached executable source and exposed:
+- First useful Hermes text/activity is forwarded without avoidable Manager buffering.
+- A started run is not recreated after stream loss.
+- Owner-visible live progress cannot cross assignment boundaries.
+- Stream frames carry exact assignment and current authority version.
+- Remote MCP authorization cannot accept caller-selected issuer/audience/redirect/scope/token custody.
+- MCP Apps cannot access external network/resources or execute actions outside the first-party protocol return path.
+- AG-UI shared state is projection and client commands are finite.
+- MCP `tools/list` is broad discovery; `tools/call` revalidates current assignment policy/version and effective capability before dispatch.
+- Capability decisions persist failed dimensions and proof references.
 
-- 63 loader failures from missing workspace dependency builds;
-- 27 obsolete pre-assignment/account-owned/direct-provider test files;
-- three reusable source-contract assertions requiring current names and topology.
-
-Repairs:
-
-- `test:unit` builds shared and database workspaces before Vitest;
-- obsolete suites were deleted atomically, not excluded;
-- reusable assertions were corrected;
-- Main Integration owns the broad pull-request gate;
-- the Standard workflow no longer duplicates broad/build execution or historical branch triggers.
-
-The replacement head `1460960` passed all implementation gates in Main Integration run `29725298163`.
-
-## Provider-authority lock evidence
-
-- runtime requests may name only the stable AMTECH alias;
-- Manager-owned `model-provider-registry.ts` resolves registered provider identity, endpoint, master API key, and upstream model;
-- endpoint is HTTPS except explicit loopback development;
-- provider and upstream model must be included in signed allowed policy;
-- signed claims must match the current durable credential row;
-- caller-supplied provider/profile/model/base URL/API key/headers/token/credential/endpoint/routing fields are rejected and audited before fetch;
-- production legacy unbound routes remain absent.
-
-This does not establish remote MCP authorization, MCP Apps, AG-UI, live connector, provider, or target-host acceptance.
+This does not establish remote MCP authorization against a live server, external MCP Apps/AG-UI conformance, live connector/provider, managed database, target-host, fixture-free channel, commercial, recovery, or production acceptance.
 
 ## Test evidence rules
 
 - Broad and curated suites are independently reported.
 - Fixture browser proof is not fixture-free provider/channel proof.
-- Local PostgreSQL proof is not managed-platform proof when a Standard trigger applies.
-- Environment-gated checks state `skipped` or `blocked`; neither becomes pass.
-- A documentation commit after an evidence run does not inherit exact-head acceptance; final PR-head checks rerun after this transaction.
+- Local PostgreSQL proof is not managed-platform proof where a Standard trigger applies.
+- `skipped`/`blocked` never become pass.
+- Documentation after an implementation run does not inherit exact-head acceptance; the final PR-head checks rerun.
 
 ## Completion rules
 
-- WS-01 is complete for repository/test source-and-CI scope when the final documentation head remains green.
-- The WS-02 provider-authority manufacture surface is locked for source/CI scope.
-- Remote protocol, live connector, database, runtime, commercial, recovery, human-surface, capacity, deployment, and production gates remain open.
+- `ISS-007` through `ISS-010` are source/CI resolved on implementation head `16dc18e`.
+- `ISS-011` remains the WS-02 workstream completion gate.
+- WS-03 is prepared but starts only after PR `#31` merges or is formally superseded.
 - Production-ready still requires every non-waivable gate on one exact signed deployed release.

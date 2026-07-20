@@ -1,91 +1,72 @@
 # Ratified Standard Production Program
 
 Status: **active and canonical**  
-Program state: **WS-01 source/CI closed; WS-02 provider-authority lock source/CI closed**  
+Program state: **WS-01 and hardened WS-02 source/CI accepted; ISS-011 live gate open; WS-03 prepared, not started**  
 Gate 0: **resolved for declared source/document/CI scope**  
 Updated: 2026-07-20  
-Task families: `AMTECH-P0-GOV-001`, `AMTECH-P0-DOC-002`, `AMTECH-P0-ONB-001`, `AMTECH-P0-PLAN-003`, `AMTECH-P0-WS01-001`, `AMTECH-P0-WS02-001`  
-Current integration baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`  
-WS-01/WS-02 implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
-Standard: [`../../../STANDARD.md`](../../../STANDARD.md)  
-Evolution vector: [`../../../validation/standard-v0.2-evolution-vector.json`](../../../validation/standard-v0.2-evolution-vector.json)
+Task families: `AMTECH-P0-GOV-001`, `AMTECH-P0-PLAN-003`, `AMTECH-P0-WS01-001`, `AMTECH-P0-WS02-001`, `AMTECH-P0-WS02-002`, `AMTECH-P0-WS03-000`  
+Current merged baseline: `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`  
+WS-01 evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
+Hardened WS-02 implementation evidence head: `16dc18e0535ac14f867875989dfe5aee596f89c0`  
+Current WS-02 review branch: `agent/ws02-runtime-ui-capability-boundary`
 
 ## Authority
 
-This folder is the single active production program. Historical phase, remediation, capability-closure, cutover, and wiki plan files remain point-in-time evidence. New work starts on reviewed task branches from current `main`.
+This folder is the single active production program. Historical plans remain point-in-time evidence. New work starts on reviewed task branches from current `main`.
 
 ## Product target
 
-AMTECH installs governed persistent AI Employees. The moat is the reusable labor protocol joining identity/assignments, capability discovery, connector custody, work objects/generated views, approvals/effects, recovery/proof/commercial attribution, and bounded MCP, MCP Apps, AG-UI, Web, SMS, and signed-Review adapters.
+AMTECH installs governed persistent AI Employees. The Web client behaves like an employee operating environment: durable workspaces, streaming conversation/activity, connected systems, approvals, contextual apps, artifacts, proof, and recovery. Manager remains the authority plane; Hermes remains the reasoning/runtime substrate.
 
 Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.
 
 ## Current evidence state
 
-- Standard v0.2 is ratified and migration head is `0072`.
-- PR `#29` merged the post-cutover roadmap transaction into `main` at `816aae3`.
-- WS-01 implementation head `1460960` passed:
-  - broad unit: **106 files / 613 tests**;
-  - repository governance, typecheck, and lint;
-  - named onboarding, assignment, release-evidence, production-boundary, and UI contract suites;
-  - production build and repository archaeology;
-  - Hermes upstream review on the gateway/profile watched boundary.
-- The canonical Main Integration workflow now runs broad unit on pull requests and `main`; the Standard workflow no longer duplicates broad/build execution or historical branch triggers.
-- Twenty-seven obsolete pre-assignment/account-owned/direct-provider test files were deleted atomically; no skip list, quarantine, or weakened assertion was introduced.
-- Runtime model requests accept only the stable AMTECH alias. Manager resolves the provider profile, HTTPS/loopback endpoint, master credential, and upstream model from one registered host-private policy.
-- Caller-supplied provider, profile, upstream model, base URL, API key, headers, token, credential, endpoint, or routing fields fail before dispatch and are audited.
-- Signed gateway claims are checked against the current durable credential row, so policy mutation invalidates stale credentials.
-- Remote MCP authorization, MCP Apps host conformance, AG-UI replay mapping, persisted effective-capability truth, and live connector lifecycle evidence remain open WS-02 boundaries.
-- Target-host, managed-platform, fixture-free provider/channel, commercial, recovery, rollback, accessibility, capacity, deployment, and launch acceptance remain open.
-- The product is not launch-cleared.
+- Standard v0.2 is ratified; migration head is `0072`.
+- WS-01 broad unit is accepted at **106 files / 613 tests** on its implementation head with no exclusions.
+- Hardened WS-02 implementation head `16dc18e` passed Standard `29735429854`, Hermes Upstream Review `29735429873`, and Main Integration `29735429859`, including **110 files / 635 tests**, source/type/lint/contracts, build, archaeology, and compiled Chromium.
+- The Mirror Cabinet review found and repaired assignment-wide live-progress leakage, stale projected-action acceptance, unenforced MCP App network claims, final MCP policy/version TOCTOU, and raw AG-UI error projection.
+- Caller-supplied provider/profile/model/base URL/API key/header/token/credential/endpoint/routing fields remain denied before dispatch.
+- Remote MCP authorization, MCP Apps, AG-UI, effective-capability execution, and streaming Web are source/CI accepted. Their live provider, external-host, connector lifecycle, managed database, and target-runtime acceptance remain open.
+- Remote MCP tokens use the current Manager-held encrypted-envelope backend. This is not managed KMS/secret-manager acceptance.
+- `ISS-007`–`ISS-010` are source/CI resolved. `ISS-011` live connector authorization, health, staleness, revocation, scope change, outage, repair, deletion, and external protocol-host proof remains open; Phase 1.2 is not release-complete.
+- WS-03 has a guarded Fisher-adjacent frontier and task contract, but implementation must begin from then-current `main` only after PR `#31` merges or is formally superseded.
+- Target-host, managed-platform, fixture-free channels, commercial, recovery, rollback, accessibility, capacity, deployment, pilot, and production acceptance remain open. The product is not launch-cleared.
 
 ## Canonical execution route
 
-1. [`04-dependency-ordered-production-plan.md`](04-dependency-ordered-production-plan.md) — phased roadmap and exact-candidate sequence.
-2. [`08-production-issue-vector.json`](08-production-issue-vector.json) and [`08-production-issue-vector.md`](08-production-issue-vector.md) — immutable baseline scored issue source.
-3. [`13-resolution-ledger.json`](13-resolution-ledger.json) — current issue and control resolution state.
-4. [`09-workstream-execution-map.md`](09-workstream-execution-map.md) — workstream contracts.
-5. [`10-test-suite-disposition.md`](10-test-suite-disposition.md) — current test authority and WS-01 closure.
-6. [`07-verification-and-handoff-matrix.md`](07-verification-and-handoff-matrix.md) — evidence state and exact-candidate rules.
-7. [`12-ws01-ws02-execution-contract.json`](12-ws01-ws02-execution-contract.json) — implementation contract for this closure pass.
+1. `04-dependency-ordered-production-plan.md` — phased roadmap.
+2. `08-production-issue-vector.json`/`.md` — immutable baseline and current summary.
+3. `13-resolution-ledger.json` — current closure/control state.
+4. `09-workstream-execution-map.md` — workstream completion contracts.
+5. `10-test-suite-disposition.md` — test authority.
+6. `07-verification-and-handoff-matrix.md` — evidence boundary.
+7. `14-ws02-runtime-ui-capability-contract.json` — WS-02 task contract.
+8. `15-ws02-capability-manifold/` — exhaustive interaction model.
+9. `16-ws02-streaming-protocol-source-ci-closure.md` — hardened WS-02 evidence record.
+10. `17-ws03-p0-fisher-frontier.md` — dependency graph and D/E-optimal evidence design.
+11. `18-ws03-p0-task-contract.json` — guarded WS-03 implementation contract.
 
 ## Current dependency order
 
-1. **Phase 1.1 — complete for source/CI scope.** Preserve the canonical broad gate; final live evidence remains outside this phase.
-2. **Phase 1.2 — provider-authority lock complete for source/CI; protocol completion remains.** Implement remote MCP authorization, MCP Apps, AG-UI, effective-capability persistence, and live connector lifecycle without reopening caller-selected provider authority.
-3. **Phase 1.3 — database authority.** Migrations, RLS/grants, existing rows, concurrency, rollback, and managed-platform triggers.
-4. **Phase 1.4 — secret/runtime custody.** Target-host five-service and two-employee isolation/lifecycle proof.
-5. **Phase 1.5 — fixture-free owner/channels.** Real identity, assignment, connector, Web/SMS/Review, and recovery journey.
-6. **Phase 1.6 — golden governed work.** Three employee roles through approval/effect/receipt/parity/refindable proof.
-7. **Phase 1.7 — commercial and ambiguity controls.** Atomic budgets, shared rates, provider ambiguity, and invoice reconciliation.
-8. **Phase 1.8 — recovery and signed release.** Fault injection, rollback, observability, SBOM/provenance, and deployment manifest.
-9. **Phase 1.9 — human surfaces, capacity, and pilot preparation.** Accessibility, browsers, progress/recovery UX, fairness, and operating packet.
-10. **Phases 2–4.** Frozen exact candidate, bounded pilot, then measured 10/100/250/500/700 expansion.
+1. Phase 1.1 is complete for repository/test source-and-CI scope.
+2. Phase 1.2 source/CI controls are accepted; complete `ISS-011` live connector/protocol lifecycle acceptance.
+3. Phase 1.3 is prepared. After PR `#31` is merged or superseded, execute: ledger/hash → capability evidence constraints → RLS/grants → authority races → effect concurrency → backfill/rollback → managed-platform proof.
+4. Phase 1.4 secret/runtime custody.
+5. Phase 1.5 fixture-free owner/channels.
+6. Phase 1.6 golden governed work.
+7. Phase 1.7 commercial/ambiguity controls.
+8. Phase 1.8 recovery/signed release.
+9. Phase 1.9 human surfaces/capacity/pilot preparation.
+10. Frozen candidate, controlled pilot, measured expansion.
 
 ## Stop rules
 
-- Work on reviewed branches from current `main`; merge only after required checks.
-- No feature expansion ahead of an unresolved prerequisite P0.
-- Every task has success criteria, rubric, tests, blockers, and task-ID commits.
-- Tests are not weakened to obtain green.
-- Fixtures, local PostgreSQL, old hosts, manually injected outcomes, ancestor SHAs, and the public estimator cannot satisfy live boundaries they did not exercise.
-- Browser, model, MCP Apps, AG-UI, or connector content cannot select or mint provider authority.
-- Unknown/stale capability evidence fails closed.
+- Tests are not weakened for green.
+- Streaming projection never creates authority or crosses assignment boundaries.
+- Browser/model/MCP Apps/AG-UI/connector content cannot mint credentials or choose providers/scopes/hosts/continuations.
+- Projected protocol actions must match current Manager-owned assignment and authority version.
+- Unknown, stale, revoked, mismatched, or unprobed evidence fails closed.
+- Applied migrations `0001`–`0072` are immutable; WS-03 additions are forward-only.
 - Ambiguous consequential outcomes reconcile before retry.
-
-## Files
-
-- `01-ratification-and-change-control.md`
-- `02-standard-evolution-vector.md`
-- `03-connector-mcp-apps-ag-ui-program.md`
-- `04-dependency-ordered-production-plan.md`
-- `05-database-tdd-and-release-proof.md`
-- `06-document-authority-and-archive-map.md`
-- `07-verification-and-handoff-matrix.md`
-- `08-production-issue-vector.json`
-- `08-production-issue-vector.md`
-- `09-workstream-execution-map.md`
-- `10-test-suite-disposition.md`
-- `11-task-contract.json`
-- `12-ws01-ws02-execution-contract.json`
-- `13-resolution-ledger.json`
+- Source/fixture evidence cannot satisfy live release gates.
