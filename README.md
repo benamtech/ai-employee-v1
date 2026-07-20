@@ -31,7 +31,7 @@ npm run repo:rubric -- ./task-contract.json
 npm run repo:verify:quick
 ```
 
-Before pushing, run `npm run repo:verify:full`. Pull requests into `main` run the canonical main integration gate with governance, type/lint, unit, production-boundary, build, archaeology, and compiled browser proof.
+Before pushing, run `npm run repo:verify:full`. Pull requests into `main` run the canonical main integration gate with governance, type/lint, named unit/source contracts, production-boundary, build, archaeology, and compiled browser proof.
 
 ## Canonical product and offer
 
@@ -75,16 +75,21 @@ trigger
 
 ## Current integration state
 
-- Cutover branch: `employee-production-tuesday`
-- Target/base: `main`
-- Draft PR: `#23`
-- Historical `research`: retained history, not current authority
-- Migration head: `0072`
-- Standard: ratified v0.2
-- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`
-- Canonical deployment selection: `mvp-build/infra/scripts/production-topology.mjs`
-- Database inner loop: production-shaped local/CI PostgreSQL; managed Supabase only for named platform/release gates
-- Product status: Gate 0 source/document/CI resolved; not live accepted or launch-cleared
+- PR `#23` merged the reviewed cutover into `main` on 2026-07-20.
+- Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
+- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
+- Final cutover workflows succeeded: Ratified Standard `29717830698`, Hermes Upstream Review `29717830703`, Main Integration Gates `29717830737`.
+- New work starts on reviewed task branches from current `main`; the cutover and `research` branches are historical context.
+- Migration head: `0072`.
+- Standard: ratified v0.2.
+- Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Current next phase: Phase 1.1, repository authority and test-contract truth.
+- The broad `npm run test:unit` aggregate is known red on the cutover evidence head; PR `#23` records 30 files and 112 failed tests from pre-ratification fixtures. The curated green main gate does not prove the aggregate.
+- Canonical deployment selection: `mvp-build/infra/scripts/production-topology.mjs`.
+- Database inner loop: production-shaped local/CI PostgreSQL; managed Supabase only for named platform/release gates.
+- Product status: Gate 0 source/document/CI resolved; not database-, runtime-, provider-, browser/channel-, commercial-, live-, or production-accepted.
+
+The active program now includes a 38-issue machine vector, nine dependency-ordered workstreams, a test-suite disposition, Phases 1.1–1.9, exact-candidate release acceptance, controlled pilot, and measured expansion.
 
 ## Hermes upstream intelligence
 
@@ -95,7 +100,7 @@ cd mvp-build
 npm run hermes:upstream:check
 ```
 
-The scheduled/path-triggered check records official upstream head, watched `hermes_cli/` and `web/src/App.tsx` blobs, and active PR themes. It never upgrades production automatically.
+The scheduled/path-triggered check records official upstream head, watched `hermes_cli/` and `web/src/App.tsx` blobs, and active PR themes. It never upgrades production automatically. Do not run it merely because a session started.
 
 ## Repository layout
 
@@ -134,4 +139,4 @@ The scheduled/path-triggered check records official upstream head, watched `herm
 9. Ambiguous outcomes reconcile before retry.
 10. `main` changes only through reviewed merge; tests are not weakened to obtain green.
 11. Upstream Hermes drift triggers review, never an automatic production upgrade.
-12. Production-ready means every non-waivable Standard gate passes on one exact deployed release.
+12. Production-ready means every non-waivable Standard gate passes on one exact signed deployed release.
