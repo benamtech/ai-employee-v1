@@ -7,8 +7,8 @@ Updated: 2026-07-20
 
 1. `identity.md`
 2. this file or `CLAUDE.md`
-3. root `CODEGRAPH.md`
-4. [`CONTRIBUTING.md`](CONTRIBUTING.md) for executable onboarding and verification
+3. `CONTRIBUTING.md`
+4. root `CODEGRAPH.md`
 5. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
 6. ratified `mvp-build/STANDARD.md`
 7. `mvp-build/second-half-plan/README.md` and its single active program
@@ -31,14 +31,16 @@ Authority order: deployed release proof → applied migrations/durable state →
 
 ## Current integration boundary
 
-- Repository: `benamtech/ai-employee-v1`.
-- Integration/cutover branch: `employee-production-tuesday`.
-- Target/base: `main`.
-- Draft cutover PR: `#23`.
-- Historical `research` is not a current authority or future integration dependency.
+- PR `#23` merged the reviewed cutover into `main` on 2026-07-20.
+- Current integration baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
+- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
+- New work starts on a reviewed non-main task branch from current `main`.
+- `employee-production-tuesday` and `research` are historical branch context, not current execution authority.
 - Migration head: `0072`.
 - Standard v0.2 is ratified and effective.
+- Phase 1.1 of the active roadmap is repository/test-contract truth.
 - Current source/CI does not imply database, target-host, provider, fixture-free browser/channel, commercial, recovery, rollback, capacity, deployment, or launch acceptance.
+- The broad historical `npm run test:unit` aggregate is known red on the final cutover head; curated green gates may not be reported as proof that it passes.
 
 ## Product and protocol invariants
 
@@ -109,6 +111,8 @@ npm run hermes:upstream:check
 
 Review the official `NousResearch/hermes-agent` repository, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active pull requests. Upstream is intelligence, not authority: AMTECH production remains pinned until exact-image compatibility and release gates pass.
 
+Do not run the check merely because a session starts. Repository policy, watched-path drift, pin/baseline mismatch, or a Hermes-boundary workstream must make it material.
+
 ## Database evidence policy
 
 Routine database work uses production-shaped local/CI PostgreSQL TDD: complete ledger, constraints, RLS/grants/functions, negative isolation, concurrency, backfills, and rollback behavior.
@@ -126,4 +130,4 @@ Disposable managed Supabase is required only for material platform-specific beha
 
 ## Git discipline
 
-`employee-production-tuesday` is the reviewed cutover branch for PR `#23` into `main`. Do not force-update shared branches without explicit approval and a recovery path. Merge only when required checks pass, current authority documents and proof agree, and no P0/P1 gate is hidden.
+Create a reviewed task branch from current `main`. Do not force-update shared branches without explicit approval and a recovery path. Merge only when required checks pass, current authority documents and proof agree, and no P0/P1 gate is hidden.
