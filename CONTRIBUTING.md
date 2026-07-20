@@ -18,12 +18,14 @@ npm run repo:verify:quick
 
 Then read progressively, stopping when the task is clear:
 
-1. root `AGENTS.md` or `CLAUDE.md` and `CODEGRAPH.md`;
+1. root `AGENTS.md` or `CLAUDE.md`, `CONTRIBUTING.md`, and `CODEGRAPH.md`;
 2. scoped `mvp-build/AGENTS.md` or `CLAUDE.md` and `CODEGRAPH.md`;
 3. `mvp-build/STANDARD.md`;
 4. `mvp-build/second-half-plan/README.md` and its single active program;
 5. the newest relevant entry in `mvp-build/memory/MEMORY.md`;
 6. only the source, migration, test, workflow, runbook, or proof files needed for the task.
+
+PR `#23` merged the cutover into `main` on 2026-07-20. The cutover branch and `research` are historical context. New production work starts on reviewed task branches from current `main`.
 
 Do not concatenate historical plans or handoffs into working context. Current source, applied migrations, exact-SHA evidence, the ratified Standard, and the active program outrank older prose.
 
@@ -72,12 +74,14 @@ New or materially changed pure/business logic should maintain at least 80% focus
 ```bash
 npm run repo:verify:quick   # Standard, plan, connector, onboarding, and governance contracts
 npm run repo:verify:full    # quick gate + dependency-ordered typecheck + lint
-npm run test:unit           # broad historical aggregate; run for touched areas and normalization work
+npm run test:unit           # broad historical aggregate; Phase 1.1 must normalize it
 npm run test:integration    # PostgreSQL/environment-gated behavior when applicable
 npm run build               # production build boundary
 ```
 
-`Main Integration Gates` executes the named ratified authority, onboarding, production-boundary, UI-contract, build, archaeology, and compiled-browser suites. The broader historical `test:unit` aggregate currently contains stale pre-ratification fixtures and remains explicit P0 normalization work; no green curated suite may be reported as proof that this aggregate is green.
+`Main Integration Gates` executes named ratified authority, onboarding, production-boundary, UI-contract, build, archaeology, and compiled-browser suites. It is the canonical merge-readiness gate for PRs into `main`, but it does not prove the broader aggregate passes.
+
+The broad `test:unit` aggregate was red on final cutover head `d131dd09`; merged PR `#23` records 30 files and 112 failed tests from pre-ratification assignment, principal, fake-RPC, and environment fixtures. This is explicit Phase 1.1 normalization work. No curated green suite may be reported as proof that the broad aggregate is green.
 
 The installed pre-commit hook runs the quick gate. The pre-push hook runs the full gate. CI remains authoritative because hooks can be skipped locally.
 
@@ -104,10 +108,10 @@ npm run hermes:upstream:check
 
 Review the official repository, `hermes_cli/`, `web/src/App.tsx`, recent merged commits, and active pull requests. Record adopted, rejected, and deferred insights in the task or PR. Update `validation/hermes-upstream-baseline.json` only after source review and focused AMTECH compatibility tests.
 
+Do not run upstream research merely because a session started. Use the scheduled/path-triggered system unless repository policy, watched-path drift, a baseline mismatch, or the workstream makes the Hermes boundary material.
+
 ## Pull requests
 
-Use `.github/pull_request_template.md`. A PR must include the task contract, rubric, Standard clauses, verification, evidence state, and any Hermes upstream review. `source-wired`, `ci-accepted`, `runtime-accepted`, `provider-accepted`, and `production-ready` are distinct claims.
+Use `.github/pull_request_template.md`. A PR must include the task contract, rubric, Standard clauses, verification, evidence state, and any material Hermes upstream review. `source-wired`, `ci-accepted`, `runtime-accepted`, `provider-accepted`, and `production-ready` are distinct claims.
 
-`Main Integration Gates` is the canonical required check for pull requests into `main`; subsystem workflows remain diagnostic and release-evidence companions.
-
-PR #23 is the integration/cutover PR from `employee-production-tuesday` to `main`. New production work continues on reviewed branches from the post-cutover `main`; the historical `research` branch is not an authority layer.
+`Main Integration Gates` is the canonical required check for pull requests into `main`; subsystem workflows remain diagnostic and release-evidence companions. New production work integrates from reviewed branches based on current `main`.
