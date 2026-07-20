@@ -6,6 +6,49 @@ import {
 } from "../../packages/shared/src/connector-setup";
 import { custodyFor } from "../../packages/shared/src/connector-registry";
 
+const PROVIDER_SPECIFIC_TOOLS = [
+  "connect_email",
+  "complete_gmail_oauth",
+  "run_email_connector_test",
+  "create_email_draft",
+  "send_email_draft",
+  "start_email_listener",
+  "renew_email_watch",
+  "handle_gmail_pubsub",
+  "sync_gmail_history",
+  "replay_gmail_history_range",
+  "relink_email_thread",
+  "connect_stripe",
+  "create_stripe_account_link",
+  "complete_stripe_onboarding",
+  "create_deposit_invoice",
+  "send_deposit_invoice",
+  "handle_stripe_webhook",
+  "get_stripe_connection_status",
+  "replay_stripe_event",
+  "regenerate_stripe_onboarding_link",
+  "connect_quickbooks",
+  "complete_quickbooks_oauth",
+  "run_quickbooks_connector_test",
+  "create_expense",
+  "create_bill",
+  "create_invoice",
+  "create_payment",
+  "commit_quickbooks_write",
+  "query_quickbooks",
+  "get_profit_and_loss",
+  "get_balance_sheet",
+  "get_aged_receivables",
+  "get_aged_payables",
+  "update_expense",
+  "update_bill",
+  "update_invoice",
+  "create_deposit",
+  "create_journal_entry",
+  "update_journal_entry",
+  "create_bill_payment",
+] as const;
+
 describe("managed native connector setup protocol", () => {
   it("represents OAuth and provider onboarding through one fail-closed descriptor", () => {
     const setups = ownerManagedConnectorSetups();
@@ -56,13 +99,19 @@ describe("managed native connector setup protocol", () => {
     })).toBeNull();
   });
 
-  it("keeps every governed tool in at most one native connector manifest", () => {
+  it("keeps every governed tool in exactly one native connector manifest", () => {
     const owners = new Map<string, string>();
     for (const setup of ownerManagedConnectorSetups()) {
       for (const tool of setup.managed_tool_names) {
         expect(owners.has(tool), `${tool} is owned by both ${owners.get(tool)} and ${setup.key}`).toBe(false);
         owners.set(tool, setup.key);
       }
+    }
+
+    // Why: provider callback/webhook/repair tools need the same exact adapter
+    // ownership as owner-visible tools even though they are not shown in the UI.
+    for (const tool of PROVIDER_SPECIFIC_TOOLS) {
+      expect(owners.get(tool), `${tool} is missing native connector ownership`).toBeTruthy();
     }
   });
 
