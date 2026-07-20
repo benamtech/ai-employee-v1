@@ -95,7 +95,7 @@ export function registerArtifactWorkbenchRoutes(app: Hono, denyInternal: Interna
     if (!setup || !setup.start_tool) return c.json({ error: "connector_not_supported" }, 404);
     const returnTo = safeWorkbenchReturnPath(auth.body.return_to, auth.employeeId);
     const toolContext = {
-      actor: "owner",
+      actor: "owner" as const,
       assignment_id: auth.authority.assignment.assignment_id,
       principal_id: auth.session.human_principal_id,
       principal_class: "human" as const,
