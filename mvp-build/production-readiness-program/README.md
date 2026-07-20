@@ -6,6 +6,8 @@ Updated: 2026-07-20
 Current integration baseline: `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`  
 Newer source/test authority incorporated: PR `#33` merge `943f2613243ebcbcc9fb703e6273e83a5edc0a24`
 
+New work starts on reviewed task branches from current `main` or an explicitly named stacked dependency.
+
 ## Authority
 
 This root-level folder is the repository's single current production-readiness program. `mvp-build/second-half-plan/` is historical and non-canonical. The old second-half plan was superseded by successful prototype work and never established production readiness.
@@ -17,6 +19,8 @@ PR #33, current source, and executable tests are newer authority than stale plan
 ## Product target
 
 AMTECH installs governed persistent AI Employees. The owner experience must preserve exact account, employee, assignment, authority, channel, work revision, approval snapshot, effect, receipt, recovery, and proof identity. Manager remains the authority plane; Hermes remains the reasoning/runtime substrate. Web, SMS, signed Review, MCP, MCP Apps, and AG-UI are bounded projections rather than authority.
+
+Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.
 
 ## Current workstream boundary
 

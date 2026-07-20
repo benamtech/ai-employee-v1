@@ -67,16 +67,14 @@ describe("AMTECH Standard v0.2 ratification", () => {
     }
   });
 
-  it("routes all current planning through one canonical production program", async () => {
-    const planIndex = await readFile("second-half-plan/README.md", "utf8");
-    const activePlan = await readFile(
-      "second-half-plan/2026-07-19-ratified-standard-production-program/README.md",
-      "utf8",
-    );
+  it("routes all current planning through the root-level production-readiness program", async () => {
+    const historicalIndex = await readFile("second-half-plan/README.md", "utf8");
+    const activePlan = await readFile("production-readiness-program/README.md", "utf8");
 
-    expect(planIndex).toContain("2026-07-19-ratified-standard-production-program/README.md");
-    expect(planIndex).toContain("single active production program");
+    expect(historicalIndex).toContain("historical and non-canonical");
+    expect(historicalIndex).toContain("production-readiness-program/README.md");
     expect(activePlan).toContain("Status: **active and canonical**");
+    expect(activePlan).toContain("Canonical path: `mvp-build/production-readiness-program/`");
     expect(activePlan).toContain("Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.");
   });
 });
