@@ -49,6 +49,7 @@ try {
     "0070_effective_capabilities_and_artifact_revisions.sql",
     "0071_artifact_policy_seed_and_contract_guards.sql",
     "0072_artifact_revision_scope_guards.sql",
+    "0073_turn_claim_assignment_scope.sql",
   ];
   const expectedMigrations = [...workerMigrations, ...artifactMigrations];
   const applied = new Set((await rows("select name from _migrations where name = any($1::text[])", [expectedMigrations])).map((row) => row.name));
@@ -96,6 +97,23 @@ try {
     check(`security_invoker:${fn.proname}`, fn.prosecdef === false, "worker claim functions must use explicit service_role grants, not SECURITY DEFINER");
     check(`service_role_execute:${fn.proname}`, fn.service_execute === true);
     check(`browser_execute_revoked:${fn.proname}`, fn.anon_execute === false && fn.authenticated_execute === false);
+  }
+
+  const turnClaimFunctions = await rows(`
+    select p.proname, p.prosecdef, pg_get_function_result(p.oid) as result_shape,
+      has_function_privilege('service_role', p.oid, 'execute') as service_execute,
+      has_function_privilege('anon', p.oid, 'execute') as anon_execute,
+      has_function_privilege('authenticated', p.oid, 'execute') as authenticated_execute
+    from pg_proc p
+    join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'public' and p.proname = any($1::text[])
+  `, [["claim_employee_turn_job", "claim_employee_turn_job_for_employee"]]);
+  check("turn_claim_functions_present", turnClaimFunctions.length === 2, `${turnClaimFunctions.length}/2`);
+  for (const fn of turnClaimFunctions) {
+    check(`turn_claim_security_definer:${fn.proname}`, fn.prosecdef === true);
+    check(`turn_claim_service_role_execute:${fn.proname}`, fn.service_execute === true);
+    check(`turn_claim_browser_execute_revoked:${fn.proname}`, fn.anon_execute === false && fn.authenticated_execute === false);
+    check(`turn_claim_assignment_scope:${fn.proname}`, String(fn.result_shape ?? "").includes("assignment_id text"), fn.result_shape);
   }
 
   const viewerActions = (await one("select amtech_employee_surface_actions_for_role('viewer') as actions"))?.actions ?? [];
