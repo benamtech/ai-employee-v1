@@ -96,11 +96,12 @@ export async function runDestructiveDockerStep(spec: DestructiveDockerSpec): Pro
     let timedOut = false;
     let spawnError: string | null = null;
     let settled = false;
+    let timer: NodeJS.Timeout | null = null;
 
     const finish = (exitCode: number | null, signal: NodeJS.Signals | null) => {
       if (settled) return;
       settled = true;
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
       resolve({ exit_code: exitCode, signal, timed_out: timedOut, stdout, stderr, spawn_error: spawnError });
     };
 
@@ -112,7 +113,7 @@ export async function runDestructiveDockerStep(spec: DestructiveDockerSpec): Pro
     });
     child.on("close", (code, signal) => finish(code, signal));
 
-    const timer = setTimeout(() => {
+    timer = setTimeout(() => {
       timedOut = true;
       child.kill("SIGTERM");
       setTimeout(() => {
