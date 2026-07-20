@@ -112,11 +112,11 @@ check("GOV-10", mainIntegrationWorkflow.includes("pull_request:")
   && mainIntegrationWorkflow.includes("Main Integration Gates OK"), "main has one canonical merge gate including the broad aggregate");
 
 const currentAuthorityDocs = [rootReadme, contributing, rootAgents, rootCodegraph, scopedAgents, scopedCodegraph, planIndex, activePlan, memoryIndex];
-check("GOV-11", currentAuthorityDocs.every((doc) => doc.includes("current `main`") || doc.includes("main@5e5b8d7") || doc.includes("main@816aae3"))
-  && activePlan.includes("main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8")
+check("GOV-11", currentAuthorityDocs.every((doc) => doc.includes("current `main`") || doc.includes("main@1eb8ad82") || doc.includes("main@816aae3"))
+  && activePlan.includes("main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366")
   && !rootCodegraph.includes("Draft PR: `#23`")
   && !scopedCodegraph.includes("Draft PR: `#23`")
-  && !memoryIndex.includes("Draft PR: `#23`"), "current authority documents describe reviewed work from current main rather than an active cutover branch");
+  && !memoryIndex.includes("Draft PR: `#23`"), "current authority documents route reviewed work from the current merged baseline");
 
 check("GOV-12", roadmap.includes("### Phase 1.1 — Repository authority and test-contract truth")
   && roadmap.includes("### Phase 1.9 — Human-surface acceptance, capacity, and pilot preparation")
@@ -135,16 +135,17 @@ check("GOV-13", issueVector.version === "2026-07-20.post-merge.1"
   && new Set(issueVector.issues.map((issue) => issue[0])).size === 38
   && new Set(issueVector.issues.map((issue) => issue[1])).size === 9, "baseline machine issue vector remains immutable and contains 38 unique issues across nine workstreams");
 
-check("GOV-14", activePlan.includes("broad unit: **106 files / 613 tests**")
+check("GOV-14", activePlan.includes("**106 files / 613 tests**")
+  && activePlan.includes("unverified until the final exact head passes")
   && testDisposition.includes("curated and broad results are independently reported")
   && verificationMatrix.includes("Broad and curated suites are independently reported")
-  && !activePlan.includes("aggregate remains explicitly red"), "test evidence reports broad and curated boundaries independently without retaining a false current-red claim");
+  && !activePlan.includes("aggregate remains explicitly red"), "WS-01 evidence stays stable while current WS-02 exact-head repair remains explicit");
 
 check("GOV-15", activePlan.includes("Caller-supplied provider")
-  && activePlan.includes("Remote MCP authorization, MCP Apps host conformance, AG-UI replay mapping")
+  && activePlan.includes("Remote MCP authorization, MCP Apps, AG-UI, effective-capability execution, and streaming Web are source implementations")
+  && activePlan.includes("Phase 1.2 is not release-complete")
   && verificationMatrix.includes("Provider-authority lock")
-  && verificationMatrix.includes("does not establish remote MCP authorization")
-  && testDisposition.includes("obsolete suites were removed atomically rather than skipped"), "provider authority is locked without overclaiming remote protocol or live acceptance, and obsolete tests are removed rather than hidden");
+  && testDisposition.includes("obsolete suites were removed atomically rather than skipped"), "provider authority stays locked without promoting protocol source into live acceptance");
 
 const resolvedIssueIds = new Set((resolutionLedger.issue_resolutions ?? []).filter((entry) => entry.state === "source_ci_resolved").map((entry) => entry.id));
 const providerControl = (resolutionLedger.control_resolutions ?? []).find((entry) => entry.id === "CTRL-WS02-PROVIDER-AUTHORITY");
