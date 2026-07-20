@@ -1,10 +1,12 @@
 # CODEGRAPH.md — AMTECH AI Employee build map
 
 Status: active  
-Updated: 2026-07-19  
+Updated: 2026-07-20  
 Active branch: `employee-production-tuesday` → draft PR `#23` → base `research`  
-Migration head: `0069`  
-Complete green code/test evidence anchor: `7492c52ba2dbb97ce57efcda4f8d4b7e839b39ec`
+Migration head: `0072`  
+Complete green predecessor evidence anchor: `55e094e6bffc9f544ecf5fc2e366323c6619feb7`
+
+This CODEGRAPH synchronization commit is documentation-only and does not automatically inherit the predecessor anchor's workflow matrix. The current exact-head workflow IDs and conclusions belong in PR `#23` after the matrix reruns.
 
 ## Mandatory cold start
 
@@ -14,13 +16,14 @@ Complete green code/test evidence anchor: `7492c52ba2dbb97ce57efcda4f8d4b7e839b3
 4. scoped `AGENTS.md` or `CLAUDE.md`
 5. this file
 6. `memory/MEMORY.md`
-7. `memory/2026-07-19-final-document-authority-infra-test-production-handoff.md`
+7. `memory/2026-07-20-capability-surface-ci-closure-and-next-plan.md`
 8. `STANDARD.md`
 9. `second-half-plan/phase-2-standard-remediation-execution.md`
-10. `docs/architecture/README.md`
-11. `docs/architecture/11-agent-orientation-and-role-map.md`
-12. `docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md`
-13. relevant UX docs, source, migrations, scripts, workflows, tests, proof, and current diff
+10. `second-half-plan/2026-07-20-capability-production-closure/README.md` when working on capability/owner-surface closure
+11. `docs/architecture/README.md`
+12. `docs/architecture/11-agent-orientation-and-role-map.md`
+13. `docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md`
+14. relevant UX docs, source, migrations, scripts, workflows, tests, proof, and current diff
 
 Authority order: applied migrations/current source → generated production source/deploy config → exact-SHA executable proof → Standard/active plan → CODEGRAPH/architecture → newest memory → historical records.
 
@@ -57,24 +60,24 @@ trigger
 
 ## Current status
 
-**`P0_P1_review_closures_ci_accepted_on_7492c52__migration_head_0069__canonical_deploy_entrypoint_fork_open__not_live_accepted__not_launch_cleared`**
+**`capability_surface_and_acceptance_contract_closure_ci_accepted_on_55e094e6__migration_head_0072__canonical_deploy_selection_source_wired__not_live_accepted__not_launch_cleared`**
 
-The evidence anchor is 81 commits ahead of the starting review head `1affb16d819aad1e8975eb5b4a48e52c78d6b255`.
+The primary implementation anchor is `5b56e6a2249f4b5a650d81badbdd7b95cd6ea2bb`. The complete predecessor workflow matrix passed on `55e094e6bffc9f544ecf5fc2e366323c6619feb7`. This is `ci-accepted` only for declared source/fixture scope; it is not real database, runtime, provider, browser/channel, commercial, deployment, rollback, or production-ready acceptance.
 
-All named code/test workflows passed on the evidence anchor. Later commits are documentation synchronization and do not automatically inherit a complete workflow rerun.
+## Exact green predecessor workflow matrix
 
-## Exact green workflow matrix
+On `55e094e6bffc9f544ecf5fc2e366323c6619feb7`:
 
-- Phase 2 Remediation Plan Integrity — `29690964418`
-- Repository Documentation Archaeology — `29690964459`
-- S2 S7 S9 Production Boundary — `29690964423`
-- Lane 1 Relationships and Authorization — `29690964448`
-- S10.1 Onboarding Identity Authority — `29690964447`
-- Lane 10 Integrated CI and Release Evidence — `29690964445`
-- Employee Work Production Boundary — `29690964453`
-- Agent Operating Surface Standard — `29690964421`
+- Repository Documentation Archaeology — `29709721661`
+- Phase 2 Remediation Plan Integrity — `29709721690`
+- S10.1 Onboarding Identity Authority — `29709721646`
+- Lane 1 Relationships and Authorization — `29709721689`
+- S2 S7 S9 Production Boundary — `29709721656`
+- Lane 10 Integrated CI and Release Evidence — `29709721664`
+- Employee Work Production Boundary — `29709721665`
+- Agent Operating Surface Standard — `29709721702`
 
-All concluded success on `7492c52ba2dbb97ce57efcda4f8d4b7e839b39ec`. This is `ci-accepted` only for their declared scope.
+All concluded success. Current-head documentation synchronization must rerun the applicable matrix; PR `#23` is the final run ledger.
 
 ## Current canonical runtime topology
 
@@ -105,23 +108,26 @@ per employee: amtech-employee-<employee_id> internal bridge
 Canonical topology sources:
 
 - `infra/deploy/docker-compose.production.yml`
+- `infra/scripts/production-topology.mjs`
 - `infra/caddy/production.Caddyfile`
 - `infra/scripts/local/start-hermes-container.sh`
 - `apps/manager/src/provisioner-host.ts`
 - `apps/manager/src/lib/provisioning-reconciler.ts`
 
-## Critical deploy fork
+## Production entrypoint convergence
 
-The following normal-production helpers still select or default to the legacy `infra/deploy/docker-compose.yml`:
+The prior source-level deploy fork is closed.
+
+These entrypoints import the same `infra/scripts/production-topology.mjs` authority and select `infra/deploy/docker-compose.production.yml`:
 
 - `infra/scripts/production-normal-up.mjs`
 - `infra/scripts/prod-like-normal-employee-up.mjs`
 - `infra/scripts/deploy-smoke.mjs`
 - `infra/scripts/deploy-rollback.mjs`
 
-The legacy compose mounts Docker socket into Manager, lacks separate Model Gateway and Host Provisioner services, and keeps Caddy on a bridge. It is not equivalent to the canonical topology above.
+`tests/unit/production-boundary-source.test.ts`, describe `canonical production deployment topology`, enforces canonical selection, five-service health, Unix-socket Docker custody, Caddy topology, employee topology inspection, and rollback recomputation.
 
-**Do not deploy through those helpers until red source tests force every production entrypoint onto `docker-compose.production.yml`, canonical names, five-service health, Unix-socket custody, and target-host topology proof.**
+This closes source/config convergence only. Do not claim runtime acceptance until the target-host two-employee isolation/replacement/teardown harness passes on the release candidate.
 
 ## Executable subsystem map
 
@@ -138,13 +144,13 @@ Primary hubs:
 - `apps/manager/src/lib/owner-assignment-authority.ts`
 - `apps/manager/src/lib/owner-session.ts`
 - `apps/manager/src/lib/platform-admin-runtime.ts`
-- migrations `0039`, `0040`, `0042`, `0053`–`0069`
+- migrations `0039`, `0040`, `0042`, `0053`–`0069`, `0071`
 
-Migration `0069` installs canonical owner employee-surface grants only for explicit human assignment principals. Account membership does not manufacture employee authority.
+Migration `0069` installs canonical owner employee-surface grants only for explicit human assignment principals. Migration `0071` makes those actions role-specific so viewers remain read-only while owner/manager/operator actions stay assignment-scoped. Account membership does not manufacture employee authority.
 
-### 2. Durable command/effect, approval, and repair
+### 2. Durable command/effect, approval, artifact history, and repair
 
-Provides stable intent, immutable command provenance, atomic claims, leases, effect reservation, accepted/failed/ambiguous receipts, approval snapshots/current resolver authority, owner-turn C3, replay, and repair entrypoints.
+Provides stable intent, immutable command provenance, atomic claims, leases, effect reservation, accepted/failed/ambiguous receipts, approval snapshots/current resolver authority, owner-turn C3, replay, repair entrypoints, immutable artifact revisions, validation evidence, and publication state.
 
 Primary hubs:
 
@@ -153,7 +159,10 @@ Primary hubs:
 - `apps/manager/src/lib/owner-turn-command.ts`
 - `apps/manager/src/lib/owner-turn-repair.ts`
 - `apps/manager/src/lib/approval-authority.ts`
-- migrations `0041`, `0048`–`0054`, `0061`
+- `apps/manager/src/lib/artifact-workbench-routes.ts`
+- migrations `0041`, `0048`–`0054`, `0061`, `0070`–`0072`
+
+Migration `0070` binds artifact publication approval to the exact validated revision. Migration `0072` enforces revision, parent, validation, and current-head scope across artifact/assignment/account/employee boundaries.
 
 ### 3. Connectors, ingress, ambient inbox, and egress
 
@@ -161,13 +170,18 @@ Provides Gmail, QuickBooks, Stripe, and Twilio custody; authenticity verificatio
 
 Primary hubs:
 
+- `packages/shared/src/connector-setup.ts`
 - `apps/manager/src/events/registry.ts`
 - `apps/manager/src/events/ingress.ts`
 - `apps/manager/src/lib/ambient-inbox.ts`
 - `apps/manager/src/lib/employee-events.ts`
 - `apps/manager/src/lib/connector-custody.ts`
+- `apps/manager/src/tools/gmail-connect-owner.ts`
+- `apps/manager/src/tools/qbo-connect-owner.ts`
 - `apps/manager/src/webhooks/*`
 - migrations `0032`–`0038`, `0043`–`0047`
+
+Gmail and QuickBooks have explicit owner OAuth setup descriptors and signed owner return bridges. Unknown connectors fail closed. Stripe OAuth is intentionally not fabricated.
 
 ### 4. Model Gateway and commercial attribution
 
@@ -199,27 +213,33 @@ Primary hubs:
 - `apps/manager/src/lib/profile-renderer.ts`
 - `apps/manager/src/lib/runtime-profile-integrity.ts`
 - `apps/manager/src/lib/caddy-activation.ts`
+- `infra/scripts/production-topology.mjs`
 - `infra/scripts/local/start-hermes-container.sh`
 
-Open P0 gaps: canonical deploy entrypoint convergence, target-host acceptance, complete crash/compensation matrix, rollback, and release attestation.
+Open P0/P1 gaps: target-host acceptance, managed secret/rotation evidence, complete crash/compensation matrix, rollback, and release attestation. Canonical entrypoint selection is no longer an open source-code gap.
 
 ### 6. Hermes, context, Manager MCP, and capabilities
 
-Provides canonical Hermes session/run keys, runtime health/capability/toolset observation, rendered profile doctrine/memory, business-brain facts, strict Manager MCP resources, and employee-callable Manager tools generated from the authoritative registry.
+Provides canonical Hermes session/run keys, runtime health/capability/toolset observation, rendered profile doctrine/memory, business-brain facts, strict Manager MCP resources, employee-callable Manager tools generated from the authoritative registry, assignment-bound capability evidence, and task-to-capability presentation.
 
 Primary hubs:
 
+- `packages/shared/src/task-capabilities.ts`
 - `apps/manager/src/lib/hermes-client.ts`
 - `apps/manager/src/lib/mcp-server.ts`
 - `apps/manager/src/lib/business-brain.ts`
 - `apps/manager/src/lib/profile-context.ts`
 - `apps/manager/src/lib/profile-renderer.ts`
+- `apps/manager/src/lib/tool-capability-catalog.ts`
+- migration `0070`
 
-Open P1 gap: persist one hash-bound effective-capability graph intersecting runtime observations, Manager tools, connector health, assignment policy, commercial entitlement, and runtime/profile revision.
+Capability discovery spans `manager_mcp`, `direct_mcp`, and `runtime_native`, but remains presentation/task guidance only. It cannot create execution authority. Stale runtime evidence fails closed rather than remaining ready.
+
+Open P1 gap: complete release-bound persistence/reconciliation of the effective-capability graph against real runtime, connector, policy, entitlement, and profile evidence.
 
 ### 7. Owner Web, operating surface, and generated UI
 
-Provides Supabase Auth → Manager owner session in HttpOnly cookie, private-hop owner header, token-free browser SSE URL, strict snapshots/deltas, task-agnostic operating state, typed envelopes/resources/actions, deterministic adaptive layout, typed generated-view compiler, opaque-origin iframe, finite intent vocabulary, and host action intersection.
+Provides Supabase Auth → Manager owner session in HttpOnly cookie, private-hop owner header, token-free browser SSE URL, strict snapshots/deltas, task-agnostic operating state, task-mapped capability drawer, typed envelopes/resources/actions, deterministic adaptive layout, typed generated-view compiler, opaque-origin iframe, finite intent vocabulary, and host action intersection.
 
 Primary hubs:
 
@@ -227,10 +247,14 @@ Primary hubs:
 - `apps/manager/src/lib/operating-surface.ts`
 - `apps/manager/src/lib/materialization.ts`
 - `apps/manager/src/lib/ui-resources.ts`
+- `apps/manager/src/lib/onboarding-identity-routes.ts`
 - `apps/web/app/agent/[employeeId]/AgentSurface.tsx`
+- `apps/web/app/agent/[employeeId]/components/CapabilityDrawer.tsx`
 - `apps/web/app/agent/[employeeId]/components/WorkObjectRenderer.tsx`
 - `apps/web/app/agent/[employeeId]/components/McpUiResource.tsx`
 - `apps/web/app/api/employee/[employeeId]/resources/route.ts`
+
+`CapabilityDrawer.tsx` represents connector setup as one nullable `{ href, label }` action and stages editable employee instructions through the existing message/durable-command path; it never calls a provider tool directly from the browser.
 
 Current fixture browser tests exercise the adaptive system. Product-shell tests prove only login and unauthenticated dashboard. No fixture-free provider-backed browser action/effect/receipt chain has passed on the current candidate.
 
@@ -244,10 +268,12 @@ Primary maps:
 - `docs/architecture/08-repository-archaeology-audit-and-cleanup.md`
 - `docs/architecture/09-current-bug-risk-and-production-gap-register.md`
 - `docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md`
+- `second-half-plan/2026-07-20-capability-production-closure/`
+- `memory/2026-07-20-capability-surface-ci-closure-and-next-plan.md`
 
 ## Migration ledger
 
-Current head: **`0069`**.
+Current head: **`0072`**.
 
 ```text
 0032–0038  Model Gateway, reconciler, ambient inbox, effects, grants, welcome, duplicate handling
@@ -259,6 +285,9 @@ Current head: **`0069`**.
 0060–0063  signed artifact/preview authority and ambiguous command reconciliation
 0064–0068  onboarding identity and activation sequence
 0069       canonical explicit-assignment owner surface grants
+0070       effective capability evidence; artifact revisions, validation, publication approval snapshots
+0071       artifact policy lifecycle seed; role-specific owner-surface contract guards
+0072       artifact revision/parent/validation/current-head cross-row scope guards
 ```
 
 Do not rewrite or renumber applied migrations. Corrections are forward migrations.
@@ -267,32 +296,28 @@ Do not rewrite or renumber applied migrations. Corrections are forward migration
 
 Not accepted yet:
 
-1. canonical deploy/smoke/rollback entrypoint convergence;
-2. approved real-Supabase `0032–0069` migration/advisor/behavior proof;
-3. managed production secrets and rotation;
-4. target-host Caddy/Docker/Unix-socket/two-employee isolation;
-5. live identity-provider verification and canonical activation;
-6. provider-backed generated UI browser action through external effect and proof;
-7. cumulative budget, shared rate limiting, and timeout ambiguity control;
-8. complete crash/compensation/deterministic repair;
-9. fixture-free Web/SMS/signed Review;
-10. real connector/provider/accounting reconciliation;
-11. effective-capability graph persistence;
-12. shared/fractional policy and broader role perspectives;
-13. 100/250/500/700 employee capacity and fairness;
-14. complete accessibility, cross-browser, visual regression, rollback, SBOM/attestation, signed deployment manifest, and exact deployment.
+1. approved real-Supabase `0032–0072` migration/advisor/behavior proof;
+2. managed production secrets and rotation;
+3. target-host Caddy/Docker/Unix-socket/two-employee isolation;
+4. live identity-provider verification and canonical activation;
+5. provider-backed generated UI browser action through external effect and proof;
+6. cumulative budget, shared rate limiting, and timeout ambiguity control;
+7. complete crash/compensation/deterministic repair;
+8. fixture-free Web/SMS/signed Review;
+9. real connector/provider/accounting reconciliation;
+10. release-bound effective-capability graph reconciliation;
+11. shared/fractional policy and broader role perspectives;
+12. 100/250/500/700 employee capacity and fairness;
+13. complete accessibility, cross-browser, visual regression, rollback, SBOM/attestation, signed deployment manifest, and exact deployment.
 
 ## Dependency-ordered TDD path
 
-1. Add red tests requiring every production/deploy/smoke/rollback script to select `docker-compose.production.yml` and canonical service names.
-2. Migrate those scripts; quarantine or explicitly label the legacy compose.
-3. Add `docker compose config`, five-service health, Unix-socket, no-Manager-Docker-socket, and host-network Caddy contracts.
-4. Prove target-host two-employee isolation/replacement/teardown.
-5. Apply `0032–0069` to approved staging and run advisors/matrices.
-6. Add red concurrent Model Gateway budget/rate/timeout tests; implement controls.
-7. Add provisioning/effect crash injection and deterministic repair.
-8. Add real authenticated dashboard/SSE/error-state browser tests.
-9. Add provider-backed generated UI browser action through approval/effect/receipts/proof.
-10. Add cross-browser, accessibility, visual regression, capacity/fairness, rollback, and signed release-attestation gates.
+1. Freeze and record a complete exact-head workflow matrix after this CODEGRAPH synchronization.
+2. Apply `0032–0072` to approved staging; run advisors and assignment/artifact/capability behavior matrices.
+3. Prove canonical target-host five-service health, Docker/Unix-socket custody, two-employee isolation, replacement, and teardown.
+4. Capture real authenticated dashboard/SSE/error/OAuth behavior and a fixture-free provider-backed generated-work-object path through approval, C3/effect, receipt, and proof.
+5. Add red concurrent Model Gateway budget/rate/ambiguous-timeout tests; implement shared atomic controls and reconciliation.
+6. Add provisioning/effect crash injection, deterministic repair, and rollback proof.
+7. Add cross-browser, accessibility, visual regression, capacity/fairness, SBOM/provenance, signed manifest, and exact deployment gates.
 
 Trajectory artifacts may refine prerequisite order, but `STANDARD.md` and exact live evidence determine whether a gate is closed.
