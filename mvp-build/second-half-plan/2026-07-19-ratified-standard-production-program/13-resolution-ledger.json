@@ -2,6 +2,7 @@
   "version": "2026-07-20.ws02-hardened.2",
   "updated_at": "2026-07-20",
   "baseline_issue_vector": "08-production-issue-vector.json",
+  "implementation_evidence_head": "1460960f415fafc20582313b1dd2117b781a63f7",
   "ws01_implementation_evidence_head": "1460960f415fafc20582313b1dd2117b781a63f7",
   "ws02_protocol_implementation_evidence_head": "16dc18e0535ac14f867875989dfe5aee596f89c0",
   "workflow_evidence": {
