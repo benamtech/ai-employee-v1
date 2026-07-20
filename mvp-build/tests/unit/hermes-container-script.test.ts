@@ -16,7 +16,8 @@ describe("Hermes container launch hardening", () => {
     expect(script).toContain("--restart=");
     expect(script).toContain("--read-only");
     expect(script).toContain("--label=\"com.amtech.kind=employee-runtime\"");
-    expect(script).toContain("--network-alias");
+    expect(script).toContain("docker network connect --alias amtech-manager");
+    expect(script).toContain("docker network connect --alias amtech-model-gateway");
     expect(script).toContain("--log-driver=");
   });
 });
