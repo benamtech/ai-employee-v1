@@ -1,10 +1,16 @@
 import { EventEmitter } from "node:events";
 import type { WorkProgressState } from "@amtech/shared";
 
+export interface ProgressScope {
+  account_id: string;
+  employee_id: string;
+  assignment_id: string;
+}
+
 /**
- * Ephemeral low-latency projection. `kind` is optional at the producer boundary so
- * existing scheduler/wake progress producers remain compatible; publish normalizes
- * them to `work_progress`. Durable state remains authoritative on reconnect.
+ * Ephemeral low-latency projection. Durable state remains authoritative on reconnect.
+ * Every owner-visible frame is keyed by account, employee, and assignment so a shared
+ * employee identity cannot leak activity across assignments.
  */
 export interface ProgressEvent {
   kind?: "work_progress" | "assistant_delta" | "run_completed";
@@ -20,20 +26,28 @@ export interface ProgressEvent {
 const bus = new EventEmitter();
 bus.setMaxListeners(0);
 
-function channel(employeeId: string): string {
-  return `progress:${employeeId}`;
+function progressChannel(scope: ProgressScope): string {
+  return `progress:${scope.account_id}:${scope.employee_id}:${scope.assignment_id}`;
 }
 
-export function publishProgress(employeeId: string, event: ProgressEvent): void {
+/** Publish only assignment-scoped owner-visible progress. */
+export function publishProgress(scope: ProgressScope, event: ProgressEvent): void;
+/**
+ * Compatibility boundary for legacy producers that do not yet possess assignment
+ * authority. Their progress is deliberately not broadcast; durable work remains visible.
+ */
+export function publishProgress(employeeId: string, event: ProgressEvent): void;
+export function publishProgress(scopeOrEmployee: ProgressScope | string, event: ProgressEvent): void {
+  if (typeof scopeOrEmployee === "string") return;
   const normalized: ProgressEvent = { ...event, kind: event.kind ?? "work_progress" };
-  bus.emit(channel(employeeId), normalized);
+  bus.emit(progressChannel(scopeOrEmployee), normalized);
 }
 
-/** Subscribe to one employee's live projection; returns an unsubscribe function. */
-export function subscribeProgress(employeeId: string, handler: (event: ProgressEvent) => void): () => void {
-  const ch = channel(employeeId);
-  bus.on(ch, handler);
-  return () => { bus.off(ch, handler); };
+/** Subscribe to one exact owner/employee assignment projection. */
+export function subscribeProgress(scope: ProgressScope, handler: (event: ProgressEvent) => void): () => void {
+  const channel = progressChannel(scope);
+  bus.on(channel, handler);
+  return () => { bus.off(channel, handler); };
 }
 
 function changeChannel(employeeId: string): string {
@@ -47,10 +61,10 @@ export function signalEmployeeChange(employeeId: string): void {
 /** Resolve when durable employee state changes, or after timeout for catch-up polling. */
 export function waitForEmployeeChange(employeeId: string, timeoutMs: number): Promise<void> {
   return new Promise((resolve) => {
-    const ch = changeChannel(employeeId);
+    const channel = changeChannel(employeeId);
     const onChange = () => { cleanup(); resolve(); };
     const timer = setTimeout(() => { cleanup(); resolve(); }, timeoutMs);
-    function cleanup() { bus.off(ch, onChange); clearTimeout(timer); }
-    bus.on(ch, onChange);
+    function cleanup() { bus.off(channel, onChange); clearTimeout(timer); }
+    bus.on(channel, onChange);
   });
 }
