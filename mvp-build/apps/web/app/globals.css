@@ -169,6 +169,44 @@ video {
   min-height: 44px !important;
 }
 
+/* Talk is the primary surface, but Workspace must retain its operating-context
+ * control. The inner identity is redundant with the next-generation top bar, so
+ * only the live/context control remains in a compact sticky subheader. */
+.nextgen-operate .os-header {
+  display: flex !important;
+  top: 68px !important;
+  min-height: 56px !important;
+  justify-content: flex-end !important;
+  padding: 6px 22px !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(22px);
+}
+
+.nextgen-operate .os-identity {
+  display: none !important;
+}
+
+.nextgen-operate .os-runtime,
+.nextgen-topbar nav button,
+.nextgen-brand,
+.nextgen-prompts button,
+.nextgen-rail-head button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
+.nextgen-brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+@media (max-width: 620px) {
+  .nextgen-operate .os-header {
+    top: 60px !important;
+    padding-inline: 12px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
