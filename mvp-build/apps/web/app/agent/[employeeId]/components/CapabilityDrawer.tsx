@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  resolveOwnerOAuthConnectorSetup,
+  resolveManagedSetupForCapability,
   type OperatingWorkLoop,
   type ResourcePayload,
   type TaskCapabilityMatch,
@@ -280,12 +280,16 @@ interface CapabilitySetupAction {
 
 function capabilitySetupAction(employeeId: string, capability: ToolCapabilityDescriptor): CapabilitySetupAction | null {
   if (capability.availability !== "needs_connection") return null;
-  const setupKey = capability.tool_name.includes("quickbooks") || capability.category === "accounting"
-    ? "quickbooks"
-    : capability.tool_name.includes("email") || capability.category === "communication"
-      ? "gmail"
-      : null;
-  const setup = setupKey ? resolveOwnerOAuthConnectorSetup(setupKey) : null;
+  /**
+   * Why: setup resolution belongs to the shared connector manifest. Category and
+   * tool-name branches in the browser would re-create a provider whitelist.
+   */
+  const setup = resolveManagedSetupForCapability({
+    connector_id: capability.connector_id,
+    server_id: capability.server_id,
+    tool_name: capability.tool_name,
+    category: capability.category,
+  });
   if (!setup) return null;
   const returnTo = `/agent/${encodeURIComponent(employeeId)}`;
   return {
