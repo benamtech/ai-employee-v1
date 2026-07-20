@@ -1,14 +1,25 @@
-# Capability Surface Production Closure — Execution Packet
+# Capability Surface Production Closure — Historical Execution Packet
 
-Status: implementation complete; exact-head CI and live acceptance remain separate gates.
-
+Status: **superseded historical implementation packet**  
 Date: 2026-07-20  
 Repository: `benamtech/ai-employee-v1`  
 Branch: `employee-production-tuesday`  
 Draft PR: `#23`  
 Implementation anchor: `5b56e6a2249f4b5a650d81badbdd7b95cd6ea2bb`
 
-## Read order
+> This packet remains the factual record for the capability-drawer nullability repair, strict-read acceptance reconciliation, migration-head drift prevention, and the exact workflow evidence recorded at that checkpoint. It is not the active production plan.
+
+## Current authority
+
+Read:
+
+1. ratified [`../../STANDARD.md`](../../STANDARD.md);
+2. canonical [`../README.md`](../README.md);
+3. active [`../2026-07-19-ratified-standard-production-program/README.md`](../2026-07-19-ratified-standard-production-program/README.md);
+4. [`../../memory/MEMORY.md`](../../memory/MEMORY.md) and the newest relevant handoff;
+5. current CODEGRAPH, source, migrations, workflows, proof, and PR `#23`.
+
+## Historical packet contents
 
 1. `01-standardized-execution-output.md`
 2. `02-production-next-step-plan.md`
@@ -16,15 +27,22 @@ Implementation anchor: `5b56e6a2249f4b5a650d81badbdd7b95cd6ea2bb`
 4. `04-recent-change-reference-map.md`
 5. `../../memory/2026-07-20-capability-surface-ci-closure-and-next-plan.md`
 
-## Closed in this execution
+## Closed at this checkpoint
 
-- `mvp-build/apps/web/app/agent/[employeeId]/components/CapabilityDrawer.tsx` now represents connector setup as one nullable `{ href, label }` action.
-- `mvp-build/tests/unit/capability-drawer-setup-contract.test.ts`, describe `CapabilityDrawer connector setup action`, test `keeps the connection href and label in one null-safe action`, prevents the split-state regression.
-- `mvp-build/tests/unit/employee-stream-strict.test.ts`, describe `employee snapshot strict reads`, test `routes every production owner and employee context entry point through strict reads`, verifies strict reads for capability enrichment and operating-state materialization.
-- `mvp-build/tests/unit/production-topology-acceptance.test.ts`, describe `target-host production topology acceptance`, test `binds staging migration proof to the complete current migration range`, derives the expected migration head from the migration ledger.
+- `apps/web/app/agent/[employeeId]/components/CapabilityDrawer.tsx` represented connector setup as one nullable `{ href, label }` action.
+- `tests/unit/capability-drawer-setup-contract.test.ts` prevented the split-state regression.
+- `tests/unit/employee-stream-strict.test.ts` aligned strict-read acceptance with capability enrichment and operating-state materialization.
+- `tests/unit/production-topology-acceptance.test.ts` derived the expected migration head from the migration ledger.
 
-## Current authority
+## Superseded assumptions
 
-Migration head is `0072` at `mvp-build/packages/db/migrations/0072_artifact_revision_scope_guards.sql`. Canonical Compose is `mvp-build/infra/deploy/docker-compose.production.yml`. The UI gate is `.github/workflows/ui-agent-operating-surface.yml`, job `source-contracts`, step `Typecheck web`, followed by job `browser-fixture`. The production boundary gate is `.github/workflows/employee-work-production-boundary.yml`, job `boundary`, step `Production boundary unit and source proofs`.
+The packet predates Standard v0.2 ratification and the managed connector setup protocol. In particular:
 
-This packet may establish only `source-wired` and named `ci-accepted` scope. It does not establish real database, runtime, provider, fixture-free browser/channel, commercial, deployment, rollback, or production-ready acceptance.
+- Gmail and QuickBooks no longer define the native connector setup ontology;
+- Stripe is represented honestly through provider-managed onboarding rather than fabricated OAuth;
+- MCP Apps is the official interactive MCP extension target;
+- AG-UI is an optional event/state adapter;
+- local/CI PostgreSQL is the routine database TDD loop, with disposable Supabase reserved for material platform/release evidence;
+- the active dependency order lives only in the ratified production program.
+
+This packet establishes only the evidence recorded on its named checkpoint. It cannot establish current database, runtime, provider, browser/channel, commercial, deployment, rollback, or production-ready acceptance.
