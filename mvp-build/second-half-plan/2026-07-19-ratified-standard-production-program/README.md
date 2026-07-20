@@ -1,6 +1,7 @@
 # Ratified Standard Production Program
 
-Status: **active and canonical; Gate 0 resolved**  
+Status: **active and canonical**  
+Gate 0: **resolved for declared source/document/CI scope**  
 Date: 2026-07-19  
 Task family: `AMTECH-P0-GOV-001`, `AMTECH-P0-DOC-002`  
 Branch: `employee-production-tuesday`  
