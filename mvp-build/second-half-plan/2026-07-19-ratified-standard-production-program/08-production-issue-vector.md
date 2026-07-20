@@ -15,10 +15,11 @@ Scores are not an averaging mechanism. The JSON remains immutable evidence of th
 
 - `ISS-001` through `ISS-006` are source/CI resolved on WS-01 evidence head `1460960`;
 - WS-01 broad unit remains **106 files / 613 tests**;
-- `ISS-007` through `ISS-010` are source/CI resolved on hardened WS-02 implementation head `16dc18e`;
-- hardened WS-02 broad unit is **110 files / 635 tests** with Standard, Hermes review, source/type/lint/contracts, build, archaeology, and compiled Chromium green;
+- `ISS-007` through `ISS-010` are source/CI resolved on final PR #31 WS-02 evidence head `e43f70a0e9a3afd4b87880b9d22089e6da2e94d0`;
+- final WS-02 broad unit is **110 files / 635 tests** with Standard, Hermes review, source/type/lint/contracts, build, archaeology, and compiled Chromium green;
+- PR #31 merged into `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`;
 - `ISS-011` remains open because live connector/provider and external protocol-host lifecycle evidence is absent;
-- WS-03 `ISS-012`–`ISS-014` remain open; their P0 frontier is prepared but implementation has not started;
+- WS-03 `ISS-012`–`ISS-014` remain open; DB-P0-01 ledger/hash preflight has started, but no database acceptance is claimed;
 - `ISS-015` through `ISS-038` remain open;
 - `production_ready` remains false.
 
@@ -37,7 +38,7 @@ Scores are not an averaging mechanism. The JSON remains immutable evidence of th
 | ISS-009 | WS-02 | P1 | .68 | .94 | .66 | Versioned AG-UI projection/replay adapter absent | source/CI resolved; fixture-free client proof open |
 | ISS-010 | WS-02 | P0 | .86 | .92 | .92 | Effective capability graph not persisted/reconciled | source/CI resolved; live lifecycle open |
 | ISS-011 | WS-02 | P0 | .90 | .98 | .90 | Live connector health/revocation/failure proof absent | open |
-| ISS-012 | WS-03 | P0 | .98 | .99 | .99 | Approved database not release-proven through migration 0072 | open; frontier prepared |
+| ISS-012 | WS-03 | P0 | .98 | .99 | .99 | Approved database not release-proven through migration 0072 | open; DB-P0-01 active |
 | ISS-013 | WS-03 | P0 | .95 | .98 | .96 | RLS/grant/backfill/concurrency/rollback matrices incomplete | open; frontier prepared |
 | ISS-014 | WS-03 | P0 | .82 | .97 | .79 | Managed Supabase trigger proof absent | open; frontier prepared |
 | ISS-015 | WS-04 | P0 | .96 | .98 | .95 | Managed secret custody/rotation proof absent | open |
@@ -70,5 +71,5 @@ Scores are not an averaging mechanism. The JSON remains immutable evidence of th
 1. Repository and test truth is stable; preserve the independent broad gate and exact-head discipline.
 2. WS-02 source authority is hardened, but `ISS-011` live lifecycle evidence still blocks workstream completion.
 3. Protocol adapters remain projections; current assignment/policy/version is re-derived before execution.
-4. WS-03 is the next prepared P0 frontier, not an inherited acceptance claim.
+4. WS-03 DB-P0-01 is the active next P0 step, not a database-acceptance claim.
 5. Database, target host, live providers/channels, commercial, recovery, accessibility, deployment, and pilot evidence remain open.
