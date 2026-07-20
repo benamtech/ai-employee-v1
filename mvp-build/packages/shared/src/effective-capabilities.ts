@@ -8,25 +8,42 @@ export interface CapabilityEvidenceInput {
   credential_ready: boolean;
   network_ready: boolean;
   policy_ready: boolean;
+  entitlement_ready: boolean;
+  authority_version_matches: boolean;
   connector_ready?: boolean;
   connector_required?: boolean;
   live_probe_status: CapabilityProbeStatus;
+  evidence_checked_at: string;
+  max_evidence_age_ms: number;
+  now?: string;
   evidence?: Record<string, unknown>;
 }
 
 export interface EffectiveCapabilityDecision extends CapabilityEvidenceInput {
   connector_ready: boolean;
+  evidence_fresh: boolean;
   effective: boolean;
   failed_dimensions: string[];
 }
 
+function evidenceFresh(input: CapabilityEvidenceInput): boolean {
+  const checked = new Date(input.evidence_checked_at).getTime();
+  const now = new Date(input.now ?? new Date().toISOString()).getTime();
+  return Number.isFinite(checked)
+    && Number.isFinite(now)
+    && input.max_evidence_age_ms > 0
+    && checked <= now
+    && now - checked <= input.max_evidence_age_ms;
+}
+
 /**
- * Effective capability is the intersection of independently observed evidence.
- * Profile YAML and host key presence may contribute to `advertised`, but can never
- * make the decision effective without a runtime report and successful live probe.
+ * Effective capability is the intersection of independently observed, current
+ * evidence. Discovery is broad; execution fails closed on missing, skipped, stale,
+ * version-mismatched, unhealthy, or unprobed evidence.
  */
 export function decideEffectiveCapability(input: CapabilityEvidenceInput): EffectiveCapabilityDecision {
   const connectorReady = input.connector_required ? Boolean(input.connector_ready) : true;
+  const fresh = evidenceFresh(input);
   const dimensions: Array<[string, boolean]> = [
     ["advertised", input.advertised],
     ["runtime_reported", input.runtime_reported],
@@ -34,13 +51,17 @@ export function decideEffectiveCapability(input: CapabilityEvidenceInput): Effec
     ["credential_ready", input.credential_ready],
     ["network_ready", input.network_ready],
     ["policy_ready", input.policy_ready],
+    ["entitlement_ready", input.entitlement_ready],
+    ["authority_version_matches", input.authority_version_matches],
     ["connector_ready", connectorReady],
     ["live_probe_passed", input.live_probe_status === "passed"],
+    ["evidence_fresh", fresh],
   ];
   const failed_dimensions = dimensions.filter(([, ready]) => !ready).map(([name]) => name);
   return {
     ...input,
     connector_ready: connectorReady,
+    evidence_fresh: fresh,
     effective: failed_dimensions.length === 0,
     failed_dimensions,
   };
@@ -51,6 +72,7 @@ export interface EffectiveCapabilityReport {
   account_id: string;
   employee_id: string;
   assignment_id: string;
+  authority_version: string;
   checked_at: string;
   capabilities: EffectiveCapabilityDecision[];
   effective_toolsets: string[];
@@ -62,16 +84,22 @@ export function buildEffectiveCapabilityReport(input: {
   account_id: string;
   employee_id: string;
   assignment_id: string;
+  authority_version: string;
   checked_at?: string;
   capabilities: CapabilityEvidenceInput[];
 }): EffectiveCapabilityReport {
-  const capabilities = input.capabilities.map(decideEffectiveCapability);
+  const checkedAt = input.checked_at ?? new Date().toISOString();
+  const capabilities = input.capabilities.map((capability) => decideEffectiveCapability({
+    ...capability,
+    now: capability.now ?? checkedAt,
+  }));
   return {
     report_id: input.report_id,
     account_id: input.account_id,
     employee_id: input.employee_id,
     assignment_id: input.assignment_id,
-    checked_at: input.checked_at ?? new Date().toISOString(),
+    authority_version: input.authority_version,
+    checked_at: checkedAt,
     capabilities,
     effective_toolsets: capabilities.filter((item) => item.effective).map((item) => item.capability_key),
     denied_toolsets: capabilities
