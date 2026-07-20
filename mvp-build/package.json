@@ -18,7 +18,7 @@
     "typecheck": "npm run generate:production-sources && npm run build --workspace @amtech/shared && npm run typecheck --workspace @amtech/shared && npm run build --workspace @amtech/db && npm run typecheck --workspace @amtech/db && npm run typecheck --workspace @amtech/manager && npm run typecheck --workspace @amtech/web",
     "lint": "npm run generate:production-sources && eslint . --ext .ts,.tsx",
     "test": "npm run test:unit",
-    "test:unit": "npm run generate:production-sources && vitest run",
+    "test:unit": "npm run generate:production-sources && npm run build --workspace @amtech/shared && npm run build --workspace @amtech/db && vitest run",
     "test:integration": "npm run generate:production-sources && vitest run --config vitest.integration.config.ts",
     "test:remediation-plan": "vitest run tests/unit/remediation-plan-integrity.test.ts",
     "test:standard": "vitest run tests/unit/standard-ratification-contract.test.ts tests/unit/connector-registry.test.ts tests/unit/connector-setup.test.ts tests/unit/connector-capability-binding-contract.test.ts tests/unit/capability-drawer-setup-contract.test.ts --reporter=verbose",
