@@ -1,6 +1,6 @@
 # AMTECH AI Employee Production Plan Index
 
-Status: **one active production program**  
+Status: **one active production program; Gate 0 resolved**  
 Updated: 2026-07-19
 
 ## Active authority
@@ -34,13 +34,15 @@ No other file or folder in `second-half-plan/` is current execution authority.
 - Branch: `employee-production-tuesday`, based on `research`; draft PR `#23`.
 - `main` is not the integration shortcut.
 - Migration head: `0072`.
-- Standard v0.2 is ratified.
-- Connector custody and capability discovery are transport-neutral.
-- Native owner setup is manifest-driven across OAuth and provider-managed onboarding; Gmail, QuickBooks, and Stripe are adapters, not the connector ontology.
+- Standard v0.2 is ratified and effective.
+- Gate 0 governance/document resolution is accepted on source/code/document head `4be092f009de`, with all eight required workflows green.
+- Final post-evidence metadata-head workflow IDs are recorded in PR `#23` after the branch freezes.
+- Connector identity, custody, setup protocol, exact tool ownership, and capability readiness are manifest-driven.
+- Native setup supports OAuth and provider-hosted onboarding without treating provider names as ontology.
+- Direct MCP requires explicit read-only/non-money/non-customer-facing declarations; uncertainty fails closed.
+- MCP Apps and AG-UI directions are ratified; complete conformance remains active P0/P1 work.
 - Canonical production Compose selection is source-wired.
-- Local/CI PostgreSQL is the database TDD inner loop; disposable Supabase remains a platform-specific and release-candidate proof boundary.
-- The connector/protocol implementation checkpoint `701936ab1ded` passed all eight required workflows.
-- Final Gate 0 authority-head workflow evidence must be recorded after documentation synchronization stops moving the branch.
+- Local/CI PostgreSQL is the database TDD inner loop; disposable managed Supabase remains a platform-specific and release-candidate proof boundary.
 - Target-host, live connector/provider, fixture-free golden work, commercial, recovery, rollback, accessibility, capacity, deployment, and launch acceptance remain open.
 
 ## Historical plan families
@@ -59,7 +61,7 @@ When historical material conflicts with the ratified Standard, active program, c
 
 - Preserve Hermes as the employee runtime and Manager as the authority/effect plane.
 - Use shared connector/capability/work/action contracts rather than bespoke provider UI ontology.
-- Treat MCP, MCP Apps, and AG-UI as interoperability adapters, not execution authority.
+- Treat MCP core, MCP Apps, and AG-UI as bounded interoperability adapters, not execution authority.
 - Keep Web, SMS, and signed Review as role-safe projections of the same durable work.
 - Keep customer-facing, monetary, destructive, credential, and broad external changes behind assignment-aware policy, approval, effects, and receipts.
 - Never promote source, fixture, local PostgreSQL, or ancestor-SHA evidence into a live acceptance state it did not exercise.
