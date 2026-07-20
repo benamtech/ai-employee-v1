@@ -1,0 +1,36 @@
+{
+  "title": "WS-02 15-Dimensional Capability Manifold",
+  "generated_at": "2026-07-20",
+  "dimensions": {
+    "Psi1": "Remote MCP transport negotiation",
+    "Psi2": "MCP App sandbox boundary",
+    "Psi3": "AG-UI rendering surface",
+    "Psi4": "Connector capability manifest",
+    "Psi5": "Effective capability resolution",
+    "Psi6": "Manager-owned authority boundary",
+    "Psi7": "Runtime-native capability dispatch",
+    "Psi8": "OAuth token custody flow",
+    "Psi9": "Transport-neutral adapter contract",
+    "Psi10": "Generated view authority projection",
+    "Psi11": "MCP tool discovery vs. execution split",
+    "Psi12": "AG-UI channel protocol binding",
+    "Psi13": "Connector fail-closed behavior",
+    "Psi14": "Idempotent external effect reservation",
+    "Psi15": "Authority version drift detection"
+  },
+  "utility_weights": {
+    "verified_improvement": 0.3,
+    "information_gain": 0.15,
+    "novelty": 0.1,
+    "coverage": 0.2,
+    "execution_cost": -0.1,
+    "regression_risk": -0.15
+  },
+  "enumeration": {
+    "pairwise": 105,
+    "triple_wise": 357,
+    "total": 462,
+    "triple_rule": "Every triple with at least two direct dependency edges, plus every hazard-bearing triple with at least one direct edge."
+  },
+  "verification_note": "[VERIFIED] means a focused deterministic contract passed on the exact candidate. Source implementation, CI acceptance, live protocol acceptance, and production acceptance remain distinct."
+}
