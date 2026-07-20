@@ -16,9 +16,9 @@ npm run hooks:install
 npm run repo:verify:quick
 ```
 
-Read progressively: root/scoped agent rules and CODEGRAPH, ratified Standard, single active program, newest indexed handoff, then only relevant source/migrations/tests/workflows/proof.
+Read progressively: root/scoped agent rules and CODEGRAPH, ratified Standard, single active program, newest indexed handoff, then only relevant source, migrations, tests, workflows, and proof.
 
-Current production work starts from current `main`. PR `#30` merged WS-01 and provider-authority controls. PR `#31` implements streaming-first Web, Remote MCP authorization contracts, MCP Apps, AG-UI, effective-capability execution custody, and connector evidence for source/CI scope.
+Current production work starts from current `main`. PR `#31` contains the hardened WS-02 source/CI boundary and guarded WS-03 preparation.
 
 ## Required task contract
 
@@ -66,7 +66,9 @@ npm run test:integration
 npm run build
 ```
 
-`Main Integration Gates` is the canonical merge gate. WS-01’s historical closure remains **106 files / 613 tests**. The WS-02 implementation head passed **109 files / 630 tests**. Broad and curated suites are independent evidence lines.
+`Main Integration Gates` is the canonical merge gate. Broad, curated, build, archaeology, browser, database, provider, and live evidence are independently reported.
+
+`test:repo-governance` validates durable structure and cross-file invariants. It must not pin transient workflow run IDs, test counts, implementation SHAs, or status prose. Current evidence values belong in the active program's machine-readable resolution ledger.
 
 ## Non-bypassable invariants
 
@@ -77,7 +79,7 @@ npm run build
 - Remote MCP authorization servers derive from protected-resource metadata; exact resource, redirect, scopes, PKCE, and state are bound.
 - MCP Apps use negotiated `ui://` resources, opaque-origin sandboxing, content hashes, bounded host methods, and current WorkAction intersection.
 - AG-UI state/events are ordered projection, never durable authority.
-- Unknown/stale connector evidence fails closed. Ambiguous provider outcomes reconcile before retry.
+- Unknown or stale connector evidence fails closed. Ambiguous provider outcomes reconcile before retry.
 - Applied migrations are immutable; corrections are forward migrations.
 
 ## Hermes upstream review
