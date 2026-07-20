@@ -12,7 +12,7 @@ const MIGRATION_NAME = /^(\d{4})([a-z]?)_[a-z0-9][a-z0-9_]*\.sql$/;
  * sequence numbers are rejected; these exact sets are preserved by filename
  * and content hash rather than being renumbered or rewritten.
  */
-const APPROVED_HISTORICAL_SEQUENCE_FILES: Readonly<Record<number, readonly string[]>> = Object.freeze({
+const APPROVED_HISTORICAL_SEQUENCE_FILES = Object.freeze({
   31: Object.freeze([
     "0031_public_estimator.sql",
     "0031_runtime_boundary_foundations.sql",
@@ -35,7 +35,7 @@ const APPROVED_HISTORICAL_SEQUENCE_FILES: Readonly<Record<number, readonly strin
   ]),
 });
 
-function sameNames(actual: string[], expected: readonly string[]): boolean {
+function sameNames(actual, expected) {
   return actual.length === expected.length && actual.every((name, index) => name === expected[index]);
 }
 
@@ -65,7 +65,7 @@ export function inspectMigrationLedger(migrationsDir) {
     }
   }
 
-  const byNumber = new Map<number, typeof entries>();
+  const byNumber = new Map();
   for (const entry of entries) {
     const group = byNumber.get(entry.number) ?? [];
     group.push(entry);
