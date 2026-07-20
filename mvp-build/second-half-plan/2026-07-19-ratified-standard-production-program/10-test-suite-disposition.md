@@ -1,8 +1,8 @@
 # Test Suite Disposition
 
-Status: **active test-authority map; WS-01 normalized; WS-02 exact-head repair in progress**  
+Status: **active test-authority map; WS-01 normalized; hardened WS-02 source/CI accepted**  
 WS-01 evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
-Last fully green WS-02 implementation ancestor: `6f792eabe44a9ca1e9635fd4fe5329fa7daca6c4`
+Hardened WS-02 implementation evidence head: `16dc18e0535ac14f867875989dfe5aee596f89c0`
 
 A suite is evidence only for the boundary it exercises.
 
@@ -29,21 +29,23 @@ A suite is evidence only for the boundary it exercises.
 - Three reusable assertions were corrected.
 - **106 test files passed** and **613 tests passed** on the WS-01 implementation head.
 - No skip list or quarantine was introduced.
-- curated and broad results are independently reported.
+- Curated and broad results are independently reported.
 
-## WS-02 regression boundary
+## Hardened WS-02 regression boundary
 
-On ancestor `6f792ea`:
+On implementation head `16dc18e`:
 
-- **109 test files / 630 tests passed**;
-- Remote MCP metadata/audience/PKCE/state/token custody attacks were covered;
-- MCP Apps sandbox/hash/host-method/action projection was covered;
-- AG-UI ordering/scope/finite command and streaming source boundaries were covered;
-- effective capability freshness/authority/entitlement and MCP pre-dispatch interception were covered;
+- **110 test files / 635 tests passed**;
+- Standard/governance `29735429854`, Hermes Review `29735429873`, and Main Integration `29735429859` passed;
+- source/type/lint/contracts, production build, repository archaeology, and compiled Chromium passed;
+- Remote MCP metadata/audience/PKCE/state/token-custody attacks were covered;
+- owner-visible progress isolation was tested across two assignments sharing one employee;
+- MCP Apps sandbox/hash/document-CSP/host-method/action projection was covered;
+- MCP App intents were proven to route through the protocol-action and current Manager assignment/version checks;
+- AG-UI ordering/scope/finite command, stable failure projection, and streaming source boundaries were covered;
+- effective capability freshness/entitlement plus final current assignment-policy/authority-version revalidation was covered;
 - the 15-dimensional generator produced exactly 105 pairs and 357 meaningful triples;
-- production build, archaeology, and compiled Chromium passed.
-
-The current branch adds assignment-scoped progress isolation, protocol assignment/version interception, enforceable iframe CSP, sanitized AG-UI failure output, and final MCP policy/version revalidation. Those additions are not accepted until the final exact head passes the same gate family.
+- no current assertion was weakened to achieve green.
 
 ## Useful but incomplete / environment-gated
 
@@ -62,5 +64,6 @@ No suite is labeled proven flaky without repeatable exact-environment evidence. 
 - Discovery tests cannot substitute for execution tests.
 - Source-order assertions must match invocation boundaries, not imports.
 - Under-scoped generated UI remains display-only instead of manufacturing authority.
-- A started Hermes run may fall back to polling the same run, never silently create another run.
+- A started Hermes run may poll the same run after stream loss, never silently create another run.
+- Unscoped progress producers may not broadcast owner-visible live state.
 - Live release claims require exact external evidence beyond these suites.
