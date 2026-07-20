@@ -30,14 +30,14 @@ Sources:
 
 Disposition: **adopt as interoperability profile**.
 
-Remote protected MCP servers are resource servers. AMTECH clients must use protected-resource metadata and authorization-server discovery rather than guessing endpoints from tool text. Dynamic client registration remains optional/profiled because provider support and registration policy vary.
+Remote protected MCP servers are resource servers. AMTECH clients use protected-resource metadata and authorization-server discovery rather than guessing endpoints from tool text. Dynamic client registration remains optional/profiled because provider support and registration policy vary.
 
 Repository implications:
 
 - preserve internal Manager MCP as the governed employee capability plane;
-- represent direct MCP and Manager-mediated MCP through one capability descriptor;
+- represent direct MCP and Manager-mediated MCP through one descriptor family;
 - keep remote authorization separate from AMTECH assignment authority;
-- add standards metadata to connector manifests before treating a remote MCP connector as native-level.
+- add standards metadata before treating a remote protected MCP connector as native-level.
 
 ### 2. MCP Apps
 
@@ -51,14 +51,9 @@ Disposition: **reorient from generic “MCP-UI” terminology to official MCP Ap
 
 MCP Apps is the official optional MCP UI extension. Tools associate with `ui://` resources; compliant hosts negotiate support, render isolated HTML, enforce CSP/permissions, and mediate JSON-RPC communication.
 
-AMTECH does not replace `SurfaceEnvelope`, `WorkResource`, `WorkAction`, approval, or effect contracts with MCP Apps. MCP Apps becomes one rendering adapter and one possible server-supplied interaction surface.
+AMTECH does not replace `SurfaceEnvelope`, `WorkResource`, `WorkAction`, approval, or effect contracts with MCP Apps. MCP Apps is one rendering adapter and one possible server-supplied interaction surface.
 
-Current `McpUiResource.tsx` and generated-view machinery remain useful, but naming and protocol claims distinguish:
-
-- AMTECH generated views;
-- legacy or compatible MCP-UI implementations;
-- official MCP Apps;
-- host capability negotiation.
+Current `McpUiResource.tsx`, `ui-resources.ts`, and generated-view machinery remain useful compatibility groundwork, but current source does not yet establish complete MCP Apps negotiation/lifecycle conformance.
 
 ### 3. AG-UI
 
@@ -71,7 +66,7 @@ Sources:
 
 Disposition: **adopt as optional agent↔user transport adapter, not authority or UI schema**.
 
-AG-UI defines event-based agent/user interaction, including run lifecycle, streamed messages/tool calls, activity, and state snapshot/delta synchronization. AG-UI explicitly is not itself a generative UI specification.
+AG-UI defines event-based agent/user interaction, including run lifecycle, streamed messages/tool calls, activity, and state snapshot/delta synchronization. AG-UI is not itself a generative UI specification.
 
 AMTECH's strict snapshot/SSE and typed event system contain analogous concepts. The production direction is a versioned adapter and conformance matrix, not replacement of durable Manager state or an immediate rewrite.
 
@@ -100,9 +95,9 @@ Required baseline:
 - no arbitrary return redirects;
 - no inferred authorization endpoint for unknown providers.
 
-Resource metadata, rich authorization requests, PAR, and DPoP are preferred when provider and operating environment support them. The Standard does not falsely claim these mechanisms are universal.
+Resource metadata, rich authorization requests, PAR, DPoP, and sender-constrained tokens are preferred when provider and operating environment support them. The Standard does not falsely claim universal support.
 
-The code implication is a declarative setup manifest supporting OAuth, provider-managed onboarding, managed secrets/service accounts, direct read-only MCP, and operator-managed installation. Gmail and QuickBooks are adapters, not the ontology. Stripe uses provider-managed Connect onboarding and must not be mislabeled as OAuth.
+The code implication is one declarative managed setup manifest supporting OAuth, provider-hosted onboarding, managed secrets/service accounts, direct read-only MCP, and operator-managed installation. Gmail, QuickBooks, and Stripe are adapters rather than the ontology.
 
 ### 5. NIST AI RMF and Generative AI Profile
 
@@ -123,7 +118,7 @@ Source:
 
 Disposition: **adopt as a threat-model checklist**.
 
-The current architecture directly addresses several high-impact classes:
+The architecture addresses:
 
 - goal hijacking: external content is data, not authority;
 - tool misuse: capability/effect bounds and approval;
@@ -143,7 +138,7 @@ Sources:
 
 Disposition: **adopt outcome-oriented secure-development practices**.
 
-The company task contract, branch discipline, self-verification, threat modeling, secure defaults, provenance, vulnerability response, and artifact integrity align with SSDF outcomes. SSDF 1.2 remains draft at ratification and is not named as a final requirement.
+The task contract, branch discipline, self-verification, threat modeling, secure defaults, provenance, vulnerability response, and artifact integrity align with SSDF outcomes. SSDF 1.2 remains draft at ratification and is not named as a final requirement.
 
 ### 8. SLSA and attestations
 
@@ -169,24 +164,36 @@ Disposition: **adopt stable conventions through a versioned adapter; do not make
 
 AMTECH's durable audit/proof records remain authoritative. OTel spans, metrics, and logs provide interoperable operational telemetry. Evolving GenAI conventions require version pinning and adapter ownership.
 
+### 10. PostgreSQL and Supabase testing
+
+Sources:
+
+- Supabase local development: `https://supabase.com/docs/guides/local-development`
+- Supabase database testing: `https://supabase.com/docs/guides/database/testing`
+- Supabase testing overview: `https://supabase.com/docs/guides/testing`
+
+Disposition: **use an evidence ladder rather than a permanent live-database dependency**.
+
+Production-shaped local/CI PostgreSQL is the routine migration, RLS, grant, function, concurrency, and negative-isolation loop. Disposable managed Supabase remains required when Auth, Realtime, Storage, Data API, advisors, security-sensitive platform behavior, or final release-candidate integration is material. Production is never the routine test target.
+
 ## Repository findings that changed the Standard
 
 ### Connector architecture
 
-`packages/shared/src/connector-registry.ts` already provides the correct baseline:
+The repository already had the right high-level direction but contained two enforcement leaks:
 
-- arbitrary connectors are representable;
-- unknown connectors default to Manager mediation;
-- custody derives from write/money/customer-facing risk;
-- only explicit read-only connectors may use direct MCP.
+1. `packages/shared/src/connector-registry.ts` described direct MCP as default-deny while `renderableDirectMcpConnectors` converted omitted risk flags to `false`, allowing underspecified connectors to appear read-only.
+2. `apps/manager/src/lib/capability-registry.ts` and `tool-capability-catalog.ts` inferred provider identity/readiness from broad categories such as `communication` and `accounting`.
 
-The lost abstraction was concentrated in owner setup:
+Gate 0 closes both:
 
-- `packages/shared/src/connector-setup.ts` listed only Gmail and QuickBooks OAuth;
-- `CapabilityDrawer.tsx` inferred those providers from category/tool-name substrings;
-- Web and Manager setup routes expected one OAuth consent URL shape.
+- every direct-MCP risk axis must be explicitly false;
+- native connector setup declares exact managed tool ownership and readiness evidence;
+- capability status and connector binding resolve through the shared manifest;
+- categories remain presentation/task grouping, never provider identity;
+- unknown or underspecified connectors remain discoverable but fail closed.
 
-The v0.2 implementation replaces that provider whitelist with a managed connector setup descriptor while retaining fail-closed provider adapters.
+The owner setup path now uses one managed connector descriptor across OAuth and provider-hosted onboarding. Browser and Manager routes consume descriptor-bound tools, hosts, proof fields, permissions, and continuation rather than inventing a provider flow.
 
 ### Database proof
 
@@ -195,8 +202,9 @@ The original real-Supabase clause was directionally correct but too easy to oper
 Ratified interpretation:
 
 - local/CI production-shaped PostgreSQL is the TDD inner loop;
-- real disposable Supabase is a release/staging boundary for platform-specific behavior, security-sensitive Data API/Auth/RLS changes, new migration classes, and final release acceptance;
-- neither substitutes for the other.
+- disposable managed Supabase is a platform-specific and release-candidate gate;
+- neither substitutes for the other;
+- production is never used for routine test mutation.
 
 ### Runtime image
 
@@ -206,9 +214,11 @@ The original Standard named an obsolete Hermes image. Current source and accepta
 
 - **“MCP Apps replaces AMTECH work objects.”** Rejected. It is a UI extension, not durable labor authority.
 - **“AG-UI is a generated UI schema.”** Rejected by AG-UI's own documentation.
-- **“Every connector should be direct MCP.”** Rejected. Consequential connectors require Manager custody.
-- **“Every provider must literally use OAuth.”** Rejected. Stripe Connect onboarding, service accounts, API keys, and operator installation must be represented honestly under one setup protocol.
-- **“Green local PostgreSQL removes the real database gate.”** Rejected. It changes frequency and purpose, not the release requirement.
+- **“Every connector should be direct MCP.”** Rejected. Consequential and unknown connectors require Manager custody.
+- **“Omitted connector risk flags mean safe.”** Rejected. Missing metadata is uncertainty and fails closed.
+- **“A capability category identifies a provider.”** Rejected. Category is not identity, scope, host, credential, or account binding.
+- **“Every provider must literally use OAuth.”** Rejected. Provider onboarding, service accounts, API keys, and operator installation must be represented honestly.
+- **“Green local PostgreSQL removes the managed-platform gate.”** Rejected. It changes frequency and purpose, not platform/release requirements.
 - **“Research framework reference means compliance.”** Rejected. Each reference is a profile/crosswalk unless independently audited.
 - **“A vector score can waive authority or safety.”** Rejected. Hard gates remain Boolean.
 
@@ -216,8 +226,8 @@ The original Standard named an obsolete Hermes image. Current source and accepta
 
 The original Standard's core product direction is retained. v0.2:
 
-- satisfies and operationalizes the identity, assignment, authority, effect, proof, and recovery ontology;
-- expands connector/protocol and engineering-method requirements;
-- narrows overbroad database-testing and cryptographic wording;
-- reorients MCP-UI, OAuth, and supply-chain assumptions to current standards;
+- satisfies and operationalizes identity, assignment, authority, effect, proof, and recovery;
+- expands connector/protocol, engineering-method, database-evidence, and supply-chain requirements;
+- narrows overbroad live-database and cryptographic wording;
+- reorients MCP-UI, OAuth, AG-UI, and supply-chain assumptions to current standards;
 - records zero unapproved destructive modifications.
