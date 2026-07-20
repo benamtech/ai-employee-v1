@@ -1,47 +1,57 @@
 # 09 — Current Bug, Risk, and Production-Gap Register
 
 Status: **current architecture summary; scored execution authority lives in the active program**  
-Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`  
-Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`  
+Current baseline: `main@816aae325401a8d8d4bc7ffe90e8f241eb977ba8`  
+Implementation evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
 Migration head: `0072`  
 Updated: 2026-07-20
 
-This architecture document summarizes the source-backed production gap shape. Exact issue scores, dependencies, affected boundaries, evidence coordinates, acceptance tests, prerequisites, stop conditions, and completion definitions are maintained in the sole active program:
+This document summarizes the source-backed production gap shape. Exact baseline scores, dependencies, evidence, acceptance tests, prerequisites, stop conditions, completion definitions, and current resolutions are maintained in the sole active program:
 
 - [`../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json`](../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json)
-- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.md)
+- [`../../second-half-plan/2026-07-19-ratified-standard-production-program/13-resolution-ledger.json`](../../second-half-plan/2026-07-19-ratified-standard-production-program/13-resolution-ledger.json)
 - [`../../second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md)
 - [`../../second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md`](../../second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md)
-
-The predecessor version of this file correctly identified many runtime, commercial, and UX trajectories but carried stale current-state metadata, including migration head `0069` and an older production-ledger coordinate. Those coordinates are superseded by current source and the active program. Historical implementation facts remain in Git history and indexed handoffs.
 
 ## Current verdict
 
 **Not production-ready and not controlled-pilot ready.**
 
-PR `#23` merged the ratified cutover into `main`. Final cutover head `d131dd09` passed the named Ratified Standard, Hermes upstream, and Main Integration workflows. That proves the declared source/document/curated-CI boundary only.
+WS-01 is complete for repository/test source-and-CI scope. Implementation head `1460960` passed Ratified Standard, Hermes upstream, and Main Integration workflows, including 106 broad test files and 613 tests, production build, archaeology, and compiled Chromium fixtures.
 
-The broad `npm run test:unit` aggregate remains red on the final cutover head. PR `#23` records 30 files and 112 failed tests caused by pre-ratification assignment, principal, fake-RPC, and environment fixtures. This is explicit Phase 1.1 work; the curated green gate is not broader proof.
+The WS-02 provider-authority manufacture surface is source/CI locked. That does not establish remote MCP authorization, MCP Apps/AG-UI conformance, persisted effective-capability truth, live connector lifecycle, target-host, or provider acceptance.
 
 ## Dependency-critical gap clusters
 
-### WS-01 — Repository authority and test-contract truth
+### WS-01 — Repository authority and test-contract truth — source/CI resolved
 
-- post-merge authority documents still described PR `#23` as a draft cutover before this transaction;
-- active evidence matrices cited ancestor Gate 0 head `4be092f` rather than final cutover head `d131dd09` and current `main` merge coordinate;
-- broad unit aggregate is red while the main merge gate composes selected current suites;
-- no prior single test-disposition map classified current, incomplete, stale/migrating, overlapping, blocked, or unusable evidence.
+Resolved controls:
 
-This is the first dependency because false repository/test truth corrupts every downstream completion claim.
+- current authority documents route work from reviewed branches based on current `main`;
+- Main Integration requires the broad aggregate as an independent job;
+- `test:unit` builds shared/database workspace dependencies before Vitest;
+- obsolete pre-assignment/account-owned/direct-provider suites were deleted atomically rather than skipped;
+- reusable assertions were repaired to current capability, topology, and managed-connector contracts;
+- 106 test files / 613 tests passed on implementation evidence head `1460960`;
+- broad, curated, browser-fixture, database, provider, and live evidence remain distinct.
 
-### WS-02 — Connector, remote MCP, MCP Apps, AG-UI, and capability truth
+### WS-02 — Connector, remote MCP, MCP Apps, AG-UI, capability, and provider authority
 
-- native connector identity/setup/custody contracts are source-wired;
-- protected remote MCP metadata/authorization profile is not implemented and accepted;
-- official MCP Apps negotiation, `ui://` resource retrieval, sandbox/CSP/permission contract, bounded JSON-RPC bridge, and assignment-scoped action intersection are incomplete;
-- AG-UI lacks a complete versioned role-safe replay/reconnect adapter;
-- effective capability truth is not persisted as one hash-bound intersection;
-- live authorization, health, staleness, revocation, scope-change, outage, repair, and deletion proof remain open.
+Source/CI control now present:
+
+- runtime callers use only the stable AMTECH model alias;
+- Manager-owned registered profiles resolve provider identity, endpoint, master API key, and upstream model;
+- caller-supplied provider/profile/model/endpoint/header/token/credential/routing fields fail before dispatch and are audited;
+- signed gateway claims must match the current durable credential policy;
+- legacy unbound production routes remain absent.
+
+Still open:
+
+- protected remote MCP metadata/authorization profile;
+- official MCP Apps negotiation, `ui://` retrieval, sandbox/CSP/permission contract, bounded JSON-RPC bridge, and assignment-scoped action intersection;
+- complete versioned role-safe AG-UI replay/reconnect adapter;
+- one persisted hash-bound effective-capability intersection;
+- live authorization, health, staleness, revocation, scope-change, outage, repair, and deletion proof.
 
 ### WS-03 — Database authority and platform proof
 
@@ -76,7 +86,7 @@ Current executable source confirms three high-centrality defects:
 
 1. `apps/manager/src/lib/model-gateway.ts` stores rate buckets in a process-local `Map`, so restart resets limits and replicas multiply authority.
 2. Gateway policy only rejects `spend_limit_cents <= 0`; it does not atomically reserve and settle cumulative spend before provider dispatch.
-3. `apps/manager/src/lib/model-gateway-http.ts` retries provider transport/time-out exceptions without a generic upstream idempotency contract and records exhausted attempts as failed/provider-unavailable rather than durable ambiguous.
+3. `apps/manager/src/lib/model-gateway-http.ts` still retries provider transport/time-out exceptions without a generic upstream idempotency contract and records exhausted attempts as failed/provider-unavailable rather than durable ambiguous.
 
 Payer, beneficiary, assignment, price snapshot, entitlement, usage, cost, invoice, credit/refund, suspension, and reactivation also lack final exact-candidate reconciliation acceptance.
 
@@ -105,15 +115,17 @@ Current source includes controls for previously identified defects:
 - Manager/Model Gateway membership in employee networks with teardown support;
 - strict Manager MCP/business-brain/operating-surface reads;
 - Web rejection of successful Manager responses missing `operating_state`;
-- cleanup of tracked generated/orphaned repository artifacts.
+- cleanup of tracked generated/orphaned repository artifacts;
+- trustworthy broad unit execution and required CI gating;
+- Manager-only model provider routing and credential custody.
 
-These are source/CI controls, not target-host or live acceptance. Their live DNS/TLS/network/reload/isolation/recovery behavior remains part of WS-04 and later exact-candidate evidence.
+These are source/CI controls, not target-host or live acceptance.
 
 ## Non-bugs retained by design
 
 - fixture mode remains useful for UI development but cannot satisfy live acceptance;
 - the public estimator remains separated and non-canonical;
-- Manager, not Hermes or generated UI, owns assignment/effect authority;
+- Manager, not Hermes or generated UI, owns assignment/effect/provider authority;
 - owner reads do not create command/effect rows solely for observation;
 - internal employee bridges intentionally deny arbitrary direct Internet access;
 - process-local SSE events are liveness hints; strict snapshots and durable receipts remain truth;
@@ -124,8 +136,7 @@ These are source/CI controls, not target-host or live acceptance. Their live DNS
 Follow the active roadmap in dependency order:
 
 ```text
-Phase 1.1 repository/test truth
-→ 1.2 protocols/capabilities
+remaining Phase 1.2 protocols/capabilities/connectors
 → 1.3 database
 → 1.4 secrets/runtime
 → 1.5 fixture-free owner/channels
@@ -138,4 +149,4 @@ Phase 1.1 repository/test truth
 → measured expansion
 ```
 
-A row leaves the active issue vector only when source, tests, exact-head CI, and the required database/runtime/provider/browser/commercial/recovery/deployment evidence agree.
+A baseline issue is marked resolved only in the resolution ledger when source, tests, exact-head CI, and the evidence class actually required for that issue agree.
