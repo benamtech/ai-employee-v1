@@ -56,7 +56,8 @@ describe("employee snapshot strict reads", () => {
     expect(generator).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
     expect(generator).toContain("fetchWorkEventsSinceStrict as fetchWorkEventsSince");
     expect(operatingRoutes).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
-    expect(operatingRoutes).toContain("buildOperatingSurfaceState(strictSnapshotClient(db), snapshot)");
+    expect(operatingRoutes).toContain("buildToolCapabilityCatalog(strictSnapshotClient(db), snapshot)");
+    expect(operatingRoutes).toContain("buildOperatingSurfaceState(strictSnapshotClient(db), enriched)");
     expect(previews).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
     expect(mcp).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
     expect(brain).toContain('"business_brain.employee"');
