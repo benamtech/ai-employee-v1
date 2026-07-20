@@ -36,10 +36,14 @@ describe("destructive Docker fail-closed classifier", () => {
     expect(() => new DestructiveDockerFailure(evidence)).not.toThrow();
   });
 
-  it("classifies timeout and missing exit status as ambiguous", () => {
+  it("classifies timeout, signal termination, and missing exit status as ambiguous", () => {
     expect(classifyDestructiveDockerObservation(spec, observed({ timed_out: true, exit_code: null, stdout: "" }))).toMatchObject({
       outcome: "ambiguous",
       failure_state: "docker_destructive_timeout",
+    });
+    expect(classifyDestructiveDockerObservation(spec, observed({ signal: "SIGKILL", exit_code: null, stdout: "" }))).toMatchObject({
+      outcome: "ambiguous",
+      failure_state: "docker_destructive_signal_termination",
     });
     expect(classifyDestructiveDockerObservation(spec, observed({ exit_code: null, stdout: "" }))).toMatchObject({
       outcome: "ambiguous",
