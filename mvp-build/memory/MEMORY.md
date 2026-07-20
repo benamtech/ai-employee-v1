@@ -8,15 +8,14 @@ This folder is the versioned narrative handoff layer. `MEMORY.md` is the sole in
 ## Current branch note
 
 - New work starts on reviewed branches from current `main`.
-- Merged baseline: current `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`.
-- PR `#31` is the current reviewed WS-02 branch and is not merged at this document transaction.
+- Merged baseline: current `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`.
+- PR `#31` merged on 2026-07-20. Final WS-02 exact evidence head: `e43f70a0e9a3afd4b87880b9d22089e6da2e94d0`.
 - WS-01 evidence: `1460960f415fafc20582313b1dd2117b781a63f7`, broad 106/613.
-- Hardened WS-02 implementation evidence: `16dc18e0535ac14f867875989dfe5aee596f89c0`.
-- Exact implementation workflows: Standard `29735429854`, Hermes `29735429873`, Main Integration `29735429859`.
-- Broad current aggregate: **110 files / 635 tests**. Migration head: `0072`. Standard: ratified v0.2.
+- Final PR #31 workflows: Standard `29737033305`, Hermes `29737033258`, Main Integration `29737033205`.
+- Broad final WS-02 aggregate: **110 files / 635 tests**. Migration head: `0072`. Standard: ratified v0.2.
 - Source/CI accepted: WS-01, provider authority, assignment-scoped streaming Web, remote MCP auth/custody, MCP Apps CSP/host mediation, AG-UI, persisted effective capability, and final MCP policy/version execution revalidation.
 - Remaining WS-02: live connector/provider lifecycle and external protocol-host evidence (`ISS-011`).
-- WS-03 P0 is prepared in active-program documents `17` and `18`, but implementation has not started.
+- WS-03 P0 is active on `agent/ws03-database-authority-p0`; DB-P0-01 ledger/hash preflight is the only admitted first step.
 - Current source/CI must not be promoted into managed database, target host, fixture-free channel, commercial, recovery, deployment, pilot, or production acceptance.
 
 ## Read order
