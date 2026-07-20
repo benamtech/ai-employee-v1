@@ -17,7 +17,7 @@ const result = run("node", ["infra/scripts/acceptance/verify-worker-migrations.m
 assert(result.output.includes("worker_migrations_verified"), "migration_verifier_missing_success_marker");
 
 const files = (await readdir(migrationsDir))
-  .filter((file) => /^\d{4}_.+\.sql$/.test(file))
+  .filter((file) => /^\d{4}[a-z]?_.+\.sql$/.test(file))
   .sort()
   .filter((file) => file.slice(0, 4) >= migrationStart && file.slice(0, 4) <= migrationHead);
 assert(files.length > 0, "migration_proof_range_empty", { migrationStart, migrationHead });
