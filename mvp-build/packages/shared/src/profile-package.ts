@@ -118,6 +118,7 @@ export interface ProvisionerRequest {
 
 export interface ProvisionerResult {
   status: "ok" | "failed";
+  outcome?: "accepted" | "failed" | "ambiguous";
   request_id?: string;
   operation?: ProvisionerOperation;
   idempotent_replay?: boolean;
@@ -142,5 +143,6 @@ export interface ProvisionerResult {
   failure_state?: string;
   logs?: string[];
   drift?: Record<string, unknown>;
+  evidence?: Record<string, unknown>;
   model_gateway_credential_version?: number;
 }
