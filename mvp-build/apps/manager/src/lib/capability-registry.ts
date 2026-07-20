@@ -5,26 +5,18 @@ import {
   custodyFor,
   getToolSchema,
   hasExplicitToolSchema,
-  knownConnectors,
   newId,
   resolveConnectorMeta,
+  resolveManagedSetupForCapability,
   type AbilitySummary,
   type CapabilityCategory,
   type CapabilityGraphNode,
   type CapabilityStatus,
+  type OwnerManagedConnectorSetup,
   type RuntimeHealthSummary,
   type ToolName,
 } from "@amtech/shared";
 import type { EmployeeSnapshot } from "./employee-stream.js";
-
-/**
- * CE-4: categories that are backed by a real connector, derived from the shared
- * connector registry (not hardcoded here). A tool in one of these categories routes
- * to its connector's status instead of a per-tool substring branch, so adding a
- * connector is data, not a code branch. `money` (Stripe) is handled specially
- * because its connection state lives in `stripe_connections`, not `connector_accounts`.
- */
-const CONNECTOR_BACKED_CATEGORIES = new Set<CapabilityCategory>(knownConnectors().map((c) => c.category));
 
 const MANAGER_TOOL_META: Partial<Record<ToolName, { category: CapabilityCategory; label: string; summary: string }>> = {
   send_phone_verification: { category: "office", label: "Verify owner phone", summary: "Confirm the owner can receive and approve work by phone." },
@@ -94,10 +86,14 @@ function runtimeStatus(runtime: RuntimeHealthSummary): CapabilityStatus {
   return "needs_info";
 }
 
-function connectorStatus(snapshot: EmployeeSnapshot, provider: string): CapabilityStatus {
-  const c = snapshot.connectors.find((row) => row.provider === provider || row.connector_key === provider);
-  if (!c) return "needs_connection";
-  return c.status === "connected" || c.status === "active" || c.status === "ok" ? "ready" : "needs_connection";
+function connectorStatus(snapshot: EmployeeSnapshot, connectorKey: string): CapabilityStatus {
+  const connector = snapshot.connectors.find((row) => {
+    const providerMeta = resolveConnectorMeta(row.provider);
+    const keyMeta = resolveConnectorMeta(row.connector_key);
+    return providerMeta.key === connectorKey || keyMeta.key === connectorKey;
+  });
+  if (!connector) return "needs_connection";
+  return ["connected", "active", "ok", "ready"].includes(connector.status) ? "ready" : "needs_connection";
 }
 
 function stripeStatus(snapshot: EmployeeSnapshot): CapabilityStatus {
@@ -106,30 +102,35 @@ function stripeStatus(snapshot: EmployeeSnapshot): CapabilityStatus {
   return "needs_connection";
 }
 
-function statusForTool(name: ToolName, snapshot: EmployeeSnapshot, runtime: RuntimeHealthSummary): CapabilityStatus {
-  // CE-4: route by the tool's CATEGORY (from MANAGER_TOOL_META) to its connector's
-  // status, via the shared registry — no per-tool substring branches. A tool's
-  // category is stable data; the connector for that category comes from the registry.
-  const category = MANAGER_TOOL_META[name]?.category;
-  if (category && CONNECTOR_BACKED_CATEGORIES.has(category)) {
-    // `money` connection state lives in `stripe_connections` (charges_enabled), not
-    // `connector_accounts`, so it keeps its dedicated status resolver.
-    if (category === "money") return stripeStatus(snapshot);
-    const meta = knownConnectors().find((c) => c.category === category);
-    if (meta) return connectorStatus(snapshot, meta.key);
-  }
-  if (runtime.status === "unhealthy" && !["connect_email", "request_approval", "resolve_approval"].includes(name)) return "degraded";
-  return hasExplicitToolSchema(name) ? "ready" : "needs_info";
+function managedConnectorStatus(snapshot: EmployeeSnapshot, setup: OwnerManagedConnectorSetup): CapabilityStatus {
+  // Why: readiness-source branching describes durable storage shape, not vendor
+  // identity. New adapters choose a declared evidence source in the manifest.
+  if (setup.readiness_source === "stripe_connections") return stripeStatus(snapshot);
+  if (setup.readiness_source === "connector_accounts") return connectorStatus(snapshot, setup.key);
+  return "needs_connection";
 }
 
-function setupFor(status: CapabilityStatus, category: CapabilityCategory): string | null {
-  if (status === "needs_connection" && category === "communication") return "Connect Gmail.";
-  if (status === "needs_connection" && category === "money") return "Finish Stripe onboarding.";
-  if (status === "needs_connection" && category === "accounting") return "Connect QuickBooks.";
+function setupFor(status: CapabilityStatus, name: ToolName | null, category: CapabilityCategory): string | null {
+  if (status === "needs_connection" && name) {
+    const setup = resolveManagedSetupForCapability({ tool_name: name, category });
+    if (setup) return setup.setup_flow === "provider_onboarding_redirect"
+      ? `Finish ${setup.label} setup.`
+      : `Connect ${setup.label}.`;
+  }
   if (status === "needs_info") return "Capability is listed but needs a live runtime/schema proof before autonomous use.";
   if (status === "degraded") return "Runtime health is degraded; Manager can still prepare safe work.";
   if (status === "unavailable") return "Runtime is unavailable.";
   return null;
+}
+
+function statusForTool(name: ToolName, snapshot: EmployeeSnapshot, runtime: RuntimeHealthSummary): CapabilityStatus {
+  const category = MANAGER_TOOL_META[name]?.category;
+  const setup = resolveManagedSetupForCapability({ tool_name: name, category });
+  // Why: exact manifest tool ownership prevents a broad category such as
+  // `accounting` from silently selecting one provider's credentials or status.
+  if (setup) return managedConnectorStatus(snapshot, setup);
+  if (runtime.status === "unhealthy" && !["request_approval", "resolve_approval"].includes(name)) return "degraded";
+  return hasExplicitToolSchema(name) ? "ready" : "needs_info";
 }
 
 export function buildCapabilityRegistry(snapshot: EmployeeSnapshot): CapabilityGraphNode[] {
@@ -143,7 +144,7 @@ export function buildCapabilityRegistry(snapshot: EmployeeSnapshot): CapabilityG
     summary: runtime.message,
     category: "system",
     status: runtimeStatus(runtime),
-    setup_requirement: setupFor(runtimeStatus(runtime), "system"),
+    setup_requirement: setupFor(runtimeStatus(runtime), null, "system"),
     trust_level: "runtime",
     can_run_now: runtimeStatus(runtime) === "ready" || runtimeStatus(runtime) === "degraded",
     sources: ["runtime_health"],
@@ -167,7 +168,7 @@ export function buildCapabilityRegistry(snapshot: EmployeeSnapshot): CapabilityG
       summary: meta.summary,
       category: meta.category,
       status,
-      setup_requirement: setupFor(status, meta.category),
+      setup_requirement: setupFor(status, name, meta.category),
       trust_level: "manager_mcp",
       can_run_now: status === "ready" || status === "policy_gated",
       sources: ["manager_tool", "manager_mcp", "policy"],
@@ -178,15 +179,13 @@ export function buildCapabilityRegistry(snapshot: EmployeeSnapshot): CapabilityG
   // CE-4: generic connector nodes. Any connector present on the employee that the
   // registry does not recognize (an arbitrary MCP connector) still appears in the
   // capability graph — derived from its metadata (category, connected state, custody),
-  // with ZERO per-tool code. Known Manager-mediated connectors (gmail/stripe/qbo)
-  // already have rich tool nodes above, so they are skipped here; known read-only
-  // direct-MCP connectors still get generic connector nodes. Mirrors
-  // `customConnectionSurface`.
+  // with ZERO per-tool code. Known Manager-mediated native adapters already have rich
+  // tool nodes above; explicitly read-only direct-MCP connectors remain generic.
   const genericConnectorNodes: CapabilityGraphNode[] = (snapshot.connectors ?? []).flatMap((connector) => {
     const meta = resolveConnectorMeta(connector.provider || connector.connector_key);
     const directMcp = custodyFor(meta) === "direct_mcp";
     if (meta.known && !directMcp) return [];
-    const status = connectorStatus(snapshot, connector.provider || connector.connector_key);
+    const status = connectorStatus(snapshot, meta.key);
     return [{
       id: newId(ID_PREFIX.capabilityNode),
       account_id: snapshot.account_id,
