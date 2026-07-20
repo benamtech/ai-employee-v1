@@ -12,6 +12,7 @@ export interface WorkStreamAssignmentScope {
   assignment_id: string;
   account_id: string;
   employee_id: string;
+  authority_version: string;
 }
 
 export type WorkStreamEvent =
