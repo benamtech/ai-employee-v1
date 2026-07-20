@@ -32,9 +32,9 @@ describe("target-host production topology acceptance", () => {
     expect(harness).toContain("employee B changed during A teardown");
   });
 
-  it("binds staging migration proof to the complete current migration range through head 0069", async () => {
+  it("binds staging migration proof to the complete current migration range through head 0072", async () => {
     const proof = await source("infra/scripts/acceptance/migration-staging-live-proof.mjs");
-    expect(proof).toContain('const migrationHead = "0069"');
+    expect(proof).toContain('const migrationHead = "0072"');
     expect(proof).toContain("readdir");
     expect(proof).toContain("migration_head: migrationHead");
     expect(proof).toContain("migration_count: migrations.length");
