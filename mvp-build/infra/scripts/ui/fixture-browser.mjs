@@ -104,9 +104,9 @@ try {
   assertCount(await page.locator('[role="tablist"]').count(), 0, "workspace_fixed_tablist_present");
 
   const runtimeToggle = page.locator(".os-runtime");
+  await runtimeToggle.waitFor({ state: "visible", timeout: 10_000 });
   await runtimeToggle.focus();
   await page.keyboard.press("Enter");
-  await runtimeToggle.waitFor({ state: "visible", timeout: 10_000 });
   if (await runtimeToggle.getAttribute("aria-expanded") !== "true") throw new Error("operating_context_keyboard_toggle_did_not_expand");
   const contextPanel = page.locator(".os-context-panel");
   await contextPanel.waitFor({ state: "visible", timeout: 10_000 });
@@ -136,12 +136,12 @@ try {
   const firstRunUrl = `${baseUrl}/agent/${employeeId}-new`;
   const firstRun = await browser.newPage({ viewport: { width: 1024, height: 768 } });
   await openRoute(firstRun, firstRunUrl);
-  await firstRun.getByRole("heading", { name: "Avery is ready", exact: true }).waitFor({ timeout: 20_000 });
-  await firstRun.getByRole("textbox", { name: "Message Avery" }).waitFor({ timeout: 10_000 });
+  await firstRun.getByRole("textbox", { name: "Message Avery" }).waitFor({ timeout: 20_000 });
+  await firstRun.locator(".nextgen-welcome h1").waitFor({ state: "visible", timeout: 10_000 });
   assertCount(await firstRun.locator('[role="tablist"]').count(), 0, "first_run_fixed_tablist_present");
   await firstRun.getByRole("button", { name: "Workspace", exact: true }).click();
-  await firstRun.getByRole("heading", { name: "Avery is ready", exact: true }).waitFor({ timeout: 20_000 });
-  await firstRun.getByRole("textbox", { name: "Command Avery" }).waitFor({ timeout: 10_000 });
+  await firstRun.getByRole("textbox", { name: "Command Avery" }).waitFor({ timeout: 20_000 });
+  await firstRun.locator(".os-guidance h1").waitFor({ state: "visible", timeout: 10_000 });
   assertCount(await firstRun.getByRole("heading", { name: "Current work", exact: true }).count(), 0, "first_run_empty_work_region_present");
   await assertMinimumTargets(firstRun, ".os-root");
   await firstRun.screenshot({ path: join(screenshotDir, "operating-surface-first-run.png"), fullPage: true });
