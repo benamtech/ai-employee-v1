@@ -67,7 +67,7 @@ const streamBlock = source.slice(streamStart, streamEnd);
 if (streamBlock.includes('c.req.query("owner_session_token")')) {
   throw new Error("production_server_stream_query_token_forbidden");
 }
-for (const marker of ["authority_versions", "streamScope", "authority_version", "assistant_delta", "run_completed"]) {
+for (const marker of ["authority_versions", "streamScope", "authority_version", "const event = p.kind", "...streamScope, ...p"]) {
   if (!source.includes(marker)) throw new Error(`production_server_stream_marker_missing:${marker}`);
 }
 await writeFile(outputPath, source, "utf8");
