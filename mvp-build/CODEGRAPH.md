@@ -1,12 +1,13 @@
 # CODEGRAPH.md — AMTECH AI Employee build map
 
 Status: active  
-Updated: 2026-07-20  
+Updated: 2026-07-19  
 Active branch: `employee-production-tuesday` → draft PR `#23` → base `research`  
 Migration head: `0072`  
-Complete green predecessor evidence anchor: `55e094e6bffc9f544ecf5fc2e366323c6619feb7`
+Standard: v0.2 ratified and effective  
+Active program: `second-half-plan/2026-07-19-ratified-standard-production-program/`
 
-This CODEGRAPH synchronization commit is documentation-only and does not automatically inherit the predecessor anchor's workflow matrix. The current exact-head workflow IDs and conclusions belong in PR `#23` after the matrix reruns.
+Exact current-head workflow IDs and conclusions belong in PR `#23` and the newest indexed memory handoff after branch movement stops. Documentation commits do not inherit an ancestor's workflow matrix.
 
 ## Mandatory cold start
 
@@ -15,30 +16,39 @@ This CODEGRAPH synchronization commit is documentation-only and does not automat
 3. root `../CODEGRAPH.md`
 4. scoped `AGENTS.md` or `CLAUDE.md`
 5. this file
-6. `memory/MEMORY.md`
-7. `memory/2026-07-20-capability-surface-ci-closure-and-next-plan.md`
-8. `STANDARD.md`
-9. `second-half-plan/phase-2-standard-remediation-execution.md`
-10. `second-half-plan/2026-07-20-capability-production-closure/README.md` when working on capability/owner-surface closure
-11. `docs/architecture/README.md`
-12. `docs/architecture/11-agent-orientation-and-role-map.md`
-13. `docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md`
-14. relevant UX docs, source, migrations, scripts, workflows, tests, proof, and current diff
+6. ratified `STANDARD.md`
+7. `second-half-plan/README.md` and its active program
+8. `memory/MEMORY.md`, then the newest relevant handoff
+9. `docs/architecture/README.md`
+10. `docs/architecture/16-standard-research-basis-and-protocol-disposition.md`
+11. relevant UX docs, source, migrations, scripts, workflows, tests, proof, and current diff
 
-Authority order: applied migrations/current source → generated production source/deploy config → exact-SHA executable proof → Standard/active plan → CODEGRAPH/architecture → newest memory → historical records.
+Authority order: deployed release-bound proof → applied migrations/durable state → generated production source/deploy config → exact-SHA executable proof → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
 ## Product and control-plane boundary
 
-AMTECH installs persistent AI Employees for owner-operated businesses. The owner experiences one employee through governed Web, SMS, signed Review, and connected-system events.
+AMTECH installs persistent AI Employees for owner-operated businesses.
 
-- **Hermes** owns reasoning/execution, sessions/runs, transcript continuity, memory, runtime-local behavior, recovery, and rotation.
-- **Manager** owns identity, assignment authority, context resources, tool schemas, connector/credential custody, approval, durable command/effect, commercial attribution, revocation, repair, and release proof.
+- **Hermes** owns reasoning/execution, sessions/runs, transcript continuity, runtime-local memory/behavior, recovery, and rotation.
+- **Manager** owns identity, assignment authority, context resources, tool/capability contracts, connector/credential custody, approval, durable command/effect, commercial attribution, revocation, repair, and release proof.
 - **Model Gateway** owns employee-scoped model access and provider/commercial evidence.
 - **Host Provisioner** is the only canonical service with Docker-host authority.
-- **Web** is an owner/operator projection, not an authority compiler.
+- **Web/SMS/Review/protocol adapters** are role-safe projections, not authority compilers.
 - **PostgreSQL/Supabase** is durable authority, event, evidence, commercial, and reconciliation state.
 
-The public estimator, fixtures, `/api/dev/login`, manually injected provider outcomes, old containers, trajectory scores, and historical screenshots are diagnostics only.
+Fixtures, `/api/dev/login`, manually injected outcomes, public-estimator paths, old containers, trajectory scores, and historical screenshots are diagnostics only.
+
+## Moat and protocol model
+
+The product moat is the governed-labor protocol, not one provider integration:
+
+1. AMTECH labor protocol — assignments, work objects, authority, approval, effects, receipts, recovery, and commercial state.
+2. MCP core — tools, resources, prompts, negotiation, and remote authorization profile.
+3. MCP Apps — optional negotiated interactive `ui://` resources.
+4. AG-UI — optional role-safe agent/user event and state adapter.
+5. AMTECH channel adapters — Web, SMS, signed Review, connected systems, and future clients.
+
+Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.
 
 ## Canonical effect boundary
 
@@ -46,38 +56,23 @@ The public estimator, fixtures, `/api/dev/login`, manually injected provider out
 trigger
 → authenticated principal
 → exact assignment or approved platform/system context
-→ current role/grant/policy/authority version
-→ stable intent
-→ immutable command and atomic claim
+→ current role/grant/policy/entitlement/authority version
+→ stable durable intent, command, event, or work object
 → Hermes or deterministic work
+→ bounded capability selection and runtime validation
 → approval when required
-→ one reserved external effect
-→ accepted / failed / ambiguous durable receipt
-→ deterministic replay or repair
-→ role-safe surface
-→ audit, metering, commercial attribution, revocation, release proof
+→ one reserved idempotent external effect
+→ accepted | failed | ambiguous durable receipt
+→ deterministic replay, reconciliation, or repair
+→ role-safe materialization
+→ audit, metering, commercial attribution, revocation, recovery, release proof
 ```
 
 ## Current status
 
-**`capability_surface_and_acceptance_contract_closure_ci_accepted_on_55e094e6__migration_head_0072__canonical_deploy_selection_source_wired__not_live_accepted__not_launch_cleared`**
+**`standard_v0_2_ratified__migration_head_0072__manifest_driven_connector_and_capability_control__canonical_deploy_source_wired__gate_0_exact_head_ci_pending__not_live_accepted__not_launch_cleared`**
 
-The primary implementation anchor is `5b56e6a2249f4b5a650d81badbdd7b95cd6ea2bb`. The complete predecessor workflow matrix passed on `55e094e6bffc9f544ecf5fc2e366323c6619feb7`. This is `ci-accepted` only for declared source/fixture scope; it is not real database, runtime, provider, browser/channel, commercial, deployment, rollback, or production-ready acceptance.
-
-## Exact green predecessor workflow matrix
-
-On `55e094e6bffc9f544ecf5fc2e366323c6619feb7`:
-
-- Repository Documentation Archaeology — `29709721661`
-- Phase 2 Remediation Plan Integrity — `29709721690`
-- S10.1 Onboarding Identity Authority — `29709721646`
-- Lane 1 Relationships and Authorization — `29709721689`
-- S2 S7 S9 Production Boundary — `29709721656`
-- Lane 10 Integrated CI and Release Evidence — `29709721664`
-- Employee Work Production Boundary — `29709721665`
-- Agent Operating Surface Standard — `29709721702`
-
-All concluded success. Current-head documentation synchronization must rerun the applicable matrix; PR `#23` is the final run ledger.
+Pre-ratification implementation checkpoints have complete green workflow matrices. The final Gate 0 authority head must pass the full required matrix after code/document synchronization stops.
 
 ## Current canonical runtime topology
 
@@ -105,7 +100,7 @@ per employee: amtech-employee-<employee_id> internal bridge
   Model Gateway alias: amtech-model-gateway
 ```
 
-Canonical topology sources:
+Canonical sources:
 
 - `infra/deploy/docker-compose.production.yml`
 - `infra/scripts/production-topology.mjs`
@@ -114,26 +109,11 @@ Canonical topology sources:
 - `apps/manager/src/provisioner-host.ts`
 - `apps/manager/src/lib/provisioning-reconciler.ts`
 
-## Production entrypoint convergence
-
-The prior source-level deploy fork is closed.
-
-These entrypoints import the same `infra/scripts/production-topology.mjs` authority and select `infra/deploy/docker-compose.production.yml`:
-
-- `infra/scripts/production-normal-up.mjs`
-- `infra/scripts/prod-like-normal-employee-up.mjs`
-- `infra/scripts/deploy-smoke.mjs`
-- `infra/scripts/deploy-rollback.mjs`
-
-`tests/unit/production-boundary-source.test.ts`, describe `canonical production deployment topology`, enforces canonical selection, five-service health, Unix-socket Docker custody, Caddy topology, employee topology inspection, and rollback recomputation.
-
-This closes source/config convergence only. Do not claim runtime acceptance until the target-host two-employee isolation/replacement/teardown harness passes on the release candidate.
+Production, production-like, smoke, and rollback entrypoints import `infra/scripts/production-topology.mjs`. This closes source/config convergence only; target-host proof remains open.
 
 ## Executable subsystem map
 
 ### 1. Identity, relationships, assignments, and authority
-
-Provides organizations, users/principals, memberships, explicit employee assignments, labor/management/custody/payer/beneficiary relationships, assignment principals, grants, policies, authority versions, owner sessions, signed resources, approvals, and platform support authority.
 
 Primary hubs:
 
@@ -146,11 +126,9 @@ Primary hubs:
 - `apps/manager/src/lib/platform-admin-runtime.ts`
 - migrations `0039`, `0040`, `0042`, `0053`–`0069`, `0071`
 
-Migration `0069` installs canonical owner employee-surface grants only for explicit human assignment principals. Migration `0071` makes those actions role-specific so viewers remain read-only while owner/manager/operator actions stay assignment-scoped. Account membership does not manufacture employee authority.
+Viewer principals are read-only. Owner/manager/operator actions remain explicit-assignment scoped. Account membership does not manufacture employee authority.
 
 ### 2. Durable command/effect, approval, artifact history, and repair
-
-Provides stable intent, immutable command provenance, atomic claims, leases, effect reservation, accepted/failed/ambiguous receipts, approval snapshots/current resolver authority, owner-turn C3, replay, repair entrypoints, immutable artifact revisions, validation evidence, and publication state.
 
 Primary hubs:
 
@@ -162,30 +140,35 @@ Primary hubs:
 - `apps/manager/src/lib/artifact-workbench-routes.ts`
 - migrations `0041`, `0048`–`0054`, `0061`, `0070`–`0072`
 
-Migration `0070` binds artifact publication approval to the exact validated revision. Migration `0072` enforces revision, parent, validation, and current-head scope across artifact/assignment/account/employee boundaries.
+Artifact revisions use compare-and-swap heads, exact-revision validation, approval snapshot binding, durable publication effects, and verification receipts.
 
-### 3. Connectors, ingress, ambient inbox, and egress
-
-Provides Gmail, QuickBooks, Stripe, and Twilio custody; authenticity verification; normalized employee-event ingress; durable ambient inbox; dedupe/order/leases/retry/dead letter/replay; owner-safe work descriptors; optional approval binding; direct delivery or Hermes wake.
+### 3. Connectors, authorization, ingress, and egress
 
 Primary hubs:
 
+- `packages/shared/src/connector-registry.ts`
 - `packages/shared/src/connector-setup.ts`
+- `apps/manager/src/lib/capability-registry.ts`
+- `apps/manager/src/lib/tool-capability-catalog.ts`
+- `apps/manager/src/lib/connector-custody.ts`
+- `apps/manager/src/lib/artifact-workbench-routes.ts`
 - `apps/manager/src/events/registry.ts`
 - `apps/manager/src/events/ingress.ts`
 - `apps/manager/src/lib/ambient-inbox.ts`
-- `apps/manager/src/lib/employee-events.ts`
-- `apps/manager/src/lib/connector-custody.ts`
-- `apps/manager/src/tools/gmail-connect-owner.ts`
-- `apps/manager/src/tools/qbo-connect-owner.ts`
 - `apps/manager/src/webhooks/*`
 - migrations `0032`–`0038`, `0043`–`0047`
 
-Gmail and QuickBooks have explicit owner OAuth setup descriptors and signed owner return bridges. Unknown connectors fail closed. Stripe OAuth is intentionally not fabricated.
+Normative behavior:
+
+- connector identity, category, risk axes, and custody are declarative;
+- exact managed-tool ownership and readiness source live in the setup manifest;
+- broad categories never imply provider identity;
+- direct MCP requires `writes`, `money`, and `customer_facing` explicitly false;
+- unknown/underspecified connectors fail closed;
+- OAuth, provider-hosted onboarding, managed secrets/service accounts, and operator installation are distinct setup protocols;
+- browser code never chooses scopes, tools, credentials, or authorization hosts.
 
 ### 4. Model Gateway and commercial attribution
-
-Provides assignment-bound credentials, employee/assignment/payer/beneficiary/price resolution, provider proxy, receipt extraction, request audit, provider usage receipt, and accounting receipt.
 
 Primary hubs:
 
@@ -195,15 +178,13 @@ Primary hubs:
 - `apps/manager/src/lib/model-gateway-http.ts`
 - `apps/manager/src/model-gateway-server.ts`
 
-Open P0 gaps:
+Open P0/P1 gaps:
 
-- cumulative settled + reserved budget is not atomically enforced;
+- cumulative settled plus reserved budget is not atomically enforced;
 - rate buckets are process-local;
-- generic timeout retry can duplicate provider cost when acceptance is ambiguous.
+- uncertain provider acceptance needs durable ambiguity/reconciliation before retry.
 
 ### 5. Provisioning, profiles, runtime, networks, and routing
-
-Provides desired-resource reconciliation, signed Unix-socket provisioner requests, scoped credential minting, rendered profile/context, secret scans, read-only profile tree, SHA-256 checksum, one runtime/workspace per employee, per-employee internal bridge, health acceptance, loopback publication, Caddy snippets, rotation, drift, repair, replace, restore, suspend, and teardown.
 
 Primary hubs:
 
@@ -216,11 +197,9 @@ Primary hubs:
 - `infra/scripts/production-topology.mjs`
 - `infra/scripts/local/start-hermes-container.sh`
 
-Open P0/P1 gaps: target-host acceptance, managed secret/rotation evidence, complete crash/compensation matrix, rollback, and release attestation. Canonical entrypoint selection is no longer an open source-code gap.
+Open gates: target-host acceptance, managed secret/rotation evidence, crash/compensation matrix, rollback, and release attestation.
 
-### 6. Hermes, context, Manager MCP, and capabilities
-
-Provides canonical Hermes session/run keys, runtime health/capability/toolset observation, rendered profile doctrine/memory, business-brain facts, strict Manager MCP resources, employee-callable Manager tools generated from the authoritative registry, assignment-bound capability evidence, and task-to-capability presentation.
+### 6. Hermes, context, MCP, and effective capabilities
 
 Primary hubs:
 
@@ -231,45 +210,38 @@ Primary hubs:
 - `apps/manager/src/lib/profile-context.ts`
 - `apps/manager/src/lib/profile-renderer.ts`
 - `apps/manager/src/lib/tool-capability-catalog.ts`
+- `apps/manager/src/lib/effective-capability-evidence.ts`
 - migration `0070`
 
-Capability discovery spans `manager_mcp`, `direct_mcp`, and `runtime_native`, but remains presentation/task guidance only. It cannot create execution authority. Stale runtime evidence fails closed rather than remaining ready.
+Capability discovery spans `manager_mcp`, `direct_mcp`, and `runtime_native`. A capability is effective only when advertisement, exact runtime report, dependency, credential, network, assignment policy, entitlement, connector health, and recent live probe pass. Stale or missing evidence fails closed.
 
-Open P1 gap: complete release-bound persistence/reconciliation of the effective-capability graph against real runtime, connector, policy, entitlement, and profile evidence.
-
-### 7. Owner Web, operating surface, and generated UI
-
-Provides Supabase Auth → Manager owner session in HttpOnly cookie, private-hop owner header, token-free browser SSE URL, strict snapshots/deltas, task-agnostic operating state, task-mapped capability drawer, typed envelopes/resources/actions, deterministic adaptive layout, typed generated-view compiler, opaque-origin iframe, finite intent vocabulary, and host action intersection.
+### 7. Owner Web, work surfaces, MCP Apps compatibility, and AG-UI profile
 
 Primary hubs:
 
 - `apps/manager/src/lib/employee-stream-strict.ts`
+- `apps/manager/src/lib/employee-stream.ts`
 - `apps/manager/src/lib/operating-surface.ts`
 - `apps/manager/src/lib/materialization.ts`
 - `apps/manager/src/lib/ui-resources.ts`
-- `apps/manager/src/lib/onboarding-identity-routes.ts`
 - `apps/web/app/agent/[employeeId]/AgentSurface.tsx`
 - `apps/web/app/agent/[employeeId]/components/CapabilityDrawer.tsx`
 - `apps/web/app/agent/[employeeId]/components/WorkObjectRenderer.tsx`
 - `apps/web/app/agent/[employeeId]/components/McpUiResource.tsx`
-- `apps/web/app/api/employee/[employeeId]/resources/route.ts`
 
-`CapabilityDrawer.tsx` represents connector setup as one nullable `{ href, label }` action and stages editable employee instructions through the existing message/durable-command path; it never calls a provider tool directly from the browser.
-
-Current fixture browser tests exercise the adaptive system. Product-shell tests prove only login and unauthenticated dashboard. No fixture-free provider-backed browser action/effect/receipt chain has passed on the current candidate.
+Current typed generated-view and sandboxed intent machinery is useful compatibility groundwork. Do not claim official MCP Apps conformance until extension negotiation, resource/tool association, JSON-RPC host lifecycle, CSP/permissions, and action-intersection tests pass. Do not claim full AG-UI conformance until a versioned adapter and snapshot/delta/replay/resync matrix pass.
 
 ### 8. Evidence, validation, archaeology, and documentation control
 
-Provides audit, metering, provider/accounting/effect receipts, profile checksums, runtime/resource evidence, release schemas, generated production Manager source, PostgreSQL matrices, image inclusion, compiled Web tests, and tracked-object archaeology.
-
 Primary maps:
 
+- `STANDARD.md`
+- `validation/standard-v0.2-evolution-vector.json`
 - `docs/architecture/06-effect-graphs-failure-semantics-and-observability.md`
-- `docs/architecture/08-repository-archaeology-audit-and-cleanup.md`
 - `docs/architecture/09-current-bug-risk-and-production-gap-register.md`
-- `docs/architecture/14-infrastructure-deployment-and-test-coverage-audit.md`
-- `second-half-plan/2026-07-20-capability-production-closure/`
-- `memory/2026-07-20-capability-surface-ci-closure-and-next-plan.md`
+- `docs/architecture/16-standard-research-basis-and-protocol-disposition.md`
+- `second-half-plan/README.md`
+- `memory/MEMORY.md`
 
 ## Migration ledger
 
@@ -290,34 +262,47 @@ Current head: **`0072`**.
 0072       artifact revision/parent/validation/current-head cross-row scope guards
 ```
 
-Do not rewrite or renumber applied migrations. Corrections are forward migrations.
+Applied migrations are immutable. Corrections use forward migrations.
+
+## Database evidence ladder
+
+1. Pure unit/contract tests for schema builders, policies, hashing, state transitions, and adapters.
+2. Production-shaped local/CI PostgreSQL for full migration ledger, RLS/grants, functions, concurrency, races, and negative isolation.
+3. Compiled application/browser tests for role-safe projections.
+4. Disposable managed Supabase only for material platform-specific Auth, Realtime, Storage, Data API, advisor, security-sensitive, or final release-candidate behavior.
+5. Target-host/provider acceptance for release boundaries.
+6. Production monitoring and reconciliation after release.
+
+A live database is not the routine development loop. Local PostgreSQL does not waive platform-specific release proof.
 
 ## Evidence boundary
 
 Not accepted yet:
 
-1. approved real-Supabase `0032–0072` migration/advisor/behavior proof;
-2. managed production secrets and rotation;
-3. target-host Caddy/Docker/Unix-socket/two-employee isolation;
-4. live identity-provider verification and canonical activation;
-5. provider-backed generated UI browser action through external effect and proof;
-6. cumulative budget, shared rate limiting, and timeout ambiguity control;
-7. complete crash/compensation/deterministic repair;
-8. fixture-free Web/SMS/signed Review;
-9. real connector/provider/accounting reconciliation;
-10. release-bound effective-capability graph reconciliation;
-11. shared/fractional policy and broader role perspectives;
-12. 100/250/500/700 employee capacity and fairness;
-13. complete accessibility, cross-browser, visual regression, rollback, SBOM/attestation, signed deployment manifest, and exact deployment.
+1. final Gate 0 exact-head workflow matrix;
+2. platform-specific disposable Supabase release proof where required by the ratified database policy;
+3. managed production secrets and rotation;
+4. target-host Caddy/Docker/Unix-socket/two-employee isolation;
+5. live identity and connector authorization/revocation;
+6. official MCP Apps and full AG-UI conformance;
+7. provider-backed generated UI/browser action through external effect and proof;
+8. cumulative budget, shared rate limiting, and timeout ambiguity control;
+9. complete crash/compensation/deterministic repair;
+10. fixture-free Web/SMS/signed Review;
+11. real connector/provider/accounting reconciliation;
+12. release-bound effective-capability graph reconciliation;
+13. shared/fractional live policy and broader role perspectives;
+14. 100/250/500/700 employee capacity and fairness;
+15. complete accessibility, cross-browser, visual regression, rollback, SBOM/provenance, signed deployment manifest, and exact deployment.
 
-## Dependency-ordered TDD path
+## Dependency-ordered path
 
-1. Freeze and record a complete exact-head workflow matrix after this CODEGRAPH synchronization.
-2. Apply `0032–0072` to approved staging; run advisors and assignment/artifact/capability behavior matrices.
-3. Prove canonical target-host five-service health, Docker/Unix-socket custody, two-employee isolation, replacement, and teardown.
-4. Capture real authenticated dashboard/SSE/error/OAuth behavior and a fixture-free provider-backed generated-work-object path through approval, C3/effect, receipt, and proof.
-5. Add red concurrent Model Gateway budget/rate/ambiguous-timeout tests; implement shared atomic controls and reconciliation.
-6. Add provisioning/effect crash injection, deterministic repair, and rollback proof.
-7. Add cross-browser, accessibility, visual regression, capacity/fairness, SBOM/provenance, signed manifest, and exact deployment gates.
+1. Complete Gate 0 repository authority reconciliation and exact-head CI.
+2. Close connector manifest/custody and protocol-adapter source contracts without widening authority.
+3. Complete local/CI PostgreSQL migration, RLS, and concurrency matrices; run disposable Supabase only at named platform/release boundaries.
+4. Prove target-host five-service health, Host Provisioner custody, and two-employee isolation/replacement/teardown.
+5. Prove fixture-free owner identity, capability evidence, managed authorization, approval/effect/receipt, and owner-refindable golden work.
+6. Implement shared budget/rate/ambiguity controls with concurrent failure tests.
+7. Add crash/repair/rollback, accessibility/cross-browser/visual, capacity/fairness, and signed release/deployment evidence.
 
-Trajectory artifacts may refine prerequisite order, but `STANDARD.md` and exact live evidence determine whether a gate is closed.
+`STANDARD.md`, the active production program, and exact executable evidence determine whether a gate is closed.
