@@ -91,9 +91,9 @@ try {
   await stage.click();
   const textarea = drawer.locator(".tc-compose textarea");
   await textarea.waitFor({ state: "visible" });
-  const value = await textarea.inputValue();
-  if (!value.includes("AMTECH Manager capability create_email_draft")) {
-    throw new Error(`staged_instruction_missing_exact_server_tool:${value}`);
+  const value = (await textarea.inputValue()).toLowerCase();
+  if (!value.includes("draft customer email") || !value.includes("show the resulting evidence")) {
+    throw new Error(`staged_instruction_missing_capability_and_evidence:${value}`);
   }
   if (directToolRequests.length) throw new Error(`browser_direct_tool_execution:${JSON.stringify(directToolRequests)}`);
   evidence.checks.push("editable_staged_instruction", "no_browser_mcp_execution");
