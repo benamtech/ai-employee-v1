@@ -50,7 +50,7 @@ async function* parseSse(body: ReadableStream<Uint8Array>): AsyncGenerator<Recor
           .map((line) => line.slice(5).replace(/^ /, ""))
           .join("\n");
         if (data) {
-          try { yield JSON.parse(data) as Record<string, unknown>; } catch { /* ignore malformed projection */ }
+          try { yield JSON.parse(data) as Record<string, unknown>; } catch { /* durable state remains authoritative */ }
         }
         boundary = buffer.indexOf("\n\n");
       }
@@ -116,11 +116,12 @@ export async function GET(
         }
         controller.close();
       } catch (error) {
+        console.warn("[web] AG-UI stream interrupted", error instanceof Error ? error.name : "unknown");
         controller.enqueue(encoder.encode(`event: RUN_ERROR\ndata: ${JSON.stringify({
           type: "RUN_ERROR",
           timestamp: Date.now(),
           sequence,
-          message: String((error as Error).message ?? error),
+          message: "ag_ui_stream_interrupted",
         })}\n\n`));
         controller.close();
       } finally {
