@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { resolveOwnerOAuthConnectorSetup } from "@amtech/shared";
+import { resolveOwnerManagedConnectorSetup } from "@amtech/shared";
 import { managerPost } from "../../../../_lib/manager";
 
 function safeReturnPath(value: string | null, employeeId: string): string {
@@ -10,7 +10,7 @@ function safeReturnPath(value: string | null, employeeId: string): string {
   return value;
 }
 
-function providerConsentUrl(value: unknown, allowedHosts: string[]): URL | null {
+function providerSetupUrl(value: unknown, allowedHosts: string[]): URL | null {
   if (typeof value !== "string") return null;
   try {
     const url = new URL(value);
@@ -26,7 +26,7 @@ export async function GET(
   { params }: { params: Promise<{ employeeId: string; connector: string }> },
 ) {
   const { employeeId, connector } = await params;
-  const setup = resolveOwnerOAuthConnectorSetup(connector);
+  const setup = resolveOwnerManagedConnectorSetup(connector);
   if (!setup) return NextResponse.json({ error: "connector_not_supported" }, { status: 404 });
   const cookieStore = await cookies();
   const ownerSession = cookieStore.get("amtech_owner_session")?.value;
@@ -43,7 +43,7 @@ export async function GET(
   const json = await response.json().catch(() => ({})) as {
     error?: string;
     message?: string;
-    proof?: { consent_url?: unknown };
+    proof?: { setup_url?: unknown };
   };
   if (!response.ok || json.error) {
     const failure = new URL(`/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(setup.key)}`, req.url);
@@ -51,7 +51,8 @@ export async function GET(
     failure.searchParams.set("returnTo", returnTo);
     return NextResponse.redirect(failure);
   }
-  const consent = providerConsentUrl(json.proof?.consent_url, setup.allowed_authorization_hosts);
-  if (!consent) return NextResponse.json({ error: "connector_consent_url_invalid" }, { status: 502 });
-  return NextResponse.redirect(consent);
+  /** Why: one descriptor-bound HTTPS allowlist covers OAuth and provider-hosted onboarding without creating an open redirect. */
+  const target = providerSetupUrl(json.proof?.setup_url, setup.allowed_authorization_hosts);
+  if (!target) return NextResponse.json({ error: "connector_setup_url_invalid" }, { status: 502 });
+  return NextResponse.redirect(target);
 }
