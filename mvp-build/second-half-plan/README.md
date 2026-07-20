@@ -1,9 +1,11 @@
 # AMTECH AI Employee Second-Half Plan
 
 Status: active standard-remediation execution  
-Updated: 2026-07-19
+Updated: 2026-07-20
 
 The active execution authority is [`phase-2-standard-remediation-execution.md`](phase-2-standard-remediation-execution.md), backed by `../validation/phase-2-remediation-vectors.json`, command-board issue `#25`, draft integration PR `#23`, `../STANDARD.md`, and exact-head proof on `employee-production-tuesday`.
+
+The focused capability/OAuth/operating-surface closure companion is [`2026-07-20-capability-production-closure/README.md`](2026-07-20-capability-production-closure/README.md). It records current implementation, standardized execution output, exact repo references, the verification matrix, and the next P0/P1 proof sequence. It does not replace the active remediation execution authority.
 
 ## Read before using this plan family
 
@@ -12,21 +14,24 @@ The active execution authority is [`phase-2-standard-remediation-execution.md`](
 3. `../memory/MEMORY.md` and newest relevant handoff
 4. `../STANDARD.md`
 5. the active remediation execution program
-6. `../docs/architecture/README.md`
-7. `../docs/architecture/09-current-bug-risk-and-production-gap-register.md`
-8. current source, migrations, tests, workflows, proof, and PR diff
+6. the focused current execution companion when working on capability/owner-surface production closure
+7. `../docs/architecture/README.md`
+8. `../docs/architecture/09-current-bug-risk-and-production-gap-register.md`
+9. current source, migrations, tests, workflows, proof, and PR diff
 
 The trajectory packet under `../docs/architecture/trajectories/` can order interacting prerequisites and bifurcation controls, but it cannot modify plan status or satisfy a release gate.
 
 ## Current execution state
 
 - Integration branch: `employee-production-tuesday`, based on `research`; draft PR `#23` targets `research`.
-- Migration head: `0069`.
-- Lane 1 relationship/authorization, Lane 3 C3 command/effect, connector custody, commercial attribution, approval authority, platform authority, authority-version revocation, onboarding identity/activation, generated UI, strict context/snapshot reads, production topology, and repository archaeology are source-wired on the integration branch.
+- Migration head: `0072` at `../packages/db/migrations/0072_artifact_revision_scope_guards.sql`.
+- Primary capability-closure implementation anchor: `5b56e6a2249f4b5a650d81badbdd7b95cd6ea2bb`; later documentation commits do not automatically inherit its workflow evidence.
+- Lane 1 relationship/authorization, Lane 3 C3 command/effect, connector custody, commercial attribution, approval authority, platform authority, authority-version revocation, onboarding identity/activation, generated UI, strict context/snapshot reads, canonical production Compose selection, capability evidence/catalog presentation, artifact revision/policy/scope guards, and repository archaeology are source-wired on the integration branch.
+- `../infra/scripts/production-topology.mjs` is the canonical Compose selector for normal-up, prod-like, smoke, and rollback source paths. Target-host runtime/network acceptance remains open.
 - The active architecture/risk map is `../docs/architecture/README.md` plus `../docs/architecture/09-current-bug-risk-and-production-gap-register.md`.
-- Exact current implementation/CI proof anchors and workflow IDs are maintained in `../CODEGRAPH.md`, the newest handoff, and PR `#23`.
-- The approved production database still requires application of `0032–0069` and exact-SHA behavior proof.
-- Target-host network/runtime, managed secrets, live identity/provider, provider-backed generated work object, cumulative budgets/shared rate limits, compensation/repair, fleet capacity/fairness, fixture-free channel evidence, rollback, attestation, deployment, and launch acceptance remain open production gates.
+- Until all current control documents are synchronized, exact implementation references and the current production sequence are maintained in the focused closure packet and `../memory/2026-07-20-capability-surface-ci-closure-and-next-plan.md`, then verified against source and exact-head workflows.
+- The approved production database still requires application of `0032–0072` and exact-SHA advisor/behavior proof.
+- Target-host network/runtime, managed secrets, live identity/provider, provider-backed generated work object, cumulative budgets/shared rate limits, ambiguous provider reconciliation, compensation/repair, fleet capacity/fairness, fixture-free channel evidence, rollback, attestation, deployment, and launch acceptance remain open production gates.
 
 The canonical normal-employee path and Start Free + $400 managed-workforce offer remain unchanged. The public estimator remains non-canonical.
 
@@ -35,12 +40,13 @@ The canonical normal-employee path and Start Free + $400 managed-workforce offer
 ### Active
 
 - [`phase-2-standard-remediation-execution.md`](phase-2-standard-remediation-execution.md) — dependency-ordered standard remediation and production execution program.
+- [`2026-07-20-capability-production-closure/README.md`](2026-07-20-capability-production-closure/README.md) — current focused implementation/proof companion; subordinate to the active execution program and Standard.
 - `../validation/phase-2-remediation-vectors.json` — machine-readable finding ownership, dependencies, gates, and failure conditions.
 - `../STANDARD.md` — non-waivable production requirements.
 
 ### Current explanatory companions
 
-- `../CODEGRAPH.md` — current implementation and proof boundary.
+- `../CODEGRAPH.md` — implementation and proof boundary; verify stale headers/status against the newest handoff and source until its synchronization transaction completes.
 - `../docs/architecture/README.md` — cross-system live map.
 - `../docs/architecture/09-current-bug-risk-and-production-gap-register.md` — current P0/P1/P2 register.
 - `../docs/architecture/trajectories/` — source-grounded dependency/bifurcation analysis.
@@ -79,8 +85,8 @@ Deep Hermes GUI/runtime research is retained in [`surface-research-hermes-gui-an
 
 When dependency order, a finding, or a gate changes:
 
-1. update the active execution program;
-2. update the machine vector registry and integrity tests;
+1. update the active execution program or add a subordinate focused companion without creating competing authority;
+2. update the machine vector registry and integrity tests when finding ownership/dependencies change;
 3. update current source/tests if implementation changed;
 4. update `../CODEGRAPH.md` and the architecture risk register;
 5. write/update the dated memory handoff and memory index;
