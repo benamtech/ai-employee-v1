@@ -60,6 +60,23 @@ A literal Fisher information matrix was impossible because the repository has no
 
 The selected trajectories covered exact-head truth, assignment isolation, final authority revalidation, protocol return paths, UX recovery, OAuth custody/freshness, generation, current documentation routing, migration ledger/RLS isolation, and authority/effect concurrency.
 
+## Governance validator correction
+
+The previous validator was overfitted to transient prose, exact workflow run IDs, test counts, and implementation SHAs. That design forced validator edits whenever evidence advanced even when governance remained valid.
+
+`verify-repository-governance.mjs` now validates durable structure instead:
+
+- required authority/evidence files exist;
+- exactly one active production program exists;
+- contributor scripts and workflow ownership remain intact;
+- the immutable issue vector has a valid schema, 38 unique issues, and nine workstreams;
+- the resolution ledger partitions every issue exactly once into resolved or remaining sets;
+- control claims can reference only still-unresolved issues in `does_not_resolve`;
+- prepared frontiers point to real documents;
+- the WS-03 contract preserves start guards, migration immutability, required proof classes, and rubric bounds.
+
+Transient run IDs, counts, SHAs, and prose status live in machine-readable evidence records and no longer require validator source changes.
+
 ## WS-03 preparation
 
 Created:
@@ -81,7 +98,7 @@ Applied migrations `0001`–`0072` remain immutable. WS-03 must branch from then
 
 ## Documentation organization
 
-Current authority entrypoints were reconciled. Canonical root files were not moved: their exact paths are consumed by governance scripts, contributor read order, and links. Organization is expressed through ownership maps instead of path churn. Historical plans and wiki records were left as historical evidence.
+Current authority entrypoints were reconciled. Canonical root files were not moved: their exact paths are consumed by contributor read order and stable links. Organization is expressed through ownership maps instead of path churn. Historical plans and wiki records remain historical evidence.
 
 ## Remaining risks
 
@@ -95,4 +112,4 @@ Current authority entrypoints were reconciled. Canonical root files were not mov
 
 ## Next move
 
-Wait for the final documentation head of PR `#31` to pass Standard, Hermes Review, and Main Integration. Then merge or formally supersede it, complete `ISS-011`, and start the guarded WS-03 branch from then-current `main`.
+Freeze the final PR head, require Standard, Hermes Review, Main Integration broad/source/build/archaeology/compiled-browser green, update the PR record, and move it out of draft. After merge or formal supersession, complete `ISS-011` and create `agent/ws03-database-authority-p0` from then-current `main`.
