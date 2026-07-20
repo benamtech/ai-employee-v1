@@ -69,7 +69,10 @@ export function registeredModelProviderProfiles(): Array<{ key: string; provider
   return Object.values(MODEL_PROVIDER_PROFILES).map(({ key, provider }) => ({ key, provider }));
 }
 
-export function resolveModelProviderRoute(allowedProviders: readonly string[]): ModelProviderRoute {
+export function resolveModelProviderRoute(input: {
+  allowed_providers: readonly string[];
+  allowed_models: readonly string[];
+}): ModelProviderRoute {
   const configuredKey = normalizeProfileKey(
     process.env.MODEL_GATEWAY_PROVIDER_PROFILE
       ?? process.env.MODEL_GATEWAY_PROVIDER
@@ -77,13 +80,16 @@ export function resolveModelProviderRoute(allowedProviders: readonly string[]): 
   );
   const profile = MODEL_PROVIDER_PROFILES[configuredKey];
   if (!profile) throw new Error("model_provider_profile_not_registered");
-  if (!allowedProviders.includes(profile.provider)) throw new Error("provider_not_allowed");
+  if (!input.allowed_providers.includes(profile.provider)) throw new Error("provider_not_allowed");
+
+  const model = requiredEnv(profile.model_env);
+  if (!input.allowed_models.includes(model)) throw new Error("upstream_model_not_allowed");
 
   return {
     profile_key: profile.key,
     provider: profile.provider,
     base_url: validateBaseUrl(requiredEnv(profile.base_url_env)),
     api_key: requiredEnv(profile.api_key_env),
-    model: requiredEnv(profile.model_env),
+    model,
   };
 }
