@@ -38,6 +38,13 @@ function recent(value: unknown, now: number, maxAgeMs: number): boolean {
   return Number.isFinite(at) && at <= now && now - at <= maxAgeMs;
 }
 
+function relationshipCurrent(input: { status?: unknown; starts_at?: unknown; ends_at?: unknown }, now: number): boolean {
+  if (String(input.status ?? "") !== "active") return false;
+  const startsAt = input.starts_at ? Date.parse(String(input.starts_at)) : Number.NEGATIVE_INFINITY;
+  const endsAt = input.ends_at ? Date.parse(String(input.ends_at)) : Number.POSITIVE_INFINITY;
+  return Number.isFinite(startsAt) && Number.isFinite(endsAt) && startsAt <= now && now < endsAt;
+}
+
 export interface McpCapabilityAuthorityDecision {
   ok: boolean;
   capability: EffectiveCapabilityDecision;
@@ -45,9 +52,9 @@ export interface McpCapabilityAuthorityDecision {
 }
 
 /**
- * Last interception before a runtime-discovered MCP tool executes. Discovery may be
- * broad, but execution is re-derived from current assignment authority, entitlement,
- * connector custody, provider verification freshness, and a live Manager request.
+ * Last interception before a runtime-discovered MCP tool executes. Credential
+ * verification is necessary but not sufficient: assignment policy and authority
+ * version are re-read here so revocation cannot race between authentication and dispatch.
  */
 export async function authorizeManagerMcpToolExecution(
   db: SupabaseClient,
@@ -61,13 +68,33 @@ export async function authorizeManagerMcpToolExecution(
     || setup?.start_tool === toolName
     || setup?.continuation?.tool === toolName;
   const connectorRequired = Boolean(setup && !bootstrap);
-  const entitlement = await checkFeature(db, {
-    account_id: identity.account_id,
-    employee_id: identity.employee_id,
-  }, toolName);
+
+  const [entitlement, assignment, authority] = await Promise.all([
+    checkFeature(db, {
+      account_id: identity.account_id,
+      employee_id: identity.employee_id,
+    }, toolName),
+    db.from("employee_assignments")
+      .select("id,status,starts_at,ends_at,policy_version")
+      .eq("id", identity.assignment_id)
+      .eq("account_id", identity.account_id)
+      .maybeSingle(),
+    db.from("authority_versions")
+      .select("current_version,revoked_at")
+      .eq("scope_type", "employee_assignment")
+      .eq("scope_id", identity.assignment_id)
+      .maybeSingle(),
+  ]);
+  if (assignment.error) throw assignment.error;
+  if (authority.error) throw authority.error;
+
+  const assignmentCurrent = Boolean(assignment.data?.id) && relationshipCurrent(assignment.data ?? {}, now);
+  const policyReady = assignmentCurrent && String(assignment.data?.policy_version ?? "") === identity.policy_version;
+  const authorityVersionMatches = !authority.data?.revoked_at
+    && Number(authority.data?.current_version ?? 0) === Number(identity.authority_version);
 
   let connectorReady = !connectorRequired;
-  let liveProbePassed = !connectorRequired;
+  let providerVerificationFresh = !connectorRequired;
   let connectorEvidence: Record<string, unknown> = {
     connector_required: connectorRequired,
     connector_bootstrap: bootstrap,
@@ -87,16 +114,20 @@ export async function authorizeManagerMcpToolExecution(
       .limit(1)
       .maybeSingle();
     if (binding.error) throw binding.error;
-    const verifiedAt = binding.data?.provider_verified_at ?? binding.data?.updated_at ?? null;
+    const verifiedAt = binding.data?.provider_verified_at ?? null;
     connectorReady = Boolean(binding.data?.id);
-    liveProbePassed = connectorReady && recent(verifiedAt, now, CONNECTOR_BINDING_MAX_AGE_MS);
+    providerVerificationFresh = Boolean(
+      connectorReady
+      && binding.data?.provider_verification_ref
+      && recent(verifiedAt, now, CONNECTOR_BINDING_MAX_AGE_MS),
+    );
     connectorEvidence = {
       ...connectorEvidence,
       connector_binding_id: binding.data?.id ?? null,
       provider: setup.provider,
       provider_verification_ref: binding.data?.provider_verification_ref ?? null,
       provider_verified_at: verifiedAt,
-      binding_fresh: liveProbePassed,
+      provider_verification_fresh: providerVerificationFresh,
     };
   }
 
@@ -111,22 +142,25 @@ export async function authorizeManagerMcpToolExecution(
       capability_key: `manager_tool:${toolName}`,
       advertised: true,
       runtime_reported: true,
-      dependency_ready: true,
+      dependency_ready: assignmentCurrent,
       credential_ready: true,
       network_ready: true,
-      policy_ready: Boolean(identity.policy_version),
+      policy_ready: policyReady,
       entitlement_ready: entitlement.decision === "allow",
-      authority_version_matches: true,
+      authority_version_matches: authorityVersionMatches,
       connector_required: connectorRequired,
       connector_ready: connectorReady,
-      live_probe_status: liveProbePassed ? "passed" : "unknown",
+      live_probe_status: providerVerificationFresh ? "passed" : "unknown",
       evidence_checked_at: checkedAt,
       max_evidence_age_ms: EXECUTION_EVIDENCE_MAX_AGE_MS,
       evidence: {
         source: "manager_mcp_execution_interceptor",
         credential_id: identity.credential_id,
-        policy_version: identity.policy_version,
-        authority_version: identity.authority_version,
+        credential_policy_version: identity.policy_version,
+        credential_authority_version: identity.authority_version,
+        current_policy_version: assignment.data?.policy_version ?? null,
+        current_authority_version: authority.data?.current_version ?? null,
+        assignment_current: assignmentCurrent,
         entitlement_decision: entitlement.decision,
         ...connectorEvidence,
       },
