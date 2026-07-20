@@ -32,6 +32,31 @@ describe("WS-04 host lifecycle authority", () => {
     expect(source).toContain('/manager/provisioning/commands');
   });
 
+  it("fails closed every destructive Host Provisioner Docker step", () => {
+    const source = readFileSync("apps/manager/src/provisioner-host.ts", "utf8");
+    expect(source).toContain("runDestructiveDockerStep");
+    expect(source).toContain('args: ["rm", "-f", container], expected_stdout: container');
+    expect(source).toContain('args: ["stop", container], expected_stdout: container');
+    expect(source).toContain('args: ["restart", container], expected_stdout: container');
+    expect(source).toContain('args: ["network", "rm", network], expected_stdout: network');
+    expect(source).toContain("const removed = await removeRuntime(req);");
+    expect(source).toContain('outcome: result.outcome ?? "failed"');
+    expect(source).toContain("evidence: result.evidence ?? null");
+  });
+
+  it("treats malformed Host output as ambiguous and blocks healthy lifecycle projection", () => {
+    const manager = readFileSync("apps/manager/src/provisioner.ts", "utf8");
+    const shared = readFileSync("packages/shared/src/profile-package.ts", "utf8");
+    expect(manager).toContain("host_provisioner_malformed_result");
+    expect(manager).toContain("host_provisioner_invalid_json");
+    expect(manager).toContain("host_provisioner_destructive_success_unverified");
+    expect(manager).toContain('.update({ status: "failed", needs_reprovision: true })');
+    expect(manager).toContain("manager_projection_guard");
+    expect(manager).toContain("host_provisioner_failure:${JSON.stringify(durableSummary)}");
+    expect(shared).toContain('outcome?: "accepted" | "failed" | "ambiguous"');
+    expect(shared).toContain("evidence?: Record<string, unknown>");
+  });
+
   it("binds rotations to one service, audience, sequential version, rollback, and old-token revocation", () => {
     const replacement: ManagedSecretDescriptor = {
       ...baseSecret,
