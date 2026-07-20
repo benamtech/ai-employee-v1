@@ -1,140 +1,124 @@
 # mvp-build — AMTECH AI Employee implementation home
 
-Status: **active integration; source/CI work in progress; not live-accepted or launch-cleared**  
+Status: **active integration; Standard v0.2 ratified; not live-accepted or launch-cleared**  
 Updated: 2026-07-19
 
-`mvp-build/` contains the executable AMTECH AI Employee product: owner surfaces, Manager control plane, Hermes runtime integration, PostgreSQL authority/effect state, connectors, ambient inbox, Model Gateway, provisioning, deployment, tests, and release proof.
+`mvp-build/` contains the executable AI Employee product: owner/channel surfaces, Manager control plane, Hermes runtime integration, PostgreSQL authority/effect state, connector and capability protocols, Model Gateway, provisioning, deployment, tests, and release proof.
 
 ## Agent start
-
-Read in this order:
 
 1. [`../identity.md`](../identity.md)
 2. root [`../AGENTS.md`](../AGENTS.md) or [`../CLAUDE.md`](../CLAUDE.md), then root [`../CODEGRAPH.md`](../CODEGRAPH.md)
 3. scoped [`AGENTS.md`](AGENTS.md) or [`CLAUDE.md`](CLAUDE.md)
 4. [`CODEGRAPH.md`](CODEGRAPH.md)
-5. [`memory/MEMORY.md`](memory/MEMORY.md), then the newest relevant handoff
-6. [`STANDARD.md`](STANDARD.md)
-7. [`second-half-plan/phase-2-standard-remediation-execution.md`](second-half-plan/phase-2-standard-remediation-execution.md)
+5. ratified [`STANDARD.md`](STANDARD.md)
+6. [`second-half-plan/README.md`](second-half-plan/README.md) and its single active production program
+7. [`memory/MEMORY.md`](memory/MEMORY.md), then the newest relevant handoff
 8. [`docs/architecture/README.md`](docs/architecture/README.md)
-9. [`docs/architecture/11-agent-orientation-and-role-map.md`](docs/architecture/11-agent-orientation-and-role-map.md)
-10. applicable [`docs/ux/`](docs/ux/), deployment/runbook, source, migrations, scripts, tests, workflows, proof, and current diff
+9. applicable source, migrations, scripts, tests, workflows, proof, runbooks, and current diff
 
-Source, applied migrations, executable proof, and newest scoped memory outrank historical prose.
+Authority order: deployed release-bound proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests and acceptance → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
 ## Current branch boundary
 
 - Integration branch: `employee-production-tuesday`
 - Base: `research`
 - Draft integration PR: `#23`
-- Migration head: `0069`
+- Migration head: `0072`
+- Standard: ratified v0.2
+- Active program: `second-half-plan/2026-07-19-ratified-standard-production-program/`
+- Canonical topology: `infra/scripts/production-topology.mjs` → `infra/deploy/docker-compose.production.yml`
 - `main` remains outside the integration shortcut
-- The exact current implementation/proof anchor and workflow IDs live in `CODEGRAPH.md`, the newest handoff, and PR `#23`
-- Real Supabase, target-host runtime/network, live identity/provider, fixture-free Web/SMS/Review, commercial reconciliation, cumulative budgets/shared rate limits, fleet capacity/fairness, crash/repair, rollback, attestation, deployment, and launch acceptance remain separate live gates unless named evidence closes them
+- Exact current implementation/proof head and workflow IDs belong in PR `#23` and the newest indexed handoff after branch movement stops
 
-Do not count fixtures, `/api/dev/login`, local `live:*`, manually injected provider results, or `prod-like:public-estimator:*` as launch proof.
+Source/CI does not imply target-host, managed-platform, live identity/connector/provider, fixture-free channel, commercial, recovery, rollback, capacity, deployment, or launch acceptance.
+
+## Product and protocol boundary
+
+AMTECH is governed persistent AI labor, not a generic chat, workflow builder, CRM, or collection of provider integrations.
+
+- Hermes supplies reasoning, sessions/runs, transcript continuity, memory behavior, runtime-local tools, and employee execution.
+- Manager supplies identity/assignment authority, context/resources, capability/tool contracts, connector/secret custody, approval, durable command/effect, commercial attribution, repair, and proof.
+- Web, SMS, signed Review, MCP Apps, and AG-UI adapters are role-safe projections; they do not create authority.
+- Caddy is public ingress; Host Provisioner alone has Docker-host authority; PostgreSQL/Supabase is durable authority/effect state.
+
+The moat is the reusable protocol spanning identity, assignment, capabilities, connectors, work objects, approval, effects, receipts, recovery, and commercial attribution. Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
+
+## Connector and capability rules
+
+- `packages/shared/src/connector-registry.ts` owns connector identity, risk axes, and custody derivation.
+- `packages/shared/src/connector-setup.ts` owns actual setup protocol, exact provider-tool ownership, scopes/permissions, allowed hosts, continuation, readiness evidence, and owner copy.
+- Capability discovery spans Manager MCP, explicitly safe direct MCP, and runtime-native tools.
+- Unknown/underspecified connectors default to Manager mediation.
+- Direct MCP requires every write/money/customer-facing axis explicitly false.
+- Broad categories never select provider identity, credentials, account rows, scopes, or setup flow.
+- MCP Apps is the official interactive MCP target; current MCP-UI-shaped code is compatibility groundwork until conformance passes.
+- AG-UI is an optional event/state adapter, not authority or a generated-UI schema.
 
 ## Canonical normal-employee path
 
-Use [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md).
+Use [`docs/production-normal-employee-live-deploy-runbook.md`](docs/production-normal-employee-live-deploy-runbook.md), verified against current CODEGRAPH and the active program.
 
 ```text
-public DNS / approved ingress
+approved ingress
 → Caddy
-→ production Web + Manager
-→ real owner authentication and identity verification
-→ canonical activation
-→ durable desired-resource graph and reconciler
-→ isolated Hermes runtime + scoped Manager/Model Gateway access
-→ owner Web/SMS/Review
-→ governed provider-backed work
-→ durable receipts, proof, recovery, and release evidence
+→ Web + Manager
+→ real owner identity and explicit assignment
+→ durable desired resources and reconciler
+→ isolated Hermes runtime + scoped Manager/Model Gateway
+→ effective capability evidence and managed connector authorization
+→ governed owner work
+→ approval and one bounded effect when required
+→ provider/effect/accounting receipts
+→ owner-refindable proof, recovery, and release evidence
 ```
 
 ## Architecture and documentation map
 
-- [`docs/architecture/README.md`](docs/architecture/README.md) — current source-backed cross-system map.
-- [`docs/architecture/09-current-bug-risk-and-production-gap-register.md`](docs/architecture/09-current-bug-risk-and-production-gap-register.md) — current P0/P1/P2 register.
-- [`docs/architecture/trajectories/`](docs/architecture/trajectories/) — source-grounded dependency/bifurcation analysis; never acceptance authority.
-- [`docs/architecture/11-agent-orientation-and-role-map.md`](docs/architecture/11-agent-orientation-and-role-map.md) — role-specific source hubs, invariants, and proof requirements.
-- [`docs/architecture/12-document-control-memory-and-handoff-map.md`](docs/architecture/12-document-control-memory-and-handoff-map.md) — root/scoped CODEGRAPH, memory, plans, implementation records, and Markdown organization.
-- [`docs/ux/`](docs/ux/) — owner UX system, coverage audit, validation, fixture policy, research disposition, and Hermes/UI decision records.
-- [`memory/MEMORY.md`](memory/MEMORY.md) — sole newest-first handoff index.
-- [`../wiki/MVP/implementation-records/README.md`](../wiki/MVP/implementation-records/README.md) — historical factual implementation records.
+- [`STANDARD.md`](STANDARD.md) — ratified non-waivable requirements.
+- [`validation/standard-v0.2-evolution-vector.json`](validation/standard-v0.2-evolution-vector.json) — original-to-ratified motion and implementation/supersession map.
+- [`second-half-plan/README.md`](second-half-plan/README.md) — sole active-plan selector.
+- [`docs/architecture/README.md`](docs/architecture/README.md) — current cross-system map.
+- [`docs/architecture/16-standard-research-basis-and-protocol-disposition.md`](docs/architecture/16-standard-research-basis-and-protocol-disposition.md) — external standards and protocol decisions.
+- [`docs/architecture/12-document-control-memory-and-handoff-map.md`](docs/architecture/12-document-control-memory-and-handoff-map.md) — document authority.
+- [`memory/MEMORY.md`](memory/MEMORY.md) — sole handoff index.
+- [`../wiki/MVP/README.md`](../wiki/MVP/README.md) — wiki strategy/history routing.
 
-Historical handoffs and implementation records stay in place to preserve point-in-time evidence and links. Current indexes tell agents what to read first.
+Historical plans and records stay in place. Their indexes and banners route current work here.
 
-## Product and runtime boundary
+## Database evidence policy
 
-AMTECH is not selling a model, estimate generator, developer dashboard, CRM, or workflow builder. AMTECH packages Hermes into a managed employee for owner-operated businesses.
+Routine database engineering uses production-shaped local/CI PostgreSQL:
 
-- Hermes supplies reasoning, sessions/runs, transcript continuity, memory behavior, runtime-local tools, and employee execution.
-- Manager supplies identity/assignment authority, business context/resources, tool schemas, connector/secret custody, approval, command/effect, commercial attribution, repair, and proof.
-- Web presents the primary owner operating surface; SMS and signed Review render the same durable work/resources/actions.
-- Caddy is public ingress; Host Provisioner is the only service with Docker-host authority; PostgreSQL/Supabase is durable authority/effect state.
+- full migration ledger from blank;
+- existing-row/backfill compatibility;
+- constraints, triggers, indexes, grants, RLS, functions, and negative isolation;
+- concurrency, races, compare-and-swap, rollback, and retry behavior;
+- migration hashes and deterministic diagnostics.
 
-Canonical consequential flow:
-
-```text
-trigger
-→ authenticated principal
-→ exact assignment / current grant / policy
-→ stable intent and durable command
-→ Hermes or deterministic work
-→ approval when required
-→ bounded external effect
-→ accepted / failed / ambiguous receipt
-→ repair/replay when needed
-→ owner-safe work and proof
-```
-
-## Current source capabilities
-
-The branch contains source and tests for:
-
-- relationship, assignment, grant, policy, and authority-version boundaries;
-- durable C3 command/effect and ambiguous repair;
-- onboarding identity and canonical activation through migration `0069`;
-- scoped owner sessions, previews, artifacts, and MCP credentials;
-- Gmail, QuickBooks, Stripe, Twilio, connector custody, ambient inbox, and provider event normalization;
-- payer/beneficiary/price attribution, Model Gateway, provider/accounting receipts, and usage audit;
-- desired resource graphs, reconciler, signed Unix-socket Host Provisioner, profile checksums, isolated employee networks, and Caddy routes;
-- task-agnostic operating surface, strict snapshots/context reads, SSE, WorkResource/WorkAction materialization, typed generated UI, and sandboxed host-routed intents;
-- admin/support authority, audit, metering, recovery tooling, local-production orchestration, and release-evidence contracts;
-- exact-head repository archaeology that reads every tracked Git object and emits file/effect/relationship ledgers.
-
-See `CODEGRAPH.md` and the architecture map for exact source hubs and evidence tiers.
-
-## UI development
-
-```bash
-npm run ui:dev
-npm run ui:browser
-npm run ui:test
-npm run ui:test:shell
-```
-
-These fixture/product-shell commands are development and CI evidence only. Fixture mode is visibly labeled and guarded from production-like environments. Live generative-UI acceptance requires a provider-backed Hermes run, typed Manager-compiled work view, exact owner action, external effect, and durable proof.
+Disposable managed Supabase is required only when material platform-specific Auth, Realtime, Storage, Data API, advisor, security-sensitive browser behavior, suspected platform differences, new release migration classes, or the final release candidate is under test. Production is never the routine test target.
 
 ## Development baseline
 
 ```bash
 npm ci
+npm run test:standard
 npm run typecheck
 npm run test:unit
+npm run test:production-boundary
 npm run build
 npm run lint
-npm run test:integration   # environment-gated
+npm run test:integration   # environment-gated; report skip as skip
 ```
 
-Use targeted checks during a narrow change, then run every integrated workflow required by the changed boundary on the exact branch head.
+Use targeted checks during narrow work, then run every required exact-head workflow before updating proof state.
 
 ## Directory map
 
 ```text
 apps/web/                  owner, review, onboarding, public, admin surfaces
-apps/manager/              Manager API, tools, events, Hermes, Model Gateway, provisioning
-packages/shared/           contracts, schemas, finite vocabularies, evidence types
+apps/manager/              control plane, tools, events, Hermes, gateway, provisioning
+packages/shared/           contracts, connector/capability manifests, finite vocabularies
 packages/db/               migrations, clients, generated database types
 packages/agent-template/   rendered Hermes profiles, skills, plugins, doctrine
 packages/profiles/         profile packages and role definitions
@@ -143,22 +127,24 @@ infra/caddy/               public/static and per-employee ingress
 infra/scripts/             local, deploy, lifecycle, repair, acceptance, release operations
 tests/unit/                deterministic/source/contract gates
 tests/integration/         PostgreSQL, authority, concurrency, receipt matrices
-docs/architecture/         current cross-system map and production trajectories
+validation/                machine-readable Standard/remediation/acceptance vectors
+docs/architecture/         current cross-system map and research disposition
 docs/ux/                   owner UX doctrine and validation
-memory/                    durable session handoffs
-second-half-plan/          active execution program plus historical phase family
-validation/                machine-readable remediation/acceptance vectors
+memory/                    durable dated handoffs; MEMORY.md is sole index
+second-half-plan/          one active production program plus history
 ```
 
 ## Invariants
 
 1. Manager owns authority; Hermes owns runtime cognition/execution.
 2. Account membership is not employee assignment authority.
-3. Reads do not create effects, and authoritative read failures fail closed.
+3. Reads do not create effects; authoritative read failures fail closed.
 4. Stable retries do not create duplicate irreversible effects.
 5. Consequential success requires a durable accepted receipt.
 6. Provider master credentials stay outside employee profiles/runtimes.
-7. Generated UI is presentation; the host resolves current actions and durable resources.
-8. Research/trajectory artifacts cannot create a second renderer, runtime, authority, or production claim.
-9. Historical records remain historical; current state is synchronized through CODEGRAPH, architecture, memory, PR, and exact-head proof.
-10. Production-ready means every non-waivable Standard gate passes on the exact deployed SHA.
+7. Capability discovery is broad; execution custody is conservative and evidence-backed.
+8. Generated UI/protocol adapters are presentation, not authority.
+9. Ambiguous consequential outcomes reconcile before retry.
+10. Historical records remain historical; current status is exact-SHA and index-routed.
+11. Production-ready means every non-waivable Standard gate passes on the exact deployed SHA.
+12. No agent edits `main`, weakens tests to obtain green, or reports untested code as complete.
