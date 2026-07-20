@@ -68,7 +68,18 @@ jobs:
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
       - name: Validate ratified Standard, evolution vector, and connector protocol
-        run: npm run test:standard
+        run: |
+          # Why: governance failures must retain exact assertions before another change is attempted.
+          set -o pipefail
+          npm run test:standard 2>&1 | tee ratified-standard-test.log
+      - name: Upload ratification diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ratified-standard-diagnostics-${{ github.sha }}
+          path: mvp-build/ratified-standard-test.log
+          if-no-files-found: error
+          retention-days: 7
       - name: Validate predecessor remediation registry remains parseable
         run: npm run test:remediation-plan
       - name: Parse evolution vector independently
