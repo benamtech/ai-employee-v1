@@ -1,92 +1,62 @@
-import { describe, expect, it } from "vitest";
 import { readFile } from "node:fs/promises";
+import { describe, expect, it } from "vitest";
 import {
-  matchTaskCapabilities,
-  resolveOwnerOAuthConnectorSetup,
-  type ToolCapabilityDescriptor,
-} from "../../packages/shared/src/index";
+  buildToolCapabilityCatalog,
+  resolveTaskCapabilities,
+} from "../../apps/manager/src/lib/tool-capability-catalog.js";
 
-const capabilities: ToolCapabilityDescriptor[] = [
-  {
-    id: "toolcap:manager:create-email-draft",
-    capability_key: "manager_tool:create_email_draft",
-    server_id: "amtech-manager",
-    server_label: "AMTECH Manager",
-    transport: "manager_mcp",
-    tool_name: "create_email_draft",
-    label: "Draft customer email",
-    summary: "Prepare a customer email draft while sending remains gated.",
-    category: "communication",
-    availability: "ready",
-    can_run_now: true,
-    read_only: false,
-    risk: "write",
-    requires_approval: false,
-    evidence: { level: "control_plane_contract", source_refs: ["manager_mcp:tools/create_email_draft"] },
+const baseContext = {
+  account_id: "acct_alpha",
+  employee_id: "emp_alpha",
+  assignment_id: "asn_alpha",
+  authority: {
+    actor: "owner" as const,
+    principal_id: "hpr_alpha",
+    principal_class: "human" as const,
+    authenticated_by: "owner_web_session:sess_alpha",
   },
-  {
-    id: "toolcap:runtime:browser",
-    capability_key: "browser",
-    server_id: "hermes:browser",
-    server_label: "Hermes Browser",
-    transport: "runtime_native",
-    tool_name: "browser",
-    label: "Browser research",
-    summary: "Research a website in an isolated browser session.",
-    category: "research",
-    availability: "unverified",
-    can_run_now: false,
-    read_only: false,
-    risk: "unknown",
-    requires_approval: true,
-    setup_requirement: "Live browser probe required",
-    evidence: { level: "runtime_report", failed_dimensions: ["live_probe_passed"], source_refs: ["effective_capability_evidence:test"] },
-  },
-];
+};
 
-describe("task-aware capability matching", () => {
-  it("maps a relevant Manager MCP tool to customer work without granting execution", () => {
-    const matches = matchTaskCapabilities([{ id: "task-1", title: "Draft the customer follow-up email", type: "work" }], capabilities);
-    expect(matches[0]).toMatchObject({
-      task_id: "task-1",
-      loop_id: "loop:task-1",
-      capability_id: "toolcap:manager:create-email-draft",
-      role: "primary",
-    });
-    expect(matches.some((match) => match.capability_id === "toolcap:runtime:browser")).toBe(false);
+describe("task capability catalog", () => {
+  it("resolves semantically related governed tools without granting execution", () => {
+    const matches = resolveTaskCapabilities("send a customer estimate by email and collect a deposit", baseContext);
+    expect(matches.map((match) => match.tool_name)).toEqual(expect.arrayContaining([
+      "create_email_draft",
+      "send_email_draft",
+      "create_deposit_invoice",
+      "send_deposit_invoice",
+    ]));
+    expect(matches.every((match) => match.assignment_id === "asn_alpha")).toBe(true);
+    expect(matches.every((match) => match.execution_authority === false)).toBe(true);
   });
 
-  it("shows a relevant runtime capability as blocked until live evidence passes", () => {
-    const matches = matchTaskCapabilities([{ id: "task-2", title: "Research and revise the website", type: "work" }], capabilities);
-    expect(matches).toContainEqual(expect.objectContaining({
-      task_id: "task-2",
-      capability_id: "toolcap:runtime:browser",
-      role: "blocked",
-    }));
+  it("requires approval metadata for consequential customer-facing and money tools", () => {
+    const catalog = buildToolCapabilityCatalog(baseContext);
+    const sendEmail = catalog.find((tool) => tool.tool_name === "send_email_draft");
+    const sendInvoice = catalog.find((tool) => tool.tool_name === "send_deposit_invoice");
+    expect(sendEmail).toMatchObject({ requires_approval: true, customer_facing: true });
+    expect(sendInvoice).toMatchObject({ requires_approval: true, money: true, customer_facing: true });
   });
 
-  it("is deterministic for the same task and catalog", () => {
-    const task = [{ id: "task-1", title: "Research and revise the website", type: "work" }];
-    expect(matchTaskCapabilities(task, capabilities)).toEqual(matchTaskCapabilities(task, capabilities));
-  });
-});
-
-describe("owner OAuth connector registry", () => {
-  it("binds shipped connectors to explicit tools, scopes, and authorization hosts", () => {
-    expect(resolveOwnerOAuthConnectorSetup("email")).toMatchObject({
-      key: "gmail",
-      start_tool: "connect_email",
-      allowed_authorization_hosts: ["accounts.google.com"],
-    });
-    expect(resolveOwnerOAuthConnectorSetup("qbo")).toMatchObject({
-      key: "quickbooks",
-      start_tool: "connect_quickbooks",
-      allowed_authorization_hosts: ["appcenter.intuit.com"],
-    });
+  it("keeps read-only capability discovery distinct from write authority", () => {
+    const matches = resolveTaskCapabilities("show current bookkeeping balances", baseContext);
+    expect(matches.some((match) => match.tool_name === "get_balance_sheet")).toBe(true);
+    expect(matches.every((match) => match.execution_authority === false)).toBe(true);
   });
 
-  it("fails closed for an unknown MCP or OAuth connector", () => {
-    expect(resolveOwnerOAuthConnectorSetup("arbitrary-mcp-server")).toBeNull();
+  it("returns no invented tool for an unsupported task", () => {
+    expect(resolveTaskCapabilities("launch a nuclear reactor", baseContext)).toEqual([]);
+  });
+
+  it("binds every catalog row to one assignment and principal context", () => {
+    const catalog = buildToolCapabilityCatalog(baseContext);
+    expect(catalog.length).toBeGreaterThan(0);
+    for (const row of catalog) {
+      expect(row.account_id).toBe("acct_alpha");
+      expect(row.employee_id).toBe("emp_alpha");
+      expect(row.assignment_id).toBe("asn_alpha");
+      expect(row.authority).toEqual(baseContext.authority);
+    }
   });
 });
 
@@ -108,13 +78,15 @@ describe("product source contracts", () => {
     expect(drawer).not.toContain("tools/call");
   });
 
-  it("uses one shared OAuth descriptor for copy, tool selection, scopes, and host validation", async () => {
+  it("uses one shared managed-connector descriptor for copy, tool selection, scopes, and host validation", async () => {
     const manager = await readFile("apps/manager/src/lib/artifact-workbench-routes.ts", "utf8");
     const web = await readFile("apps/web/app/api/employee/[employeeId]/connect/[connector]/route.ts", "utf8");
     const consent = await readFile("apps/web/app/agent/[employeeId]/connect/[connector]/page.tsx", "utf8");
-    expect(manager).toContain("resolveOwnerOAuthConnectorSetup");
-    expect(web).toContain("resolveOwnerOAuthConnectorSetup");
-    expect(consent).toContain("resolveOwnerOAuthConnectorSetup");
+    expect(manager).toContain("resolveOwnerManagedConnectorSetup");
+    expect(web).toContain("resolveOwnerManagedConnectorSetup");
+    expect(consent).toContain("resolveOwnerManagedConnectorSetup");
     expect(web).toContain("allowed_authorization_hosts");
+    expect(manager).not.toMatch(/category\s*===\s*["'](?:accounting|communication|money)["']/);
+    expect(web).not.toMatch(/category\s*===\s*["'](?:accounting|communication|money)["']/);
   });
 });
