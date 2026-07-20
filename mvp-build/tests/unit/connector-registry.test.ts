@@ -6,7 +6,7 @@ import {
   renderableDirectMcpConnectors,
   resolveConnectorMeta,
   resolveContextPolicy,
-} from "@amtech/shared";
+} from "../../packages/shared/src/connector-registry";
 
 describe("CE-4 connector registry", () => {
   it("resolves the real connectors by provider or connector_key hints", () => {
