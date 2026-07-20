@@ -16,7 +16,7 @@ This folder is the versioned narrative handoff layer. `MEMORY.md` is the sole in
 - Source/CI accepted: WS-01, provider authority, assignment-scoped streaming Web, remote MCP auth/custody, MCP Apps CSP/host mediation, AG-UI, persisted effective capability, and final MCP policy/version execution revalidation.
 - Remaining WS-02: live connector/provider lifecycle and external protocol-host evidence (`ISS-011`).
 - WS-03 is not complete: PR `#32` contains DB-P0-01 ledger/hash preflight only; DB-P0-02 through DB-P0-07 remain open.
-- WS-04 source hardening is stacked from PR #32 on `agent/ws04-target-host-lifecycle`: lifecycle CLI host authority is routed through Manager, and secret-custody/runtime-digest contracts plus focused tests are added. Exact-head CI and live target-host acceptance remain pending.
+- WS-04 source hardening is stacked from PR #32 on `agent/ws04-target-host-lifecycle`: destructive Host Docker operations now classify failure/ambiguity, preserve partial-effect evidence, and force Manager lifecycle projection non-healthy. Exact-head repository CI and live target-host acceptance remain pending.
 - Current source/CI must not be promoted into managed database, target host, fixture-free channel, commercial, recovery, deployment, pilot, or production acceptance.
 
 ## Read order
@@ -27,6 +27,7 @@ Read CODEGRAPH, Standard, active program, architecture, then the newest relevant
 
 ### Current production boundary
 
+- [2026-07-20 — WS-04 destructive Host failure verification](2026-07-20-ws04-destructive-host-failure-verification.md) — Computed trace003 decision model, strict destructive Docker result classification, partial-effect evidence, Manager unhealthy projection guard, focused harness evidence, and explicit CI/live-host boundary.
 - [2026-07-20 — WS-04 source hardening and decision pass](2026-07-20-ws04-source-hardening-decision-pass.md) — Public spectral/proxy decision model, exact WS-03 correction, Manager-only lifecycle CLI, secret custody/rotation contracts, immutable runtime digest evidence, focused tests, and explicit live-proof boundary.
 - [2026-07-20 — WS-02 Mirror Cabinet hardening and WS-03 frontier](2026-07-20-ws02-mirror-cabinet-hardening-ws03-frontier.md) — Exact-head correction, assignment-scoped live projection, current authority revalidation, MCP App CSP/protocol mediation, AG-UI error hardening, 110/635 evidence, documentation ownership map, and guarded WS-03 P0 preparation.
 - [2026-07-20 — WS-02 streaming and protocol source/CI closure](2026-07-20-ws02-streaming-protocol-source-ci-closure.md) — Original streaming employee OS, Remote MCP authorization/custody, MCP Apps, AG-UI, effective capability, manifold, and source/CI evidence record; superseded for hardening details by the entry above.
