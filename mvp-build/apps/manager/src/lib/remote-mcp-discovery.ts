@@ -40,7 +40,7 @@ export function remoteMcpResourceMetadataFromChallenge(header: string | null, re
   const resource = safeHttpsUrl(resourceUrl, "remote_mcp_resource");
   for (const challenge of splitChallenges(header)) {
     if (!/^Bearer\b/i.test(challenge)) continue;
-    const match = challenge.match(/(?:^|,)\s*resource_metadata="([^"]+)"/i);
+    const match = challenge.match(/(?:^|[,\s])resource_metadata="([^"]+)"/i);
     if (!match?.[1]) continue;
     const metadata = safeHttpsUrl(match[1], "remote_mcp_resource_metadata");
     if (metadata.origin !== resource.origin) throw new Error("remote_mcp_resource_metadata_cross_origin");
