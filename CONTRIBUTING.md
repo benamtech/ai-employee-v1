@@ -37,6 +37,8 @@ npm run repo:rubric -- ./task-contract.json
 
 The contract declares task ID, repository, branch, objective, success criteria, allowed and forbidden files, required tests, known blockers, maximum commits, six rubric scores, and mitigations.
 
+### Six-point rubric
+
 Rubric dimensions are each in `[-1, 1]`:
 
 - `authority` — preserves identity, assignment, policy, approval, effect, and custody boundaries;
