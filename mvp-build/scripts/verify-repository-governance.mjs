@@ -83,8 +83,9 @@ check("GOV-05", [
 check("GOV-06", workflow.includes("npm run test:repo-governance")
   && workflow.includes("npm run typecheck")
   && workflow.includes("npm run lint")
-  && workflow.includes("github.event_name == 'push'")
-  && workflow.includes("Standard Integrity OK"), "ratification workflow differentiates PR/push and emits a clear summary");
+  && workflow.includes("Standard Integrity OK")
+  && !workflow.includes("npm run test:unit")
+  && !workflow.includes("npm run build"), "ratification workflow owns governance only and does not duplicate broad/build gates");
 check("GOV-07", prTemplate.includes("## Six-point rubric")
   && prTemplate.includes("## TDD and verification")
   && prTemplate.includes("## Evidence boundary"), "pull-request template requires rubric, TDD, and evidence boundaries");
@@ -100,7 +101,10 @@ check("GOV-10", mainIntegrationWorkflow.includes("pull_request:")
   && mainIntegrationWorkflow.includes("branches: [main]")
   && mainIntegrationWorkflow.includes("npm run repo:verify:full")
   && mainIntegrationWorkflow.includes("npm run test:production-boundary")
-  && mainIntegrationWorkflow.includes("Main Integration Gates OK"), "main has a canonical merge-readiness gate");
+  && mainIntegrationWorkflow.includes("broad-unit:")
+  && mainIntegrationWorkflow.includes("npm run test:unit")
+  && mainIntegrationWorkflow.includes("Broad unit:")
+  && mainIntegrationWorkflow.includes("Main Integration Gates OK"), "main has one canonical merge gate including the broad aggregate");
 
 const currentAuthorityDocs = [rootReadme, contributing, rootAgents, rootCodegraph, scopedAgents, scopedCodegraph, planIndex, activePlan, memoryIndex];
 check("GOV-11", currentAuthorityDocs.every((doc) => doc.includes("main@5e5b8d7") || doc.includes("current `main`"))
