@@ -2,7 +2,8 @@
 
 Status: **source implementation; target-host and provider-backed acceptance incomplete**  
 Standard: v0.2 ratified  
-Active program: `../../second-half-plan/2026-07-19-ratified-standard-production-program/`
+Active program: `../../production-readiness-program/`  
+Current WS-05/WS-06 supplement: `../../production-readiness-program/19-ws05-ws06-owner-runtime-source-transaction.md`
 
 This slice does not introduce a new workflow engine, authority plane, or lifecycle launcher. It composes existing assignment, approval, durable command/effect, work-resource, generated-view, connector-custody, and Hermes runtime boundaries into artifact-centered owner journeys.
 
@@ -18,6 +19,8 @@ This slice does not introduce a new workflow engine, authority plane, or lifecyc
 8. Resolve approval through an authorized human assignment principal.
 9. Publish through the existing durable command/effect path.
 10. Verify the observed target and retain the post-publish receipt.
+11. Preserve the same work/revision/approval/effect/receipt/proof identity across Web, SMS, and signed Review projections.
+12. Reconnect or recover without replaying accepted owner intent or duplicating the external effect.
 
 ## Runtime filesystem contract
 
@@ -80,12 +83,18 @@ Exact managed-tool ownership and readiness source come from `packages/shared/src
 
 Revision updates use compare-and-swap. Validation rejects stale revisions. Publish approval snapshots the current revision hash. Later revision invalidates stale execution through existing approval authority.
 
+## Owner snapshot and projection contract
+
+The Web owner surface installs a full snapshot only after exact account, employee, assignment, authority-version, operating-context, full-read-model, and tuple-cursor validation. The cursor is established before ordered deltas. Duplicate, stale, reordered, malformed, or cross-scope deltas fail closed. Reconnect clears projected authority and waits for a new validated snapshot; it does not resubmit accepted owner intent.
+
+This source contract does not yet prove fixture-free Web, SMS, or signed Review convergence. All three must ultimately project the same durable work revision, approval snapshot, effect identity, terminal receipt, recovery state, and proof reference.
+
 ## Protocol adapters
 
 - AMTECH generated views remain typed work projections with bounded host intents.
 - Current `ui://`/iframe code is compatibility groundwork for official negotiated MCP Apps; it is not yet a full conformance claim.
 - Current strict snapshot/SSE/work-event code is analogous groundwork for a versioned AG-UI adapter; shared state remains projection, not authority.
-- Browser, MCP Apps, and AG-UI clients cannot directly mutate authority, approval, connector custody, or provider state.
+- Browser, MCP Apps, AG-UI, SMS, and signed Review clients cannot directly mutate authority, approval, connector custody, or provider state.
 
 ## Golden employee scenarios
 
@@ -123,6 +132,7 @@ Launch clearance requires, on the same deployed SHA and pinned Hermes digest:
 - no advertised capability marked effective without complete fresh evidence and a passing live probe;
 - real managed connector setup, health, assignment binding, owner return, revocation, and failure-path proof for the adapters used by the journey;
 - Website A passes manually before automated acceptance;
-- Website A, Contractor B, and Bookkeeping C pass with revision, validation, approval snapshot, effect receipt, publication reference, verification receipt, and idempotent replay;
+- Website A, Contractor B, and Bookkeeping C pass with exact account/employee/assignment identity, revision, validation, approval snapshot, one effect, terminal receipt, recovery, publication reference, verification receipt, refindable proof, and idempotent replay;
+- Web, SMS, and signed Review converge on the same durable state without fixture substitution;
 - viewer principals remain read-only and cannot connect, revise, validate, approve, or publish;
 - protocol/channel adapters do not create authority.

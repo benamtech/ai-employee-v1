@@ -196,7 +196,7 @@ if (direct) {
     const root = dirname(fileURLToPath(import.meta.url));
     const destination = process.argv[writeIndex + 1]
       ? resolve(process.argv[writeIndex + 1])
-      : resolve(root, "../second-half-plan/2026-07-19-ratified-standard-production-program/15-ws02-capability-manifold/generated");
+      : resolve(root, "../production-readiness-program/15-ws02-capability-manifold/generated");
     await writeManifold(manifold, destination);
     console.log(JSON.stringify({ status: "ok", ...summary, destination }));
   } else {
