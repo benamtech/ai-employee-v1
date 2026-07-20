@@ -2,121 +2,93 @@
 
 Status: **active and canonical**  
 Gate 0: **resolved for declared source/document/CI scope**  
-Date: 2026-07-19  
-Task family: `AMTECH-P0-GOV-001`, `AMTECH-P0-DOC-002`  
+Updated: 2026-07-20  
+Task family: `AMTECH-P0-GOV-001`, `AMTECH-P0-DOC-002`, `AMTECH-P0-ONB-001`  
 Branch: `employee-production-tuesday`  
-Base: `research`  
+Target/base: `main`  
 PR: `#23`  
 Standard: `../../../STANDARD.md`  
 Evolution vector: `../../../validation/standard-v0.2-evolution-vector.json`
 
 ## Authority
 
-This folder is the single active production program for the AI Employee repository.
-
-It supersedes as active execution authority:
-
-- `../phase-2-standard-remediation-execution.md`;
-- `../2026-07-20-capability-production-closure/`;
-- the historical phase sequence under `../phase-*.md`;
-- `wiki/MVP/build-plan-current/`.
-
-Those files remain point-in-time evidence and subsystem history. They do not define current order or status.
+This folder is the single active production program. Predecessor remediation, capability-closure, historical phase, and wiki plan files remain point-in-time evidence, not current execution authority.
 
 ## Product target
 
-AMTECH installs governed persistent AI Employees. The product moat is the reusable labor protocol joining:
+AMTECH installs governed persistent AI Employees. The moat is the reusable labor protocol joining identity/assignments, capability discovery, connector custody, work objects/generated views, approvals/effects, recovery/proof/commercial attribution, and bounded MCP, MCP Apps, AG-UI, Web, SMS, and signed-Review adapters.
 
-- identity and assignments;
-- tool and capability discovery;
-- connector and credential custody;
-- work objects and generated views;
-- approvals and external effects;
-- recovery, proof, and commercial attribution;
-- bounded protocol/channel adapters for MCP, MCP Apps, AG-UI, Web, SMS, and signed Review.
-
-Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.
+Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
 
 ## Current state
 
-- Standard v0.2 is ratified and effective.
-- Migration head is `0072`.
-- `AMTECH-P0-GOV-001` and `AMTECH-P0-DOC-002` are resolved for their declared source/document/CI scope.
-- Gate 0 source/code/document authority head `4be092f009de` passed all eight required workflows.
-- The post-evidence handoff/index head must also remain green; its exact matrix is recorded in PR `#23`.
-- Canonical Compose selection is source-wired.
-- Connector identity, custody, setup protocol, exact tool ownership, and capability readiness are manifest-driven.
+- Standard v0.2 is ratified and migration head is `0072`.
+- Gate 0 governance/document authority passed exact-head CI.
+- Connector identity, custody, setup, tool ownership, and readiness are manifest-driven.
 - Direct MCP denies omitted or uncertain risk metadata.
-- MCP Apps and AG-UI dispositions are ratified; complete adapters/conformance remain open.
 - Local/CI PostgreSQL is the database TDD loop; managed Supabase is selective platform/release evidence.
+- Contributor guide, task rubric, installable hooks, quick/full gates, PR template, governance validator, main integration workflow, and Hermes upstream intelligence are source-wired.
+- `research` is historical branch context, not an execution dependency.
 - The product is not launch-cleared.
 
 ## Execution order
 
-1. **G0 — Ratification and repository authority — COMPLETE for declared scope**
-   - ratified Standard v0.2;
-   - published 16-dimensional evolution vector and research disposition;
-   - enforced connector-agnostic setup/custody/readiness in source and tests;
-   - reconciled root, scoped, wiki, plan, memory, architecture, and PR authority;
-   - passed the complete Gate 0 workflow matrix on `4be092f009de`.
+1. **G0 — Ratification, repository authority, and contributor enforcement — COMPLETE for declared scope**
+   - Standard/evolution vector, one active program, one memory index;
+   - connector-agnostic setup/custody/readiness enforcement;
+   - executable contributor onboarding and merge-readiness gates;
+   - exact-head CI before cutover.
 
 2. **P0-A — Protocol and connector conformance**
-   - complete remote MCP protected-resource authorization profile;
-   - implement official MCP Apps negotiation/host adapter without changing durable authority;
-   - add versioned AG-UI adapter after the P0 MCP/connector boundary;
-   - prove unknown, stale, revoked, and underspecified connectors fail closed;
-   - add managed-secret/service-account/operator-installation adapters only through the shared manifest.
+   - remote MCP protected-resource authorization;
+   - official MCP Apps host adapter;
+   - versioned AG-UI adapter after the MCP/connector boundary;
+   - unknown, stale, revoked, and underspecified connectors fail closed;
+   - managed-secret/service-account/operator adapters only through the manifest.
 
 3. **P0-B — Database TDD closure**
-   - close local PostgreSQL migration, RLS, existing-row, concurrency, race, and rollback matrices;
-   - require disposable managed Supabase only for platform-specific and release-candidate evidence;
-   - preserve forward-only migration discipline.
+   - migration, RLS, existing-row, concurrency, race, and rollback matrices;
+   - managed Supabase only for named platform/release conditions;
+   - forward-only migrations.
 
 4. **P0-C — Target-host runtime proof**
-   - five-service health;
-   - Host Provisioner Docker custody;
-   - two-employee network, data, and action isolation;
+   - five-service health and Host Provisioner custody;
+   - two-employee network/data/action isolation;
    - replace, recover, rotate, and teardown.
 
 5. **P0-D — Fixture-free golden owner journey**
-   - real owner identity and explicit assignment;
-   - fresh effective-capability evidence;
-   - managed connector authorization, health, revocation, and failure paths;
-   - approval → one bounded effect → receipt → owner-refindable proof;
-   - Website A manually, then automated;
-   - Contractor B and Bookkeeping C.
+   - real identity/assignment and fresh capability evidence;
+   - connector authorization, health, revocation, and failure paths;
+   - approval → bounded effect → receipt → refindable proof;
+   - Website A, Contractor B, and Bookkeeping C.
 
 6. **P1 — Commercial and reliability closure**
-   - cumulative reserved/settled budgets;
-   - shared atomic rate limits;
-   - ambiguous provider reconciliation;
-   - crash, repair, and rollback;
-   - attestation and signed deployment manifest.
+   - cumulative budgets, shared atomic rates, provider ambiguity;
+   - crash, repair, rollback, attestation, and signed deployment manifest.
 
-7. **P1/P2 — Supported-browser, accessibility, capacity, and pilot**
-   - cross-browser, accessibility, and visual gates;
+7. **P1/P2 — Browser, accessibility, capacity, and pilot**
+   - cross-browser/accessibility/visual gates;
    - 100/250/500/700 employee measurements;
-   - controlled free and $400 managed pilots after non-waivable gates.
+   - controlled pilots only after non-waivable gates.
 
-## Global stop rules
+## Stop rules
 
-- Never edit `main`.
+- Work on reviewed branches and merge to `main` only after required checks.
 - No feature expansion ahead of an unresolved prerequisite P0.
-- Every task has explicit success criteria and task-ID commits.
-- No test expectation is weakened merely to obtain green.
-- After three failed attempts on one concrete step, preserve diagnostics and escalate.
-- A fixture, source contract, local PostgreSQL test, or previous SHA cannot satisfy a live boundary it did not exercise.
-- A live database is not the routine development loop.
-- Browser or protocol UI never creates authority.
-- Unknown or stale capability evidence fails closed.
+- Every task has success criteria, rubric, and task-ID commits.
+- Tests are not weakened to obtain green.
+- After three failed attempts, preserve diagnostics and escalate.
+- Fixtures, local PostgreSQL, and ancestor SHAs cannot satisfy live boundaries they did not exercise.
+- Browser/protocol UI never creates authority.
+- Unknown/stale capability evidence fails closed.
 - Ambiguous consequential effects reconcile before retry.
 
 ## Files
 
-- [`01-ratification-and-change-control.md`](01-ratification-and-change-control.md)
-- [`02-standard-evolution-vector.md`](02-standard-evolution-vector.md)
-- [`03-connector-mcp-apps-ag-ui-program.md`](03-connector-mcp-apps-ag-ui-program.md)
-- [`04-dependency-ordered-production-plan.md`](04-dependency-ordered-production-plan.md)
-- [`05-database-tdd-and-release-proof.md`](05-database-tdd-and-release-proof.md)
-- [`06-document-authority-and-archive-map.md`](06-document-authority-and-archive-map.md)
-- [`07-verification-and-handoff-matrix.md`](07-verification-and-handoff-matrix.md)
+- `01-ratification-and-change-control.md`
+- `02-standard-evolution-vector.md`
+- `03-connector-mcp-apps-ag-ui-program.md`
+- `04-dependency-ordered-production-plan.md`
+- `05-database-tdd-and-release-proof.md`
+- `06-document-authority-and-archive-map.md`
+- `07-verification-and-handoff-matrix.md`
