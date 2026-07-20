@@ -15,6 +15,8 @@ export interface ToolCapabilityEvidenceSummary {
   level: ToolCapabilityEvidenceLevel;
   checked_at?: string | null;
   report_id?: string | null;
+  age_seconds?: number | null;
+  stale?: boolean;
   failed_dimensions?: string[];
   source_refs: string[];
 }
@@ -124,15 +126,17 @@ function availabilityWeight(value: ToolCapabilityAvailability): number {
 }
 
 function rationale(task: TaskCapabilityInput, capability: ToolCapabilityDescriptor, categoryMatch: number, lexical: number): string {
-  const state = capability.availability === "approval_gated"
-    ? "available with owner approval"
-    : capability.availability === "ready"
-      ? "ready now"
-      : capability.availability === "needs_connection"
-        ? "relevant after its connection is repaired"
-        : capability.availability === "unverified"
-          ? "relevant but not live-proved"
-          : `${capability.availability.replace(/_/g, " ")}`;
+  const state = capability.evidence.stale
+    ? "relevant but its live evidence is stale"
+    : capability.availability === "approval_gated"
+      ? "available with owner approval"
+      : capability.availability === "ready"
+        ? "ready now"
+        : capability.availability === "needs_connection"
+          ? "relevant after its connection is repaired"
+          : capability.availability === "unverified"
+            ? "relevant but not live-proved"
+            : capability.availability.replace(/_/g, " ");
   const fit = lexical >= 0.25
     ? "Its description directly overlaps this work."
     : categoryMatch > 0
@@ -178,8 +182,8 @@ export function matchTaskCapabilities(
         score: Number(item.score.toFixed(3)),
         rationale: rationale(task, item.capability, item.categoryScore, item.lexical),
         suggested_prompt: blocked
-          ? `For ${task.title}, explain what is needed before ${item.capability.label.toLowerCase()} can be used, then continue with the safest available alternative.`
-          : `For ${task.title}, use ${item.capability.label.toLowerCase()} where it materially improves the outcome, and show the resulting evidence.`,
+          ? `For ${task.title}, explain what is needed before ${item.capability.server_label} capability ${item.capability.tool_name} can be used, then continue with the safest available alternative.`
+          : `For ${task.title}, use ${item.capability.server_label} capability ${item.capability.tool_name} where it materially improves the outcome, and show the resulting evidence.`,
       });
     }
   }
