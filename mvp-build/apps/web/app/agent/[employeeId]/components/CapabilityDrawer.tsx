@@ -273,17 +273,29 @@ function LoopButton({ loop, selected, onSelect }: { loop: OperatingWorkLoop; sel
   return <button type="button" className={selected ? "selected" : ""} onClick={onSelect}><span>{loop.state.replace(/_/g, " ")}</span><strong>{loop.title}</strong></button>;
 }
 
-function CapabilityCard({ employeeId, capability, match, onStage }: { employeeId: string; capability: ToolCapabilityDescriptor; match: TaskCapabilityMatch | null; onStage: (prompt: string) => void }) {
+interface CapabilitySetupAction {
+  href: string;
+  label: string;
+}
+
+function capabilitySetupAction(employeeId: string, capability: ToolCapabilityDescriptor): CapabilitySetupAction | null {
+  if (capability.availability !== "needs_connection") return null;
   const setupKey = capability.tool_name.includes("quickbooks") || capability.category === "accounting"
     ? "quickbooks"
     : capability.tool_name.includes("email") || capability.category === "communication"
       ? "gmail"
       : null;
   const setup = setupKey ? resolveOwnerOAuthConnectorSetup(setupKey) : null;
+  if (!setup) return null;
   const returnTo = `/agent/${encodeURIComponent(employeeId)}`;
-  const setupHref = setup && capability.availability === "needs_connection"
-    ? `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(setup.key)}?returnTo=${encodeURIComponent(returnTo)}`
-    : null;
+  return {
+    href: `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(setup.key)}?returnTo=${encodeURIComponent(returnTo)}`,
+    label: setup.label,
+  };
+}
+
+function CapabilityCard({ employeeId, capability, match, onStage }: { employeeId: string; capability: ToolCapabilityDescriptor; match: TaskCapabilityMatch | null; onStage: (prompt: string) => void }) {
+  const setupAction = capabilitySetupAction(employeeId, capability);
   return (
     <article className={`tc-card ${capability.availability}`}>
       <div className="tc-card-head"><div><p>{capability.server_label} · {capability.transport.replace(/_/g, " ")}</p><h4>{capability.label}</h4></div><span>{capability.availability.replace(/_/g, " ")}</span></div>
@@ -298,7 +310,7 @@ function CapabilityCard({ employeeId, capability, match, onStage }: { employeeId
       {capability.setup_requirement ? <div className="tc-blocker"><strong>Blocked by</strong><span>{capability.setup_requirement}</span></div> : null}
       <div className="tc-card-actions">
         {match ? <button type="button" onClick={() => onStage(match.suggested_prompt)}>{capability.can_run_now ? "Use for this work" : "Plan the unblock"}</button> : null}
-        {setupHref ? <Link href={setupHref}>Connect {setup.label}</Link> : null}
+        {setupAction ? <Link href={setupAction.href}>Connect {setupAction.label}</Link> : null}
       </div>
     </article>
   );
