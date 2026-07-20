@@ -25,8 +25,8 @@ This folder is the versioned narrative handoff layer for AMTECH AI Employee impl
 - Migration head: `0072` at `../packages/db/migrations/0072_artifact_revision_scope_guards.sql`.
 - Standard v0.2 is ratified and effective.
 - Active program: `../second-half-plan/2026-07-19-ratified-standard-production-program/`.
-- Connector/protocol implementation checkpoint `701936ab1ded` passed all eight required workflows.
-- Final repository-authority workflow IDs belong in the newest handoff and PR after branch movement stops.
+- Gate 0 source/code/document authority head `4be092f009de` passed all eight required workflows; exact run IDs are in the newest handoff.
+- The later handoff/index metadata head must remain green; its final exact matrix is recorded in PR `#23` after branch movement stops.
 
 Current source/CI must not be promoted into live managed-database, target-runtime/network, identity/provider, MCP Apps/AG-UI conformance, fixture-free Web/SMS/Review, commercial, capacity, crash/repair, rollback, deployment, or launch acceptance.
 
@@ -44,11 +44,11 @@ The complete family map is `../docs/architecture/12-document-control-memory-and-
 
 ### Current Standard, protocol, architecture, and production boundary
 
-- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Current handoff. Records human ratification, the 16-dimensional evolution vector, managed connector manifest, MCP Apps/AG-UI disposition, database TDD boundary, connector checkpoint workflow matrix, authority-document transaction, and remaining live gates.
-- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Historical immediate predecessor. Records the capability nullability repair, strict-read/migration acceptance corrections, migration `0072`, and predecessor plan packet. Its “final-head pending” and active-plan claims are superseded by the ratification handoff and current PR evidence.
+- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Current handoff. Records human ratification, the 16-dimensional evolution vector, managed connector manifest, exact provider-tool ownership, direct-MCP default deny, MCP Apps/AG-UI disposition, database TDD boundary, Gate 0 workflow matrix, authority-document transaction, and remaining live gates.
+- [2026-07-20 — Capability surface CI closure and production next plan](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — Historical immediate predecessor. Records the capability nullability repair, strict-read/migration acceptance corrections, migration `0072`, and predecessor plan packet. Its active-plan and pending-status claims are superseded.
 - [2026-07-19 — Final document authority, infra/test audit, and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md) — Historical predecessor. Its `0069` and legacy-selector claims are superseded.
 - [2026-07-19 — Repository archaeology, architecture, production trajectories, and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md) — Repository-wide documentation/code-review checkpoint.
-- [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Historical Hermes/MCP/UI protocol predecessor; official MCP Apps disposition is now in architecture document 16.
+- [2026-07-19 — Hermes/WebUI research and UI congruence pass](2026-07-19-hermes-webui-ui-congruence-pass.md) — Historical Hermes/MCP/UI predecessor; official MCP Apps disposition is now in architecture document 16.
 - [2026-07-19 — UI, Hermes, roles, assignments, and production-readiness handoff](2026-07-19-ui-runtime-production-readiness-handoff.md) — Historical UI/runtime/role/session analysis.
 - [2026-07-18 — S2–S9 authority and runtime-boundary checkpoint](2026-07-18-s2-s9-authority-runtime-checkpoint.md) — Authority/runtime predecessor.
 
