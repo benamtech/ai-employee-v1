@@ -116,7 +116,7 @@ jobs:
           NODE_ENV: production
           CI: "true"
           AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
-          AMTECH_ENVIRONMENT_NAME: main-integration-fixture-ci
+          AMTECH_ENVIRONMENT_NAME: ui-fixture-ci
         run: |
           set -o pipefail
           mkdir -p infra/.local/main-integration-ui
@@ -132,7 +132,7 @@ jobs:
           NODE_ENV: production
           CI: "true"
           AMTECH_UI_FIXTURE_PRODUCTION_TEST: "1"
-          AMTECH_ENVIRONMENT_NAME: main-integration-fixture-ci
+          AMTECH_ENVIRONMENT_NAME: ui-fixture-ci
         run: |
           set -euo pipefail
           EVIDENCE_DIR="infra/.local/main-integration-ui"
