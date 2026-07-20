@@ -157,6 +157,18 @@ video {
   opacity: 0.48;
 }
 
+/* Capability workbench controls are high-frequency operational targets. Keep the
+ * full interactive hit area accessible even when the component's compact visual
+ * style uses smaller typography. */
+.tc-drawer .tc-head > button,
+.tc-drawer .tc-card-actions button,
+.tc-drawer .tc-card-actions a,
+.tc-drawer .tc-compose-actions button,
+.tc-drawer .tc-state button {
+  min-width: 44px !important;
+  min-height: 44px !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
