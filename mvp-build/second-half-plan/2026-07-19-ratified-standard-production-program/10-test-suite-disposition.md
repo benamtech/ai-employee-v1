@@ -1,8 +1,8 @@
 # Test Suite Disposition
 
-Status: **active test-authority map; WS-01 normalized; WS-02 protocol contracts integrated**  
+Status: **active test-authority map; WS-01 normalized; WS-02 exact-head repair in progress**  
 WS-01 evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
-WS-02 implementation evidence head: `6f792eabe44a9ca1e9635fd4fe5329fa7daca6c4`
+Last fully green WS-02 implementation ancestor: `6f792eabe44a9ca1e9635fd4fe5329fa7daca6c4`
 
 A suite is evidence only for the boundary it exercises.
 
@@ -25,22 +25,25 @@ A suite is evidence only for the boundary it exercises.
 
 - 63 loader failures were repaired by building workspace dependencies first.
 - 27 obsolete pre-ratification suites were removed atomically rather than skipped.
+- In governance vocabulary, obsolete suites were removed atomically rather than skipped.
 - Three reusable assertions were corrected.
 - **106 test files passed** and **613 tests passed** on the WS-01 implementation head.
 - No skip list or quarantine was introduced.
-- Curated and broad results are independently reported.
+- curated and broad results are independently reported.
 
-## WS-02 current regression
+## WS-02 regression boundary
 
-On implementation head `6f792ea`:
+On ancestor `6f792ea`:
 
 - **109 test files / 630 tests passed**;
-- Remote MCP metadata/audience/PKCE/state/token custody attacks are covered;
-- MCP Apps sandbox/hash/host-method/action projection is covered;
-- AG-UI ordering/scope/finite command and streaming source boundaries are covered;
-- effective capability freshness/authority/entitlement and MCP pre-dispatch interception are covered;
-- the 15-dimensional generator is required to produce exactly 105 pairs and 357 meaningful triples;
-- production build, archaeology, and compiled Chromium also passed.
+- Remote MCP metadata/audience/PKCE/state/token custody attacks were covered;
+- MCP Apps sandbox/hash/host-method/action projection was covered;
+- AG-UI ordering/scope/finite command and streaming source boundaries were covered;
+- effective capability freshness/authority/entitlement and MCP pre-dispatch interception were covered;
+- the 15-dimensional generator produced exactly 105 pairs and 357 meaningful triples;
+- production build, archaeology, and compiled Chromium passed.
+
+The current branch adds assignment-scoped progress isolation, protocol assignment/version interception, enforceable iframe CSP, sanitized AG-UI failure output, and final MCP policy/version revalidation. Those additions are not accepted until the final exact head passes the same gate family.
 
 ## Useful but incomplete / environment-gated
 
