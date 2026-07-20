@@ -1,0 +1,53 @@
+{
+  "task_id": "AMTECH-P0-WS01-001",
+  "repository": "benamtech/ai-employee-v1",
+  "branch": "agent/amtech-p0-ws01-ws02-lock",
+  "objective": "Make the broad unit suite trustworthy and green, de-duplicate CI, and close executable provider-authority manufacture paths without weakening current invariants.",
+  "success_criteria": [
+    "npm run test:unit passes on the exact candidate and is part of Main Integration Gates for pull requests and main pushes.",
+    "Every removed or changed assertion is proven obsolete against current Standard, source, migration, or replacement contract evidence.",
+    "Browser, model payloads, MCP Apps, AG-UI, and runtime profiles cannot select or receive provider master credentials, provider base URLs, provider identity, or upstream models.",
+    "Only Manager-owned registry/policy and deployment configuration resolve provider identity and upstream routing.",
+    "Redundant historical workflow triggers and duplicate broad-suite/build execution are removed.",
+    "All current source, broad-unit, production-boundary, UI, build, archaeology, and compiled-browser gates pass on the final candidate."
+  ],
+  "allowed_files": [
+    ".github/workflows/**",
+    "mvp-build/apps/manager/src/lib/model-gateway*.ts",
+    "mvp-build/apps/manager/src/lib/runtime-profile-integrity.ts",
+    "mvp-build/apps/manager/src/lib/provisioning-reconciler.ts",
+    "mvp-build/packages/shared/src/**",
+    "mvp-build/tests/**",
+    "mvp-build/scripts/**",
+    "mvp-build/package.json",
+    "mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/**",
+    "mvp-build/memory/**",
+    "mvp-build/CODEGRAPH.md"
+  ],
+  "forbidden_files": [
+    "mvp-build/STANDARD.md",
+    "mvp-build/packages/db/migrations/0001_init.sql through 0072_artifact_revision_scope_guards.sql",
+    "wiki historical bodies",
+    "Hermes image pin or upstream source"
+  ],
+  "required_tests": [
+    "npm run test:unit",
+    "npm run test:standard",
+    "npm run test:production-boundary",
+    "npm run test:ui:contracts",
+    "npm run repo:verify:full",
+    "npm run build",
+    "Main Integration Gates"
+  ],
+  "known_blockers": [],
+  "max_commits": 40,
+  "rubric": {
+    "authority": 0.98,
+    "completeness": 0.96,
+    "agility": 0.93,
+    "isolation": 0.98,
+    "provability": 0.96,
+    "moat": 0.94
+  },
+  "mitigations": []
+}
