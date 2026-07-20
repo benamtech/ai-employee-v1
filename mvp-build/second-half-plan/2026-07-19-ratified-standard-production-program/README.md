@@ -28,6 +28,7 @@ Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector o
 - Direct MCP denies omitted or uncertain risk metadata.
 - Local/CI PostgreSQL is the database TDD loop; managed Supabase is selective platform/release evidence.
 - Contributor guide, task rubric, installable hooks, quick/full gates, PR template, governance validator, main integration workflow, and Hermes upstream intelligence are source-wired.
+- The broad historical `test:unit` aggregate still contains pre-ratification assignment/principal/RPC fixtures. Its red state is explicit P0 normalization work and is not hidden behind the ratified contract suites.
 - `research` is historical branch context, not an execution dependency.
 - The product is not launch-cleared.
 
@@ -46,7 +47,8 @@ Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector o
    - unknown, stale, revoked, and underspecified connectors fail closed;
    - managed-secret/service-account/operator adapters only through the manifest.
 
-3. **P0-B — Database TDD closure**
+3. **P0-B — Database and test-contract closure**
+   - normalize the broad historical unit suite to current assignment, principal, fake-RPC, and environment fixtures until `npm run test:unit` is green;
    - migration, RLS, existing-row, concurrency, race, and rollback matrices;
    - managed Supabase only for named platform/release conditions;
    - forward-only migrations.
