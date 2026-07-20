@@ -69,11 +69,11 @@ export function McpUiResource({
   }, [envelope._meta, html]);
 
   useEffect(() => {
-    function onMessage(event: MessageEvent) {
-      if (!ref.current || event.source !== ref.current.contentWindow || event.origin !== "null") return;
+    function onMessage(e: MessageEvent) {
+      if (!ref.current || e.source !== ref.current.contentWindow || e.origin !== "null") return;
       const metadata = envelope._meta;
       if (!metadata || !validateMcpAppSecurityMetadata(metadata).ok) return;
-      const message = event.data as {
+      const message = e.data as {
         jsonrpc?: string;
         method?: string;
         params?: {
