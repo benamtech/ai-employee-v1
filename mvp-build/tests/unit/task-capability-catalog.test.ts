@@ -45,7 +45,7 @@ const capabilities: ToolCapabilityDescriptor[] = [
 ];
 
 describe("task-aware capability matching", () => {
-  it("maps server-agnostic capabilities to current work without granting execution", () => {
+  it("maps a relevant Manager MCP tool to customer work without granting execution", () => {
     const matches = matchTaskCapabilities([{ id: "task-1", title: "Draft the customer follow-up email", type: "work" }], capabilities);
     expect(matches[0]).toMatchObject({
       task_id: "task-1",
@@ -53,7 +53,16 @@ describe("task-aware capability matching", () => {
       capability_id: "toolcap:manager:create-email-draft",
       role: "primary",
     });
-    expect(matches.some((match) => match.capability_id === "toolcap:runtime:browser" && match.role === "blocked")).toBe(true);
+    expect(matches.some((match) => match.capability_id === "toolcap:runtime:browser")).toBe(false);
+  });
+
+  it("shows a relevant runtime capability as blocked until live evidence passes", () => {
+    const matches = matchTaskCapabilities([{ id: "task-2", title: "Research and revise the website", type: "work" }], capabilities);
+    expect(matches).toContainEqual(expect.objectContaining({
+      task_id: "task-2",
+      capability_id: "toolcap:runtime:browser",
+      role: "blocked",
+    }));
   });
 
   it("is deterministic for the same task and catalog", () => {
