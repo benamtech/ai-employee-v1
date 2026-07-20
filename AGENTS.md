@@ -8,75 +8,101 @@ Updated: 2026-07-19
 1. `identity.md`
 2. this file or `CLAUDE.md`
 3. root `CODEGRAPH.md`
-4. the nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
-5. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff for product work
-6. `mvp-build/STANDARD.md` and the active execution plan for production-boundary work
-7. `mvp-build/docs/architecture/README.md`
-8. `mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`
-9. relevant UX, deployment, source, migrations, scripts, tests, proofs, release records, and current branch diff
+4. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
+5. ratified `mvp-build/STANDARD.md`
+6. `mvp-build/second-half-plan/README.md` and its single active program
+7. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
+8. `mvp-build/docs/architecture/README.md`
+9. relevant source, migrations, tests, workflows, proof, release records, and current diff
 
-Verified source, applied migrations, executable proof, and newest scoped memory outrank stale prose. The narrowest scoped instruction governs its subtree unless it conflicts with source truth or an explicit user instruction.
+Authority order: deployed release proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests/acceptance → ratified Standard/active program → CODEGRAPH/architecture → newest indexed memory → historical records.
 
-## Scope routing
+## Repository routing
 
-- AI Employee product/runtime work: `mvp-build/`.
-- Current cross-system architecture, risks, and agent roles: `mvp-build/docs/architecture/`.
-- Owner UX doctrine and research disposition: `mvp-build/docs/ux/`.
-- Durable session handoffs: `mvp-build/memory/`, indexed only by `mvp-build/memory/MEMORY.md`.
-- Historical factual implementation records: `wiki/MVP/implementation-records/`.
-- Product and implementation rationale: `wiki/`, verified against current `mvp-build/` source and proof.
-- Cross-repository marketing-site framework work lives in `benamtech/hyper-site`; do not recreate it here.
-- The public estimator is an outdated, non-canonical acquisition/regression surface.
+- AI Employee implementation and production authority: `mvp-build/`.
+- Ratified product/engineering requirements: `mvp-build/STANDARD.md`.
+- Single active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Current architecture/research disposition: `mvp-build/docs/architecture/`.
+- Durable handoffs: `mvp-build/memory/`, indexed only by `mvp-build/memory/MEMORY.md`.
+- Historical factual ledger: `wiki/MVP/implementation-records/`.
+- Wiki plans/rationale are historical or explanatory unless routed by current root/scoped indexes.
+- Hyper Site lives in `benamtech/hyper-site`; do not recreate it here.
+- The public estimator is outdated and non-canonical.
 
 ## Current integration boundary
 
+- Repository: `benamtech/ai-employee-v1`.
 - Integration branch: `employee-production-tuesday`.
 - Base: `research`.
-- Draft integration PR: `#23`.
-- Migration head: `0069`.
-- `main` is not an integration or production shortcut.
-- Source/CI progress does not imply real Supabase, runtime, provider, browser/channel, commercial, capacity, recovery, rollback, deployment, or launch acceptance.
+- Draft PR: `#23`.
+- Migration head: `0072`.
+- `main` is never the integration or release shortcut.
+- Standard v0.2 is ratified and effective.
+- Current source/CI does not imply database, target-host, provider, fixture-free browser/channel, commercial, recovery, rollback, capacity, deployment, or launch acceptance.
 
-Use root/scoped CODEGRAPH and the newest handoff for the exact current proof anchor and workflow IDs.
+## Product and protocol invariants
 
-## Repository invariants
+1. AMTECH is governed AI labor, not a generic chat or tool wrapper.
+2. Every consequential path resolves an authenticated principal plus explicit assignment or approved platform/system context.
+3. Identity, ownership, employment, access, authority, custody, payer, and beneficiary remain separate relationships.
+4. Hermes remains the reasoning/runtime substrate; Manager owns assignment authority, capability/tool contracts, connector custody, approvals, durable effects, commercial attribution, revocation, repair, and proof.
+5. MCP core, MCP Apps, and AG-UI are interoperability layers, not execution authority.
+6. Gmail, QuickBooks, and Stripe are shipped adapters, not the connector ontology.
+7. Unknown/consequential connectors fail closed to Manager mediation; direct MCP requires explicit read-only, non-money, non-customer-facing evidence.
+8. Generated UI and adaptive layout are presentation systems; browser state cannot invent work, actions, approval, credentials, or effects.
+9. Customer-facing, monetary, destructive, credential, and broad external actions use assignment-aware policy, approval where required, durable effect state, and receipts.
+10. Provider master credentials never enter employee profiles or runtimes.
+11. Ambiguous consequential provider outcomes reconcile before retry.
+12. Public and release claims never exceed evidence on the exact candidate.
 
-1. Preserve the canonical normal-employee deployment path.
-2. Never claim live, provider, runtime, browser, channel, commercial, migration, capacity, recovery, or release acceptance without exact proof bound to the tested and deployed SHA.
-3. Every consequential customer-work path resolves an authenticated principal plus explicit assignment or approved platform/system context.
-4. Account membership, bearer possession, caller-selected IDs, mutable headers, and phone ownership are never complete authority.
-5. Customer-, money-, reputation-, credential-, and destructive actions use assignment-aware approval and durable receipts.
-6. Provider master credentials never enter employee profiles or employee runtimes.
-7. Consequential success without a matching durable accepted receipt is forbidden; ambiguity remains durable and repairable.
-8. Hermes remains the agent/runtime substrate; Manager owns authority, command/effect, custody, commercial provenance, repair, and proof.
-9. Generated UI and adaptive layout are presentation systems, not independent authority or hidden psychographic engines.
-10. Preserve Start Free, Managed AI Employee from $400, and Workforce custom pricing unless explicitly changed.
-11. Voice is a future extension, not a launch gate. Current governed surfaces are web, SMS, signed review, and connected-system events.
-12. Keep docs, migrations, contracts, tests, proofs, memory, plan/vector state, PR state, and release claims synchronized.
+## Company engineering standards
 
-## Working method
+Every task must declare:
 
-- Inspect before editing.
-- State one primary coding-agent role and the interacting subsystems for substantial work; use the role map in `mvp-build/docs/architecture/11-agent-orientation-and-role-map.md`.
-- Correct a flawed acceptance contract before implementing against it.
-- Prefer the smallest coherent change that closes an invariant without hiding a failed gate.
-- Adapt existing Manager, Hermes, reconciler, inbox, provider, provisioning, commercial, and UI machinery to shared contracts rather than building parallel platforms.
-- Treat trajectory artifacts as dependency and bifurcation review aids only. They never establish runtime behavior, authority, or acceptance.
-- Record what was not validated. `source-wired` is not `production-ready`.
-- Update the nearest CODEGRAPH and durable handoff when architecture, authority, branch state, source-of-truth paths, or production risk changes.
+- task ID, repository, branch, and concise objective;
+- verifiable success criteria;
+- allowed and forbidden files;
+- required tests;
+- known blockers;
+- maximum commits when assigned.
 
-## Document and memory discipline
+Execution:
 
-- Root `CODEGRAPH.md` owns repository-level routing and current integration headline.
-- `mvp-build/CODEGRAPH.md` owns current implementation topology, migration head, proof boundary, and next dependency gates.
-- `mvp-build/memory/MEMORY.md` is the sole handoff index; keep it newest-first.
-- `mvp-build/docs/architecture/12-document-control-memory-and-handoff-map.md` defines all document families and update transactions.
-- Historical handoffs and implementation records remain point-in-time evidence; do not silently rewrite them into current state.
-- Do not physically move Markdown evidence files without rewriting every inbound reference and retaining an archive/index path.
+```text
+Explore → smallest coherent action → test → commit → verify exact head
+```
+
+Rules:
+
+- Never edit `main`.
+- No feature expansion while a prerequisite P0 is unresolved.
+- Every commit references the task ID.
+- If CI is red after the change, stop downstream work and fix or escalate.
+- If an applicable test fails after the change, treat it as the change's defect unless evidence proves the expectation stale.
+- Do not weaken tests merely to obtain green.
+- Use `find`/`grep` rather than guessing paths.
+- Run tests before reporting completion.
+- After three failed attempts on the same concrete step, preserve diagnostics and escalate.
+- Measure on this codebase and deployed product boundary, not public benchmark scores.
+- Schemas, fixtures, migrations, typed contracts, harnesses, diagnostics, proof capture, and runbooks are first-class implementation.
+- Add concise `why` comments at non-obvious authority, safety, failure, or compatibility boundaries.
+
+## Database evidence policy
+
+Routine database work uses production-shaped local/CI PostgreSQL TDD: complete ledger, constraints, RLS/grants/functions, negative isolation, concurrency, backfills, and rollback behavior.
+
+Disposable managed Supabase is required only for material platform-specific behavior, security-sensitive browser/Data API boundaries, suspected platform differences, new release migration classes, and the final release candidate. Production is never the routine test target.
+
+## Documentation discipline
+
+- Root `CODEGRAPH.md` owns repository routing and the integration headline.
+- `mvp-build/CODEGRAPH.md` owns implementation topology, migration head, source hubs, and evidence boundary.
+- `mvp-build/STANDARD.md` owns normative requirements.
+- `mvp-build/second-half-plan/README.md` owns the single active plan route.
+- `mvp-build/memory/MEMORY.md` is the sole handoff index.
+- Historical documents remain point-in-time evidence; route them through explicit supersession banners rather than silently rewriting facts.
+- A newer date or longer document does not automatically make a file authoritative.
 
 ## Git discipline
 
-- Work on the explicitly selected branch; preserve `main` unless the user explicitly directs otherwise.
-- Keep specialist lanes narrow and merge through the integration branch.
-- Do not force-update shared branches without explicit approval and a safe recovery path.
-- Merge only when the target is current, conflicts are resolved, required checks pass, documentation/proof is synchronized, and no P0/P1 gate is hidden.
+Work only on the selected branch. Do not force-update shared branches without explicit approval and a recovery path. Merge only when required checks pass, current authority documents and proof agree, and no P0/P1 gate is hidden.
