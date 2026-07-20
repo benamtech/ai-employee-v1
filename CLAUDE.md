@@ -7,13 +7,15 @@ Read `identity.md` first. Root `AGENTS.md` is the complete tool-agnostic contrac
 
 ## Current branch state
 
-- Integration/cutover branch: `employee-production-tuesday`.
-- Target/base: `main`.
-- Draft cutover PR: `#23`.
-- Historical `research` is not a current integration dependency.
+- PR `#23` merged the reviewed cutover into `main` on 2026-07-20.
+- Current integration baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`.
+- Final cutover evidence head: `d131dd09e216fc9dcf0444afd1eb1494194f52eb`.
+- New work starts on reviewed task branches from current `main`.
+- `employee-production-tuesday` and `research` are historical context, not current integration dependencies.
 - Migration head: `0072`.
 - Standard v0.2 is ratified and effective.
 - Active program: `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`.
+- Phase 1.1 repairs repository/test-contract truth, including the known red broad unit aggregate.
 
 ## Canonical boundary
 
@@ -37,19 +39,20 @@ The task contract includes Authority, Completeness, Agility, Isolation, Provabil
 
 ## Engineering rules
 
-- Work on a reviewed branch; `main` changes only through approved merge.
+- Work on a reviewed task branch from current `main`; `main` changes only through approved merge.
 - Inspect before editing; use `find`/`grep` rather than invented paths.
 - No feature expansion while a prerequisite P0 is unresolved.
 - Every commit references the task ID.
 - Run applicable tests and exact-head CI before completion.
 - Stop downstream work on red CI.
 - Do not weaken expectations merely to get green.
+- The named curated main gate and the broad `npm run test:unit` aggregate are separate claims; never substitute one for the other.
 - After three failed attempts on one concrete step, retain diagnostics and escalate.
 - Treat scaffolding, tests, migrations, proof capture, and runbooks as first-class implementation.
 
 ## Hermes upstream review
 
-For Hermes integration, runtime, profile, session, delegation, tool-discovery, gateway, or Hermes-derived UI changes, run `npm run hermes:upstream:check` and review the official repository, `hermes_cli/`, `web/src/App.tsx`, recent commits, and active PRs. Upstream changes never auto-upgrade the pinned production runtime.
+For Hermes integration, runtime, profile, session, delegation, tool-discovery, gateway, or Hermes-derived UI changes, run `npm run hermes:upstream:check` and review the official repository, `hermes_cli/`, `web/src/App.tsx`, recent commits, and active PRs. Upstream changes never auto-upgrade the pinned production runtime. Do not run the check merely because a session starts; require repository policy, watched-path drift, pin mismatch, or a material Hermes-boundary workstream.
 
 ## Database and evidence policy
 
