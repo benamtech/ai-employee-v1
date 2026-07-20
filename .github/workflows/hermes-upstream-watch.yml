@@ -1,0 +1,78 @@
+name: Hermes Upstream Review
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 13 * * 1"
+  push:
+    branches:
+      - employee-production-tuesday
+      - main
+    paths:
+      - "mvp-build/infra/**"
+      - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/packages/agent-template/**"
+      - "mvp-build/packages/profiles/**"
+      - "mvp-build/docs/architecture/04-hermes-context-capabilities-and-power-user-operation.md"
+      - "mvp-build/docs/architecture/17-hermes-upstream-review-protocol.md"
+      - "mvp-build/scripts/check-hermes-upstream.mjs"
+      - "mvp-build/validation/hermes-upstream-baseline.json"
+      - ".github/workflows/hermes-upstream-watch.yml"
+  pull_request:
+    branches:
+      - main
+      - research
+    paths:
+      - "mvp-build/infra/**"
+      - "mvp-build/apps/manager/src/lib/hermes-client.ts"
+      - "mvp-build/packages/agent-template/**"
+      - "mvp-build/packages/profiles/**"
+      - "mvp-build/docs/architecture/04-hermes-context-capabilities-and-power-user-operation.md"
+      - "mvp-build/docs/architecture/17-hermes-upstream-review-protocol.md"
+      - "mvp-build/scripts/check-hermes-upstream.mjs"
+      - "mvp-build/validation/hermes-upstream-baseline.json"
+      - ".github/workflows/hermes-upstream-watch.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hermes-upstream-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  upstream-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: mvp-build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Inspect official Hermes head, watched paths, and active pull requests
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            node scripts/check-hermes-upstream.mjs
+          else
+            node scripts/check-hermes-upstream.mjs --enforce
+          fi
+      - name: Publish upstream review report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hermes-upstream-review-${{ github.sha }}
+          path: mvp-build/validation/reports/hermes-upstream-watch.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Write review summary
+        if: always()
+        run: |
+          echo "## Hermes upstream review" >> "$GITHUB_STEP_SUMMARY"
+          echo "Official source: https://github.com/NousResearch/hermes-agent" >> "$GITHUB_STEP_SUMMARY"
+          echo "Watched: hermes_cli/ and web/src/App.tsx" >> "$GITHUB_STEP_SUMMARY"
+          echo "Production remains pinned; this workflow never upgrades the runtime." >> "$GITHUB_STEP_SUMMARY"
