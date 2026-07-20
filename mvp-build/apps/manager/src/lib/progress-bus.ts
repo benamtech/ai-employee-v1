@@ -2,29 +2,20 @@ import { EventEmitter } from "node:events";
 import type { WorkProgressState } from "@amtech/shared";
 
 /**
- * Ephemeral low-latency stream events. They improve responsiveness but never become
- * authority: durable messages, work objects, approvals, effects, and receipts remain
- * in PostgreSQL and are reloaded on reconnect.
+ * Ephemeral low-latency projection. `kind` is optional at the producer boundary so
+ * existing scheduler/wake progress producers remain compatible; publish normalizes
+ * them to `work_progress`. Durable state remains authoritative on reconnect.
  */
-export type ProgressEvent =
-  | {
-      kind: "work_progress";
-      run_id: string;
-      verb: string;
-      state: WorkProgressState;
-    }
-  | {
-      kind: "assistant_delta";
-      run_id: string;
-      message_id: string;
-      sequence: number;
-      delta: string;
-    }
-  | {
-      kind: "run_completed";
-      run_id: string;
-      status: string;
-    };
+export interface ProgressEvent {
+  kind?: "work_progress" | "assistant_delta" | "run_completed";
+  run_id: string;
+  verb?: string;
+  state?: WorkProgressState;
+  message_id?: string;
+  sequence?: number;
+  delta?: string;
+  status?: string;
+}
 
 const bus = new EventEmitter();
 bus.setMaxListeners(0);
@@ -34,7 +25,8 @@ function channel(employeeId: string): string {
 }
 
 export function publishProgress(employeeId: string, event: ProgressEvent): void {
-  bus.emit(channel(employeeId), event);
+  const normalized: ProgressEvent = { ...event, kind: event.kind ?? "work_progress" };
+  bus.emit(channel(employeeId), normalized);
 }
 
 /** Subscribe to one employee's live projection; returns an unsubscribe function. */
