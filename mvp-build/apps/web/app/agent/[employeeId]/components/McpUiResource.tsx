@@ -76,11 +76,11 @@ export function McpUiResource({
   }, [envelope._meta, html]);
 
   useEffect(() => {
-    function onMessage(event: MessageEvent) {
-      if (!ref.current || event.source !== ref.current.contentWindow || event.origin !== "null") return;
+    function onMessage(e: MessageEvent) {
+      if (!ref.current || e.source !== ref.current.contentWindow || e.origin !== "null") return;
       const metadata = envelope._meta;
       if (!metadata || !validateMcpAppSecurityMetadata(metadata).ok) return;
-      const message = event.data as {
+      const message = e.data as {
         jsonrpc?: string;
         method?: string;
         params?: {
@@ -96,7 +96,7 @@ export function McpUiResource({
       if (!metadata.host_methods.includes("tools/call")) return;
       const args = message.params.arguments;
       const intent = args?.intent as McpUiIntent;
-      if (!( ["accept", "accept_all", "reject", "respond"] as string[]).includes(intent)) return;
+      if (!(["accept", "accept_all", "reject", "respond"] as string[]).includes(intent)) return;
       const returned = args?.authority;
       if (!returned
         || returned.protocol_version !== metadata.authority.protocol_version
