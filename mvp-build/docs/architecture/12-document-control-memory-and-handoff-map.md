@@ -1,12 +1,11 @@
 # 12 — Document Control, Memory, Handoff, and Plan Map
 
-Status: **[VERIFIED] repository documentation-routing map**
+Status: **active repository documentation-routing contract**  
+Updated: 2026-07-19
 
-This document accounts for the repository’s root/scoped control documents, durable memory, implementation records, execution plans, architecture/UX packets, deployment runbooks, and historical handoffs. It organizes them by authority and use without physically moving historical Markdown files or breaking inbound references.
+This document defines authority and routing without physically moving historical Markdown or breaking inbound references.
 
 ## One cold-start chain
-
-Every coding agent working on the AI Employee follows this chain:
 
 ```text
 root identity.md
@@ -14,16 +13,14 @@ root identity.md
 → root CODEGRAPH.md
 → mvp-build/AGENTS.md or CLAUDE.md
 → mvp-build/CODEGRAPH.md
-→ mvp-build/memory/MEMORY.md
-→ newest relevant handoff
-→ mvp-build/STANDARD.md
-→ active second-half execution program
+→ ratified mvp-build/STANDARD.md
+→ mvp-build/second-half-plan/README.md and its one active program
+→ mvp-build/memory/MEMORY.md and newest relevant handoff
 → docs/architecture/README.md
-→ role/subsystem docs and UX docs
-→ current source, migrations, tests, workflows, proof, and branch diff
+→ relevant source, migrations, tests, workflows, proof, and branch diff
 ```
 
-`docs/architecture/11-agent-orientation-and-role-map.md` explains the role-specific version of this sequence.
+Do not concatenate every historical handoff or select authority by filename date alone.
 
 ## Authority classes
 
@@ -31,208 +28,136 @@ root identity.md
 
 | File/family | Purpose | Update trigger |
 |---|---|---|
-| `identity.md` | AMTECH operating/product identity | deliberate company/product posture change |
-| root `AGENTS.md` / `CLAUDE.md` | repository-wide agent rules and scope routing | repository boundary, invariant, or boot-sequence change |
-| root `CODEGRAPH.md` | repository-level current state and source-of-truth routing | branch/proof/current-state/repository-boundary change |
-| `mvp-build/AGENTS.md` / `CLAUDE.md` | scoped implementation rules | implementation invariant, role, or validation change |
-| `mvp-build/CODEGRAPH.md` | current implementation graph, source hubs, migration head, evidence boundary | substantial implementation, architecture, migration, or proof change |
-| `mvp-build/STANDARD.md` | non-waivable production standard | approved standard revision only |
-| `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md` | active dependency-ordered execution program | explicit plan amendment/supersession |
-| `mvp-build/validation/phase-2-remediation-vectors.json` | machine-readable finding/gate registry | plan/gate change with integrity tests |
-| draft PR `#23` | integration diff/status/evidence boundary | exact-head implementation or CI state change |
+| `identity.md` | company/product identity | deliberate company/product posture change |
+| root/scoped `AGENTS.md` and `CLAUDE.md` | agent rules and scope routing | repository boundary or execution invariant change |
+| root `CODEGRAPH.md` | repository purpose, current branch, routing, repository-wide status | branch/product/repository authority change |
+| `mvp-build/CODEGRAPH.md` | implementation topology, source hubs, migration head, evidence boundary | substantial implementation/migration/proof change |
+| `mvp-build/STANDARD.md` | ratified non-waivable product and engineering requirements | approved Standard amendment |
+| `mvp-build/validation/standard-v0.2-evolution-vector.json` | original-to-ratified clause/implementation motion | Standard or implementation-satisfaction change |
+| `mvp-build/second-half-plan/README.md` | sole active-plan index | active program supersession |
+| `mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/` | active dependency order and task contracts | gate/order/task change |
+| draft PR `#23` | integration diff, exact-head status, workflow evidence | branch head or evidence change |
 
-These files must not disagree about branch, migration head, current proof boundary, or production-ready meaning.
+These files must not disagree about branch, migration head, current plan, Standard status, or production-ready meaning.
 
 ### Class 2 — current explanatory authority
 
-| File/family | Purpose |
-|---|---|
-| `mvp-build/docs/architecture/README.md` | cross-sectional live map |
-| `mvp-build/docs/architecture/01–09` | product, network, events, Hermes/context, UI, effects, use cases, archaeology, and risk register |
-| `mvp-build/docs/architecture/trajectories/` | dependency/bifurcation review aids grounded in source interactions |
-| `mvp-build/docs/architecture/11-agent-orientation-and-role-map.md` | agent roles and required proof |
-| this file | document family and handoff routing |
-| `mvp-build/docs/ux/` | owner UX doctrine, system map, implementation coverage, validation, research disposition, Hermes/UI decisions |
-| `mvp-build/docs/production-normal-employee-live-deploy-runbook.md` | canonical production-shaped live execution path |
+- `mvp-build/docs/architecture/README.md` and indexed current companions;
+- `mvp-build/docs/architecture/16-standard-research-basis-and-protocol-disposition.md`;
+- `mvp-build/docs/ux/`;
+- canonical production runbooks.
 
-Architecture and UX documents explain current source. They do not override source or turn source wiring into live acceptance.
+These explain source and requirements. They do not establish deployed acceptance.
 
-### Class 3 — durable memory and point-in-time evidence
+### Class 3 — durable narrative and factual evidence
 
-| Family | Purpose |
-|---|---|
-| `mvp-build/memory/` | newest-first session handoffs, decisions, unresolved risks, and next-agent start |
-| `wiki/MVP/implementation-records/` | dated factual implementation/proof records |
-| CI artifacts and release records | exact-SHA executable evidence |
+- `mvp-build/memory/` — dated handoffs; indexed only by `memory/MEMORY.md`;
+- `wiki/MVP/implementation-records/` — historical factual implementation/proof ledger;
+- exact CI artifacts and release records.
 
-Memory and implementation records are intentionally historical. Older entries remain readable, but their status does not automatically carry forward.
+Point-in-time evidence never carries forward automatically.
 
-### Class 4 — plans and research history
+### Class 4 — historical plans and research
 
-| Family | Purpose |
-|---|---|
-| `mvp-build/second-half-plan/phase-00…phase-06` | historical subsystem plan family |
-| `mvp-build/second-half-plan/context-engineering/` | historical context-engineering plan/research |
-| `mvp-build/second-half-plan/surface-research-*` | Hermes/UI research history |
-| `wiki/` | company/product strategy, evidence, historical plans, research |
-| older `docs/` packets | historical design/operating context |
+- `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`;
+- `mvp-build/second-half-plan/2026-07-20-capability-production-closure/`;
+- `mvp-build/second-half-plan/phase-00-*` through `phase-06-*`;
+- `mvp-build/second-half-plan/context-engineering/`;
+- `wiki/MVP/build-plan-current/` and `wiki/MVP/old-build-plan/`;
+- older architecture, UX, handoff, research, and implementation-record packets.
 
-These files supply rationale and hypotheses. Current source, standard, active plan, architecture map, CODEGRAPH, and newest memory determine current state.
+Historical materials remain readable and retain their original facts. Their indexes or banners route current work to Class 1.
 
-## Root and scoped CODEGRAPH division
+## Root and scoped responsibilities
 
 ### Root `CODEGRAPH.md`
 
-Owns:
-
-- repository boundary and purpose;
-- canonical product/offer;
-- root read order;
-- current integration branch/PR/status;
-- source-of-truth and document-family routing;
-- repository-wide invariants;
-- link to scoped implementation graph.
-
-It should not duplicate every Manager migration, route, worker, or UI component.
+Owns repository boundary, canonical product/offer, root read order, branch/PR, current Standard/plan route, evidence headline, and repository-wide invariants.
 
 ### `mvp-build/CODEGRAPH.md`
 
-Owns:
+Owns executable topology, source hubs, migration head, connector/protocol state, database evidence ladder, current proof boundary, and dependency gates.
 
-- current implementation topology and source hubs;
-- active migration head;
-- closed source-level P0/P1 findings;
-- current exact implementation/CI proof anchor;
-- current live evidence boundary;
-- next production dependency gates;
-- links to architecture, UX, memory, plan, validation, and runbook layers.
+### `mvp-build/STANDARD.md`
 
-It should not carry every historical lane narrative inline after those records are preserved in memory/implementation records.
+Owns non-waivable requirements and evidence vocabulary. It does not contain current incident narrative or detailed task sequencing.
 
-## Durable memory inventory
+### Active production program
 
-`mvp-build/memory/MEMORY.md` is the sole index for the handoff directory. The files below are retained and classified; none is physically moved.
+Owns dependency order, verifiable task contracts, exit criteria, stop rules, and handoff matrix. No other plan file is current execution authority.
 
-### Current architecture/production handoffs
+### Memory
 
-- `2026-07-19-repository-archaeology-architecture-and-agent-orientation.md` — current documentation/architecture/code-review pass and agent-navigation checkpoint.
-- `2026-07-19-hermes-webui-ui-congruence-pass.md` — current Hermes/WebUI/UI congruence implementation and evidence predecessor.
-- `2026-07-19-ui-runtime-production-readiness-handoff.md` — current UI/runtime/role/production-readiness predecessor.
-- `2026-07-18-s2-s9-authority-runtime-checkpoint.md` — authority/runtime production-boundary predecessor.
+Owns narrative: what changed, why, incidents, unresolved risks, exact proof, and next-agent handoff. `MEMORY.md` is the sole index.
 
-### Standard/remediation and integration handoffs
+### Wiki
 
-- `2026-07-18-ci-green-plan-digest.md`
-- `2026-07-18-lane1-scope-lane10-evidence-spine.md`
-- `2026-07-18-lane3-integration-and-repository-boundary-cleanup.md`
-- `2026-07-18-standard-remediation-lane1-lane3-handoff.md`
-- `2026-07-18-amtech-phase-2-standard-enforcement-audit.md`
-- `2026-07-18-amtech-standard-v0.1-draft-2.md`
+Owns strategy, rationale, research history, historical plans, and factual records. A wiki page does not become implementation authority because it is newer or more detailed.
 
-### Runtime, deployment, and production-boundary handoffs
+## Plan-family decision
 
-- `2026-07-17-employee-work-production-boundary-reconciler-pass.md`
-- `2026-07-17-production-next-sequence-and-generative-ui-reconciliation.md`
-- `2026-07-16-2000-prod-env-overlay-system.md`
-- `2026-07-16-1645-documentation-freeze-reconciliation.md`
-- `2026-07-16-1323-web-message-runtime-recovery.md`
-- `2026-07-16-0812-owner-resource-safety-and-xai-runtime-proof.md`
-- `2026-07-16-0719-provisioner-twilio-webhook-and-api-tunnel-fix.md`
-- `2026-07-16-0538-provisioner-failure-live-production-handoff.md`
-- `2026-07-16-0335-production-normal-employee-runbook-default-handoff.md`
-- `2026-07-16-ws1-ws2-production-boundary-pass.md`
+The active program is:
 
-### UX, method, and historical product-direction handoffs
+`mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`
 
-- `2026-07-17-ws1-ws2-documentation-reconciliation-and-website-frontier.md`
-- `2026-07-17-0145-leverage-and-method-distilled.md`
-- `2026-07-17-0130-final-doc-sync-complete.md`
-- `2026-07-17-0030-prod-ux-branch-start.md`
+Superseded plans remain in place. `mvp-build/second-half-plan/README.md` is the only current plan selector.
 
-The exact filename for the WS1/WS2 documentation handoff is verified by `memory/MEMORY.md`; historical titles may be longer than their filename slug. The memory index remains the filename authority.
+Creating another “current” plan without updating that index and explicitly superseding the prior active program in the same transaction is prohibited.
 
-## Handoff selection rules
+## Handoff selection
 
-Read only the subset needed after reading the current control chain:
+After the Class 1 cold start, select only handoffs relevant to the subsystem:
 
-| Work type | Required current handoffs | Optional predecessors |
+| Work | Current handoff requirement | Optional history |
 |---|---|---|
-| repository/docs/architecture | newest archaeology/orientation handoff + Hermes/UI congruence handoff | documentation freeze, final doc sync |
-| UI/UX/generated UI | newest archaeology/orientation + Hermes/UI congruence + UI/runtime readiness | prod UX branch start, generative UI reconciliation |
-| authority/assignments/C3 | newest archaeology/orientation + S2–S9 checkpoint | lane 1/lane 3 handoffs, standard audit |
-| runtime/network/provisioning | newest archaeology/orientation + employee-work reconciler pass | WS1/WS2 boundary, production run handoffs |
-| deployment/live proof | newest archaeology/orientation + production normal-employee runbook handoff | env overlay, tunnel/runtime proof incidents |
-| plan/standard changes | newest archaeology/orientation + standard enforcement audit | standard draft, CI plan digest |
+| Standard/plan/docs | newest ratification/Gate 0 handoff | prior capability and document-authority handoffs |
+| connector/MCP/protocol | newest ratification handoff | Hermes/UI congruence, MCP/tool records |
+| database/migrations | newest ratification handoff | prior production-boundary and lane records |
+| runtime/network/deploy | newest ratification handoff | reconciler and production-run handoffs |
+| UI/generated work | newest ratification handoff | UI/runtime and generative UI predecessors |
+| authority/approval/effects | newest ratification handoff | S2–S9 and Lane 1/Lane 3 predecessors |
 
-Do not read every historical handoff as an unordered prompt bundle. Read current control documents first, select predecessors by subsystem, and verify every carried-forward claim.
+Verify every carried-forward claim against current source and exact proof.
 
-## Implementation-record inventory and routing
+## Update transaction
 
-`wiki/MVP/implementation-records/README.md` is the index for older factual implementation records, including:
-
-- 2026-07-17 WS1/WS2 production boundary;
-- 2026-07-05 MCP/toolsets/tool activity;
-- 2026-07-03 Phase 4 hardening/Phase 6;
-- 2026-07-03 Phase 3/3A/4 core;
-- 2026-06-30 Phase 2 runtime/scheduler;
-- 2026-06-30 Phase 1 acceptance harness;
-- earlier baseline, Gmail/Stripe, Work Surface, repair/security, and event-bus records.
-
-These remain point-in-time factual records. The index must route readers to current CODEGRAPH, architecture, memory, and exact-head proof before historical records.
-
-## Plan-family organization
-
-`mvp-build/second-half-plan/README.md` remains the index for:
-
-- active `phase-2-standard-remediation-execution.md`;
-- historical Phase 0–6 files;
-- context-engineering history;
-- Hermes surface/materialization research.
-
-The README must describe current integration state, not the older pre-Lane-3 checkpoint. Historical plan files are not renamed or moved.
-
-## Markdown organization decision
-
-[VERIFIED] No broad physical Markdown move is performed in this pass.
-
-Reasons:
-
-1. handoffs and implementation records are point-in-time evidence with many inbound links;
-2. moving them would create stale references throughout memory, wiki, PRs, and external notes;
-3. current confusion comes from missing routing/status, not from directory names;
-4. virtual organization through canonical indexes preserves evidence and improves agent navigation.
-
-Allowed future moves require:
-
-- an exact inbound-reference rewrite;
-- redirect/stub or explicit archive index;
-- archaeology verification showing no stale path remains;
-- CODEGRAPH/memory/PR synchronization.
-
-## Update transaction after substantial work
-
-A documentation/state update is complete only when all applicable layers are synchronized:
+A substantial source, Standard, plan, or status change is complete only when applicable layers are synchronized:
 
 ```text
 source/migration/test/workflow
-→ architecture or UX contract
-→ mvp-build/CODEGRAPH.md
-→ root CODEGRAPH.md when repository-level state changes
-→ dated memory handoff
-→ memory/MEMORY.md newest-first index
-→ implementation record when durable factual proof warrants it
-→ active plan/vector when dependency or gate changes
-→ PR description and exact-head workflow evidence
+→ Standard/vector when normative motion changed
+→ active program when dependency/order changed
+→ architecture/UX explanation
+→ scoped CODEGRAPH
+→ root CODEGRAPH/README when repository routing changed
+→ one dated memory handoff
+→ memory/MEMORY.md
+→ wiki/root supersession routing when stale readers could be misled
+→ exact-head workflows
+→ PR #23
 ```
 
-A documentation-only follow-up SHA must not replace an earlier implementation proof anchor unless all required workflows rerun and pass on the new head.
+A documentation-only SHA does not inherit an ancestor's workflow matrix.
 
-## Staleness controls
+## Anti-context-rot rules
 
-- Every current index carries `Status` and `Updated`.
-- Current-state files link to exact source/proof rather than copying old pass counts indefinitely.
-- Historical files keep their original point-in-time statements and receive a clear historical/superseded banner only when needed.
-- Memory remains newest-first.
-- Architecture risk register owns current source-confirmed P0/P1 production gaps.
-- Trajectory artifacts own dependency/bifurcation analysis, not current-state claims.
-- Repository archaeology runs on the exact branch head and emits stale-reference/orphan candidates for source-level confirmation.
+- One ratified Standard.
+- One active production program.
+- One memory index.
+- CODEGRAPH is a current map, not an incident journal.
+- Memory is a handoff layer, not a competing plan.
+- Historical records are not rewritten to appear current.
+- Dates and filenames do not determine authority.
+- Current claims use exact source/evidence instead of copied historical pass counts.
+- Stale point-in-time audits receive supersession banners.
+- Repository archaeology detects candidate stale references; a human/source review decides whether they are defects.
+
+## Completion predicate for `AMTECH-P0-DOC-002`
+
+Gate 0 document resolution is complete when:
+
+1. root/scoped/wiki indexes route to ratified Standard v0.2 and one active program;
+2. old plans are explicitly historical;
+3. connector/MCP/AG-UI/database terminology matches current source and research disposition;
+4. the newest handoff records the final exact head and all required workflows;
+5. PR `#23` matches that branch head without claiming unclosed live gates.
