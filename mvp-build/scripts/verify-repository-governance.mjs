@@ -1,15 +1,102 @@
 #!/usr/bin/env node
-import { readFile } from "node:fs/promises";
+import { access, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
+/**
+ * Repository governance validator.
+ *
+ * This validates durable structure and cross-file invariants. It deliberately does
+ * not pin transient commit SHAs, workflow run IDs, test counts, or prose status
+ * sentences. Those values belong in machine-readable evidence records and may change
+ * without requiring validator source edits.
+ */
+
 const root = process.cwd();
-const read = (path) => readFile(resolve(root, path), "utf8");
+const activeProgramRelative = "second-half-plan/2026-07-19-ratified-standard-production-program";
+const activeProgram = resolve(root, activeProgramRelative);
 const failures = [];
 const passes = [];
 
 function check(id, condition, detail) {
   (condition ? passes : failures).push({ id, detail });
 }
+
+async function read(path) {
+  return readFile(resolve(root, path), "utf8");
+}
+
+async function exists(path) {
+  try {
+    await access(resolve(root, path));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function parseJson(path, text) {
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    failures.push({ id: `JSON-${path}`, detail: `invalid JSON: ${String(error)}` });
+    return null;
+  }
+}
+
+function isSha(value) {
+  return typeof value === "string" && /^[a-f0-9]{40}$/i.test(value);
+}
+
+function isNonEmptyString(value) {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function unique(values) {
+  return new Set(values).size === values.length;
+}
+
+function sameSet(left, right) {
+  if (left.size !== right.size) return false;
+  for (const value of left) if (!right.has(value)) return false;
+  return true;
+}
+
+const requiredPaths = [
+  "../identity.md",
+  "../README.md",
+  "../AGENTS.md",
+  "../CLAUDE.md",
+  "../CONTRIBUTING.md",
+  "../CODEGRAPH.md",
+  "AGENTS.md",
+  "CLAUDE.md",
+  "CODEGRAPH.md",
+  "STANDARD.md",
+  "memory/MEMORY.md",
+  "second-half-plan/README.md",
+  `${activeProgramRelative}/README.md`,
+  `${activeProgramRelative}/04-dependency-ordered-production-plan.md`,
+  `${activeProgramRelative}/07-verification-and-handoff-matrix.md`,
+  `${activeProgramRelative}/08-production-issue-vector.json`,
+  `${activeProgramRelative}/09-workstream-execution-map.md`,
+  `${activeProgramRelative}/10-test-suite-disposition.md`,
+  `${activeProgramRelative}/13-resolution-ledger.json`,
+  `${activeProgramRelative}/17-ws03-p0-fisher-frontier.md`,
+  `${activeProgramRelative}/18-ws03-p0-task-contract.json`,
+  "docs/architecture/README.md",
+  "docs/architecture/17-hermes-upstream-review-protocol.md",
+  "validation/hermes-upstream-baseline.json",
+  "../.github/workflows/phase-2-remediation-plan.yml",
+  "../.github/workflows/main-integration-gates.yml",
+  "../.github/pull_request_template.md",
+];
+
+const requiredExistence = await Promise.all(requiredPaths.map(async (path) => [path, await exists(path)]));
+check(
+  "GOV-01",
+  requiredExistence.every(([, present]) => present),
+  `required authority/evidence files exist; missing: ${requiredExistence.filter(([, present]) => !present).map(([path]) => path).join(", ") || "none"}`,
+);
 
 const [
   rootReadme,
@@ -24,16 +111,17 @@ const [
   roadmap,
   workstreamMap,
   testDisposition,
+  verificationMatrix,
+  memoryIndex,
+  packageJsonText,
   issueVectorText,
   resolutionLedgerText,
-  memoryIndex,
-  verificationMatrix,
-  packageJsonText,
+  ws03ContractText,
   workflow,
+  mainIntegrationWorkflow,
   prTemplate,
   hermesProtocol,
   hermesBaselineText,
-  mainIntegrationWorkflow,
 ] = await Promise.all([
   read("../README.md"),
   read("../CONTRIBUTING.md"),
@@ -43,132 +131,258 @@ const [
   read("CODEGRAPH.md"),
   read("STANDARD.md"),
   read("second-half-plan/README.md"),
-  read("second-half-plan/2026-07-19-ratified-standard-production-program/README.md"),
-  read("second-half-plan/2026-07-19-ratified-standard-production-program/04-dependency-ordered-production-plan.md"),
-  read("second-half-plan/2026-07-19-ratified-standard-production-program/09-workstream-execution-map.md"),
-  read("second-half-plan/2026-07-19-ratified-standard-production-program/10-test-suite-disposition.md"),
-  read("second-half-plan/2026-07-19-ratified-standard-production-program/08-production-issue-vector.json"),
-  read("second-half-plan/2026-07-19-ratified-standard-production-program/13-resolution-ledger.json"),
+  read(`${activeProgramRelative}/README.md`),
+  read(`${activeProgramRelative}/04-dependency-ordered-production-plan.md`),
+  read(`${activeProgramRelative}/09-workstream-execution-map.md`),
+  read(`${activeProgramRelative}/10-test-suite-disposition.md`),
+  read(`${activeProgramRelative}/07-verification-and-handoff-matrix.md`),
   read("memory/MEMORY.md"),
-  read("second-half-plan/2026-07-19-ratified-standard-production-program/07-verification-and-handoff-matrix.md"),
   read("package.json"),
+  read(`${activeProgramRelative}/08-production-issue-vector.json`),
+  read(`${activeProgramRelative}/13-resolution-ledger.json`),
+  read(`${activeProgramRelative}/18-ws03-p0-task-contract.json`),
   read("../.github/workflows/phase-2-remediation-plan.yml"),
+  read("../.github/workflows/main-integration-gates.yml"),
   read("../.github/pull_request_template.md"),
   read("docs/architecture/17-hermes-upstream-review-protocol.md"),
   read("validation/hermes-upstream-baseline.json"),
-  read("../.github/workflows/main-integration-gates.yml"),
 ]);
 
-const packageJson = JSON.parse(packageJsonText);
-const hermesBaseline = JSON.parse(hermesBaselineText);
-const issueVector = JSON.parse(issueVectorText);
-const resolutionLedger = JSON.parse(resolutionLedgerText);
+const packageJson = parseJson("package.json", packageJsonText) ?? {};
+const issueVector = parseJson("08-production-issue-vector.json", issueVectorText) ?? {};
+const resolutionLedger = parseJson("13-resolution-ledger.json", resolutionLedgerText) ?? {};
+const ws03Contract = parseJson("18-ws03-p0-task-contract.json", ws03ContractText) ?? {};
+const hermesBaseline = parseJson("hermes-upstream-baseline.json", hermesBaselineText) ?? {};
 const scripts = packageJson.scripts ?? {};
 
-check("GOV-01", standard.includes("# AMTECH Standard v0.2 — Ratified Production Standard")
-  && standard.includes("Status: **ratified and effective**"), "ratified Standard remains canonical");
-check("GOV-02", planIndex.includes("one active production program")
-  && planIndex.includes("2026-07-19-ratified-standard-production-program/README.md")
-  && activePlan.includes("Status: **active and canonical"), "one active production program remains explicit");
-check("GOV-03", contributing.includes("npm run hooks:install")
-  && contributing.includes("npm run repo:verify:quick")
-  && contributing.includes("Six-point rubric"), "contributor start, hooks, verification, and rubric are documented");
-check("GOV-04", rootAgents.includes("Required contributor gate")
-  && scopedAgents.includes("Hermes upstream review"), "root and scoped agent rules route contributors through executable gates");
-check("GOV-05", [
+check(
+  "GOV-02",
+  standard.includes("# AMTECH Standard v0.2 — Ratified Production Standard")
+    && standard.includes("Status: **ratified and effective**"),
+  "ratified Standard remains canonical",
+);
+
+const planEntries = await readdir(resolve(root, "second-half-plan"), { withFileTypes: true });
+const activeMarkers = [];
+for (const entry of planEntries) {
+  if (!entry.isDirectory()) continue;
+  const readmePath = `second-half-plan/${entry.name}/README.md`;
+  if (!(await exists(readmePath))) continue;
+  const body = await read(readmePath);
+  if (body.includes("Status: **active and canonical**")) activeMarkers.push(entry.name);
+}
+check(
+  "GOV-03",
+  activeMarkers.length === 1
+    && activeMarkers[0] === "2026-07-19-ratified-standard-production-program"
+    && planIndex.includes("2026-07-19-ratified-standard-production-program/README.md"),
+  `exactly one active production program exists; found: ${activeMarkers.join(", ") || "none"}`,
+);
+
+check(
+  "GOV-04",
+  [rootReadme, rootCodegraph, scopedCodegraph, planIndex, activePlan, memoryIndex]
+    .every((doc) => doc.includes("current `main`") || doc.includes("current main") || doc.includes("then-current `main`")),
+  "current authority entrypoints route work from reviewed current-main branches without pinning one transient SHA",
+);
+
+check(
+  "GOV-05",
+  contributing.includes("npm run hooks:install")
+    && contributing.includes("npm run repo:verify:quick")
+    && contributing.includes("Six-point rubric")
+    && rootAgents.includes("Required contributor gate")
+    && scopedAgents.includes("Hermes upstream review"),
+  "contributor and agent entrypoints expose executable gates",
+);
+
+const requiredScripts = [
   "hooks:install",
   "repo:rubric",
   "repo:verify:quick",
   "repo:verify:full",
   "test:repo-governance",
+  "test:unit",
+  "test:integration",
+  "test:production-boundary",
+  "build",
   "hermes:upstream:check",
-].every((name) => typeof scripts[name] === "string"), "package scripts expose governance and upstream checks");
-check("GOV-06", workflow.includes("npm run test:repo-governance")
-  && workflow.includes("npm run typecheck")
-  && workflow.includes("npm run lint")
-  && workflow.includes("Standard Integrity OK")
-  && !workflow.includes("npm run test:unit")
-  && !workflow.includes("npm run build")
-  && !workflow.includes("employee-production-tuesday")
-  && !workflow.includes("branches:\n      - research"), "ratification workflow owns governance only and carries no duplicate broad/build or historical branch gate");
-check("GOV-07", prTemplate.includes("## Six-point rubric")
-  && prTemplate.includes("## TDD and verification")
-  && prTemplate.includes("## Evidence boundary"), "pull-request template requires rubric, TDD, and evidence boundaries");
-check("GOV-08", hermesBaseline.upstream_repository === "NousResearch/hermes-agent"
-  && typeof hermesBaseline.reviewed_main_sha === "string"
-  && hermesBaseline.reviewed_main_sha.length === 40
-  && hermesBaseline.watched_paths?.["hermes_cli/__init__.py"]
-  && hermesBaseline.watched_paths?.["web/src/App.tsx"], "Hermes upstream baseline pins official repository and watched paths");
-check("GOV-09", hermesProtocol.includes("upstream is intelligence, not authority")
-  && hermesProtocol.includes("npm run hermes:upstream:check")
-  && hermesProtocol.includes("active pull requests"), "Hermes review protocol preserves pinning and PR intelligence");
-check("GOV-10", mainIntegrationWorkflow.includes("pull_request:")
-  && mainIntegrationWorkflow.includes("branches: [main]")
-  && mainIntegrationWorkflow.includes("npm run repo:verify:full")
-  && mainIntegrationWorkflow.includes("npm run test:production-boundary")
-  && mainIntegrationWorkflow.includes("broad-unit:")
-  && mainIntegrationWorkflow.includes("npm run test:unit")
-  && mainIntegrationWorkflow.includes("Broad unit:")
-  && mainIntegrationWorkflow.includes("Main Integration Gates OK"), "main has one canonical merge gate including the broad aggregate");
+];
+check(
+  "GOV-06",
+  requiredScripts.every((name) => isNonEmptyString(scripts[name])),
+  `package scripts expose required governance, test, build, and upstream checks; missing: ${requiredScripts.filter((name) => !isNonEmptyString(scripts[name])).join(", ") || "none"}`,
+);
 
-const currentAuthorityDocs = [rootReadme, contributing, rootAgents, rootCodegraph, scopedAgents, scopedCodegraph, planIndex, activePlan, memoryIndex];
-check("GOV-11", currentAuthorityDocs.every((doc) => doc.includes("current `main`") || doc.includes("main@1eb8ad82") || doc.includes("main@816aae3"))
-  && activePlan.includes("main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366")
-  && !rootCodegraph.includes("Draft PR: `#23`")
-  && !scopedCodegraph.includes("Draft PR: `#23`")
-  && !memoryIndex.includes("Draft PR: `#23`"), "current authority documents route reviewed work from the current merged baseline");
+check(
+  "GOV-07",
+  workflow.includes("npm run test:repo-governance")
+    && workflow.includes("npm run typecheck")
+    && workflow.includes("npm run lint")
+    && !workflow.includes("npm run test:unit")
+    && !workflow.includes("npm run build")
+    && mainIntegrationWorkflow.includes("pull_request:")
+    && mainIntegrationWorkflow.includes("branches: [main]")
+    && mainIntegrationWorkflow.includes("npm run repo:verify:full")
+    && mainIntegrationWorkflow.includes("npm run test:unit")
+    && mainIntegrationWorkflow.includes("npm run test:production-boundary")
+    && mainIntegrationWorkflow.includes("npm run build"),
+  "governance and main-integration workflows retain non-overlapping responsibilities",
+);
 
-check("GOV-12", roadmap.includes("### Phase 1.1 — Repository authority and test-contract truth")
-  && roadmap.includes("### Phase 1.9 — Human-surface acceptance, capacity, and pilot preparation")
-  && roadmap.includes("## Phase 2 — Frozen exact release candidate")
-  && workstreamMap.includes("## WS-01 — Repository authority and test-contract truth")
-  && workstreamMap.includes("## WS-09 — Human-surface acceptance, capacity, and controlled pilot")
-  && testDisposition.includes("106 test files passed")
-  && testDisposition.includes("613 tests passed")
-  && verificationMatrix.includes("accepted: 106 files / 613 tests"), "active program records the full roadmap and authoritative WS-01 broad-suite closure");
+check(
+  "GOV-08",
+  prTemplate.includes("## Six-point rubric")
+    && prTemplate.includes("## TDD and verification")
+    && prTemplate.includes("## Evidence boundary")
+    && hermesProtocol.includes("upstream is intelligence, not authority")
+    && hermesProtocol.includes("npm run hermes:upstream:check")
+    && hermesBaseline.upstream_repository === "NousResearch/hermes-agent"
+    && isSha(hermesBaseline.reviewed_main_sha)
+    && isNonEmptyString(hermesBaseline.watched_paths?.["hermes_cli/__init__.py"])
+    && isNonEmptyString(hermesBaseline.watched_paths?.["web/src/App.tsx"]),
+  "PR evidence contract and pinned Hermes intelligence boundary remain intact",
+);
 
-check("GOV-13", issueVector.version === "2026-07-20.post-merge.1"
-  && issueVector.baseline?.merge_sha === "5e5b8d7c7a5e20490d58855ffb4450b13b53cd03"
-  && issueVector.baseline?.cutover_head === "d131dd09e216fc9dcf0444afd1eb1494194f52eb"
-  && Array.isArray(issueVector.issues)
-  && issueVector.issues.length === 38
-  && new Set(issueVector.issues.map((issue) => issue[0])).size === 38
-  && new Set(issueVector.issues.map((issue) => issue[1])).size === 9, "baseline machine issue vector remains immutable and contains 38 unique issues across nine workstreams");
+const expectedSchema = [
+  "id", "workstream", "priority", "production_blocking", "evidence_confidence",
+  "user_impact", "authority_safety_risk", "dependency_centrality", "blast_radius",
+  "reversibility_risk", "maintainability_drag", "production_readiness_gap", "title",
+  "affected_boundaries", "evidence",
+];
+const issueRows = Array.isArray(issueVector.issues) ? issueVector.issues : [];
+const issueIds = issueRows.map((row) => row?.[0]);
+const workstreams = issueRows.map((row) => row?.[1]);
+const scoreIndexes = [3, 4, 5, 6, 7, 8, 9, 10, 11];
+const issueRowsValid = issueRows.every((row) => Array.isArray(row)
+  && row.length === expectedSchema.length
+  && /^ISS-\d{3}$/.test(row[0])
+  && /^WS-0[1-9]$/.test(row[1])
+  && ["P0", "P1", "P2"].includes(row[2])
+  && scoreIndexes.every((index) => typeof row[index] === "number" && row[index] >= 0 && row[index] <= 1)
+  && isNonEmptyString(row[12])
+  && Array.isArray(row[13])
+  && Array.isArray(row[14]));
+check(
+  "GOV-09",
+  issueVector.repository === "benamtech/ai-employee-v1"
+    && JSON.stringify(issueVector.schema) === JSON.stringify(expectedSchema)
+    && issueRows.length === 38
+    && unique(issueIds)
+    && unique(workstreams.filter((value, index, values) => values.indexOf(value) === index))
+    && new Set(workstreams).size === 9
+    && issueRowsValid
+    && isSha(issueVector.baseline?.merge_sha)
+    && isSha(issueVector.baseline?.cutover_head),
+  "immutable issue vector has a complete valid schema, 38 unique issues, and nine workstreams",
+);
 
-check("GOV-14", activePlan.includes("**106 files / 613 tests**")
-  && activePlan.includes("Hardened WS-02 implementation evidence head")
-  && activePlan.includes("ISS-011")
-  && testDisposition.includes("110 test files / 635 tests")
-  && verificationMatrix.includes("110 files / 635 tests")
-  && verificationMatrix.includes("Broad and curated suites are independently reported")
-  && !activePlan.includes("aggregate remains explicitly red"), "WS-01 history and hardened WS-02 evidence remain distinct while ISS-011 stays open");
+const allIssueIds = new Set(issueIds);
+const resolutions = Array.isArray(resolutionLedger.issue_resolutions) ? resolutionLedger.issue_resolutions : [];
+const resolvedIds = resolutions.map((entry) => entry?.id);
+const remainingIds = Array.isArray(resolutionLedger.remaining_issue_ids) ? resolutionLedger.remaining_issue_ids : [];
+const resolvedSet = new Set(resolvedIds);
+const remainingSet = new Set(remainingIds);
+const overlap = resolvedIds.filter((id) => remainingSet.has(id));
+const union = new Set([...resolvedIds, ...remainingIds]);
+const evidenceHeadsValid = [
+  resolutionLedger.implementation_evidence_head,
+  resolutionLedger.ws01_implementation_evidence_head,
+  resolutionLedger.ws02_protocol_implementation_evidence_head,
+].filter((value) => value != null).every(isSha);
+const workflowEvidenceValid = resolutionLedger.workflow_evidence
+  && Object.values(resolutionLedger.workflow_evidence).every(isNonEmptyString);
+check(
+  "GOV-10",
+  resolutionLedger.baseline_issue_vector === "08-production-issue-vector.json"
+    && resolutions.every((entry) => allIssueIds.has(entry?.id) && isNonEmptyString(entry?.state) && isNonEmptyString(entry?.evidence))
+    && unique(resolvedIds)
+    && unique(remainingIds)
+    && remainingIds.every((id) => allIssueIds.has(id))
+    && overlap.length === 0
+    && sameSet(union, allIssueIds)
+    && evidenceHeadsValid
+    && workflowEvidenceValid
+    && resolutionLedger.production_ready === (remainingIds.length === 0),
+  `resolution ledger partitions every baseline issue exactly once; overlap: ${overlap.join(", ") || "none"}`,
+);
 
-check("GOV-15", activePlan.includes("Caller-supplied provider")
-  && activePlan.includes("Remote MCP authorization, MCP Apps, AG-UI, effective-capability execution, and streaming Web are source/CI accepted")
-  && activePlan.includes("Phase 1.2 is not release-complete")
-  && verificationMatrix.includes("Provider-authority lock")
-  && testDisposition.includes("obsolete pre-ratification suites were removed atomically rather than skipped"), "provider and protocol authority are source/CI locked without promoting live connector or release acceptance");
+const controls = Array.isArray(resolutionLedger.control_resolutions) ? resolutionLedger.control_resolutions : [];
+const controlIds = controls.map((entry) => entry?.id);
+const controlsValid = controls.every((entry) => isNonEmptyString(entry?.id)
+  && isNonEmptyString(entry?.state)
+  && (!entry.evidence_head || isSha(entry.evidence_head))
+  && isNonEmptyString(entry?.scope)
+  && Array.isArray(entry?.does_not_resolve)
+  && entry.does_not_resolve.every((id) => remainingSet.has(id)));
+check(
+  "GOV-11",
+  unique(controlIds) && controlsValid,
+  "control resolutions are unique, evidence-bound when applicable, and cannot claim unresolved issues",
+);
 
-const resolvedIssueIds = new Set((resolutionLedger.issue_resolutions ?? [])
-  .filter((entry) => entry.state === "source_ci_resolved")
-  .map((entry) => entry.id));
-const providerControl = (resolutionLedger.control_resolutions ?? [])
-  .find((entry) => entry.id === "CTRL-WS02-PROVIDER-AUTHORITY");
-const protocolControl = (resolutionLedger.control_resolutions ?? [])
-  .find((entry) => entry.id === "CTRL-WS02-PROTOCOL-AUTHORITY");
-check("GOV-16", resolutionLedger.baseline_issue_vector === "08-production-issue-vector.json"
-  && resolutionLedger.implementation_evidence_head === "1460960f415fafc20582313b1dd2117b781a63f7"
-  && resolutionLedger.ws02_protocol_implementation_evidence_head === "16dc18e0535ac14f867875989dfe5aee596f89c0"
-  && ["ISS-001", "ISS-002", "ISS-003", "ISS-004", "ISS-005", "ISS-006", "ISS-007", "ISS-008", "ISS-009", "ISS-010"].every((id) => resolvedIssueIds.has(id))
-  && !resolvedIssueIds.has("ISS-011")
-  && providerControl?.state === "source_ci_accepted"
-  && providerControl?.does_not_resolve?.length === 5
-  && protocolControl?.state === "source_ci_accepted"
-  && JSON.stringify(protocolControl?.does_not_resolve) === JSON.stringify(["ISS-011"])
-  && resolutionLedger.production_ready === false, "resolution ledger preserves WS-01 history, closes hardened WS-02 source controls, and keeps ISS-011/production gates open");
+const frontiers = Array.isArray(resolutionLedger.prepared_frontiers) ? resolutionLedger.prepared_frontiers : [];
+let frontierDocsExist = true;
+for (const frontier of frontiers) {
+  if (!isNonEmptyString(frontier?.id) || !isNonEmptyString(frontier?.state) || !Array.isArray(frontier?.documents)) {
+    frontierDocsExist = false;
+    continue;
+  }
+  for (const document of frontier.documents) {
+    if (!isNonEmptyString(document) || !(await exists(`${activeProgramRelative}/${document}`))) frontierDocsExist = false;
+  }
+}
+check(
+  "GOV-12",
+  frontierDocsExist,
+  "prepared frontiers point to existing task/evidence documents",
+);
+
+const rubricValues = Object.values(ws03Contract.rubric ?? {});
+const ws03RequiredCommands = [
+  "npm run test:unit",
+  "npm run test:integration",
+  "npm run test:production-boundary",
+  "npm run repo:verify:full",
+  "npm run build",
+];
+check(
+  "GOV-13",
+  ws03Contract.task_id === "AMTECH-P0-WS03-000"
+    && ws03Contract.repository === "benamtech/ai-employee-v1"
+    && /^agent\/ws03-/.test(ws03Contract.branch ?? "")
+    && Array.isArray(ws03Contract.start_conditions) && ws03Contract.start_conditions.length >= 3
+    && Array.isArray(ws03Contract.success_criteria) && ws03Contract.success_criteria.length >= 5
+    && Array.isArray(ws03Contract.allowed_files)
+    && ws03Contract.allowed_files.some((path) => String(path).includes("migrations/0073"))
+    && Array.isArray(ws03Contract.forbidden_files)
+    && ws03Contract.forbidden_files.some((path) => String(path).includes("0001") && String(path).includes("0072"))
+    && Array.isArray(ws03Contract.required_tests)
+    && ws03RequiredCommands.every((command) => ws03Contract.required_tests.includes(command))
+    && ws03Contract.required_tests.some((test) => /managed Supabase/i.test(test))
+    && rubricValues.length === 6
+    && rubricValues.every((value) => typeof value === "number" && value >= 0 && value <= 1),
+  "WS-03 contract preserves start guards, migration immutability, required proof classes, and bounded rubric",
+);
+
+check(
+  "GOV-14",
+  roadmap.includes("### Phase 1.1 — Repository authority and test-contract truth")
+    && roadmap.includes("### Phase 1.9 — Human-surface acceptance, capacity, and pilot preparation")
+    && roadmap.includes("## Phase 2 — Frozen exact release candidate")
+    && workstreamMap.includes("## WS-01 — Repository authority and test-contract truth")
+    && workstreamMap.includes("## WS-09 — Human-surface acceptance, capacity, and controlled pilot")
+    && activePlan.includes("13-resolution-ledger.json")
+    && activePlan.includes("17-ws03-p0-fisher-frontier.md")
+    && activePlan.includes("18-ws03-p0-task-contract.json")
+    && testDisposition.includes("A suite is evidence only for the boundary it exercises")
+    && verificationMatrix.includes("Source/CI evidence boundary"),
+  "roadmap, workstreams, evidence classes, and WS-03 routes remain structurally connected",
+);
 
 const report = {
   generated_at: new Date().toISOString(),
+  validator_version: "2.0.0-structural",
   status: failures.length ? "fail" : "pass",
   pass_count: passes.length,
   fail_count: failures.length,
