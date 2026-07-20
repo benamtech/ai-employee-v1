@@ -23,12 +23,14 @@ afterEach(() => {
 });
 
 describe("DB-P0-01 migration ledger preflight", () => {
-  it("inventories the repository ledger through immutable head 0072", () => {
+  it("inventories the repository ledger through immutable head 0072 including approved historical supplements", () => {
     const ledger = inspectRepositoryMigrationLedger();
     expect(ledger.appliedHead).toBe(72);
-    expect(ledger.migrationCount).toBeGreaterThanOrEqual(72);
+    expect(ledger.migrationCount).toBeGreaterThan(72);
     expect(ledger.entries[0]?.number).toBe(1);
-    expect(ledger.entries[71]?.number).toBe(72);
+    expect(ledger.entries.some((entry) => entry.name === "0044b_connector_compatibility_timestamps.sql" && entry.number === 44 && entry.suffix === "b")).toBe(true);
+    expect(ledger.entries.some((entry) => entry.number === 72)).toBe(true);
+    expect(ledger.historicalSupplementalSequences).toEqual([31, 44, 57, 58, 59]);
     expect(ledger.ledgerSha256).toMatch(/^[a-f0-9]{64}$/);
     expect(ledger.entries.every((entry) => /^[a-f0-9]{64}$/.test(entry.sha256))).toBe(true);
   });
@@ -43,10 +45,16 @@ describe("DB-P0-01 migration ledger preflight", () => {
     expect(() => inspectMigrationLedger(directory)).toThrow("missing applied migration: 0072");
   });
 
-  it("rejects duplicate migration numbers", () => {
+  it("rejects an unapproved duplicate migration sequence", () => {
     const directory = makeLedger();
     writeFileSync(join(directory, "0072_duplicate.sql"), "select 72;\n");
-    expect(() => inspectMigrationLedger(directory)).toThrow("duplicate migration number: 0072");
+    expect(() => inspectMigrationLedger(directory)).toThrow("unapproved duplicate migration sequence: 0072");
+  });
+
+  it("does not accept a lookalike supplemental file outside the immutable historical allowlist", () => {
+    const directory = makeLedger();
+    writeFileSync(join(directory, "0044b_unapproved.sql"), "select 44;\n");
+    expect(() => inspectMigrationLedger(directory)).toThrow("unapproved duplicate migration sequence: 0044");
   });
 
   it("changes the ledger hash when an applied migration changes", () => {

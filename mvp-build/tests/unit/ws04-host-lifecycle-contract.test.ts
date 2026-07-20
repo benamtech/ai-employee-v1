@@ -5,10 +5,12 @@ import {
   assertSecretUsable,
   redactSecretValue,
   secretDescriptorFingerprint,
+  validateSecretDescriptor,
   type ManagedSecretDescriptor,
 } from "../../apps/manager/src/lib/secret-custody.js";
 import { assertExactRuntimeImage, validateRuntimeImageEvidence } from "../../apps/manager/src/lib/runtime-image-evidence.js";
 
+const cutover = "2026-07-21T00:00:00.000Z";
 const baseSecret: ManagedSecretDescriptor = {
   secret_id: "secret_model_gateway_v1",
   scope: "model-gateway",
@@ -19,9 +21,23 @@ const baseSecret: ManagedSecretDescriptor = {
   version: 1,
   issued_at: "2026-07-20T00:00:00.000Z",
   rotation_due_at: "2026-08-20T00:00:00.000Z",
-  revoked_at: "2026-07-21T00:00:00.000Z",
+  revoked_at: cutover,
   replacement_secret_id: "secret_model_gateway_v2",
 };
+
+function replacement(overrides: Partial<ManagedSecretDescriptor> = {}): ManagedSecretDescriptor {
+  return {
+    ...baseSecret,
+    secret_id: "secret_model_gateway_v2",
+    version: 2,
+    issued_at: cutover,
+    rotation_due_at: "2026-08-21T00:00:00.000Z",
+    revoked_at: null,
+    replacement_secret_id: null,
+    rollback_secret_id: baseSecret.secret_id,
+    ...overrides,
+  };
+}
 
 describe("WS-04 host lifecycle authority", () => {
   it("routes every lifecycle action through Manager instead of direct Docker authority", () => {
@@ -61,21 +77,21 @@ describe("WS-04 host lifecycle authority", () => {
     expect(shared).toContain("evidence?: Record<string, unknown>");
   });
 
-  it("binds rotations to one service, audience, sequential version, rollback, and old-token revocation", () => {
-    const replacement: ManagedSecretDescriptor = {
-      ...baseSecret,
-      secret_id: "secret_model_gateway_v2",
-      version: 2,
-      issued_at: "2026-07-21T00:00:00.000Z",
-      rotation_due_at: "2026-08-21T00:00:00.000Z",
-      revoked_at: null,
-      replacement_secret_id: null,
-      rollback_secret_id: baseSecret.secret_id,
-    };
-    expect(() => assertRotationContinuity(baseSecret, replacement)).not.toThrow();
-    expect(() => assertSecretUsable(baseSecret, { audience: "amtech-model-gateway" }, Date.parse("2026-07-22T00:00:00.000Z"))).toThrow("secret_revoked");
-    expect(secretDescriptorFingerprint(replacement)).toMatch(/^[a-f0-9]{64}$/);
+  it("supports a scheduled rotation cutover without a validity gap and denies the old token at cutover", () => {
+    const next = replacement();
+    expect(() => validateSecretDescriptor(baseSecret, Date.parse("2026-07-20T12:00:00.000Z"))).not.toThrow();
+    expect(() => assertSecretUsable(baseSecret, { audience: "amtech-model-gateway" }, Date.parse("2026-07-20T23:59:59.000Z"))).not.toThrow();
+    expect(() => assertRotationContinuity(baseSecret, next)).not.toThrow();
+    expect(() => assertSecretUsable(baseSecret, { audience: "amtech-model-gateway" }, Date.parse(cutover))).toThrow("secret_revoked");
+    expect(() => assertSecretUsable(next, { audience: "amtech-model-gateway", minimum_version: 2 }, Date.parse(cutover))).not.toThrow();
+    expect(secretDescriptorFingerprint(next)).toMatch(/^[a-f0-9]{64}$/);
     expect(redactSecretValue("super-secret")).toEqual(expect.objectContaining({ redacted: true, length: 12 }));
+  });
+
+  it("rejects a replacement issued after cutover and self-referential custody links", () => {
+    expect(() => assertRotationContinuity(baseSecret, replacement({ issued_at: "2026-07-21T00:00:01.000Z" }))).toThrow("secret_rotation_cutover_gap");
+    expect(() => validateSecretDescriptor({ ...baseSecret, replacement_secret_id: baseSecret.secret_id })).toThrow("secret_replacement_self_reference");
+    expect(() => validateSecretDescriptor({ ...replacement(), rollback_secret_id: "secret_model_gateway_v2" })).toThrow("secret_rollback_self_reference");
   });
 
   it("rejects floating or mismatched runtime images", () => {
