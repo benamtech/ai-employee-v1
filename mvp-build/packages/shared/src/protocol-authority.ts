@@ -41,7 +41,7 @@ export type ProjectedActionDecision =
 /**
  * Final presentation-to-command interception. A browser, MCP App, or AG-UI client
  * may return only a finite intent. Manager intersects that intent with both the
- * signed/projected authority and freshly resolved durable authority.
+ * projected authority and freshly resolved durable authority.
  */
 export function decideProjectedAction(input: {
   projection: AuthorityProjection;
@@ -83,8 +83,11 @@ export function validateMcpAppSecurityMetadata(metadata: McpAppSecurityMetadata)
   if (!metadata.resource_uri.startsWith("ui://")) return { ok: false, reason: "mcp_app_resource_uri_invalid" };
   if (metadata.mime_type !== "text/html;profile=mcp-app") return { ok: false, reason: "mcp_app_mime_type_invalid" };
   if (!/^[a-f0-9]{64}$/i.test(metadata.resource_hash)) return { ok: false, reason: "mcp_app_resource_hash_invalid" };
-  if (metadata.csp.connect_domains.length) return { ok: false, reason: "mcp_app_direct_network_forbidden" };
+  if (metadata.csp.connect_domains.length || metadata.csp.resource_domains.length) {
+    return { ok: false, reason: "mcp_app_direct_network_forbidden" };
+  }
   if (metadata.csp.frame_domains.length) return { ok: false, reason: "mcp_app_nested_frames_forbidden" };
+  if (metadata.permissions.length) return { ok: false, reason: "mcp_app_permission_not_allowed" };
   const methods = new Set(metadata.host_methods);
   const allowed = new Set(["ui/initialize", "ui/notifications/tool-input", "ui/notifications/tool-result", "tools/call"]);
   if ([...methods].some((method) => !allowed.has(method))) return { ok: false, reason: "mcp_app_host_method_not_allowed" };
