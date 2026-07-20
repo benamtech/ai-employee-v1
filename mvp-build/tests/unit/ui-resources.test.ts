@@ -4,7 +4,9 @@ import {
   SUPPORTED_WORK_VIEW_KINDS,
   withUiResource,
 } from "../../apps/manager/src/lib/ui-resources";
-import type { McpAppSecurityMetadata, WorkDeliverableDescriptor, WorkView } from "@amtech/shared";
+import type { McpAppSecurityMetadata, UiResourceEnvelope, WorkDeliverableDescriptor, WorkView } from "@amtech/shared";
+
+type TestMcpAppEnvelope = UiResourceEnvelope & { _meta: McpAppSecurityMetadata };
 
 const tableDeliverable = (over: Partial<WorkDeliverableDescriptor> = {}): WorkDeliverableDescriptor => ({
   type: "dataset_report",
@@ -30,16 +32,16 @@ const supportedViews: WorkView[] = [
 
 describe("compileDeliverableUiResource", () => {
   it("produces a negotiated ui:// MCP Apps resource", () => {
-    const ui = compileDeliverableUiResource(tableDeliverable())! as typeof tableDeliverable & { _meta?: McpAppSecurityMetadata };
+    const ui = compileDeliverableUiResource(tableDeliverable())! as TestMcpAppEnvelope;
     expect(ui.type).toBe("resource");
     expect(ui.resource.uri).toBe("ui://amtech/dataset_report/appr_1");
     expect(ui.resource.mimeType).toBe("text/html;profile=mcp-app");
     expect(ui.resource.text).toContain("Acme");
-    expect((ui as unknown as { _meta: McpAppSecurityMetadata })._meta.extension).toBe("io.modelcontextprotocol/ui");
+    expect(ui._meta.extension).toBe("io.modelcontextprotocol/ui");
   });
 
   it("binds actions to assignment, authority version, resource, and approval id before offering bulk accept", () => {
-    const ui = compileDeliverableUiResource(tableDeliverable())! as unknown as { resource: { text?: string }; _meta: McpAppSecurityMetadata };
+    const ui = compileDeliverableUiResource(tableDeliverable())! as TestMcpAppEnvelope;
     const html = ui.resource.text ?? "";
     expect(html).toContain('data-intent="accept_all"');
     expect(html).toContain('"assignment_id":"asn_1"');
@@ -49,7 +51,7 @@ describe("compileDeliverableUiResource", () => {
   });
 
   it("makes an under-scoped generated view display-only instead of manufacturing authority", () => {
-    const ui = compileDeliverableUiResource(tableDeliverable({ refs: { approval_id: "appr_1" } }))! as unknown as { resource: { text?: string }; _meta: McpAppSecurityMetadata };
+    const ui = compileDeliverableUiResource(tableDeliverable({ refs: { approval_id: "appr_1" } }))! as TestMcpAppEnvelope;
     expect(ui.resource.text).not.toContain("data-intent=");
     expect(ui._meta.authority.allowed_actions).toEqual([]);
     expect(ui._meta.host_methods).toEqual(["ui/initialize"]);
@@ -76,11 +78,11 @@ describe("compileDeliverableUiResource", () => {
   it("keeps the shared WorkView vocabulary congruent with the MCP Apps renderer registry", () => {
     expect([...SUPPORTED_WORK_VIEW_KINDS].sort()).toEqual(["diff", "form", "schedule", "table"]);
     for (const view of supportedViews) {
-      const ui = compileDeliverableUiResource(tableDeliverable({ view })) as unknown as { resource?: { uri?: string; mimeType?: string }; _meta?: McpAppSecurityMetadata } | undefined;
-      expect(ui?.resource?.uri).toBe("ui://amtech/dataset_report/appr_1");
-      expect(ui?.resource?.mimeType).toBe("text/html;profile=mcp-app");
-      expect(ui?._meta?.extension).toBe("io.modelcontextprotocol/ui");
-      expect(ui?._meta?.resource_hash).toMatch(/^[a-f0-9]{64}$/);
+      const ui = compileDeliverableUiResource(tableDeliverable({ view })) as TestMcpAppEnvelope | undefined;
+      expect(ui?.resource.uri).toBe("ui://amtech/dataset_report/appr_1");
+      expect(ui?.resource.mimeType).toBe("text/html;profile=mcp-app");
+      expect(ui?._meta.extension).toBe("io.modelcontextprotocol/ui");
+      expect(ui?._meta.resource_hash).toMatch(/^[a-f0-9]{64}$/);
     }
   });
 
@@ -101,11 +103,11 @@ describe("compileDeliverableUiResource", () => {
 
 describe("withUiResource", () => {
   it("attaches a compiled resource when a view is present", () => {
-    const d = withUiResource({ deliverable: tableDeliverable() }).deliverable!;
-    expect(d.ui_resource?.resource.uri).toContain("ui://amtech/dataset_report");
+    const deliverable = withUiResource({ deliverable: tableDeliverable() }).deliverable!;
+    expect(deliverable.ui_resource?.resource.uri).toContain("ui://amtech/dataset_report");
   });
   it("leaves a viewless deliverable untouched", () => {
-    const d = withUiResource({ deliverable: tableDeliverable({ view: undefined }) }).deliverable!;
-    expect(d.ui_resource).toBeUndefined();
+    const deliverable = withUiResource({ deliverable: tableDeliverable({ view: undefined }) }).deliverable!;
+    expect(deliverable.ui_resource).toBeUndefined();
   });
 });
