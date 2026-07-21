@@ -11,12 +11,14 @@ Source migration head: `0076`
 1. `identity.md`
 2. root contributor rules, `CONTRIBUTING.md`, and this file
 3. scoped `mvp-build/AGENTS.md`/`CLAUDE.md` and `mvp-build/CODEGRAPH.md`
-4. ratified `mvp-build/STANDARD.md`
+4. ratified `mvp-build/STANDARD.md` plus `mvp-build/STANDARD-V0.2-AMENDMENT-001.md`
 5. mandatory `mvp-build/decision/README.md` and `protocol-v1.json`
 6. `mvp-build/production-readiness-program/README.md`
 7. current transaction record and active trace
 8. newest indexed memory handoff
 9. relevant architecture, source, migrations, executable tests, workflows, proof, PR, and diff
+
+The amendment controls where the base Standard still shows the superseded execution loop, old document-family routing, migration `0072`, or the earlier source map.
 
 Authority order:
 
@@ -91,6 +93,7 @@ trigger
 
 ## Current evidence headline
 
+- Standard v0.2 plus Amendment 001 are effective.
 - PR #34 is the exact stacked base for PR #35.
 - PR #35 implements the WS-07 source transaction and bounded WS-08 repair/lineage/observability groundwork through forward migrations `0074`–`0076`.
 - Website, Contractor Office, and Bookkeeping publication has an exact revision → approval → effect → output → owner-proof projection source path.
@@ -104,7 +107,7 @@ trigger
 ## Repository ownership boundary
 
 - root authority files remain path-stable for governance and contributor tooling;
-- `mvp-build/` owns executable product, Standard, computation protocol/traces, active production program, architecture, memory, tests, deployment, and proof;
+- `mvp-build/` owns executable product, Standard and amendments, computation protocol/traces, active production program, architecture, memory, tests, deployment, and proof;
 - `mvp-build/decision/README.md` owns the decision protocol;
 - `mvp-build/decision/trace007/` owns the active computed transaction;
 - `mvp-build/second-half-plan/`, old audits, handoffs, and prior complete traces are historical/non-canonical;
@@ -115,19 +118,20 @@ trigger
 ## Core invariants
 
 1. Manager owns authority; Hermes reasons within bound capabilities.
-2. Computation precedes non-mechanical decision modeling and implementation.
-3. Unknown evidence remains Unknown and increases Unsupported.
-4. Exploration may be broad; implementation is the smallest coherent compression.
-5. Initial snapshots install atomically after exact scope validation; cursor/version precedes deltas.
-6. Reconnect/retry do not replay accepted intent or effect.
-7. Browser, model, MCP App, connector, or caller payload cannot select credentials, providers, scopes, hosts, authority versions, budgets, or commercial state.
-8. Provider/connector secrets remain Manager-held.
-9. PostgreSQL is shared rate, budget, settlement, ambiguity, and repair authority; process-local buckets are forbidden.
-10. Accepted success requires matching provider, effect, and accounting receipts.
-11. Accepted-but-unrecorded outcomes remain ambiguous and reconcile before retry.
-12. Output, receipt, proof, and accounting identify the same revision and effect.
-13. Every partial state has convergent repair or explicit manual-repair terminal state.
-14. Repair cannot erase accepted effects or invent completion.
-15. Cross-account, stale-assignment, stale-entitlement, stale-approval, duplicate, and reordered requests fail closed.
-16. Applied migrations are immutable and additions are forward-only.
-17. Production-ready requires every non-waivable gate on one exact signed deployed SHA; no evidence class promotes into another.
+2. Standard v0.2 plus ratified amendments govern engineering.
+3. Computation precedes non-mechanical decision modeling and implementation.
+4. Unknown evidence remains Unknown and increases Unsupported.
+5. Exploration may be broad; implementation is the smallest coherent compression.
+6. Initial snapshots install atomically after exact scope validation; cursor/version precedes deltas.
+7. Reconnect/retry do not replay accepted intent or effect.
+8. Browser, model, MCP App, connector, or caller payload cannot select credentials, providers, scopes, hosts, authority versions, budgets, or commercial state.
+9. Provider/connector secrets remain Manager-held.
+10. PostgreSQL is shared rate, budget, settlement, ambiguity, and repair authority; process-local buckets are forbidden.
+11. Accepted success requires matching provider, effect, and accounting receipts.
+12. Accepted-but-unrecorded outcomes remain ambiguous and reconcile before retry.
+13. Output, receipt, proof, and accounting identify the same revision and effect.
+14. Every partial state has convergent repair or explicit manual-repair terminal state.
+15. Repair cannot erase accepted effects or invent completion.
+16. Cross-account, stale-assignment, stale-entitlement, stale-approval, duplicate, and reordered requests fail closed.
+17. Applied migrations are immutable and additions are forward-only.
+18. Production-ready requires every non-waivable gate on one exact signed deployed SHA; no evidence class promotes into another.
