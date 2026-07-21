@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 /**
@@ -5,13 +6,20 @@ import { defineConfig } from "vitest/config";
  * and are excluded from `test:unit`. Each test self-gates on the env it needs
  * (describe.skipIf), so a missing live env produces a clean skip, never a mock pass.
  * Provider mocks are forbidden here (00-source-of-truth-and-rules.md "Realness Rules").
+ * Workspace aliases keep collection source-exact on a clean checkout without making
+ * an unrelated prebuild a prerequisite for PostgreSQL integration evidence.
  */
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@amtech/shared": fileURLToPath(new URL("./packages/shared/src/index.ts", import.meta.url)),
+      "@amtech/db": fileURLToPath(new URL("./packages/db/src/index.ts", import.meta.url)),
+    },
+  },
   test: {
     environment: "node",
     include: ["tests/integration/**/*.test.ts"],
     exclude: ["node_modules/**"],
-    // Real network round-trips (auth admin, sign-in, cleanup) need more headroom.
     testTimeout: 30_000,
     hookTimeout: 30_000,
   },
