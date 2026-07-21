@@ -31,11 +31,26 @@ jobs:
         working-directory: mvp-build
         run: npm ci
       - name: Run agentic check
+        id: agentic
+        continue-on-error: true
         working-directory: mvp-build
         run: npm run repo:agentic:check
       - name: Run full repository verification
+        id: full
+        continue-on-error: true
         working-directory: mvp-build
         run: npm run repo:verify:full
       - name: Run unit suite
+        id: unit
+        continue-on-error: true
         working-directory: mvp-build
         run: npm run test:unit
+      - name: Enforce aggregate result
+        if: always()
+        run: |
+          echo "agentic=${{ steps.agentic.outcome }}"
+          echo "full=${{ steps.full.outcome }}"
+          echo "unit=${{ steps.unit.outcome }}"
+          test "${{ steps.agentic.outcome }}" = success
+          test "${{ steps.full.outcome }}" = success
+          test "${{ steps.unit.outcome }}" = success
