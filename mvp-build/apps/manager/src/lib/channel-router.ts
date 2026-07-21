@@ -4,6 +4,8 @@ import { insertDedup, mustWrite, orThrow } from "./db.js";
 import { renderWorkEventSms } from "@amtech/shared";
 import { resolveEmployeeSmsSender } from "./sms-sender.js";
 import { sendSms } from "./twilio.js";
+import { loadApprovalAuthority } from "./approval-authority.js";
+import { openSmsApprovalDecisionContext } from "./channel-decisions.js";
 
 function webPresenceWindowMs(): number {
   return Number(process.env.WEB_PRESENCE_WINDOW_SECONDS ?? 90) * 1000;
@@ -44,6 +46,41 @@ async function loadOwnerPhone(db: SupabaseClient, accountId: string): Promise<st
   return (data as { phone_e164?: string } | null)?.phone_e164 ?? null;
 }
 
+async function bindDeliveredSmsDecisionContext(db: SupabaseClient, input: {
+  intent: EmployeeIntent;
+  owner_phone: string;
+  provider_message_id: string;
+}): Promise<{ context_id?: string; approval_id?: string; error?: string }> {
+  const messageId = input.intent.message_id;
+  const approvalId = input.intent.descriptor?.deliverable?.refs.approval_id;
+  if (!messageId || !approvalId) return {};
+  try {
+    const approval = await loadApprovalAuthority(db, approvalId);
+    if (!approval || approval.account_id !== input.intent.account_id || approval.employee_id !== input.intent.employee_id) {
+      throw new Error("sms_delivery_approval_scope_mismatch");
+    }
+    const scoped = await db.from("employee_messages").update({
+      account_id: input.intent.account_id,
+      assignment_id: approval.assignment_id,
+      channel: "sms",
+      status: "delivered",
+      provider_id: input.provider_message_id,
+    }).eq("id", messageId).eq("employee_id", input.intent.employee_id);
+    if (scoped.error) throw scoped.error;
+    const context = await openSmsApprovalDecisionContext(db, {
+      account_id: input.intent.account_id,
+      employee_id: input.intent.employee_id,
+      approval_id: approvalId,
+      prompt_message_id: messageId,
+      owner_phone_e164: input.owner_phone,
+      external_subject: input.owner_phone,
+    });
+    return { context_id: context.context_id, approval_id: approvalId };
+  } catch (error) {
+    return { approval_id: approvalId, error: String((error as Error)?.message ?? error).slice(0, 180) };
+  }
+}
+
 export async function routeEmployeeIntent(
   db: SupabaseClient,
   intent: EmployeeIntent,
@@ -79,7 +116,12 @@ export async function routeEmployeeIntent(
       "delivery_decisions.web",
     );
     if (intent.message_id) {
-      await db.from("employee_messages").update({ channel: "web", status: "delivered" }).eq("id", intent.message_id);
+      await db.from("employee_messages").update({
+        account_id: intent.account_id,
+        assignment_id: intent.assignment_id ?? null,
+        channel: "web",
+        status: "delivered",
+      }).eq("id", intent.message_id);
     }
     return { duplicate: false, chosen_channel: "web", delivery_status: "delivered" };
   }
@@ -96,12 +138,34 @@ export async function routeEmployeeIntent(
   try {
     const from = await resolveEmployeeSmsSender(db, intent.employee_id);
     const sent = await sendSms({ to: ownerPhone, from, body, forceFrom: true });
+    if (intent.message_id && !intent.descriptor?.deliverable?.refs.approval_id) {
+      await db.from("employee_messages").update({
+        account_id: intent.account_id,
+        assignment_id: intent.assignment_id ?? null,
+        channel: "sms",
+        status: "delivered",
+        provider_id: sent.sid,
+      }).eq("id", intent.message_id);
+    }
+    const decisionContext = await bindDeliveredSmsDecisionContext(db, {
+      intent,
+      owner_phone: ownerPhone,
+      provider_message_id: sent.sid,
+    });
     await mustWrite(
-      db.from("delivery_decisions").update({ chosen_channel: "sms", reason: "ambient_sms", proof: { sms_sid: sent.sid, message_id: intent.message_id ?? null } }).eq("id", decisionId),
+      db.from("delivery_decisions").update({
+        chosen_channel: "sms",
+        reason: "ambient_sms",
+        proof: {
+          sms_sid: sent.sid,
+          message_id: intent.message_id ?? null,
+          approval_id: decisionContext.approval_id ?? null,
+          decision_context_id: decisionContext.context_id ?? null,
+          decision_context_error: decisionContext.error ?? null,
+        },
+      }).eq("id", decisionId),
       "delivery_decisions.ambient_sms",
     );
-    // Reflect how the message was actually delivered (it was seeded as `web`).
-    if (intent.message_id) await db.from("employee_messages").update({ channel: "sms", status: "delivered", provider_id: sent.sid }).eq("id", intent.message_id);
     return { duplicate: false, chosen_channel: "sms", sms_sid: sent.sid, delivery_status: "delivered" };
   } catch (err) {
     await mustWrite(
