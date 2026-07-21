@@ -1,0 +1,260 @@
+{
+  "coverage_order": "proved<=complete<=fractional<=touch",
+  "hyperedges": [
+    {
+      "id": "E_repository_closure",
+      "members": [
+        "source",
+        "migration",
+        "fixtures",
+        "types",
+        "unit",
+        "integration",
+        "build",
+        "workflow",
+        "artifact",
+        "pr_prose"
+      ],
+      "weight": 1.0
+    },
+    {
+      "id": "E_temporal_authority",
+      "members": [
+        "replica_clock",
+        "database_clock",
+        "rate_window",
+        "lease",
+        "expiry",
+        "retry"
+      ],
+      "weight": 1.0
+    },
+    {
+      "id": "E_ambiguity_terminality",
+      "members": [
+        "ambiguous",
+        "accepted_proof",
+        "nonacceptance_proof",
+        "operator_blocked",
+        "reservation_release",
+        "retry_permission"
+      ],
+      "weight": 1.2
+    },
+    {
+      "id": "E_durable_truth",
+      "members": [
+        "database_mutation",
+        "returned_record",
+        "application_projection",
+        "audit",
+        "conservation"
+      ],
+      "weight": 1.2
+    },
+    {
+      "id": "E_release",
+      "members": [
+        "git_sha",
+        "manager_digest",
+        "gateway_digest",
+        "provisioner_digest",
+        "web_digest",
+        "caddy_digest",
+        "compose_hash",
+        "config_hash",
+        "migration_head",
+        "signed_manifest",
+        "independent_verifier"
+      ],
+      "weight": 1.5
+    },
+    {
+      "id": "E_effect_recovery",
+      "members": [
+        "command",
+        "effect",
+        "provider_receipt",
+        "accounting_receipt",
+        "proof",
+        "repair"
+      ],
+      "weight": 1.4
+    },
+    {
+      "id": "E_restore",
+      "members": [
+        "backup_id",
+        "database_backup",
+        "filesystem_backup",
+        "secret_version",
+        "restore_result",
+        "proof_refinding"
+      ],
+      "weight": 1.5
+    },
+    {
+      "id": "E_truthful_health",
+      "members": [
+        "five_service_state",
+        "dependency_health",
+        "migration_readiness",
+        "public_route",
+        "degraded_state"
+      ],
+      "weight": 1.2
+    },
+    {
+      "id": "E_docker_authority",
+      "members": [
+        "host_provisioner",
+        "docker_socket",
+        "signed_request",
+        "idempotency",
+        "audit",
+        "manager_denial",
+        "gateway_denial"
+      ],
+      "weight": 1.3
+    },
+    {
+      "id": "E_network_isolation",
+      "members": [
+        "employee_network",
+        "manager_attachment",
+        "gateway_attachment",
+        "hermes_attachment",
+        "cross_employee_denial",
+        "bounded_egress"
+      ],
+      "weight": 1.2
+    },
+    {
+      "id": "E_whole_release_rollback",
+      "members": [
+        "prior_manifest",
+        "image_set",
+        "compose_config",
+        "migration_compatibility",
+        "accepted_work_check",
+        "rollback_smoke",
+        "rollback_proof"
+      ],
+      "weight": 1.4
+    },
+    {
+      "id": "E_operator_recovery",
+      "members": [
+        "stable_crash_point",
+        "failure_state",
+        "safe_next_action",
+        "retry_permission",
+        "diagnostic_bundle"
+      ],
+      "weight": 1.1
+    },
+    {
+      "id": "E_capacity_groundwork",
+      "members": [
+        "employee_id",
+        "queue_depth",
+        "connection_count",
+        "sse_count",
+        "resource_sample",
+        "fairness",
+        "saturation_state",
+        "pilot_stop_schema"
+      ],
+      "weight": 0.8
+    }
+  ],
+  "schema": "amtech.trace008.software-hypergraph.v1",
+  "vertices": [
+    "accepted_proof",
+    "accepted_work_check",
+    "accounting_receipt",
+    "ambiguous",
+    "application_projection",
+    "artifact",
+    "audit",
+    "backup_id",
+    "bounded_egress",
+    "build",
+    "caddy_digest",
+    "command",
+    "compose_config",
+    "compose_hash",
+    "config_hash",
+    "connection_count",
+    "conservation",
+    "cross_employee_denial",
+    "database_backup",
+    "database_clock",
+    "database_mutation",
+    "degraded_state",
+    "dependency_health",
+    "diagnostic_bundle",
+    "docker_socket",
+    "effect",
+    "employee_id",
+    "employee_network",
+    "expiry",
+    "failure_state",
+    "fairness",
+    "filesystem_backup",
+    "five_service_state",
+    "fixtures",
+    "gateway_attachment",
+    "gateway_denial",
+    "gateway_digest",
+    "git_sha",
+    "hermes_attachment",
+    "host_provisioner",
+    "idempotency",
+    "image_set",
+    "independent_verifier",
+    "integration",
+    "lease",
+    "manager_attachment",
+    "manager_denial",
+    "manager_digest",
+    "migration",
+    "migration_compatibility",
+    "migration_head",
+    "migration_readiness",
+    "nonacceptance_proof",
+    "operator_blocked",
+    "pilot_stop_schema",
+    "pr_prose",
+    "prior_manifest",
+    "proof",
+    "proof_refinding",
+    "provider_receipt",
+    "provisioner_digest",
+    "public_route",
+    "queue_depth",
+    "rate_window",
+    "repair",
+    "replica_clock",
+    "reservation_release",
+    "resource_sample",
+    "restore_result",
+    "retry",
+    "retry_permission",
+    "returned_record",
+    "rollback_proof",
+    "rollback_smoke",
+    "safe_next_action",
+    "saturation_state",
+    "secret_version",
+    "signed_manifest",
+    "signed_request",
+    "source",
+    "sse_count",
+    "stable_crash_point",
+    "types",
+    "unit",
+    "web_digest",
+    "workflow"
+  ]
+}

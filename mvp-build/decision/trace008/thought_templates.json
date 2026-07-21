@@ -1,0 +1,87 @@
+{
+  "interpretations": [
+    {
+      "id": "I1",
+      "space": "authority",
+      "text": "Every deploy, repair, rollback and restore action must preserve one exact release identity and one authorized operator path."
+    },
+    {
+      "id": "I2",
+      "space": "topology",
+      "text": "The five-service release unit, employee-network boundaries and Host Provisioner Docker authority must agree across compose, source and runtime checks."
+    },
+    {
+      "id": "I3",
+      "space": "release",
+      "text": "Release construction must bind Git SHA, image digests, configuration hashes, migration head and independently verifiable manifest."
+    },
+    {
+      "id": "I4",
+      "space": "failure",
+      "text": "Critical partial destructive effects, crash points, false health, ambiguous outcomes and restart ordering require deterministic failure treatment."
+    },
+    {
+      "id": "I5",
+      "space": "recovery",
+      "text": "Repair, backup, restore and whole-release rollback must preserve accepted work and refindable proof."
+    },
+    {
+      "id": "I6",
+      "space": "operator",
+      "text": "Every terminal or blocked state must be diagnosable, bounded and linked to a safe next action."
+    },
+    {
+      "id": "I7",
+      "space": "capacity",
+      "text": "WS-09 groundwork measures truthful saturation and fairness for one 64 GiB host and 25-30 employee runtimes; 200-500 is future pressure only."
+    },
+    {
+      "id": "I8",
+      "space": "product_future",
+      "text": "Release proof, restore proof and saturation state may become reusable trust and support capabilities without promoting acceptance."
+    }
+  ],
+  "schema": "amtech.trace008.templates.v1",
+  "templates": [
+    {
+      "id": "T1",
+      "instantiation": "Map actor, release identity, command, durable state, side effect, terminal state and repair permission.",
+      "name": "authority-preserving state machine"
+    },
+    {
+      "id": "T2",
+      "instantiation": "Bind Git SHA, five image digests, compose/config hashes, migration head, secret versions and signed manifest.",
+      "name": "exact-identity chain"
+    },
+    {
+      "id": "T3",
+      "instantiation": "Enumerate crash before effect, during effect, after acceptance, after durable receipt and before proof projection.",
+      "name": "partial-effect ledger"
+    },
+    {
+      "id": "T4",
+      "instantiation": "Check application, schema, image, config and secret compatibility while preserving accepted work.",
+      "name": "rollback compatibility envelope"
+    },
+    {
+      "id": "T5",
+      "instantiation": "Bind backup ID to database, filesystem, secret version, restore result and proof refinding.",
+      "name": "restore continuity proof"
+    },
+    {
+      "id": "T6",
+      "instantiation": "Require five services, exact health dependencies, scoped employee networks, bounded egress and Host Provisioner-only Docker authority.",
+      "name": "topology truth table"
+    },
+    {
+      "id": "T7",
+      "instantiation": "Every ambiguous, failed, degraded or saturated state names retry permission, blocking reason, evidence and safe next action.",
+      "name": "operator terminality contract"
+    },
+    {
+      "id": "T8",
+      "instantiation": "Measure connection, queue, SSE, CPU, memory and noisy-neighbor effects at the 25-30 runtime target.",
+      "name": "capacity/fairness pressure harness"
+    }
+  ]
+}

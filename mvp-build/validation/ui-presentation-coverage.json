@@ -1,0 +1,636 @@
+{
+  "schema": "amtech.ui-presentation-coverage.v1",
+  "method": "deterministic greedy constrained covering array",
+  "coverage": {
+    "pairwise": [
+      "surface",
+      "browser",
+      "viewport",
+      "density",
+      "network"
+    ],
+    "three_way": [
+      "surface",
+      "browser",
+      "network"
+    ],
+    "consequential_authority_states": "excluded; covered exhaustively by validation/ui-state-machine-cases.json"
+  },
+  "factors": {
+    "surface": [
+      "talk",
+      "workspace",
+      "review",
+      "mcp_apps",
+      "operator",
+      "ui_lab"
+    ],
+    "browser": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "viewport": [
+      "mobile",
+      "tablet",
+      "desktop"
+    ],
+    "density": [
+      "calm",
+      "balanced",
+      "dense"
+    ],
+    "network": [
+      "online",
+      "slow",
+      "offline",
+      "reconnecting"
+    ]
+  },
+  "valid_combination_count": 648,
+  "generated_case_count": 72,
+  "cases": [
+    {
+      "id": "UI-001",
+      "surface": "mcp_apps",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-002",
+      "surface": "mcp_apps",
+      "browser": "firefox",
+      "viewport": "mobile",
+      "density": "calm",
+      "network": "online"
+    },
+    {
+      "id": "UI-003",
+      "surface": "mcp_apps",
+      "browser": "webkit",
+      "viewport": "tablet",
+      "density": "dense",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-004",
+      "surface": "operator",
+      "browser": "chromium",
+      "viewport": "mobile",
+      "density": "dense",
+      "network": "slow"
+    },
+    {
+      "id": "UI-005",
+      "surface": "review",
+      "browser": "firefox",
+      "viewport": "tablet",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-006",
+      "surface": "talk",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "calm",
+      "network": "slow"
+    },
+    {
+      "id": "UI-007",
+      "surface": "ui_lab",
+      "browser": "chromium",
+      "viewport": "tablet",
+      "density": "calm",
+      "network": "offline"
+    },
+    {
+      "id": "UI-008",
+      "surface": "ui_lab",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "dense",
+      "network": "online"
+    },
+    {
+      "id": "UI-009",
+      "surface": "ui_lab",
+      "browser": "webkit",
+      "viewport": "mobile",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-010",
+      "surface": "operator",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "calm",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-011",
+      "surface": "operator",
+      "browser": "webkit",
+      "viewport": "tablet",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-012",
+      "surface": "review",
+      "browser": "webkit",
+      "viewport": "mobile",
+      "density": "dense",
+      "network": "offline"
+    },
+    {
+      "id": "UI-013",
+      "surface": "review",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "calm",
+      "network": "online"
+    },
+    {
+      "id": "UI-014",
+      "surface": "talk",
+      "browser": "chromium",
+      "viewport": "mobile",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-015",
+      "surface": "talk",
+      "browser": "firefox",
+      "viewport": "tablet",
+      "density": "dense",
+      "network": "offline"
+    },
+    {
+      "id": "UI-016",
+      "surface": "workspace",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-017",
+      "surface": "workspace",
+      "browser": "firefox",
+      "viewport": "mobile",
+      "density": "calm",
+      "network": "online"
+    },
+    {
+      "id": "UI-018",
+      "surface": "workspace",
+      "browser": "webkit",
+      "viewport": "tablet",
+      "density": "dense",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-019",
+      "surface": "mcp_apps",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-020",
+      "surface": "operator",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-021",
+      "surface": "review",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-022",
+      "surface": "talk",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-023",
+      "surface": "ui_lab",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-024",
+      "surface": "workspace",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-025",
+      "surface": "mcp_apps",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-026",
+      "surface": "mcp_apps",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-027",
+      "surface": "mcp_apps",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-028",
+      "surface": "mcp_apps",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-029",
+      "surface": "mcp_apps",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-030",
+      "surface": "mcp_apps",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-031",
+      "surface": "mcp_apps",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-032",
+      "surface": "mcp_apps",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-033",
+      "surface": "operator",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-034",
+      "surface": "operator",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-035",
+      "surface": "operator",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-036",
+      "surface": "operator",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-037",
+      "surface": "operator",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-038",
+      "surface": "operator",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-039",
+      "surface": "operator",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-040",
+      "surface": "operator",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-041",
+      "surface": "review",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-042",
+      "surface": "review",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-043",
+      "surface": "review",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-044",
+      "surface": "review",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-045",
+      "surface": "review",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-046",
+      "surface": "review",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-047",
+      "surface": "review",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-048",
+      "surface": "review",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-049",
+      "surface": "talk",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-050",
+      "surface": "talk",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-051",
+      "surface": "talk",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-052",
+      "surface": "talk",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-053",
+      "surface": "talk",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-054",
+      "surface": "talk",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-055",
+      "surface": "talk",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-056",
+      "surface": "talk",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-057",
+      "surface": "ui_lab",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-058",
+      "surface": "ui_lab",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-059",
+      "surface": "ui_lab",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-060",
+      "surface": "ui_lab",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-061",
+      "surface": "ui_lab",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-062",
+      "surface": "ui_lab",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-063",
+      "surface": "ui_lab",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-064",
+      "surface": "ui_lab",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-065",
+      "surface": "workspace",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-066",
+      "surface": "workspace",
+      "browser": "chromium",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-067",
+      "surface": "workspace",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-068",
+      "surface": "workspace",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "reconnecting"
+    },
+    {
+      "id": "UI-069",
+      "surface": "workspace",
+      "browser": "firefox",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    },
+    {
+      "id": "UI-070",
+      "surface": "workspace",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "offline"
+    },
+    {
+      "id": "UI-071",
+      "surface": "workspace",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "online"
+    },
+    {
+      "id": "UI-072",
+      "surface": "workspace",
+      "browser": "webkit",
+      "viewport": "desktop",
+      "density": "balanced",
+      "network": "slow"
+    }
+  ],
+  "uncovered_combinations": [],
+  "nonclaims": [
+    "Generated combinations are test plans, not executed browser evidence.",
+    "UI Lab cases remain fixture demonstrations.",
+    "Browser, accessibility, capacity, pilot, deployment, and production acceptance remain separate."
+  ]
+}

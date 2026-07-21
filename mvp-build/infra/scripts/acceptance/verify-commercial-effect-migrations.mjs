@@ -23,6 +23,7 @@ try {
     "0076_ws08_reconciliation_authority_hardening.sql",
     "0077_ws07_database_owned_rate_windows.sql",
     "0078_ws07_rate_window_namespace_fix.sql",
+    "0079_ws07_rate_window_update_namespace_fix.sql",
   ];
   const applied = new Set((await rows("select name from _migrations where name = any($1::text[])", [migrations])).map((row) => row.name));
   check("commercial_effect_migrations_applied", migrations.every((name) => applied.has(name)), `${applied.size}/${migrations.length}`);
@@ -102,7 +103,12 @@ try {
     /on conflict on constraint model_gateway_rate_windows_pkey/i.test(admissionSource),
     "RETURNS TABLE output names cannot collide with the rate-window conflict target",
   );
-
+  check(
+    "rate_window_update_namespace_qualified",
+    /update\s+model_gateway_rate_windows\s+(?:as\s+)?rw[\s\S]*where\s+rw\.credential_id\s*=\s*p_credential_id[\s\S]*rw\.rate_window_key\s*=\s*v_rate_window_key/i.test(admissionSource)
+      && /set\s+admitted_count\s*=\s*rw\.admitted_count\s*\+\s*1/i.test(admissionSource),
+    "RETURNS TABLE output names cannot collide with the rate-window update predicate or expression",
+  );
   check(
     "metadata_safe_gateway_replay",
     !admissionSource.includes("v_existing.correlation_id <> p_correlation_id")

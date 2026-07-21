@@ -372,6 +372,8 @@ export async function executePlatformAdminSupportAction(db: SupabaseClient, inpu
     account_id: input.action.account_id,
     employee_id: input.action.employee_id,
     assignment_id: assignmentId,
+    platform_session_id: auth.actor.platform_session_id,
+    support_lease_id: auth.actor.support_lease_id,
     reason: auth.actor.support_reason,
     event_id: input.action.event_id ?? null,
     source: input.action.source ?? null,

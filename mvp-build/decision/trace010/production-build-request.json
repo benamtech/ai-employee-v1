@@ -1,0 +1,7 @@
+{
+  "kind": "ProductionBuildRequest",
+  "requested_after_merge": "PR #37",
+  "pipeline": ".github/workflows/ws08-ws09-release.yml",
+  "purpose": "Trigger and retain an exact-head run of the real production build pipeline, including PostgreSQL integration and five Docker image builds.",
+  "evidence_boundary": "CI production-build evidence only; not deployment or live production acceptance."
+}
