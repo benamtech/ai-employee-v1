@@ -1,157 +1,150 @@
 # 09 — Current Bug, Risk, and Production-Gap Register
 
-Status: **current architecture summary; scored execution authority lives in the active program**  
-Main baseline: `48b917389ed85b9652eca43a8e4a8f60b52e917b`  
-Stacked base: PR #34 exact head `e04ace7bd6fafa9e2eadaeec3f04e70043513e3a`  
-Current source candidate: PR #35  
-Source migration head: `0076`  
-Active decision trace: `../../decision/trace007/`  
+Status: current architecture summary; scored issue state lives in the active program  
+Exact candidate and migration status: [`../../CODEGRAPH.md`](../../CODEGRAPH.md)  
 Updated: 2026-07-20
 
-Exact scores, dependencies, candidate vectors, acceptance tests, prerequisites, stop conditions, and resolutions live in the active production program and computed decision protocol. This file is a readable summary, not a competing issue ledger.
+This is a readable risk summary, not a competing issue ledger. Exact issue rows, resolutions, prerequisites, and gates live in `../../production-readiness-program/`.
 
-## Current verdict
+## Verdict
 
 **Not production-ready and not controlled-pilot ready.**
 
-PR #35 implements a coherent WS-06/07 source transaction and bounded WS-08 groundwork. Exact-head CI has not yet established the candidate. Live connector/provider, managed database, target host, fixture-free browser/channel/golden-work, commercial lifecycle, rollback/recovery, signed release, capacity, pilot, deployment, and production evidence remain open.
+Source exists for a substantial WS-06/07 transaction and bounded WS-08 groundwork. Exact-head CI and every stronger external evidence class remain independent gates.
 
-## Computation status
+## Decision-trace risk
 
-`decision/trace007/` is the active `T3` possible-decision-vector record:
+Trace007 retains a complete candidate matrix, but its original mathematical interpretation was overstated.
 
-- explicit `B288` authority/evidence basis;
-- six reusable thought templates selected before task-specific conclusions;
-- 64 independent current/feature/counterfactual/recombination candidates;
-- 16 weighted dimensions with explicit Unknown/Unsupported treatment;
-- genuine multi-way hypergraph and deterministic spectral/hash reconstruction;
-- joint, utility-only, diversity-only, and 120 feasible random comparisons;
-- separate selected exploration and six-trajectory implementation compression.
+Corrected state:
 
-Joint `J=0.5818732` materially exceeds utility-only `J=0.2346884` and changes required coverage, so graph/diversity terms are causal for this task. That result selects work; it does not establish source or acceptance.
+- candidate graph vertices are candidate trajectories and support search diversity, lineage, redundancy, and candidate-edge touch;
+- software invariant hypergraph vertices are actual system entities/obligations and support software touch, fractional, complete, and proved coverage;
+- mandatory workstream/space coverage is a feasible-domain constraint, not an objective bonus;
+- full, no-graph, no-diversity, evidence baseline, and random controls use the same feasible domain;
+- search and weight sensitivity are reported;
+- graph terms are descriptive;
+- diversity is descriptive or selection-influencing;
+- causal improvement is unestablished without independent implementation outcomes.
 
-## Dependency-critical gap clusters
+The implementation remains defensible from source evidence and invariants even if the mathematical machinery is removed.
 
-### Repository/document authority
+## Dependency-critical risks
 
-Resolved in the current branch:
+### Repository and document authority
 
-- one active production-readiness program;
-- one computation-first decision protocol;
-- one active WS-06/07/08 trace;
-- incomplete trace transports removed;
-- active contributor, CODEGRAPH, architecture, gap/remediation, test, and memory routes converging on current source.
+Current cleanup target:
 
-Still open:
+- one repository contract;
+- one product contract;
+- short root/scoped compatibility routers;
+- one exact-status owner: `mvp-build/CODEGRAPH.md`;
+- structural governance based on schemas, references, evidence classes, and reproducibility;
+- no pinned PR numbers, migration values, issue counts, candidate IDs, objective values, causal labels, or prose fragments in governance tests.
 
-- exact-head governance and documentation verification on PR #35;
-- final stale-reference scan and workflow result.
+Open: exact-head governance, stale-reference scan, and broad verification.
+
+### Generated production source mutation
+
+Production Manager assembly still mutates a template through string replacement and a second patch script. This creates three risks:
+
+1. template hashes and string positions become accidental semantic authority;
+2. structural tests carry behavior that should live in typed composition and behavioral contracts;
+3. every new route increases transform fragility and review opacity.
+
+Required direction: typed server composition with generated data/config only. This risk is recorded, not fixed by the documentation transaction.
 
 ### WS-02 — Protocol and capability authority
 
-Retain only exact prior source/test evidence. Live remote MCP/OAuth, shipped-connector authorization, provider-backed health/revocation/outage/repair/deletion, external MCP Apps host, AG-UI client conformance, and release-candidate evidence remain open.
+Live Remote MCP/OAuth, connector authorization, provider-backed health/revocation/outage/repair/deletion, external MCP Apps host, AG-UI client conformance, and release-candidate evidence remain open.
 
-### WS-03 — Database authority and platform proof
+### WS-03 — Database authority
 
-Source now includes forward migrations through `0076`, including shared Model Gateway admission, settlement, adjustment, reconciliation, proof projection, and authority hardening. Still required:
+Source contains forward commercial/effect/reconciliation migrations. Still required:
 
-- blank-ledger PostgreSQL execution through `0076`;
+- blank-ledger execution through the source head;
 - RLS/grant/function/concurrency/negative-isolation proof;
 - existing-row/backfill compatibility;
-- disposable managed Supabase application, security, trigger, and advisor proof.
+- required disposable managed-platform application, security, trigger, and advisor proof.
 
-### WS-04 — Secret custody, target host, and runtime lifecycle
+### WS-04 — Secret custody and target host
 
-Managed secret custody/rotation, five-service target-host health, two-employee network/runtime isolation, immutable Hermes image binding, teardown/replacement, and signed release packet remain open.
+Managed secret custody/rotation, five-service target-host health, two-employee isolation, immutable Hermes image binding, lifecycle replacement, rollback, and signed release remain open.
 
-### WS-05 — Fixture-free identity, owner, connector, and channels
+### WS-05 — Fixture-free owner and channels
 
-Real owner activation, exact assignment, first turn, connector setup, failure matrix, and Web/SMS/signed-Review parity remain unaccepted.
+Real owner activation, exact assignment, first turn, connector setup, failure matrix, reconnect, and Web/SMS/signed-Review convergence remain unaccepted.
 
-### WS-06 — Golden governed work and proof refinding
+### WS-06 — Golden governed work
 
-Source candidate now binds:
+Source models:
 
 ```text
 artifact → immutable revision → validation → exact approval
-→ one durable effect → publication/output
-→ accepted effect receipt → repairable owner proof projection
+→ one durable effect → output/publication
+→ accepted receipt/accounting when applicable
+→ repairable owner proof
 ```
 
 Open:
 
 - provider-backed Website, Contractor Office, and Bookkeeping journeys;
-- exact output parity across owner surfaces;
+- output parity across owner surfaces;
 - crash/restart proof refinding;
 - fixture-free replay and owner presentation.
 
 ### WS-07 — Commercial controls and provider ambiguity
 
-Source candidate now includes:
-
-- PostgreSQL shared rate windows;
-- worst-case budget reservation before dispatch;
-- one durable request/effect/provider-idempotency identity;
-- accepted, failed, denied, refunded, and durable ambiguous states;
-- accepted effect-bound accounting;
-- immutable adjustments and conservation query;
-- explicit native-idempotency reconciliation of the original effect identity;
-- reconciliation and lineage views.
+Source models shared rate authority, pre-dispatch budget reservation, one request/effect/provider identity, durable ambiguity, effect-bound accounting, immutable adjustments, conservation, and original-effect reconciliation.
 
 Open:
 
-- exact-head unit/PostgreSQL CI;
-- real provider request-ID/idempotency/timeout/accepted-response-loss behavior;
+- exact-head unit/PostgreSQL verification;
+- real provider request ID, idempotency, timeout, and accepted-response-loss behavior;
 - managed database proof;
-- payer/beneficiary/usage/cost/invoice/refund/suspension lifecycle reconciliation.
+- payer/beneficiary/usage/cost/invoice/refund/suspension/reactivation lifecycle.
 
-### WS-08 — Crash repair, rollback, observability, and signed release
+### WS-08 — Recovery, observability, and release
 
-Source groundwork now includes:
-
-- effect proof repair state;
-- ambiguous request reconciliation;
-- repair and reconciliation queues;
-- commercial/effect/proof lineage;
-- focused fault seams and behavioral matrices;
-- a focused exact-head workflow.
+Source groundwork includes proof repair, ambiguity reconciliation, queues, lineage, and fault seams.
 
 Open:
 
 - target-host fault injection;
 - reservation expiry/reclamation policy;
+- typed server composition;
 - backup/restore and rollback;
-- complete telemetry/alerting/incident runbooks;
+- telemetry, alerts, and incident runbooks;
 - SBOM/provenance and independently verifiable signed deployment manifest.
 
 ### WS-09 — Human surface, capacity, and pilot
 
-Fixture-free supported-browser/channel behavior, WCAG 2.2 AA, screen readers, durable interruption/recovery UX, fairness/noisy-neighbor controls, capacity envelope, pilot entry/exit criteria, and incident authority remain open.
+Supported-browser/channel behavior, WCAG 2.2 AA, screen readers, interruption/recovery UX, fairness/noisy-neighbor controls, capacity envelope, pilot entry/exit criteria, and incident authority remain open.
 
 ## Non-bugs retained by design
 
-- computation is mandatory but proportional; mechanical edits do not require decorative manifolds;
+- computation is mandatory but proportional;
+- simple evidence-and-invariants analysis is the baseline;
 - fixture mode is development evidence, not live acceptance;
 - the public estimator is non-canonical;
-- Manager owns authority; Hermes and generated UI do not;
+- Manager owns authority; Hermes, browser, models, protocols, and generated UI do not;
 - owner reads do not create effects solely for observation;
-- internal bridges deny arbitrary direct Internet access;
-- live stream events are liveness projection; durable snapshots/receipts are truth;
+- stream events are liveness projection; durable state and receipts are truth;
 - Hermes upstream review does not auto-upgrade production;
-- incomplete or non-causal mathematical artifacts are removed rather than retained for prestige.
+- non-causal mathematics is labeled descriptive rather than retained for prestige.
 
 ## Completion route
 
 ```text
-PR #35 exact-head computed/source/unit/PostgreSQL gates
-→ managed database proof through 0076
-→ provider-backed WS-07 ambiguity/idempotency/accounting reconciliation
+structural governance + corrected trace + exact-head broad gates
+→ managed database proof
+→ provider-backed commercial ambiguity/accounting reconciliation
 → target-host/runtime custody
 → fixture-free owner/channels
-→ provider-backed WS-06 golden work and restart proof refinding
-→ WS-08 recovery/rollback/observability/signed release
-→ WS-09 accessibility/capacity/pilot preparation
+→ provider-backed golden work and restart proof refinding
+→ typed server composition + recovery/rollback/observability/signed release
+→ accessibility/capacity/pilot preparation
 → frozen candidate → controlled pilot → measured expansion
 ```
 
-An issue is resolved only when computation, source, tests, exact-head CI, and the evidence class required by the claim agree. Computation can reject a bad implementation trajectory; it cannot close an external gate.
+An issue closes only when source, behavioral tests, exact-head CI, and the evidence class required by the claim agree. Decision computation can reject a bad path; it cannot close an external gate.
