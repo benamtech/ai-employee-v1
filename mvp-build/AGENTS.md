@@ -3,57 +3,52 @@
 Status: active  
 Updated: 2026-07-20
 
-Root `../AGENTS.md` and `../CONTRIBUTING.md` apply.
+Root `../AGENTS.md` and `../CONTRIBUTING.md` apply. Exact branch, candidate, migration, workstream, and gate status lives only in `CODEGRAPH.md`.
 
 ## Required start
 
-1. Read `../identity.md`, root rules, and root `CODEGRAPH.md`.
-2. Read this file, `CODEGRAPH.md`, `STANDARD.md`, and ratified amendments.
-3. Read `decision/README.md` and `decision/protocol-v1.json` before any non-mechanical choice.
-4. Read `production-readiness-program/README.md`, the current transaction, and only the exact source/test/proof needed.
-5. Resolve branch, base, head, migration head, affected workstreams, contradictions, and evidence class before editing.
-
-## Current candidate
-
-- Stack: PR #34 owner-runtime base → PR #35 WS-06/07 candidate.
-- Branch: `agent/ws06-ws07-production`.
-- Source migration head: `0076`.
-- Active trace: `decision/trace007/`.
-- Active program: `production-readiness-program/`.
-- Exact-head CI and all stronger external evidence remain gates until demonstrated.
+1. Read `../identity.md`, root rules, and root routing.
+2. Read this file and `CODEGRAPH.md`.
+3. Read `STANDARD.md` plus ratified amendments.
+4. Read `decision/README.md` before any non-mechanical choice.
+5. Read the active program/current transaction and only the exact source/test/proof needed.
+6. Resolve contradictions by evidence class before editing.
 
 ## Compute before patching
 
-Use the smallest tier that honestly represents the decision. A task may not downgrade itself to avoid analysis.
+Use the smallest tier that honestly represents the decision.
 
 ```text
 authority/evidence/Unknown extraction
 → independent applicable candidate spaces
 → invariant and prerequisite filter
 → simple evidence-and-invariants baseline
-→ computed alternatives
-→ dependency coverage: touch / partial / complete
-→ weight and search sensitivity
+→ candidate search topology when useful
+→ software invariant topology when useful
+→ equal-feasibility controls
+→ search and weight sensitivity
 → selected exploration
 → separate implementation compression
-→ complete behavioral proof for each selected dependency transaction
+→ complete behavioral proof plan
 → implementation
 → exact-head and external verification
 ```
 
-Binding anti-ritual rules:
+Binding rules:
 
-- No mathematical term is causal without a counterfactual ablation that changes the implementation set, required proof, or rejection decision.
-- A different exploration ranking alone is not an implementation-level causal result.
-- Hypergraph edge touch is not partial coverage; partial coverage is not complete coverage.
+- No mathematical term is causal without an implementation-level ablation that improves independent outcomes over the simple baseline.
+- Candidate trajectories and software entities are separate topologies.
+- Candidate-edge touch is not software coverage.
+- Software coverage distinguishes `touch`, `fractional`, `complete`, and `proved`.
+- Mandatory coverage is a feasibility constraint, not an objective bonus.
+- `T2/T3` reports weight and search sensitivity; instability is evidence, not noise to hide.
 - Hodge requires a true simplicial complex.
-- Koopman or any predictive latent model requires repeated comparable trajectories, held-out evaluation, and superior performance to a simpler baseline. Otherwise it remains disabled.
-- Weight sensitivity and search sensitivity are required for `T2/T3` selection claims.
+- Koopman or another predictive latent model requires repeated comparable trajectories, held-out evaluation, and better performance than the simple baseline. Otherwise it remains disabled.
+- Continuous-thought, latent BFS, COCONUT, manifold, and hidden-state language is inspiration only unless the executable system implements and verifies it.
 - Unknown remains Unknown and increases Unsupported.
 - Exploration may be broad. The patch is the smallest coherent transaction preserving invariants.
-- Continuous-thought, latent BFS, COCONUT, manifold, and hidden-state language are inspiration only unless the executable system actually implements and verifies them.
 
-## Execution boundary
+## Product authority
 
 ```text
 trigger
@@ -71,19 +66,24 @@ trigger
 → original-effect reconciliation or replay-safe repair
 ```
 
-Manager owns authority, custody, approvals, effects, commercial state, reconciliation, repair, and proof. Hermes owns reasoning/runtime behavior within those bounds. Browser, MCP Apps, AG-UI, SMS, signed Review, models, connectors, and caller payloads cannot mint authority or select credentials/provider/commercial state.
+- Manager owns identity, assignment authority, connector/provider custody, approvals, durable effects, commercial state, reconciliation, repair, and proof.
+- Hermes owns reasoning, runs, sessions, runtime-local memory, and tool execution inside Manager authority.
+- Web, SMS, signed Review, MCP Apps, AG-UI, models, connectors, and caller payloads are bounded mechanisms; they cannot mint authority or select credentials/provider/commercial state.
+- Initial snapshots install only after exact scope validation; cursor/version precedes ordered deltas.
+- Reconnect and retry never repeat accepted owner intent or an accepted effect.
+- Ambiguous consequential outcomes reconcile against the original effect identity before retry.
+- Cross-account, stale-assignment, stale-entitlement, stale-approval, duplicate, and reordered requests fail closed.
+- Applied migrations are immutable; additions are forward-only.
 
-## Engineering rules
+## Engineering execution
 
-- Work only on the specified reviewed branch/base.
+- Work only on the reviewed branch/base named in `CODEGRAPH.md` or the task contract.
 - No feature expansion while a prerequisite P0 is unresolved.
 - Use Red → Green → Refactor for the selected transaction.
-- Add behavioral tests for selected invariants and the minimum failure manifold; do not test every imagined candidate.
-- Do not let structural document tests become a second semantic specification.
-- Forward migrations only; never rewrite applied migration history.
-- Reconnect/retry never repeats accepted intent or effect.
-- Ambiguous consequential outcomes reconcile before retry.
-- Fixtures, source, local PostgreSQL, CI, managed platform, provider, browser/channel, target-host, commercial, release, pilot, and production are distinct evidence classes.
+- Test selected invariants and the minimum failure manifold; do not create ceremonial tests for rejected candidates.
+- Every selected software dependency edge maps to a complete behavioral test or explicit blocker.
+- Do not let structural document tests carry product semantics already owned by Standard, source, migrations, and behavioral tests.
+- Fixtures, source, unit, integration, CI, managed platform, provider, browser/channel, target host, commercial lifecycle, signed release, pilot, deployment, and production are distinct evidence classes.
 - Stop on red exact-head CI and preserve diagnostics.
 
 ## Verification
@@ -97,15 +97,15 @@ npm run repo:verify:full
 npm run test:unit
 ```
 
-Run the complete applicable matrix available in the environment. Report unavailable dependencies or external gates rather than substituting weaker evidence.
+Run the complete applicable matrix available in the environment. Report unavailable external prerequisites rather than substituting weaker evidence.
 
 ## Document ownership
 
 - `STANDARD.md` and amendments — normative requirements.
 - `decision/README.md` — decision method.
-- `CODEGRAPH.md` — topology and current evidence.
-- `production-readiness-program/` — one active program and transaction ledger.
+- `CODEGRAPH.md` — sole exact current status and executable topology.
+- `production-readiness-program/` — one active production route.
 - `docs/architecture/` — explanatory architecture.
 - `memory/MEMORY.md` — sole handoff index.
-- `second-half-plan/`, `GAPS.md`, `REMEDIATION.md` — historical routing/provenance only.
+- `second-half-plan/`, `GAPS.md`, `REMEDIATION.md` — historical provenance/routing only.
 - source, migrations, executable tests, workflows, and proof — implementation/acceptance truth.
