@@ -10,6 +10,7 @@ export * from "./materialization.js";
 export * from "./task-capabilities.js";
 export * from "./operating-system.js";
 export { planAdaptiveOperatingLayoutV2 as planAdaptiveOperatingLayout } from "./operating-layout.js";
+export * from "./operating-projection.js";
 export * from "./work-stream.js";
 export * from "./ag-ui.js";
 export * from "./protocol-authority.js";
