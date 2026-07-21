@@ -1,0 +1,28 @@
+name: MVP Build Merge Gates
+
+on:
+  pull_request:
+    paths:
+      - 'mvp-build/**'
+      - '.github/workflows/mvp-build-merge-gates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  merge-gates:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Install dependencies
+        working-directory: mvp-build
+        run: npm ci
+      - name: Run complete merge gate
+        working-directory: mvp-build
+        run: npm run repo:merge:check
