@@ -3,15 +3,15 @@
 Status: active source candidate; exact acceptance is owned by workflows and retained release records  
 Updated: 2026-07-21  
 Candidate: PR #36, branch `agent/ws08-ws09-production`, stacked on PR #35  
-Source migration head: `0081`
+Source migration head: `0082`
 
 This is the sole contributor-facing file that carries current product/workstream structure. Root and compatibility documents route here rather than duplicating it. Exact transient SHA, run number, and conclusion remain in GitHub Actions or retained evidence.
 
 ## Evidence headline
 
 - PR #36 contains production-level WS-08 source closure, WS-09 capacity groundwork, and the computed UI projection consolidation.
-- Source migrations extend through `0081`; application to managed Supabase remains a separate evidence class.
-- `0077` makes the shared minute rate window database-owned; `0078` qualifies the conflict target; `0079` qualifies the subsequent rate-window update predicate and expression; `0080` adds the provider-neutral connector lifecycle, guided setup intents, capability projections, fail-closed revocation, and exact conversational decision context; `0081` normalizes verified reconnects, resets stale revocation/discovery projections, and records connected lifecycle receipts.
+- Source migrations extend through `0082`; application to managed Supabase remains a separate evidence class.
+- `0077` makes the shared minute rate window database-owned; `0078` qualifies the conflict target; `0079` qualifies the subsequent rate-window update predicate and expression; `0080` adds the provider-neutral connector lifecycle, guided setup intents, capability projections, fail-closed revocation, and exact conversational decision context; `0081` normalizes verified reconnects, resets stale revocation/discovery projections, and records connected lifecycle receipts; `0082` serializes one SMS decision focus per owner assignment and attaches it atomically to the delivered work object.
 - Manager compiles and runs from committed typed `apps/manager/src/server.ts`; generated-template and string-patch assembly remains structurally forbidden.
 - The owner UI has one projection controller, one semantic compiler, one layout planner, one renderer registry, one WorkResource renderer, and one embedded-view compiler. Talk, Workspace, Review, MCP Apps, and UI Lab are projections rather than authority.
 - Connector setup now uses one owner experience: AMTECH-managed authorization for supported providers and guided assignment-bound setup intents for long-tail systems. SMS remains a normal verified owner session; Hermes interprets natural language while Manager binds decisions to the exact immutable approval and effect.
@@ -57,6 +57,7 @@ owner names or selects a business system
 → harmless read/health proof
 → verified event ingress or controlled polling when supported
 → Hermes uses broad effective capabilities in normal work
+→ delivered approval opens one atomic conversation focus for the verified owner
 → natural owner decision across web/SMS/voice for held consequential work
 → Manager revalidates exact principal + assignment + approval snapshot + effect
 → lifecycle/effect receipt projected to owner
@@ -128,10 +129,15 @@ packages/db/migrations/0081_connector_reactivation_normalization.sql
   ├─ stale terminal/discovery projection reset
   └─ connected lifecycle receipt and guided-intent completion
 
+packages/db/migrations/0082_atomic_sms_decision_focus.sql
+  ├─ one open SMS focus per assignment-bound human
+  ├─ advisory-lock and partial-unique race closure
+  └─ supersede, open/replay and message attachment in one transaction
+
 apps/manager/src/lib/channel-decisions.ts + webhooks/twilio.ts
   ├─ verified SMS principal and assignment
   ├─ multiple legitimate roles for one human principal
-  ├─ exact pending approval conversation focus
+  ├─ atomic exact pending-approval conversation focus
   ├─ natural-language interpretation by Hermes
   └─ immutable Manager approval resolution without repeated challenges
 
@@ -193,12 +199,12 @@ All controls use the same feasible domain. Mandatory invariants are constraints.
 |---|---|---|
 | repository/source truth | Trace008/009/010, structural governance, direct typed Manager, singleton UI projection architecture, exact-candidate workflow | final exact-head workflow record and later release evidence |
 | protocol/capability | current assignment/version interception; scoped streams; connector manifests/discovery; exact conversational decisions; embedded actions | live remote MCP/OAuth/provider/client lifecycle |
-| database | forward migrations through `0081`, immutable ledger, blank-ledger and direct PostgreSQL contracts | managed Supabase migration, advisors, backup and rollback proof |
+| database | forward migrations through `0082`, immutable ledger, blank-ledger and direct PostgreSQL contracts | managed Supabase migration, advisors, backup and rollback proof |
 | release identity | five exact-SHA image definitions, signed manifest and independent verifier | trusted production signing authority and registry retention |
 | target host/runtime | Host Provisioner-only Docker authority and lifecycle contracts | target-host secrets, isolation, replacement and recovery evidence |
 | owner UI | one controller/compiler/planner/registry/render path; unified native/guided connector setup; evidence-gated connected state; constrained presentation coverage | fixture-free browser, accessibility, reconnect and cross-account acceptance |
 | connectors/events | assignment-bound discovery, lifecycle receipts, setup intents, verified ingress, durable effects, revoke and reactivation projection | live OAuth consent, credential refresh/expiry, provider webhook delivery, provider-side revoke confirmation |
-| SMS decisions | verified assignment-bound owner session, multi-role principal resolution, exact approval context bridge | live Twilio delivery and fixture-free conversational approval journey |
+| SMS decisions | verified assignment-bound owner session, multi-role principal resolution, atomic exact approval focus and resolution bridge | live Twilio delivery and fixture-free conversational approval journey |
 | restore/rollback | complete source transaction and fail-closed compatibility/conservation guards | destructive local rehearsal and target-host rehearsal |
 | Model Gateway | database admission, one provider identity, validated bounds, reconciliation | provider sandbox idempotency and accepted-response-loss proof |
 | WS-09 groundwork | queue/connection/SSE/fairness descriptors, saturation and pilot-stop schema | representative 64 GiB measurement, capacity and pilot acceptance |
@@ -219,7 +225,7 @@ All controls use the same feasible domain. Mandatory invariants are constraints.
 ## Dependency order
 
 1. Use the exact current candidate workflow record; stop downstream claims on any red job.
-2. Apply and prove migrations through `0081` on a disposable managed platform.
+2. Apply and prove migrations through `0082` on a disposable managed platform.
 3. Run provider-backed connector setup, harmless-use, event-ingress, natural-decision, revoke, reconnect, and post-revoke failure evidence.
 4. Run provider-backed idempotency, ambiguity, original-effect, accounting and proof-refinding evidence.
 5. Rehearse destructive fault, restore and rollback transactions without accepted-work loss.
