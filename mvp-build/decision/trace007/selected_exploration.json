@@ -1,1 +1,18 @@
-{"schema":"amtech.trace007.selected_exploration.v1","selected_ids":["D01","D02","D03","D04","D06","D07","D15","A16","B08","A06","A11","C05","A12","B13","C09","A14"],"metrics":{"q_bar":0.42278126,"C_Omega":1.0,"C_H":0.95584989,"Sep_min":0.21540659,"Sep_mean":0.67111443,"VNE":0.56573456,"QD":0.9375,"Redundancy":0.53014482,"J":0.5818732},"coverage":{"workstreams":["WS06","WS07","WS08_g"],"z_spaces":["authority","commercial","failure","future","operator","proof","provider","work"]}}
+{
+  "schema": "amtech.trace007.selected-exploration.v2",
+  "status": "seed only; corrected controls recompute selections during verification",
+  "seed_selected_ids": [
+    "D01", "D02", "D03", "D04", "D06", "D07", "D15", "A16",
+    "B08", "A06", "A11", "C05", "A12", "B13", "C09", "A14"
+  ],
+  "seed_origin": "legacy joint objective before equal-feasibility and topology correction",
+  "valid_use": "known feasible initialization for deterministic multi-start search",
+  "invalid_uses": [
+    "canonical optimum",
+    "software-invariant completion",
+    "causal improvement",
+    "exact implementation authority"
+  ],
+  "current_selection_source": "decision/trace007/compute.py output on the exact candidate",
+  "coverage_rule": "Candidate graph metrics and software-invariant coverage are reported separately. Mandatory workstream/space coverage is a feasibility constraint, not an objective bonus."
+}
