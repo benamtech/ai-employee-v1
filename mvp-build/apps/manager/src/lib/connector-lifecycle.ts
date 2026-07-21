@@ -1,12 +1,14 @@
 import { createHash, randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@amtech/db";
 import {
+  approvalInteractionForEffect,
   compileAdaptiveConnectorPlan,
+  genericConnectorRuntimeManifest,
   resolveConnectorRuntimeManifest,
-  verificationRequirementForEffect,
   type AdaptiveConnectorPlan,
   type ConnectorCapabilityManifest,
   type ConnectorLifecycleState,
+  type ConnectorRuntimeManifest,
 } from "@amtech/shared";
 
 interface StoredBinding {
@@ -46,7 +48,7 @@ interface StoredCapabilityProjection {
   label: string;
   category: string;
   effect_class: string;
-  verification_requirement: string;
+  approval_interaction: string;
   event_driven: boolean;
   status: string;
   manifest_revision: string;
@@ -55,6 +57,22 @@ interface StoredCapabilityProjection {
   last_verified_at?: string | null;
   revoked_at?: string | null;
   updated_at?: string | null;
+}
+
+export interface ConnectorSetupIntent {
+  id: string;
+  assignment_id: string;
+  account_id: string;
+  employee_id: string;
+  connector_key: string;
+  label: string;
+  setup_experience: string;
+  requested_by_principal_id: string;
+  status: "requested" | "in_progress" | "ready" | "connected" | "cancelled" | "failed" | string;
+  owner_context: Record<string, unknown>;
+  evidence: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ConnectorLifecycleSnapshot {
@@ -69,12 +87,14 @@ export interface ConnectorLifecycleSnapshot {
     capabilities: StoredCapabilityProjection[];
   }>;
   unbound_capabilities: StoredCapabilityProjection[];
+  setup_intents: ConnectorSetupIntent[];
   activation_plan: AdaptiveConnectorPlan;
   proof: {
     binding_count: number;
     active_binding_count: number;
     capability_count: number;
     revoked_binding_count: number;
+    setup_intent_count: number;
   };
 }
 
@@ -87,13 +107,17 @@ function lifecycleState(row: StoredBinding): ConnectorLifecycleState {
   if (row.revoked_at || row.status === "revoked" || row.lifecycle_state === "revoked") return "revoked";
   if (row.status === "expired" || row.lifecycle_state === "expired") return "expired";
   if (row.status === "degraded" || row.lifecycle_state === "degraded") return "degraded";
-  if (["active", "connected", "working", "current"].includes(row.status)) return "connected";
+  if (["active", "connected", "working", "current", "ok", "ready"].includes(row.status)) return "connected";
   if (row.status === "pending" || row.lifecycle_state === "authorizing") return "authorizing";
   return "setup_required";
 }
 
 function connectorKey(row: StoredBinding): string {
   return String(row.connector_key || resolveConnectorRuntimeManifest(row.provider)?.key || row.provider || "connector");
+}
+
+function manifestFor(value: string): ConnectorRuntimeManifest {
+  return resolveConnectorRuntimeManifest(value) ?? genericConnectorRuntimeManifest(value);
 }
 
 async function loadBindings(db: SupabaseClient, input: {
@@ -117,7 +141,7 @@ async function loadProjections(db: SupabaseClient, input: {
   assignment_id: string;
 }): Promise<StoredCapabilityProjection[]> {
   const result = await db.from("connector_capability_projections")
-    .select("id,connector_binding_id,assignment_id,account_id,employee_id,provider,connector_key,capability_key,label,category,effect_class,verification_requirement,event_driven,status,manifest_revision,evidence,discovered_at,last_verified_at,revoked_at,updated_at")
+    .select("id,connector_binding_id,assignment_id,account_id,employee_id,provider,connector_key,capability_key,label,category,effect_class,approval_interaction,event_driven,status,manifest_revision,evidence,discovered_at,last_verified_at,revoked_at,updated_at")
     .eq("account_id", input.account_id)
     .eq("employee_id", input.employee_id)
     .eq("assignment_id", input.assignment_id)
@@ -126,8 +150,22 @@ async function loadProjections(db: SupabaseClient, input: {
   return (result.data ?? []) as StoredCapabilityProjection[];
 }
 
-async function loadActivationPlan(db: SupabaseClient, input: {
+async function loadSetupIntents(db: SupabaseClient, input: {
   account_id: string;
+  employee_id: string;
+  assignment_id: string;
+}): Promise<ConnectorSetupIntent[]> {
+  const result = await db.from("connector_setup_intents")
+    .select("id,assignment_id,account_id,employee_id,connector_key,label,setup_experience,requested_by_principal_id,status,owner_context,evidence,created_at,updated_at")
+    .eq("account_id", input.account_id)
+    .eq("employee_id", input.employee_id)
+    .eq("assignment_id", input.assignment_id)
+    .order("updated_at", { ascending: false });
+  if (result.error) throw result.error;
+  return (result.data ?? []) as ConnectorSetupIntent[];
+}
+
+async function loadActivationPlan(db: SupabaseClient, input: {
   employee_id: string;
   connected_connector_keys: string[];
 }): Promise<AdaptiveConnectorPlan> {
@@ -166,7 +204,7 @@ function capabilityProjection(binding: StoredBinding, capability: ConnectorCapab
     label: capability.label,
     category: capability.category,
     effect_class: capability.effect_class,
-    verification_requirement: verificationRequirementForEffect(capability.effect_class),
+    approval_interaction: approvalInteractionForEffect(capability.effect_class),
     event_driven: capability.event_driven,
     status: "discovered",
     manifest_revision: "connector-runtime-v1",
@@ -189,9 +227,8 @@ function capabilityProjection(binding: StoredBinding, capability: ConnectorCapab
 }
 
 /**
- * Discover declared connector capabilities from the provider-neutral manifest.
- * This creates owner/runtime evidence only; every execution still re-enters the
- * existing fresh Manager capability interceptor and current assignment authority.
+ * Declared discovery improves guidance and owner evidence. Execution remains
+ * governed by the existing fresh capability interceptor and current assignment.
  */
 export async function refreshAssignmentConnectorCapabilities(db: SupabaseClient, input: {
   account_id: string;
@@ -201,22 +238,8 @@ export async function refreshAssignmentConnectorCapabilities(db: SupabaseClient,
   const checkedAt = new Date().toISOString();
   const bindings = await loadBindings(db, input);
   for (const binding of bindings) {
-    const state = lifecycleState(binding);
-    if (state !== "connected") continue;
-    const manifest = resolveConnectorRuntimeManifest(binding.connector_key || binding.provider);
-    if (!manifest) {
-      const updated = await db.from("connector_bindings").update({
-        connector_key: connectorKey(binding),
-        lifecycle_state: "connected",
-        discovery_state: "degraded",
-        last_capability_discovery_at: checkedAt,
-        discovered_capabilities: [],
-        updated_at: checkedAt,
-      }).eq("id", binding.id).eq("assignment_id", input.assignment_id);
-      if (updated.error) throw updated.error;
-      continue;
-    }
-
+    if (lifecycleState(binding) !== "connected") continue;
+    const manifest = manifestFor(binding.connector_key || binding.provider);
     const projections = manifest.capabilities.map((capability) => capabilityProjection(binding, capability, checkedAt));
     if (projections.length > 0) {
       const write = await db.from("connector_capability_projections").upsert(projections, {
@@ -228,11 +251,11 @@ export async function refreshAssignmentConnectorCapabilities(db: SupabaseClient,
     const bindingWrite = await db.from("connector_bindings").update({
       connector_key: manifest.key,
       lifecycle_state: "connected",
-      discovery_state: "complete",
+      discovery_state: manifest.capabilities.length ? "complete" : "degraded",
       discovered_capabilities: projections.map((projection) => ({
         capability_key: projection.capability_key,
         effect_class: projection.effect_class,
-        verification_requirement: projection.verification_requirement,
+        approval_interaction: projection.approval_interaction,
         event_driven: projection.event_driven,
       })),
       last_capability_discovery_at: checkedAt,
@@ -262,14 +285,57 @@ export async function refreshAssignmentConnectorCapabilities(db: SupabaseClient,
   return loadConnectorLifecycleSnapshot(db, input);
 }
 
+export async function requestConnectorSetupIntent(db: SupabaseClient, input: {
+  account_id: string;
+  employee_id: string;
+  assignment_id: string;
+  requested_by_principal_id: string;
+  connector: string;
+  owner_context?: Record<string, unknown>;
+}): Promise<ConnectorSetupIntent> {
+  const manifest = manifestFor(input.connector);
+  const now = new Date().toISOString();
+  const id = stableId("csi", input.assignment_id, manifest.key, input.requested_by_principal_id);
+  const row = {
+    id,
+    assignment_id: input.assignment_id,
+    account_id: input.account_id,
+    employee_id: input.employee_id,
+    connector_key: manifest.key,
+    label: manifest.label,
+    setup_experience: manifest.setup_experience,
+    requested_by_principal_id: input.requested_by_principal_id,
+    status: "requested",
+    owner_context: input.owner_context ?? {},
+    evidence: {
+      source: "owner_guided_connector_setup",
+      adapter_kind: manifest.adapter_kind,
+      supports_webhooks: manifest.supports_webhooks,
+      supports_polling: manifest.supports_polling,
+      supports_remote_mcp: manifest.supports_remote_mcp,
+      custody: manifest.custody,
+      provider_secrets_visible_to_owner_ui: false,
+    },
+    created_at: now,
+    updated_at: now,
+  };
+  const result = await db.from("connector_setup_intents").upsert(row, {
+    onConflict: "assignment_id,connector_key,requested_by_principal_id",
+  }).select("*").maybeSingle();
+  if (result.error) throw result.error;
+  if (!result.data) throw new Error("connector_setup_intent_not_persisted");
+  return result.data as ConnectorSetupIntent;
+}
+
 export async function loadConnectorLifecycleSnapshot(db: SupabaseClient, input: {
   account_id: string;
   employee_id: string;
   assignment_id: string;
 }): Promise<ConnectorLifecycleSnapshot> {
-  const [bindings, projections] = await Promise.all([
+  const [bindings, projections, setupIntents] = await Promise.all([
     loadBindings(db, input),
     loadProjections(db, input),
+    loadSetupIntents(db, input),
   ]);
   const byBinding = new Map<string, StoredCapabilityProjection[]>();
   for (const projection of projections) {
@@ -281,7 +347,6 @@ export async function loadConnectorLifecycleSnapshot(db: SupabaseClient, input: 
     .filter((binding) => lifecycleState(binding) === "connected")
     .map(connectorKey);
   const activationPlan = await loadActivationPlan(db, {
-    account_id: input.account_id,
     employee_id: input.employee_id,
     connected_connector_keys: connectedKeys,
   });
@@ -298,12 +363,14 @@ export async function loadConnectorLifecycleSnapshot(db: SupabaseClient, input: 
     checked_at: new Date().toISOString(),
     bindings: normalizedBindings,
     unbound_capabilities: projections.filter((projection) => !knownBindingIds.has(projection.connector_binding_id)),
+    setup_intents: setupIntents,
     activation_plan: activationPlan,
     proof: {
       binding_count: bindings.length,
       active_binding_count: normalizedBindings.filter((binding) => binding.lifecycle_state === "connected").length,
       capability_count: projections.length,
       revoked_binding_count: normalizedBindings.filter((binding) => binding.lifecycle_state === "revoked").length,
+      setup_intent_count: setupIntents.length,
     },
   };
 }
