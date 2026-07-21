@@ -22,6 +22,7 @@ try {
     "0075_ws08_gateway_reconciliation.sql",
     "0076_ws08_reconciliation_authority_hardening.sql",
     "0077_ws07_database_owned_rate_windows.sql",
+    "0078_ws07_rate_window_namespace_fix.sql",
   ];
   const applied = new Set((await rows("select name from _migrations where name = any($1::text[])", [migrations])).map((row) => row.name));
   check("commercial_effect_migrations_applied", migrations.every((name) => applied.has(name)), `${applied.size}/${migrations.length}`);
@@ -96,6 +97,12 @@ try {
       && !admissionSource.includes("v_existing.rate_window_key <> p_rate_window_key"),
     "caller window cannot shard shared minute authority or invalidate a deterministic replay",
   );
+  check(
+    "rate_window_conflict_namespace_qualified",
+    /on conflict on constraint model_gateway_rate_windows_pkey/i.test(admissionSource),
+    "RETURNS TABLE output names cannot collide with the rate-window conflict target",
+  );
+
   check(
     "metadata_safe_gateway_replay",
     !admissionSource.includes("v_existing.correlation_id <> p_correlation_id")
