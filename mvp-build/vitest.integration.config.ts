@@ -9,6 +9,10 @@ import { defineConfig } from "vitest/config";
  * Workspace aliases keep collection source-exact on a clean checkout without making
  * an unrelated prebuild a prerequisite for PostgreSQL integration evidence.
  */
+if (!process.env.STAGING_DATABASE_URL && process.env.DATABASE_URL) {
+  process.env.STAGING_DATABASE_URL = process.env.DATABASE_URL;
+}
+
 export default defineConfig({
   resolve: {
     alias: {
