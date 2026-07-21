@@ -23,16 +23,23 @@ export interface OperatingProjectionPolicy {
 }
 
 /**
- * Canonical presentation semantic compiler. Manager-supplied operating state is
- * accepted only when its account/employee/assignment scope matches the payload.
- * Otherwise the same bounded projection compiler is used by production fallback
- * and UI Lab. Presentation policy cannot add authority or durable truth.
+ * Canonical presentation semantic compiler. Production accepts only the
+ * authoritative Manager-supplied operating state with exact account, employee,
+ * and assignment scope. Fixture demonstrations use the same bounded compiler
+ * to derive projection-only semantics without adding authority or durable truth.
  */
 export function compileOperatingProjection(
   payload: ResourcePayload,
   policy: OperatingProjectionPolicy,
 ): OperatingSurfaceState {
   const supplied = payload.operating_state;
+  if (policy.evidence_class === "production") {
+    if (!supplied) throw new Error("operating_projection_authoritative_state_required");
+    if (!exactContext(supplied.context, payload, policy.employee_id)) {
+      throw new Error("operating_projection_scope_mismatch");
+    }
+    return supplied;
+  }
   if (supplied && exactContext(supplied.context, payload, policy.employee_id)) return supplied;
 
   const now = policy.generated_at ?? new Date().toISOString();
@@ -70,9 +77,7 @@ export function compileOperatingProjection(
   const decisions: OperatingDecision[] = payload.approvals.map((approval) => ({
     id: `decision:${approval.id}`,
     title: approval.summary,
-    consequence: policy.evidence_class === "fixture_demonstration"
-      ? "This branch is simulated. No provider, customer, monetary, publishing, or runtime effect occurs."
-      : "This action is held until an authorized owner decides.",
+    consequence: "This branch is simulated. No provider, customer, monetary, publishing, or runtime effect occurs.",
     risk: approval.risk_level === "low" ? "low" : approval.risk_level === "medium" ? "medium" : "high",
     target: { kind: "approval", id: approval.id },
     proof: { approval_id: approval.id, assignment_id: assignmentId },
@@ -134,9 +139,7 @@ export function compileOperatingProjection(
     guidance: decisions.length
       ? {
           headline: `${context.employee_name} has ${decisions.length} decisions ready`,
-          summary: policy.evidence_class === "fixture_demonstration"
-            ? "The production projection path is rendering simulated work. No external effect or production proof exists."
-            : "Work is held until current owner authority resolves the exact decision.",
+          summary: "The production projection path is rendering simulated work. No external effect or production proof exists.",
           suggested_prompt: "Explain the most important decision and the next safe action.",
           mode: "needs_you",
         }
