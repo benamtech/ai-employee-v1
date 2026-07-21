@@ -1,0 +1,33 @@
+name: Trace005 Computation Bootstrap
+on:
+  push:
+    branches:
+      - agent/ws06-ws07-production
+permissions:
+  contents: write
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/ws06-ws07-production
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Generate and verify trace005
+        run: |
+          python mvp-build/decision/trace005/trace005_bootstrap.py
+          python mvp-build/decision/trace005/compute.py
+      - name: Commit computation checkpoint
+        run: |
+          if git diff --quiet -- mvp-build/decision/trace005; then
+            echo "trace005 already materialized"
+            exit 0
+          fi
+          git config user.name "amtech-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add mvp-build/decision/trace005
+          git commit -m "AMTECH-P0 commit trace005 computation checkpoint"
+          git push origin HEAD:agent/ws06-ws07-production
