@@ -1,33 +1,97 @@
-# Trace 007 — WS-06/07 production transaction and WS-08 groundwork
+# Trace 007 — WS-06/07 transaction and bounded WS-08 groundwork
 
 ## Authority
 
 - Repository: `benamtech/ai-employee-v1`
-- Base authority: PR #34 exact head `e04ace7bd6fafa9e2eadaeec3f04e70043513e3a`
-- Stacked branch: `agent/ws06-ws07-production`
-- Authority order: source/migrations/tests/workflows > exact reviewed evidence > architecture/plan > memory > PR prose.
+- Stack: PR #34 owner-runtime base → PR #35 candidate
+- Source migration head: `0076`
+- Evidence order: applied durable state → executable source/config → exact-SHA executable evidence → Standard/program → architecture → memory → PR prose
 
-## Computed result
+This trace is decision evidence only. It does not establish source correctness, CI, managed database, provider, browser/channel, target-host, commercial lifecycle, release, pilot, deployment, or production acceptance.
 
-The canonical generator produced 64 candidates in four isolated batches. The joint hypergraph/quality-diversity selection achieved `J=0.5818732` versus utility-only `J=0.2346884` and diversity-only `J=0.56291544`. The selected set differs materially from utility-only and restores complete applicable workstream/Z-space coverage, so graph/diversity terms are **causal**, not merely descriptive.
+## Candidate matrix
 
-## Selected production transaction
+The trace retains:
 
-`D01, D02, D03, D04, D06, D07` compresses to one transaction:
+- `B288 = W3 × L12 × H8` authority/evidence extraction;
+- 64 candidates across `current`, `feature`, `counterfactual`, and `recombination` batches;
+- 16 scored dimensions with explicit `Unsupported` and prerequisite debt;
+- one coherent implementation transaction: `D01,D02,D03,D04,D06,D07`.
 
-1. atomically admit a stable request using shared budget and rate authority;
-2. dispatch with one provider idempotency identity;
-3. persist accepted, failed, or ambiguous outcome;
-4. reconcile ambiguity before retry;
-5. bind accepted effect receipt to accounting;
-6. project exact revision/output/proof and repair projection after crash without repeating the effect.
+The implementation remains justified by repository evidence, production invariants, and dependency prerequisites even when the mathematical machinery is removed.
 
-## Repository cleanup rule
+## Corrected topology
 
-Trace 007 is the only active manifold trace for WS-06/07/08. Older traces remain historical evidence only when referenced by the document authority map; incomplete trace transports are removed. `compute.py` regenerates all numeric artifacts from compact evidence-backed descriptors, preventing opaque matrix bloat.
+Trace007 previously used one hypergraph whose vertices were candidate IDs. That structure could measure candidate grouping and edge touch, but it could not measure complete software invariants.
 
-The useful research pattern is retained as **evidence-bounded forced dreaming**: four independent candidate batches, cross-lens recombination, genuine hypergraph dependencies, explicit unsupported penalties, and a separate implementation compression. It may expand possibility space, but it cannot override repository invariants or promote evidence classes.
+The trace now separates:
 
-## Evidence boundary
+1. `candidate_graph.json` — candidate trajectories and relations used for diversity, redundancy, lineage, similarity, and candidate-edge touch;
+2. `software_invariant_hypergraph.json` — actual software entities and obligations used for `touch`, `fractional`, `complete`, and `proved` coverage.
 
-This transaction may establish source, unit, integration, CI, and local acceptance evidence. It does not by itself establish live-provider, managed-database, target-host, pilot, or production evidence.
+`C_complete` and `C_proved` are never computed from candidate-group edges.
+
+## Corrected controls
+
+All controls use the same feasible domain:
+
+```text
+16 validated candidates
++ all mandatory workstream coverage
++ all mandatory Z-space coverage
++ repository invariant feasibility
+```
+
+Mandatory coverage is a constraint, not a `+0.20` reward.
+
+`compute.py` compares:
+
+- full objective;
+- no-graph objective;
+- no-diversity objective;
+- simple evidence/value/testability/risk/scope baseline;
+- at least 1,000 feasible random sets.
+
+It also reports deterministic multi-start search sensitivity and bounded weight sensitivity.
+
+The prior `J=0.5818732` versus `J=0.2346884` comparison is retained only as historical context. The utility control failed the same coverage condition that rewarded the joint set, so that delta is invalid as a graph/diversity ablation.
+
+## Current classification
+
+```text
+candidate graph terms: descriptive
+software invariant graph terms: descriptive
+diversity terms: selection-influencing when equal-feasibility selections differ
+causal improvement: unestablished
+```
+
+Selection influence is not causal improvement. Causal promotion requires `implementation_ablation.json` to show better independent outcomes for the implementation and proof surface.
+
+## Software transaction
+
+```text
+immutable request or work revision
+→ exact assignment, authority, entitlement, and approval
+→ atomic shared rate and budget admission
+→ one durable command/effect and provider idempotency identity
+→ accepted | failed | ambiguous durable outcome
+→ original-effect reconciliation before retry
+→ accepted effect-bound accounting receipt
+→ output and owner proof bound to the same revision/effect
+→ projection repair without repeating an accepted effect
+```
+
+`software_invariant_hypergraph.json` models these obligations directly. `verification_plan.json` maps every software hyperedge to a complete behavioral proof plan. Proof status remains `unestablished` until exact executable evidence is attached.
+
+## Predictive-model boundary
+
+No Koopman, Hodge, COCONUT, continuous hidden-state, latent BFS, or phase-switching implementation is claimed. Predictive models remain disabled because this trace has no repeated comparable trajectories and no held-out result that beats the simpler baseline.
+
+## Repository cleanup consequence
+
+- snapshot-specific governance assertions are being replaced by schema, reference, evidence-class, routing, and reproducibility invariants;
+- contributor policy is consolidated into one root contract, one scoped product contract, and short compatibility routers;
+- current status is not duplicated across every contributor document;
+- opaque derived matrices are regenerated from compact topology descriptors.
+
+The corrected trace is useful when it expands search and exposes dependencies. It is non-causal when it does not outperform the simpler baseline.
