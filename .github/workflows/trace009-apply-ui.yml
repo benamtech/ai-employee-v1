@@ -6,6 +6,7 @@ on:
       - agent/ws08-ws09-production
     paths:
       - mvp-build/scripts/apply-trace009-ui-consolidation.mjs
+      - mvp-build/scripts/generate-ui-coverage.mjs
       - .github/workflows/trace009-apply-ui.yml
   workflow_dispatch:
 
@@ -14,7 +15,7 @@ permissions:
 
 concurrency:
   group: trace009-apply-ui-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   apply:
@@ -22,22 +23,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: agent/ws08-ws09-production
           fetch-depth: 0
-      - name: Assert exact branch head
+      - name: Assert migration branch
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
-          test "${GITHUB_REF_NAME}" = "agent/ws08-ws09-production"
+          test "$(git branch --show-current)" = "agent/ws08-ws09-production"
       - name: Apply assertion-checked transformation
         working-directory: mvp-build
-        run: node scripts/apply-trace009-ui-consolidation.mjs
-      - name: Commit transformed source
+        run: |
+          set -euo pipefail
+          node scripts/apply-trace009-ui-consolidation.mjs
+          node scripts/generate-ui-coverage.mjs validation/ui-presentation-coverage.json
+      - name: Commit transformed source and generated coverage
         run: |
           set -euo pipefail
           git config user.name "amtech-trace-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add mvp-build/apps/web/app/agent mvp-build/apps/web/app/ui-lab
+          git add mvp-build/apps/web/app/agent mvp-build/apps/web/app/ui-lab mvp-build/validation/ui-presentation-coverage.json
           git diff --cached --check
           if git diff --cached --quiet; then
             echo "Trace009 UI consolidation already applied."
