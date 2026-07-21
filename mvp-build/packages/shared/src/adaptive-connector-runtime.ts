@@ -1,6 +1,9 @@
 import type { CapabilityCategory } from "./materialization.js";
 import type { ConnectorCustody } from "./connector-registry.js";
-import { resolveOwnerManagedConnectorSetup } from "./connector-setup.js";
+import {
+  resolveManagedSetupForCapability,
+  resolveOwnerManagedConnectorSetup,
+} from "./connector-setup.js";
 
 export type ConnectorAdapterKind =
   | "native_oauth"
@@ -9,6 +12,14 @@ export type ConnectorAdapterKind =
   | "remote_mcp"
   | "managed_credentials"
   | "operator_managed";
+
+export type ConnectorSetupExperience =
+  | "amtech_managed_oauth"
+  | "amtech_managed_provider_onboarding"
+  | "guided_business_credentials"
+  | "guided_webhook_subscription"
+  | "guided_remote_mcp"
+  | "amtech_managed_service";
 
 export type ConnectorLifecycleState =
   | "available"
@@ -25,10 +36,16 @@ export type ConnectorEffectClass =
   | "customer_facing"
   | "money_movement";
 
-export type ActionVerificationRequirement =
-  | "owner_session"
-  | "sms_step_up"
-  | "sms_and_owner_session";
+/**
+ * Interaction grammar, not authentication. SMS, web, and voice render the same
+ * approval decision. A verified owner SMS session does not re-authenticate on
+ * every turn; Hermes interprets natural language against one exact work object.
+ */
+export type ApprovalInteraction =
+  | "none"
+  | "conversational"
+  | "explicit"
+  | "typed_confirmation";
 
 export interface ConnectorCapabilityManifest {
   key: string;
@@ -47,6 +64,7 @@ export interface ConnectorRuntimeManifest {
   aliases: string[];
   label: string;
   adapter_kind: ConnectorAdapterKind;
+  setup_experience: ConnectorSetupExperience;
   custody: ConnectorCustody;
   self_service_setup: boolean;
   supports_webhooks: boolean;
@@ -77,6 +95,7 @@ export interface AdaptiveConnectorRecommendation {
   recommendation_class: AdaptiveRecommendationClass;
   reasons: string[];
   self_service_setup: boolean;
+  setup_experience: ConnectorSetupExperience;
   event_driven: boolean;
   custody: ConnectorCustody;
   next_steps: Array<
@@ -84,7 +103,7 @@ export interface AdaptiveConnectorRecommendation {
     | "discover_capabilities"
     | "prove_read"
     | "enable_events"
-    | "configure_step_up"
+    | "configure_approval_policy"
     | "activate_automation"
   >;
   highest_effect_class: ConnectorEffectClass;
@@ -95,9 +114,17 @@ export interface AdaptiveConnectorPlan {
   runtime_posture: {
     reasoning_and_discovery: "broad_by_default";
     consequential_effects: "fresh_manager_authority";
+    owner_interaction: "natural_language_across_surfaces";
     unknown_connector_risk: "manager_custody_default_deny";
   };
   recommendations: AdaptiveConnectorRecommendation[];
+}
+
+export interface ConnectorSetupAction {
+  key: string;
+  label: string;
+  setup_experience: ConnectorSetupExperience;
+  self_service: boolean;
 }
 
 const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
@@ -107,6 +134,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["gmail", "email", "google workspace", "google-workspace"],
     label: "Gmail",
     adapter_kind: "native_oauth",
+    setup_experience: "amtech_managed_oauth",
     custody: "manager_mediated",
     self_service_setup: true,
     supports_webhooks: true,
@@ -138,7 +166,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
       {
         key: "gmail.send_approved",
         label: "Send approved email",
-        summary: "Send only the immutable draft covered by current approval.",
+        summary: "Send only the immutable draft covered by the owner’s current conversational approval.",
         category: "communication",
         effect_class: "customer_facing",
         event_driven: false,
@@ -153,6 +181,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["google calendar", "calendar", "gcal", "schedule"],
     label: "Google Calendar",
     adapter_kind: "native_oauth",
+    setup_experience: "amtech_managed_oauth",
     custody: "manager_mediated",
     self_service_setup: false,
     supports_webhooks: true,
@@ -174,7 +203,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
       {
         key: "calendar.manage_appointment",
         label: "Manage approved appointments",
-        summary: "Create, update, or cancel customer-facing appointments through approval policy.",
+        summary: "Create, update, or cancel customer-visible appointments through the normal approval grammar.",
         category: "office",
         effect_class: "customer_facing",
         event_driven: false,
@@ -189,6 +218,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["quickbooks", "qbo", "intuit", "accounting", "bookkeeping"],
     label: "QuickBooks",
     adapter_kind: "native_oauth",
+    setup_experience: "amtech_managed_oauth",
     custody: "manager_mediated",
     self_service_setup: true,
     supports_webhooks: true,
@@ -220,7 +250,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
       {
         key: "quickbooks.commit_financial_write",
         label: "Commit approved financial writes",
-        summary: "Commit only the stored write covered by its exact approval and effect identity.",
+        summary: "Commit only the stored write covered by its exact owner decision and effect identity.",
         category: "money",
         effect_class: "money_movement",
         event_driven: false,
@@ -235,6 +265,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["stripe", "payments", "payment processing", "deposit"],
     label: "Stripe",
     adapter_kind: "native_provider_onboarding",
+    setup_experience: "amtech_managed_provider_onboarding",
     custody: "manager_mediated",
     self_service_setup: true,
     supports_webhooks: true,
@@ -256,7 +287,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
       {
         key: "stripe.send_approved_invoice",
         label: "Send approved invoices",
-        summary: "Create and send only the approved invoice bound to the durable effect.",
+        summary: "Create and send only the invoice the owner approved in the normal conversation.",
         category: "money",
         effect_class: "customer_facing",
         event_driven: false,
@@ -266,7 +297,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
       {
         key: "stripe.money_movement",
         label: "Perform approved money movement",
-        summary: "Perform a bounded money effect only after current authority and step-up verification.",
+        summary: "Perform a bounded money effect only after the explicit confirmation required by policy.",
         category: "money",
         effect_class: "money_movement",
         event_driven: false,
@@ -281,6 +312,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["shopify", "online store", "ecommerce", "e-commerce", "storefront"],
     label: "Shopify",
     adapter_kind: "native_webhook",
+    setup_experience: "guided_webhook_subscription",
     custody: "manager_mediated",
     self_service_setup: false,
     supports_webhooks: true,
@@ -302,7 +334,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
       {
         key: "shopify.manage_customer_order",
         label: "Manage approved order actions",
-        summary: "Perform customer-visible order or fulfillment changes through exact approval.",
+        summary: "Perform customer-visible order or fulfillment changes through the same approval grammar as every other tool.",
         category: "automation",
         effect_class: "customer_facing",
         event_driven: true,
@@ -312,7 +344,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
       {
         key: "shopify.refund",
         label: "Issue approved refunds",
-        summary: "Issue a bounded refund only through current money authority and step-up verification.",
+        summary: "Issue a bounded refund only after the explicit confirmation selected by money policy.",
         category: "money",
         effect_class: "money_movement",
         event_driven: false,
@@ -327,18 +359,19 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["twilio", "sms", "text message", "texting"],
     label: "SMS",
     adapter_kind: "native_webhook",
+    setup_experience: "amtech_managed_service",
     custody: "manager_mediated",
     self_service_setup: false,
     supports_webhooks: true,
     supports_polling: false,
     supports_remote_mcp: false,
     vertical_hints: ["owner", "service", "contractor", "commerce", "store", "field"],
-    workflow_hints: ["sms", "text", "urgent", "approval", "verification", "customer update"],
+    workflow_hints: ["sms", "text", "urgent", "approval", "customer update"],
     capabilities: [
       {
         key: "sms.owner_session",
         label: "Use SMS as an owner session",
-        summary: "Receive assignment-bound owner messages and continue the normal employee session.",
+        summary: "Continue the normal assignment-bound employee conversation by text without repeated authentication challenges.",
         category: "communication",
         effect_class: "read",
         event_driven: true,
@@ -346,14 +379,14 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
         triggers: ["message_received", "delivery_status"],
       },
       {
-        key: "sms.action_step_up",
-        label: "Verify consequential actions by SMS",
-        summary: "Verify a named authorized human for one target-bound, expiring, single-use action.",
+        key: "sms.owner_decisions",
+        label: "Carry natural-language owner decisions",
+        summary: "Resolve approve, edit, reject, and respond decisions against the exact work object currently being discussed.",
         category: "system",
         effect_class: "internal_write",
         event_driven: true,
-        actions: ["verify", "approve", "reject"],
-        triggers: ["verification_reply"],
+        actions: ["approve", "edit", "reject", "respond"],
+        triggers: ["owner_reply"],
       },
       {
         key: "sms.customer_message",
@@ -373,6 +406,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["telegram", "telegram bot"],
     label: "Telegram",
     adapter_kind: "native_webhook",
+    setup_experience: "guided_webhook_subscription",
     custody: "manager_mediated",
     self_service_setup: false,
     supports_webhooks: true,
@@ -399,6 +433,7 @@ const MANIFESTS: readonly ConnectorRuntimeManifest[] = [
     aliases: ["mcp", "remote mcp", "custom integration", "custom connector"],
     label: "Custom business system",
     adapter_kind: "remote_mcp",
+    setup_experience: "guided_remote_mcp",
     custody: "manager_mediated",
     self_service_setup: false,
     supports_webhooks: false,
@@ -433,6 +468,11 @@ function containsHint(text: string, hint: string): boolean {
   return Boolean(normalizedHint) && text.includes(normalizedHint);
 }
 
+function humanLabel(value: string): string {
+  const normalized = value.replace(/[_:-]+/g, " ").trim();
+  return normalized.replace(/\b\w/g, (char) => char.toUpperCase()) || "Business system";
+}
+
 function cloneCapability(value: ConnectorCapabilityManifest): ConnectorCapabilityManifest {
   return { ...value, actions: [...value.actions], triggers: [...value.triggers] };
 }
@@ -462,18 +502,73 @@ export function resolveConnectorRuntimeManifest(value: string | null | undefined
   return match ? cloneManifest(match) : null;
 }
 
-export function verificationRequirementForEffect(effectClass: ConnectorEffectClass): ActionVerificationRequirement {
-  if (effectClass === "money_movement") return "sms_and_owner_session";
-  if (effectClass === "customer_facing") return "sms_step_up";
-  return "owner_session";
+/** Unknown systems remain connectable through one guided, fail-closed experience. */
+export function genericConnectorRuntimeManifest(value: string): ConnectorRuntimeManifest {
+  const key = normalize(value).replace(/\s+/g, "_") || "custom_business_system";
+  return {
+    revision: "connector-runtime-v1",
+    key,
+    aliases: [value],
+    label: humanLabel(value),
+    adapter_kind: "operator_managed",
+    setup_experience: "guided_business_credentials",
+    custody: "manager_mediated",
+    self_service_setup: false,
+    supports_webhooks: false,
+    supports_polling: false,
+    supports_remote_mcp: true,
+    vertical_hints: [],
+    workflow_hints: [],
+    capabilities: [],
+  };
+}
+
+export function approvalInteractionForEffect(effectClass: ConnectorEffectClass): ApprovalInteraction {
+  if (effectClass === "money_movement") return "explicit";
+  if (effectClass === "customer_facing") return "conversational";
+  return "none";
 }
 
 export function effectClassForActionKey(actionKey: string): ConnectorEffectClass {
   const action = normalize(actionKey);
-  if (/(refund|transfer|charge|payment|payout|deposit|money movement)/.test(action)) return "money_movement";
+  if (/(refund|transfer|charge|payment|payout|bill pay|money movement)/.test(action)) return "money_movement";
   if (/(send|publish|notify|appointment|cancel|fulfill|customer)/.test(action)) return "customer_facing";
   if (/(create|update|commit|write|draft|categorize|reconcile)/.test(action)) return "internal_write";
   return "read";
+}
+
+export function resolveConnectorSetupActionForCapability(input: {
+  connector_id?: string | null;
+  server_id?: string | null;
+  tool_name?: string | null;
+  category?: string | null;
+  server_label?: string | null;
+}): ConnectorSetupAction | null {
+  const managed = resolveManagedSetupForCapability({
+    connector_id: input.connector_id ?? null,
+    server_id: input.server_id ?? "",
+    tool_name: input.tool_name ?? "",
+    category: input.category ?? "system",
+  });
+  if (managed) {
+    const manifest = resolveConnectorRuntimeManifest(managed.key);
+    return {
+      key: managed.key,
+      label: managed.label,
+      setup_experience: manifest?.setup_experience ?? "amtech_managed_oauth",
+      self_service: true,
+    };
+  }
+
+  const candidate = input.connector_id || (input.server_id && input.server_id !== "amtech-manager" ? input.server_id : null);
+  if (!candidate) return null;
+  const manifest = resolveConnectorRuntimeManifest(candidate) ?? genericConnectorRuntimeManifest(input.server_label || candidate);
+  return {
+    key: manifest.key,
+    label: manifest.label,
+    setup_experience: manifest.setup_experience,
+    self_service: false,
+  };
 }
 
 function highestEffectClass(manifest: ConnectorRuntimeManifest): ConnectorEffectClass {
@@ -484,7 +579,6 @@ function highestEffectClass(manifest: ConnectorRuntimeManifest): ConnectorEffect
 
 function recommendationForManifest(
   manifest: ConnectorRuntimeManifest,
-  input: AdaptiveConnectorPlanInput,
   normalizedBusiness: string,
   normalizedWork: string,
   normalizedTools: string,
@@ -512,7 +606,7 @@ function recommendationForManifest(
   if (!alreadyConnected) nextSteps.push("connect");
   nextSteps.push("discover_capabilities", "prove_read");
   if (manifest.supports_webhooks) nextSteps.push("enable_events");
-  if (highest === "customer_facing" || highest === "money_movement") nextSteps.push("configure_step_up");
+  if (highest === "customer_facing" || highest === "money_movement") nextSteps.push("configure_approval_policy");
   if (manifest.supports_webhooks || manifest.supports_polling) nextSteps.push("activate_automation");
 
   return {
@@ -521,6 +615,7 @@ function recommendationForManifest(
     recommendation_class: recommendationClass,
     reasons: reasons.length ? reasons : ["Available when this system becomes relevant"],
     self_service_setup: Boolean(resolveOwnerManagedConnectorSetup(manifest.key)) && manifest.self_service_setup,
+    setup_experience: manifest.setup_experience,
     event_driven: manifest.supports_webhooks,
     custody: manifest.custody,
     next_steps: [...new Set(nextSteps)],
@@ -529,10 +624,9 @@ function recommendationForManifest(
 }
 
 /**
- * Deterministic first-use activation plan. This is deliberately not a hand-weighted
- * ranking. Exact named tools dominate, then observed workflow/vertical matches,
- * then event-capable optional systems. Consequential effects remain separately
- * governed by fresh Manager authority.
+ * Deterministic first-use activation plan. Exact named tools dominate, followed
+ * by observed workflow/vertical matches and event-capable systems. It broadens
+ * discovery without relaxing the final Manager effect boundary.
  */
 export function compileAdaptiveConnectorPlan(input: AdaptiveConnectorPlanInput): AdaptiveConnectorPlan {
   const normalizedBusiness = normalize([input.business_kind, input.business_description].filter(Boolean).join(" "));
@@ -541,7 +635,7 @@ export function compileAdaptiveConnectorPlan(input: AdaptiveConnectorPlanInput):
   const connected = new Set((input.connected_connector_keys ?? []).map((value) => normalize(value).replace(/ /g, "_")));
 
   const recommendations = MANIFESTS
-    .map((manifest) => recommendationForManifest(manifest, input, normalizedBusiness, normalizedWork, normalizedTools, connected))
+    .map((manifest) => recommendationForManifest(manifest, normalizedBusiness, normalizedWork, normalizedTools, connected))
     .sort((a, b) => {
       const classDelta = RECOMMENDATION_ORDER[a.recommendation_class] - RECOMMENDATION_ORDER[b.recommendation_class];
       if (classDelta !== 0) return classDelta;
@@ -555,6 +649,7 @@ export function compileAdaptiveConnectorPlan(input: AdaptiveConnectorPlanInput):
     runtime_posture: {
       reasoning_and_discovery: "broad_by_default",
       consequential_effects: "fresh_manager_authority",
+      owner_interaction: "natural_language_across_surfaces",
       unknown_connector_risk: "manager_custody_default_deny",
     },
     recommendations,
