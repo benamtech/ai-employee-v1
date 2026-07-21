@@ -15,7 +15,7 @@ on:
       - ".github/workflows/ws07-ws08-commercial-effect.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -119,6 +119,27 @@ jobs:
           path: mvp-build/apps/manager/src/server.generated.ts
           if-no-files-found: error
           retention-days: 2
+      - name: Promote exact Manager output for typed-source migration
+        if: steps.source-matrix.outcome == 'success'
+        run: |
+          set -euo pipefail
+          if test -f apps/manager/src/server.promoted.ts; then
+            echo "promoted Manager source already exists"
+            exit 0
+          fi
+          {
+            echo "// Canonical typed Manager server source."
+            echo "// Promoted from the exact generated output after WS01-WS07 verification."
+            echo
+            tail -n +5 apps/manager/src/server.generated.ts
+          } > apps/manager/src/server.promoted.ts
+          git config user.name "amtech-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add -f apps/manager/src/server.promoted.ts
+          git commit -m "WS01 promote exact Manager source for typed composition"
+          target_branch="${GITHUB_HEAD_REF:-agent/ws06-ws07-production}"
+          git push origin "HEAD:${target_branch}"
+        working-directory: mvp-build
       - name: Enforce source and unit result
         if: steps.source-matrix.outcome == 'failure'
         run: exit 1
