@@ -1,20 +1,20 @@
 # CODEGRAPH.md — AI Employee executable topology
 
-Status: active source candidate; exact acceptance unresolved  
+Status: active source candidate; exact acceptance is owned by workflow and release records  
 Updated: 2026-07-20  
 Candidate: PR #35, branch `agent/ws06-ws07-production`, stacked on PR #34  
 Source migration head: `0078`
 
-This is the sole contributor-facing file that carries exact current product/workstream status. Root and compatibility documents route here rather than duplicating it.
+This is the sole contributor-facing file that carries current product/workstream structure. Root and compatibility documents route here rather than duplicating it. Exact transient SHA, run number, and conclusion remain in GitHub Actions or release evidence.
 
 ## Evidence headline
 
 - PR #35 contains the WS-01–07 production-boundary cleanup and bounded WS-08 reconciliation, lineage, repair, and observability groundwork.
-- Source migrations extend through `0078`; application to a database or managed platform requires separate proof.
-- Migration `0077` makes the shared minute rate window database-owned and removes correlation/window metadata from deterministic replay conflict checks; `0078` fixes the PL/pgSQL output-column namespace collision forward-only.
-- Manager now compiles and runs from committed typed `apps/manager/src/server.ts`; generated-template and string-patch assembly has been removed.
-- Exact-head decision, source, production-boundary, and broad-local gates have passed on the preceding candidate; PostgreSQL reruns on `0078` before exact acceptance is claimed.
-- Managed database, live provider, target host, fixture-free golden work/channel, billing lifecycle, signed release, accessibility, capacity, pilot, deployment, and production remain separate gates.
+- Source migrations extend through `0078`; application to a managed platform requires separate proof.
+- Migration `0077` makes the shared minute rate window database-owned and removes correlation/window metadata from deterministic replay conflict checks; `0078` repairs the PL/pgSQL output-column conflict-target namespace forward-only.
+- Manager compiles and runs from committed typed `apps/manager/src/server.ts`; generated-template and string-patch assembly has been removed and structurally forbidden.
+- The exact-candidate workflow must pass decision, governance, source, production-boundary, broad, build, and blank-ledger PostgreSQL jobs after every candidate change. Its record, not this file, owns the current conclusion.
+- Managed database, live connector/provider, target host, fixture-free golden work/channel, billing lifecycle, signed release, accessibility, capacity, pilot, deployment, and production remain separate gates.
 - The public estimator is outdated and non-canonical.
 
 ## Product authority
@@ -34,6 +34,7 @@ owner, ambient, scheduled, or delegated intent
 → Hermes reasoning or deterministic Manager work
 → current effective capability
 → exact approval when required
+→ finite request economics
 → atomic PostgreSQL rate token + worst-case budget reservation
 → one durable command/effect + provider idempotency identity
 → accepted | failed | ambiguous receipt
@@ -98,9 +99,9 @@ All selection controls use one feasible domain. Mandatory workstream/space cover
 
 | Boundary | Source candidate | Still open |
 |---|---|---|
-| repository/source truth | structural governance, direct typed Manager composition, exact-head candidate workflow, derived migration status | final exact-head all-job green result and stale-reference reconciliation |
+| repository/source truth | structural governance, direct typed Manager composition, exact-candidate workflow, source-derived migration status | exact current workflow record and later release evidence |
 | protocol/capability | current assignment/version interception for projected actions; assignment-scoped stream projection | live remote MCP/OAuth/provider/client lifecycle |
-| database | forward migrations through `0078`, immutable ledger, focused PostgreSQL contracts | exact-head blank-ledger rerun and managed Supabase proof |
+| database | forward migrations through `0078`, immutable ledger, blank-ledger and focused PostgreSQL contracts | managed Supabase migration, security, advisor, backup, and rollback proof |
 | target host/runtime | source boundaries and lifecycle contracts | target-host secrets, isolation, replacement, and recovery evidence |
 | owner snapshot/stream | exact-scope snapshot, authority-version stream frames, cursor-before-delta, reconnect without intent replay | fixture-free browser, reconnect, and cross-account acceptance |
 | golden work | revision → approval → effect → output → proof with projection repair | provider-backed three-role journeys and restart refinding |
@@ -109,7 +110,7 @@ All selection controls use one feasible domain. Mandatory workstream/space cover
 
 ## Resolved architectural liability
 
-Production Manager assembly no longer mutates generated source. `apps/manager/src/server.ts` is committed, typechecked, built, tested, and used directly by package and Docker entrypoints. The removed template/generator/patch chain is not a compatibility authority and must not be reintroduced.
+Production Manager assembly no longer mutates generated source. `apps/manager/src/server.ts` is committed, typechecked, built, tested, and used directly by package and Docker entrypoints. Governance `GOV-19` rejects the removed template/generator/patch chain and generated entrypoints.
 
 ## Active authority map
 
@@ -126,7 +127,7 @@ Production Manager assembly no longer mutates generated source. `apps/manager/sr
 
 ## Dependency order
 
-1. Complete the exact-head `0078` decision/source/broad/PostgreSQL matrix without weakened assertions.
+1. Use the exact current candidate workflow record; stop downstream claims on any red job.
 2. Apply and prove migrations through the source head on a disposable managed platform.
 3. Run provider-backed idempotency, ambiguity, original-effect, and accounting reconciliation.
 4. Run fixture-free golden journeys and restart proof refinding.
