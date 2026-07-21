@@ -3,16 +3,17 @@
 Status: active source candidate; exact acceptance unresolved  
 Updated: 2026-07-20  
 Candidate: PR #35, branch `agent/ws06-ws07-production`, stacked on PR #34  
-Source migration head: `0077`
+Source migration head: `0078`
 
 This is the sole contributor-facing file that carries exact current product/workstream status. Root and compatibility documents route here rather than duplicating it.
 
 ## Evidence headline
 
-- PR #35 contains the WS-07 commercial/effect source transaction and bounded WS-08 reconciliation, lineage, repair, and observability groundwork.
-- Source migrations extend through `0077`; application to a database or managed platform requires separate proof.
-- Migration `0077` makes the shared minute rate window database-owned and removes correlation/window metadata from deterministic replay conflict checks.
-- Exact-head CI is unresolved until the current candidate's required workflows complete successfully.
+- PR #35 contains the WS-01–07 production-boundary cleanup and bounded WS-08 reconciliation, lineage, repair, and observability groundwork.
+- Source migrations extend through `0078`; application to a database or managed platform requires separate proof.
+- Migration `0077` makes the shared minute rate window database-owned and removes correlation/window metadata from deterministic replay conflict checks; `0078` fixes the PL/pgSQL output-column namespace collision forward-only.
+- Manager now compiles and runs from committed typed `apps/manager/src/server.ts`; generated-template and string-patch assembly has been removed.
+- Exact-head decision, source, production-boundary, and broad-local gates have passed on the preceding candidate; PostgreSQL reruns on `0078` before exact acceptance is claimed.
 - Managed database, live provider, target host, fixture-free golden work/channel, billing lifecycle, signed release, accessibility, capacity, pilot, deployment, and production remain separate gates.
 - The public estimator is outdated and non-canonical.
 
@@ -45,6 +46,12 @@ owner, ambient, scheduled, or delegated intent
 ## Active source graph
 
 ```text
+server.ts
+  ├─ direct typed Manager route composition
+  ├─ owner assignment and current authority-version interception
+  ├─ account + employee + assignment + authority-version stream scope
+  └─ no generated source or string-based production patching
+
 model-gateway.ts
   └─ signed alias + assignment/commercial claims
 
@@ -91,17 +98,18 @@ All selection controls use one feasible domain. Mandatory workstream/space cover
 
 | Boundary | Source candidate | Still open |
 |---|---|---|
-| owner snapshot/stream | exact-scope snapshot, cursor-before-delta, reconnect without intent replay | fixture-free browser, reconnect, and cross-account acceptance |
+| repository/source truth | structural governance, direct typed Manager composition, exact-head candidate workflow, derived migration status | final exact-head all-job green result and stale-reference reconciliation |
+| protocol/capability | current assignment/version interception for projected actions; assignment-scoped stream projection | live remote MCP/OAuth/provider/client lifecycle |
+| database | forward migrations through `0078`, immutable ledger, focused PostgreSQL contracts | exact-head blank-ledger rerun and managed Supabase proof |
+| target host/runtime | source boundaries and lifecycle contracts | target-host secrets, isolation, replacement, and recovery evidence |
+| owner snapshot/stream | exact-scope snapshot, authority-version stream frames, cursor-before-delta, reconnect without intent replay | fixture-free browser, reconnect, and cross-account acceptance |
 | golden work | revision → approval → effect → output → proof with projection repair | provider-backed three-role journeys and restart refinding |
 | Model Gateway | shared DB admission, one provider identity, validated request bounds, accepted/failed/ambiguous settlement | provider sandbox idempotency and accepted-response-loss proof |
 | commercial accounting | effect-bound usage, immutable adjustments, conservation | entitlement, invoice, refund, and billing lifecycle reconciliation |
-| database | forward migrations through `0077` and focused PostgreSQL contracts | blank-ledger exact-head CI and managed Supabase proof |
-| recovery | ambiguity queues, lineage, projection repair seams | target-host fault injection, rollback, backup/restore, telemetry |
-| release | release-evidence foundations | signed deployed candidate, accessibility, capacity, pilot, production |
 
-## Known architectural liability
+## Resolved architectural liability
 
-Production Manager assembly still depends on generated server source plus string-based patch transforms. This is a real source-maintenance and semantic-test liability. The current WS-01–07 cleanup is replacing that mutation chain with committed typed server source; no completion claim is made until the direct-source build and complete exact-head matrix pass.
+Production Manager assembly no longer mutates generated source. `apps/manager/src/server.ts` is committed, typechecked, built, tested, and used directly by package and Docker entrypoints. The removed template/generator/patch chain is not a compatibility authority and must not be reintroduced.
 
 ## Active authority map
 
@@ -118,10 +126,8 @@ Production Manager assembly still depends on generated server source plus string
 
 ## Dependency order
 
-1. Make repository governance structural and make trace007 semantically valid.
-2. Establish exact-head decision/source/unit/PostgreSQL/broad CI without weakening assertions.
-3. Apply and prove migrations through the source head on a disposable managed platform.
-4. Run provider-backed idempotency, ambiguity, original-effect, and accounting reconciliation.
-5. Run fixture-free golden journeys and restart proof refinding.
-6. Replace generated source mutation with typed server composition before it accumulates more semantic weight.
-7. Complete target-host recovery, signed release, accessibility, capacity, pilot, deployment, and production gates.
+1. Complete the exact-head `0078` decision/source/broad/PostgreSQL matrix without weakened assertions.
+2. Apply and prove migrations through the source head on a disposable managed platform.
+3. Run provider-backed idempotency, ambiguity, original-effect, and accounting reconciliation.
+4. Run fixture-free golden journeys and restart proof refinding.
+5. Complete target-host recovery, signed release, accessibility, capacity, pilot, deployment, and production gates.
