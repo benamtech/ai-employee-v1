@@ -30,6 +30,12 @@ export function getManagerExtensionToolSchema(name: string): z.ZodTypeAny | null
   return isManagerExtensionToolName(name) ? SCHEMAS[name] : null;
 }
 
+function optionalScalar(value: unknown): string | null {
+  if (typeof value === "string") return value || null;
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return null;
+}
+
 const resolveOwnerDecision: ToolHandler = async (ctx: ToolContext, raw: unknown) => {
   const input = raw as {
     account_id: string;
@@ -54,6 +60,9 @@ const resolveOwnerDecision: ToolHandler = async (ctx: ToolContext, raw: unknown)
     if (!resolvedAssignmentId || resolvedAssignmentId !== ctx.assignment_id) {
       throw new Error("channel_decision_runtime_assignment_mismatch");
     }
+    const resolverRole = optionalScalar(resolved.resolver_role);
+    const commandId = input.resolution === "approved" ? optionalScalar(resolved.command_id) : null;
+    const effectKey = input.resolution === "approved" ? optionalScalar(resolved.effect_key) : null;
     const audit_id = await writeAudit(ctx.db, {
       assignment_id: ctx.assignment_id,
       account_id: input.account_id,
@@ -66,7 +75,7 @@ const resolveOwnerDecision: ToolHandler = async (ctx: ToolContext, raw: unknown)
         resolution: input.resolution,
         owner_message_id: input.owner_message_id,
         decision_context_id: input.decision_context_id,
-        resolver_role: resolved.resolver_role ?? null,
+        resolver_role: resolverRole,
         duplicate: Boolean(resolved.duplicate),
         interpretation: input.interpretation?.slice(0, 300) ?? null,
         natural_language_interpreted_by: "hermes",
@@ -86,9 +95,9 @@ const resolveOwnerDecision: ToolHandler = async (ctx: ToolContext, raw: unknown)
         resolution: input.resolution,
         owner_message_id: input.owner_message_id,
         decision_context_id: input.decision_context_id,
-        resolver_role: resolved.resolver_role ?? null,
-        command_id: input.resolution === "approved" ? resolved.command_id ?? null : null,
-        effect_key: input.resolution === "approved" ? resolved.effect_key ?? null : null,
+        resolver_role: resolverRole,
+        command_id: commandId,
+        effect_key: effectKey,
         duplicate: Boolean(resolved.duplicate),
       },
       user_facing_summary_hint: input.resolution === "approved"
