@@ -1,118 +1,145 @@
 # 12 — Document Control, Decision, Memory, and Handoff Map
 
-Status: **active documentation-routing contract**  
-Updated: 2026-07-20  
-Main baseline: `48b917389ed85b9652eca43a8e4a8f60b52e917b`  
-Stacked source candidate: PR #35 on PR #34  
-Source migration head: `0076`
+Status: active routing contract  
+Updated: 2026-07-20
 
-## One cold-start chain
+## Cold-start chain
 
 ```text
 identity.md
-→ root contributor rules, CONTRIBUTING, and CODEGRAPH
-→ scoped AGENTS.md/CLAUDE.md and CODEGRAPH.md
-→ STANDARD.md
-→ decision/README.md and protocol-v1.json
-→ production-readiness-program/README.md
-→ memory/MEMORY.md and newest relevant handoff
-→ docs/architecture/README.md
-→ current source, migrations, tests, workflows, proof, PR, and diff
-→ applicable computed trace
+→ root AGENTS.md + CONTRIBUTING.md + root CODEGRAPH.md
+→ mvp-build/AGENTS.md + mvp-build/CODEGRAPH.md
+→ STANDARD.md + ratified amendments
+→ decision/README.md + protocol-v1.json
+→ production-readiness-program/README.md + current transaction
+→ exact source, migrations, tests, workflows, and proof
+→ newest relevant indexed handoff when needed
+→ applicable architecture documents
 ```
 
-Do not select authority by filename date, concatenate historical handoffs, or treat a decision score as source truth.
+Do not select authority by filename date, concatenate historical handoffs, or treat a score as source truth.
+
+## Contributor-document consolidation
+
+| File | Owns | Must not own |
+|---|---|---|
+| `/AGENTS.md` | repository-wide authority, evidence rules, routing, generic Git discipline | product topology, current PR/SHA, migration head, workstream state |
+| `/mvp-build/AGENTS.md` | product authority invariants and task execution | duplicated exact status or root repository mechanics |
+| `/CLAUDE.md` | short compatibility router to root `AGENTS.md` | independent policy |
+| `/mvp-build/CLAUDE.md` | short compatibility router to scoped `AGENTS.md` | independent policy |
+| `/CODEGRAPH.md` | repository routing and major ownership boundaries | product implementation detail or exact status |
+| `/mvp-build/CODEGRAPH.md` | sole exact product status and executable topology | contributor-policy duplication |
+
+The exact branch, candidate, migration head, workstream status, and gate state must not be maintained in four or more mirrors.
 
 ## Authority classes
 
-### Operating and release authority
+### Normative and operating
 
 - `identity.md` — company/product identity.
-- root/scoped contributor rules — execution constraints.
-- `STANDARD.md` — ratified non-waivable requirements.
-- `decision/README.md` and `decision/protocol-v1.json` — mandatory computation-before-decision contract.
-- root/scoped `CODEGRAPH.md` — current topology, migration head, source hubs, and evidence boundary.
-- `production-readiness-program/` — sole active dependency order, issue/workstream/test/evidence program.
-- source, migrations, generated production config, executable tests, exact workflows, deployed proof, and release records — implementation and acceptance truth.
+- root/scoped `AGENTS.md` — execution contracts.
+- `STANDARD.md` plus ratified amendments — non-waivable requirements.
+- `decision/README.md` and `protocol-v1.json` — decision method.
+- `mvp-build/CODEGRAPH.md` — exact current product topology/status.
+- `production-readiness-program/` — single active dependency/issue/workstream/test/evidence route.
+- source, migrations, generated configuration, executable tests, workflows, deployed proof, and release records — implementation/acceptance truth.
 
-### Current explanatory authority
+### Explanatory
 
-- `docs/architecture/README.md` and indexed companions;
+- `docs/architecture/`;
 - current UX/runtime derivations;
-- canonical production runbooks.
+- canonical runbooks.
 
-These explain current source and computed decisions but do not establish stronger evidence.
+These explain current source. They do not establish stronger evidence.
 
 ### Decision records
 
-- `decision/README.md` defines the protocol.
-- `decision/protocol-v1.json` is the machine-readable contract.
-- one `decision/traceNNN/` directory is active per current consequential transaction.
-- complete prior traces are historical evidence; incomplete transports are removed.
-- computation selects and compresses work; it never establishes implementation or acceptance.
+- one active `decision/traceNNN/` per consequential transaction;
+- candidate graph and software invariant hypergraph remain separate;
+- complete prior traces are historical evidence;
+- incomplete duplicate transports are removed;
+- computation selects/describes work and records non-causality when it does not beat the simple baseline.
 
-### Narrative and factual evidence
+### Narrative evidence
 
-- `memory/` — dated handoffs; `MEMORY.md` is the sole index;
-- `wiki/MVP/implementation-records/` — point-in-time factual ledger;
-- exact CI artifacts and release records.
+- `memory/` contains dated handoffs; `MEMORY.md` is the sole index;
+- `wiki/MVP/implementation-records/` is point-in-time factual history;
+- exact CI artifacts and release records retain their original candidate scope.
 
 Point-in-time evidence does not carry forward automatically.
 
 ### Historical plans and audits
 
-- `second-half-plan/` is historical and non-canonical.
-- old architecture packets, audit bodies, implementation records, and handoffs remain readable through history or archive routing.
-- active-looking obsolete entrypoints become explicit routing stubs; they are not silently rewritten to look current.
+- `second-half-plan/` is historical and non-canonical;
+- old audits, architecture packets, and handoffs remain readable as provenance;
+- obsolete active-looking entrypoints become routing stubs or archives rather than rewritten pseudo-current documents.
 
-## Current program and transaction
+## Active route
 
-Active program:
+```text
+production-readiness-program/README.md
+├─ 04-dependency-ordered-production-plan.md
+├─ 08-production-issue-vector.json
+├─ 13-resolution-ledger.json
+├─ 09-workstream-execution-map.md
+├─ 20-ws06-ws08-commercial-effect-transaction.md
+├─ 10-test-suite-disposition.md
+└─ 07-verification-and-handoff-matrix.md
 
-`production-readiness-program/`
-
-Current computation-first transaction:
-
-`decision/trace007/`
-
-Canonical execution files:
-
-- `04-dependency-ordered-production-plan.md`;
-- `08-production-issue-vector.json` and `.md`;
-- `13-resolution-ledger.json`;
-- `09-workstream-execution-map.md`;
-- `20-ws06-ws08-commercial-effect-transaction.md`;
-- `10-test-suite-disposition.md`;
-- `07-verification-and-handoff-matrix.md`.
-
-PR #35/source may supersede stale status prose only for the exact source boundary it implements. Exact-head CI, provider, managed database, target host, fixture-free browser/channel, commercial lifecycle, pilot, deployment, and production evidence remain separate.
+decision/trace007/
+├─ candidate_population.json
+├─ candidate_graph.json
+├─ software_invariant_hypergraph.json
+├─ selection_comparison.json
+├─ selected_implementation.json
+├─ implementation_ablation.json
+├─ verification_plan.json
+└─ compute.py
+```
 
 ## Update transaction
 
 ```text
-authority extraction and evidence/Unknown matrix
-→ computed candidate frontier and implementation compression
-→ source / migration / behavioral tests / workflows
-→ active decision trace
-→ production program issue/workstream/test/evidence maps
-→ architecture and scoped CODEGRAPH
-→ root routing when repository authority changed
-→ contributor/read-order docs
+authority/evidence/Unknown extraction
+→ baseline, candidate matrix, topology, controls, sensitivity
+→ implementation compression and proof plan
+→ source / migrations / behavioral tests / workflows
+→ active trace
+→ program issue/workstream/test/evidence maps
+→ mvp-build/CODEGRAPH exact status
+→ architecture explanation
+→ root routing only when ownership changes
 → one dated handoff and MEMORY.md
 → PR or release record
 ```
 
-A current claim is incomplete when any required downstream map still points to a superseded head, migration, workstream status, trace, or evidence class.
+A current claim is incomplete when any required map points to another candidate, migration, workstream state, trace, or evidence class.
+
+## Governance boundary
+
+Repository governance validates:
+
+- required authority routes exist;
+- JSON schemas and references are valid;
+- compressed trace payloads decode and hash correctly;
+- candidate and software topology semantics are distinct;
+- software edges have behavioral proof mappings;
+- evidence classes do not promote;
+- exact product status is not duplicated;
+- deterministic verification entrypoints exist.
+
+It does **not** hard-pin PR numbers, SHAs, migration values, issue counts, selected candidate IDs, objective values, causal labels, or prose fragments.
 
 ## Anti-context-rot rules
 
-1. One ratified Standard.
-2. One computation-first protocol.
-3. One active production-readiness program.
-4. One active trace per active consequential transaction.
-5. One memory index.
-6. CODEGRAPH is a current map, not an incident diary.
-7. Memory is a handoff layer, not a second plan.
-8. Historical material is preserved as point-in-time evidence.
-9. Unknown evidence stays Unknown.
-10. Source wiring, computation, documentation, fixtures, local-only tests, and ancestor-SHA evidence do not prove stronger gates.
+1. One Standard family.
+2. One decision protocol.
+3. One active production program.
+4. One active trace per active transaction.
+5. One exact product-status owner.
+6. One memory index.
+7. Compatibility files route; they do not mirror policy.
+8. Memory is a handoff layer, not a second plan.
+9. Historical material remains point-in-time evidence.
+10. Unknown stays Unknown.
+11. Documentation, computation, source, fixtures, local tests, and ancestor evidence do not prove stronger gates.
