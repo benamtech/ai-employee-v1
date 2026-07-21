@@ -67,23 +67,32 @@ describe("WS08 exact release and recovery authority", () => {
 
   it("binds compose health and image identity to all five services", () => {
     const compose = read("infra/deploy/docker-compose.production.yml");
+    const smoke = read("infra/scripts/deploy-smoke.mjs");
     expect(compose).toContain("amtech-ai-employee-model-gateway:${AMTECH_GIT_SHA");
     expect(compose).toContain("dockerfile: infra/deploy/model-gateway.Dockerfile");
     expect(compose).toContain("amtech-ai-employee-host-provisioner:${AMTECH_GIT_SHA");
     expect(compose).toContain("wget -q -T 5 -O /dev/null http://127.0.0.1:8092/health");
     expect(compose).toContain("host-provisioner:\n        condition: service_healthy");
     expect(compose).toContain("model-gateway:\n        condition: service_healthy");
+    expect(smoke).toContain('container_state === "running" && health === "healthy"');
+    expect(smoke).not.toContain('health === "none"');
+    expect(smoke).toContain("exact_git_sha_unavailable");
   });
 
-  it("requires signed prior identity, schema compatibility, five images, and accepted-work conservation for rollback", () => {
+  it("requires signed exact prior identity, executable schema compatibility, and accepted-work conservation for rollback", () => {
     const rollback = read("infra/scripts/deploy-rollback.mjs");
     expect(rollback).toContain("AMTECH_PREVIOUS_RELEASE_MANIFEST");
-    expect(rollback).toContain("ROLLBACK_DATABASE_COMPATIBILITY");
+    expect(rollback).toContain("databaseMigrationHead");
+    expect(rollback).toContain("rollback_migration_head_mismatch");
+    expect(rollback).toContain("assertConfigurationCompatibility");
     expect(rollback).toContain("RELEASE_SERVICES");
-    expect(rollback).toContain("acceptedWorkSnapshot");
+    expect(rollback).toContain("databaseSnapshot");
     expect(rollback).toContain("rollback_accepted_work_conservation_failed");
     expect(rollback).toContain("AMTECH_ROLLBACK_APPLY");
-    expect(rollback).not.toContain("PREVIOUS_MANAGER_IMAGE");
+    expect(rollback).toContain("process.env.AMTECH_GIT_SHA = previousSha");
+    expect(rollback).not.toContain('AMTECH_GIT_SHA = "rollback"');
+    expect(rollback).not.toContain('amtech-ai-employee-${service}:rollback');
+    expect(rollback).not.toContain("ROLLBACK_DATABASE_COMPATIBILITY");
   });
 
   it("requires database filesystem release secret and proof continuity for restore", () => {
