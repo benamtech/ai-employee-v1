@@ -1,0 +1,51 @@
+name: Trace010 MVP Build Audit
+
+on:
+  pull_request:
+    branches:
+      - agent/ws08-ws09-production
+    paths:
+      - 'mvp-build/decision/trace010/**'
+      - '.github/workflows/trace010-mvp-build-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Assert exact trace head
+        if: github.event_name == 'pull_request'
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+
+      - name: Generate starting-SHA inventory
+        run: |
+          node mvp-build/decision/trace010/generate_inventory.mjs \
+            --output mvp-build/decision/trace010/generated
+          node mvp-build/decision/trace010/verify_inventory.mjs \
+            mvp-build/decision/trace010/generated \
+            | tee mvp-build/decision/trace010/generated/verification.json
+
+      - name: Archive immutable starting repository
+        run: |
+          BASE_SHA="$(node -p "require('./mvp-build/decision/trace010/task_state.json').starting_sha")"
+          git archive --format=tar.gz \
+            --output=mvp-build/decision/trace010/generated/starting-repository.tar.gz \
+            "$BASE_SHA"
+          sha256sum mvp-build/decision/trace010/generated/starting-repository.tar.gz \
+            > mvp-build/decision/trace010/generated/starting-repository.tar.gz.sha256
+
+      - name: Upload trace audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: trace010-audit-${{ github.event.pull_request.head.sha || github.sha }}
+          path: mvp-build/decision/trace010/generated/
+          if-no-files-found: error
+          retention-days: 5
