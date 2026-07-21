@@ -14,8 +14,9 @@ import {
 import { verifyMiddeskWebhookSignature } from "./onboarding-identity-provider.js";
 import { writeAudit } from "./audit.js";
 import { registerArtifactWorkbenchRoutes } from "./artifact-workbench-routes.js";
+import { registerConnectorWorkbenchRoutes } from "./connector-workbench-routes.js";
 
- type DenyInternal = (c: Context) => Response | null;
+type DenyInternal = (c: Context) => Response | null;
 
 function retryAfterSeconds(retryAfterAt: string | null): number {
   if (!retryAfterAt) return 24 * 60 * 60;
@@ -24,9 +25,10 @@ function retryAfterSeconds(retryAfterAt: string | null): number {
 
 export function registerOnboardingIdentityRoutes(app: Hono, denyInternal: DenyInternal): void {
   // Owner-authenticated connector, capability, and artifact routes share this
-  // existing registration seam so the production server generator remains the
-  // single authority for constructing the Manager app.
+  // existing registration seam so the production server remains the single
+  // authority for constructing the Manager app.
   registerArtifactWorkbenchRoutes(app, denyInternal);
+  registerConnectorWorkbenchRoutes(app, denyInternal);
 
   /**
    * Production owner login boundary. The web server authenticates email/password
