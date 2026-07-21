@@ -9,6 +9,44 @@
 
 begin;
 
+-- Upgrade safety for any 0080 deployment that briefly ran the pre-atomic Manager
+-- path. Expire dead focus first, then keep the newest live focus per owner and
+-- supersede every older duplicate before adding the partial unique index.
+update channel_decision_contexts cdc
+   set status = 'expired',
+       updated_at = now(),
+       evidence = cdc.evidence || jsonb_build_object(
+         'normalized_by_migration', '0082',
+         'normalized_reason', 'expired_open_context',
+         'normalized_at', now()
+       )
+ where cdc.channel = 'sms'
+   and cdc.status = 'open'
+   and cdc.expires_at <= now();
+
+with ranked_open as (
+  select cdc.id,
+         row_number() over (
+           partition by cdc.assignment_id, cdc.human_principal_id
+           order by cdc.created_at desc, cdc.id desc
+         ) as focus_rank
+    from channel_decision_contexts cdc
+   where cdc.channel = 'sms'
+     and cdc.status = 'open'
+), duplicates as (
+  select id from ranked_open where focus_rank > 1
+)
+update channel_decision_contexts cdc
+   set status = 'superseded',
+       updated_at = now(),
+       evidence = cdc.evidence || jsonb_build_object(
+         'normalized_by_migration', '0082',
+         'normalized_reason', 'duplicate_open_context',
+         'normalized_at', now()
+       )
+  from duplicates d
+ where cdc.id = d.id;
+
 create unique index if not exists channel_decision_context_one_open_sms_idx
   on channel_decision_contexts(assignment_id, human_principal_id)
   where channel = 'sms' and status = 'open';
