@@ -1,39 +1,47 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { Hono } from "hono";
 import { serviceClient, type SupabaseClient } from "@amtech/db";
 import {
   enforceGatewayTokenPolicy,
-  recordModelGatewayUsage,
   resolveUpstreamModel,
   verifyModelGatewayCredential,
 } from "./model-gateway.js";
+import { resolveCommercialScope, type ResolvedCommercialScope } from "./commercial-attribution.js";
+import { recordEffectBoundProviderUsage } from "./commercial-effect-attribution.js";
 import {
-  recordProviderUsageReceipt,
-  resolveCommercialScope,
-  type ResolvedCommercialScope,
-} from "./commercial-attribution.js";
+  ProviderOutcomeAmbiguousError,
+  createSupabaseGatewayCommercialStore,
+  executeCommercialProviderRequest,
+  gatewayRequestIdentity,
+  type GatewayCommercialRecord,
+  type GatewayCommercialStore,
+} from "./model-gateway-commercial.js";
+import {
+  DurableEffectAmbiguousError,
+  executeDurableCommandEffect,
+  type DurableEffectExecution,
+} from "./durable-command-runtime.js";
+
+interface ProviderExecution {
+  json: Record<string, unknown>;
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  estimated_cost_cents: number;
+  provider_receipt_id: string;
+}
 
 export interface ModelGatewayHttpDependencies {
   db: () => SupabaseClient;
   fetch: typeof globalThis.fetch;
+  commercialStore: <T>(db: SupabaseClient) => GatewayCommercialStore<T>;
+  executeEffect: typeof executeDurableCommandEffect;
 }
 
 const FORBIDDEN_PROVIDER_AUTHORITY_FIELDS = new Set([
-  "provider",
-  "providerprofile",
-  "modelprovider",
-  "upstreammodel",
-  "baseurl",
-  "apikey",
-  "endpoint",
-  "url",
-  "headers",
-  "extraheaders",
-  "extrabody",
-  "authorization",
-  "credential",
-  "token",
-  "routing",
+  "provider", "providerprofile", "modelprovider", "upstreammodel", "baseurl", "apikey",
+  "endpoint", "url", "headers", "extraheaders", "extrabody", "authorization",
+  "credential", "token", "routing",
 ]);
 
 function normalizedFieldName(value: string): string {
@@ -47,6 +55,27 @@ function forbiddenProviderAuthorityField(body: Record<string, unknown>): string 
   return null;
 }
 
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, item]) => [key, canonicalize(item)]),
+    );
+  }
+  return value;
+}
+
+function stableRevision(body: Record<string, unknown>, supplied: string | undefined): string {
+  if (supplied) return supplied;
+  return `reqrev_${createHash("sha256").update(JSON.stringify(canonicalize(body))).digest("hex").slice(0, 32)}`;
+}
+
+function rateWindowKey(credentialId: string, now = new Date()): string {
+  return `${credentialId}:${now.toISOString().slice(0, 16)}`;
+}
+
 function estimateCostCents(usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }): number {
   const perMillionInput = Number(process.env.MODEL_GATEWAY_INPUT_CENTS_PER_MILLION ?? 300);
   const perMillionOutput = Number(process.env.MODEL_GATEWAY_OUTPUT_CENTS_PER_MILLION ?? 1500);
@@ -55,31 +84,22 @@ function estimateCostCents(usage: { prompt_tokens?: number; completion_tokens?: 
   return Math.ceil(((input / 1_000_000) * perMillionInput) + ((output / 1_000_000) * perMillionOutput));
 }
 
-function redactError(err: unknown): string {
-  const message = String((err as Error).message ?? err);
+function reserveCostCents(body: Record<string, unknown>): number {
+  const estimatedPromptTokens = Math.ceil(JSON.stringify(body.messages ?? body.input ?? body).length / 4);
+  const maximumOutputTokens = Math.max(1, Math.min(Number(body.max_tokens ?? body.max_output_tokens ?? 1024), 128_000));
+  return Math.max(1, estimateCostCents({ prompt_tokens: estimatedPromptTokens, completion_tokens: maximumOutputTokens }));
+}
+
+function redactError(error: unknown): string {
+  const message = String((error as Error)?.message ?? error);
   return message.replace(/[A-Za-z0-9_=-]{24,}/g, "[REDACTED]").slice(0, 180);
 }
 
-function providerReceiptId(response: Response, json: Record<string, any>): string | null {
-  const header = response.headers.get("x-request-id")
+function providerReceiptId(response: Response, json: Record<string, unknown>): string | null {
+  return response.headers.get("x-request-id")
     ?? response.headers.get("request-id")
-    ?? response.headers.get("x-correlation-id");
-  const bodyId = typeof json.id === "string" ? json.id : null;
-  return header || bodyId;
-}
-
-function usageScope(claims: {
-  assignment_id: string;
-  payer_relationship_id: string;
-  beneficiary_relationship_id: string;
-  price_version_id: string;
-}) {
-  return {
-    assignment_id: claims.assignment_id,
-    payer_relationship_id: claims.payer_relationship_id,
-    beneficiary_relationship_id: claims.beneficiary_relationship_id,
-    price_version_id: claims.price_version_id,
-  };
+    ?? response.headers.get("x-correlation-id")
+    ?? (typeof json.id === "string" ? json.id : null);
 }
 
 async function commercialScopeForClaims(
@@ -103,16 +123,62 @@ async function commercialScopeForClaims(
     scope.payer_relationship_id !== claims.payer_relationship_id
     || scope.beneficiary_relationship_id !== claims.beneficiary_relationship_id
     || scope.price_version_id !== claims.price_version_id
-  ) {
-    throw new Error("model_gateway_commercial_scope_changed");
-  }
+  ) throw new Error("model_gateway_commercial_scope_changed");
   return scope;
 }
 
-async function recordDeniedRequest(db: SupabaseClient, input: {
-  request_id: string;
+async function recordAudit(db: SupabaseClient, input: {
+  id: string;
+  credential_id: string;
+  account_id: string;
+  employee_id: string;
+  assignment_id: string;
+  payer_relationship_id: string;
+  beneficiary_relationship_id: string;
+  price_version_id: string;
+  accounting_receipt_id?: string | null;
+  provider_receipt_id?: string | null;
+  model_alias: string;
+  provider: string;
+  upstream_model: string;
+  credential_version: number;
+  latency_ms: number;
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
+  estimated_cost_cents?: number;
+  status: "ok" | "failed" | "rate_limited" | "provider_unavailable" | "unauthorized" | "ambiguous";
+  error_code?: string | null;
   correlation_id: string;
-  started: number;
+}): Promise<void> {
+  const result = await db.from("model_gateway_request_audit").upsert({
+    id: input.id,
+    credential_id: input.credential_id,
+    account_id: input.account_id,
+    employee_id: input.employee_id,
+    assignment_id: input.assignment_id,
+    payer_relationship_id: input.payer_relationship_id,
+    beneficiary_relationship_id: input.beneficiary_relationship_id,
+    price_version_id: input.price_version_id,
+    accounting_receipt_id: input.accounting_receipt_id ?? null,
+    provider_receipt_id: input.provider_receipt_id ?? null,
+    model_alias: input.model_alias,
+    provider: input.provider,
+    upstream_model: input.upstream_model,
+    credential_version: input.credential_version,
+    latency_ms: input.latency_ms,
+    prompt_tokens: input.prompt_tokens ?? 0,
+    completion_tokens: input.completion_tokens ?? 0,
+    total_tokens: input.total_tokens ?? 0,
+    estimated_cost_cents: input.estimated_cost_cents ?? 0,
+    status: input.status,
+    error_code: input.error_code ?? null,
+    correlation_id: input.correlation_id,
+  }, { onConflict: "id" });
+  if (result.error) throw result.error;
+}
+
+async function recordPreAdmissionDenial(db: SupabaseClient, input: {
   claims: {
     credential_id: string;
     account_id: string;
@@ -124,313 +190,338 @@ async function recordDeniedRequest(db: SupabaseClient, input: {
     model_alias: string;
     credential_version: number;
   };
-  code: string;
   requested_model: string;
+  code: string;
+  correlation_id: string;
+  started: number;
 }): Promise<void> {
-  await recordModelGatewayUsage(db, {
-    request_id: input.request_id,
-    credential_id: input.claims.credential_id,
-    account_id: input.claims.account_id,
-    employee_id: input.claims.employee_id,
-    ...usageScope(input.claims),
-    model_alias: input.claims.model_alias,
+  await recordAudit(db, {
+    id: `mgwa_${randomUUID()}`,
+    ...input.claims,
     provider: "none",
     upstream_model: input.requested_model,
-    credential_version: input.claims.credential_version,
     latency_ms: Date.now() - input.started,
-    prompt_tokens: 0,
-    completion_tokens: 0,
-    total_tokens: 0,
-    estimated_cost_cents: 0,
     status: input.code === "rate_limit_exceeded" ? "rate_limited" : "failed",
     error_code: input.code,
     correlation_id: input.correlation_id,
-    provider_receipt_id: null,
-    accounting_receipt_id: null,
   });
 }
 
-async function proxyOpenAiCompatible(
-  c: any,
-  upstreamPath: string,
-  expectedEmployeeId: string,
+async function executeProviderEffect(
+  db: SupabaseClient,
   deps: ModelGatewayHttpDependencies,
-) {
+  record: GatewayCommercialRecord<ProviderExecution>,
+  input: {
+    route: ReturnType<typeof resolveUpstreamModel>;
+    upstreamPath: string;
+    upstreamBody: Record<string, unknown>;
+    correlationId: string;
+    commercial: ResolvedCommercialScope;
+    requestId: string;
+  },
+): Promise<{
+  response: ProviderExecution;
+  provider_receipt_id: string;
+  effect_receipt_id: string;
+  accounting_receipt_id: string;
+  amount_minor: number;
+  evidence: Record<string, unknown>;
+}> {
+  if (!record.command_id || !record.effect_key) throw new Error("gateway_durable_identity_missing");
+  let execution: DurableEffectExecution<ProviderExecution>;
+  try {
+    execution = await deps.executeEffect<ProviderExecution>(db, {
+      assignment_id: record.assignment_id,
+      command_id: record.command_id,
+      effect_key: record.effect_key,
+      provider: input.route.provider,
+      operation: `model_gateway${input.upstreamPath}`,
+      capability_class: "native_idempotency",
+      request: {
+        request_key: record.request_key,
+        revision_id: record.revision_id,
+        route_key: input.route.profile_key,
+        upstream_path: input.upstreamPath,
+        body: input.upstreamBody,
+      },
+      provider_idempotency_key: record.provider_idempotency_key,
+      apply: async () => {
+        const controller = new AbortController();
+        const timeoutMs = Math.max(1_000, Math.min(Number(process.env.MODEL_GATEWAY_PROVIDER_TIMEOUT_MS ?? 30_000), 120_000));
+        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+        let response: Response;
+        try {
+          response = await deps.fetch(`${input.route.base_url}${input.upstreamPath}`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${input.route.api_key}`,
+              "Content-Type": "application/json",
+              "Idempotency-Key": record.provider_idempotency_key,
+              "X-Amtech-Request-Key": record.request_key,
+              "X-Amtech-Assignment-Id": record.assignment_id,
+              "X-Amtech-Correlation-Id": input.correlationId,
+            },
+            body: JSON.stringify(input.upstreamBody),
+            signal: controller.signal,
+          });
+        } catch (error) {
+          throw new DurableEffectAmbiguousError("provider_response_lost_after_dispatch", {
+            request_key: record.request_key,
+            provider_idempotency_key: record.provider_idempotency_key,
+            error: redactError(error),
+          });
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        const text = await response.text();
+        let json: Record<string, unknown> = {};
+        try { json = text ? JSON.parse(text) as Record<string, unknown> : {}; } catch { json = {}; }
+        if (!response.ok) throw new Error(`provider_http_${response.status}`);
+        const providerId = providerReceiptId(response, json);
+        if (!providerId) {
+          throw new DurableEffectAmbiguousError("provider_success_without_receipt", {
+            request_key: record.request_key,
+            http_status: response.status,
+          });
+        }
+        const usage = (json.usage ?? {}) as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
+        const promptTokens = Number(usage.prompt_tokens ?? 0);
+        const completionTokens = Number(usage.completion_tokens ?? 0);
+        const totalTokens = Number(usage.total_tokens ?? promptTokens + completionTokens);
+        const estimatedCostCents = estimateCostCents(usage);
+        return {
+          provider_receipt_id: providerId,
+          result: {
+            json,
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: totalTokens,
+            estimated_cost_cents: estimatedCostCents,
+            provider_receipt_id: providerId,
+          },
+          evidence: {
+            request_key: record.request_key,
+            revision_id: record.revision_id,
+            upstream_model: input.route.model,
+            provider_profile: input.route.profile_key,
+            http_status: response.status,
+          },
+        };
+      },
+    });
+  } catch (error) {
+    if (error instanceof DurableEffectAmbiguousError) {
+      throw new ProviderOutcomeAmbiguousError(error.ambiguity_code, {
+        ...error.evidence,
+        request_key: record.request_key,
+      });
+    }
+    throw error;
+  }
+
+  try {
+    const accounting = await recordEffectBoundProviderUsage(db, {
+      ...input.commercial,
+      request_id: input.requestId,
+      effect_receipt_id: execution.receipt_id,
+      provider: input.route.provider,
+      provider_receipt_id: execution.result.provider_receipt_id,
+      meter_kind: "model_request",
+      quantity: execution.result.total_tokens,
+      amount_minor: execution.result.estimated_cost_cents,
+      correlation_id: input.correlationId,
+      evidence: {
+        request_key: record.request_key,
+        revision_id: record.revision_id,
+        upstream_model: input.route.model,
+        provider_profile: input.route.profile_key,
+      },
+    });
+    return {
+      response: execution.result,
+      provider_receipt_id: execution.result.provider_receipt_id,
+      effect_receipt_id: execution.receipt_id,
+      accounting_receipt_id: accounting.accounting_receipt_id,
+      amount_minor: execution.result.estimated_cost_cents,
+      evidence: { replayed_effect: execution.replayed },
+    };
+  } catch (error) {
+    throw new ProviderOutcomeAmbiguousError("accepted_effect_accounting_pending", {
+      request_key: record.request_key,
+      effect_receipt_id: execution.receipt_id,
+      error: redactError(error),
+    });
+  }
+}
+
+async function proxyOpenAiCompatible(c: any, upstreamPath: string, expectedEmployeeId: string, deps: ModelGatewayHttpDependencies) {
   const db = deps.db();
   const started = Date.now();
-  const requestId = `mgwr_${randomUUID()}`;
-  const correlationId = c.req.header("X-Amtech-Correlation-Id") ?? requestId;
-  const claims = await verifyModelGatewayCredential(db, c.req.header("Authorization"), {
-    employee_id: expectedEmployeeId,
-  });
+  const correlationId = c.req.header("X-Amtech-Correlation-Id") ?? `corr_${randomUUID()}`;
+  const claims = await verifyModelGatewayCredential(db, c.req.header("Authorization"), { employee_id: expectedEmployeeId });
   if (!claims) {
-    return c.json({
-      error: {
-        code: "model_gateway_unauthorized",
-        message: "Model gateway credential is invalid, expired, revoked, stale, or not bound to this employee assignment.",
-      },
-    }, 401);
+    return c.json({ error: { code: "model_gateway_unauthorized", message: "Model gateway credential is invalid, expired, revoked, stale, or not bound to this employee assignment." } }, 401);
   }
 
-  let commercial: ResolvedCommercialScope;
-  try {
-    commercial = await commercialScopeForClaims(db, claims);
-  } catch (err) {
-    return c.json({
-      error: {
-        code: "model_gateway_commercial_scope_unavailable",
-        message: redactError(err),
-      },
-    }, 503);
-  }
-
-  let body: Record<string, any>;
+  let body: Record<string, unknown>;
   try {
     const parsed = await c.req.json();
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("request_body_not_object");
-    body = parsed as Record<string, any>;
+    body = parsed as Record<string, unknown>;
   } catch {
     return c.json({ error: { code: "invalid_json", message: "Request body must be a JSON object." } }, 400);
   }
 
   const forbiddenField = forbiddenProviderAuthorityField(body);
   if (forbiddenField) {
-    await recordDeniedRequest(db, {
-      request_id: requestId,
+    await recordPreAdmissionDenial(db, {
+      claims,
+      requested_model: String(body.model ?? claims.model_alias),
+      code: "provider_authority_fields_forbidden",
       correlation_id: correlationId,
       started,
-      claims,
-      code: "provider_authority_fields_forbidden",
-      requested_model: String(body.model ?? claims.model_alias),
     });
-    return c.json({
-      error: {
-        code: "provider_authority_fields_forbidden",
-        message: `Provider routing and credentials are Manager-owned; request field ${forbiddenField} is not accepted.`,
-      },
-    }, 400);
+    return c.json({ error: { code: "provider_authority_fields_forbidden", message: `Provider routing and credentials are Manager-owned; request field ${forbiddenField} is not accepted.` } }, 400);
   }
 
   const requestedModel = String(body.model ?? claims.model_alias);
   const policy = enforceGatewayTokenPolicy(claims, requestedModel);
   if (!policy.ok) {
-    await recordDeniedRequest(db, {
-      request_id: requestId,
-      correlation_id: correlationId,
-      started,
-      claims,
-      code: policy.code,
-      requested_model: requestedModel,
-    });
+    await recordPreAdmissionDenial(db, { claims, requested_model: requestedModel, code: policy.code, correlation_id: correlationId, started });
     return c.json({ error: { code: policy.code, message: "Model gateway policy denied this request." } }, policy.status as any);
   }
 
+  let commercial: ResolvedCommercialScope;
   let route: ReturnType<typeof resolveUpstreamModel>;
   try {
+    commercial = await commercialScopeForClaims(db, claims);
     route = resolveUpstreamModel(claims);
-  } catch (err) {
-    return c.json({ error: { code: "model_gateway_route_unavailable", message: redactError(err) } }, 503);
+  } catch (error) {
+    return c.json({ error: { code: "model_gateway_route_unavailable", message: redactError(error) } }, 503);
   }
 
   const { model: _requestedModel, stream: _requestedStream, ...requestPayload } = body;
   const upstreamBody = { ...requestPayload, model: route.model, stream: false };
-  const maxRetries = Math.max(0, Math.min(Number(process.env.MODEL_GATEWAY_MAX_RETRIES ?? 2), 4));
-  const timeoutMs = Math.max(1_000, Math.min(Number(process.env.MODEL_GATEWAY_PROVIDER_TIMEOUT_MS ?? 30_000), 120_000));
-  let lastError = "provider_unavailable";
-
-  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const response = await deps.fetch(`${route.base_url}${upstreamPath}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${route.api_key}`,
-          "Content-Type": "application/json",
-          "X-Amtech-Assignment-Id": claims.assignment_id,
-          "X-Amtech-Correlation-Id": correlationId,
-        },
-        body: JSON.stringify(upstreamBody),
-        signal: controller.signal,
-      });
-      clearTimeout(timeout);
-      const text = await response.text();
-      let json: Record<string, any> = {};
-      try {
-        json = text ? JSON.parse(text) as Record<string, any> : {};
-      } catch {
-        json = {};
-      }
-      const usage = (json.usage ?? {}) as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-      const promptTokens = Number(usage.prompt_tokens ?? 0);
-      const completionTokens = Number(usage.completion_tokens ?? 0);
-      const totalTokens = Number(usage.total_tokens ?? promptTokens + completionTokens);
-      const costCents = estimateCostCents(usage);
-      const providerId = providerReceiptId(response, json);
-
-      if (response.ok && !providerId) {
-        const receipt = await recordProviderUsageReceipt(db, {
-          ...commercial,
-          request_id: requestId,
-          provider: route.provider,
-          provider_receipt_id: null,
-          state: "ambiguous",
-          meter_kind: "model_request",
-          quantity: totalTokens,
-          amount_minor: costCents,
-          currency: commercial.currency,
-          correlation_id: correlationId,
-          evidence: { upstream_model: route.model, provider_profile: route.profile_key, reason: "provider_success_without_receipt" },
-        });
-        await recordModelGatewayUsage(db, {
-          request_id: requestId,
-          credential_id: claims.credential_id,
-          account_id: claims.account_id,
-          employee_id: claims.employee_id,
-          ...usageScope(claims),
-          model_alias: claims.model_alias,
-          provider: route.provider,
-          upstream_model: route.model,
-          credential_version: claims.credential_version,
-          latency_ms: Date.now() - started,
-          prompt_tokens: promptTokens,
-          completion_tokens: completionTokens,
-          total_tokens: totalTokens,
-          estimated_cost_cents: costCents,
-          status: "ambiguous",
-          error_code: "provider_receipt_missing",
-          correlation_id: correlationId,
-          provider_receipt_id: null,
-          accounting_receipt_id: receipt.accounting_receipt_id,
-        });
-        return c.json({
-          error: {
-            code: "model_gateway_provider_receipt_ambiguous",
-            message: "The provider returned content without a durable receipt. The result was not reported as successful.",
-          },
-        }, 502);
-      }
-
-      const receipt = await recordProviderUsageReceipt(db, {
-        ...commercial,
-        request_id: requestId,
-        provider: route.provider,
-        provider_receipt_id: providerId,
-        state: response.ok ? "accepted" : "failed",
-        meter_kind: "model_request",
-        quantity: totalTokens,
-        amount_minor: costCents,
-        currency: commercial.currency,
-        correlation_id: correlationId,
-        evidence: { upstream_model: route.model, provider_profile: route.profile_key, http_status: response.status },
-      });
-      await recordModelGatewayUsage(db, {
-        request_id: requestId,
-        credential_id: claims.credential_id,
-        account_id: claims.account_id,
-        employee_id: claims.employee_id,
-        ...usageScope(claims),
-        model_alias: claims.model_alias,
-        provider: route.provider,
-        upstream_model: route.model,
-        credential_version: claims.credential_version,
-        latency_ms: Date.now() - started,
-        prompt_tokens: promptTokens,
-        completion_tokens: completionTokens,
-        total_tokens: totalTokens,
-        estimated_cost_cents: costCents,
-        status: response.ok ? "ok" : "failed",
-        error_code: response.ok ? null : `provider_${response.status}`,
-        correlation_id: correlationId,
-        provider_receipt_id: providerId,
-        accounting_receipt_id: receipt.accounting_receipt_id,
-      });
-      if (!response.ok) {
-        return c.json({ error: { code: "provider_error", message: "The model provider returned a bounded failure through the gateway." } }, 502);
-      }
-      return c.json({
-        ...json,
-        model: claims.model_alias,
-        amtech_gateway: {
-          request_id: requestId,
-          provider_receipt_id: providerId,
-          accounting_receipt_id: receipt.accounting_receipt_id,
-          assignment_id: claims.assignment_id,
-          credential_version: claims.credential_version,
-        },
-      });
-    } catch (err) {
-      clearTimeout(timeout);
-      lastError = redactError(err);
-      if (attempt >= maxRetries) break;
-      await new Promise((resolve) => setTimeout(resolve, 250 * (attempt + 1)));
-    }
-  }
-
-  const failedReceipt = await recordProviderUsageReceipt(db, {
-    ...commercial,
-    request_id: requestId,
-    provider: route.provider,
-    provider_receipt_id: null,
-    state: "failed",
-    meter_kind: "model_request",
-    quantity: 0,
-    amount_minor: 0,
-    currency: commercial.currency,
+  const revisionId = stableRevision(body, c.req.header("X-Amtech-Request-Revision"));
+  const routeKey = `${route.provider}:${route.profile_key}:${route.model}:${upstreamPath}`;
+  const identity = gatewayRequestIdentity({
+    assignment_id: claims.assignment_id,
+    credential_id: claims.credential_id,
+    revision_id: revisionId,
+    route_key: routeKey,
+    request: upstreamBody,
+    reserve_amount_minor: reserveCostCents(upstreamBody),
+    rate_window_key: rateWindowKey(claims.credential_id),
     correlation_id: correlationId,
-    evidence: { upstream_model: route.model, provider_profile: route.profile_key, error: lastError },
   });
-  await recordModelGatewayUsage(db, {
-    request_id: requestId,
+  const store = deps.commercialStore<ProviderExecution>(db);
+  const provider = (record: GatewayCommercialRecord<ProviderExecution>) => executeProviderEffect(db, deps, record, {
+    route,
+    upstreamPath,
+    upstreamBody,
+    correlationId,
+    commercial,
+    requestId: identity.request_key,
+  });
+  const result = await executeCommercialProviderRequest(store, {
+    assignment_id: claims.assignment_id,
+    credential_id: claims.credential_id,
+    revision_id: revisionId,
+    route_key: routeKey,
+    request: upstreamBody,
+    reserve_amount_minor: reserveCostCents(upstreamBody),
+    rate_window_key: rateWindowKey(claims.credential_id),
+    correlation_id: correlationId,
+    provider,
+    resume: provider,
+    projectProof: async (accepted) => `commercial://assignments/${accepted.assignment_id}/model-requests/${accepted.request_key}`,
+  } as Parameters<typeof executeCommercialProviderRequest<ProviderExecution>>[1] & { resume: typeof provider });
+
+  const terminal = result.record;
+  const execution = terminal.response;
+  const auditStatus = result.state === "accepted" ? "ok"
+    : result.state === "ambiguous" ? "ambiguous"
+      : result.error_code === "rate_limit_exceeded" ? "rate_limited"
+        : result.state === "denied" ? "failed" : "provider_unavailable";
+  await recordAudit(db, {
+    id: terminal.request_key,
     credential_id: claims.credential_id,
     account_id: claims.account_id,
     employee_id: claims.employee_id,
-    ...usageScope(claims),
+    assignment_id: claims.assignment_id,
+    payer_relationship_id: claims.payer_relationship_id,
+    beneficiary_relationship_id: claims.beneficiary_relationship_id,
+    price_version_id: claims.price_version_id,
+    accounting_receipt_id: terminal.accounting_receipt_id,
+    provider_receipt_id: terminal.provider_receipt_id,
     model_alias: claims.model_alias,
     provider: route.provider,
     upstream_model: route.model,
     credential_version: claims.credential_version,
     latency_ms: Date.now() - started,
-    prompt_tokens: 0,
-    completion_tokens: 0,
-    total_tokens: 0,
-    estimated_cost_cents: 0,
-    status: "provider_unavailable",
-    error_code: lastError,
+    prompt_tokens: execution?.prompt_tokens,
+    completion_tokens: execution?.completion_tokens,
+    total_tokens: execution?.total_tokens,
+    estimated_cost_cents: execution?.estimated_cost_cents,
+    status: auditStatus,
+    error_code: result.error_code ?? result.ambiguity_code,
     correlation_id: correlationId,
-    provider_receipt_id: null,
-    accounting_receipt_id: failedReceipt.accounting_receipt_id,
   });
+
+  if (result.state === "denied") {
+    const status = result.error_code === "rate_limit_exceeded" ? 429 : result.error_code === "budget_reservation_conflict" ? 402 : 409;
+    return c.json({ error: { code: result.error_code ?? "model_gateway_admission_denied", message: "Shared commercial authority denied this request before provider dispatch." } }, status);
+  }
+  if (result.state === "ambiguous") {
+    return c.json({
+      error: {
+        code: "model_gateway_provider_outcome_ambiguous",
+        message: "Provider acceptance may have occurred. The request is durable and must reconcile before another effect attempt.",
+      },
+      amtech_gateway: { request_id: terminal.request_key, ambiguity_code: terminal.ambiguity_code, assignment_id: terminal.assignment_id },
+    }, 502);
+  }
+  if (result.state !== "accepted" || !execution) {
+    return c.json({ error: { code: result.error_code ?? "model_gateway_provider_unavailable", message: "The provider effect failed before an accepted durable receipt was established." } }, 503);
+  }
+
   return c.json({
-    error: {
-      code: "model_gateway_provider_unavailable",
-      message: "The model gateway could not reach the provider after bounded retries. The employee should surface this as a temporary provider outage, not hang.",
+    ...execution.json,
+    model: claims.model_alias,
+    amtech_gateway: {
+      request_id: terminal.request_key,
+      request_revision_id: terminal.revision_id,
+      provider_receipt_id: terminal.provider_receipt_id,
+      effect_receipt_id: terminal.effect_receipt_id,
+      accounting_receipt_id: terminal.accounting_receipt_id,
+      proof_ref: terminal.proof_ref,
+      assignment_id: claims.assignment_id,
+      credential_version: claims.credential_version,
+      idempotent_replay: result.replayed,
     },
-  }, 503);
+  });
 }
 
 export function buildModelGatewayApp(overrides: Partial<ModelGatewayHttpDependencies> = {}): Hono {
   const deps: ModelGatewayHttpDependencies = {
     db: overrides.db ?? serviceClient,
     fetch: overrides.fetch ?? globalThis.fetch,
+    commercialStore: overrides.commercialStore ?? createSupabaseGatewayCommercialStore,
+    executeEffect: overrides.executeEffect ?? executeDurableCommandEffect,
   };
   const app = new Hono();
   app.get("/health", (c) => c.json({ status: "ok", boundary: "host-private-model-gateway" }));
   app.post("/v1/employees/:employeeId/chat/completions", (c) => proxyOpenAiCompatible(c, "/chat/completions", c.req.param("employeeId"), deps));
   app.post("/v1/employees/:employeeId/responses", (c) => proxyOpenAiCompatible(c, "/responses", c.req.param("employeeId"), deps));
-
   app.post("/v1/chat/completions", (c) => {
-    if (process.env.NODE_ENV === "production" || process.env.MODEL_GATEWAY_ALLOW_LEGACY_UNBOUND_ROUTE !== "1") {
-      return c.json({ error: { code: "employee_route_required" } }, 404);
-    }
+    if (process.env.NODE_ENV === "production" || process.env.MODEL_GATEWAY_ALLOW_LEGACY_UNBOUND_ROUTE !== "1") return c.json({ error: { code: "employee_route_required" } }, 404);
     const employeeId = c.req.header("X-Amtech-Employee-Id");
     if (!employeeId) return c.json({ error: { code: "employee_route_required" } }, 400);
     return proxyOpenAiCompatible(c, "/chat/completions", employeeId, deps);
   });
   app.post("/v1/responses", (c) => {
-    if (process.env.NODE_ENV === "production" || process.env.MODEL_GATEWAY_ALLOW_LEGACY_UNBOUND_ROUTE !== "1") {
-      return c.json({ error: { code: "employee_route_required" } }, 404);
-    }
+    if (process.env.NODE_ENV === "production" || process.env.MODEL_GATEWAY_ALLOW_LEGACY_UNBOUND_ROUTE !== "1") return c.json({ error: { code: "employee_route_required" } }, 404);
     const employeeId = c.req.header("X-Amtech-Employee-Id");
     if (!employeeId) return c.json({ error: { code: "employee_route_required" } }, 400);
     return proxyOpenAiCompatible(c, "/responses", employeeId, deps);
