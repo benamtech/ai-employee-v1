@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { Client, Pool } from "pg";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 const databaseUrl = process.env.STAGING_DATABASE_URL;
 let db: Client | undefined;
@@ -71,32 +71,52 @@ beforeAll(async () => {
   await seed(db);
 });
 
+beforeEach(async () => {
+  if (!db) return;
+  await db.query("delete from model_gateway_rate_windows where credential_id = $1", [ids.credential]);
+});
+
 afterAll(async () => {
   await pool?.end();
   await db?.end();
 });
 
 describe.skipIf(!databaseUrl)("WS-07 PostgreSQL commercial authority", () => {
-  it("atomically deduplicates concurrent admission and shares rate tokens across connections", async () => {
+  it("deduplicates concurrent admission and prevents caller-selected rate-window sharding", async () => {
     const requestKey = "mgreq_ws07_concurrent";
-    const args = [requestKey, ids.assignment, ids.credential, "rev-1", sha("request-1"), "openai_compatible:model", "amtech-idem-1", "window-1", 20, "corr-1"];
+    const args = [requestKey, ids.assignment, ids.credential, "rev-1", sha("request-1"), "openai_compatible:model", "amtech-idem-1", "caller-window-a", 20, "corr-1"];
     const calls = await Promise.all(Array.from({ length: 6 }, () => pool!.query(`select * from admit_model_gateway_request($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, args)));
     expect(calls.flatMap((result) => result.rows).filter((row) => row.admission_kind === "admitted")).toHaveLength(1);
     expect(calls.flatMap((result) => result.rows).filter((row) => row.admission_kind === "replay")).toHaveLength(5);
 
+    const metadataReplay = await pool!.query(`select * from admit_model_gateway_request($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [
+      requestKey, ids.assignment, ids.credential, "rev-1", sha("request-1"), "openai_compatible:model", "amtech-idem-1", "different-caller-window", 20, "different-correlation",
+    ]);
+    expect(metadataReplay.rows[0]).toMatchObject({ admission_kind: "replay", request_key: requestKey });
+
     const second = await pool!.query(`select * from admit_model_gateway_request($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [
-      "mgreq_ws07_second", ids.assignment, ids.credential, "rev-2", sha("request-2"), "openai_compatible:model", "amtech-idem-2", "window-1", 20, "corr-2",
+      "mgreq_ws07_second", ids.assignment, ids.credential, "rev-2", sha("request-2"), "openai_compatible:model", "amtech-idem-2", "caller-window-b", 20, "corr-2",
     ]);
     expect(second.rows[0].admission_kind).toBe("admitted");
     const exhausted = await pool!.query(`select * from admit_model_gateway_request($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [
-      "mgreq_ws07_third", ids.assignment, ids.credential, "rev-3", sha("request-3"), "openai_compatible:model", "amtech-idem-3", "window-1", 20, "corr-3",
+      "mgreq_ws07_third", ids.assignment, ids.credential, "rev-3", sha("request-3"), "openai_compatible:model", "amtech-idem-3", "caller-window-c", 20, "corr-3",
     ]);
     expect(exhausted.rows[0]).toMatchObject({ admission_kind: "denied", error_code: "rate_limit_exceeded" });
+
+    const storedWindows = await db!.query(`
+      select request_key, rate_window_key, evidence
+        from model_gateway_request_reservations
+       where request_key = any($1::text[])
+       order by request_key
+    `, [[requestKey, "mgreq_ws07_second", "mgreq_ws07_third"]]);
+    expect(new Set(storedWindows.rows.map((row) => row.rate_window_key)).size).toBe(1);
+    expect(String(storedWindows.rows[0].rate_window_key)).toMatch(new RegExp(`^${ids.credential}:\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$`));
+    expect(storedWindows.rows.every((row) => row.evidence.rate_window_authority === "database_statement_minute")).toBe(true);
   });
 
   it("binds accepted effect, accounting, and reservation settlement and conserves value through refund", async () => {
     const admitted = await db!.query(`select * from admit_model_gateway_request($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [
-      "mgreq_ws07_accept", ids.assignment, ids.credential, "rev-accept", sha("request-accept"), "openai_compatible:model", "amtech-idem-accept", "window-accept", 30, "corr-accept",
+      "mgreq_ws07_accept", ids.assignment, ids.credential, "rev-accept", sha("request-accept"), "openai_compatible:model", "amtech-idem-accept", "caller-window-accept", 30, "corr-accept",
     ]);
     const row = admitted.rows[0];
     const lease = "lease-ws07";
@@ -126,14 +146,14 @@ describe.skipIf(!databaseUrl)("WS-07 PostgreSQL commercial authority", () => {
 
   it("keeps response-loss ambiguity durable and blocks ordinary retry", async () => {
     await db!.query(`select * from admit_model_gateway_request($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [
-      "mgreq_ws07_ambiguous", ids.assignment, ids.credential, "rev-ambiguous", sha("request-ambiguous"), "openai_compatible:model", "amtech-idem-ambiguous", "window-ambiguous", 10, "corr-ambiguous",
+      "mgreq_ws07_ambiguous", ids.assignment, ids.credential, "rev-ambiguous", sha("request-ambiguous"), "openai_compatible:model", "amtech-idem-ambiguous", "caller-window-ambiguous", 10, "corr-ambiguous",
     ]);
     const ambiguous = await db!.query(`select * from settle_model_gateway_request($1,'ambiguous',0,null,null,null,null,'provider_response_lost_after_dispatch',$2::jsonb)`, [
       "mgreq_ws07_ambiguous", JSON.stringify({ accepted_possible: true }),
     ]);
     expect(ambiguous.rows[0]).toMatchObject({ state: "ambiguous", ambiguity_code: "provider_response_lost_after_dispatch", released_amount_minor: 0 });
     const replay = await db!.query(`select * from admit_model_gateway_request($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [
-      "mgreq_ws07_ambiguous", ids.assignment, ids.credential, "rev-ambiguous", sha("request-ambiguous"), "openai_compatible:model", "amtech-idem-ambiguous", "window-ambiguous", 10, "corr-ambiguous",
+      "mgreq_ws07_ambiguous", ids.assignment, ids.credential, "rev-ambiguous", sha("request-ambiguous"), "openai_compatible:model", "amtech-idem-ambiguous", "new-caller-window", 10, "new-correlation",
     ]);
     expect(replay.rows[0]).toMatchObject({ admission_kind: "replay", state: "ambiguous" });
   });
