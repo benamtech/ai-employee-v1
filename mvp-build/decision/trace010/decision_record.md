@@ -13,38 +13,41 @@ The base repository completed 7 of 13 mandatory lifecycle invariants. Four were 
 
 - no provider-neutral capability discovery and lifecycle receipt;
 - no atomic generic revoke spanning binding, grants, credential references, capability projections, and owner evidence;
-- no target-bound, single-use SMS step-up factor for consequential approvals;
+- no durable conversation-to-work-object binding that lets a natural owner reply safely resolve the exact immutable approval across SMS, web, or voice;
 - no deterministic first-use activation plan compiled from business context, named tools, repeat workflows, event posture, and current connections.
 
-The existing repository already contains strong primitives: owner setup descriptors, Manager custody, assignment-bound connector bindings, fresh execution interception, verified webhook ingress, durable effects, and SMS sessions. Replacing those primitives would increase risk without closing the missing transitions.
+The existing repository already contains strong primitives: owner setup descriptors, Manager custody, assignment-bound connector bindings, fresh execution interception, verified webhook ingress, durable effects, sophisticated Hermes sessions, verified SMS ownership, signed review links, and immutable approval snapshots. Replacing those primitives or inventing a passcode challenge would reduce the intended user experience without closing the real context-binding gap.
 
 ## Candidate decision
 
 Candidate D, `connector_operating_substrate`, is selected because it is the only feasible candidate under the all-invariant constraint. No weighted score, graph density, diversity term, or mathematical decoration affected the decision.
 
-The implementation must preserve three separate but joined spines:
+The implementation preserves three separate but joined spines:
 
 1. **Connection lifecycle** — setup → custody → binding → discovery → use → proof → expiry/revoke → fail closed.
 2. **Ambient event lifecycle** — verified ingress → assignment custody → durable command/effect → projection/automation → receipt/reconciliation.
-3. **Human step-up lifecycle** — authorized principal → verified phone → target-bound challenge → single-use verification → atomic approval resolution.
+3. **Conversational decision lifecycle** — verified owner session → exact current work object → LLM intent interpretation → immutable approval resolution → one authorized effect.
 
 ## Runtime doctrine
 
 Adaptive does not mean bypassing authority. The employee remains broadly capable in reasoning, discovery, composition, tool selection, recommendation, and proactive planning. Narrowing occurs only at the final consequential effect boundary. Manager policy must not be presented to Hermes as general inability.
 
-Unknown connectors remain representable. Unknown write, money, or customer-facing risk defaults to Manager custody. Read-only direct MCP remains possible only when every risk axis is explicitly false.
+SMS is a normal assignment-bound owner session, not a repeated authentication ceremony. “Reply YES,” “yeah, send it,” a web approval tap, and an equivalent voice response are surface-specific expressions of one decision grammar. The LLM interprets meaning; Manager proves that the inbound message, human principal, assignment, focused approval, immutable snapshot, and effect identity agree.
+
+Unknown connectors remain representable. Unknown write, money, or customer-facing risk defaults to Manager custody. Read-only direct MCP remains possible only when every risk axis is explicitly false. Long-tail systems use a guided in-product setup intent rather than exposing credential, webhook, or MCP mechanics to the owner.
 
 ## Maximum implementation
 
 The selected trajectory includes:
 
 - a provider-neutral connector runtime manifest and adaptive activation compiler;
-- a forward-only database lifecycle, capability projection, revocation, and action-verification spine;
-- Manager lifecycle discovery, evidence, and revoke transactions;
-- optional SMS step-up requirements attached to immutable approvals and resolved atomically;
-- SMS command handling for VERIFY, APPROVE, and REJECT challenges without converting ordinary SMS into a restricted approval-only channel;
+- one setup grammar for AMTECH-managed OAuth/provider onboarding and guided long-tail systems;
+- a forward-only database lifecycle, capability projection, revocation, setup-intent, and conversational decision spine;
+- Manager lifecycle discovery, evidence, setup, and revoke transactions;
+- exact SMS conversation focus attached when an approval prompt is delivered, without blocking ordinary messages when no focus exists;
+- a Manager MCP capability that lets Hermes resolve a clear natural-language decision only against the supplied exact context;
 - first-session context that recommends highest-gain event-driven workflows from onboarding evidence;
-- owner UI support for discovery results and revocation;
+- owner UI support for discovery results, event posture, guided setup, evidence, and revocation;
 - exact source, migration, unit, integration, UI-contract, and workflow evidence.
 
 ## Evidence classes
