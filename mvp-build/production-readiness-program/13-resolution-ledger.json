@@ -1,56 +1,85 @@
 {
-  "version": "2026-07-20.ws06-ws08-source-candidate.1",
+  "version": "2026-07-20.computation-first-ws06-ws08-source-candidate.2",
   "updated_at": "2026-07-20",
   "baseline_issue_vector": "08-production-issue-vector.json",
+  "decision_protocol": {
+    "schema": "../decision/protocol-v1.json",
+    "human_contract": "../decision/README.md",
+    "active_trace": "../decision/trace007/",
+    "tier": "T3_production_cross_workstream",
+    "candidate_count": 64,
+    "random_baseline_count": 120,
+    "graph_diversity_classification": "causal",
+    "selected_implementation_ids": ["D01", "D02", "D03", "D04", "D06", "D07"]
+  },
   "current_stack": {
+    "main_baseline": "48b917389ed85b9652eca43a8e4a8f60b52e917b",
     "base_pr": 34,
     "base_head": "e04ace7bd6fafa9e2eadaeec3f04e70043513e3a",
     "candidate_pr": 35,
     "candidate_branch": "agent/ws06-ws07-production",
-    "migration_head": "0075",
-    "active_decision_trace": "../decision/trace007/"
+    "migration_head": "0076"
   },
   "workflow_evidence": {
-    "ws02_historical": "accepted only for its exact prior head",
+    "ws02_historical": "accepted only for exact prior heads",
     "ws07_ws08_exact_head": "pending_run_object",
+    "document_governance": "source_candidate_not_exact_head_verified",
+    "computed_trace": "committed_not_exact_workflow_verified",
     "broad_unit": "not_run_on_pr35_exact_head",
     "source_type_lint_contracts": "not_run_on_pr35_exact_head",
     "postgres_integration": "not_run_on_pr35_exact_head",
     "managed_database": "not_established",
     "live_provider": "not_established",
+    "fixture_free_golden_work": "not_established",
     "target_host": "not_established",
+    "recovery_rollback": "not_established",
     "pilot": "not_established",
+    "deployment": "not_established",
     "production": "not_established"
   },
   "issue_resolutions": [
-    {"id":"ISS-001","state":"source_ci_resolved","evidence":"post-merge authority routing"},
-    {"id":"ISS-002","state":"source_ci_resolved","evidence":"exact-head evidence discipline"},
-    {"id":"ISS-003","state":"source_ci_resolved","evidence":"historical WS-01 broad aggregate"},
-    {"id":"ISS-004","state":"source_ci_resolved","evidence":"broad/curated independent reporting"},
-    {"id":"ISS-005","state":"source_ci_resolved","evidence":"test-suite disposition"},
-    {"id":"ISS-006","state":"source_ci_resolved","evidence":"current architecture/status maps"},
-    {"id":"ISS-007","state":"source_ci_resolved","evidence":"Manager-owned protected-resource and authorization-server discovery and attack contracts"},
-    {"id":"ISS-008","state":"source_ci_resolved","evidence":"content-bound MCP App resource and host mediation"},
-    {"id":"ISS-009","state":"source_ci_resolved","evidence":"ordered assignment/version-scoped protocol mapping"},
-    {"id":"ISS-010","state":"source_ci_resolved","evidence":"persisted capability/entitlement/freshness execution gate"},
-    {"id":"ISS-022","state":"source_candidate","evidence":"PR #35 exact revision→approval→effect→owner-proof projection"},
+    {"id":"ISS-001","state":"source_candidate_refresh","evidence":"one computation protocol, one active program/trace/index, historical routers; exact-head governance pending"},
+    {"id":"ISS-002","state":"source_candidate_refresh","evidence":"exact-head evidence and non-promotion encoded across active docs"},
+    {"id":"ISS-003","state":"historical_exact_evidence","evidence":"WS-01 broad aggregate remains exact-head historical only"},
+    {"id":"ISS-004","state":"source_candidate_refresh","evidence":"broad/curated/computed/external evidence independently classified"},
+    {"id":"ISS-005","state":"source_candidate_refresh","evidence":"test disposition selects compressed transaction and minimum failure manifold"},
+    {"id":"ISS-006","state":"source_candidate_refresh","evidence":"root/scoped CODEGRAPH, README, architecture, gaps/remediation, roadmap, workstream, verification maps reconciled"},
+    {"id":"ISS-007","state":"source_ci_resolved_prior_head","evidence":"Manager-owned protected-resource and authorization-server discovery and attack contracts"},
+    {"id":"ISS-008","state":"source_ci_resolved_prior_head","evidence":"content-bound MCP App resource and host mediation"},
+    {"id":"ISS-009","state":"source_ci_resolved_prior_head","evidence":"ordered assignment/version-scoped protocol mapping"},
+    {"id":"ISS-010","state":"source_ci_resolved_prior_head","evidence":"persisted capability/entitlement/freshness execution gate"},
+    {"id":"ISS-022","state":"source_candidate","evidence":"PR #35 exact revision→approval→effect→output→owner-proof projection"},
     {"id":"ISS-023","state":"source_candidate","evidence":"three golden scenarios share immutable artifact completion grammar"},
-    {"id":"ISS-024","state":"source_candidate","evidence":"effect proof projection is owner-refindable and repairable in source"},
+    {"id":"ISS-024","state":"source_candidate","evidence":"effect proof projection is owner-refindable and independently repairable in source"},
     {"id":"ISS-025","state":"source_candidate","evidence":"PostgreSQL worst-case reservation before dispatch"},
     {"id":"ISS-026","state":"source_candidate","evidence":"shared PostgreSQL rate windows replace process-local buckets"},
     {"id":"ISS-027","state":"source_candidate","evidence":"one durable request/effect/provider-idempotency identity"},
-    {"id":"ISS-028","state":"source_candidate","evidence":"post-dispatch loss becomes durable ambiguity with explicit reconciliation"},
+    {"id":"ISS-028","state":"source_candidate","evidence":"post-dispatch loss becomes durable ambiguity; migration 0076 reconciles original native-idempotency effect before accounting"},
     {"id":"ISS-029","state":"source_candidate_groundwork","evidence":"receipt/proof crash seam and convergent projection repair"},
-    {"id":"ISS-030","state":"source_candidate_groundwork","evidence":"reconciliation and repair queues plus lineage view"},
-    {"id":"ISS-031","state":"source_candidate_groundwork","evidence":"focused exact-head workflow and migration hashes; signed release still open"},
+    {"id":"ISS-030","state":"source_candidate_groundwork","evidence":"reconciliation and repair queues plus commercial/effect/proof lineage"},
+    {"id":"ISS-031","state":"source_candidate_groundwork","evidence":"focused exact-head workflow, migration hashes, immutable adjustment authority; signed release open"},
     {"id":"ISS-032","state":"source_candidate_groundwork","evidence":"operator-visible ambiguous/repair/conservation state in durable views"}
   ],
   "control_resolutions": [
     {
+      "id": "CTRL-COMPUTE-BEFORE-DECIDE",
+      "state": "active_source_contract",
+      "evidence_ref": "decision/README.md and decision/protocol-v1.json",
+      "scope": "proportional T0-T3 computation before non-mechanical decision modeling and implementation",
+      "does_not_resolve": ["implementation", "tests", "CI", "external acceptance"]
+    },
+    {
+      "id": "CTRL-DOCUMENT-AUTHORITY-CONSOLIDATION",
+      "state": "source_candidate",
+      "evidence_ref": "PR #35 active documentation transaction",
+      "scope": "one active program, computation protocol, trace, memory index, and historical routing",
+      "does_not_resolve": ["exact-head governance CI", "runtime acceptance"]
+    },
+    {
       "id": "CTRL-WS07-SHARED-COMMERCIAL-AUTHORITY",
       "state": "source_candidate",
-      "evidence_ref": "PR #35",
-      "scope": "shared rate, budget reservation, durable settlement, immutable adjustments, conservation",
+      "evidence_ref": "PR #35 migrations 0074-0076",
+      "scope": "shared rate, budget reservation, durable settlement, immutable adjustments, conservation, original-effect reconciliation",
       "does_not_resolve": ["managed database", "provider sandbox", "billing sandbox", "production"]
     },
     {
@@ -64,11 +93,11 @@
       "id": "CTRL-EVIDENCE-BOUNDED-FORCED-DREAMING",
       "state": "computed_candidate",
       "evidence_ref": "decision/trace007",
-      "scope": "64-candidate independent-batch manifold, hypergraph selection, unsupported penalty, coherent compression",
+      "scope": "64-candidate independent-batch manifold, multi-way hypergraph, unsupported penalty, causal comparison, coherent compression",
       "does_not_resolve": ["any runtime or acceptance gate"]
     }
   ],
-  "remaining_issue_ids": ["ISS-011","ISS-012","ISS-013","ISS-014","ISS-015","ISS-016","ISS-017","ISS-018","ISS-019","ISS-020","ISS-021","ISS-022","ISS-023","ISS-024","ISS-025","ISS-026","ISS-027","ISS-028","ISS-029","ISS-030","ISS-031","ISS-032","ISS-033","ISS-034","ISS-035","ISS-036","ISS-037","ISS-038"],
+  "remaining_issue_ids": ["ISS-001","ISS-002","ISS-004","ISS-005","ISS-006","ISS-011","ISS-012","ISS-013","ISS-014","ISS-015","ISS-016","ISS-017","ISS-018","ISS-019","ISS-020","ISS-021","ISS-022","ISS-023","ISS-024","ISS-025","ISS-026","ISS-027","ISS-028","ISS-029","ISS-030","ISS-031","ISS-032","ISS-033","ISS-034","ISS-035","ISS-036","ISS-037","ISS-038"],
   "production_ready": false,
-  "next_dependency": "establish PR #35 exact-head CI, then managed migration proof and provider-backed WS-07 reconciliation before fixture-free golden WS-06 acceptance"
+  "next_dependency": "establish PR #35 exact-head computation/document/source/unit/PostgreSQL/broad CI, then managed migration proof through 0076 and provider-backed original-effect reconciliation before fixture-free WS-06 acceptance"
 }
