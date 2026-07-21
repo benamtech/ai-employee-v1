@@ -25,15 +25,15 @@ jobs:
       - name: Assert exact candidate
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
       - name: Run architecture fitness and coverage
+        id: diagnose
         continue-on-error: true
         working-directory: mvp-build
         run: |
           set -o pipefail
           {
             node scripts/verify-ui-architecture.mjs
-            cp validation/ui-presentation-coverage.json /tmp/ui-presentation-coverage.json
-            node scripts/generate-ui-coverage.mjs validation/ui-presentation-coverage.json
-            diff -u /tmp/ui-presentation-coverage.json validation/ui-presentation-coverage.json
+            node scripts/generate-ui-coverage.mjs /tmp/ui-presentation-coverage.json
+            diff -u validation/ui-presentation-coverage.json /tmp/ui-presentation-coverage.json
           } 2>&1 | tee ../ws08-ui-diagnostic.log
       - name: Upload diagnostics
         if: always()
@@ -44,4 +44,5 @@ jobs:
           if-no-files-found: error
           retention-days: 3
       - name: Enforce result
-        run: grep -q '"status": "ok"' ws08-ui-diagnostic.log && ! grep -q '^[-+][^-+]' ws08-ui-diagnostic.log
+        if: always()
+        run: test "${{ steps.diagnose.outcome }}" = success
