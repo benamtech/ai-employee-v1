@@ -114,7 +114,7 @@ describe("assignment-scoped low-latency projection", () => {
 });
 
 describe("streaming protocol HTTP surfaces", () => {
-  it("binds Manager stream frames and subscriptions to assignment authority before AG-UI projection", async () => {
+  it("binds Manager stream frames and subscriptions to current assignment authority", async () => {
     const [server, route, bus] = await Promise.all([
       readFile("apps/manager/src/server.ts", "utf8"),
       readFile("apps/web/app/api/employee/[employeeId]/ag-ui/route.ts", "utf8"),
@@ -122,10 +122,11 @@ describe("streaming protocol HTTP surfaces", () => {
     ]);
     expect(server).toContain('action: "stream:read"');
     expect(server).toContain("const assignmentId = authority.assignment.assignment_id");
-    expect(server).toContain("subscribeProgress({");
-    expect(server).toContain("account_id: accountId");
-    expect(server).toContain("employee_id: employeeId");
-    expect(server).toContain("assignment_id: assignmentId");
+    expect(server).toContain("loadCurrentAssignmentAuthorityVersion(db, assignmentId)");
+    expect(server).toContain("const streamScope = {");
+    expect(server).toContain("authority_version: authorityVersion");
+    expect(server).toContain("subscribeProgress(streamScope");
+    expect(server).toContain("JSON.stringify({ ...streamScope, kind: \"snapshot\", snapshot, cursor })");
     expect(server).toContain("buildEmployeeSnapshot(db, employeeId, accountId, assignmentId)");
     expect(server).toContain("fetchWorkEventsSince(db, employeeId, accountId, cursor, assignmentId)");
     expect(bus).toContain("progress:${scope.account_id}:${scope.employee_id}:${scope.assignment_id}");
@@ -135,21 +136,25 @@ describe("streaming protocol HTTP surfaces", () => {
     expect(route).not.toContain("message: String((error as Error).message");
   });
 
-  it("routes MCP App actions through existing effects with current assignment/version interception", async () => {
-    const [route, card, server] = await Promise.all([
+  it("routes MCP App actions through current assignment/version interception", async () => {
+    const [route, card, server, authority] = await Promise.all([
       readFile("apps/web/app/api/employee/[employeeId]/protocol-action/route.ts", "utf8"),
       readFile("apps/web/app/agent/[employeeId]/components/WorkCard.tsx", "utf8"),
       readFile("apps/manager/src/server.ts", "utf8"),
+      readFile("apps/manager/src/lib/protocol-projection-authority.ts", "utf8"),
     ]);
     expect(route).toContain("validateAgUiClientCommandShape");
     expect(route).toContain('command.resource_type === "approval"');
     expect(route).toContain('/manager/tools/resolve_approval');
     expect(route).toContain('/manager/employee/${employeeId}/message');
+    expect(route).toContain("protocol_assignment_id: command.assignment_id");
+    expect(route).toContain("protocol_authority_version: command.authority_version");
     expect(card).toContain('/api/employee/${employeeId}/protocol-action');
     expect(card).toContain('profile: "amtech.mcp-app.v1"');
-    expect(server).toContain("protocol_assignment_mismatch");
-    expect(server).toContain("protocol_authority_version_stale");
-    expect(server).toContain("protocol_authority_incomplete");
+    expect(server).toContain("validateProjectedProtocolAuthority");
+    expect(authority).toContain("protocol_assignment_mismatch");
+    expect(authority).toContain("protocol_authority_version_stale");
+    expect(authority).toContain("protocol_authority_incomplete");
     for (const forbidden of ["api.stripe.com", "quickbooks.api.intuit.com", "accounts.google.com", "Authorization: Bearer"]) {
       expect(route).not.toContain(forbidden);
     }
