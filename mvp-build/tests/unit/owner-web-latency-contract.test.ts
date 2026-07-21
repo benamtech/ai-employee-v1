@@ -3,28 +3,31 @@ import { describe, expect, it } from "vitest";
 
 describe("owner web latency and next-generation client contract", () => {
   it("defaults to a streaming Talk surface and mounts the heavy workspace only in Operate mode", async () => {
-    const source = await readFile("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", "utf8");
-    expect(source).toContain('useState<PrimaryMode>("talk")');
-    expect(source).toContain('fixtureMode || mode !== "talk"');
-    expect(source).toContain('mode === "operate" ?');
-    expect(source).toContain("<AgentSurface employeeId={employeeId} fixtureMode={fixtureMode} />");
-    expect(source).toContain('source.addEventListener("assistant_delta"');
-    expect(source).toContain('source.addEventListener("run_completed"');
-    expect(source).toContain("installOwnerSnapshot(payload, employeeId)");
-    expect(source).toContain('validateScopedFrame(payload, scope, kind)');
+    const shell = await readFile("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", "utf8");
+    const controller = await readFile("apps/web/app/agent/[employeeId]/owner-projection-controller.ts", "utf8");
+    expect(shell).toContain('useState<PrimaryMode>("talk")');
+    expect(shell).toContain('fixtureMode || mode !== "talk"');
+    expect(shell).toContain('mode === "operate" ?');
+    expect(shell).toContain("<AgentSurface");
+    expect(shell).toContain("openOwnerProjectionController");
+    expect(shell).toContain('eventKinds: ["assistant_delta", "work_progress", "run_completed", "approval_update"]');
+    expect(controller).toContain("new EventSource");
+    expect(controller).toContain('source.addEventListener("snapshot"');
+    expect(controller).toContain("installOwnerSnapshot(payload, options.employeeId)");
+    expect(controller).toContain("validateScopedFrame(payload, scope, kind)");
   });
 
   it("shows owner intent optimistically, streams first words, and does not lock the composer for a full Hermes run", async () => {
-    const source = await readFile("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", "utf8");
-    const optimistic = source.indexOf("setPending((current) => [...current");
-    const dispatch = source.indexOf("await fetch(`/api/employee/${employeeId}/message`");
+    const shell = await readFile("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", "utf8");
+    const optimistic = shell.indexOf("setPending((current) => [...current");
+    const dispatch = shell.indexOf("await fetch(`/api/employee/${employeeId}/message`");
     expect(optimistic).toBeGreaterThan(-1);
     expect(dispatch).toBeGreaterThan(optimistic);
-    expect(source).toContain("setInput(\"\")");
-    expect(source).toContain("window.setTimeout(() => setDispatching(false), 1_200)");
-    expect(source).toContain('event.key === "Enter" && !event.shiftKey');
-    expect(source).toContain('text: `${previous?.text ?? ""}${delta}`');
-    expect(source).toContain("Queued safely. The employee will answer in order.");
+    expect(shell).toContain("setInput(\"\")");
+    expect(shell).toContain("window.setTimeout(() => setDispatching(false), 1_200)");
+    expect(shell).toContain('event.key === "Enter" && !event.shiftKey');
+    expect(shell).toContain('text: (previous?.text ?? "") + delta');
+    expect(shell).toContain("Queued safely. The employee will answer in order.");
   });
 
   it("forwards the exact installed assignment authority through the private Next proxy", async () => {
