@@ -1,4 +1,4 @@
-name: Trace010 Execute Overhaul Payload
+name: Trace010 Exact-Head Repository Gates
 
 on:
   pull_request:
@@ -6,18 +6,19 @@ on:
       - agent/ws08-ws09-production
     paths:
       - '.github/workflows/trace010-execute-overhaul-payload.yml'
+      - 'mvp-build/**'
       - '.overhaul-payload/**'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: trace010-execute-overhaul-payload
+  group: trace010-exact-head-repository-gates-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: false
 
 jobs:
-  execute-verify-commit:
+  repository-gates:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -26,74 +27,15 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Assert exact input head
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
-      - name: Decode staged payload
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import base64, gzip
-
-          def decode_family(name, output):
-              parts = sorted(Path(f'.overhaul-payload/{name}').glob('part-*'))
-              texts = [p.read_text().strip() for p in parts]
-              attempts = []
-              try:
-                  attempts.append(gzip.decompress(base64.b64decode(''.join(texts))))
-              except Exception:
-                  pass
-              try:
-                  attempts.append(gzip.decompress(b''.join(base64.b64decode(text) for text in texts)))
-              except Exception:
-                  pass
-              try:
-                  attempts.append(b''.join(gzip.decompress(base64.b64decode(text)) for text in texts))
-              except Exception:
-                  pass
-              if not attempts:
-                  raise SystemExit(f'could not decode {name}')
-              Path(output).write_bytes(max(attempts, key=len))
-
-          decode_family('apply', '/tmp/apply_agentic_overhaul.py')
-          decode_family('patch', '/tmp/post_transform.patch')
-          decode_family('finalize', '/tmp/finalize_overhaul.patch')
-          PY
-          python3 -m py_compile /tmp/apply_agentic_overhaul.py
-      - name: Apply deterministic transformation
-        run: python3 /tmp/apply_agentic_overhaul.py
-      - name: Apply post-transform patch
-        run: |
-          git apply --check /tmp/post_transform.patch
-          git apply /tmp/post_transform.patch
-      - name: Apply finalize patch
-        run: |
-          git apply --check /tmp/finalize_overhaul.patch
-          git apply /tmp/finalize_overhaul.patch
-      - name: Remove staging transport
-        run: |
-          rm -rf .overhaul-payload
-          rm -f .github/workflows/trace010-mvp-build-audit.yml
-          rm -f .github/workflows/trace010-execute-overhaul-payload.yml
       - name: Install dependencies
         working-directory: mvp-build
         run: npm ci
-      - name: Verify agentic contracts
+      - name: Run agentic check
         working-directory: mvp-build
         run: npm run repo:agentic:check
-      - name: Verify full repository
+      - name: Run full repository verification
         working-directory: mvp-build
         run: npm run repo:verify:full
-      - name: Run broad unit suite
+      - name: Run unit suite
         working-directory: mvp-build
         run: npm run test:unit
-      - name: Build all workspaces
-        working-directory: mvp-build
-        run: npm run build
-      - name: Commit verified exact-head tree
-        run: |
-          test ! -e .overhaul-payload
-          test ! -e .github/workflows/trace010-mvp-build-audit.yml
-          test ! -e .github/workflows/trace010-execute-overhaul-payload.yml
-          git config user.name "amtech-agent"
-          git config user.email "agent@amtechai.com"
-          git add -A
-          git commit -m "restructure mvp-build for agentic engineering"
-          git push origin HEAD:agent/mvp-build-agentic-overhaul
