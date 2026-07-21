@@ -3,15 +3,15 @@
 Status: **active and canonical**  
 Updated: 2026-07-20
 
-This directory is the single active production-readiness route. Exact branch, candidate, migration, workstream, and gate status lives in [`../CODEGRAPH.md`](../CODEGRAPH.md). Historical plans and audits are provenance only.
+This directory is the single active production-readiness route. Current structural status lives in [`../CODEGRAPH.md`](../CODEGRAPH.md); exact transient candidate conclusions live in workflow or release records. Historical plans and audits are provenance only.
 
 ## Authority
 
 ```text
 deployed release proof
 → applied durable state
-→ executable source and generated configuration
-→ exact-SHA executable evidence
+→ committed executable source and configuration
+→ exact-candidate executable evidence
 → ratified Standard and this program
 → current topology and architecture
 → indexed memory
@@ -28,7 +28,7 @@ Use [`../decision/README.md`](../decision/README.md):
 authority/evidence/Unknown extraction
 → independent candidate batches
 → invariant/prerequisite filter
-→ simple evidence-and-invariants baseline
+→ explicit evidence-and-invariants baseline
 → candidate search graph when useful
 → software invariant hypergraph when useful
 → equal-feasibility controls
@@ -42,9 +42,9 @@ Candidate topology and software topology are distinct. Mandatory coverage is a f
 
 ## Product target
 
-AMTECH installs governed persistent AI Employees. The owner experience preserves exact account, employee, assignment, authority, entitlement, request/work revision, approval, shared rate/budget admission, command/effect, provider receipt, accounting receipt, recovery, output, and proof identity.
+AMTECH installs governed persistent AI Employees. The owner experience preserves exact account, employee, assignment, current authority, entitlement, request/work revision, approval, shared rate/budget admission, command/effect, provider receipt, accounting receipt, recovery, output, and proof identity.
 
-Manager is the authority plane. Hermes is the reasoning/runtime substrate. Web, SMS, signed Review, MCP, MCP Apps, and AG-UI are bounded projections. Provider and connector adapters do not create authority.
+Manager is the authority plane and compiles from committed typed source. Hermes is the reasoning/runtime substrate. Web, SMS, signed Review, MCP, MCP Apps, and AG-UI are bounded projections. Provider and connector adapters do not create authority.
 
 ## Program route
 
@@ -55,10 +55,28 @@ Manager is the authority plane. Hermes is the reasoning/runtime substrate. Web, 
 5. `20-ws06-ws08-commercial-effect-transaction.md` — current source transaction.
 6. `10-test-suite-disposition.md` — test/evidence authority.
 7. `07-verification-and-handoff-matrix.md` — evidence and handoff boundary.
-8. `../decision/trace007/` — current candidate matrix, split topology, controls, implementation compression, and proof plan.
-9. current source, migrations, tests, workflows, proof, and newest indexed memory.
+8. `../decision/trace007/` — candidate matrix, split topology, controls, implementation compression, and proof plan.
+9. current source, immutable migrations, tests, workflows, proof, and newest indexed memory.
 
 Historical WS-02/03 records remain available for provenance but do not override newer exact source or evidence.
+
+## Current source transaction
+
+WS-01 through WS-07 now converge on one locally reproducible production boundary:
+
+```text
+committed typed Manager source
+→ exact account/employee/assignment/current-authority interception
+→ scoped snapshot and stream projection
+→ finite Model Gateway request economics
+→ database-owned rate and budget admission
+→ one command/effect/provider identity
+→ durable accepted/failed/ambiguous settlement
+→ effect-bound accounting and conservation
+→ exact output and repairable proof
+```
+
+Forward migrations through the source-derived head preserve immutable history. Caller metadata cannot shard shared rate authority or redefine replay identity.
 
 ## Current trace contract
 
@@ -82,13 +100,13 @@ causal improvement: unestablished
 - Do not weaken tests for green.
 - Do not infer authority or acceptance from filenames, dates, fixtures, UI labels, scores, source wiring, workflow names, or stale prose.
 - Preserve exact account/employee/assignment/authority/revision/commercial/effect identity across snapshot, stream, reconnect, retry, output, accounting, and proof.
-- Shared rate and budget authority cannot be process-local.
+- Shared rate and budget authority cannot be process-local or caller-sharded.
 - Accepted provider success requires matching effect and accounting receipts.
 - Ambiguous outcomes reconcile the original effect identity before retry.
 - Repair cannot erase accepted effects or invent completion.
 - Fixture state cannot satisfy fixture-free acceptance.
 - Do not claim a stronger evidence class without exact proof on the claimed candidate.
 
-## Known source liability
+## Resolved source liability
 
-String-based production server generation and patching remains an architectural liability. Typed server composition is a separate bounded source transaction and a prerequisite to letting more semantic behavior accumulate in generated source. This program records that liability; this documentation cleanup does not claim it is fixed.
+String-based production server generation and patching has been removed. `apps/manager/src/server.ts` is the canonical typed source, and structural governance rejects the deleted mutation chain and generated entrypoints. This resolves source composition only; it does not establish target-host, provider, managed, pilot, deployment, or production acceptance.
