@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@amtech/db";
-import { OnboardingManifest } from "@amtech/shared";
+import { compileAdaptiveConnectorPlan, OnboardingManifest } from "@amtech/shared";
 import { buildProfileContext } from "./profile-context.js";
 import { renderProfileContextMarkdown } from "./memory-seed.js";
 
@@ -29,20 +29,65 @@ export async function buildOwnerTurnSystemMessage(db: SupabaseClient, input: {
   channel: "sms" | "web";
   decision_context?: OwnerDecisionTurnContext | null;
 }): Promise<string> {
-  const { data: manifestRow } = await db
-    .from("employee_manifests")
-    .select("manifest,profile_package_key")
-    .eq("employee_id", input.employee_id)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const parsed = OnboardingManifest.safeParse((manifestRow as { manifest?: unknown } | null)?.manifest);
+  const [manifestResult, bindingResult, setupIntentResult] = await Promise.all([
+    db.from("employee_manifests")
+      .select("manifest,profile_package_key")
+      .eq("employee_id", input.employee_id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    db.from("connector_bindings")
+      .select("connector_key,provider,status,lifecycle_state,revoked_at")
+      .eq("account_id", input.account_id)
+      .eq("employee_id", input.employee_id)
+      .eq("assignment_id", input.assignment_id),
+    db.from("connector_setup_intents")
+      .select("id,connector_key,label,setup_experience,status,owner_context,updated_at")
+      .eq("account_id", input.account_id)
+      .eq("employee_id", input.employee_id)
+      .eq("assignment_id", input.assignment_id)
+      .in("status", ["requested", "in_progress", "ready"])
+      .order("updated_at", { ascending: false })
+      .limit(8),
+  ]);
+  if (manifestResult.error) throw manifestResult.error;
+  if (bindingResult.error) throw bindingResult.error;
+  if (setupIntentResult.error) throw setupIntentResult.error;
+
+  const manifestRow = manifestResult.data as { manifest?: unknown; profile_package_key?: string | null } | null;
+  const parsed = OnboardingManifest.safeParse(manifestRow?.manifest);
   const context = parsed.success
     ? renderProfileContextMarkdown(buildProfileContext({
-      packageKey: String((manifestRow as { profile_package_key?: string } | null)?.profile_package_key ?? "contractor_estimator"),
+      packageKey: String(manifestRow?.profile_package_key ?? "contractor_estimator"),
       manifest: parsed.data,
     }))
     : "";
+  const connectedConnectorKeys = (bindingResult.data ?? [])
+    .filter((binding) =>
+      !binding.revoked_at
+      && binding.lifecycle_state !== "revoked"
+      && ["active", "connected", "working", "current"].includes(String(binding.status)),
+    )
+    .map((binding) => String(binding.connector_key || binding.provider));
+  const activationPlan = compileAdaptiveConnectorPlan(parsed.success ? {
+    business_kind: parsed.data.business_kind,
+    business_description: `${parsed.data.business_display_name} ${parsed.data.seven_question_answers?.business ?? ""}`,
+    tools_mentioned: parsed.data.tools_mentioned,
+    top_workflows: parsed.data.top_workflows,
+    connected_connector_keys: connectedConnectorKeys,
+  } : { connected_connector_keys: connectedConnectorKeys });
+  const recommended = activationPlan.recommendations
+    .filter((item) => item.recommendation_class === "activate_now" || item.recommendation_class === "high_gain")
+    .slice(0, 4);
+  const setupIntents = (setupIntentResult.data ?? []) as Array<{
+    id: string;
+    connector_key: string;
+    label: string;
+    setup_experience: string;
+    status: string;
+    owner_context?: Record<string, unknown> | null;
+  }>;
+
   const channelLines = input.channel === "sms"
     ? [
       "Owner channel: SMS. Keep the reply short, useful, and limited to one question.",
@@ -50,6 +95,15 @@ export async function buildOwnerTurnSystemMessage(db: SupabaseClient, input: {
       "Interpret ordinary conversational language naturally; a reply may approve, reject, request edits, answer a question, or continue unrelated work.",
     ]
     : ["Owner channel: web. Be concise, but use enough business context to feel like their employee."];
+
+  const setupLines = setupIntents.flatMap((intent) => [
+    `Active business-system setup: ${intent.label} [${intent.status}], intent_id=${intent.id}.`,
+    "Guide the owner through the next missing business fact or provider action in plain language. Do not ask them to understand OAuth, MCP, webhook signatures, secret storage, or infrastructure terminology.",
+  ]);
+  const recommendationLines = recommended.length ? [
+    `Highest-gain connection opportunities from onboarding evidence: ${recommended.map((item) => `${item.label} (${item.reasons.join("; ")})`).join(" | ")}.`,
+    "Recommend at most one connection or automation at a time, tied to a concrete time-saving workflow. Do not turn the conversation into a setup checklist.",
+  ] : [];
 
   const decisionLines = input.decision_context ? [
     "The conversation is currently focused on exactly one pending approval. The following identifiers are hidden authority context, not text to repeat to the owner.",
@@ -70,6 +124,8 @@ export async function buildOwnerTurnSystemMessage(db: SupabaseClient, input: {
     "Reason broadly and use effective tools proactively. Narrow only at the final customer-facing, money, or destructive effect boundary.",
     "Do the work where you can. Use the existing Manager approval and durable-effect tools before consequential actions.",
     "Never expose credentials, raw provider payloads, MCP terminology, or Manager policy internals.",
+    ...setupLines,
+    ...recommendationLines,
     ...decisionLines,
     context ? `Business context:\n${clip(context)}` : "",
   ].filter(Boolean).join("\n");
