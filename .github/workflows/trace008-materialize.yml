@@ -1,0 +1,68 @@
+name: Trace008 Materialize
+
+on:
+  push:
+    branches:
+      - agent/ws08-ws09-release-recovery
+    paths:
+      - mvp-build/decision/trace008/.generate.py.gz.b64
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/ws08-ws09-release-recovery
+          fetch-depth: 0
+      - name: Reconstruct deterministic generator
+        working-directory: mvp-build/decision/trace008
+        run: |
+          base64 --decode .generate.py.gz.b64 | gzip --decompress > generate.py
+          python -m py_compile generate.py
+      - name: Compute Trace008
+        working-directory: mvp-build/decision/trace008
+        run: |
+          python generate.py | tee trace008-compute.json
+          cat > compute.py <<'PY'
+          #!/usr/bin/env python3
+          import json
+          from generate import build
+          report = build(False)
+          print(json.dumps(report, indent=2))
+          if report.get("status") != "pass":
+              raise SystemExit(1)
+          PY
+          chmod +x compute.py
+          python compute.py | tee trace008-verify.json
+      - name: Validate selection gate
+        working-directory: mvp-build/decision/trace008
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          population = json.loads(Path("candidate_population.json").read_text())
+          selected = json.loads(Path("selected_implementation.json").read_text())
+          comparison = json.loads(Path("selection_comparison.json").read_text())
+          assert len(population["candidates"]) == 64
+          assert len(selected["selected_ids"]) <= 6
+          assert selected["coverage_before_patch"]["omega"] is True
+          assert comparison["same_feasible_domain"] is True
+          assert comparison["random_feasible_sets"] == 1024
+          assert comparison["search_restarts"] == 32
+          assert len(comparison["weight_perturbations"]) == 32
+          assert comparison["classification"]["causal_improvement"] == "unestablished"
+          PY
+      - name: Commit public computation artifacts
+        run: |
+          git config user.name amtech-ci
+          git config user.email amtech-ci@users.noreply.github.com
+          git add mvp-build/decision/trace008
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "trace008 computed selection"
+          git push origin HEAD:agent/ws08-ws09-release-recovery
