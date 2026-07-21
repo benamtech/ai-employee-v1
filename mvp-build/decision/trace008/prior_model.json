@@ -1,1 +1,123 @@
-PLACEHOLDER
+{
+  "schema": "amtech.trace008.prior-model.v1",
+  "status": "pre_implementation_source_inspection",
+  "created_at": "2026-07-21",
+  "repository": "benamtech/ai-employee-v1",
+  "base_pr": 35,
+  "starting_sha": "0193bc2f8d87fec07fd645171c37cb4b9e66e1ff",
+  "branch": "agent/ws08-ws09-production",
+  "public_reasoning_boundary": "This artifact records public hypotheses, structures, unknowns and evidence requirements. It does not claim access to hidden reasoning.",
+  "theta": {
+    "basis": "W2 x L16 x H8",
+    "basis_size": 256,
+    "candidate_topology": "candidate trajectories only",
+    "software_topology": "software entities, states and proof obligations only"
+  },
+  "active_basis_coordinates": {
+    "workstreams": ["WS08", "WS09_g"],
+    "lenses": ["crash", "repair", "rollback", "backup", "restore", "telemetry", "provenance", "signing", "compose", "image", "network", "secret", "migration", "proof", "capacity", "pilot"],
+    "horizons": ["current", "build", "deploy", "partialEffect", "crash", "rollback", "saturation", "future"],
+    "expansion": "Every Cartesian product coordinate W x L x H is active.",
+    "default_prior_label": "Unknown",
+    "unknown_is_zero": false
+  },
+  "interpretations": [
+    {"id":"I1","space":"authority","text":"Every deploy, repair, rollback and restore action must preserve one exact release identity and one authorized operator path."},
+    {"id":"I2","space":"topology","text":"The five-service release unit, employee-network boundaries and Host Provisioner Docker authority must agree across compose, source and runtime checks."},
+    {"id":"I3","space":"release","text":"Release construction must bind Git SHA, image digests, configuration hashes, migration head and independently verifiable manifest."},
+    {"id":"I4","space":"failure","text":"Critical partial destructive effects, crash points, false health, ambiguous outcomes and restart ordering require deterministic failure treatment."},
+    {"id":"I5","space":"recovery","text":"Repair, backup, restore and whole-release rollback must preserve accepted work and refindable proof."},
+    {"id":"I6","space":"operator","text":"Every terminal or blocked state must be diagnosable, bounded and linked to a safe next action."},
+    {"id":"I7","space":"capacity","text":"WS-09 groundwork measures truthful saturation and fairness for one 64 GiB host and 25-30 employee runtimes; 200-500 is future pressure only."},
+    {"id":"I8","space":"product_future","text":"Release proof, restore proof and saturation state may become reusable trust and support capabilities without promoting acceptance."}
+  ],
+  "reusable_templates": [
+    {"id":"T1","name":"authority-preserving state machine","instantiation":"Map actor, release identity, command, durable state, side effect, terminal state and repair permission."},
+    {"id":"T2","name":"exact-identity chain","instantiation":"Bind Git SHA, five image digests, compose/config hashes, migration head, secret versions and signed manifest."},
+    {"id":"T3","name":"partial-effect ledger","instantiation":"Enumerate crash before effect, during effect, after acceptance, after durable receipt and before proof projection."},
+    {"id":"T4","name":"rollback compatibility envelope","instantiation":"Check application, schema, image, config and secret compatibility while preserving accepted work."},
+    {"id":"T5","name":"restore continuity proof","instantiation":"Bind backup ID to database, filesystem, secret version, restore result and proof refinding."},
+    {"id":"T6","name":"topology truth table","instantiation":"Require five services, exact health dependencies, scoped employee networks, bounded egress and Host Provisioner-only Docker authority."},
+    {"id":"T7","name":"operator terminality contract","instantiation":"Every ambiguous, failed, degraded or saturated state names retry permission, blocking reason, evidence and safe next action."},
+    {"id":"T8","name":"capacity/fairness pressure harness","instantiation":"Measure connection, queue, SSE, CPU, memory and noisy-neighbor effects at the 25-30 runtime target."}
+  ],
+  "hypotheses": [
+    {"id":"H01","statement":"Production compose may not encode one canonical five-service release unit with exact health dependencies.","prior_status":"unresolved"},
+    {"id":"H02","statement":"One or more production images may use floating tags or omit source-SHA/digest binding.","prior_status":"unresolved"},
+    {"id":"H03","statement":"Release manifests may be self-asserted rather than independently recomputable.","prior_status":"unresolved"},
+    {"id":"H04","statement":"Rollback may be service-local and fail to preserve whole-release compatibility or accepted work.","prior_status":"unresolved"},
+    {"id":"H05","statement":"Backup/restore may omit filesystem, secret-version or proof-refinding continuity.","prior_status":"unresolved"},
+    {"id":"H06","statement":"Health checks may report success for partial topology or before migration/runtime readiness.","prior_status":"unresolved"},
+    {"id":"H07","statement":"Fault injection may be absent, nondeterministic or destructive without bounded cleanup.","prior_status":"unresolved"},
+    {"id":"H08","statement":"Repair paths may rewrite application projections instead of validating database-authoritative returned records.","prior_status":"unresolved"},
+    {"id":"H09","statement":"Manager or Model Gateway may retain Docker control outside Host Provisioner authority.","prior_status":"unresolved"},
+    {"id":"H10","statement":"Employee network isolation or bounded egress may be declarative but not behaviorally verified.","prior_status":"unresolved"},
+    {"id":"H11","statement":"Secret versions may not be release-bound, redacted in diagnostics or restored coherently.","prior_status":"unresolved"},
+    {"id":"H12","statement":"Telemetry may lack stable command/effect/release lineage across failure and recovery.","prior_status":"unresolved"},
+    {"id":"H13","statement":"Workflows may build workspaces but not all five exact-SHA release images and inspect their digests.","prior_status":"unresolved"},
+    {"id":"H14","statement":"Artifact upload or continue-on-error wrappers may obscure a failed release command.","prior_status":"unresolved"},
+    {"id":"H15","statement":"Capacity harnesses may omit per-employee fairness, queue delay or SSE accounting.","prior_status":"unresolved"},
+    {"id":"H16","statement":"Pilot schemas may omit saturation stop authority, rollback trigger, incident owner or customer exit state.","prior_status":"unresolved"},
+    {"id":"H17","statement":"Temporal authority may mix replica clocks with database clocks for leases, expiry, retry or health.","prior_status":"unresolved"},
+    {"id":"H18","statement":"Ambiguous recovery may permit retry without accepted proof, nonacceptance proof or operator-blocked terminality.","prior_status":"unresolved"},
+    {"id":"H19","statement":"Migration rollback compatibility may be documented but not executable against the exact release unit.","prior_status":"unresolved"},
+    {"id":"H20","statement":"The 25-30 runtime target may exceed current connection, queue, memory or network assumptions.","prior_status":"unresolved"}
+  ],
+  "invariants": ["canonicalCompose","fiveServiceReleaseUnit","dockerAuthorityIsolation","perEmployeeNetworkIsolation","boundedEgress","exactSHAImages","migrationCompatibility","crashNoFalseSuccess","acceptedEffectNoDuplicate","repairUsesOriginalIdentity","rollbackPreservesAcceptedWork","wholeReleaseRollback","completeBackupRestore","proofRefindAfterRestore","telemetryLineage","stableCrashPoints","operatorRecoverability","independentProvenance","secretNonExposure","truthfulHealth","buildReproducibility"],
+  "forbidden_transitions": [
+    {"from":"partial_topology","to":"healthy","reason":"No health success for a partial release unit."},
+    {"from":"accepted_effect","to":"redispatch","reason":"Accepted work cannot be duplicated during retry, repair, rollback or restore."},
+    {"from":"ambiguous","to":"retry_allowed","reason":"Retry requires accepted proof, nonacceptance proof or explicit operator-blocked terminality."},
+    {"from":"manager_or_gateway","to":"docker_mutation","reason":"Host Provisioner alone owns Docker authority."},
+    {"from":"restore_complete","to":"success","reason":"Restore is incomplete until proof is refindable and release identity is verified."},
+    {"from":"floating_image","to":"release_manifest","reason":"Release identity cannot float."},
+    {"from":"application_projection","to":"durable_truth_rewrite","reason":"Application validates database-authoritative returned records; it does not rewrite them."},
+    {"from":"replica_clock","to":"shared_expiry_authority","reason":"Shared temporal authority must be database-owned where concurrency matters."},
+    {"from":"rollback","to":"accepted_work_loss","reason":"Rollback cannot discard accepted durable work."},
+    {"from":"capacity_fixture","to":"ws09_acceptance","reason":"Groundwork and synthetic pressure do not establish capacity or pilot acceptance."}
+  ],
+  "software_hyperedges": [
+    {"id":"E_repository_closure","members":["source","migration","fixtures","types","unit","integration","build","workflow","artifact","PR_prose"],"weight":1.0},
+    {"id":"E_temporal_authority","members":["replica_clock","database_clock","rate_window","lease","expiry","retry"],"weight":1.0},
+    {"id":"E_ambiguity_terminality","members":["ambiguous","accepted_proof","nonacceptance_proof","operator_blocked","reservation_release","retry_permission"],"weight":1.0},
+    {"id":"E_durable_truth","members":["database_mutation","returned_record","application_projection","audit","conservation"],"weight":1.0},
+    {"id":"E_release","members":["git_sha","image_digests","compose_config_hashes","migration_head","signed_manifest"],"weight":1.0},
+    {"id":"E_effect_recovery","members":["command","effect","provider_receipt","accounting_receipt","proof","repair"],"weight":1.0},
+    {"id":"E_restore","members":["backup_id","database","filesystem","secret_version","restore_result","proof_refinding"],"weight":1.0}
+  ],
+  "expected_closure_regressions": [
+    "Direct Manager composition may have left stale infra callers or workflow assumptions.",
+    "Migration 0078 may require release and rollback compatibility updates.",
+    "PR #35 exact-head CI may be red or incomplete.",
+    "Compose syntax may pass while health ordering or network authority remains incomplete.",
+    "Images may build independently without forming one coherent release manifest.",
+    "Backups may restore incompletely or fail proof refinding.",
+    "Fault injection may strand durable state or containers.",
+    "Rollback may restore images without schema/config/secret compatibility.",
+    "Capacity probes may hide noisy-neighbor starvation.",
+    "PR and active documents may lag executable release/recovery topology."
+  ],
+  "consequences": {
+    "operator": ["One bounded command surface for deploy, repair, restore and rollback outcomes.","Explicit blocked states with retry permission and evidence.","Release and restore diagnostics without secret exposure."],
+    "product": ["Refindable restore proof can become a customer-trust capability.","Signed release identity can reduce false-success support incidents.","Saturation state can support truthful degraded behavior."],
+    "architecture": ["Five-service release unit becomes explicit.","Release identity crosses source, images, compose, schema and secrets.","Failure, repair and rollback share stable identities and telemetry lineage."],
+    "future_capacity": ["Connection, queue and SSE metrics become per-employee and fairness-aware.","Noisy-neighbor descriptors guide later multi-host partitioning.","200-500 employees remain pressure inputs, not accepted capacity."]
+  },
+  "explicit_unknowns": [
+    {"id":"U01","unknown":"Exact conclusion of PR #35 head workflow.","evidence_required":"GitHub Actions exact-head run and retained logs/artifacts."},
+    {"id":"U02","unknown":"Canonical production compose and five-service release unit.","evidence_required":"Infra call-graph and compose inspection."},
+    {"id":"U03","unknown":"Image tag, digest and SHA behavior for Manager, Gateway, Provisioner, Web and Caddy.","evidence_required":"Dockerfiles, build workflows and image metadata."},
+    {"id":"U04","unknown":"Deployment, smoke, repair, rollback and backup/restore implementations.","evidence_required":"All transitive infra callers and tests."},
+    {"id":"U05","unknown":"Whether health is topology-complete and migration-aware.","evidence_required":"Health source, compose dependencies and behavioral tests."},
+    {"id":"U06","unknown":"Whether Host Provisioner is the sole Docker authority.","evidence_required":"Repository-wide call search and negative tests."},
+    {"id":"U07","unknown":"Whether employee network isolation and bounded egress are executable.","evidence_required":"Compose/network/provisioner source plus integration evidence."},
+    {"id":"U08","unknown":"Whether rollback preserves accepted work across schema, image, config and secrets.","evidence_required":"Rollback implementation and destructive tests."},
+    {"id":"U09","unknown":"Whether backup/restore includes database, filesystem, secret versions and proof refinding.","evidence_required":"Backup/restore source, manifests and restore tests."},
+    {"id":"U10","unknown":"Whether telemetry preserves release-command-effect-proof lineage.","evidence_required":"Telemetry schemas, emitters and assertions."},
+    {"id":"U11","unknown":"Measured resource envelope for 25-30 runtimes on 64 GiB.","evidence_required":"Capacity harness and representative measurements."},
+    {"id":"U12","unknown":"Whether pilot stop/rollback schemas exist and are authority-bound.","evidence_required":"Program schemas, source and tests."},
+    {"id":"U13","unknown":"Availability of signing keys, registry, target Linux host, managed database and backup store.","evidence_required":"External environment and credential inventory; never inferred from repository."}
+  ],
+  "ranking_status": "not_performed",
+  "implementation_dispositions": "not_assigned"
+}
