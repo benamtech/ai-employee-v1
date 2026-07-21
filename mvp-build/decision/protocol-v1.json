@@ -1,6 +1,6 @@
 {
   "schema": "amtech.computed-decision.v1",
-  "protocol_revision": 2,
+  "protocol_revision": 3,
   "status": "active",
   "scope": "mvp-build non-mechanical planning and implementation decisions",
   "order": [
@@ -9,6 +9,7 @@
     "tier_selection",
     "independent_candidate_batches",
     "feasibility_invariant_filter",
+    "explicit_baseline_semantics",
     "simple_evidence_invariants_baseline",
     "candidate_search_topology",
     "software_invariant_topology",
@@ -41,6 +42,7 @@
       "minimum_weight_sensitivity_runs": 8,
       "required": [
         "weighted_dimensions",
+        "explicit_baseline_roles_and_orientation",
         "simple_baseline",
         "equal_feasibility_controls",
         "separate_implementation_compression",
@@ -57,6 +59,7 @@
       "required": [
         "explicit_basis",
         "observed_unknown_reconciliation",
+        "explicit_baseline_roles_orientation_and_groups",
         "candidate_graph",
         "software_invariant_hypergraph",
         "touch_fractional_complete_proved_coverage",
@@ -85,23 +88,70 @@
   ],
   "evidence_labels": ["Observed", "Inferred", "Hypothesis", "Unknown", "NotApplicable"],
   "candidate_dimensions": [
-    "Applicability",
-    "Transfer",
-    "Evidence",
+    "IG",
+    "BV",
+    "N",
+    "Adj",
     "CrossLens",
-    "Unsupported",
-    "BusinessValue",
-    "VerificationFeasibility",
-    "ProofDensity",
+    "FutureBug",
+    "FeatureYield",
+    "ArchLeverage",
+    "VF",
+    "Testability",
     "Reversibility",
-    "ArchitectureLeverage",
-    "RiskReduction",
+    "ProofDensity",
+    "Risk",
     "Cost",
     "Scope",
-    "PrerequisiteDebt",
-    "OperatorBurden",
-    "FutureOptionality"
+    "Unsupported"
   ],
+  "dimension_semantics": {
+    "IG": {"meaning": "information gain from repository-grounded inspection", "orientation": "maximize"},
+    "BV": {"meaning": "business and user value", "orientation": "maximize"},
+    "N": {"meaning": "novelty of the candidate trajectory", "orientation": "maximize"},
+    "Adj": {"meaning": "useful adjacency to the current boundary", "orientation": "maximize"},
+    "CrossLens": {"meaning": "cross-lens resonance", "orientation": "maximize"},
+    "FutureBug": {"meaning": "future-bug prevention or discovery yield", "orientation": "maximize"},
+    "FeatureYield": {"meaning": "future feature possibility unlocked", "orientation": "maximize"},
+    "ArchLeverage": {"meaning": "architecture leverage", "orientation": "maximize"},
+    "VF": {"meaning": "verification feasibility", "orientation": "maximize"},
+    "Testability": {"meaning": "behavioral testability", "orientation": "maximize"},
+    "Reversibility": {"meaning": "implementation reversibility", "orientation": "maximize"},
+    "ProofDensity": {"meaning": "independent proof obligations addressed per unit scope", "orientation": "maximize"},
+    "Risk": {"meaning": "implementation and production risk", "orientation": "minimize"},
+    "Cost": {"meaning": "implementation and operational cost", "orientation": "minimize"},
+    "Scope": {"meaning": "implementation scope burden", "orientation": "minimize"},
+    "Unsupported": {"meaning": "unsupported inference and unverifiability", "orientation": "minimize"}
+  },
+  "baseline_contracts": {
+    "trace007": {
+      "roles": {
+        "positive_required": ["IG", "BV", "VF", "ProofDensity"],
+        "positive_optional": ["Testability"],
+        "penalty_required": ["Unsupported", "Scope"],
+        "penalty_optional": ["Risk", "Cost"],
+        "excluded": ["N", "Adj", "CrossLens", "FutureBug", "FeatureYield", "ArchLeverage", "Reversibility"]
+      },
+      "groups": {
+        "positive": {
+          "evidence": {"weight": 0.30, "dimensions": ["IG"]},
+          "value": {"weight": 0.25, "dimensions": ["BV"]},
+          "verification": {"weight": 0.25, "dimensions": ["VF", "Testability"]},
+          "proof": {"weight": 0.20, "dimensions": ["ProofDensity"]}
+        },
+        "penalty": {
+          "unsupported": {"weight": 0.35, "dimensions": ["Unsupported"]},
+          "risk": {"weight": 0.30, "dimensions": ["Risk"]},
+          "scope": {"weight": 0.20, "dimensions": ["Scope"]},
+          "cost": {"weight": 0.15, "dimensions": ["Cost"]}
+        }
+      },
+      "aggregation": "weighted_mean_of_available_dimensions_within_each_declared_group",
+      "positive_group_weight_sum": 1.0,
+      "penalty_group_weight_sum": 1.0,
+      "schema_rule": "every score dimension is classified exactly once; required dimensions must exist; optional absence is reported; unclassified dimensions fail closed"
+    }
+  },
   "topology_contract": {
     "candidate_graph": {
       "vertices": "candidate trajectories",
@@ -121,6 +171,24 @@
     "mandatory_coverage": "constraint_not_objective_bonus"
   },
   "required_controls_T2_T3": ["full", "no_graph", "no_diversity", "evidence_baseline", "feasible_random"],
+  "baseline_rules": {
+    "membership": "declared explicitly; never inferred from names, aliases, weight signs, or whatever dimensions happen to exist",
+    "orientation": "declared independently from objective weights",
+    "schema_change": "a newly introduced unclassified score dimension fails with unclassified_baseline_dimensions",
+    "grouping": "semantic group weights prevent schema density from changing baseline importance",
+    "reporting": [
+      "baseline_positive_used",
+      "baseline_penalties_used",
+      "baseline_optional_missing",
+      "baseline_excluded",
+      "same_feasible_domain",
+      "selection_jaccard",
+      "implementation_jaccard",
+      "full_objective_difference",
+      "independent_proof_yield_difference",
+      "causal_improvement"
+    ]
+  },
   "causality": {
     "selection_influencing": "the term changes a selected candidate set inside the same feasible domain",
     "causal_improvement": "an equal-feasibility implementation ablation improves independent outcomes such as defects found, complete proof obligations, coherence, review defects, unnecessary scope, or executable verification yield",
