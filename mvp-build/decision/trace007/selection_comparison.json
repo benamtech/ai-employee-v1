@@ -1,1 +1,62 @@
-{"schema":"amtech.trace007.selection_comparison.v1","joint":{"selected_ids":["D01","D02","D03","D04","D06","D07","D15","A16","B08","A06","A11","C05","A12","B13","C09","A14"],"metrics":{"q_bar":0.42278126,"C_Omega":1.0,"C_H":0.95584989,"Sep_min":0.21540659,"Sep_mean":0.67111443,"VNE":0.56573456,"QD":0.9375,"Redundancy":0.53014482,"J":0.5818732}},"utility_only":{"selected_ids":["B06","D06","A06","B07","D07","C07","A07","B02","D02","B12","D12","B08","D08","B10","D10","C02"],"metrics":{"q_bar":0.48893306,"C_Omega":0.0,"C_H":0.5584989,"Sep_min":0.0,"Sep_mean":0.52172946,"VNE":0.40373653,"QD":0.375,"Redundancy":0.6525867,"J":0.2346884}},"diversity_only":{"selected_ids":["D01","D02","D03","D04","D06","D07","D15","A16","A08","A06","C05","A11","B06","A13","B12","C09"],"metrics":{"q_bar":0.43420358,"C_Omega":1.0,"C_H":0.91169978,"Sep_min":0.0,"Sep_mean":0.71197378,"VNE":0.56943207,"QD":0.875,"Redundancy":0.49437466,"J":0.56291544}},"random_feasible":{"count":120,"sample":[0.5056732,0.51006676,0.44664319,0.44960206,0.50736995,0.5171974,0.5119279,0.52220305,0.44516273,0.48944842,0.45671829,0.49948438,0.4510102,0.49080824,0.48593565,0.5074079,0.49937975,0.43544884,0.47833035,0.48288062,0.50652839,0.49989483,0.42954954,0.479203,0.5096755,0.46969483,0.4865013,0.47725719,0.52394759,0.51589408,0.50324228,0.49637478,0.45688754,0.48588963,0.51041275,0.52222832,0.46760849,0.47188371,0.45359105,0.48001091,0.48607288,0.44941635,0.47353257,0.48679321,0.4720753,0.50829168,0.52999142,0.4599913,0.5137864,0.45698019,0.47625203,0.47208165,0.4998177,0.48011827,0.46949486,0.51532028,0.48611048,0.42310856,0.46570284,0.49757685,0.456896,0.50985904,0.44843493,0.45435681,0.51881174,0.4934347,0.47021885,0.47275803,0.48107117,0.49632849,0.45226099,0.48678329,0.49274302,0.48034438,0.45623362,0.48561126,0.51305601,0.5173472,0.41534186,0.46030986,0.4419127,0.50103938,0.49323976,0.49520662,0.49680127,0.49103407,0.47113335,0.47570338,0.51912407,0.50538508,0.468056,0.4602958,0.49816353,0.49646647,0.48132294,0.46426995,0.5046597,0.45355848,0.45380158,0.50170594,0.47297399,0.51945822,0.51078403,0.51211471,0.49384446,0.47389615,0.51040288,0.50151226,0.49258936,0.50929842,0.50586975,0.51619013,0.48561627,0.50102626,0.49889424,0.49124684,0.43804614,0.51096554,0.45776101,0.50607562]},"causality":{"material_change":true,"J_delta_vs_utility":0.3471848,"J_delta_vs_diversity":0.01895776,"classification":"causal"}}
+{
+  "schema": "amtech.trace007.selection-comparison.v2",
+  "status": "recomputed at verification time",
+  "feasible_domain": {
+    "set_size": 16,
+    "candidate_status": "validated",
+    "mandatory_coverage": [
+      "all task_state.basis.workstreams",
+      "all task_state.z_spaces"
+    ],
+    "rule": "Every control and baseline is optimized or sampled inside the same feasible domain. Mandatory coverage is a constraint, not an objective reward."
+  },
+  "objectives": {
+    "full": {
+      "q_bar": 0.45,
+      "software_fractional": 0.15,
+      "software_complete": 0.10,
+      "candidate_edge_touch": 0.05,
+      "separation_mean": 0.08,
+      "von_neumann_entropy": 0.08,
+      "quality_diversity_occupancy": 0.06,
+      "redundancy": -0.08
+    },
+    "no_graph": "full minus software_fractional, software_complete, and candidate_edge_touch",
+    "no_diversity": "full minus separation_mean, von_neumann_entropy, quality_diversity_occupancy, and redundancy",
+    "evidence_baseline": "mean(Evidence, BusinessValue, VerificationFeasibility, ProofDensity, RiskReduction) minus mean(Unsupported, Cost, Scope, PrerequisiteDebt)",
+    "evaluation_rule": "All selected sets are evaluated with the full metric vector after optimization. Objective differences alone do not establish causal improvement."
+  },
+  "search": {
+    "algorithm": "deterministic multi-start feasible single-swap local search",
+    "restarts_per_objective": 32,
+    "random_feasible_baselines": 1024,
+    "weight_sensitivity_runs": 32,
+    "weight_perturbation_fraction": 0.20,
+    "search_sensitivity": "report unique optima, objective spread, and pairwise Jaccard stability across restarts",
+    "weight_sensitivity": "report selected-set Jaccard stability and implementation-coverage stability under bounded weight perturbations"
+  },
+  "classifications": {
+    "candidate_graph_terms": "descriptive",
+    "software_invariant_graph_terms": "descriptive",
+    "diversity_terms": "selection-influencing",
+    "causal_improvement": "unestablished"
+  },
+  "causal_gate": {
+    "required": "equal-feasibility implementation ablation with independent outcomes",
+    "independent_outcomes": [
+      "defects discovered",
+      "complete invariant proof obligations",
+      "implementation coherence",
+      "review defects",
+      "unnecessary scope",
+      "executable verification yield"
+    ],
+    "record": "implementation_ablation.json"
+  },
+  "legacy_correction": {
+    "previous_joint_J": 0.5818732,
+    "previous_utility_control_J": 0.2346884,
+    "reason_invalid_for_causality": "The previous control did not satisfy the same mandatory-coverage feasibility condition, while binary coverage contributed directly to the objective. Candidate-edge touch was also mislabeled as hypergraph completion.",
+    "disposition": "historical descriptive snapshot only"
+  }
+}
