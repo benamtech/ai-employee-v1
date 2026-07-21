@@ -10,12 +10,14 @@ Root rules and `../CONTRIBUTING.md` apply.
 1. `../identity.md`
 2. root agent rules, CONTRIBUTING, and CODEGRAPH
 3. this file and scoped `CODEGRAPH.md`
-4. ratified `STANDARD.md`
+4. ratified `STANDARD.md` plus `STANDARD-V0.2-AMENDMENT-001.md`
 5. mandatory [`decision/README.md`](decision/README.md) and `decision/protocol-v1.json`
 6. `production-readiness-program/README.md`
 7. newest relevant indexed handoff
 8. architecture index and applicable subsystem documents
 9. applicable source, migrations, executable tests, workflows, proof, PRs, and current diff
+
+The amendment controls where the base Standard still shows the superseded `Explore → Act` loop, old document-family routing, migration `0072`, or the pre-computation source map.
 
 ## Current implementation state
 
@@ -109,7 +111,7 @@ Before changing Hermes images, launchers, sessions, streaming, tool discovery, r
 
 ## Document authority
 
-- `STANDARD.md` — ratified normative product and engineering requirements.
+- `STANDARD.md` plus `STANDARD-V0.2-AMENDMENT-001.md` — ratified normative requirements and current computation/document/status amendment.
 - `decision/README.md` — mandatory computation-first decision protocol.
 - `CODEGRAPH.md` — current topology and evidence boundary.
 - `production-readiness-program/` — sole active production-readiness route.
