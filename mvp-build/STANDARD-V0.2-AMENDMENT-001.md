@@ -2,7 +2,7 @@
 
 Status: **ratified additive amendment and effective**  
 Effective date: **2026-07-20**  
-Approved by: **AMTECH human operator through explicit computation-first and repository-cleanup directives, including the correction separating candidate topology from software-invariant topology and selection influence from causal improvement**  
+Approved by: **AMTECH human operator through explicit computation-first and repository-cleanup directives, including separation of candidate topology from software-invariant topology, explicit baseline semantics, equal-feasibility controls, and separation of selection influence from causal improvement**  
 Applies to: `mvp-build/` engineering, planning, architecture, production-readiness, testing, documentation, and handoff work  
 Base Standard: [`STANDARD.md`](STANDARD.md)  
 Protocol: [`decision/README.md`](decision/README.md) and [`decision/protocol-v1.json`](decision/protocol-v1.json)  
@@ -33,6 +33,7 @@ A task MUST NOT self-classify as mechanical to avoid computation, prerequisites,
 authority and evidence/Unknown extraction
 → applicable independent candidate spaces
 → invariant and prerequisite filtering
+→ explicit score semantics and baseline contract
 → simple evidence-and-invariants baseline
 → candidate search topology when useful
 → software invariant topology when useful
@@ -62,8 +63,8 @@ No implementation decision may be justified by a score, graph, model, or note cr
 |---|---|---|
 | `T0 mechanical` | deterministic correction with no material choice | authority check, protected invariant, exact verification |
 | `T1 bounded` | meaningful local choice | 4 candidates, 2 independent batches, evidence/Unknown labels, feasibility filter, rejection reasons |
-| `T2 consequential` | security, database, provider, commercial, effect, recovery, owner-surface, or multi-file behavior | 16 candidates, 3 batches, simple baseline, equal-feasibility controls, search/weight sensitivity, separate implementation compression |
-| `T3 production/cross-workstream` | release boundary, architecture mutation, or multiple workstreams | 64 candidates in 4 batches, explicit basis reconciliation, candidate graph, software invariant hypergraph, full/no-graph/no-diversity/evidence controls over one feasible domain, at least 1,000 feasible random baselines, at least 32 search restarts, at least 32 weight perturbations, implementation ablation or explicit non-causal result |
+| `T2 consequential` | security, database, provider, commercial, effect, recovery, owner-surface, or multi-file behavior | 16 candidates, 3 batches, explicit baseline semantics, equal-feasibility controls, search/weight sensitivity, separate implementation compression |
+| `T3 production/cross-workstream` | release boundary, architecture mutation, or multiple workstreams | 64 candidates in 4 batches, explicit basis reconciliation, explicit baseline roles/orientation/groups, candidate graph, software invariant hypergraph, full/no-graph/no-diversity/evidence controls over one feasible domain, at least 1,000 feasible random baselines, at least 32 search restarts, at least 32 weight perturbations, implementation ablation or explicit non-causal result |
 
 Tier reduction requires proof that no material decision space exists.
 
@@ -84,7 +85,31 @@ Observed | Inferred | Hypothesis | Unknown | NotApplicable
 
 Unknown remains Unknown and increases `Unsupported`. It MUST NOT become zero risk, positive evidence, or an accepted prerequisite.
 
-## ENG-12.3D — Separate topology layers
+## ENG-12.3D — Explicit score and baseline semantics
+
+Every score dimension MUST declare:
+
+- an exact schema name;
+- a human meaning;
+- an orientation of `maximize` or `minimize`, independent of objective-weight sign.
+
+A baseline MUST classify every score dimension exactly once as:
+
+```text
+positive_required
+positive_optional
+penalty_required
+penalty_optional
+excluded
+```
+
+The verifier MUST fail on duplicate declarations, missing required dimensions, stale nonoptional declarations, missing orientation, orientation mismatch, or any unclassified score dimension. New dimensions MUST fail with `unclassified_baseline_dimensions` rather than silently entering or leaving the baseline.
+
+Optional absence MUST be reported. Baseline membership MUST NOT be inferred from names, aliases, weight signs, or the set of dimensions that happens to exist.
+
+The baseline MUST use declared semantic groups and weights. A group score is the mean of its available declared dimensions; group weights, not schema density, determine semantic importance.
+
+## ENG-12.3E — Separate topology layers
 
 ### Candidate search graph
 
@@ -105,7 +130,7 @@ Only this graph MAY report:
 
 Representation MUST NOT be reported as proof.
 
-## ENG-12.3E — Equal-feasibility controls and sensitivity
+## ENG-12.3F — Equal-feasibility controls and sensitivity
 
 Mandatory coverage and invariants define a feasible domain. Mandatory coverage MUST be a constraint, not an objective reward.
 
@@ -121,7 +146,9 @@ feasible_random
 
 Search sensitivity MUST report restarts, unique optima, objective spread, and selected-set stability. Weight sensitivity MUST report selected-set and software-coverage stability under declared perturbations. Instability MUST remain visible.
 
-## ENG-12.3F — Selection influence and causality
+The verifier MUST report baseline dimensions used, optional dimensions missing, excluded dimensions, same-feasible-domain status, selection Jaccard, implementation Jaccard or an honest null, full-objective difference, independent proof-yield difference or an honest null, and causal status.
+
+## ENG-12.3G — Selection influence and causality
 
 A term is `selection-influencing` when it changes a selected set inside the same feasible domain.
 
@@ -129,7 +156,7 @@ A term is `causally improving` only when an equal-feasibility implementation abl
 
 Ranking differences, objective deltas, candidate-edge touch, and software-node representation MUST NOT establish causal improvement. Without independent outcome evidence, graph terms MUST be `descriptive`; diversity terms MUST be `descriptive` or `selection-influencing`.
 
-## ENG-12.3G — Mathematical prerequisites
+## ENG-12.3H — Mathematical prerequisites
 
 - Hypergraphs MUST represent genuine multi-way dependencies.
 - Pairwise graphs SHOULD be preferred when they preserve the relationship.
@@ -158,7 +185,7 @@ Tests cover the selected transaction and minimum failure manifold. Discarded can
 
 ## ENG-12.7A — Decision scaffolding
 
-Task matrices, candidate populations, candidate graphs, software invariant hypergraphs, deterministic verifiers, equal-feasibility controls, sensitivity reports, implementation ablations, counterexamples, implementation contracts, and verification plans are first-class `T2/T3` scaffolding.
+Task matrices, candidate populations, score-semantics contracts, grouped baseline contracts, candidate graphs, software invariant hypergraphs, deterministic verifiers, equal-feasibility controls, sensitivity reports, implementation ablations, counterexamples, implementation contracts, and verification plans are first-class `T2/T3` scaffolding.
 
 Large derived matrices SHOULD be regenerated from compact descriptors rather than committed as duplicated opaque payloads.
 
@@ -181,11 +208,17 @@ Current document families are:
 
 Exact PR/SHA, migration head, issue counts, selected IDs, objective values, and gate status MUST NOT be duplicated across contributor mirrors or hard-pinned in structural governance.
 
+## ENG-12.9A — Exact-candidate workflow evidence
+
+A pull-request workflow that claims exact-head evidence MUST explicitly check out and assert the pull request head SHA. GitHub's synthetic merge ref is merge-candidate evidence, not branch-head evidence.
+
+Decision, source/unit, broad local, and PostgreSQL outputs SHOULD be retained as short-lived candidate-scoped workflow artifacts. They MUST NOT be committed as repository payloads.
+
 ## STD-13.3A — Release status ownership
 
 Ratification does **not** make the product production-ready. Exact current source and evidence state lives in `mvp-build/CODEGRAPH.md` and exact workflow/release records.
 
-No active document may use stale base-Standard status prose as current release state. No source, decision, documentation, fixture, local test, or ancestor result may satisfy a stronger gate it did not exercise.
+No active document may use stale base-Standard status prose as current release state. No source, decision, documentation, fixture, local test, merge-ref test, or ancestor result may satisfy a stronger gate it did not exercise.
 
 ## Appendix B amendment — Source map additions
 
