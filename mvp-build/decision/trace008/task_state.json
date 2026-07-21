@@ -1,0 +1,190 @@
+{
+  "baseline": "0.30IG+0.25BV+0.25mean(VF,Testability)+0.20ProofDensity-0.35Unsupported-0.30Risk-0.20Scope-0.15Cost",
+  "basis": {
+    "default_prior_label": "Unknown",
+    "expansion": "Every Cartesian product coordinate W x L x H is active.",
+    "horizons": [
+      "current",
+      "build",
+      "deploy",
+      "partialEffect",
+      "crash",
+      "rollback",
+      "saturation",
+      "future"
+    ],
+    "lenses": [
+      "crash",
+      "repair",
+      "rollback",
+      "backup",
+      "restore",
+      "telemetry",
+      "provenance",
+      "signing",
+      "compose",
+      "image",
+      "network",
+      "secret",
+      "migration",
+      "proof",
+      "capacity",
+      "pilot"
+    ],
+    "unknown_is_zero": false,
+    "workstreams": [
+      "WS08",
+      "WS09_g"
+    ]
+  },
+  "commands": [
+    "python decision/trace008/compute.py --write",
+    "python decision/trace008/compute.py --verify"
+  ],
+  "evidence_nonpromotion": [
+    "source",
+    "ci",
+    "container",
+    "target_host",
+    "restore",
+    "rollback",
+    "capacity",
+    "provider",
+    "pilot",
+    "production"
+  ],
+  "generation_head": "707fa950b693b4931197fc4a8fcc9850c1bab155",
+  "hypothesis_classification": {
+    "H01": {
+      "evidence": "compose declares five services, but dependency health is incomplete",
+      "status": "modified"
+    },
+    "H02": {
+      "evidence": "SHA tags are required, but model-gateway reuses the manager image",
+      "status": "modified"
+    },
+    "H03": {
+      "evidence": "release evidence has a digest but no signature or independent recomputation",
+      "status": "confirmed"
+    },
+    "H04": {
+      "evidence": "rollback is a manual command planner, omits gateway coordinate, and does not enforce compatibility",
+      "status": "confirmed"
+    },
+    "H05": {
+      "evidence": "backup covers Hermes and clients directories only; database, secret version and proof refinding are absent",
+      "status": "confirmed"
+    },
+    "H06": {
+      "evidence": "Caddy health validates configuration; compose smoke accepts containers with no healthcheck",
+      "status": "confirmed"
+    },
+    "H07": {
+      "evidence": "Host Provisioner records partial destructive Docker failure; release-level deterministic fault injection is absent",
+      "status": "modified"
+    },
+    "H08": {
+      "evidence": "repair surfaces require deeper caller-level behavioral proof",
+      "status": "unresolved"
+    },
+    "H09": {
+      "evidence": "production compose grants docker.sock only to Host Provisioner; repository-wide negative proof remains required",
+      "status": "modified"
+    },
+    "H10": {
+      "evidence": "employee topology checks exist but are optional and target-host evidence remains external",
+      "status": "modified"
+    },
+    "H11": {
+      "evidence": "backup and release artifacts do not bind secret versions",
+      "status": "confirmed"
+    },
+    "H12": {
+      "evidence": "component proofs carry Git SHA, but one release-command-effect lineage is absent",
+      "status": "modified"
+    },
+    "H13": {
+      "evidence": "no workflow builds and inspects five distinct exact-SHA images",
+      "status": "confirmed"
+    },
+    "H14": {
+      "evidence": "current workflow preserves artifacts and separately enforces outcomes, but the base PostgreSQL job is red",
+      "status": "modified"
+    },
+    "H15": {
+      "evidence": "capacity harness lacks queue, SSE and fairness accounting",
+      "status": "confirmed"
+    },
+    "H16": {
+      "evidence": "pilot stop/rollback source schema not established",
+      "status": "unresolved"
+    },
+    "H17": {
+      "evidence": "Host Provisioner TTL uses replica Date.now; database remains authority for shared commercial windows",
+      "status": "modified"
+    },
+    "H18": {
+      "evidence": "effect ambiguity is durable, but release/operator terminality is incomplete",
+      "status": "modified"
+    },
+    "H19": {
+      "evidence": "rollback accepts an operator compatibility string rather than executable compatibility proof",
+      "status": "confirmed"
+    },
+    "H20": {
+      "evidence": "no representative 25-30 runtime result on a 64 GiB host is available",
+      "status": "unresolved"
+    }
+  },
+  "input_blob_shas": {
+    "../.github/workflows/ws07-ws08-commercial-effect.yml": null,
+    "CODEGRAPH.md": "f834a01e113444e8f03f43d41a92e515e9878158",
+    "STANDARD-V0.2-AMENDMENT-001.md": "1200601c14bb3571ca64a2c37456075ebfc50be6",
+    "STANDARD.md": "83db0285649c41df6f0d5ac16928e78f5df308af",
+    "apps/manager/src/lib/provisioning-reconciler.ts": "756d921e3be015d979d2bd005e8e3227e98dc51c",
+    "apps/manager/src/provisioner-host.ts": "32b23b2f2b849bee7b08739859326e557fe278f7",
+    "decision/protocol-v1.json": "14cc7cf465b4fb746b5640d3e7a3242ea03919fb",
+    "decision/trace008/prior_model.json": "dfcc27565c55fcbe9552b60591982987e32393e7",
+    "infra/deploy/docker-compose.production.yml": "b4e12df73b6d0cda6682bc0daa43e6397609e8eb",
+    "infra/scripts/acceptance/release-evidence-spine.mjs": "b39352871cbfb7410fca4cd35c651412307e305c",
+    "infra/scripts/backup-restore.mjs": "364abb0b7e4a57bdf98d273b0034cecf5f9922af",
+    "infra/scripts/capacity-pod-alpha.mjs": "c8f83f6854fb89b879c5b8e7a788ea3da6a7c950",
+    "infra/scripts/deploy-rollback.mjs": "d7aab81ccd8636c9240d5fd226d2841a83135ad0",
+    "infra/scripts/deploy-smoke.mjs": "2069509bfc22243d82afe933cd8961d27d2963e0",
+    "infra/scripts/production-normal-up.mjs": "334fc00b4dc04970014b60725872a1e1e454ab52",
+    "infra/scripts/production-topology.mjs": "9617b9b711c77dc64049fb75acd29b4b6a7eb9d9",
+    "infra/scripts/repair.mjs": "4109f2068103051d10adf7fb7882d499ad911535",
+    "package.json": "3c4bfda22e47203988f4974658ea9b65bbf09464"
+  },
+  "lambdas": {
+    "complete": 0.2,
+    "fractional": 0.18,
+    "q": 0.22,
+    "qd": 0.1,
+    "redundancy": 0.12,
+    "separation": 0.1,
+    "vne": 0.08
+  },
+  "runtime": "3.13.14 (main, Jun 11 2026, 03:02:07) [GCC 13.3.0]",
+  "schema": "amtech.trace008.task-state.v1",
+  "seed": 80820260721,
+  "starting_sha": "0193bc2f8d87fec07fd645171c37cb4b9e66e1ff",
+  "weights_w": {
+    "Adj": 0.04,
+    "ArchLeverage": 0.07,
+    "BV": 0.08,
+    "Cost": -0.04,
+    "CrossLens": 0.05,
+    "FeatureYield": 0.04,
+    "FutureBug": 0.07,
+    "IG": 0.1,
+    "N": 0.03,
+    "ProofDensity": 0.09,
+    "Reversibility": 0.04,
+    "Risk": -0.09,
+    "Scope": -0.04,
+    "Testability": 0.08,
+    "Unsupported": -0.06,
+    "VF": 0.08
+  }
+}
