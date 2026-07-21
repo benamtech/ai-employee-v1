@@ -23,22 +23,27 @@ describe("connector operating substrate source contract", () => {
     expect(migration).not.toContain("action_verification_challenges");
   });
 
-  it("closes connector lifecycle and revocation through one assignment authority", () => {
-    const migration = read("packages/db/migrations/0080_connector_operating_substrate.sql");
+  it("closes connector lifecycle, revoke, and verified reconnect through one assignment authority", () => {
+    const lifecycleMigration = read("packages/db/migrations/0080_connector_operating_substrate.sql");
+    const reconnectMigration = read("packages/db/migrations/0081_connector_reactivation_normalization.sql");
     const lifecycle = read("apps/manager/src/lib/connector-lifecycle.ts");
     const routes = read("apps/manager/src/lib/connector-workbench-routes.ts");
 
-    expect(migration).toContain("connector_capability_projections");
-    expect(migration).toContain("connector_lifecycle_events");
-    expect(migration).toContain("connector_setup_intents");
-    expect(migration).toContain("amtech_revoke_connector_binding");
+    expect(lifecycleMigration).toContain("connector_capability_projections");
+    expect(lifecycleMigration).toContain("connector_lifecycle_events");
+    expect(lifecycleMigration).toContain("connector_setup_intents");
+    expect(lifecycleMigration).toContain("amtech_revoke_connector_binding");
+    expect(reconnectMigration).toContain("amtech_normalize_connector_binding_activation");
+    expect(reconnectMigration).toContain("amtech_project_connector_binding_activation");
+    expect(reconnectMigration).toContain("capability_discovery_required");
+    expect(reconnectMigration).toContain("if tg_op = 'INSERT' then");
     expect(lifecycle).toContain("refreshAssignmentConnectorCapabilities");
     expect(lifecycle).toContain("revokeAssignmentConnector");
     expect(routes).toContain("connector:revoke");
     expect(routes).toContain("connector:setup:request");
   });
 
-  it("gives native and long-tail tools the same GUI entry point", () => {
+  it("gives native and long-tail tools the same GUI entry point without optimistic readiness", () => {
     const drawer = read("apps/web/app/agent/[employeeId]/components/CapabilityDrawer.tsx");
     const connectPage = read("apps/web/app/agent/[employeeId]/connect/[connector]/page.tsx");
     const connectRoute = read("apps/web/app/api/employee/[employeeId]/connect/[connector]/route.ts");
@@ -47,7 +52,10 @@ describe("connector operating substrate source contract", () => {
     expect(drawer).toContain("Set up ${setup.label}");
     expect(connectPage).toContain("Every connector uses the same AMTECH lifecycle");
     expect(connectPage).toContain("No power-user knowledge required");
+    expect(connectPage).toContain("No employee capability is promoted from the callback parameter alone");
+    expect(connectPage).toContain("observedConnected");
     expect(connectRoute).toContain("/request");
     expect(connectRoute).toContain("connectors/revoke");
+    expect(connectRoute).toContain("POST/Redirect/GET");
   });
 });
