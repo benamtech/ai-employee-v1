@@ -1,6 +1,6 @@
 {
   "schema": "amtech.computed-decision.v1",
-  "protocol_revision": 3,
+  "protocol_revision": 4,
   "status": "active",
   "scope": "mvp-build non-mechanical planning and implementation decisions",
   "order": [
@@ -128,8 +128,8 @@
       "roles": {
         "positive_required": ["IG", "BV", "VF", "ProofDensity"],
         "positive_optional": ["Testability"],
-        "penalty_required": ["Unsupported", "Scope"],
-        "penalty_optional": ["Risk", "Cost"],
+        "penalty_required": ["Unsupported", "Risk", "Scope", "Cost"],
+        "penalty_optional": [],
         "excluded": ["N", "Adj", "CrossLens", "FutureBug", "FeatureYield", "ArchLeverage", "Reversibility"]
       },
       "groups": {
