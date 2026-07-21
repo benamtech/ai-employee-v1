@@ -22,6 +22,7 @@ export * from "./golden-employee-scenarios.js";
 export * from "./model-context.js";
 export * from "./connector-registry.js";
 export * from "./connector-setup.js";
+export * from "./adaptive-connector-runtime.js";
 export * from "./channel-routing.js";
 export * from "./tool-contracts.js";
 export * from "./tool-schemas.js";
