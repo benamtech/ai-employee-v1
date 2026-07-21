@@ -1,0 +1,47 @@
+name: Trace009 Apply UI Consolidation
+
+on:
+  push:
+    branches:
+      - agent/ws08-ws09-production
+    paths:
+      - mvp-build/scripts/apply-trace009-ui-consolidation.mjs
+      - .github/workflows/trace009-apply-ui.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trace009-apply-ui-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Assert exact branch head
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test "${GITHUB_REF_NAME}" = "agent/ws08-ws09-production"
+      - name: Apply assertion-checked transformation
+        working-directory: mvp-build
+        run: node scripts/apply-trace009-ui-consolidation.mjs
+      - name: Commit transformed source
+        run: |
+          set -euo pipefail
+          git config user.name "amtech-trace-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add mvp-build/apps/web/app/agent mvp-build/apps/web/app/ui-lab
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "Trace009 UI consolidation already applied."
+            exit 0
+          fi
+          git commit -m "ui(trace009): consolidate production projection path"
+          git push origin HEAD:agent/ws08-ws09-production
