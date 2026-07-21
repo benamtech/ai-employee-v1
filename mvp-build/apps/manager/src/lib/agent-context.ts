@@ -7,7 +7,13 @@ const MAX_ESTIMATED_TOKENS = 2000;
 const SESSION_TARGET_TOKENS = 400000;
 const MAX_CHARS = MAX_ESTIMATED_TOKENS * 4;
 
-type BrainIndex = Awaited<ReturnType<typeof buildBusinessBrainIndex>>;
+type CurrentBrainIndex = Awaited<ReturnType<typeof buildBusinessBrainIndex>>;
+type BrainIndex = Omit<CurrentBrainIndex, "brain_index"> & {
+  brain_index: Omit<CurrentBrainIndex["brain_index"], "activation_plan"> & {
+    /** Retained pre-0080 snapshots remain readable; absence means no recommendation. */
+    activation_plan?: CurrentBrainIndex["brain_index"]["activation_plan"];
+  };
+};
 
 export function estimatedTokens(text: string): number {
   return Math.ceil(text.length / 4);
@@ -71,7 +77,7 @@ export function buildAgentContext(input: {
   pushLine(lines, `Counts: facts ${b.proof.fact_count}, connectors ${b.proof.connector_count}, artifacts ${b.proof.artifact_count}, open approvals ${b.proof.open_approval_count}, work items ${b.proof.work_queue_count}, capabilities ${b.proof.capability_count}.`);
   pushLine(lines, `Resources: ${Object.values(b.resources).join(", ")}.`);
 
-  const activationRecommendations = b.brain_index.activation_plan.recommendations
+  const activationRecommendations = (b.brain_index.activation_plan?.recommendations ?? [])
     .filter((item) => item.recommendation_class === "activate_now" || item.recommendation_class === "high_gain")
     .slice(0, 4);
   for (const recommendation of activationRecommendations) {
