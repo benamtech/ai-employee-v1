@@ -28,9 +28,34 @@ jobs:
         run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
       - name: Decode staged payload
         run: |
-          for f in .overhaul-payload/apply/part-*; do base64 -d "$f"; done | gzip -d > /tmp/apply_agentic_overhaul.py
-          for f in .overhaul-payload/patch/part-*; do base64 -d "$f"; done | gzip -d > /tmp/post_transform.patch
-          for f in .overhaul-payload/finalize/part-*; do base64 -d "$f"; done | gzip -d > /tmp/finalize_overhaul.patch
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip
+
+          def decode_family(name, output):
+              parts = sorted(Path(f'.overhaul-payload/{name}').glob('part-*'))
+              texts = [p.read_text().strip() for p in parts]
+              attempts = []
+              try:
+                  attempts.append(gzip.decompress(base64.b64decode(''.join(texts))))
+              except Exception:
+                  pass
+              try:
+                  attempts.append(gzip.decompress(b''.join(base64.b64decode(text) for text in texts)))
+              except Exception:
+                  pass
+              try:
+                  attempts.append(b''.join(gzip.decompress(base64.b64decode(text)) for text in texts))
+              except Exception:
+                  pass
+              if not attempts:
+                  raise SystemExit(f'could not decode {name}')
+              Path(output).write_bytes(max(attempts, key=len))
+
+          decode_family('apply', '/tmp/apply_agentic_overhaul.py')
+          decode_family('patch', '/tmp/post_transform.patch')
+          decode_family('finalize', '/tmp/finalize_overhaul.patch')
+          PY
           python3 -m py_compile /tmp/apply_agentic_overhaul.py
       - name: Apply deterministic transformation
         run: python3 /tmp/apply_agentic_overhaul.py
