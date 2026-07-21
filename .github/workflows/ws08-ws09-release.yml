@@ -197,27 +197,39 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Initialize release diagnostics
+        working-directory: mvp-build
+        run: |
+          mkdir -p infra/proofs/ci-release
+          : > infra/proofs/ci-release/build.log
       - name: Validate canonical compose
         working-directory: mvp-build
         run: |
           set -euo pipefail
           : > infra/deploy/.env.production
-          AMTECH_GIT_SHA="$CANDIDATE_SHA" docker compose -f infra/deploy/docker-compose.production.yml --env-file infra/deploy/.env.production config > /tmp/compose.json
-          AMTECH_GIT_SHA="$CANDIDATE_SHA" docker compose -f infra/deploy/docker-compose.production.yml --env-file infra/deploy/.env.production config --quiet
+          {
+            AMTECH_GIT_SHA="$CANDIDATE_SHA" docker compose -f infra/deploy/docker-compose.production.yml --env-file infra/deploy/.env.production config > /tmp/compose.json
+            AMTECH_GIT_SHA="$CANDIDATE_SHA" docker compose -f infra/deploy/docker-compose.production.yml --env-file infra/deploy/.env.production config --quiet
+          } 2>&1 | tee -a infra/proofs/ci-release/build.log
       - name: Build five exact-SHA images
         working-directory: mvp-build
         run: |
           set -euo pipefail
-          docker build --build-arg AMTECH_GIT_SHA="$CANDIDATE_SHA" -f infra/deploy/manager.Dockerfile -t "amtech-ai-employee-manager:$CANDIDATE_SHA" .
-          docker build --build-arg AMTECH_GIT_SHA="$CANDIDATE_SHA" -f infra/deploy/model-gateway.Dockerfile -t "amtech-ai-employee-model-gateway:$CANDIDATE_SHA" .
-          docker build --build-arg AMTECH_GIT_SHA="$CANDIDATE_SHA" -f infra/deploy/provisioner.Dockerfile -t "amtech-ai-employee-host-provisioner:$CANDIDATE_SHA" .
-          docker build --build-arg AMTECH_GIT_SHA="$CANDIDATE_SHA" -f infra/deploy/web.Dockerfile -t "amtech-ai-employee-web:$CANDIDATE_SHA" .
-          docker build --build-arg AMTECH_GIT_SHA="$CANDIDATE_SHA" -f infra/deploy/caddy.Dockerfile -t "amtech-ai-employee-caddy:$CANDIDATE_SHA" .
+          build_image() {
+            local service="$1"
+            local dockerfile="$2"
+            echo "BUILD ${service} ${CANDIDATE_SHA}" | tee -a infra/proofs/ci-release/build.log
+            docker build --build-arg AMTECH_GIT_SHA="$CANDIDATE_SHA" -f "$dockerfile" -t "amtech-ai-employee-${service}:$CANDIDATE_SHA" . 2>&1 | tee -a infra/proofs/ci-release/build.log
+          }
+          build_image manager infra/deploy/manager.Dockerfile
+          build_image model-gateway infra/deploy/model-gateway.Dockerfile
+          build_image host-provisioner infra/deploy/provisioner.Dockerfile
+          build_image web infra/deploy/web.Dockerfile
+          build_image caddy infra/deploy/caddy.Dockerfile
       - name: Inspect image identity
         working-directory: mvp-build
         run: |
           set -euo pipefail
-          mkdir -p infra/proofs/ci-release
           for service in manager model-gateway host-provisioner web caddy; do
             docker image inspect "amtech-ai-employee-${service}:$CANDIDATE_SHA" > "infra/proofs/ci-release/${service}.json"
             test "$(docker image inspect "amtech-ai-employee-${service}:$CANDIDATE_SHA" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$CANDIDATE_SHA"
@@ -245,12 +257,15 @@ jobs:
           AMTECH_RELEASE_MANIFEST_OUT: infra/proofs/ci-release/release-manifest.json
         run: |
           set -euo pipefail
-          node infra/scripts/release-manifest.mjs
+          node infra/scripts/release-manifest.mjs 2>&1 | tee -a infra/proofs/ci-release/build.log
           node infra/scripts/verify-release-manifest.mjs infra/proofs/ci-release/release-manifest.json | tee infra/proofs/ci-release/verification.json
           rm -f /tmp/release-private.pem
       - name: Retain exact release diagnostics
         if: always()
-        run: cp /tmp/compose.json mvp-build/infra/proofs/ci-release/compose.json || true
+        working-directory: mvp-build
+        run: |
+          mkdir -p infra/proofs/ci-release
+          cp /tmp/compose.json infra/proofs/ci-release/compose.json || true
       - name: Upload exact release diagnostics
         if: always()
         uses: actions/upload-artifact@v4
