@@ -1,0 +1,97 @@
+name: Trace010 Finalize Merge Ready
+
+on:
+  pull_request:
+    branches:
+      - agent/ws08-ws09-production
+    paths:
+      - '.github/workflows/trace010-finalize-merge-ready.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trace010-finalize-merge-ready
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Assert exact input head
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+      - name: Normalize package script graph
+        working-directory: mvp-build
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+          const pkg = JSON.parse(await readFile('package.json', 'utf8'));
+          pkg.scripts['repo:scripts:check'] = 'node scripts/verify-package-scripts.mjs';
+          pkg.scripts['repo:agentic:check'] = 'node scripts/verify-agentic-repository.mjs && npm run repo:scripts:check';
+          pkg.scripts['repo:verify:full'] = 'npm run repo:agentic:check && npm run repo:verify:quick && npm run typecheck && npm run lint';
+          pkg.scripts['repo:merge:check'] = 'npm run repo:verify:full && npm run test:unit && npm run build';
+          await writeFile('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          NODE
+      - name: Install durable merge gate
+        run: |
+          cat > .github/workflows/mvp-build-merge-gates.yml <<'YAML'
+          name: MVP Build Merge Gates
+
+          on:
+            pull_request:
+              paths:
+                - 'mvp-build/**'
+                - '.github/workflows/mvp-build-merge-gates.yml'
+            workflow_dispatch:
+
+          permissions:
+            contents: read
+
+          jobs:
+            merge-gates:
+              runs-on: ubuntu-24.04
+              steps:
+                - uses: actions/checkout@v4
+                  with:
+                    fetch-depth: 0
+                    ref: ${{ github.event.pull_request.head.sha || github.sha }}
+                - name: Assert exact head
+                  run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
+                - name: Install dependencies
+                  working-directory: mvp-build
+                  run: npm ci
+                - name: Run complete merge gate
+                  working-directory: mvp-build
+                  run: npm run repo:merge:check
+          YAML
+      - name: Remove temporary transport and workflows
+        run: |
+          rm -rf .overhaul-payload
+          rm -f .github/workflows/trace010-mvp-build-audit.yml
+          rm -f .github/workflows/trace010-execute-overhaul-payload.yml
+          rm -f .github/workflows/trace010-finalize-merge-ready.yml
+      - name: Install dependencies
+        working-directory: mvp-build
+        run: npm ci
+      - name: Run complete merge gate
+        working-directory: mvp-build
+        run: npm run repo:merge:check
+      - name: Assert clean merge tree
+        run: |
+          test ! -e .overhaul-payload
+          test ! -e .github/workflows/trace010-mvp-build-audit.yml
+          test ! -e .github/workflows/trace010-execute-overhaul-payload.yml
+          test ! -e .github/workflows/trace010-finalize-merge-ready.yml
+          test -e .github/workflows/mvp-build-merge-gates.yml
+      - name: Commit verified tree
+        run: |
+          git config user.name 'amtech-agent'
+          git config user.email 'agent@amtechai.com'
+          git add -A
+          git commit -m 'finalize agentic repository merge gates'
+          git push origin HEAD:agent/mvp-build-agentic-overhaul
