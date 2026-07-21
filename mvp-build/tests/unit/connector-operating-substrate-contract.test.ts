@@ -9,7 +9,9 @@ describe("connector operating substrate source contract", () => {
   it("keeps normal SMS conversational and binds decisions to exact durable context", () => {
     const prompt = read("apps/manager/src/lib/owner-turn-context.ts");
     const twilio = read("apps/manager/src/webhooks/twilio.ts");
-    const migration = read("packages/db/migrations/0080_connector_operating_substrate.sql");
+    const decisionRuntime = read("apps/manager/src/lib/channel-decisions.ts");
+    const resolutionMigration = read("packages/db/migrations/0080_connector_operating_substrate.sql");
+    const focusMigration = read("packages/db/migrations/0082_atomic_sms_decision_focus.sql");
     const tool = read("apps/manager/src/tools/manager-extension-tools.ts");
 
     expect(prompt).toContain("Do not ask for a code, password, or repeated identity challenge");
@@ -17,10 +19,16 @@ describe("connector operating substrate source contract", () => {
     expect(prompt).toContain("never require a keyword such as YES");
     expect(twilio).toContain("loadSmsDecisionContextForTurn");
     expect(tool).toContain("resolveOwnerChannelDecision");
-    expect(migration).toContain("channel_decision_contexts");
-    expect(migration).toContain("amtech_resolve_sms_channel_decision");
-    expect(migration).not.toContain("code_hash");
-    expect(migration).not.toContain("action_verification_challenges");
+    expect(resolutionMigration).toContain("channel_decision_contexts");
+    expect(resolutionMigration).toContain("amtech_resolve_sms_channel_decision");
+    expect(focusMigration).toContain("channel_decision_context_one_open_sms_idx");
+    expect(focusMigration).toContain("amtech_open_sms_channel_decision_context");
+    expect(focusMigration).toContain("pg_advisory_xact_lock");
+    expect(focusMigration).toContain("on conflict (prompt_message_id, approval_id) do update");
+    expect(decisionRuntime).toContain('db.rpc("amtech_open_sms_channel_decision_context"');
+    expect(resolutionMigration).not.toContain("code_hash");
+    expect(resolutionMigration).not.toContain("action_verification_challenges");
+    expect(focusMigration).not.toContain("code_hash");
   });
 
   it("closes connector lifecycle, revoke, and verified reconnect through one assignment authority", () => {
