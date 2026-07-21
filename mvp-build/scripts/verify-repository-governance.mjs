@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-import { access, readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { access, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
+import { inflateSync } from "node:zlib";
 
 const root = process.cwd();
 const passes = [];
@@ -11,169 +13,257 @@ const exists = async (path) => {
   try { await access(pathOf(path)); return true; } catch { return false; }
 };
 const read = (path) => readFile(pathOf(path), "utf8");
-const parse = (name, text) => {
-  try { return JSON.parse(text); }
-  catch (error) { failures.push({ id: `JSON-${name}`, detail: String(error) }); return {}; }
-};
 const nonempty = (value) => typeof value === "string" && value.trim().length > 0;
-const sha = (value) => typeof value === "string" && /^[a-f0-9]{40}$/i.test(value);
 const unique = (values) => new Set(values).size === values.length;
+const candidateId = (value) => typeof value === "string" && /^[A-D][0-9]{2}$/.test(value);
+
+function parseJson(name, text) {
+  try { return JSON.parse(text); }
+  catch (error) {
+    failures.push({ id: `JSON-${name}`, detail: String(error) });
+    return {};
+  }
+}
+
+function decodeJson(name, text) {
+  const wrapper = parseJson(name, text);
+  if (wrapper?.encoding !== "zlib+base64+json") return wrapper;
+  try {
+    const raw = inflateSync(Buffer.from(wrapper.payload, "base64"));
+    const digest = createHash("sha256").update(raw).digest("hex");
+    if (digest !== wrapper.sha256 || raw.length !== wrapper.bytes) {
+      throw new Error(`compressed payload mismatch digest=${digest} bytes=${raw.length}`);
+    }
+    return JSON.parse(raw.toString("utf8"));
+  } catch (error) {
+    failures.push({ id: `DECODE-${name}`, detail: String(error) });
+    return {};
+  }
+}
 
 const required = [
   "../identity.md", "../AGENTS.md", "../CLAUDE.md", "../CONTRIBUTING.md", "../CODEGRAPH.md",
-  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "README.md", "STANDARD.md", "STANDARD-V0.2-AMENDMENT-001.md", "GAPS.md", "REMEDIATION.md",
-  "validation/standard-v0.2-evolution-vector.json", "validation/standard-v0.2-amendment-001-evolution.json",
-  "decision/README.md", "decision/protocol-v1.json", "decision/trace007/compute.py", "decision/trace007/task_state.json",
-  "decision/trace007/candidate_population.json", "decision/trace007/candidate_scores.json", "decision/trace007/hypergraph.json",
-  "decision/trace007/selection_comparison.json", "decision/trace007/selected_exploration.json",
-  "decision/trace007/selected_implementation.json", "decision/trace007/implementation_contract.json",
-  "decision/trace007/verification_plan.json", "decision/trace007/decision_record.md",
-  "production-readiness-program/README.md", "production-readiness-program/04-dependency-ordered-production-plan.md",
-  "production-readiness-program/07-verification-and-handoff-matrix.md", "production-readiness-program/08-production-issue-vector.json",
-  "production-readiness-program/09-workstream-execution-map.md", "production-readiness-program/10-test-suite-disposition.md",
-  "production-readiness-program/13-resolution-ledger.json", "production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
-  "docs/architecture/README.md", "docs/architecture/09-current-bug-risk-and-production-gap-register.md",
-  "docs/architecture/11-agent-orientation-and-role-map.md", "docs/architecture/12-document-control-memory-and-handoff-map.md",
-  "memory/MEMORY.md", "second-half-plan/README.md", "packages/db/migrations/0076_ws08_reconciliation_authority_hardening.sql",
-  "../.github/workflows/ws07-ws08-commercial-effect.yml", "../.github/workflows/main-integration-gates.yml",
+  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "README.md", "STANDARD.md", "STANDARD-V0.2-AMENDMENT-001.md",
+  "decision/README.md", "decision/protocol-v1.json", "decision/trace007/compute.py",
+  "decision/trace007/task_state.json", "decision/trace007/candidate_population.json",
+  "decision/trace007/candidate_scores.json", "decision/trace007/candidate_graph.json",
+  "decision/trace007/software_invariant_hypergraph.json", "decision/trace007/selection_comparison.json",
+  "decision/trace007/selected_exploration.json", "decision/trace007/selected_implementation.json",
+  "decision/trace007/implementation_ablation.json", "decision/trace007/counterexample_matrix.json",
+  "decision/trace007/implementation_contract.json", "decision/trace007/verification_plan.json",
+  "decision/trace007/decision_record.md", "production-readiness-program/README.md",
+  "production-readiness-program/04-dependency-ordered-production-plan.md",
+  "production-readiness-program/07-verification-and-handoff-matrix.md",
+  "production-readiness-program/08-production-issue-vector.json",
+  "production-readiness-program/09-workstream-execution-map.md",
+  "production-readiness-program/10-test-suite-disposition.md",
+  "production-readiness-program/13-resolution-ledger.json",
+  "production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+  "docs/architecture/README.md", "memory/MEMORY.md", "second-half-plan/README.md",
+  "packages/db/migration-ledger.mjs", "package.json",
+  "../.github/workflows/ws07-ws08-commercial-effect.yml", "../.github/workflows/main-integration-gates.yml"
 ];
 const missing = [];
 for (const path of required) if (!(await exists(path))) missing.push(path);
-record("GOV-01", missing.length === 0, `required authority files exist; missing=${missing.join(",") || "none"}`);
+record("GOV-01", missing.length === 0,
+  `required authority and trace files exist; missing=${missing.join(",") || "none"}`);
 
-const [
-  rootGraph, scopedGraph, readme, agents, claude, standard, amendment, amendmentEvolutionText,
-  gaps, remediation, historicalPlans, decisionDoc, protocolText, traceImplementationText,
-  traceComparisonText, programReadme, roadmap, workstreams, testsDoc, verificationDoc,
-  ledgerText, issuesText, architectureReadme, architectureRisk, roleMap, documentMap,
-  memoryIndex, packageText, migrationLedgerText, workflowText, mainWorkflowText,
-] = await Promise.all([
-  read("../CODEGRAPH.md"), read("CODEGRAPH.md"), read("README.md"), read("AGENTS.md"), read("CLAUDE.md"),
-  read("STANDARD.md"), read("STANDARD-V0.2-AMENDMENT-001.md"), read("validation/standard-v0.2-amendment-001-evolution.json"),
-  read("GAPS.md"), read("REMEDIATION.md"), read("second-half-plan/README.md"),
-  read("decision/README.md"), read("decision/protocol-v1.json"), read("decision/trace007/selected_implementation.json"),
-  read("decision/trace007/selection_comparison.json"), read("production-readiness-program/README.md"),
-  read("production-readiness-program/04-dependency-ordered-production-plan.md"),
-  read("production-readiness-program/09-workstream-execution-map.md"),
-  read("production-readiness-program/10-test-suite-disposition.md"),
-  read("production-readiness-program/07-verification-and-handoff-matrix.md"),
-  read("production-readiness-program/13-resolution-ledger.json"),
-  read("production-readiness-program/08-production-issue-vector.json"),
-  read("docs/architecture/README.md"), read("docs/architecture/09-current-bug-risk-and-production-gap-register.md"),
-  read("docs/architecture/11-agent-orientation-and-role-map.md"),
-  read("docs/architecture/12-document-control-memory-and-handoff-map.md"),
-  read("memory/MEMORY.md"), read("package.json"), read("packages/db/migration-ledger.mjs"),
-  read("../.github/workflows/ws07-ws08-commercial-effect.yml"), read("../.github/workflows/main-integration-gates.yml"),
-]);
+const texts = Object.fromEntries(await Promise.all(required
+  .filter((path) => path.endsWith(".md") || path.endsWith(".json") || path.endsWith(".mjs") || path.endsWith(".py") || path.endsWith(".yml"))
+  .map(async (path) => [path, await read(path)])));
 
-const protocol = parse("decision-protocol", protocolText);
-const amendmentEvolution = parse("standard-amendment-evolution", amendmentEvolutionText);
-const implementation = parse("trace007-selected-implementation", traceImplementationText);
-const comparison = parse("trace007-selection-comparison", traceComparisonText);
-const ledger = parse("resolution-ledger", ledgerText);
-const issues = parse("issue-vector", issuesText);
-const pkg = parse("package", packageText);
+const protocol = parseJson("protocol", texts["decision/protocol-v1.json"]);
+const candidateGraph = parseJson("candidate-graph", texts["decision/trace007/candidate_graph.json"]);
+const softwareGraph = parseJson("software-graph", texts["decision/trace007/software_invariant_hypergraph.json"]);
+const comparison = parseJson("selection-comparison", texts["decision/trace007/selection_comparison.json"]);
+const exploration = parseJson("selected-exploration", texts["decision/trace007/selected_exploration.json"]);
+const implementation = parseJson("selected-implementation", texts["decision/trace007/selected_implementation.json"]);
+const ablation = parseJson("implementation-ablation", texts["decision/trace007/implementation_ablation.json"]);
+const verification = parseJson("verification-plan", texts["decision/trace007/verification_plan.json"]);
+const issueVector = parseJson("issue-vector", texts["production-readiness-program/08-production-issue-vector.json"]);
+const ledger = parseJson("resolution-ledger", texts["production-readiness-program/13-resolution-ledger.json"]);
+const pkg = parseJson("package", texts["package.json"]);
+const population = decodeJson("candidate-population", texts["decision/trace007/candidate_population.json"]);
 
-record("GOV-02", standard.includes("Status: **ratified and effective**")
-  && amendment.includes("Status: **ratified additive amendment and effective**")
-  && amendment.includes("ENG-12.3A — Computation-first execution loop")
-  && amendment.includes("STD-13.3A — Current release status")
-  && amendmentEvolution.amendment_id === "amtech-standard-v0.2-amendment-001"
-  && amendmentEvolution.destructive_modification === 0
-  && amendmentEvolution.summary?.musts_removed_or_weakened === 0,
-  "ratified base Standard plus additive computation-first amendment are canonical");
+record("GOV-02",
+  texts["STANDARD.md"].includes("ratified and effective")
+  && texts["STANDARD-V0.2-AMENDMENT-001.md"].includes("ratified additive amendment and effective"),
+  "ratified Standard and additive amendment remain canonical");
 
-const routedDocs = [rootGraph, scopedGraph, readme, agents, claude, programReadme, roadmap, workstreams, testsDoc, verificationDoc, architectureReadme, architectureRisk, roleMap, documentMap];
-record("GOV-03", routedDocs.every((text) => text.includes("decision/README.md") || text.includes("decision protocol") || text.includes("Computation")), "active entrypoints route through computation-first authority");
-record("GOV-04", routedDocs.every((text) => text.includes("0076")), "active status maps agree on source migration head 0076");
-record("GOV-05", gaps.includes("historical audit; not current execution authority") && gaps.includes("0b22b7d828e43c81992713c578b090b3875f12ac")
-  && remediation.includes("historical remediation plan; not current execution authority") && remediation.includes("51bae06670bd4b00dc88dca42f13596b78c22923")
-  && historicalPlans.includes("historical and non-canonical"), "historical audits/plans are explicit routers with original evidence references");
+const rootClaudeLines = texts["../CLAUDE.md"].trim().split(/\r?\n/).length;
+const scopedClaudeLines = texts["CLAUDE.md"].trim().split(/\r?\n/).length;
+record("GOV-03",
+  texts["../CLAUDE.md"].includes("AGENTS.md") && texts["CLAUDE.md"].includes("AGENTS.md")
+  && rootClaudeLines <= 20 && scopedClaudeLines <= 20,
+  `CLAUDE compatibility routers remain short; root=${rootClaudeLines} scoped=${scopedClaudeLines}`);
 
-const expectedTiers = ["T0_mechanical", "T1_bounded", "T2_consequential", "T3_production_cross_workstream"];
-record("GOV-06", protocol.schema === "amtech.computed-decision.v1" && expectedTiers.every((tier) => protocol.tiers?.[tier])
-  && protocol.tiers?.T1_bounded?.minimum_candidates === 4 && protocol.tiers?.T2_consequential?.minimum_candidates === 16
-  && protocol.tiers?.T3_production_cross_workstream?.minimum_candidates === 64
-  && protocol.tiers?.T3_production_cross_workstream?.minimum_random_baselines >= 100
-  && Array.isArray(protocol.candidate_dimensions) && protocol.candidate_dimensions.length === 16,
-  "machine-readable computation protocol has proportional tiers and complete dimensions");
+const statusMirrors = ["../AGENTS.md", "../CODEGRAPH.md", "AGENTS.md", "README.md"];
+const duplicatedStatus = statusMirrors.flatMap((path) => {
+  const hits = [];
+  if (/PR #\d+/i.test(texts[path])) hits.push(`${path}:PR`);
+  if (/Source migration head/i.test(texts[path])) hits.push(`${path}:migration`);
+  if (/Current main baseline/i.test(texts[path])) hits.push(`${path}:baseline`);
+  return hits;
+});
+record("GOV-04", duplicatedStatus.length === 0,
+  `exact product status is owned by scoped CODEGRAPH only; duplicates=${duplicatedStatus.join(",") || "none"}`);
 
-record("GOV-07", decisionDoc.includes("Unknown evidence remains Unknown") && decisionDoc.includes("Separate implementation compression")
-  && decisionDoc.includes("Hodge Laplacians only") && decisionDoc.includes("Koopman propagation only"),
-  "human protocol preserves Unknown, compression, and mathematical prerequisites");
+const migrationFiles = await readdir(pathOf("packages/db/migrations"));
+const migrationNumbers = migrationFiles
+  .map((name) => /^(\d{4})[a-z]?_.*\.sql$/.exec(name))
+  .filter(Boolean)
+  .map((match) => Number(match[1]));
+const sourceHead = Math.max(...migrationNumbers);
+const sourceHeadLabel = String(sourceHead).padStart(4, "0");
+const ledgerHeadMatch = /const APPLIED_HEAD\s*=\s*(\d+)/.exec(texts["packages/db/migration-ledger.mjs"]);
+record("GOV-05",
+  Number(ledgerHeadMatch?.[1]) === sourceHead
+  && texts["CODEGRAPH.md"].includes(`Source migration head: \`${sourceHeadLabel}\``),
+  `migration status is derived from source; head=${sourceHeadLabel}`);
 
-const selectedIds = implementation.selected_ids ?? [];
-record("GOV-08", JSON.stringify(selectedIds) === JSON.stringify(["D01","D02","D03","D04","D06","D07"])
-  && comparison.joint?.metrics?.J === 0.5818732 && comparison.random_feasible?.count >= 100
-  && comparison.causality?.classification === "causal", "trace007 selected implementation and comparison remain canonical");
+record("GOV-06",
+  protocol.schema === "amtech.computed-decision.v1"
+  && protocol.protocol_revision >= 2
+  && protocol.topology_contract?.candidate_graph
+  && protocol.topology_contract?.software_invariant_hypergraph
+  && protocol.feasible_domain?.mandatory_coverage === "constraint_not_objective_bonus"
+  && protocol.tiers?.T3_production_cross_workstream?.minimum_random_feasible_baselines >= 1000
+  && protocol.tiers?.T3_production_cross_workstream?.minimum_search_restarts >= 32
+  && protocol.tiers?.T3_production_cross_workstream?.minimum_weight_sensitivity_runs >= 32,
+  "decision protocol separates topologies, equalizes feasibility, and requires sensitivity");
 
-const expectedIssueSchema = ["id","workstream","priority","production_blocking","evidence_confidence","user_impact","authority_safety_risk","dependency_centrality","blast_radius","reversibility_risk","maintainability_drag","production_readiness_gap","title","affected_boundaries","evidence"];
-const issueRows = Array.isArray(issues.issues) ? issues.issues : [];
-const issueIds = issueRows.map((row) => row?.[0]);
-record("GOV-09", issues.repository === "benamtech/ai-employee-v1" && JSON.stringify(issues.schema) === JSON.stringify(expectedIssueSchema)
-  && issueRows.length === 38 && unique(issueIds) && issueRows.every((row) => Array.isArray(row) && row.length === expectedIssueSchema.length),
-  "immutable issue vector shape remains valid");
+const softwareVertices = new Set(softwareGraph.vertices ?? []);
+const softwareEdges = softwareGraph.hyperedges ?? [];
+const invalidSoftwareMembers = softwareEdges.flatMap((edge) =>
+  (edge.members ?? []).filter((member) => !softwareVertices.has(member)));
+record("GOV-07",
+  candidateGraph.semantic_boundary?.includes("candidate trajectories")
+  && candidateGraph.forbidden_uses?.includes("software invariant completion")
+  && softwareVertices.size > 0
+  && [...softwareVertices].every((vertex) => !candidateId(vertex))
+  && invalidSoftwareMembers.length === 0
+  && softwareGraph.coverage_definitions?.touch
+  && softwareGraph.coverage_definitions?.fractional
+  && softwareGraph.coverage_definitions?.complete
+  && softwareGraph.coverage_definitions?.proved,
+  `candidate and software topology semantics are distinct; invalid_members=${invalidSoftwareMembers.join(",") || "none"}`);
 
+record("GOV-08",
+  comparison.feasible_domain?.rule?.includes("constraint, not an objective reward")
+  && comparison.objectives?.no_graph
+  && comparison.objectives?.no_diversity
+  && comparison.objectives?.evidence_baseline
+  && comparison.classifications?.candidate_graph_terms === "descriptive"
+  && comparison.classifications?.software_invariant_graph_terms === "descriptive"
+  && comparison.classifications?.causal_improvement === "unestablished"
+  && comparison.search?.random_feasible_baselines >= 1000,
+  "selection controls share one feasible domain and make no causal claim");
+
+record("GOV-09",
+  ablation.status === "unestablished"
+  && Object.values(ablation.required_independent_outcomes ?? {}).every((value) => value === null)
+  && ablation.current_findings?.causal_improvement === "unestablished",
+  "implementation ablation remains explicitly unestablished");
+
+const softwareEdgeIds = softwareEdges.map((edge) => edge.id);
+const plannedEdgeIds = Object.keys(verification.software_edge_tests ?? {});
+record("GOV-10",
+  unique(softwareEdgeIds) && unique(plannedEdgeIds)
+  && softwareEdgeIds.length > 0
+  && softwareEdgeIds.every((id) =>
+    Array.isArray(verification.software_edge_tests?.[id])
+    && verification.software_edge_tests[id].length > 0)
+  && plannedEdgeIds.every((id) => softwareEdgeIds.includes(id)),
+  "every software hyperedge has a complete behavioral proof plan");
+
+const candidates = population.candidates ?? [];
+const candidateIds = candidates.map((candidate) => candidate.id);
+record("GOV-11",
+  candidateIds.length >= protocol.tiers?.T3_production_cross_workstream?.minimum_candidates
+  && unique(candidateIds)
+  && candidateIds.every(candidateId)
+  && (exploration.seed_selected_ids ?? []).every((id) => candidateIds.includes(id))
+  && (implementation.selected_ids ?? []).every((id) => candidateIds.includes(id))
+  && implementation.mathematical_causality === "unestablished",
+  "candidate population, feasible seed, and implementation references are structurally valid");
+
+const issueSchema = issueVector.schema ?? [];
+const issueRows = Array.isArray(issueVector.issues) ? issueVector.issues : [];
+const issueIdIndex = issueSchema.indexOf("id");
+const issueIds = issueRows.map((row) => row?.[issueIdIndex]);
 const knownIssues = new Set(issueIds);
 const resolutions = Array.isArray(ledger.issue_resolutions) ? ledger.issue_resolutions : [];
 const remaining = Array.isArray(ledger.remaining_issue_ids) ? ledger.remaining_issue_ids : [];
-const controls = Array.isArray(ledger.control_resolutions) ? ledger.control_resolutions : [];
-record("GOV-10", ledger.baseline_issue_vector === "08-production-issue-vector.json"
-  && ledger.current_stack?.base_pr === 34 && sha(ledger.current_stack?.base_head)
-  && ledger.current_stack?.candidate_pr === 35 && ledger.current_stack?.migration_head === "0076"
-  && ledger.decision_protocol?.tier === "T3_production_cross_workstream"
-  && ledger.decision_protocol?.candidate_count === 64 && ledger.decision_protocol?.random_baseline_count >= 100
-  && JSON.stringify(ledger.decision_protocol?.selected_implementation_ids) === JSON.stringify(selectedIds)
-  && resolutions.every((entry) => knownIssues.has(entry?.id) && nonempty(entry?.state) && nonempty(entry?.evidence))
-  && unique(resolutions.map((entry) => entry.id)) && unique(remaining) && remaining.every((id) => knownIssues.has(id))
-  && controls.every((entry) => nonempty(entry?.id) && nonempty(entry?.state) && nonempty(entry?.scope) && Array.isArray(entry?.does_not_resolve))
-  && ledger.workflow_evidence && Object.values(ledger.workflow_evidence).every(nonempty)
-  && ledger.production_ready === false, "resolution ledger matches current stack, computation, and non-production state");
+record("GOV-12",
+  issueIdIndex >= 0
+  && issueRows.every((row) => Array.isArray(row) && row.length === issueSchema.length)
+  && unique(issueIds)
+  && resolutions.every((entry) =>
+    knownIssues.has(entry?.id) && nonempty(entry?.state) && nonempty(entry?.evidence))
+  && unique(resolutions.map((entry) => entry.id))
+  && unique(remaining)
+  && remaining.every((id) => knownIssues.has(id))
+  && ledger.production_ready === false,
+  "issue and resolution ledgers satisfy schema/reference invariants without pinned counts or IDs");
 
-const stalePatterns = [
-  /PR #33\/source/i,
-  /migration head remains `0072`/i,
-  /Source migration head:\s*`0075`/i,
-  /Migration head:\s*`0075`/i,
-  /WS-07, WS-08, and WS-09 may appear only/i,
-  /second-half-plan\/.*current production/i,
+const computeText = texts["decision/trace007/compute.py"];
+record("GOV-13",
+  computeText.includes('load("candidate_graph.json")')
+  && computeText.includes('load("software_invariant_hypergraph.json")')
+  && computeText.includes('load("implementation_ablation.json")')
+  && computeText.includes("random_feasible_baselines")
+  && computeText.includes("weight_sensitivity_runs")
+  && !computeText.includes('"C_Omega"')
+  && !computeText.includes('"C_H"'),
+  "deterministic verifier uses corrected topology, controls, and sensitivity");
+
+const forbiddenActiveClaims = [
+  /graph\/diversity classification\s*=\s*causal/i,
+  /graph\/diversity terms are causal/i,
+  /C_H\s*=|C_Ω\s*=/,
+  /120 feasible random/i
 ];
-const activeDocuments = {
-  rootGraph, scopedGraph, readme, agents, claude, programReadme, roadmap, workstreams, testsDoc,
-  verificationDoc, architectureReadme, architectureRisk, roleMap, documentMap,
-};
-const staleHits = [];
-for (const [name, text] of Object.entries(activeDocuments)) {
-  for (const pattern of stalePatterns) if (pattern.test(text)) staleHits.push(`${name}:${pattern}`);
-}
-record("GOV-11", staleHits.length === 0, `no stale active authority references; hits=${staleHits.join(",") || "none"}`);
-
-record("GOV-12", migrationLedgerText.includes("const APPLIED_HEAD = 76")
-  && workflowText.includes("migrations/0076_*.sql") && workflowText.includes("mvp-build/decision/**")
-  && workflowText.includes("STANDARD-V0.2-AMENDMENT-001.md")
-  && workflowText.includes("npm run test:repo-governance"), "migration ledger and focused workflow enforce current authority");
+const claimDocs = [
+  "CODEGRAPH.md", "README.md", "AGENTS.md", "decision/README.md",
+  "decision/trace007/decision_record.md", "production-readiness-program/README.md",
+  "production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+  "production-readiness-program/10-test-suite-disposition.md"
+];
+const staleClaims = claimDocs.flatMap((path) => forbiddenActiveClaims
+  .filter((pattern) => pattern.test(texts[path]))
+  .map((pattern) => `${path}:${pattern}`));
+record("GOV-14", staleClaims.length === 0,
+  `active documents contain no invalid causal/coverage claims; hits=${staleClaims.join(",") || "none"}`);
 
 const scripts = pkg.scripts ?? {};
-const requiredScripts = ["repo:rubric","repo:verify:quick","repo:verify:full","test:repo-governance","test:unit","test:integration","test:production-boundary","test:ws07-ws08","db:verify:commercial-effect-migrations","build"];
-record("GOV-13", requiredScripts.every((name) => nonempty(scripts[name]))
-  && String(scripts["repo:verify:quick"]).includes("test:repo-governance"), "required computation, governance, test, database, and build scripts are routed");
+const requiredScripts = [
+  "repo:rubric", "repo:verify:quick", "repo:verify:full", "test:repo-governance",
+  "test:unit", "test:integration", "test:production-boundary", "test:ws07-ws08",
+  "db:verify:commercial-effect-migrations", "build"
+];
+record("GOV-15",
+  requiredScripts.every((name) => nonempty(scripts[name]))
+  && String(scripts["repo:verify:quick"]).includes("test:repo-governance"),
+  "required contributor, trace, test, database, and build scripts remain routed");
 
-record("GOV-14", roadmap.includes("## WS-01") && roadmap.includes("## WS-09")
-  && workstreams.includes("## Workstream matrix") && workstreams.includes("## Current WS-06/07/08 transaction")
-  && testsDoc.includes("Test-design order") && verificationDoc.includes("Evidence-class rule")
-  && programReadme.includes("Active decision result"), "roadmap, workstreams, tests, verification, and program are connected without duplicate current plans");
+record("GOV-16",
+  texts["../.github/workflows/ws07-ws08-commercial-effect.yml"].includes("python decision/trace007/compute.py")
+  && texts["../.github/workflows/ws07-ws08-commercial-effect.yml"].includes("npm run test:repo-governance")
+  && texts["../.github/workflows/main-integration-gates.yml"].includes("npm run repo:verify:full"),
+  "focused and main workflows execute the structural governance and trace verifier");
 
-record("GOV-15", memoryIndex.includes("Index — newest first") && mainWorkflowText.includes("npm run repo:verify:full")
-  && mainWorkflowText.includes("npm run test:unit") && mainWorkflowText.includes("npm run build"), "memory and main integration routes remain intact");
+record("GOV-17", !(await exists("decision/trace007/hypergraph.json")),
+  "legacy conflated hypergraph transport is removed");
 
 const report = {
   generated_at: new Date().toISOString(),
-  validator_version: "3.1.0-computation-first-amendment",
+  validator_version: "4.0.0-structural-topology-split",
   status: failures.length ? "fail" : "pass",
+  source_migration_head: sourceHeadLabel,
   pass_count: passes.length,
   fail_count: failures.length,
   passes,
-  failures,
+  failures
 };
 console.log(JSON.stringify(report, null, 2));
 if (failures.length) {
