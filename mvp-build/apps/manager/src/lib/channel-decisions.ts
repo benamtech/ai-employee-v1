@@ -22,6 +22,7 @@ export interface SmsDecisionContext {
 interface CurrentHumanPrincipal {
   human_principal_id: string;
   role: string;
+  roles: string[];
   policy_version: string;
 }
 
@@ -32,10 +33,22 @@ function currentAt(row: { status?: string | null; starts_at?: string | null; end
   return true;
 }
 
+function selectRole(rows: Array<{ role?: unknown; policy_version?: unknown }>, allowedRoles?: readonly string[]) {
+  const order = new Map((allowedRoles ?? []).map((role, index) => [role, index]));
+  return [...rows].sort((a, b) => {
+    const aRole = String(a.role ?? "");
+    const bRole = String(b.role ?? "");
+    const aRank = order.has(aRole) ? order.get(aRole)! : Number.MAX_SAFE_INTEGER;
+    const bRank = order.has(bRole) ? order.get(bRole)! : Number.MAX_SAFE_INTEGER;
+    return aRank - bRank || aRole.localeCompare(bRole);
+  })[0];
+}
+
 async function currentAssignmentHuman(db: SupabaseClient, input: {
   assignment_id: string;
   human_principal_id: string;
   allowed_roles?: readonly string[];
+  policy_version?: string | null;
 }): Promise<CurrentHumanPrincipal | null> {
   let query = db.from("assignment_principals")
     .select("principal_id,role,status,starts_at,ends_at,policy_version")
@@ -43,28 +56,34 @@ async function currentAssignmentHuman(db: SupabaseClient, input: {
     .eq("principal_class", "human")
     .eq("principal_id", input.human_principal_id);
   if (input.allowed_roles?.length) query = query.in("role", [...input.allowed_roles]);
+  if (input.policy_version) query = query.eq("policy_version", input.policy_version);
   const result = await query;
   if (result.error) throw result.error;
   const rows = (result.data ?? []).filter((row) => currentAt(row));
-  if (rows.length !== 1) return null;
+  if (!rows.length) return null;
+  const selected = selectRole(rows, input.allowed_roles);
+  if (!selected) return null;
+  const roles = [...new Set(rows.map((row) => String(row.role)))];
   return {
-    human_principal_id: String(rows[0]!.principal_id),
-    role: String(rows[0]!.role),
-    policy_version: String(rows[0]!.policy_version),
+    human_principal_id: input.human_principal_id,
+    role: String(selected.role),
+    roles,
+    policy_version: String(selected.policy_version),
   };
 }
 
 /**
  * Resolve the human behind an assignment-bound SMS session. Phone possession is
  * never enough by itself: the verified phone must map to a current human
- * principal on this exact assignment. A compatibility row may be repaired only
- * when the assignment has one unambiguous eligible human.
+ * principal on this exact assignment. Multiple current roles for the same human
+ * are valid; ambiguity means multiple distinct humans, not multiple role rows.
  */
 export async function resolveSmsHumanPrincipal(db: SupabaseClient, input: {
   account_id: string;
   assignment_id: string;
   phone_e164: string;
   allowed_roles?: readonly string[];
+  policy_version?: string | null;
 }): Promise<CurrentHumanPrincipal> {
   const phoneResult = await db.from("verified_phones")
     .select("id,account_id,phone_e164,human_principal_id,verified_at")
@@ -83,6 +102,7 @@ export async function resolveSmsHumanPrincipal(db: SupabaseClient, input: {
       assignment_id: input.assignment_id,
       human_principal_id: String(phone.human_principal_id),
       allowed_roles: input.allowed_roles,
+      policy_version: input.policy_version,
     });
     if (!current) throw new Error("sms_human_principal_not_current_for_assignment");
     return current;
@@ -93,6 +113,7 @@ export async function resolveSmsHumanPrincipal(db: SupabaseClient, input: {
     .eq("assignment_id", input.assignment_id)
     .eq("principal_class", "human");
   if (input.allowed_roles?.length) principalQuery = principalQuery.in("role", [...input.allowed_roles]);
+  if (input.policy_version) principalQuery = principalQuery.eq("policy_version", input.policy_version);
   const principalsResult = await principalQuery;
   if (principalsResult.error) throw principalsResult.error;
   const currentRows = (principalsResult.data ?? []).filter((row) => currentAt(row));
@@ -104,6 +125,7 @@ export async function resolveSmsHumanPrincipal(db: SupabaseClient, input: {
     assignment_id: input.assignment_id,
     human_principal_id: distinct[0]!,
     allowed_roles: input.allowed_roles,
+    policy_version: input.policy_version,
   });
   if (!current) throw new Error("sms_human_principal_not_current_for_assignment");
 
@@ -137,8 +159,8 @@ export async function openSmsApprovalDecisionContext(db: SupabaseClient, input: 
     assignment_id: approval.assignment_id,
     phone_e164: input.owner_phone_e164,
     allowed_roles: approval.required_resolver_roles,
+    policy_version: approval.policy_version,
   });
-  if (human.policy_version !== approval.policy_version) throw new Error("sms_decision_policy_version_mismatch");
 
   const prompt = await db.from("employee_messages")
     .select("id,assignment_id,account_id,employee_id,direction,channel")
@@ -185,6 +207,7 @@ export async function openSmsApprovalDecisionContext(db: SupabaseClient, input: 
       approval_snapshot_hash: approval.snapshot_hash,
       action_key: approval.action_key,
       resolver_role: human.role,
+      resolver_roles: human.roles,
       natural_language_surface: true,
       code_challenge_required: false,
     },
@@ -232,7 +255,7 @@ export async function loadSmsDecisionContextForTurn(db: SupabaseClient, input: {
   phone_e164: string;
   owner_message_id: string;
 }): Promise<SmsDecisionContext | null> {
-  const human = await resolveSmsHumanPrincipal(db, {
+  const identity = await resolveSmsHumanPrincipal(db, {
     account_id: input.account_id,
     assignment_id: input.assignment_id,
     phone_e164: input.phone_e164,
@@ -244,7 +267,7 @@ export async function loadSmsDecisionContextForTurn(db: SupabaseClient, input: {
     .eq("account_id", input.account_id)
     .eq("employee_id", input.employee_id)
     .eq("channel", "sms")
-    .eq("human_principal_id", human.human_principal_id)
+    .eq("human_principal_id", identity.human_principal_id)
     .eq("status", "open")
     .gt("expires_at", new Date().toISOString())
     .order("created_at", { ascending: false })
@@ -254,7 +277,7 @@ export async function loadSmsDecisionContextForTurn(db: SupabaseClient, input: {
 
   const messageUpdateBase = {
     account_id: input.account_id,
-    human_principal_id: human.human_principal_id,
+    human_principal_id: identity.human_principal_id,
   };
   const row = contexts.data?.[0];
   if (!row?.id) {
@@ -278,9 +301,13 @@ export async function loadSmsDecisionContextForTurn(db: SupabaseClient, input: {
     if (updated.error) throw updated.error;
     return null;
   }
-  if (!approval.required_resolver_roles.includes(human.role) || approval.policy_version !== human.policy_version) {
-    throw new Error("sms_decision_resolver_no_longer_authorized");
-  }
+  const authorizedHuman = await currentAssignmentHuman(db, {
+    assignment_id: input.assignment_id,
+    human_principal_id: identity.human_principal_id,
+    allowed_roles: approval.required_resolver_roles,
+    policy_version: approval.policy_version,
+  });
+  if (!authorizedHuman) throw new Error("sms_decision_resolver_no_longer_authorized");
 
   const updated = await db.from("employee_messages").update({
     ...messageUpdateBase,
@@ -291,6 +318,7 @@ export async function loadSmsDecisionContextForTurn(db: SupabaseClient, input: {
       summary: approval.summary,
       snapshot_hash: approval.snapshot_hash,
       expires_at: approval.expires_at,
+      resolver_role: authorizedHuman.role,
     },
   }).eq("id", input.owner_message_id).eq("assignment_id", input.assignment_id);
   if (updated.error) throw updated.error;
@@ -301,7 +329,7 @@ export async function loadSmsDecisionContextForTurn(db: SupabaseClient, input: {
     account_id: approval.account_id,
     employee_id: approval.employee_id,
     assignment_id: approval.assignment_id,
-    human_principal_id: human.human_principal_id,
+    human_principal_id: identity.human_principal_id,
     owner_message_id: input.owner_message_id,
     action_key: approval.action_key,
     summary: approval.summary,
