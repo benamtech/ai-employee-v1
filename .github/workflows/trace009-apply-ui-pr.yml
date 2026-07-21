@@ -43,16 +43,19 @@ jobs:
           path: trace009-ui-transform.log
           if-no-files-found: error
           retention-days: 3
-      - name: Commit exact derived changes
+      - name: Retain exact transformed source
+        uses: actions/upload-artifact@v4
+        with:
+          name: trace009-ui-source-${{ github.event.pull_request.head.sha }}
+          path: |
+            mvp-build/apps/web/app/agent/[employeeId]/AgentSurface.tsx
+            mvp-build/apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx
+            mvp-build/validation/ui-presentation-coverage.json
+          if-no-files-found: error
+          retention-days: 3
+      - name: Validate derived diff
         run: |
           set -euo pipefail
-          git config user.name "amtech-trace-bot"
-          git config user.email "actions@users.noreply.github.com"
           git add mvp-build/apps/web/app/agent mvp-build/apps/web/app/ui-lab mvp-build/validation/ui-presentation-coverage.json
           git diff --cached --check
-          if git diff --cached --quiet; then
-            echo "Trace009 UI consolidation already applied."
-            exit 0
-          fi
-          git commit -m "ui(trace009): consolidate production projection path"
-          git push origin HEAD:agent/ws08-ws09-production
+          git diff --cached --stat
