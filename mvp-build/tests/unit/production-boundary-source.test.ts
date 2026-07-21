@@ -175,7 +175,11 @@ describe("owner session containment", () => {
     expect(stream).not.toContain("encodeURIComponent(token)");
 
     expect(managerServer).toContain('c.req.header("X-AMTECH-Owner-Session")');
-    expect(managerServer).toContain('"owner_stream_session_header"');
+    expect(managerServer).toContain('action: "stream:read"');
+    expect(managerServer).toContain("const assignmentId = authority.assignment.assignment_id");
+    expect(managerServer).toContain("subscribeProgress({");
+    expect(managerServer).toContain("assignment_id: assignmentId");
+    expect(managerServer).not.toContain("owner_session_token=");
     expect(managerServer).not.toContain("server.generated");
   });
 });
