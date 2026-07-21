@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
+const activeRoots = ["apps/web/app/agent", "apps/web/app/ui-lab", "apps/manager/src/lib", "packages/shared/src"];
+const files = activeRoots.flatMap((entry) => walk(resolve(root, entry)))
+  .filter((path) => /\.(ts|tsx|mjs)$/.test(path));
+const rel = (path) => relative(root, path).replaceAll("\\", "/");
+const text = (path) => readFileSync(resolve(root, path), "utf8");
+const activeText = files
+  .filter((path) => !rel(path).endsWith("/FixtureLabClient.tsx"))
+  .map((path) => ({ path: rel(path), value: readFileSync(path, "utf8") }));
+
+function walk(path) {
+  if (!statSync(path).isDirectory()) return [path];
+  return readdirSync(path).flatMap((name) => walk(join(path, name)));
+}
+function definitions(pattern) {
+  return activeText.filter(({ value }) => pattern.test(value)).map(({ path }) => path);
+}
+function requireExactly(label, values, count = 1) {
+  if (values.length !== count) throw new Error(`${label}:expected_${count}:found_${values.length}:${values.join(",")}`);
+  console.log(`PASS ${label} ${values.join(",")}`);
+}
+function requireText(path, pattern, label) {
+  if (!pattern.test(text(path))) throw new Error(`${label}:${path}`);
+  console.log(`PASS ${label} ${path}`);
+}
+function forbidActive(pattern, label) {
+  const found = activeText.filter(({ value }) => pattern.test(value)).map(({ path }) => path);
+  if (found.length) throw new Error(`${label}:${found.join(",")}`);
+  console.log(`PASS ${label}`);
+}
+
+requireExactly("one_projection_controller", definitions(/export function openOwnerProjectionController\(/));
+requireExactly("one_semantic_compiler", definitions(/export function compileOperatingProjection\(/));
+requireExactly("one_layout_planner", definitions(/export function planAdaptiveOperatingLayoutV2\(/));
+requireExactly("one_renderer_registry", definitions(/export function registeredOperatingRegions\(/));
+requireExactly("one_work_resource_renderer", definitions(/export function WorkObjectRenderer\(/));
+requireExactly("one_embedded_view_compiler", definitions(/export function compileDeliverableUiResource\(/));
+
+requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /openOwnerProjectionController/, "workspace_uses_controller");
+requireText("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", /openOwnerProjectionController/, "talk_uses_controller");
+requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /compileOperatingProjection/, "workspace_uses_compiler");
+requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /registeredOperatingRegions/, "workspace_uses_registry");
+requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /ProductionFixtureLabClient/, "ui_lab_routes_to_thin_shell");
+requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /<AgentSurface[\s\S]*fixturePayload=/, "ui_lab_reuses_production_surface");
+requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /fixture_demonstration|Fixture truth/, "ui_lab_evidence_class_explicit");
+
+forbidActive(/new EventSource\(/, "no_surface_local_eventsource");
+forbidActive(/function fallbackOperatingState\(/, "no_active_fallback_compiler");
+forbidActive(/function deriveOperatingState\(/, "no_active_lab_compiler");
+requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /ProductionFixtureLabClient/, "legacy_lab_isolated_from_route");
+
+console.log(JSON.stringify({ status: "ok", checked_files: activeText.length, legacy_fixture_lab: "isolated_not_routed" }, null, 2));
