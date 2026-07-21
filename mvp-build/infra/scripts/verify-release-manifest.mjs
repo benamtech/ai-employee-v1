@@ -37,23 +37,23 @@ if (!verify(null, payloadBytes, publicKey, Buffer.from(manifest.signature.value,
   throw new Error("release_manifest_signature_verification_failed");
 }
 
-function fileDigest(path) {
-  return sha256(readFileSync(resolve(root, path)));
+if (process.env.AMTECH_RELEASE_VERIFY_REPOSITORY !== "0") {
+  const fileDigest = (path) => sha256(readFileSync(resolve(root, path)));
+  const requireDigest = (path, expected, label) => {
+    if (fileDigest(path) !== expected) throw new Error(`release_manifest_file_digest_mismatch:${label}`);
+  };
+  requireDigest(manifest.compose.path, manifest.compose.sha256, "compose");
+  requireDigest("infra/caddy/production.Caddyfile", manifest.configuration.caddyfile_sha256, "caddyfile");
+  requireDigest("infra/scripts/production-topology.mjs", manifest.configuration.topology_sha256, "topology");
+  for (const [name, item] of Object.entries(manifest.configuration.dockerfiles)) {
+    requireDigest(item.path, item.sha256, `dockerfile:${name}`);
+  }
+  const migrationHead = String(Math.max(...readdirSync(resolve(root, "packages/db/migrations"))
+    .map((name) => /^(\d{4})[a-z]?_.*\.sql$/.exec(name))
+    .filter(Boolean)
+    .map((match) => Number(match[1])))).padStart(4, "0");
+  if (migrationHead !== manifest.migration_head) throw new Error("release_manifest_migration_head_mismatch");
 }
-function requireDigest(path, expected, label) {
-  if (fileDigest(path) !== expected) throw new Error(`release_manifest_file_digest_mismatch:${label}`);
-}
-requireDigest(manifest.compose.path, manifest.compose.sha256, "compose");
-requireDigest("infra/caddy/production.Caddyfile", manifest.configuration.caddyfile_sha256, "caddyfile");
-requireDigest("infra/scripts/production-topology.mjs", manifest.configuration.topology_sha256, "topology");
-for (const [name, item] of Object.entries(manifest.configuration.dockerfiles)) {
-  requireDigest(item.path, item.sha256, `dockerfile:${name}`);
-}
-const migrationHead = String(Math.max(...readdirSync(resolve(root, "packages/db/migrations"))
-  .map((name) => /^(\d{4})[a-z]?_.*\.sql$/.exec(name))
-  .filter(Boolean)
-  .map((match) => Number(match[1])))).padStart(4, "0");
-if (migrationHead !== manifest.migration_head) throw new Error("release_manifest_migration_head_mismatch");
 
 if (process.env.AMTECH_RELEASE_VERIFY_LOCAL_IMAGES !== "0") {
   for (const service of RELEASE_SERVICES) {
@@ -76,5 +76,7 @@ console.log(JSON.stringify({
   image_count: RELEASE_SERVICES.length,
   payload_digest: manifest.payload_digest,
   public_key_fingerprint: fingerprint,
+  repository_verified: process.env.AMTECH_RELEASE_VERIFY_REPOSITORY !== "0",
+  local_images_verified: process.env.AMTECH_RELEASE_VERIFY_LOCAL_IMAGES !== "0",
   trust_note: expectedFingerprint ? "matched_external_fingerprint" : "cryptographic_integrity_only",
 }, null, 2));
