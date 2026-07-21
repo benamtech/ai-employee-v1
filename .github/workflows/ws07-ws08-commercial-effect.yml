@@ -15,7 +15,7 @@ on:
       - ".github/workflows/ws07-ws08-commercial-effect.yml"
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -87,8 +87,6 @@ jobs:
           echo "candidate_sha=$CANDIDATE_SHA"
           echo "== structural repository governance =="
           npm run test:repo-governance
-          echo "== canonical production source generation =="
-          npm run generate:production-sources
           echo "== all workspace typechecks =="
           npm run typecheck
           echo "== focused WS01 migration-ledger boundary =="
@@ -110,36 +108,6 @@ jobs:
           path: mvp-build/source-and-unit.log
           if-no-files-found: error
           retention-days: 14
-      - name: Retain generated Manager source for typed composition
-        if: always()
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: manager-generated-source-${{ env.CANDIDATE_SHA }}
-          path: mvp-build/apps/manager/src/server.generated.ts
-          if-no-files-found: error
-          retention-days: 2
-      - name: Promote exact Manager output for typed-source migration
-        if: steps.source-matrix.outcome == 'success'
-        run: |
-          set -euo pipefail
-          if test -f apps/manager/src/server.promoted.ts; then
-            echo "promoted Manager source already exists"
-            exit 0
-          fi
-          {
-            echo "// Canonical typed Manager server source."
-            echo "// Promoted from the exact generated output after WS01-WS07 verification."
-            echo
-            tail -n +5 apps/manager/src/server.generated.ts
-          } > apps/manager/src/server.promoted.ts
-          git config user.name "amtech-ci"
-          git config user.email "actions@users.noreply.github.com"
-          git add -f apps/manager/src/server.promoted.ts
-          git commit -m "WS01 promote exact Manager source for typed composition"
-          target_branch="${GITHUB_HEAD_REF:-agent/ws06-ws07-production}"
-          git push origin "HEAD:${target_branch}"
-        working-directory: mvp-build
       - name: Enforce source and unit result
         if: steps.source-matrix.outcome == 'failure'
         run: exit 1
@@ -262,7 +230,7 @@ jobs:
           create table if not exists storage.objects (
             id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id), name text not null,
             owner uuid, metadata jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
-            last_accessed_at timestamptz not null default now(), unique(bucket_id, name)
+            last_accessed_at timestamptz not null default now(), unique(bucket_id,name)
           );
           SQL
           echo "== apply immutable migration ledger =="
