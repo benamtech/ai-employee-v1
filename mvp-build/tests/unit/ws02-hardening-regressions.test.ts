@@ -61,10 +61,11 @@ describe("WS-02 hardening regressions", () => {
     expect(source).not.toContain("authority_version_matches: true");
   });
 
-  it("requires the generated Manager server to reject stale projected actions", async () => {
-    const source = await readFile("apps/manager/scripts/patch-production-stream.mjs", "utf8");
+  it("requires the typed Manager server to reject stale projected actions", async () => {
+    const source = await readFile("apps/manager/src/server.ts", "utf8");
     expect(source).toContain("protocol_assignment_mismatch");
     expect(source).toContain("protocol_authority_version_stale");
     expect(source).toContain("protocol_authority_incomplete");
+    expect(source).toContain("authorizeOwnerAssignment");
   });
 });
