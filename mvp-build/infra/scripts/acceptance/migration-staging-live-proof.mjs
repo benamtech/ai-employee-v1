@@ -2,9 +2,11 @@
 import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { inspectRepositoryMigrationLedger } from "../../../packages/db/migration-ledger.mjs";
 import { requireEnv, run, writeProof, assert } from "./production-proof-lib.mjs";
 
-const migrationHead = "0076";
+const migrationLedger = inspectRepositoryMigrationLedger();
+const migrationHead = String(migrationLedger.appliedHead).padStart(4, "0");
 const migrationStart = "0032";
 const migrationsDir = "packages/db/migrations";
 
@@ -28,6 +30,12 @@ const files = (await readdir(migrationsDir))
 assert(files.length > 0, "migration_proof_range_empty", { migrationStart, migrationHead });
 assert(files[0].startsWith(`${migrationStart}_`), "migration_proof_start_missing", { first: files[0] });
 assert(files.at(-1)?.startsWith(`${migrationHead}_`), "migration_proof_head_missing", { last: files.at(-1) });
+assert(
+  files.filter((file) => file.slice(0, 4) === migrationHead).length
+    === migrationLedger.entries.filter((entry) => entry.number === migrationLedger.appliedHead).length,
+  "migration_proof_head_file_count_mismatch",
+  { migrationHead },
+);
 
 const status = run("node", ["packages/db/migrate.mjs", "--status"], {
   env: databaseEnv,
@@ -48,6 +56,7 @@ await writeProof("migration-staging", "passed", {
   database_ref: process.env.STAGING_SUPABASE_PROJECT_REF ?? "database-url-only",
   migration_start: migrationStart,
   migration_head: migrationHead,
+  migration_ledger_sha256: migrationLedger.ledgerSha256,
   migration_count: migrations.length,
   migrations,
   worker_verifier_tail: workerResult.output.split("\n").slice(-20),
