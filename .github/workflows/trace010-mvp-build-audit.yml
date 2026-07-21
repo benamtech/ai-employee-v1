@@ -32,6 +32,8 @@ jobs:
           node mvp-build/decision/trace010/verify_inventory.mjs \
             mvp-build/decision/trace010/generated \
             | tee mvp-build/decision/trace010/generated/verification.json
+          node mvp-build/decision/trace010/write_tree_identity.mjs \
+            mvp-build/decision/trace010/generated
 
       - name: Archive immutable starting repository
         run: |
