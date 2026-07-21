@@ -9,11 +9,13 @@ Updated: 2026-07-20
 
 1. Read root [`../CONTRIBUTING.md`](../CONTRIBUTING.md), [`../AGENTS.md`](../AGENTS.md) or [`../CLAUDE.md`](../CLAUDE.md), and [`../CODEGRAPH.md`](../CODEGRAPH.md).
 2. Read scoped [`AGENTS.md`](AGENTS.md) or [`CLAUDE.md`](CLAUDE.md), then [`CODEGRAPH.md`](CODEGRAPH.md).
-3. Read ratified [`STANDARD.md`](STANDARD.md).
+3. Read ratified [`STANDARD.md`](STANDARD.md) plus [`STANDARD-V0.2-AMENDMENT-001.md`](STANDARD-V0.2-AMENDMENT-001.md).
 4. Read mandatory [`decision/README.md`](decision/README.md) and [`decision/protocol-v1.json`](decision/protocol-v1.json).
 5. Read [`production-readiness-program/README.md`](production-readiness-program/README.md).
 6. For WS-06/07/08, read the current transaction and [`decision/trace007/`](decision/trace007/).
 7. Read only the newest relevant indexed handoff and exact source/test/proof needed for the task.
+
+The amendment controls where the base Standard still shows the superseded execution loop, old document-family routing, migration `0072`, or the earlier source map.
 
 ```bash
 npm ci
@@ -42,7 +44,7 @@ Computation precedes non-mechanical planning and implementation but does not pro
 - PR #34 exact head `e04ace7bd6fafa9e2eadaeec3f04e70043513e3a` is the stacked owner-runtime base.
 - PR #35 is the WS-06/07 source candidate with bounded WS-08 repair/lineage/observability groundwork.
 - Source migration head is `0076`; applied/platform acceptance requires separate proof.
-- Standard v0.2 remains ratified.
+- Standard v0.2 plus Amendment 001 are effective.
 - Active computation protocol: `decision/README.md`.
 - Active production program: `production-readiness-program/`.
 - Active WS-06/07/08 trace: `decision/trace007/`.
@@ -87,6 +89,7 @@ Do not flatten defect, feature, user, operator, architecture, protocol, commerci
 
 ## Active production-readiness route
 
+- `STANDARD.md` plus `STANDARD-V0.2-AMENDMENT-001.md` — ratified normative requirements.
 - `decision/README.md` — computation-first contract.
 - `production-readiness-program/04-dependency-ordered-production-plan.md` — dependency order.
 - `production-readiness-program/08-production-issue-vector.json` — issue baseline.
@@ -134,7 +137,7 @@ Routine database engineering uses production-shaped local/CI PostgreSQL. Disposa
 | File/folder | Responsibility |
 |---|---|
 | `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md` | contributor behavior and executable gates |
-| `STANDARD.md` | ratified normative requirements |
+| `STANDARD.md`, `STANDARD-V0.2-AMENDMENT-001.md` | ratified normative requirements and current additive amendment |
 | `decision/README.md`, `decision/protocol-v1.json` | computation-first decision contract |
 | `CODEGRAPH.md` | current topology and evidence boundary |
 | `production-readiness-program/` | current dependency order, workstreams, issues, transactions, tests, evidence |
@@ -154,7 +157,7 @@ packages/db/                    forward migrations, clients, generated types
 infra/                          topology, deploy, lifecycle, acceptance, release operations
 tests/                          unit behavioral, PostgreSQL integration, browser matrices
 decision/                       protocol, active/historical computed traces
-validation/                     Standard, rubric, upstream, evidence artifacts
+validation/                     Standard evolution, amendment, rubric, upstream, evidence artifacts
 docs/architecture/              current cross-system explanation
 memory/                         durable handoffs; MEMORY.md is sole index
 production-readiness-program/   single active production program
