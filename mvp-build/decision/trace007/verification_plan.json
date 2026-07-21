@@ -1,1 +1,84 @@
-{"schema":"amtech.trace007.verification_plan.v1","red_first":["tests/unit/ws07-commercial-admission.test.ts","tests/unit/ws06-ws08-failure-manifold.test.ts","tests/integration/ws07-commercial-ledger.test.ts"],"affected":["test:production-boundary","integration approval/commercial/artifact suites"],"broad":["test:unit","typecheck","lint","build","repo:verify:quick"],"acceptance":["golden website","golden contractor","golden bookkeeping","browser owner proof refinding"],"evidence_classes":["source established","unit established","integration established","CI established","live provider established","managed database established","target-host established","pilot established","production established"],"promotion_rule":"No evidence class promotes into another."}
+{
+  "schema": "amtech.trace007.verification-plan.v2",
+  "rule": "Every software-invariant hyperedge has a complete behavioral proof plan. A plan is not accepted proof until the exact candidate executes it successfully.",
+  "software_edge_tests": {
+    "SI-01": [
+      "tests/unit/ws06-ws08-failure-manifold.test.ts",
+      "tests/unit/artifact-workbench-contract.test.ts"
+    ],
+    "SI-02": [
+      "tests/unit/ws07-commercial-admission.test.ts",
+      "tests/integration/ws07-commercial-ledger.test.ts"
+    ],
+    "SI-03": [
+      "tests/unit/model-gateway-http-isolation.test.ts",
+      "tests/unit/ws06-ws08-failure-manifold.test.ts"
+    ],
+    "SI-04": [
+      "tests/unit/ws07-commercial-admission.test.ts",
+      "tests/integration/ws07-commercial-ledger.test.ts"
+    ],
+    "SI-05": [
+      "tests/unit/artifact-workbench-contract.test.ts",
+      "acceptance:golden:website",
+      "acceptance:golden:contractor",
+      "acceptance:golden:bookkeeping"
+    ],
+    "SI-06": [
+      "tests/unit/model-gateway-http-isolation.test.ts",
+      "tests/unit/ws06-ws08-failure-manifold.test.ts",
+      "tests/integration/ws07-commercial-ledger.test.ts"
+    ],
+    "SI-07": [
+      "tests/unit/ws06-ws08-failure-manifold.test.ts",
+      "tests/unit/artifact-workbench-contract.test.ts",
+      "browser owner proof refinding"
+    ],
+    "SI-08": [
+      "tests/unit/ws07-commercial-admission.test.ts",
+      "tests/integration/ws07-commercial-ledger.test.ts"
+    ]
+  },
+  "narrow": [
+    "python decision/trace007/compute.py",
+    "tests/unit/ws07-commercial-admission.test.ts",
+    "tests/unit/ws06-ws08-failure-manifold.test.ts",
+    "tests/unit/model-gateway-http-isolation.test.ts",
+    "tests/unit/artifact-workbench-contract.test.ts",
+    "tests/integration/ws07-commercial-ledger.test.ts"
+  ],
+  "affected": [
+    "test:production-boundary",
+    "db:verify:commercial-effect-migrations",
+    "repo:verify:quick"
+  ],
+  "broad": [
+    "repo:verify:full",
+    "test:unit",
+    "test:integration",
+    "build"
+  ],
+  "external": [
+    "managed database",
+    "provider accepted-response-loss reconciliation",
+    "fixture-free golden journeys",
+    "owner proof refinding after restart",
+    "target-host recovery and signed release"
+  ],
+  "evidence_classes": [
+    "decision reproducibility",
+    "source",
+    "unit",
+    "integration",
+    "exact-head CI",
+    "managed database",
+    "provider",
+    "browser/channel",
+    "target host",
+    "commercial lifecycle",
+    "signed release",
+    "pilot",
+    "production"
+  ],
+  "promotion_rule": "No evidence class promotes into another. software_invariant_hypergraph.json proof_status remains unestablished until exact accepted evidence is attached."
+}
