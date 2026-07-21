@@ -1,9 +1,10 @@
 -- ============================================================================
 -- AMTECH WS-02/WS-06 — provider-neutral connector operating substrate
 --
--- One forward-only lifecycle for native OAuth/provider onboarding, verified
--- webhook connectors, remote MCP, and managed credentials. Connection discovery,
--- revoke, capability projection, and SMS step-up remain assignment-scoped.
+-- One lifecycle for AMTECH-managed OAuth/provider onboarding, guided credentials,
+-- verified webhook connectors, remote MCP, and operator-managed systems.
+-- SMS remains a normal assignment-bound owner session. Natural-language owner
+-- decisions bind to one exact approval context; no per-message challenge exists.
 -- ============================================================================
 
 begin;
@@ -11,15 +12,20 @@ begin;
 alter table verified_phones
   add column if not exists human_principal_id text references human_principals(id) on delete set null;
 
--- Backfill only when the account has exactly one current owner human principal.
+-- Compatibility backfill is allowed only when every current owner assignment for
+-- the account points to one distinct human principal. Ambiguity remains null.
 with unique_owner as (
-  select am.account_id, min(hp.id) as human_principal_id
-    from account_memberships am
-    join users u on u.id = am.user_id
-    join human_principals hp on hp.user_id = u.id and hp.status = 'active'
-   where am.role = 'owner'
-   group by am.account_id
-  having count(*) = 1
+  select ea.account_id, min(ap.principal_id) as human_principal_id
+    from employee_assignments ea
+    join assignment_principals ap
+      on ap.assignment_id = ea.id
+     and ap.principal_class = 'human'
+     and ap.role = 'owner'
+     and amtech_relationship_current(ap.status, ap.starts_at, ap.ends_at)
+    join human_principals hp on hp.id = ap.principal_id and hp.status = 'active'
+   where amtech_relationship_current(ea.status, ea.starts_at, ea.ends_at)
+   group by ea.account_id
+  having count(distinct ap.principal_id) = 1
 )
 update verified_phones vp
    set human_principal_id = uo.human_principal_id
@@ -57,29 +63,29 @@ alter table connector_bindings
   check (discovery_state in ('pending','complete','degraded','revoked'));
 
 create table if not exists connector_capability_projections (
-  id                         text primary key,
-  connector_binding_id       text not null references connector_bindings(id) on delete cascade,
-  assignment_id              text not null references employee_assignments(id) on delete cascade,
-  account_id                 text not null references accounts(id) on delete cascade,
-  employee_id                text not null references employees(id) on delete cascade,
-  provider                   text not null,
-  connector_key              text not null,
-  capability_key             text not null,
-  label                      text not null,
-  category                   text not null,
-  effect_class               text not null
-                             check (effect_class in ('read','internal_write','customer_facing','money_movement')),
-  verification_requirement   text not null
-                             check (verification_requirement in ('owner_session','sms_step_up','sms_and_owner_session')),
-  event_driven               boolean not null default false,
-  status                     text not null default 'discovered'
-                             check (status in ('discovered','ready','degraded','revoked')),
-  manifest_revision          text not null,
-  evidence                   jsonb not null default '{}'::jsonb,
-  discovered_at              timestamptz not null default now(),
-  last_verified_at           timestamptz,
-  revoked_at                 timestamptz,
-  updated_at                 timestamptz not null default now(),
+  id                       text primary key,
+  connector_binding_id     text not null references connector_bindings(id) on delete cascade,
+  assignment_id            text not null references employee_assignments(id) on delete cascade,
+  account_id               text not null references accounts(id) on delete cascade,
+  employee_id              text not null references employees(id) on delete cascade,
+  provider                 text not null,
+  connector_key            text not null,
+  capability_key           text not null,
+  label                    text not null,
+  category                 text not null,
+  effect_class             text not null
+                           check (effect_class in ('read','internal_write','customer_facing','money_movement')),
+  approval_interaction     text not null
+                           check (approval_interaction in ('none','conversational','explicit','typed_confirmation')),
+  event_driven             boolean not null default false,
+  status                   text not null default 'discovered'
+                           check (status in ('discovered','ready','degraded','revoked')),
+  manifest_revision        text not null,
+  evidence                 jsonb not null default '{}'::jsonb,
+  discovered_at            timestamptz not null default now(),
+  last_verified_at         timestamptz,
+  revoked_at               timestamptz,
+  updated_at               timestamptz not null default now(),
   unique (connector_binding_id, capability_key)
 );
 
@@ -106,49 +112,97 @@ create table if not exists connector_lifecycle_events (
 create index if not exists connector_lifecycle_events_scope_idx
   on connector_lifecycle_events(assignment_id, created_at desc, id desc);
 
-create table if not exists action_verification_challenges (
+create table if not exists connector_setup_intents (
   id                         text primary key,
+  assignment_id              text not null references employee_assignments(id) on delete cascade,
   account_id                 text not null references accounts(id) on delete cascade,
   employee_id                text not null references employees(id) on delete cascade,
-  assignment_id              text not null references employee_assignments(id) on delete cascade,
-  human_principal_id         text not null references human_principals(id) on delete restrict,
-  phone_e164                 text not null,
-  verification_requirement   text not null
-                             check (verification_requirement in ('sms_step_up','sms_and_owner_session')),
-  target_type                text not null,
-  target_id                  text not null,
-  purpose                    text not null,
-  code_hash                  text not null,
-  status                     text not null default 'pending'
-                             check (status in ('pending','verified','consumed','expired','locked','delivery_ambiguous','revoked')),
-  attempts                   integer not null default 0 check (attempts >= 0),
-  max_attempts               integer not null default 5 check (max_attempts between 1 and 10),
-  provider_message_id        text,
-  provider_status            text,
-  verified_provider_message_id text,
-  verified_at                timestamptz,
-  consumed_at                timestamptz,
-  expires_at                 timestamptz not null,
+  connector_key              text not null,
+  label                      text not null,
+  setup_experience           text not null
+                             check (setup_experience in ('amtech_managed_oauth','amtech_managed_provider_onboarding','guided_business_credentials','guided_webhook_subscription','guided_remote_mcp','amtech_managed_service')),
+  requested_by_principal_id  text not null references human_principals(id) on delete restrict,
+  status                     text not null default 'requested'
+                             check (status in ('requested','in_progress','ready','connected','cancelled','failed')),
+  owner_context              jsonb not null default '{}'::jsonb,
   evidence                   jsonb not null default '{}'::jsonb,
   created_at                 timestamptz not null default now(),
   updated_at                 timestamptz not null default now(),
-  unique (assignment_id, target_type, target_id, human_principal_id)
+  unique (assignment_id, connector_key, requested_by_principal_id)
 );
 
-create index if not exists action_verification_pending_phone_idx
-  on action_verification_challenges(assignment_id, phone_e164, status, expires_at desc);
-create index if not exists action_verification_target_idx
-  on action_verification_challenges(target_type, target_id, status);
+create index if not exists connector_setup_intents_scope_idx
+  on connector_setup_intents(assignment_id, status, updated_at desc);
 
-alter table approvals
-  add column if not exists verification_requirement text not null default 'owner_session',
-  add column if not exists verification_challenge_id text references action_verification_challenges(id) on delete set null;
+-- Durable conversational decision context. The LLM interprets natural language;
+-- this row prevents a reply such as “yeah, send it” from drifting to another task.
+create table if not exists channel_decision_contexts (
+  id                    text primary key,
+  assignment_id         text not null references employee_assignments(id) on delete cascade,
+  account_id            text not null references accounts(id) on delete cascade,
+  employee_id           text not null references employees(id) on delete cascade,
+  channel               text not null check (channel in ('sms','web','voice')),
+  external_subject      text,
+  human_principal_id    text not null references human_principals(id) on delete restrict,
+  approval_id           text not null references approvals(id) on delete cascade,
+  prompt_message_id     text not null references employee_messages(id) on delete cascade,
+  status                text not null default 'open'
+                        check (status in ('open','resolved','rejected','superseded','expired')),
+  resolution            text check (resolution is null or resolution in ('approved','rejected')),
+  resolved_by_message_id text references employee_messages(id) on delete set null,
+  expires_at            timestamptz not null,
+  evidence              jsonb not null default '{}'::jsonb,
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now(),
+  unique (prompt_message_id, approval_id)
+);
 
-alter table approvals
-  drop constraint if exists approvals_verification_requirement_check;
-alter table approvals
-  add constraint approvals_verification_requirement_check
-  check (verification_requirement in ('owner_session','sms_step_up','sms_and_owner_session'));
+create index if not exists channel_decision_context_open_idx
+  on channel_decision_contexts(assignment_id, channel, human_principal_id, status, created_at desc);
+
+alter table employee_messages
+  add column if not exists account_id text references accounts(id) on delete cascade,
+  add column if not exists human_principal_id text references human_principals(id) on delete set null,
+  add column if not exists decision_context_id text references channel_decision_contexts(id) on delete set null,
+  add column if not exists decision_consumed_at timestamptz,
+  add column if not exists decision_context jsonb not null default '{}'::jsonb;
+
+create index if not exists employee_messages_decision_context_idx
+  on employee_messages(assignment_id, human_principal_id, decision_context_id, created_at desc);
+
+-- Owner/manager/operator surfaces can request or revoke connections. Viewers remain
+-- read-only. Re-running assignment principals refreshes existing grants.
+create or replace function amtech_employee_surface_actions_for_role(p_role text)
+returns text[]
+language sql
+immutable
+parallel safe
+as $$
+  select case
+    when p_role = 'viewer' then array[
+      'read',
+      'stream:read',
+      'materialize',
+      'capabilities:read'
+    ]::text[]
+    when p_role in ('owner','manager','operator') then array[
+      'read',
+      'message:create',
+      'stream:read',
+      'materialize',
+      'heartbeat',
+      'turn:create',
+      'connector:connect',
+      'connector:setup:request',
+      'connector:revoke',
+      'capabilities:read',
+      'artifact:revise',
+      'artifact:validate',
+      'artifact:publish'
+    ]::text[]
+    else array['read']::text[]
+  end
+$$;
 
 create or replace function amtech_connector_binding_lifecycle_projection()
 returns trigger
@@ -186,7 +240,14 @@ begin
              'reason', coalesce(new.revocation_reason, new.status)
            )
      where arg.assignment_id = new.assignment_id
-       and arg.provenance ->> 'connector_binding_id' = new.id
+       and (
+         arg.provenance ->> 'connector_binding_id' = new.id
+         or (
+           arg.principal_id = new.principal_id
+           and arg.resource_class = new.resource_class
+           and arg.resource_id is not distinct from new.resource_id
+         )
+       )
        and arg.status not in ('revoked','ended','expired');
   end if;
 
@@ -270,44 +331,22 @@ begin
    where cb.id = v_binding.id
    returning cb.* into v_binding;
 
-  if v_binding.connector_account_id is not null then
+  if v_binding.provider = 'stripe' then
+    update stripe_connections sc
+       set charges_enabled = false,
+           payouts_enabled = false,
+           secret_ref = null
+     where sc.id = v_binding.connector_account_id
+       and sc.account_id = p_account_id
+       and sc.employee_id = p_employee_id;
+  else
     update connector_accounts ca
        set status = 'revoked',
            token_secret_ref = null
      where ca.id = v_binding.connector_account_id
        and ca.account_id = p_account_id
        and ca.employee_id = p_employee_id;
-
-    if v_binding.provider = 'stripe' then
-      update stripe_connections sc
-         set onboarding_status = 'revoked',
-             charges_enabled = false,
-             payouts_enabled = false,
-             secret_ref = null
-       where sc.id = v_binding.connector_account_id
-         and sc.account_id = p_account_id
-         and sc.employee_id = p_employee_id;
-    end if;
   end if;
-
-  update assignment_resource_grants arg
-     set status = 'revoked',
-         ends_at = coalesce(arg.ends_at, v_now),
-         provenance = arg.provenance || jsonb_build_object(
-           'connector_binding_revoked', v_binding.id,
-           'revoked_at', v_now,
-           'reason', p_reason
-         )
-   where arg.assignment_id = p_assignment_id
-     and (
-       arg.provenance ->> 'connector_binding_id' = v_binding.id
-       or (
-         arg.principal_id = v_binding.principal_id
-         and arg.resource_class = v_binding.resource_class
-         and arg.resource_id is not distinct from v_binding.resource_id
-       )
-     )
-     and arg.status not in ('revoked','ended','expired');
 
   update connector_capability_projections ccp
      set status = 'revoked',
@@ -319,6 +358,13 @@ begin
            'reason', p_reason
          )
    where ccp.connector_binding_id = v_binding.id;
+
+  update connector_setup_intents csi
+     set status = case when csi.status in ('requested','in_progress','ready') then 'cancelled' else csi.status end,
+         updated_at = v_now,
+         evidence = csi.evidence || jsonb_build_object('binding_revoked', v_binding.id, 'reason', p_reason)
+   where csi.assignment_id = p_assignment_id
+     and csi.connector_key = coalesce(v_binding.connector_key, v_binding.provider);
 
   v_event_id := 'cle_' || substr(encode(digest(
     v_binding.id || ':' || v_now::text || ':revoked', 'sha256'
@@ -344,78 +390,14 @@ begin
 end
 $$;
 
-create or replace function amtech_verify_action_challenge(
-  p_assignment_id text,
-  p_phone_e164 text,
-  p_code_hash text,
-  p_provider_message_id text
-)
-returns table(
-  challenge_id text,
-  target_type text,
-  target_id text,
-  human_principal_id text,
-  verification_requirement text
-)
-language plpgsql
-volatile
-security definer
-set search_path = public
-as $$
-declare
-  v_challenge action_verification_challenges%rowtype;
-begin
-  select avc.*
-    into v_challenge
-    from action_verification_challenges avc
-   where avc.assignment_id = p_assignment_id
-     and avc.phone_e164 = p_phone_e164
-     and avc.code_hash = p_code_hash
-     and avc.status = 'pending'
-     and avc.expires_at > now()
-   order by avc.created_at desc
-   limit 1
-   for update;
-
-  if v_challenge.id is null then
-    update action_verification_challenges avc
-       set attempts = avc.attempts + 1,
-           status = case when avc.attempts + 1 >= avc.max_attempts then 'locked' else avc.status end,
-           updated_at = now(),
-           evidence = avc.evidence || jsonb_build_object('last_failed_provider_message_id', p_provider_message_id)
-     where avc.assignment_id = p_assignment_id
-       and avc.phone_e164 = p_phone_e164
-       and avc.status = 'pending'
-       and avc.expires_at > now();
-    return;
-  end if;
-
-  update action_verification_challenges avc
-     set status = 'verified',
-         verified_at = now(),
-         verified_provider_message_id = p_provider_message_id,
-         attempts = avc.attempts + 1,
-         updated_at = now()
-   where avc.id = v_challenge.id
-   returning avc.* into v_challenge;
-
-  return query select
-    v_challenge.id,
-    v_challenge.target_type,
-    v_challenge.target_id,
-    v_challenge.human_principal_id,
-    v_challenge.verification_requirement;
-end
-$$;
-
-create or replace function resolve_approval_authority_with_verification(
+-- The LLM has already interpreted the natural-language reply. This transaction
+-- proves that the exact SMS message, human principal, conversation context, and
+-- immutable approval all agree before recording the decision.
+create or replace function amtech_resolve_sms_channel_decision(
+  p_owner_message_id text,
+  p_decision_context_id text,
   p_approval_id text,
-  p_resolver_principal_id text,
-  p_resolution text,
-  p_channel text,
-  p_current_snapshot_hash text,
-  p_authenticated_by text,
-  p_verification_challenge_id text default null
+  p_resolution text
 )
 returns table(
   approval_id text,
@@ -433,93 +415,144 @@ security definer
 set search_path = public
 as $$
 declare
+  v_message employee_messages%rowtype;
+  v_context channel_decision_contexts%rowtype;
   v_approval approvals%rowtype;
-  v_challenge action_verification_challenges%rowtype;
+  v_current_snapshot_hash text;
+  v_resolved record;
 begin
+  if p_resolution not in ('approved','rejected') then
+    raise exception 'channel_decision_resolution_invalid';
+  end if;
+
+  select em.*
+    into v_message
+    from employee_messages em
+   where em.id = p_owner_message_id
+   for update;
+
+  if v_message.id is null
+     or v_message.direction <> 'to_employee'
+     or v_message.channel <> 'sms'
+     or v_message.assignment_id is null
+     or v_message.account_id is null
+     or v_message.human_principal_id is null then
+    raise exception 'channel_decision_owner_message_invalid';
+  end if;
+  if v_message.decision_consumed_at is not null then
+    raise exception 'channel_decision_message_already_consumed';
+  end if;
+
+  select cdc.*
+    into v_context
+    from channel_decision_contexts cdc
+   where cdc.id = p_decision_context_id
+   for update;
+
+  if v_context.id is null
+     or v_context.approval_id <> p_approval_id
+     or v_context.assignment_id <> v_message.assignment_id
+     or v_context.account_id <> v_message.account_id
+     or v_context.employee_id <> v_message.employee_id
+     or v_context.human_principal_id <> v_message.human_principal_id
+     or v_context.channel <> 'sms'
+     or v_context.status <> 'open'
+     or v_context.expires_at <= now() then
+    raise exception 'channel_decision_context_not_current';
+  end if;
+
   select a.*
     into v_approval
     from approvals a
-   where a.id = p_approval_id
-   for update;
-
-  if v_approval.id is null then
-    raise exception 'approval_not_found';
+   where a.id = p_approval_id;
+  if v_approval.id is null
+     or v_approval.assignment_id <> v_context.assignment_id
+     or v_approval.account_id <> v_context.account_id
+     or v_approval.employee_id <> v_context.employee_id then
+    raise exception 'channel_decision_approval_scope_mismatch';
   end if;
 
-  if p_resolution = 'approved'
-     and v_approval.verification_requirement in ('sms_step_up','sms_and_owner_session') then
-    if coalesce(p_verification_challenge_id, '') = ''
-       or v_approval.verification_challenge_id is distinct from p_verification_challenge_id then
-      raise exception 'approval_sms_step_up_required';
-    end if;
+  v_current_snapshot_hash := amtech_approval_snapshot_hash(amtech_approval_snapshot(
+    v_approval.assignment_id,
+    v_approval.action_key,
+    v_approval.resource_class,
+    v_approval.resource_id
+  ));
 
-    select avc.*
-      into v_challenge
-      from action_verification_challenges avc
-     where avc.id = p_verification_challenge_id
-       and avc.assignment_id = v_approval.assignment_id
-       and avc.human_principal_id = p_resolver_principal_id
-       and avc.target_type = 'approval'
-       and avc.target_id = v_approval.id
-     for update;
-
-    if v_challenge.id is null
-       or v_challenge.status <> 'verified'
-       or v_challenge.verified_at is null
-       or v_challenge.consumed_at is not null
-       or v_challenge.expires_at <= now() then
-      raise exception 'approval_sms_step_up_not_current';
-    end if;
-
-    update action_verification_challenges avc
-       set status = 'consumed',
-           consumed_at = now(),
-           updated_at = now(),
-           evidence = avc.evidence || jsonb_build_object(
-             'consumed_for_approval', v_approval.id,
-             'consumed_by_principal', p_resolver_principal_id,
-             'consumed_channel', p_channel
-           )
-     where avc.id = v_challenge.id;
-  end if;
-
-  return query
-  select resolved.approval_id,
-         resolved.assignment_id,
-         resolved.resolution,
-         resolved.resolver_role,
-         resolved.command_intent_id,
-         resolved.command_id,
-         resolved.effect_key,
-         resolved.duplicate
+  select resolved.*
+    into v_resolved
     from resolve_approval_authority(
-      p_approval_id,
-      p_resolver_principal_id,
+      v_approval.id,
+      v_message.human_principal_id,
       p_resolution,
-      p_channel,
-      p_current_snapshot_hash,
-      p_authenticated_by
+      'sms',
+      v_current_snapshot_hash,
+      'owner_sms_session:' || v_message.id
     ) resolved;
+
+  if v_resolved.approval_id is null then
+    raise exception 'channel_decision_resolution_missing';
+  end if;
+
+  update channel_decision_contexts cdc
+     set status = case when p_resolution = 'approved' then 'resolved' else 'rejected' end,
+         resolution = p_resolution,
+         resolved_by_message_id = v_message.id,
+         updated_at = now(),
+         evidence = cdc.evidence || jsonb_build_object(
+           'resolved_by_message_id', v_message.id,
+           'authenticated_by', 'owner_sms_session',
+           'natural_language_interpreted_by', 'hermes'
+         )
+   where cdc.id = v_context.id;
+
+  update employee_messages em
+     set decision_context_id = v_context.id,
+         decision_consumed_at = now(),
+         decision_context = em.decision_context || jsonb_build_object(
+           'approval_id', v_approval.id,
+           'resolution', p_resolution,
+           'context_id', v_context.id
+         )
+   where em.id = v_message.id;
+
+  return query select
+    v_resolved.approval_id,
+    v_resolved.assignment_id,
+    v_resolved.resolution,
+    v_resolved.resolver_role,
+    v_resolved.command_intent_id,
+    v_resolved.command_id,
+    v_resolved.effect_key,
+    v_resolved.duplicate;
 end
 $$;
 
 alter table connector_capability_projections enable row level security;
 alter table connector_lifecycle_events enable row level security;
-alter table action_verification_challenges enable row level security;
+alter table connector_setup_intents enable row level security;
+alter table channel_decision_contexts enable row level security;
 
 revoke all on connector_capability_projections from public, anon, authenticated;
 revoke all on connector_lifecycle_events from public, anon, authenticated;
-revoke all on action_verification_challenges from public, anon, authenticated;
+revoke all on connector_setup_intents from public, anon, authenticated;
+revoke all on channel_decision_contexts from public, anon, authenticated;
 grant select, insert, update, delete on connector_capability_projections to service_role;
 grant select, insert, update, delete on connector_lifecycle_events to service_role;
-grant select, insert, update, delete on action_verification_challenges to service_role;
+grant select, insert, update, delete on connector_setup_intents to service_role;
+grant select, insert, update, delete on channel_decision_contexts to service_role;
 
+revoke all on function amtech_employee_surface_actions_for_role(text) from public, anon, authenticated;
 revoke all on function amtech_connector_binding_lifecycle_projection() from public, anon, authenticated;
 revoke all on function amtech_revoke_connector_binding(text,text,text,text,text,jsonb) from public, anon, authenticated;
-revoke all on function amtech_verify_action_challenge(text,text,text,text) from public, anon, authenticated;
-revoke all on function resolve_approval_authority_with_verification(text,text,text,text,text,text,text) from public, anon, authenticated;
+revoke all on function amtech_resolve_sms_channel_decision(text,text,text,text) from public, anon, authenticated;
+grant execute on function amtech_employee_surface_actions_for_role(text) to service_role;
 grant execute on function amtech_revoke_connector_binding(text,text,text,text,text,jsonb) to service_role;
-grant execute on function amtech_verify_action_challenge(text,text,text,text) to service_role;
-grant execute on function resolve_approval_authority_with_verification(text,text,text,text,text,text,text) to service_role;
+grant execute on function amtech_resolve_sms_channel_decision(text,text,text,text) to service_role;
+
+update assignment_principals
+   set policy_version = policy_version
+ where principal_class = 'human'
+   and role in ('owner','manager','operator','viewer');
 
 commit;
