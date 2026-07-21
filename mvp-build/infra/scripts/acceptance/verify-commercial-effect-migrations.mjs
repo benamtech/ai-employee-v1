@@ -21,6 +21,7 @@ try {
     "0074_ws07_commercial_effect_and_ws08_repair.sql",
     "0075_ws08_gateway_reconciliation.sql",
     "0076_ws08_reconciliation_authority_hardening.sql",
+    "0077_ws07_database_owned_rate_windows.sql",
   ];
   const applied = new Set((await rows("select name from _migrations where name = any($1::text[])", [migrations])).map((row) => row.name));
   check("commercial_effect_migrations_applied", migrations.every((name) => applied.has(name)), `${applied.size}/${migrations.length}`);
@@ -78,6 +79,29 @@ try {
     check(`service_execute:${fn.proname}`, fn.service_execute === true);
     check(`browser_execute_revoked:${fn.proname}`, fn.anon_execute === false && fn.authenticated_execute === false);
   }
+
+  const admissionDefinition = await rows(`
+    select pg_get_functiondef(p.oid) as definition
+      from pg_proc p
+      join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public'
+       and p.proname = 'admit_model_gateway_request'
+       and pg_get_function_identity_arguments(p.oid) = 'p_request_key text, p_assignment_id text, p_credential_id text, p_revision_id text, p_request_hash text, p_route_key text, p_provider_idempotency_key text, p_rate_window_key text, p_reserve_amount_minor integer, p_correlation_id text'
+  `);
+  const admissionSource = String(admissionDefinition[0]?.definition ?? "");
+  check(
+    "database_owned_rate_window",
+    admissionSource.includes("statement_timestamp()")
+      && admissionSource.includes("v_rate_window_key")
+      && !admissionSource.includes("v_existing.rate_window_key <> p_rate_window_key"),
+    "caller window cannot shard shared minute authority or invalidate a deterministic replay",
+  );
+  check(
+    "metadata_safe_gateway_replay",
+    !admissionSource.includes("v_existing.correlation_id <> p_correlation_id")
+      && !admissionSource.includes("v_existing.reserved_amount_minor <> p_reserve_amount_minor"),
+    "nonidentity metadata cannot mutate or conflict with the original reservation",
+  );
 
   const views = new Set((await rows(`
     select table_name from information_schema.views
