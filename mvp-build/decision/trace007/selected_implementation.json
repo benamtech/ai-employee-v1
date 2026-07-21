@@ -1,1 +1,20 @@
-{"schema":"amtech.trace007.selected_implementation.v1","selected_ids":["D01","D02","D03","D04","D06","D07"],"scores":{"D01":1.37,"D02":1.24,"D03":1.82,"D04":1.65,"D06":2.41,"D07":1.92},"transaction":"database-authoritative admission→dispatch→receipt→accounting→proof→repair","coherence":["atomic admission","durable settlement","ambiguity reconciliation","accepted effect/accounting continuity","exact revision completion","convergent proof repair"],"rejected_frontier_ids":["A01","A02","A03","A04","A05","A06","A07","A08","A09","A10","A11","A12","A13","A14","A15","A16","B01","B02","B03","B04","B05","B06","B07","B08","B09","B10","B11","B12","B13","B14","B15","B16","C01","C02","C03","C04","C05","C06","C07","C08","C09","C10","C11","C12","C13","C14","C15","C16","D05","D08","D09","D10","D11","D12","D13","D14","D15","D16"]}
+{
+  "schema": "amtech.trace007.selected-implementation.v2",
+  "selected_ids": ["D01", "D02", "D03", "D04", "D06", "D07"],
+  "transaction": "database-authoritative admission → dispatch → receipt → accounting → output/proof → repair",
+  "selection_basis": "repository evidence, production invariants, dependency prerequisites, and coherent transaction compression",
+  "mathematical_role": "supporting search description only",
+  "mathematical_causality": "unestablished",
+  "coherence": [
+    "atomic shared admission",
+    "durable settlement and conservation",
+    "one provider idempotency identity",
+    "original-effect ambiguity reconciliation",
+    "accepted effect and accounting continuity",
+    "exact revision completion",
+    "convergent proof repair"
+  ],
+  "software_invariant_coverage": "computed from software_invariant_hypergraph.json; candidate-group edges are not used",
+  "proof_plan": "verification_plan.json:software_edge_tests",
+  "evidence_boundary": "The transaction remains justified by the simpler evidence-and-invariants baseline even if graph/diversity terms are removed. Causal improvement requires implementation_ablation.json independent outcomes."
+}
