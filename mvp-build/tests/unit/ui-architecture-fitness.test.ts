@@ -24,9 +24,11 @@ describe("Trace009 executable UI architecture fitness", () => {
   it("keeps generated embedded views on the one compiler and validating host boundary", () => {
     const compiler = read("apps/manager/src/lib/ui-resources.ts");
     const host = read("apps/web/app/agent/[employeeId]/components/McpUiResource.tsx");
+    const workRenderer = read("apps/web/app/agent/[employeeId]/components/WorkObjectRenderer.tsx");
     expect((compiler.match(/export function compileDeliverableUiResource\(/g) ?? []).length).toBe(1);
-    expect(host).toContain("expectedAuthority");
-    expect(host).toContain("resource.actions.some");
-    expect(host).toContain("ui_resource_hash_mismatch");
+    expect(host).toContain("actualHash !== metadata.resource_hash");
+    expect(host).toContain("returned.assignment_id !== metadata.authority.assignment_id");
+    expect(host).toContain("metadata.authority.allowed_actions.includes(projectedAction(intent))");
+    expect(workRenderer).toContain("resource.actions.some");
   });
 });
