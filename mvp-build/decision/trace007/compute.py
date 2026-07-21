@@ -8,6 +8,7 @@ import math
 import random
 import re
 import zlib
+from collections import Counter
 from pathlib import Path
 from statistics import mean
 
@@ -17,8 +18,8 @@ ROOT = Path(__file__).resolve().parent
 CANDIDATE_ID = re.compile(r"^[A-D][0-9]{2}$")
 
 
-def load(name: str):
-    data = json.loads((ROOT / name).read_text())
+def load_path(path: Path):
+    data = json.loads(path.read_text())
     if data.get("encoding") != "zlib+base64+json":
         return data
     raw = zlib.decompress(base64.b64decode(data["payload"]))
@@ -27,6 +28,11 @@ def load(name: str):
     return json.loads(raw)
 
 
+def load(name: str):
+    return load_path(ROOT / name)
+
+
+PROTOCOL = load_path(ROOT.parent / "protocol-v1.json")
 TASK = load("task_state.json")
 POP = load("candidate_population.json")
 SCORES = load("candidate_scores.json")
@@ -40,6 +46,8 @@ ABLATION = load("implementation_ablation.json")
 
 DIMS = list(SCORES["dimensions"])
 SCORE_WEIGHTS = SCORES["weights"]
+DIMENSION_SEMANTICS = PROTOCOL["dimension_semantics"]
+BASELINE_CONTRACT = PROTOCOL["baseline_contracts"]["trace007"]
 CANDIDATES = {row["id"]: row for row in POP["candidates"]}
 SCORE_ROWS = {row["id"]: row for row in SCORES["rows"]}
 IDS = sorted(CANDIDATES)
@@ -49,22 +57,133 @@ VALIDATED = {candidate_id for candidate_id, row in CANDIDATES.items() if row.get
 REQUIRED_WORKSTREAMS = set(TASK["basis"]["workstreams"])
 REQUIRED_SPACES = set(TASK["z_spaces"])
 
-POSITIVE_ALIASES = (
-    "Evidence", "EvidenceGrounding", "EvidenceStrength", "Applicability", "Transfer",
-    "BusinessValue", "UserValue", "VerificationFeasibility", "Testability", "ProofDensity",
-    "RiskReduction", "Reversibility", "ArchitectureLeverage",
-)
-NEGATIVE_ALIASES = (
-    "Unsupported", "Unverifiability", "Risk", "Cost", "Scope", "PrerequisiteDebt", "OperatorBurden",
-)
-BASELINE_POSITIVE = [dimension for dimension in POSITIVE_ALIASES if dimension in DIMS]
-BASELINE_NEGATIVE = [dimension for dimension in NEGATIVE_ALIASES if dimension in DIMS]
-assert BASELINE_POSITIVE, f"no positive baseline dimensions in {DIMS}"
-assert BASELINE_NEGATIVE, f"no penalty baseline dimensions in {DIMS}"
-
 
 def quality(row: dict) -> float:
     return float(sum(SCORE_WEIGHTS[dimension] * row["r"][dimension] for dimension in DIMS))
+
+
+def validate_baseline_contract() -> dict:
+    roles = BASELINE_CONTRACT["roles"]
+    positive_required = list(roles["positive_required"])
+    positive_optional = list(roles.get("positive_optional", []))
+    penalty_required = list(roles["penalty_required"])
+    penalty_optional = list(roles.get("penalty_optional", []))
+    excluded = list(roles.get("excluded", []))
+
+    declared = (
+        positive_required
+        + positive_optional
+        + penalty_required
+        + penalty_optional
+        + excluded
+    )
+    duplicates = sorted(name for name, count in Counter(declared).items() if count > 1)
+    assert not duplicates, ("duplicate_baseline_dimension", duplicates)
+
+    dim_set = set(DIMS)
+    missing_positive = sorted(set(positive_required) - dim_set)
+    missing_penalty = sorted(set(penalty_required) - dim_set)
+    assert not missing_positive, ("missing_required_positive_dimensions", missing_positive)
+    assert not missing_penalty, ("missing_required_penalty_dimensions", missing_penalty)
+
+    unclassified = sorted(dim_set - set(declared))
+    assert not unclassified, ("unclassified_baseline_dimensions", unclassified)
+
+    optional = set(positive_optional + penalty_optional)
+    stale_nonoptional = sorted(set(declared) - dim_set - optional)
+    assert not stale_nonoptional, ("declared_nonoptional_baseline_dimensions_absent", stale_nonoptional)
+
+    assert DIMS == list(PROTOCOL["candidate_dimensions"]), (
+        "candidate_dimension_schema_mismatch",
+        {"trace": DIMS, "protocol": PROTOCOL["candidate_dimensions"]},
+    )
+    missing_semantics = sorted(dim_set - set(DIMENSION_SEMANTICS))
+    assert not missing_semantics, ("missing_dimension_semantics", missing_semantics)
+    extra_semantics = sorted(set(DIMENSION_SEMANTICS) - dim_set)
+    assert not extra_semantics, ("stale_dimension_semantics", extra_semantics)
+
+    for dimension in DIMS:
+        orientation = DIMENSION_SEMANTICS[dimension]["orientation"]
+        assert orientation in {"maximize", "minimize"}, (
+            "invalid_dimension_orientation",
+            dimension,
+            orientation,
+        )
+        weight = float(SCORE_WEIGHTS[dimension])
+        orientation_matches = (
+            orientation == "maximize" and weight >= 0
+        ) or (
+            orientation == "minimize" and weight <= 0
+        )
+        assert orientation_matches, (
+            "objective_weight_orientation_mismatch",
+            dimension,
+            orientation,
+            weight,
+        )
+
+    positive = [dimension for dimension in positive_required + positive_optional if dimension in dim_set]
+    penalties = [dimension for dimension in penalty_required + penalty_optional if dimension in dim_set]
+    optional_missing = sorted(optional - dim_set)
+
+    assert all(DIMENSION_SEMANTICS[dimension]["orientation"] == "maximize" for dimension in positive), (
+        "positive_baseline_orientation_mismatch",
+        positive,
+    )
+    assert all(DIMENSION_SEMANTICS[dimension]["orientation"] == "minimize" for dimension in penalties), (
+        "penalty_baseline_orientation_mismatch",
+        penalties,
+    )
+
+    groups_report: dict[str, dict] = {"positive": {}, "penalty": {}}
+    role_sets = {"positive": set(positive), "penalty": set(penalties)}
+    group_membership: dict[str, Counter] = {"positive": Counter(), "penalty": Counter()}
+    for side in ("positive", "penalty"):
+        groups = BASELINE_CONTRACT["groups"][side]
+        declared_weight_sum = float(BASELINE_CONTRACT[f"{side}_group_weight_sum"])
+        actual_weight_sum = sum(float(group["weight"]) for group in groups.values())
+        assert math.isclose(actual_weight_sum, declared_weight_sum, abs_tol=1e-12), (
+            "baseline_group_weight_sum_mismatch",
+            side,
+            actual_weight_sum,
+            declared_weight_sum,
+        )
+        for name, group in groups.items():
+            group_dimensions = list(group["dimensions"])
+            invalid = sorted(set(group_dimensions) - role_sets[side] - optional)
+            assert not invalid, ("baseline_group_role_mismatch", side, name, invalid)
+            used = [dimension for dimension in group_dimensions if dimension in dim_set]
+            assert used, ("empty_baseline_group", side, name, group_dimensions)
+            for dimension in used:
+                group_membership[side][dimension] += 1
+            groups_report[side][name] = {
+                "weight": float(group["weight"]),
+                "dimensions_declared": group_dimensions,
+                "dimensions_used": used,
+            }
+
+    for side, dimensions in (("positive", positive), ("penalty", penalties)):
+        missing_from_groups = sorted(set(dimensions) - set(group_membership[side]))
+        duplicate_group_membership = sorted(
+            dimension for dimension, count in group_membership[side].items() if count != 1
+        )
+        assert not missing_from_groups, ("baseline_dimensions_without_group", side, missing_from_groups)
+        assert not duplicate_group_membership, (
+            "baseline_dimension_group_multiplicity",
+            side,
+            duplicate_group_membership,
+        )
+
+    return {
+        "positive": positive,
+        "penalties": penalties,
+        "optional_missing": optional_missing,
+        "excluded": excluded,
+        "groups": groups_report,
+    }
+
+
+BASELINE_DIMENSIONS = validate_baseline_contract()
 
 
 def build_candidate_graph():
@@ -115,6 +234,7 @@ def build_candidate_graph():
 
 EDGES, INCIDENCE, EDGE_WEIGHTS, LAPLACIAN, DISTANCE, SIMILARITY, SIGMA = build_candidate_graph()
 METRIC_CACHE: dict[tuple[str, ...], dict] = {}
+BASELINE_CACHE: dict[str, float] = {}
 
 
 def canonical(selection) -> tuple[str, ...]:
@@ -236,17 +356,26 @@ GRAPH_TERMS = {"software_fractional", "software_complete", "candidate_edge_touch
 DIVERSITY_TERMS = {
     "separation_mean", "von_neumann_entropy", "quality_diversity_occupancy", "redundancy",
 }
-BASELINE_VALUE = {
-    candidate_id: (
-        mean(float(SCORE_ROWS[candidate_id]["r"][dimension]) for dimension in BASELINE_POSITIVE)
-        - mean(float(SCORE_ROWS[candidate_id]["r"][dimension]) for dimension in BASELINE_NEGATIVE)
-    )
-    for candidate_id in IDS
-}
+
+
+def grouped_candidate_baseline(candidate_id: str) -> float:
+    if candidate_id in BASELINE_CACHE:
+        return BASELINE_CACHE[candidate_id]
+    row = SCORE_ROWS[candidate_id]["r"]
+    side_scores: dict[str, float] = {}
+    for side in ("positive", "penalty"):
+        group_total = 0.0
+        for group in BASELINE_DIMENSIONS["groups"][side].values():
+            group_score = mean(float(row[dimension]) for dimension in group["dimensions_used"])
+            group_total += float(group["weight"]) * group_score
+        side_scores[side] = group_total
+    value = side_scores["positive"] - side_scores["penalty"]
+    BASELINE_CACHE[candidate_id] = float(value)
+    return float(value)
 
 
 def evidence_baseline(selection) -> float:
-    return float(mean(BASELINE_VALUE[candidate_id] for candidate_id in canonical(selection)))
+    return float(mean(grouped_candidate_baseline(candidate_id) for candidate_id in canonical(selection)))
 
 
 def objective(selection, mode: str, override: dict[str, float] | None = None) -> float:
@@ -370,6 +499,7 @@ def main() -> None:
     assert all(feasible(result["selected_ids"]) for result in searches.values())
 
     full_set = tuple(searches["full"]["selected_ids"])
+    evidence_set = tuple(searches["evidence_baseline"]["selected_ids"])
     random_values = [
         objective(feasible_walk(seed, 50000 + index, steps=192), "full")
         for index in range(int(CMP["search"]["random_feasible_baselines"]))
@@ -398,14 +528,22 @@ def main() -> None:
     assert software_edge_ids == set(planned_edges)
     assert all(planned_edges[edge_id] for edge_id in software_edge_ids)
 
+    comparison = {
+        "same_feasible_domain": True,
+        "selection_jaccard": jaccard(full_set, evidence_set),
+        "implementation_jaccard": None,
+        "implementation_comparison_status": "not_performed; one evidence-grounded implementation compression is recorded, not one implementation per selection arm",
+        "full_objective_difference": objective(full_set, "full") - objective(evidence_set, "full"),
+        "independent_proof_yield_difference": None,
+        "causal_improvement": "unestablished",
+    }
+
     report = {
         "trace": "trace007",
         "candidate_count": len(CANDIDATES),
         "score_dimensions": DIMS,
-        "evidence_baseline_dimensions": {
-            "positive": BASELINE_POSITIVE,
-            "penalties": BASELINE_NEGATIVE,
-        },
+        "dimension_semantics": DIMENSION_SEMANTICS,
+        "baseline_dimensions_used": BASELINE_DIMENSIONS,
         "candidate_graph": {
             "vertices": len(IDS),
             "edges": len(EDGES),
@@ -419,6 +557,7 @@ def main() -> None:
             "proof_plan_complete": software_edge_ids == set(planned_edges),
         },
         "equal_feasibility_searches": searches,
+        "equal_feasibility_comparison": comparison,
         "random_feasible_baseline": {
             "count": len(random_values),
             "minimum": min(random_values),
