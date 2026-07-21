@@ -51,6 +51,8 @@ describe("S8 production admin authority source boundary", () => {
     expect(runtime).toContain("executeDurableCommandEffect");
     expect(runtime).toContain('p_actor_class: "platform"');
     expect(runtime).toContain('p_policy_version: "platform-admin-v1"');
+    expect(runtime).toContain("platform_session_id: auth.actor.platform_session_id");
+    expect(runtime).toContain("support_lease_id: auth.actor.support_lease_id");
     expect(runtime).toContain("effect_receipt_id: execution.receipt_id");
     expect(runtime).toContain("if (receiptLinked.error) throw receiptLinked.error");
   });
@@ -92,10 +94,11 @@ describe("local machine production gate", () => {
   it("builds and starts only exact-SHA images for the full production topology", async () => {
     const compose = await source("infra/deploy/docker-compose.production.yml");
     const manager = await source("infra/deploy/manager.Dockerfile");
+    const gateway = await source("infra/deploy/model-gateway.Dockerfile");
     const provisioner = await source("infra/deploy/provisioner.Dockerfile");
     const web = await source("infra/deploy/web.Dockerfile");
     const caddy = await source("infra/deploy/caddy.Dockerfile");
-    for (const text of [compose, manager, provisioner, web, caddy]) expect(text).toContain("AMTECH_GIT_SHA");
+    for (const text of [compose, manager, gateway, provisioner, web, caddy]) expect(text).toContain("AMTECH_GIT_SHA");
     for (const service of ["manager:", "model-gateway:", "host-provisioner:", "web:", "caddy:"]) expect(compose).toContain(service);
     expect(compose).toContain("AMTECH_GIT_SHA is required");
     const managerBlock = compose.split("  model-gateway:")[0];
@@ -104,6 +107,8 @@ describe("local machine production gate", () => {
     expect(manager).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
     expect(manager).toContain("apps/manager/dist/server.js");
     expect(manager).not.toContain("server.generated.js");
+    expect(gateway).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
+    expect(gateway).toContain("apps/manager/dist/model-gateway-server.js");
     expect(provisioner).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
     expect(provisioner).not.toContain("server.generated.js");
     expect(web).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
