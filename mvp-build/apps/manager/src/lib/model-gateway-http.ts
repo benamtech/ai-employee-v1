@@ -43,6 +43,20 @@ const FORBIDDEN_PROVIDER_AUTHORITY_FIELDS = new Set([
   "endpoint", "url", "headers", "extraheaders", "extrabody", "authorization",
   "credential", "token", "routing",
 ]);
+const REQUEST_REVISION = /^[A-Za-z0-9._:-]{1,160}$/;
+const MAX_PROVIDER_OUTPUT_TOKENS = 128_000;
+
+class GatewayRequestEnvelopeError extends Error {
+  readonly code: string;
+  readonly status: 400 | 503;
+
+  constructor(code: string, status: 400 | 503) {
+    super(code);
+    this.name = "GatewayRequestEnvelopeError";
+    this.code = code;
+    this.status = status;
+  }
+}
 
 function normalizedFieldName(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -68,26 +82,88 @@ function canonicalize(value: unknown): unknown {
 }
 
 function stableRevision(body: Record<string, unknown>, supplied: string | undefined): string {
-  if (supplied) return supplied;
+  if (supplied !== undefined) {
+    if (!REQUEST_REVISION.test(supplied)) {
+      throw new GatewayRequestEnvelopeError("model_gateway_request_revision_invalid", 400);
+    }
+    return supplied;
+  }
   return `reqrev_${createHash("sha256").update(JSON.stringify(canonicalize(body))).digest("hex").slice(0, 32)}`;
 }
 
-function rateWindowKey(credentialId: string, now = new Date()): string {
+function rateWindowHint(credentialId: string, now = new Date()): string {
+  // Compatibility-only hint. Migration 0077 derives the authoritative window
+  // from the database statement timestamp and ignores caller selection.
   return `${credentialId}:${now.toISOString().slice(0, 16)}`;
 }
 
+function configuredNonnegativeNumber(name: string, fallback: number): number {
+  const raw = process.env[name];
+  const value = raw === undefined ? fallback : Number(raw);
+  if (!Number.isFinite(value) || value < 0) {
+    throw new GatewayRequestEnvelopeError("model_gateway_pricing_configuration_invalid", 503);
+  }
+  return value;
+}
+
 function estimateCostCents(usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }): number {
-  const perMillionInput = Number(process.env.MODEL_GATEWAY_INPUT_CENTS_PER_MILLION ?? 300);
-  const perMillionOutput = Number(process.env.MODEL_GATEWAY_OUTPUT_CENTS_PER_MILLION ?? 1500);
+  const perMillionInput = configuredNonnegativeNumber("MODEL_GATEWAY_INPUT_CENTS_PER_MILLION", 300);
+  const perMillionOutput = configuredNonnegativeNumber("MODEL_GATEWAY_OUTPUT_CENTS_PER_MILLION", 1500);
   const input = Number(usage.prompt_tokens ?? 0);
   const output = Number(usage.completion_tokens ?? Math.max(0, Number(usage.total_tokens ?? 0) - input));
-  return Math.ceil(((input / 1_000_000) * perMillionInput) + ((output / 1_000_000) * perMillionOutput));
+  if (!Number.isSafeInteger(input) || input < 0 || !Number.isSafeInteger(output) || output < 0) {
+    throw new GatewayRequestEnvelopeError("model_gateway_usage_estimate_invalid", 503);
+  }
+  const result = Math.ceil(((input / 1_000_000) * perMillionInput) + ((output / 1_000_000) * perMillionOutput));
+  if (!Number.isSafeInteger(result) || result < 0) {
+    throw new GatewayRequestEnvelopeError("model_gateway_pricing_configuration_invalid", 503);
+  }
+  return result;
+}
+
+function maximumOutputTokens(body: Record<string, unknown>): number {
+  const hasMaxTokens = Object.prototype.hasOwnProperty.call(body, "max_tokens");
+  const hasMaxOutputTokens = Object.prototype.hasOwnProperty.call(body, "max_output_tokens");
+  const raw = hasMaxTokens ? body.max_tokens : hasMaxOutputTokens ? body.max_output_tokens : 1024;
+  if (typeof raw !== "number" || !Number.isSafeInteger(raw) || raw < 1 || raw > MAX_PROVIDER_OUTPUT_TOKENS) {
+    throw new GatewayRequestEnvelopeError("model_gateway_max_output_tokens_invalid", 400);
+  }
+  return raw;
+}
+
+function providerTimeoutMs(): number {
+  const raw = process.env.MODEL_GATEWAY_PROVIDER_TIMEOUT_MS;
+  const value = raw === undefined ? 30_000 : Number(raw);
+  if (!Number.isSafeInteger(value) || value < 1_000 || value > 120_000) {
+    throw new GatewayRequestEnvelopeError("model_gateway_provider_timeout_invalid", 503);
+  }
+  return value;
 }
 
 function reserveCostCents(body: Record<string, unknown>): number {
-  const estimatedPromptTokens = Math.ceil(JSON.stringify(body.messages ?? body.input ?? body).length / 4);
-  const maximumOutputTokens = Math.max(1, Math.min(Number(body.max_tokens ?? body.max_output_tokens ?? 1024), 128_000));
-  return Math.max(1, estimateCostCents({ prompt_tokens: estimatedPromptTokens, completion_tokens: maximumOutputTokens }));
+  const serialized = JSON.stringify(body.messages ?? body.input ?? body);
+  const estimatedPromptTokens = Math.max(1, Math.ceil(serialized.length / 4));
+  const maximumOutput = maximumOutputTokens(body);
+  return Math.max(1, estimateCostCents({ prompt_tokens: estimatedPromptTokens, completion_tokens: maximumOutput }));
+}
+
+export function validateGatewayRequestEnvelope(
+  body: Record<string, unknown>,
+  suppliedRevision?: string,
+): { revision_id: string; reserve_amount_minor: number; provider_timeout_ms: number } {
+  return {
+    revision_id: stableRevision(body, suppliedRevision),
+    reserve_amount_minor: reserveCostCents(body),
+    provider_timeout_ms: providerTimeoutMs(),
+  };
+}
+
+function providerUsageInteger(value: unknown, field: string): number {
+  const parsed = value === undefined ? 0 : value;
+  if (typeof parsed !== "number" || !Number.isSafeInteger(parsed) || parsed < 0) {
+    throw new DurableEffectAmbiguousError("provider_usage_invalid_after_acceptance", { field });
+  }
+  return parsed;
 }
 
 function redactError(error: unknown): string {
@@ -218,6 +294,7 @@ async function executeProviderEffect(
     correlationId: string;
     commercial: ResolvedCommercialScope;
     requestId: string;
+    providerTimeoutMs: number;
   },
 ): Promise<{
   response: ProviderExecution;
@@ -247,8 +324,7 @@ async function executeProviderEffect(
       provider_idempotency_key: record.provider_idempotency_key,
       apply: async () => {
         const controller = new AbortController();
-        const timeoutMs = Math.max(1_000, Math.min(Number(process.env.MODEL_GATEWAY_PROVIDER_TIMEOUT_MS ?? 30_000), 120_000));
-        const timeout = setTimeout(() => controller.abort(), timeoutMs);
+        const timeout = setTimeout(() => controller.abort(), input.providerTimeoutMs);
         let response: Response;
         try {
           response = await deps.fetch(`${input.route.base_url}${input.upstreamPath}`, {
@@ -285,11 +361,28 @@ async function executeProviderEffect(
             http_status: response.status,
           });
         }
-        const usage = (json.usage ?? {}) as { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-        const promptTokens = Number(usage.prompt_tokens ?? 0);
-        const completionTokens = Number(usage.completion_tokens ?? 0);
-        const totalTokens = Number(usage.total_tokens ?? promptTokens + completionTokens);
-        const estimatedCostCents = estimateCostCents(usage);
+        const usage = (json.usage ?? {}) as Record<string, unknown>;
+        const promptTokens = providerUsageInteger(usage.prompt_tokens, "prompt_tokens");
+        const completionTokens = providerUsageInteger(usage.completion_tokens, "completion_tokens");
+        const totalTokens = usage.total_tokens === undefined
+          ? promptTokens + completionTokens
+          : providerUsageInteger(usage.total_tokens, "total_tokens");
+        if (totalTokens < promptTokens + completionTokens) {
+          throw new DurableEffectAmbiguousError("provider_usage_invalid_after_acceptance", {
+            field: "total_tokens",
+            prompt_tokens: promptTokens,
+            completion_tokens: completionTokens,
+            total_tokens: totalTokens,
+          });
+        }
+        let estimatedCostCents: number;
+        try {
+          estimatedCostCents = estimateCostCents({ prompt_tokens: promptTokens, completion_tokens: completionTokens, total_tokens: totalTokens });
+        } catch (error) {
+          throw new DurableEffectAmbiguousError("provider_usage_pricing_invalid_after_acceptance", {
+            error: redactError(error),
+          });
+        }
         return {
           provider_receipt_id: providerId,
           result: {
@@ -403,16 +496,33 @@ async function proxyOpenAiCompatible(c: any, upstreamPath: string, expectedEmplo
 
   const { model: _requestedModel, stream: _requestedStream, ...requestPayload } = body;
   const upstreamBody = { ...requestPayload, model: route.model, stream: false };
-  const revisionId = stableRevision(body, c.req.header("X-Amtech-Request-Revision"));
+  let envelope: ReturnType<typeof validateGatewayRequestEnvelope>;
+  try {
+    envelope = validateGatewayRequestEnvelope(upstreamBody, c.req.header("X-Amtech-Request-Revision"));
+  } catch (error) {
+    const failure = error instanceof GatewayRequestEnvelopeError
+      ? error
+      : new GatewayRequestEnvelopeError("model_gateway_request_envelope_invalid", 400);
+    await recordPreAdmissionDenial(db, {
+      claims,
+      requested_model: requestedModel,
+      code: failure.code,
+      correlation_id: correlationId,
+      started,
+    });
+    return c.json({ error: { code: failure.code, message: "Model gateway request bounds or pricing configuration are invalid." } }, failure.status);
+  }
+
   const routeKey = `${route.provider}:${route.profile_key}:${route.model}:${upstreamPath}`;
+  const windowHint = rateWindowHint(claims.credential_id);
   const identity = gatewayRequestIdentity({
     assignment_id: claims.assignment_id,
     credential_id: claims.credential_id,
-    revision_id: revisionId,
+    revision_id: envelope.revision_id,
     route_key: routeKey,
     request: upstreamBody,
-    reserve_amount_minor: reserveCostCents(upstreamBody),
-    rate_window_key: rateWindowKey(claims.credential_id),
+    reserve_amount_minor: envelope.reserve_amount_minor,
+    rate_window_key: windowHint,
     correlation_id: correlationId,
   });
   const store = deps.commercialStore<ProviderExecution>(db);
@@ -423,20 +533,20 @@ async function proxyOpenAiCompatible(c: any, upstreamPath: string, expectedEmplo
     correlationId,
     commercial,
     requestId: identity.request_key,
+    providerTimeoutMs: envelope.provider_timeout_ms,
   });
   const result = await executeCommercialProviderRequest(store, {
     assignment_id: claims.assignment_id,
     credential_id: claims.credential_id,
-    revision_id: revisionId,
+    revision_id: envelope.revision_id,
     route_key: routeKey,
     request: upstreamBody,
-    reserve_amount_minor: reserveCostCents(upstreamBody),
-    rate_window_key: rateWindowKey(claims.credential_id),
+    reserve_amount_minor: envelope.reserve_amount_minor,
+    rate_window_key: windowHint,
     correlation_id: correlationId,
     provider,
-    resume: provider,
     projectProof: async (accepted) => `commercial://assignments/${accepted.assignment_id}/model-requests/${accepted.request_key}`,
-  } as Parameters<typeof executeCommercialProviderRequest<ProviderExecution>>[1] & { resume: typeof provider });
+  });
 
   const terminal = result.record;
   const execution = terminal.response;
