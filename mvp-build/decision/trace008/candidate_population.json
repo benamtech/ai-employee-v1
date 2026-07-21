@@ -1041,7 +1041,7 @@
         "Risk": 0.23,
         "Cost": 0.23,
         "Scope": 0.25,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -2318,7 +2318,7 @@
         "Risk": 0.23,
         "Cost": 0.23,
         "Scope": 0.25,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -3595,7 +3595,7 @@
         "Risk": 0.23,
         "Cost": 0.23,
         "Scope": 0.25,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -3928,7 +3928,7 @@
         "Risk": 0.28,
         "Cost": 0.31,
         "Scope": 0.32,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -4034,7 +4034,7 @@
         "Risk": 0.28,
         "Cost": 0.31,
         "Scope": 0.32,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -4222,7 +4222,7 @@
         "Risk": 0.43,
         "Cost": 0.31,
         "Scope": 0.32,
-        "Unsupported": -0.025
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -4743,7 +4743,7 @@
         "Risk": 0.28,
         "Cost": 0.31,
         "Scope": 0.32,
-        "Unsupported": -0.04
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -4943,7 +4943,7 @@
         "Risk": 0.23,
         "Cost": 0.23,
         "Scope": 0.25,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -5131,7 +5131,7 @@
         "Risk": 0.255,
         "Cost": 0.27,
         "Scope": 0.285,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -5442,7 +5442,7 @@
         "Risk": 0.23,
         "Cost": 0.23,
         "Scope": 0.25,
-        "Unsupported": -0.04
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,

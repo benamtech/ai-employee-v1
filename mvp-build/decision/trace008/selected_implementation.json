@@ -97,7 +97,7 @@
         "Risk": 0.28,
         "Cost": 0.31,
         "Scope": 0.32,
-        "Unsupported": -0.01
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
@@ -208,7 +208,7 @@
         "Risk": 0.43,
         "Cost": 0.31,
         "Scope": 0.32,
-        "Unsupported": -0.025
+        "Unsupported": 0
       },
       "eligibility": {
         "eligible": true,
