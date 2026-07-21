@@ -12,9 +12,9 @@ decision reproducibility
 → source
 → unit
 → integration
-→ exact-head CI
+→ exact-candidate CI
 → managed database
-→ provider/connector
+→ connector/provider
 → target host/runtime
 → browser/channel/accessibility
 → commercial lifecycle
@@ -31,23 +31,43 @@ A higher class may depend on a lower one. It never inherits acceptance automatic
 
 | Gate | Required evidence |
 |---|---|
-| decision record | candidate matrix, split topology, equal-feasibility controls, search/weight sensitivity, implementation compression, proof plan, deterministic verifier |
+| decision record | explicit baseline semantics, split topology, equal-feasibility controls, search/weight sensitivity, implementation compression, proof plan, deterministic verifier |
 | document authority | one repository contract, one product contract, short compatibility routers, one exact-status owner, historical separation |
-| normative requirements | ratified Standard plus amendments; no document silently weakens them |
-| source/type/lint/contracts | exact-head source and generated-config checks |
-| broad regression | exact-head complete surviving suites with no weakened assertions |
-| build | exact-head production compilability |
-| repository archaeology | active/orphan/stale-reference proof |
-| database | blank forward ledger, existing-row compatibility, isolation/concurrency/security, required managed-platform proof |
-| connector/protocol | live authorization, scope, health, revocation, outage, repair, deletion, client/host conformance |
-| owner/channels | fixture-free owner, assignment, connector, snapshot/reconnect, Web/SMS/Review convergence |
+| direct Manager source | committed `server.ts`, direct typecheck/build/package/Docker entrypoints, no template/generated/string-patch assembly, structural anti-regression gate |
+| source/type/lint/contracts | exact-candidate source and contract checks |
+| broad regression | exact-candidate surviving unit and lint suites with no weakened assertions |
+| build | exact-candidate production workspace compilation |
+| database | blank immutable forward ledger, security, isolation, concurrency, namespace, receipt-chain, and applicable managed-platform proof |
+| connector/protocol | live authorization, scope, health, revocation, outage, repair, deletion, client and host conformance |
+| owner/channels | fixture-free owner, assignment, connector, current-authority stream, reconnect, Web/SMS/Review convergence |
 | golden work | provider-backed Website/Contractor/Bookkeeping revision → approval → effect → receipt/accounting → output/proof → replay/restart |
 | commercial ambiguity | multi-replica rate/budget/effect/accounting/reconciliation plus provider and billing proof |
-| recovery/release | fault, repair, rollback, backup/restore, telemetry, provenance, typed composition, signed manifest |
+| target host/release | secret custody, isolation, lifecycle, fault, repair, rollback, backup/restore, telemetry, provenance, signed manifest |
 | human/capacity/pilot | supported browsers, accessibility, fairness/capacity, pilot entry/exit/incident/rollback |
 | production | every non-waivable gate on one exact signed deployed candidate |
 
-Current state for each gate is recorded in `../CODEGRAPH.md` and `13-resolution-ledger.json`, not duplicated here.
+Current structural state lives in `../CODEGRAPH.md` and `13-resolution-ledger.json`. Transient SHA, run number, and conclusion live only in GitHub Actions or release records.
+
+## Exact-candidate local matrix
+
+The focused workflow uses the PR branch head, asserts the checkout SHA, and runs:
+
+```text
+Trace007 deterministic verifier
+→ structural repository governance
+→ all workspace typechecks
+→ focused WS-01–07 production-boundary units
+→ migration ledger and quick contracts
+→ full repository verification
+→ complete unit regression
+→ all production workspace builds
+→ blank-ledger migrations
+→ commercial migration/security verifier
+→ focused WS-07 PostgreSQL matrix
+→ complete PostgreSQL integration aggregate
+```
+
+Artifact upload is diagnostic. A missing retained log fails the evidence step; artifact-service failure alone does not rewrite command truth.
 
 ## Decision handoff
 
@@ -55,11 +75,11 @@ A consequential handoff records:
 
 - tier and protocol revision;
 - authority basis and observed/unknown reconciliation;
-- candidate batches and dimensions;
-- candidate graph construction and allowed semantic use;
+- exact score schema, orientation, roles, groups, and optional dimensions;
+- candidate batches and candidate-graph semantic boundary;
 - software invariant vertices, hyperedges, candidate mapping, and touch/fractional/complete/proved coverage;
 - one feasible domain shared by full, no-graph, no-diversity, evidence baseline, and random controls;
-- search sensitivity and weight sensitivity;
+- search and weight sensitivity;
 - selected exploration and separate implementation compression;
 - complete behavioral proof plan for every selected software edge;
 - implementation ablation status and independent outcomes;
@@ -70,35 +90,36 @@ For Trace007:
 ```text
 Tier: T3
 Candidates: 64
-Candidate topology: search-only
-Software topology: actual invariant entities/obligations
-Random feasible baselines: at least 1,000
-Search restarts: at least 32
-Weight sensitivity runs: at least 32
-Graph terms: descriptive
-Diversity terms: descriptive or selection-influencing
+Random feasible baselines: 1,024
+Search restarts: 32
+Weight sensitivity runs: 32
+Candidate graph: descriptive
+Software invariant graph: descriptive
+Diversity: descriptive or selection-influencing
 Causal improvement: unestablished
-Implementation: decision/trace007/selected_implementation.json
 ```
 
-Do not copy objective snapshots or selected IDs into multiple active documents. The exact verifier output and canonical implementation file own those details.
+Do not duplicate objective snapshots or selected IDs across active documents. The exact verifier output and canonical implementation artifact own those details.
 
-## Source candidate boundary
+## Source boundary
 
-The current source transaction intends to establish:
+The current source establishes or intends to establish locally:
 
+- direct typed Manager route composition;
+- current assignment and authority-version interception for projected owner actions and streams;
+- strict account/employee/assignment/authority-version stream framing and cursor-before-delta ordering;
 - shared PostgreSQL rate and worst-case budget admission;
-- stable request/revision/effect/provider identity;
+- finite request economics and bounded provider timeout;
+- stable request, revision, command, effect, and provider identity;
 - accepted, failed, denied, refunded, and durable ambiguous settlement;
 - accepted effect-bound accounting and conservation;
 - original-effect reconciliation;
 - exact artifact revision/approval/effect/output/proof continuity;
 - projection repair without republishing;
 - reconciliation, repair, and lineage views;
-- focused behavioral and PostgreSQL tests;
-- focused exact-head workflow.
+- forward migrations through the source-derived head.
 
-Intent and source shape are not accepted evidence until exact tests run and pass.
+Source and local CI do not establish managed, provider, host, browser, billing, release, pilot, deployment, or production evidence.
 
 ## Test and proof rules
 
@@ -108,19 +129,19 @@ Intent and source shape are not accepted evidence until exact tests run and pass
 - Software completeness is not proof.
 - `software_proved` requires exact accepted behavioral evidence.
 - Fixture browser proof is not fixture-free provider/channel proof.
-- Local PostgreSQL is not managed-platform proof where a platform trigger applies.
+- Local PostgreSQL is not managed-platform proof.
 - Provider mocks do not establish provider idempotency or accepted-response-loss behavior.
 - `skipped`, unavailable, and blocked remain visible.
-- Documentation commits after an implementation run require final exact-head checks.
 - Reconciliation and repair preserve original effect identity and accepted evidence.
+- Documentation commits require final exact-candidate checks.
 
 ## Handoff transaction
 
 ```text
-exact branch/base/head and source migration head
-→ decision verifier output and sensitivity
+branch/base and source migration head
+→ decision verifier and sensitivity output
 → source/migration/test/workflow changes
-→ exact commands/runs/results
+→ exact candidate commands and results
 → external prerequisites and blocked classes
 → CODEGRAPH/program/architecture update
 → one dated memory handoff
@@ -128,4 +149,4 @@ exact branch/base/head and source migration head
 → PR or release record
 ```
 
-A workstream or release claim is complete only when the decision record, executable implementation, exact-head verification, required external evidence, and active documentation agree on the same candidate.
+A workstream or release claim is complete only when the decision record, executable implementation, exact-candidate verification, required external evidence, and active documentation agree.
