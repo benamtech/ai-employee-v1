@@ -13,6 +13,8 @@ on:
       - "mvp-build/CODEGRAPH.md"
       - "mvp-build/README.md"
       - "mvp-build/STANDARD.md"
+      - "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+      - "mvp-build/validation/standard-v0.2-amendment-001-evolution.json"
       - "mvp-build/GAPS.md"
       - "mvp-build/REMEDIATION.md"
       - "mvp-build/apps/manager/src/lib/model-gateway*.ts"
