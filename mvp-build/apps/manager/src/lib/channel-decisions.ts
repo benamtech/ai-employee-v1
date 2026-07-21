@@ -137,9 +137,9 @@ export async function resolveSmsHumanPrincipal(db: SupabaseClient, input: {
 }
 
 /**
- * Focus the SMS conversation on the approval just delivered. Superseding a prior
- * focus does not resolve or revoke its approval; it only prevents a later vague
- * reply from being applied to the wrong work object.
+ * Focus the SMS conversation on the approval just delivered. Manager serializes
+ * focus per assignment-bound human, supersedes the prior work object, persists or
+ * replays the new context, and attaches it to the prompt message atomically.
  */
 export async function openSmsApprovalDecisionContext(db: SupabaseClient, input: {
   account_id: string;
@@ -162,47 +162,17 @@ export async function openSmsApprovalDecisionContext(db: SupabaseClient, input: 
     policy_version: approval.policy_version,
   });
 
-  const prompt = await db.from("employee_messages")
-    .select("id,assignment_id,account_id,employee_id,direction,channel")
-    .eq("id", input.prompt_message_id)
-    .maybeSingle();
-  if (prompt.error) throw prompt.error;
-  if (
-    !prompt.data?.id
-    || prompt.data.direction !== "to_owner"
-    || prompt.data.assignment_id !== approval.assignment_id
-    || prompt.data.account_id !== approval.account_id
-    || prompt.data.employee_id !== approval.employee_id
-  ) {
-    throw new Error("sms_decision_prompt_scope_mismatch");
-  }
-
-  const now = new Date().toISOString();
-  const superseded = await db.from("channel_decision_contexts").update({
-    status: "superseded",
-    updated_at: now,
-    evidence: { superseded_by_prompt_message_id: input.prompt_message_id },
-  })
-    .eq("assignment_id", approval.assignment_id)
-    .eq("channel", "sms")
-    .eq("human_principal_id", human.human_principal_id)
-    .eq("status", "open");
-  if (superseded.error) throw superseded.error;
-
-  const contextId = newId(ID_PREFIX.event);
-  const inserted = await db.from("channel_decision_contexts").insert({
-    id: contextId,
-    assignment_id: approval.assignment_id,
-    account_id: approval.account_id,
-    employee_id: approval.employee_id,
-    channel: "sms",
-    external_subject: input.external_subject ?? input.owner_phone_e164,
-    human_principal_id: human.human_principal_id,
-    approval_id: approval.approval_id,
-    prompt_message_id: input.prompt_message_id,
-    status: "open",
-    expires_at: approval.expires_at,
-    evidence: {
+  const opened = await db.rpc("amtech_open_sms_channel_decision_context", {
+    p_context_id: newId(ID_PREFIX.event),
+    p_assignment_id: approval.assignment_id,
+    p_account_id: approval.account_id,
+    p_employee_id: approval.employee_id,
+    p_external_subject: input.external_subject ?? input.owner_phone_e164,
+    p_human_principal_id: human.human_principal_id,
+    p_approval_id: approval.approval_id,
+    p_prompt_message_id: input.prompt_message_id,
+    p_expires_at: approval.expires_at,
+    p_evidence: {
       source: "sms_approval_delivery",
       approval_snapshot_hash: approval.snapshot_hash,
       action_key: approval.action_key,
@@ -211,26 +181,15 @@ export async function openSmsApprovalDecisionContext(db: SupabaseClient, input: 
       natural_language_surface: true,
       code_challenge_required: false,
     },
-    created_at: now,
-    updated_at: now,
-  }).select("*").maybeSingle();
-  if (inserted.error) throw inserted.error;
-  if (!inserted.data?.id) throw new Error("sms_decision_context_not_persisted");
-
-  const messageUpdate = await db.from("employee_messages").update({
-    human_principal_id: human.human_principal_id,
-    decision_context_id: contextId,
-    decision_context: {
-      approval_id: approval.approval_id,
-      action_key: approval.action_key,
-      snapshot_hash: approval.snapshot_hash,
-      expires_at: approval.expires_at,
-    },
-  }).eq("id", input.prompt_message_id).eq("assignment_id", approval.assignment_id);
-  if (messageUpdate.error) throw messageUpdate.error;
+  });
+  if (opened.error) throw opened.error;
+  const row = Array.isArray(opened.data) ? opened.data[0] : opened.data;
+  if (!row || typeof row !== "object" || !String((row as Record<string, unknown>).id ?? "")) {
+    throw new Error("sms_decision_context_not_persisted");
+  }
 
   return {
-    context_id: contextId,
+    context_id: String((row as Record<string, unknown>).id),
     approval_id: approval.approval_id,
     account_id: approval.account_id,
     employee_id: approval.employee_id,
