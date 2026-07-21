@@ -115,16 +115,20 @@ describe("assignment-scoped low-latency projection", () => {
 
 describe("streaming protocol HTTP surfaces", () => {
   it("binds Manager stream frames and subscriptions to assignment authority before AG-UI projection", async () => {
-    const [patch, route, bus] = await Promise.all([
-      readFile("apps/manager/scripts/patch-production-stream.mjs", "utf8"),
+    const [server, route, bus] = await Promise.all([
+      readFile("apps/manager/src/server.ts", "utf8"),
       readFile("apps/web/app/api/employee/[employeeId]/ag-ui/route.ts", "utf8"),
       readFile("apps/manager/src/lib/progress-bus.ts", "utf8"),
     ]);
-    expect(patch).toContain('scope_type", "employee_assignment"');
-    expect(patch).toContain("subscribeProgress(streamScope");
-    expect(patch).toContain("...streamScope, ...p");
-    expect(bus).toContain("account_id");
-    expect(bus).toContain("assignment_id");
+    expect(server).toContain('action: "stream:read"');
+    expect(server).toContain("const assignmentId = authority.assignment.assignment_id");
+    expect(server).toContain("subscribeProgress({");
+    expect(server).toContain("account_id: accountId");
+    expect(server).toContain("employee_id: employeeId");
+    expect(server).toContain("assignment_id: assignmentId");
+    expect(server).toContain("buildEmployeeSnapshot(db, employeeId, accountId, assignmentId)");
+    expect(server).toContain("fetchWorkEventsSince(db, employeeId, accountId, cursor, assignmentId)");
+    expect(bus).toContain("progress:${scope.account_id}:${scope.employee_id}:${scope.assignment_id}");
     expect(route).toContain("ag_ui_authority_scope_drift");
     expect(route).toContain("projectWorkStreamEventToAgUi");
     expect(route).toContain('message: "ag_ui_stream_interrupted"');
@@ -132,10 +136,10 @@ describe("streaming protocol HTTP surfaces", () => {
   });
 
   it("routes MCP App actions through existing effects with current assignment/version interception", async () => {
-    const [route, card, patch] = await Promise.all([
+    const [route, card, server] = await Promise.all([
       readFile("apps/web/app/api/employee/[employeeId]/protocol-action/route.ts", "utf8"),
       readFile("apps/web/app/agent/[employeeId]/components/WorkCard.tsx", "utf8"),
-      readFile("apps/manager/scripts/patch-production-stream.mjs", "utf8"),
+      readFile("apps/manager/src/server.ts", "utf8"),
     ]);
     expect(route).toContain("validateAgUiClientCommandShape");
     expect(route).toContain('command.resource_type === "approval"');
@@ -143,8 +147,9 @@ describe("streaming protocol HTTP surfaces", () => {
     expect(route).toContain('/manager/employee/${employeeId}/message');
     expect(card).toContain('/api/employee/${employeeId}/protocol-action');
     expect(card).toContain('profile: "amtech.mcp-app.v1"');
-    expect(patch).toContain("protocol_assignment_mismatch");
-    expect(patch).toContain("protocol_authority_version_stale");
+    expect(server).toContain("protocol_assignment_mismatch");
+    expect(server).toContain("protocol_authority_version_stale");
+    expect(server).toContain("protocol_authority_incomplete");
     for (const forbidden of ["api.stripe.com", "quickbooks.api.intuit.com", "accounts.google.com", "Authorization: Bearer"]) {
       expect(route).not.toContain(forbidden);
     }
