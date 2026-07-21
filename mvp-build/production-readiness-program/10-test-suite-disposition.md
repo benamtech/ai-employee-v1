@@ -1,17 +1,17 @@
 # Test Suite Disposition
 
-Status: **active test-authority map**  
-Decision protocol: [`../decision/README.md`](../decision/README.md)  
-Current source candidate: PR #35  
-Source migration head: `0076`
+Status: **active test/evidence map**  
+Exact candidate and migration status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Decision protocol: [`../decision/README.md`](../decision/README.md)
 
-A suite is evidence only for the boundary and exact SHA it exercises. Computation chooses the coherent implementation transaction and minimum counterexample manifold; it does not justify testing every discarded possible-decision vector.
+A suite is evidence only for the exact boundary and candidate it exercises. Decision computation selects and describes a transaction; Standard/source invariants define expected behavior.
 
 ## Test-design order
 
 ```text
-verified computation record
+valid decision record
 → selected implementation contract
+→ complete software-edge proof plan
 → narrow red behavioral proof
 → source/migration change
 → narrow green
@@ -24,38 +24,59 @@ Rules:
 
 - `T0` verifies the exact mechanical invariant.
 - `T1` tests the selected behavior and decisive rejection boundary.
-- `T2/T3` tests the selected transaction, concurrency/authority/effect boundaries, and the smallest failure manifold proving convergence.
-- Discarded exploration vectors do not automatically become tests.
-- A score or graph is not a test oracle; expected behavior comes from Standard/source invariants.
+- `T2/T3` tests the coherent transaction, authority/concurrency/effect boundaries, and minimum failure manifold.
+- Every selected software-invariant hyperedge maps to a complete behavioral test or explicit blocker.
+- Rejected candidate vectors do not automatically become tests.
+- Candidate scores and graph metrics are not test oracles.
 - Unknown external prerequisites remain blocked, not mocked into acceptance.
+- Structural governance tests validate routing, schemas, references, evidence classes, and reproducibility. They do not hard-pin prose, PR numbers, migration numbers, issue counts, selected IDs, objective values, or causal labels.
 
-## Current authoritative suites
+## Trace and topology verification
+
+| Harness | Evidence |
+|---|---|
+| `python decision/trace007/compute.py` | decodes the complete candidate matrix; rebuilds candidate search topology; computes software touch/fractional/complete/proved coverage; runs equal-feasibility controls, ≥1,000 feasible random baselines, search sensitivity, and weight sensitivity; not runtime evidence |
+| `test:repo-governance` | structural authority/routing/schema/reference/evidence invariants; not product behavior |
+
+Candidate graph terms are descriptive. Diversity is at most selection-influencing. Causal improvement remains unestablished until independent implementation outcomes are recorded.
+
+## Product suites
 
 | Suite / harness | Authority |
 |---|---|
-| `python decision/trace007/compute.py` | reproducibility of the current candidate frontier, graph hashes, comparisons, and implementation compression; not runtime evidence |
-| `test:standard` | Standard and connector registry/setup/binding contracts |
-| `test:s10-onboarding` | identity/onboarding source contract |
-| `test:lane1-scope` | assignment/authorization scope |
+| `test:standard` | ratified Standard and connector contract shape |
+| `test:s10-onboarding` | identity/onboarding source behavior |
+| `test:lane1-scope` | assignment and authorization scope |
 | `test:lane10-evidence` | release-evidence shape, not signed deployed proof |
-| `test:production-boundary` | named source/unit boundaries including gateway, topology, workbench, streaming, protocol |
-| `test:ws07-ws08` | focused PR #35 commercial admission, ambiguity, partial-success repair, gateway isolation, PostgreSQL ledger |
-| `test:ui:contracts` | typed/fixture UI, MCP Apps, AG-UI, operating snapshot contracts |
-| `db:verify:commercial-effect-migrations` | source-target database security/authority shape after migrations apply |
-| `repo:verify:quick/full` | repository/document governance, contracts, typecheck, lint |
-| `test:unit` | complete surviving broad regression after workspace builds |
-| `test:integration` | PostgreSQL integration boundaries; environment-gated tests remain explicit |
+| `test:production-boundary` | named source/unit production boundaries |
+| `test:ws07-ws08` | commercial admission, ambiguity, repair, gateway isolation, and PostgreSQL ledger boundaries |
+| `test:ui:contracts` | typed/fixture UI, MCP Apps, AG-UI, and owner snapshot contracts |
+| `db:verify:commercial-effect-migrations` | post-migration schema/security/authority shape |
+| `repo:verify:quick/full` | structural governance, contract suites, typecheck, and lint |
+| `test:unit` | surviving broad unit regression |
+| `test:integration` | PostgreSQL integration; environment-gated tests remain explicit |
 | `build` | production compilability |
-| `.github/workflows/ws07-ws08-commercial-effect.yml` | exact-head PR #35 decision/source/unit/PostgreSQL gate when a run exists |
-| Main Integration | canonical merge gate only for the exact candidate it runs |
+| focused WS07/08 workflow | exact-head trace/governance/source/unit/PostgreSQL evidence when a run exists |
+| Main Integration | merge-gate evidence only for its exact candidate |
 
-## Historical exact evidence
+## Software invariant proof matrix
 
-WS-01 and hardened WS-02 pass counts and workflow IDs remain historical evidence for their exact heads. They are not inherited by PR #35. Active docs may cite them only with exact SHA/scope and without implying current-head green.
+The canonical edge-to-test mapping lives in `../decision/trace007/verification_plan.json`.
 
-## PR #35 selected failure manifold
+It covers:
 
-The current transaction tests:
+- exact revision/approval/effect authority;
+- shared rate, budget, dispatch, settlement, and release;
+- provider idempotency and durable receipt continuity;
+- accepted effect/accounting continuity;
+- golden completion and owner refinding;
+- ambiguity reconciliation and retry denial;
+- accepted-effect proof repair;
+- commercial conservation and immutable adjustments.
+
+A mapped test is a proof plan. `software_proved` advances only when the required exact-candidate behavioral evidence is accepted.
+
+## Current minimum failure manifold
 
 1. concurrent same-revision admission;
 2. stale/wrong revision identity;
@@ -65,36 +86,28 @@ The current transaction tests:
 6. accepted-response loss and durable ambiguity;
 7. original-effect reconciliation without redispatch;
 8. crash after receipt before proof projection;
-9. partial multi-step success followed by retry;
+9. partial success followed by retry;
 10. duplicate/stale/reordered replay;
 11. refund/adjustment conservation;
 12. restart and proof refinding.
 
-The mandatory partial-success case accepts the effect, injects projection failure, retries the same identity, and requires one effect, conserved value, no false failure, and refindable proof.
+## External or incomplete evidence
 
-## Useful but incomplete or external
-
-- blank migration and worker-migration harnesses;
-- disposable managed Supabase application/advisors/security proof;
+- blank-ledger and managed-platform migration/security/advisor proof;
 - live provider request-ID/idempotency/accepted-response-loss reconciliation;
 - fixture-free Website/Contractor/Bookkeeping journeys;
-- target-host topology, recovery, rollback, backup/restore;
-- supported-browser/channel, accessibility, capacity, pilot, deployment, signed release.
+- owner proof refinding after restart;
+- target-host fault, rollback, backup/restore, and telemetry;
+- supported-browser/channel, accessibility, capacity, billing lifecycle, signed release, pilot, deployment, and production.
 
-Compiled fixture Web remains deterministic regression, not fixture-free channel acceptance.
-
-## Flakiness and blocked evidence
-
-No suite is labeled flaky without repeatable exact-environment evidence. Missing provider, host, database, browser, billing, or signing prerequisites are `blocked`, not pass. Fix product or harness invariants rather than adding blind retries.
+Compiled fixture Web remains deterministic regression, not fixture-free acceptance.
 
 ## Preservation rules
 
 - Do not weaken a current invariant for green.
 - Discovery cannot substitute for execution.
-- Source-order assertions follow invocation boundaries, not imports.
-- Under-scoped generated UI remains display-only.
-- A started Hermes run may resume/poll the same run after stream loss, never create another silently.
+- A started Hermes run may resume/poll the same run after stream loss; it never silently creates another.
 - Unscoped progress cannot broadcast owner-visible state.
 - Ambiguous provider outcome is not ordinary failure or success.
-- Accepted success requires the boundary's provider/effect/accounting/proof evidence.
+- Accepted success requires matching provider/effect/accounting/proof evidence for the boundary.
 - A lower evidence class cannot satisfy a higher one.
