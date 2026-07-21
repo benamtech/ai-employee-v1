@@ -48,13 +48,27 @@ agent = exact(agent,
   const [res, setRes] = useState<ResourcePayload>(() => fixtureMode ? fixtureResourcePayload(employeeId) : EMPTY);
 `,
 `export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded = false }: Props) {
-  const fixtureSource = fixturePayload ?? fixtureResourcePayload(employeeId);
+  const fixtureSource = useMemo(() => fixturePayload ?? fixtureResourcePayload(employeeId), [employeeId, fixturePayload]);
   const [res, setRes] = useState<ResourcePayload>(() => fixtureMode ? fixtureSource : EMPTY);
 `, "agent_signature");
 agent = exact(agent, "      installResources(fixtureResourcePayload(employeeId));", "      installResources(fixtureSource);", "agent_fixture_refresh");
-agent = exact(agent, "  }, [employeeId, fixtureMode, installResources]);", "  }, [employeeId, fixtureMode, fixtureSource, installResources]);", "agent_refresh_dependencies");
+agent = exact(agent,
+`  }, [employeeId, fixtureMode, installResources]);
+
+  const scheduleRefresh`,
+`  }, [employeeId, fixtureMode, fixtureSource, installResources]);
+
+  const scheduleRefresh`, "agent_refresh_dependencies");
 agent = exact(agent, "    const initial = fixtureMode ? fixtureResourcePayload(employeeId) : EMPTY;", "    const initial = fixtureMode ? fixtureSource : EMPTY;", "agent_initial_fixture");
-agent = exact(agent, "  }, [employeeId, fixtureMode, installResources]);\n\n  useEffect(() => {\n    if (fixtureMode) void refresh();", "  }, [employeeId, fixtureMode, fixtureSource, installResources]);\n\n  useEffect(() => {\n    if (fixtureMode) void refresh();", "agent_reset_dependencies");
+agent = exact(agent,
+`  }, [employeeId, fixtureMode, installResources]);
+
+  useEffect(() => {
+    if (fixtureMode) void refresh();`,
+`  }, [employeeId, fixtureMode, fixtureSource, installResources]);
+
+  useEffect(() => {
+    if (fixtureMode) void refresh();`, "agent_reset_dependencies");
 agent = regex(agent,
 /  useEffect\(\(\) => \{\n    if \(fixtureMode\) return;\n    let source: EventSource \| null = null;[\s\S]*?\n  \}, \[employeeId, fixtureMode, installResources, scheduleRefresh\]\);/,
 `  useEffect(() => {
