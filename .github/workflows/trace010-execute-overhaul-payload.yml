@@ -32,12 +32,15 @@ jobs:
           cat .overhaul-payload/patch/part-* | base64 -d | gzip -d > /tmp/post_transform.patch
           cat .overhaul-payload/finalize/part-* | base64 -d | gzip -d > /tmp/finalize_overhaul.patch
           python3 -m py_compile /tmp/apply_agentic_overhaul.py
-          git apply --check /tmp/post_transform.patch
-          git apply --check /tmp/finalize_overhaul.patch
-      - name: Apply overhaul
+      - name: Apply deterministic transformation
+        run: python3 /tmp/apply_agentic_overhaul.py
+      - name: Apply post-transform patch
         run: |
-          python3 /tmp/apply_agentic_overhaul.py
+          git apply --check /tmp/post_transform.patch
           git apply /tmp/post_transform.patch
+      - name: Apply finalize patch
+        run: |
+          git apply --check /tmp/finalize_overhaul.patch
           git apply /tmp/finalize_overhaul.patch
       - name: Remove staging transport
         run: |
