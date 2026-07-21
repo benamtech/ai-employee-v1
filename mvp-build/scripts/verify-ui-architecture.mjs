@@ -28,8 +28,11 @@ function requireText(path, pattern, label) {
   if (!pattern.test(text(path))) throw new Error(`${label}:${path}`);
   console.log(`PASS ${label} ${path}`);
 }
-function forbidActive(pattern, label) {
-  const found = activeText.filter(({ value }) => pattern.test(value)).map(({ path }) => path);
+function forbidActive(pattern, label, allowed = []) {
+  const allowedSet = new Set(allowed);
+  const found = activeText
+    .filter(({ path, value }) => !allowedSet.has(path) && pattern.test(value))
+    .map(({ path }) => path);
   if (found.length) throw new Error(`${label}:${found.join(",")}`);
   console.log(`PASS ${label}`);
 }
@@ -49,9 +52,9 @@ requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /ProductionFixtureLabClie
 requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /<AgentSurface[\s\S]*fixturePayload=/, "ui_lab_reuses_production_surface");
 requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /fixture_demonstration|Fixture truth/, "ui_lab_evidence_class_explicit");
 
-forbidActive(/new EventSource\(/, "no_surface_local_eventsource");
+forbidActive(/new EventSource\(/, "no_surface_local_eventsource", ["apps/web/app/agent/[employeeId]/owner-projection-controller.ts"]);
 forbidActive(/function fallbackOperatingState\(/, "no_active_fallback_compiler");
 forbidActive(/function deriveOperatingState\(/, "no_active_lab_compiler");
 requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /ProductionFixtureLabClient/, "legacy_lab_isolated_from_route");
 
-console.log(JSON.stringify({ status: "ok", checked_files: activeText.length, legacy_fixture_lab: "isolated_not_routed" }, null, 2));
+console.log(JSON.stringify({ status: "ok", checked_files: activeText.length, event_source_owner: "owner-projection-controller.ts", legacy_fixture_lab: "isolated_not_routed" }, null, 2));
