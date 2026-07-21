@@ -21,7 +21,8 @@ const unique = (values) => new Set(values).size === values.length;
 
 const required = [
   "../identity.md", "../AGENTS.md", "../CLAUDE.md", "../CONTRIBUTING.md", "../CODEGRAPH.md",
-  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "README.md", "STANDARD.md", "GAPS.md", "REMEDIATION.md",
+  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "README.md", "STANDARD.md", "STANDARD-V0.2-AMENDMENT-001.md", "GAPS.md", "REMEDIATION.md",
+  "validation/standard-v0.2-evolution-vector.json", "validation/standard-v0.2-amendment-001-evolution.json",
   "decision/README.md", "decision/protocol-v1.json", "decision/trace007/compute.py", "decision/trace007/task_state.json",
   "decision/trace007/candidate_population.json", "decision/trace007/candidate_scores.json", "decision/trace007/hypergraph.json",
   "decision/trace007/selection_comparison.json", "decision/trace007/selected_exploration.json",
@@ -41,13 +42,15 @@ for (const path of required) if (!(await exists(path))) missing.push(path);
 record("GOV-01", missing.length === 0, `required authority files exist; missing=${missing.join(",") || "none"}`);
 
 const [
-  rootGraph, scopedGraph, readme, agents, claude, standard, gaps, remediation, historicalPlans,
-  decisionDoc, protocolText, traceImplementationText, traceComparisonText, programReadme, roadmap,
-  workstreams, testsDoc, verificationDoc, ledgerText, issuesText, architectureReadme, architectureRisk,
-  roleMap, documentMap, memoryIndex, packageText, migrationLedgerText, workflowText, mainWorkflowText,
+  rootGraph, scopedGraph, readme, agents, claude, standard, amendment, amendmentEvolutionText,
+  gaps, remediation, historicalPlans, decisionDoc, protocolText, traceImplementationText,
+  traceComparisonText, programReadme, roadmap, workstreams, testsDoc, verificationDoc,
+  ledgerText, issuesText, architectureReadme, architectureRisk, roleMap, documentMap,
+  memoryIndex, packageText, migrationLedgerText, workflowText, mainWorkflowText,
 ] = await Promise.all([
   read("../CODEGRAPH.md"), read("CODEGRAPH.md"), read("README.md"), read("AGENTS.md"), read("CLAUDE.md"),
-  read("STANDARD.md"), read("GAPS.md"), read("REMEDIATION.md"), read("second-half-plan/README.md"),
+  read("STANDARD.md"), read("STANDARD-V0.2-AMENDMENT-001.md"), read("validation/standard-v0.2-amendment-001-evolution.json"),
+  read("GAPS.md"), read("REMEDIATION.md"), read("second-half-plan/README.md"),
   read("decision/README.md"), read("decision/protocol-v1.json"), read("decision/trace007/selected_implementation.json"),
   read("decision/trace007/selection_comparison.json"), read("production-readiness-program/README.md"),
   read("production-readiness-program/04-dependency-ordered-production-plan.md"),
@@ -64,13 +67,21 @@ const [
 ]);
 
 const protocol = parse("decision-protocol", protocolText);
+const amendmentEvolution = parse("standard-amendment-evolution", amendmentEvolutionText);
 const implementation = parse("trace007-selected-implementation", traceImplementationText);
 const comparison = parse("trace007-selection-comparison", traceComparisonText);
 const ledger = parse("resolution-ledger", ledgerText);
 const issues = parse("issue-vector", issuesText);
 const pkg = parse("package", packageText);
 
-record("GOV-02", standard.includes("Status: **ratified and effective**") && standard.includes("Computation-First Decision Protocol"), "ratified Standard routes to the computation protocol");
+record("GOV-02", standard.includes("Status: **ratified and effective**")
+  && amendment.includes("Status: **ratified additive amendment and effective**")
+  && amendment.includes("ENG-12.3A — Computation-first execution loop")
+  && amendment.includes("STD-13.3A — Current release status")
+  && amendmentEvolution.amendment_id === "amtech-standard-v0.2-amendment-001"
+  && amendmentEvolution.destructive_modification === 0
+  && amendmentEvolution.summary?.musts_removed_or_weakened === 0,
+  "ratified base Standard plus additive computation-first amendment are canonical");
 
 const routedDocs = [rootGraph, scopedGraph, readme, agents, claude, programReadme, roadmap, workstreams, testsDoc, verificationDoc, architectureReadme, architectureRisk, roleMap, documentMap];
 record("GOV-03", routedDocs.every((text) => text.includes("decision/README.md") || text.includes("decision protocol") || text.includes("Computation")), "active entrypoints route through computation-first authority");
@@ -138,7 +149,8 @@ for (const [name, text] of Object.entries(activeDocuments)) {
 record("GOV-11", staleHits.length === 0, `no stale active authority references; hits=${staleHits.join(",") || "none"}`);
 
 record("GOV-12", migrationLedgerText.includes("const APPLIED_HEAD = 76")
-  && workflowText.includes("migrations/0076_*.sql") && workflowText.includes("decision/protocol-v1.json")
+  && workflowText.includes("migrations/0076_*.sql") && workflowText.includes("mvp-build/decision/**")
+  && workflowText.includes("STANDARD-V0.2-AMENDMENT-001.md")
   && workflowText.includes("npm run test:repo-governance"), "migration ledger and focused workflow enforce current authority");
 
 const scripts = pkg.scripts ?? {};
@@ -156,7 +168,7 @@ record("GOV-15", memoryIndex.includes("Index — newest first") && mainWorkflowT
 
 const report = {
   generated_at: new Date().toISOString(),
-  validator_version: "3.0.0-computation-first",
+  validator_version: "3.1.0-computation-first-amendment",
   status: failures.length ? "fail" : "pass",
   pass_count: passes.length,
   fail_count: failures.length,
