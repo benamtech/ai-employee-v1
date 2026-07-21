@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -7,46 +7,16 @@ const mvpRoot = process.cwd();
 const repoRoot = join(mvpRoot, "..");
 const source = (path: string) => readFile(join(mvpRoot, path), "utf8");
 const rootSource = (path: string) => readFile(join(repoRoot, path), "utf8");
-
-function generateProductionServer() {
-  return spawnSync(process.execPath, [join(mvpRoot, "apps", "manager", "scripts", "generate-production-server.mjs")], {
-    cwd: mvpRoot,
-    encoding: "utf8",
-    timeout: 5000,
-  });
-}
+const exists = async (path: string) => access(join(mvpRoot, path)).then(() => true, () => false);
 
 describe("S8 production admin authority source boundary", () => {
-  it("compiles the only runnable Manager server from an exact pinned template", async () => {
-    const wrapper = await source("apps/manager/src/server.ts");
-    const template = await source("apps/manager/src/server.template.ts");
-    const generator = await source("apps/manager/scripts/generate-production-server.mjs");
+  it("builds the canonical Manager directly from committed typed source", async () => {
+    const server = await source("apps/manager/src/server.ts");
     const managerPackage = JSON.parse(await source("apps/manager/package.json"));
     const tsconfig = JSON.parse(await source("apps/manager/tsconfig.json"));
 
-    expect(wrapper).toBe([
-      "// Canonical import surface for tests and internal callers.",
-      "// Build/dev/start execute server.generated.ts directly after the pinned generator runs.",
-      'export * from "./server.generated.js";',
-      "",
-    ].join("\n"));
-    expect(template).toContain("async function adminActor(");
-    expect(generator).toContain('expectedTemplateBlob = "c1ba7ef5b3f26a4511cd639f70b926605e7d834c"');
-    expect(generator).toContain("production_server_template_hash_mismatch");
-    expect(generator).toContain('from "node:url"');
-    expect(managerPackage).toMatchObject({
-      main: "./dist/server.generated.js",
-      scripts: {
-        "generate:production-server": expect.any(String),
-        dev: "tsx watch src/server.generated.ts",
-        start: "node dist/server.generated.js",
-      },
-    });
-    expect(tsconfig.exclude).toContain("src/server.template.ts");
-
-    const generated = generateProductionServer();
-    expect(generated.status, generated.stderr).toBe(0);
-    const server = await source("apps/manager/src/server.generated.ts");
+    expect(server).toContain("// Canonical typed Manager server source.");
+    expect(server).toContain("export function buildApp(): Hono");
     expect(server).toContain("authorizePlatformAdminRequest");
     expect(server).toContain('authorization: c.req.header("X-AMTECH-Admin-Authorization")');
     expect(server).toContain('support_lease_id: c.req.header("X-AMTECH-Support-Lease-Id")');
@@ -56,6 +26,23 @@ describe("S8 production admin authority source boundary", () => {
     expect(server).not.toContain("requirePlatformRole");
     expect(server).not.toContain("recordSupportAccess");
     expect(server).not.toContain("runAdminSupportAction");
+
+    expect(managerPackage).toMatchObject({
+      main: "./dist/server.js",
+      scripts: {
+        dev: "tsx watch src/server.ts",
+        start: "node dist/server.js",
+        build: "tsc -p tsconfig.json",
+        typecheck: "tsc -p tsconfig.json --noEmit",
+      },
+    });
+    expect(managerPackage.scripts).not.toHaveProperty("generate:production-server");
+    expect(tsconfig).not.toHaveProperty("exclude");
+    await expect(exists("apps/manager/src/server.template.ts")).resolves.toBe(false);
+    await expect(exists("apps/manager/src/server.promoted.ts")).resolves.toBe(false);
+    await expect(exists("apps/manager/scripts/generate-production-server.mjs")).resolves.toBe(false);
+    await expect(exists("apps/manager/scripts/patch-production-stream.mjs")).resolves.toBe(false);
+    await expect(exists("apps/manager/scripts/production-admin-block.mjs")).resolves.toBe(false);
   });
 
   it("registers every support write through C3 and links the accepted receipt", async () => {
@@ -95,7 +82,9 @@ describe("local machine production gate", () => {
     expect(rootPackage.packageManager).toMatch(/^pnpm@/);
     expect(rootPackage.scripts).toMatchObject({ build: expect.any(String), test: expect.any(String), dev: expect.any(String), verify: expect.any(String), "s9:go-no-go": expect.any(String) });
     expect(mvpPackage.workspaces).toEqual(["packages/*", "apps/*"]);
-    expect(mvpPackage.scripts.prepare).toContain("generate:production-sources");
+    expect(mvpPackage.scripts).not.toHaveProperty("generate:production-sources");
+    expect(mvpPackage.scripts).not.toHaveProperty("prepare");
+    expect(Object.values(mvpPackage.scripts).some((command) => String(command).includes("server.generated"))).toBe(false);
     await expect(readFile(join(mvpRoot, "package-lock.json"), "utf8")).resolves.toContain('"lockfileVersion"');
     await expect(readFile(join(repoRoot, "pnpm-lock.yaml"), "utf8")).resolves.toContain("importers:");
   });
@@ -113,9 +102,10 @@ describe("local machine production gate", () => {
     expect(managerBlock).not.toContain("/var/run/docker.sock");
     expect(compose).toContain("provisioner_socket:/run/amtech-provisioner");
     expect(manager).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
-    expect(manager).toContain("apps/manager/dist/server.generated.js");
-    expect(manager).not.toContain('CMD ["node", "apps/manager/dist/server.js"]');
+    expect(manager).toContain("apps/manager/dist/server.js");
+    expect(manager).not.toContain("server.generated.js");
     expect(provisioner).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
+    expect(provisioner).not.toContain("server.generated.js");
     expect(web).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
     expect(caddy).toContain('org.opencontainers.image.revision="${AMTECH_GIT_SHA}"');
   });
@@ -132,8 +122,8 @@ describe("local machine production gate", () => {
     expect(dev).toContain("docker-compose.production.yml");
     expect(dev).toContain('"--no-build"');
     expect(dev).toContain('"--pull", "never"');
-    expect(dev).toContain("requireProof(\"build-artifacts\")");
-    expect(dev).toContain("requireProof(\"test\")");
+    expect(dev).toContain('requireProof("build-artifacts")');
+    expect(dev).toContain('requireProof("test")');
   });
 
   it("exposes help without running build, test, or deploy work", async () => {
