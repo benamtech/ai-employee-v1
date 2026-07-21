@@ -1,68 +1,69 @@
-# WS-06/07 Commercial Effect Transaction and WS-08 Repair Groundwork
+# WS-01–07 Production Boundary and WS-08 Repair Groundwork
 
-Status: **source candidate; exact-head and external verification unresolved**  
-Exact current candidate and migration status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Status: **source and locally reproducible candidate; external acceptance remains open**  
+Exact candidate and migration status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
 Decision protocol: [`../decision/README.md`](../decision/README.md)  
 Trace: [`../decision/trace007/`](../decision/trace007/)
 
 ## Claim boundary
 
-This record describes a source transaction and its proof plan. It does not establish exact-head CI, managed database, live provider, target host, fixture-free golden work, billing lifecycle, recovery/rollback, signed release, pilot, deployment, or production acceptance.
+This record describes the production source transaction and locally reproducible proof surface. Exact GitHub Actions records own transient candidate conclusions. Managed database, live connector/provider, target host, fixture-free channels and golden work, billing lifecycle, recovery/rollback, signed release, accessibility, capacity, pilot, deployment, and production remain separate evidence classes.
 
-## Decision correction
+## Decision semantics
 
-The task remains `T3` because it crosses WS-06, WS-07, and bounded WS-08 boundaries. Trace007 still contains the complete 64-candidate matrix, but its topology and causal claims are corrected.
+Trace007 is a `T3` record with:
 
-### Candidate search graph
-
-`candidate_graph.json` has candidate trajectories as vertices. It supports diversity, redundancy, lineage, similarity, and candidate-edge touch. It does not describe complete software invariants.
-
-### Software invariant hypergraph
-
-`software_invariant_hypergraph.json` has actual software entities and obligations as vertices, including revision, approval, authority, reservation, effect, provider attempt/identity/receipt, settlement, accounting, output, proof, reconciliation, refinding, and repair.
-
-Only this graph computes:
-
-```text
-software_touch
-software_fractional
-software_complete
-software_proved
-```
-
-`software_proved` remains zero or otherwise unestablished until independent exact-candidate behavioral evidence is attached.
-
-### Equal-feasibility controls
-
-All controls use the same set size, validated candidate domain, mandatory workstream coverage, mandatory Z-space coverage, and invariant feasibility.
-
-```text
-full
-no_graph
-no_diversity
-evidence_baseline
-≥ 1,000 feasible random baselines
-```
-
-Mandatory coverage is a constraint, not an objective reward. The previous comparison against an uncovered utility control is invalid for causal inference.
+- 64 independently batched candidates;
+- explicit score-dimension roles, orientation, and grouped evidence baseline;
+- a candidate search graph used only for search diversity, lineage, redundancy, and candidate-edge touch;
+- a software-invariant hypergraph used for touch, fractional, complete, and proved software coverage;
+- one feasible domain shared by full, no-graph, no-diversity, evidence-baseline, and 1,024 random controls;
+- 32 deterministic search restarts and 32 weight perturbations;
+- separate exploration and implementation compression.
 
 Current classification:
 
 ```text
 candidate graph terms: descriptive
 software invariant graph terms: descriptive
-diversity terms: selection-influencing when the equal-feasibility set changes
+diversity terms: descriptive or selection-influencing
 causal improvement: unestablished
 ```
 
-Causal promotion requires independent implementation outcomes in `implementation_ablation.json`.
+No ranking delta, objective delta, edge touch, or represented software node establishes better software. Causal promotion requires independent implementation outcomes in `implementation_ablation.json`.
 
-## Coherent source transaction
+## Repository and Manager boundary
+
+Production Manager behavior is committed typed source:
+
+```text
+apps/manager/src/server.ts
+→ direct typecheck
+→ direct build to dist/server.js
+→ direct package and Docker entrypoint
+```
+
+The template, generated server, string-patch scripts, generation hooks, and generated Docker entrypoints were removed. Structural governance fails if that mutation chain reappears.
+
+Projected owner actions and streams revalidate current assignment authority:
+
+```text
+owner session
+→ exact account + employee + assignment
+→ current non-revoked authority version
+→ projected assignment/version match
+→ command/tool dispatch or scoped stream projection
+```
+
+Stream frames carry account, employee, assignment, authority version, and cursor before deltas. Unscoped progress cannot reach the owner stream.
+
+## Commercial effect transaction
 
 ```text
 immutable request/work revision
 → exact assignment + current commercial authority
-→ atomic shared rate token + worst-case budget reservation
+→ finite request economics and bounded provider timeout
+→ database-owned minute rate token + worst-case budget reservation
 → one durable command/effect identity
 → one provider idempotency identity
 → accepted | failed | ambiguous durable outcome
@@ -74,92 +75,72 @@ immutable request/work revision
 → projection repair without repeating the accepted effect
 ```
 
-Implementation compression remains:
+Key invariants:
 
-- `D01` — atomic PostgreSQL admission;
-- `D02` — durable settlement, release, adjustment, and conservation;
-- `D03` — provider idempotency and original-effect ambiguity reconciliation;
-- `D04` — accepted effect/accounting continuity;
-- `D06` — exact golden-work completion;
-- `D07` — independently repairable proof projection.
-
-This transaction is justified by source evidence and invariants. The mathematics is supporting description, not established cause.
+- caller-supplied rate-window keys are compatibility metadata and cannot shard shared authority;
+- correlation IDs and reservation estimates do not redefine deterministic replay identity;
+- malformed token, timeout, price, or provider-usage values cannot introduce `NaN` or false settlement;
+- provider acceptance with invalid or lost usage evidence remains ambiguous;
+- accepted success requires provider, effect, accounting, output, and proof evidence appropriate to the boundary;
+- reconciliation preserves the original command, effect, and provider identity.
 
 ## Forward migrations
 
-The source candidate adds forward-only database state for:
+Migrations `0074` through `0078` establish:
 
-- shared model-gateway rate windows and request reservations;
-- immutable adjustments and conservation;
-- effect proof projections;
-- ambiguity and reconciliation state;
-- lineage and repair queues;
-- native-idempotency reconciliation constrained to the original command/effect/provider identity;
-- reviewed service-role RPC mutation boundaries.
+- shared rate windows and request reservations;
+- settlement, release, immutable adjustments, refunds, and conservation;
+- accepted effect/accounting continuity;
+- proof projection and repair queues;
+- ambiguity, reconciliation, and lineage views;
+- database-owned minute-window authority;
+- forward-only repair of the PL/pgSQL rate-window conflict-target namespace collision.
 
-Applied migrations remain immutable. Exact migration names and current source head live in `../CODEGRAPH.md` and `packages/db/migrations/`.
-
-## Model Gateway boundary
-
-- request identity derives from canonical request content and exact assignment/commercial authority;
-- worst-case cost reserves before dispatch;
-- one provider call uses one provider idempotency identity;
-- blind post-dispatch retry is forbidden;
-- timeout, connection loss, or accepted response without sufficient receipt evidence becomes durable ambiguity;
-- accepted usage binds the accepted effect receipt and accounting receipt;
-- reconciliation queries/replays only the existing provider identity and cannot mint a new effect.
+Applied migrations remain immutable. The current source head is derived by the migration ledger and recorded only in `../CODEGRAPH.md`.
 
 ## Golden work boundary
 
-Website, Contractor Office, and Bookkeeping share one revision/approval/effect/proof grammar:
+Website, Contractor Office, and Bookkeeping share one grammar:
 
-- one immutable revision;
-- exact approval authority;
-- one publication effect;
-- owner-visible success only with accepted effect and proof reference;
-- degraded projection state when effect acceptance exists but proof projection is pending;
-- repair that projects/refinds proof without republishing.
+```text
+immutable revision
+→ validation
+→ exact approval snapshot
+→ one publication effect
+→ accepted receipt
+→ output bound to revision and effect
+→ owner proof projection
+→ replay-safe repair and restart refinding
+```
 
-## Software invariant proof plan
+Provider-backed execution and restart refinding remain external acceptance.
 
-`verification_plan.json` maps every software hyperedge to behavioral tests or named external acceptance. The minimum failure manifold covers:
+## Locally reproducible proof surface
 
-1. concurrent same-revision admission;
-2. stale/wrong revision authority;
-3. budget reservation conflict;
-4. shared rate exhaustion;
-5. failure before proven effect;
-6. accepted-response loss;
-7. original-effect reconciliation without redispatch;
-8. crash after receipt before proof projection;
-9. partial success followed by retry;
-10. duplicate/stale/reordered replay;
-11. refund, reversal, and conservation;
-12. restart and owner proof refinding.
-
-A complete proof plan is not accepted proof. Exact-head and external results determine `software_proved`.
-
-## Verification route
+The candidate workflow executes, on one exact branch head:
 
 ```bash
 python decision/trace007/compute.py
-npm run test:ws07-ws08
-npm run db:verify:commercial-effect-migrations
+npm run test:repo-governance
+npm run typecheck
 npm run test:production-boundary
 npm run repo:verify:quick
 npm run repo:verify:full
 npm run test:unit
-npm run test:integration
 npm run build
+npm run db:migrate
+npm run db:verify:commercial-effect-migrations
+npm run test:integration
 ```
 
-## Open prerequisites
+Artifact upload is diagnostic only; command exit status and retained evidence-file existence are the gates.
 
-- exact-head trace, governance, source, unit, PostgreSQL, type, lint, build, and broad regression evidence;
-- disposable managed-platform migration/security/advisor proof;
-- provider sandbox request-ID/idempotency/timeout/accepted-response-loss reconciliation;
-- billing, entitlement, invoice, refund, and reversal lifecycle;
-- fixture-free Website/Contractor/Bookkeeping journeys and restart proof refinding;
-- target-host fault injection, rollback, backup/restore, telemetry, and signed release;
-- typed server composition replacing generated string mutation;
-- accessibility, capacity, pilot, deployment, and production gates.
+## External prerequisites
+
+- disposable managed-platform migration, security, trigger, advisor, backup, and rollback proof;
+- live remote MCP/OAuth and shipped connector setup, scope change, revocation, outage, repair, and deletion;
+- provider request-ID, idempotency, timeout, accepted-response-loss, and original-effect reconciliation;
+- payer, beneficiary, entitlement, usage, cost, invoice, refund, suspension, and reactivation lifecycle;
+- fixture-free Website, Contractor Office, and Bookkeeping journeys with restart proof refinding;
+- target-host secret custody, employee isolation, lifecycle replacement, fault injection, rollback, backup/restore, telemetry, and signed release;
+- supported-browser/channel, accessibility, capacity/fairness, pilot, deployment, and production gates.
