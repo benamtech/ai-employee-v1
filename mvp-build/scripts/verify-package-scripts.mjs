@@ -42,8 +42,11 @@ for (const pattern of workspacePatterns) {
 }
 
 if (workspacePackages.length === 0) errors.push('no workspace packages discovered');
+const names = new Set();
 for (const workspace of workspacePackages) {
   if (!workspace.name) errors.push(`workspace missing name: ${workspace.path}`);
+  else if (names.has(workspace.name)) errors.push(`duplicate workspace name: ${workspace.name}`);
+  else names.add(workspace.name);
 }
 
 const buildBearing = workspacePackages.filter((workspace) => workspace.build);
