@@ -50,18 +50,24 @@ jobs:
         working-directory: mvp-build
         run: |
           set -euo pipefail
-          node scripts/verify-ui-architecture.mjs
-          cp validation/ui-presentation-coverage.json /tmp/ui-presentation-coverage.json
-          node scripts/generate-ui-coverage.mjs validation/ui-presentation-coverage.json
-          diff -u /tmp/ui-presentation-coverage.json validation/ui-presentation-coverage.json
+          mkdir -p infra/proofs/ci-source
+          {
+            node scripts/verify-ui-architecture.mjs
+            node scripts/generate-ui-coverage.mjs /tmp/ui-presentation-coverage.json
+            diff -u validation/ui-presentation-coverage.json /tmp/ui-presentation-coverage.json
+          } 2>&1 | tee infra/proofs/ci-source/architecture.log
       - name: Build generated source dependencies
         working-directory: mvp-build
         run: |
-          npm run build --workspace @amtech/shared
-          npm run build --workspace @amtech/db
+          set -euo pipefail
+          {
+            npm run build --workspace @amtech/shared
+            npm run build --workspace @amtech/db
+          } 2>&1 | tee -a infra/proofs/ci-source/source.log
       - name: Focused WS08 UI and recovery tests
         working-directory: mvp-build
         run: |
+          set -euo pipefail
           npx vitest run \
             tests/unit/ui-architecture-fitness.test.ts \
             tests/unit/ui-state-machine-conformance.test.ts \
@@ -71,26 +77,35 @@ jobs:
             tests/unit/ui-resources.test.ts \
             tests/unit/ui-fixture-guard.test.ts \
             tests/unit/ws06-ws08-failure-manifold.test.ts \
+            tests/unit/ws08-release-authority.test.ts \
+            tests/unit/ws09-capacity-groundwork.test.ts \
             tests/unit/production-topology-acceptance.test.ts \
             tests/unit/ops-proof-scripts.test.ts \
-            --reporter=verbose
+            --reporter=verbose 2>&1 | tee -a infra/proofs/ci-source/source.log
       - name: Repository governance typecheck and lint
         working-directory: mvp-build
         run: |
-          npm run test:repo-governance
-          npm run typecheck
-          npm run lint
+          set -euo pipefail
+          {
+            npm run test:repo-governance
+            npm run typecheck
+            npm run lint
+          } 2>&1 | tee -a infra/proofs/ci-source/source.log
       - name: Broad unit and workspace build
         working-directory: mvp-build
         run: |
-          npm run test:unit
-          npm run build
+          set -euo pipefail
+          {
+            npm run test:unit
+            npm run build
+          } 2>&1 | tee -a infra/proofs/ci-source/source.log
       - name: Retain source diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ws08-source-${{ env.CANDIDATE_SHA }}
           path: |
+            mvp-build/infra/proofs/ci-source
             mvp-build/validation/ui-presentation-coverage.json
             mvp-build/decision/trace008/selection_comparison.json
             mvp-build/decision/trace009/selection_comparison.json
@@ -133,27 +148,36 @@ jobs:
         run: npm ci
       - name: Apply blank forward ledger
         working-directory: mvp-build
-        run: npm run db:migrate
+        run: |
+          set -euo pipefail
+          mkdir -p infra/proofs/ci-postgres
+          npm run db:migrate 2>&1 | tee infra/proofs/ci-postgres/postgres.log
       - name: Verify migration and commercial authority
         working-directory: mvp-build
         run: |
-          npm run db:status
-          npm run db:verify:commercial-effect-migrations
-          npx vitest run --config vitest.integration.config.ts tests/integration/ws07-commercial-ledger.test.ts --reporter=verbose
+          set -euo pipefail
+          {
+            npm run db:status
+            npm run db:verify:commercial-effect-migrations
+            npx vitest run --config vitest.integration.config.ts tests/integration/ws07-commercial-ledger.test.ts --reporter=verbose
+          } 2>&1 | tee -a infra/proofs/ci-postgres/postgres.log
       - name: Full PostgreSQL integration aggregate
         working-directory: mvp-build
-        run: npm run test:integration
+        run: |
+          set -euo pipefail
+          npm run test:integration 2>&1 | tee -a infra/proofs/ci-postgres/postgres.log
       - name: Retain PostgreSQL diagnostics
         if: always()
+        working-directory: mvp-build
         run: |
-          mkdir -p mvp-build/infra/proofs/ci
-          psql "$DATABASE_URL" -XAt -c "select filename, checksum from schema_migrations order by filename" > mvp-build/infra/proofs/ci/migration-ledger.txt || true
+          mkdir -p infra/proofs/ci-postgres
+          psql "$DATABASE_URL" -XAt -c "select name, applied_at from _migrations order by name" > infra/proofs/ci-postgres/migration-ledger.txt 2>> infra/proofs/ci-postgres/postgres.log || true
       - name: Upload PostgreSQL diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ws08-postgres-${{ env.CANDIDATE_SHA }}
-          path: mvp-build/infra/proofs/ci
+          path: mvp-build/infra/proofs/ci-postgres
           if-no-files-found: error
           retention-days: 5
 
