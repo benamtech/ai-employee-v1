@@ -3,14 +3,15 @@
 Status: active source candidate; exact acceptance unresolved  
 Updated: 2026-07-20  
 Candidate: PR #35, branch `agent/ws06-ws07-production`, stacked on PR #34  
-Source migration head: `0076`
+Source migration head: `0077`
 
 This is the sole contributor-facing file that carries exact current product/workstream status. Root and compatibility documents route here rather than duplicating it.
 
 ## Evidence headline
 
 - PR #35 contains the WS-07 commercial/effect source transaction and bounded WS-08 reconciliation, lineage, repair, and observability groundwork.
-- Source migrations extend through `0076`; application to a database or managed platform requires separate proof.
+- Source migrations extend through `0077`; application to a database or managed platform requires separate proof.
+- Migration `0077` makes the shared minute rate window database-owned and removes correlation/window metadata from deterministic replay conflict checks.
 - Exact-head CI is unresolved until the current candidate's required workflows complete successfully.
 - Managed database, live provider, target host, fixture-free golden work/channel, billing lifecycle, signed release, accessibility, capacity, pilot, deployment, and production remain separate gates.
 - The public estimator is outdated and non-canonical.
@@ -48,8 +49,9 @@ model-gateway.ts
   └─ signed alias + assignment/commercial claims
 
 model-gateway-http.ts
+  ├─ validated request economics and provider accounting bounds
   ├─ model-gateway-commercial.ts
-  │   ├─ atomic rate and budget admission
+  │   ├─ atomic database-owned rate and budget admission
   │   ├─ dispatch state
   │   ├─ settlement, release, and adjustment
   │   └─ request proof projection
@@ -91,15 +93,15 @@ All selection controls use one feasible domain. Mandatory workstream/space cover
 |---|---|---|
 | owner snapshot/stream | exact-scope snapshot, cursor-before-delta, reconnect without intent replay | fixture-free browser, reconnect, and cross-account acceptance |
 | golden work | revision → approval → effect → output → proof with projection repair | provider-backed three-role journeys and restart refinding |
-| Model Gateway | shared DB admission, one provider identity, accepted/failed/ambiguous settlement | provider sandbox idempotency and accepted-response-loss proof |
+| Model Gateway | shared DB admission, one provider identity, validated request bounds, accepted/failed/ambiguous settlement | provider sandbox idempotency and accepted-response-loss proof |
 | commercial accounting | effect-bound usage, immutable adjustments, conservation | entitlement, invoice, refund, and billing lifecycle reconciliation |
-| database | forward migrations through `0076` and focused PostgreSQL contracts | blank-ledger exact-head CI and managed Supabase proof |
+| database | forward migrations through `0077` and focused PostgreSQL contracts | blank-ledger exact-head CI and managed Supabase proof |
 | recovery | ambiguity queues, lineage, projection repair seams | target-host fault injection, rollback, backup/restore, telemetry |
 | release | release-evidence foundations | signed deployed candidate, accessibility, capacity, pilot, production |
 
 ## Known architectural liability
 
-Production Manager assembly still depends on generated server source plus string-based patch transforms. This is a real source-maintenance and semantic-test liability. The next bounded source transaction should replace mutation with typed server composition and route generation to data/config only. This documentation/trace cleanup does not claim that source refactor is implemented.
+Production Manager assembly still depends on generated server source plus string-based patch transforms. This is a real source-maintenance and semantic-test liability. The current WS-01–07 cleanup is replacing that mutation chain with committed typed server source; no completion claim is made until the direct-source build and complete exact-head matrix pass.
 
 ## Active authority map
 
