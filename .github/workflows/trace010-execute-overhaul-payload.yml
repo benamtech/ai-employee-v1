@@ -1,0 +1,70 @@
+name: Trace010 Execute Overhaul Payload
+
+on:
+  push:
+    branches:
+      - agent/mvp-build-agentic-overhaul
+    paths:
+      - '.github/workflows/trace010-execute-overhaul-payload.yml'
+      - '.overhaul-payload/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trace010-execute-overhaul-payload
+  cancel-in-progress: false
+
+jobs:
+  execute-verify-commit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Assert exact input head
+        run: test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+      - name: Decode staged payload
+        run: |
+          cat .overhaul-payload/apply/part-* | base64 -d | gzip -d > /tmp/apply_agentic_overhaul.py
+          cat .overhaul-payload/patch/part-* | base64 -d | gzip -d > /tmp/post_transform.patch
+          cat .overhaul-payload/finalize/part-* | base64 -d | gzip -d > /tmp/finalize_overhaul.patch
+          python3 -m py_compile /tmp/apply_agentic_overhaul.py
+          git apply --check /tmp/post_transform.patch
+          git apply --check /tmp/finalize_overhaul.patch
+      - name: Apply overhaul
+        run: |
+          python3 /tmp/apply_agentic_overhaul.py
+          git apply /tmp/post_transform.patch
+          git apply /tmp/finalize_overhaul.patch
+      - name: Remove staging transport
+        run: |
+          rm -rf .overhaul-payload
+          rm -f .github/workflows/trace010-mvp-build-audit.yml
+          rm -f .github/workflows/trace010-execute-overhaul-payload.yml
+      - name: Install dependencies
+        working-directory: mvp-build
+        run: npm ci
+      - name: Verify agentic contracts
+        working-directory: mvp-build
+        run: npm run repo:agentic:check
+      - name: Verify full repository
+        working-directory: mvp-build
+        run: npm run repo:verify:full
+      - name: Run broad unit suite
+        working-directory: mvp-build
+        run: npm run test:unit
+      - name: Build all workspaces
+        working-directory: mvp-build
+        run: npm run build
+      - name: Commit verified exact-head tree
+        run: |
+          test ! -e .overhaul-payload
+          test ! -e .github/workflows/trace010-mvp-build-audit.yml
+          test ! -e .github/workflows/trace010-execute-overhaul-payload.yml
+          git config user.name "amtech-agent"
+          git config user.email "agent@amtechai.com"
+          git add -A
+          git commit -m "restructure mvp-build for agentic engineering"
+          git push origin HEAD:agent/mvp-build-agentic-overhaul
