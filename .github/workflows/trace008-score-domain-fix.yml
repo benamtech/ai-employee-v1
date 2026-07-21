@@ -1,0 +1,55 @@
+name: Trace008 Score Domain Fix
+
+on:
+  push:
+    branches:
+      - agent/ws08-ws09-release-recovery
+    paths:
+      - .github/workflows/trace008-score-domain-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/ws08-ws09-release-recovery
+          fetch-depth: 0
+      - name: Repair and recompute score domain
+        working-directory: mvp-build/decision/trace008
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path("generate.py")
+          source = path.read_text()
+          old = "min(1,.05+.22*x-.015*e)]"
+          new = "max(0,min(1,.05+.22*x-.015*e))]"
+          if source.count(old) != 1:
+              raise SystemExit("trace008_unsupported_score_anchor_mismatch")
+          path.write_text(source.replace(old, new))
+          PY
+          python generate.py > trace008-compute.json
+          python compute.py > trace008-verify.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          scores = json.loads(Path("candidate_scores.json").read_text())
+          for row in scores["rows"]:
+              for name, value in row["r"].items():
+                  if not 0 <= float(value) <= 1:
+                      raise SystemExit(f"score_out_of_domain:{row['id']}:{name}:{value}")
+          selected = json.loads(Path("selected_implementation.json").read_text())
+          assert selected["selected_ids"] == ["D01", "D04", "D08", "D14"]
+          assert selected["coverage_before_patch"]["omega"] is True
+          PY
+          gzip -9c generate.py | base64 -w0 > .generate.py.gz.b64
+      - name: Commit corrected computation
+        run: |
+          git config user.name amtech-ci
+          git config user.email amtech-ci@users.noreply.github.com
+          git add mvp-build/decision/trace008
+          git commit -m "trace008 enforce score domain"
+          git push origin HEAD:agent/ws08-ws09-release-recovery
