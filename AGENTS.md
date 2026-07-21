@@ -1,60 +1,78 @@
-# AGENTS.md — Repository Agent Rules
+# AGENTS.md — Repository contract
 
 Status: active  
 Updated: 2026-07-20
 
-## Mandatory read order
+## Start here
 
-1. `identity.md`
-2. this file or `CLAUDE.md`
-3. `CONTRIBUTING.md`
-4. root `CODEGRAPH.md`
-5. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
-6. ratified `mvp-build/STANDARD.md`
-7. `mvp-build/production-readiness-program/README.md`
-8. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
-9. `mvp-build/docs/architecture/README.md`
-10. relevant source, migrations, tests, workflows, proof, release records, PRs, and current diff
+1. Read `identity.md`.
+2. Read this file, `CONTRIBUTING.md`, and `CODEGRAPH.md`.
+3. For product work, read `mvp-build/AGENTS.md`, `mvp-build/CODEGRAPH.md`, and the ratified Standard.
+4. Read only the active program record, active decision trace, newest relevant indexed handoff, and exact source/test/proof needed for the task.
 
-Authority order: deployed release proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests/acceptance → ratified Standard/current production-readiness program → CODEGRAPH/architecture → newest indexed memory → historical records.
+Do not recursively absorb historical plans, audits, or handoffs as current instructions.
+
+## Authority
+
+```text
+deployed release proof
+→ applied durable state
+→ executable source and generated configuration
+→ exact-SHA executable evidence
+→ ratified Standard and active production program
+→ current CODEGRAPH and architecture
+→ newest indexed memory
+→ historical records
+```
+
+A lower evidence class never promotes itself into a higher one. Source is not CI. CI is not provider proof. Fixtures are not live acceptance. An ancestor SHA is not evidence for the current candidate.
 
 ## Repository routing
 
-- AI Employee implementation and production authority: `mvp-build/`.
-- Ratified requirements: `mvp-build/STANDARD.md`.
-- Single active program: `mvp-build/production-readiness-program/`.
-- Historical plans: `mvp-build/second-half-plan/`; non-canonical.
-- Current architecture: `mvp-build/docs/architecture/`.
-- Sole handoff index: `mvp-build/memory/MEMORY.md`.
-- Historical factual ledger: `wiki/MVP/implementation-records/`.
-- Hyper Site lives in `benamtech/hyper-site`; do not recreate it here.
-- The public estimator is outdated and non-canonical.
+- `mvp-build/` — executable AI Employee product and production authority.
+- `mvp-build/STANDARD.md` plus ratified amendments — normative requirements.
+- `mvp-build/decision/` — decision protocol and one active trace per active transaction.
+- `mvp-build/production-readiness-program/` — sole active production-readiness route.
+- `mvp-build/docs/architecture/` — current source-backed explanation.
+- `mvp-build/memory/MEMORY.md` — sole handoff index.
+- `mvp-build/second-half-plan/`, old audits, and dated handoffs — historical evidence only.
+- `wiki/` — strategy, research, and factual history; never implementation authority.
 
-## Current integration boundary
+## Current stack
 
-- Current `main` baseline for this work is `48b917389ed85b9652eca43a8e4a8f60b52e917b`.
-- PR #33/source/tests are newer authority than stale plan-status prose, but establish only their exact lifecycle/source/test evidence.
-- Remote MCP, MCP Apps, AG-UI, effective capability, and streaming Web retain only their exact source/test evidence.
-- Live connector authorization/revocation, third-party host conformance, managed database, target host, provider, fixture-free Web/SMS/Review, commercial, recovery, deployment, pilot, and production acceptance remain distinct and open unless exact current evidence closes them.
-- WS-05 and WS-06 may use WS-07/08/09 only as read-only dependencies or future frontier nodes.
+- PR #34 is the stacked owner-runtime base.
+- PR #35 (`agent/ws06-ws07-production`) is the active WS-06/07 candidate with bounded WS-08 groundwork.
+- Source migration head is `0076`; applied, managed-platform, and production status require separate proof.
+- PR #35 exact-head CI is currently a release gate, not an assumed fact.
 
-## Product and protocol invariants
+## Decision discipline
 
-1. AMTECH is governed AI labor, not a generic chat or tool wrapper.
-2. Every consequential path resolves an authenticated principal plus explicit assignment or approved platform/system context.
-3. Identity, ownership, employment, access, authority, custody, payer, and beneficiary remain separate.
-4. Hermes owns reasoning/runtime behavior; Manager owns assignment authority, capability/tool contracts, connector/token custody, approvals, effects, commercial attribution, revocation, repair, and proof.
-5. Capability discovery may be broad. Execution requires current effective capability evidence.
-6. MCP core, MCP Apps, AG-UI, Web, SMS, and signed Review are interoperability/presentation layers, not authority.
-7. Generated UI and shared state cannot invent work, actions, approval, credentials, provider routing, or effects.
-8. Harmless Hermes text/activity should stream immediately; authority gates apply when crossing into commands, credentials, approvals, or external effects.
-9. Unknown, stale, revoked, cross-account, mismatched, or unprobed evidence fails closed.
-10. Provider master credentials and connector tokens never enter employee profiles, Hermes runtimes, browser payloads, or generated UI.
-11. Consequential effects reserve once and terminate with accepted, failed, or ambiguous durable receipts; ambiguous reconciles before retry.
-12. Reconnect never resubmits accepted owner intent.
-13. Public and release claims never exceed exact-candidate evidence.
+For non-mechanical work, compute before patching using `mvp-build/decision/README.md`.
 
-## Required contributor gate
+Binding rules:
+
+1. No score, graph, spectral term, or predictive model is causal without an ablation that changes the implementation decision or required proof.
+2. Graph coverage distinguishes `touch`, `partial`, and `complete`; touch is not completion.
+3. Candidate selection must report weight sensitivity and search sensitivity.
+4. Every selected dependency transaction maps to a complete behavioral proof or an explicit blocked proof.
+5. Predictive models remain disabled when they do not beat a simpler evidence-and-invariants baseline on held-out data.
+6. Exploration and implementation compression are separate artifacts.
+7. Unknown evidence remains Unknown and increases Unsupported.
+
+Continuous-thought, latent-vector, COCONUT, manifold, BFS, Koopman, or similar language may motivate exploration. It is not repository evidence and must not imply that the running model or product implements those mechanisms.
+
+## Product invariants
+
+1. Manager owns identity, assignment, authority, custody, approvals, effects, commercial state, repair, and proof. Hermes reasons and executes only inside those bounds.
+2. Identity, ownership, employment, access, authority, payer, beneficiary, and custody remain separate.
+3. Consequential work binds exact account, employee, assignment, authority/entitlement, request or work revision, approval, command/effect, provider receipt, accounting receipt, output, and proof.
+4. Reconnect and retry never repeat accepted intent or an accepted external effect.
+5. Accepted-but-unrecorded outcomes remain ambiguous and reconcile against the original effect identity before retry.
+6. Cross-account, stale-assignment, stale-entitlement, stale-approval, duplicate, and reordered requests fail closed.
+7. Applied migrations are immutable; additions are forward-only.
+8. Public and release claims never exceed exact-candidate evidence.
+
+## Contributor gate
 
 From `mvp-build/`:
 
@@ -67,12 +85,8 @@ npm run repo:verify:full
 npm run test:unit
 ```
 
-CI is authoritative only when an exact run exists for the exact claimed SHA. Do not weaken tests, hide blocked evidence, or promote fixtures into live acceptance.
-
-## Hermes upstream review
-
-Before changing Hermes integration, launch, sessions, tool discovery, streaming, gateway behavior, runtime capabilities, or Hermes-derived UI, run `npm run hermes:upstream:check`. The pinned image/digest changes only through exact-image compatibility and release gates.
+Run only tests that prove the selected transaction and affected regression surface. Do not create ceremonial tests for rejected candidates, duplicate structural prose checks, or weaken assertions to make CI green.
 
 ## Git discipline
 
-Create a reviewed task branch from current `main`. Every commit references the task ID. Stop downstream work on red CI. Merge only when required checks pass and source, program, memory, and PR evidence agree.
+Work on the reviewed branch/base, never directly on `main`. Every commit references the task. Stop downstream claims on red exact-head CI. Merge only when source, active program, handoff, PR description, and exact evidence agree.
