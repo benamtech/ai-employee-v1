@@ -1,82 +1,80 @@
-# AMTECH Standard v0.2 — Amendment 001: Computation-First Engineering and Current Authority
+# AMTECH Standard v0.2 — Amendment 001: Computation-First Engineering and Document Authority
 
 Status: **ratified additive amendment and effective**  
 Effective date: **2026-07-20**  
-Approved by: **AMTECH human operator through the explicit directive requiring a comprehensive `mvp-build` repository-wide documentation cleanup and all required computation before decision modeling or implementation across possible-decision vectors**  
+Approved by: **AMTECH human operator through explicit computation-first and repository-cleanup directives, including the correction separating candidate topology from software-invariant topology and selection influence from causal improvement**  
 Applies to: `mvp-build/` engineering, planning, architecture, production-readiness, testing, documentation, and handoff work  
-Base Standard: [`STANDARD.md`](STANDARD.md), blob `83db0285649c41df6f0d5ac16928e78f5df308af`  
+Base Standard: [`STANDARD.md`](STANDARD.md)  
 Protocol: [`decision/README.md`](decision/README.md) and [`decision/protocol-v1.json`](decision/protocol-v1.json)  
 Evolution supplement: [`validation/standard-v0.2-amendment-001-evolution.json`](validation/standard-v0.2-amendment-001-evolution.json)
 
 ## 0. Amendment control
 
-This amendment is an `expansion` and `reorientation`. It removes or weakens no existing MUST. Where it conflicts with `ENG-12.1`, `ENG-12.3`, `ENG-12.7`, `ENG-12.8`, `STD-13.3`, or Appendix B of the base Standard, this amendment controls. All other clauses remain unchanged.
+This amendment expands and reorients engineering process. It removes or weakens no existing MUST. Where it conflicts with the base Standard's execution loop, document routing, or stale release-status prose, this amendment controls.
 
-Computation is a mandatory engineering-process artifact. It does not change the evidence hierarchy in `STD-0.3`, establish implementation, or promote acceptance state.
+Computation is an engineering-process artifact. It does not change the evidence hierarchy, establish implementation, or promote acceptance.
 
 ## ENG-12.1A — Computed task contract
 
-Every non-mechanical engineering task MUST declare:
+Every non-mechanical task MUST declare:
 
 - task ID, repository, branch/base, and current head;
-- objective, success criteria, allowed/forbidden files, required tests, blockers, and commit ceiling;
-- applicable decision tier from `decision/README.md`;
+- objective, success criteria, allowed/forbidden files, tests, blockers, and commit ceiling;
+- decision tier;
 - authority/evidence sources and explicit Unknown coordinates;
-- required decision-trace location for `T2`/`T3` work;
-- selected implementation IDs or the exact mechanical invariant for `T0`.
+- trace location for `T2/T3`;
+- selected implementation identity or exact mechanical invariant.
 
-A task MUST NOT self-classify as mechanical merely to avoid computation, prerequisite analysis, or behavioral proof.
+A task MUST NOT self-classify as mechanical to avoid computation, prerequisites, or behavioral proof.
 
-## ENG-12.3A — Computation-first execution loop
-
-The execution loop is:
+## ENG-12.3A — Execution loop
 
 ```text
 authority and evidence/Unknown extraction
-→ applicable concurrent possible-decision spaces
-→ independent candidate generation
+→ applicable independent candidate spaces
 → invariant and prerequisite filtering
-→ computed comparison
+→ simple evidence-and-invariants baseline
+→ candidate search topology when useful
+→ software invariant topology when useful
+→ equal-feasibility controls
+→ search and weight sensitivity
 → selected exploration
 → separate coherent implementation compression
-→ narrow red behavioral proof
+→ complete behavioral proof plan
+→ narrow red proof
 → implementation
 → affected and broad exact-head verification
 → required external acceptance
 → documentation and handoff reconciliation
 ```
 
-For a truly mechanical edit with no material alternative, `T0` MAY compress this to:
+`T0` MAY compress to:
 
 ```text
-authority check → protected invariant → exact deterministic edit → exact verification
+authority check → protected invariant → deterministic edit → exact verification
 ```
 
-No implementation decision may be justified by a score, graph, model, or note created after the implementation choice was already made.
+No implementation decision may be justified by a score, graph, model, or note created after the implementation choice.
 
-## ENG-12.3B — Proportional decision tiers
+## ENG-12.3B — Proportional tiers
 
-The repository MUST use these minimum tiers:
-
-| Tier | Boundary | Minimum computation |
+| Tier | Boundary | Minimum |
 |---|---|---|
 | `T0 mechanical` | deterministic correction with no material choice | authority check, protected invariant, exact verification |
-| `T1 bounded` | meaningful local choice | at least 4 candidates, 2 independent batches, evidence/Unknown labels, feasibility filter, rejection reasons |
-| `T2 consequential` | security, database, provider, commercial, effect, recovery, owner-surface, or multi-file behavior | at least 16 candidates, 3 batches, weighted comparison, utility-only comparison, separate implementation compression |
-| `T3 production/cross-workstream` | release boundary, architecture mutation, or multiple workstreams | at least 64 candidates in current/feature/counterfactual/recombination batches, explicit basis reconciliation, multi-way dependency analysis or proof of pairwise sufficiency, joint/utility/diversity comparison, at least 100 feasible random baselines, causal/descriptive graph classification, separate implementation compression |
+| `T1 bounded` | meaningful local choice | 4 candidates, 2 independent batches, evidence/Unknown labels, feasibility filter, rejection reasons |
+| `T2 consequential` | security, database, provider, commercial, effect, recovery, owner-surface, or multi-file behavior | 16 candidates, 3 batches, simple baseline, equal-feasibility controls, search/weight sensitivity, separate implementation compression |
+| `T3 production/cross-workstream` | release boundary, architecture mutation, or multiple workstreams | 64 candidates in 4 batches, explicit basis reconciliation, candidate graph, software invariant hypergraph, full/no-graph/no-diversity/evidence controls over one feasible domain, at least 1,000 feasible random baselines, at least 32 search restarts, at least 32 weight perturbations, implementation ablation or explicit non-causal result |
 
-Tier reduction requires a recorded proof that no material decision space exists.
+Tier reduction requires proof that no material decision space exists.
 
-## ENG-12.3C — Concurrent spaces and Unknown evidence
+## ENG-12.3C — Concurrent spaces and Unknown
 
-Applicable possible-decision spaces MUST be considered independently before recombination:
+Applicable spaces MUST be considered independently before recombination:
 
 ```text
 bug | feature | user | operator | architecture | protocol
 commercial | failure | proof | market | weird | constraint
 ```
-
-Excluded spaces MUST record why they are not applicable. Dimensions from different spaces MUST NOT be silently collapsed into one coordinate system.
 
 Evidence labels are:
 
@@ -84,94 +82,121 @@ Evidence labels are:
 Observed | Inferred | Hypothesis | Unknown | NotApplicable
 ```
 
-Unknown remains Unknown and increases `Unsupported`. It MUST NOT be converted into zero risk, positive evidence, or an accepted prerequisite.
+Unknown remains Unknown and increases `Unsupported`. It MUST NOT become zero risk, positive evidence, or an accepted prerequisite.
 
-## ENG-12.3D — Mathematical validity
+## ENG-12.3D — Separate topology layers
 
-- Hypergraphs MUST be used only for genuine multi-way dependencies.
+### Candidate search graph
+
+Vertices are candidate trajectories. Relations MAY represent same-concept variants, shared implementation boundaries, recombination lineage, similarity, or common evidence.
+
+It MAY compute candidate-edge touch, separation, redundancy, lineage, and diversity. It MUST NOT report software-invariant completion.
+
+### Software invariant hypergraph
+
+Vertices are actual software entities or obligations. Candidates MUST declare represented software vertices.
+
+Only this graph MAY report:
+
+- `touch` — an edge has any represented member;
+- `fractional` — represented-member fraction;
+- `complete` — every member is represented;
+- `proved` — complete representation plus accepted independent behavioral proof on the exact candidate.
+
+Representation MUST NOT be reported as proof.
+
+## ENG-12.3E — Equal-feasibility controls and sensitivity
+
+Mandatory coverage and invariants define a feasible domain. Mandatory coverage MUST be a constraint, not an objective reward.
+
+`T2/T3` controls MUST use the same feasible domain:
+
+```text
+full
+no_graph
+no_diversity
+evidence_baseline
+feasible_random
+```
+
+Search sensitivity MUST report restarts, unique optima, objective spread, and selected-set stability. Weight sensitivity MUST report selected-set and software-coverage stability under declared perturbations. Instability MUST remain visible.
+
+## ENG-12.3F — Selection influence and causality
+
+A term is `selection-influencing` when it changes a selected set inside the same feasible domain.
+
+A term is `causally improving` only when an equal-feasibility implementation ablation improves independent outcomes such as defects found, complete proof obligations, coherence, review defects, unnecessary scope, or executable verification yield.
+
+Ranking differences, objective deltas, candidate-edge touch, and software-node representation MUST NOT establish causal improvement. Without independent outcome evidence, graph terms MUST be `descriptive`; diversity terms MUST be `descriptive` or `selection-influencing`.
+
+## ENG-12.3G — Mathematical prerequisites
+
+- Hypergraphs MUST represent genuine multi-way dependencies.
 - Pairwise graphs SHOULD be preferred when they preserve the relationship.
-- Hodge Laplacians MUST NOT be used unless the task constructs a true simplicial complex.
-- Koopman propagation MUST NOT be used unless repeated comparable trajectories exist, an operator is fitted, held-out propagation error is computed, and residual/diversity control prevents mode collapse.
-- Spectral entropy, separation, quality-diversity, and redundancy metrics MUST be deterministically reconstructable.
-- Graph/diversity terms are `causal` only when they materially alter selected candidates, required coverage, feasibility, or implementation compression; otherwise they are `descriptive` and cannot justify complexity.
+- Hodge MUST NOT be used without a true simplicial complex.
+- Koopman or another predictive latent model MUST NOT be used without repeated comparable trajectories, fitted propagation, held-out evaluation, and residual/diversity control.
+- Predictive models MUST remain disabled when they do not outperform the simple baseline on held-out outcomes.
+- COCONUT, continuous hidden-state reasoning, latent BFS, manifold, or phase-switching language MUST NOT be presented as implemented without executable source and verification.
+- Derived metrics MUST be deterministically reconstructable.
 
 Decorative mathematics is prohibited.
 
-## ENG-12.3E — Exploration and implementation separation
+## ENG-12.4A — Implementation and behavioral proof
 
-Selected exploration and selected implementation MUST be separate artifacts.
+Exploration and implementation MUST be separate artifacts.
 
-The implementation compression MUST:
+Implementation compression MUST:
 
-- preserve every non-negotiable Standard invariant;
+- preserve every non-negotiable invariant;
 - resolve the highest-value current boundary;
-- reuse canonical primitives instead of creating parallel ontologies, runtimes, plans, or authority sources;
-- name exact files, migrations, tests, and evidence classes;
-- have direct behavioral proof or an honest blocked proof;
+- reuse canonical primitives;
+- name exact source/migration surfaces and evidence classes;
+- map every selected software-invariant edge to a complete behavioral proof or explicit blocker;
 - exclude unrelated cleanup and speculative architecture.
 
-A broad possibility frontier MUST NOT become an equally broad patch list.
-
-## ENG-12.4A — Test selection after computation
-
-Computation precedes test design, but implementation remains Red → Green → Refactor.
-
-Tests MUST cover the selected implementation transaction, its protected invariant boundaries, and the smallest counterexample/failure manifold needed to prove convergence. Discarded possible-decision vectors do not automatically become tests.
-
-A score or graph is not a test oracle. Expected behavior derives from Standard and source invariants.
+Tests cover the selected transaction and minimum failure manifold. Discarded candidates do not automatically become tests. Scores and graphs are not test oracles.
 
 ## ENG-12.7A — Decision scaffolding
 
-Decision protocols, task-state matrices, candidate populations, score definitions, dependency matrices/hypergraphs, deterministic verifiers, selection comparisons, counterexample matrices, implementation contracts, and verification plans are first-class engineering scaffolding for `T2`/`T3` work.
+Task matrices, candidate populations, candidate graphs, software invariant hypergraphs, deterministic verifiers, equal-feasibility controls, sensitivity reports, implementation ablations, counterexamples, implementation contracts, and verification plans are first-class `T2/T3` scaffolding.
 
-Large opaque matrices SHOULD be regenerated from compact descriptors and retained hashes rather than committed as duplicated payloads.
+Large derived matrices SHOULD be regenerated from compact descriptors rather than committed as duplicated opaque payloads.
 
-## ENG-12.8A — Current document families
+## ENG-12.8A — Document ownership
 
 Current document families are:
 
+- root `AGENTS.md` — repository authority/evidence/routing;
+- `mvp-build/AGENTS.md` — product invariants and task execution;
+- root/scoped `CLAUDE.md` — short compatibility routers only;
+- root `CODEGRAPH.md` — repository routing and major boundaries;
+- `mvp-build/CODEGRAPH.md` — sole exact product status and executable topology;
 - `STANDARD.md` plus ratified amendments — normative requirements;
-- `decision/README.md` and `decision/protocol-v1.json` — computation-before-decision contract;
-- one active `decision/traceNNN/` per active consequential transaction;
-- `production-readiness-program/` — sole active production-readiness roadmap, issue, resolution, workstream, test, and evidence route;
-- `CODEGRAPH.md` — current topology, source hubs, migration head, and evidence boundary;
+- `decision/` — decision protocol and one active trace per consequential transaction;
+- `production-readiness-program/` — sole active production route;
 - `docs/architecture/` — current source-backed explanation;
-- `memory/` — dated narrative handoffs indexed only by `memory/MEMORY.md`;
-- `wiki/MVP/implementation-records/` — historical factual ledger;
-- `second-half-plan/`, old audits, and prior complete traces — historical and non-canonical;
+- `memory/` — dated handoffs indexed only by `MEMORY.md`;
+- `second-half-plan/`, old audits, and complete prior traces — historical/non-canonical;
 - source, migrations, tests, workflows, and proof — implementation and acceptance authority.
 
-Active-looking stale entrypoints MUST become explicit routing stubs or move to archive. Historical bodies remain point-in-time evidence and are not rewritten to appear current.
+Exact PR/SHA, migration head, issue counts, selected IDs, objective values, and gate status MUST NOT be duplicated across contributor mirrors or hard-pinned in structural governance.
 
-## STD-13.3A — Current release status
+## STD-13.3A — Release status ownership
 
-Ratification and this amendment do **not** make the product production-ready.
+Ratification does **not** make the product production-ready. Exact current source and evidence state lives in `mvp-build/CODEGRAPH.md` and exact workflow/release records.
 
-As of 2026-07-20:
+No active document may use stale base-Standard status prose as current release state. No source, decision, documentation, fixture, local test, or ancestor result may satisfy a stronger gate it did not exercise.
 
-- main baseline is `48b917389ed85b9652eca43a8e4a8f60b52e917b`;
-- PR #34 exact head `e04ace7bd6fafa9e2eadaeec3f04e70043513e3a` is the stacked owner-runtime base;
-- PR #35 is the WS-06/07 source candidate with bounded WS-08 groundwork;
-- source migration head is `0076`;
-- `decision/trace007/` is the active `T3` computed transaction;
-- exact-head computation/document/source/unit/PostgreSQL/broad CI remains pending;
-- managed database, live provider/connector, target host, fixture-free browser/channel/golden-work, commercial lifecycle, recovery/rollback, signed release, accessibility, capacity, pilot, deployment, and production evidence remain separate and open.
-
-No active document may cite the base Standard's earlier `0072` status sentence as current release state.
-
-## Appendix B amendment — Current source map additions
+## Appendix B amendment — Source map additions
 
 Appendix B additionally includes:
 
-- `decision/README.md`
-- `decision/protocol-v1.json`
-- `decision/trace007/`
-- `production-readiness-program/`
-- `apps/manager/src/lib/model-gateway-commercial.ts`
-- `apps/manager/src/lib/model-gateway-reconciliation.ts`
-- `apps/manager/src/lib/effect-proof-projection.ts`
-- `infra/scripts/acceptance/verify-commercial-effect-migrations.mjs`
-- `packages/db/migrations/0073*` through `packages/db/migrations/0076*`
-- `.github/workflows/ws07-ws08-commercial-effect.yml`
+- `decision/README.md` and `decision/protocol-v1.json`;
+- active `decision/traceNNN/` directories;
+- `production-readiness-program/`;
+- current Model Gateway commercial/reconciliation source;
+- effect-proof projection source;
+- forward commercial/effect migrations;
+- focused decision/governance/database workflows.
 
-The source map remains navigational. Computation selects work; current source and exact evidence decide conformance.
+The source map is navigational. Executable source and exact evidence decide conformance.
