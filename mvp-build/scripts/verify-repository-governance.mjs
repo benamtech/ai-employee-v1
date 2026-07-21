@@ -16,6 +16,7 @@ const read = (path) => readFile(pathOf(path), "utf8");
 const nonempty = (value) => typeof value === "string" && value.trim().length > 0;
 const unique = (values) => new Set(values).size === values.length;
 const candidateId = (value) => typeof value === "string" && /^[A-D][0-9]{2}$/.test(value);
+const sorted = (values) => [...values].sort();
 
 function parseJson(name, text) {
   try { return JSON.parse(text); }
@@ -84,6 +85,7 @@ const issueVector = parseJson("issue-vector", texts["production-readiness-progra
 const ledger = parseJson("resolution-ledger", texts["production-readiness-program/13-resolution-ledger.json"]);
 const pkg = parseJson("package", texts["package.json"]);
 const population = decodeJson("candidate-population", texts["decision/trace007/candidate_population.json"]);
+const scores = decodeJson("candidate-scores", texts["decision/trace007/candidate_scores.json"]);
 
 record("GOV-02",
   texts["STANDARD.md"].includes("ratified and effective")
@@ -123,14 +125,15 @@ record("GOV-05",
 
 record("GOV-06",
   protocol.schema === "amtech.computed-decision.v1"
-  && protocol.protocol_revision >= 2
+  && protocol.protocol_revision >= 3
   && protocol.topology_contract?.candidate_graph
   && protocol.topology_contract?.software_invariant_hypergraph
+  && protocol.baseline_contracts?.trace007
   && protocol.feasible_domain?.mandatory_coverage === "constraint_not_objective_bonus"
   && protocol.tiers?.T3_production_cross_workstream?.minimum_random_feasible_baselines >= 1000
   && protocol.tiers?.T3_production_cross_workstream?.minimum_search_restarts >= 32
   && protocol.tiers?.T3_production_cross_workstream?.minimum_weight_sensitivity_runs >= 32,
-  "decision protocol separates topologies, equalizes feasibility, and requires sensitivity");
+  "decision protocol separates topologies, declares baseline semantics, equalizes feasibility, and requires sensitivity");
 
 const softwareVertices = new Set(softwareGraph.vertices ?? []);
 const softwareEdges = softwareGraph.hyperedges ?? [];
@@ -152,12 +155,12 @@ record("GOV-08",
   comparison.feasible_domain?.rule?.includes("constraint, not an objective reward")
   && comparison.objectives?.no_graph
   && comparison.objectives?.no_diversity
-  && comparison.objectives?.evidence_baseline
+  && comparison.objectives?.evidence_baseline?.contract === "../protocol-v1.json:baseline_contracts.trace007"
   && comparison.classifications?.candidate_graph_terms === "descriptive"
   && comparison.classifications?.software_invariant_graph_terms === "descriptive"
   && comparison.classifications?.causal_improvement === "unestablished"
   && comparison.search?.random_feasible_baselines >= 1000,
-  "selection controls share one feasible domain and make no causal claim");
+  "selection controls share one feasible domain, use the declared baseline contract, and make no causal claim");
 
 record("GOV-09",
   ablation.status === "unestablished"
@@ -211,11 +214,17 @@ record("GOV-13",
   computeText.includes('load("candidate_graph.json")')
   && computeText.includes('load("software_invariant_hypergraph.json")')
   && computeText.includes('load("implementation_ablation.json")')
+  && computeText.includes("validate_baseline_contract")
+  && computeText.includes("unclassified_baseline_dimensions")
+  && computeText.includes("full_objective_difference")
+  && computeText.includes("independent_proof_yield_difference")
   && computeText.includes("random_feasible_baselines")
   && computeText.includes("weight_sensitivity_runs")
+  && !computeText.includes("POSITIVE_ALIASES")
+  && !computeText.includes("NEGATIVE_ALIASES")
   && !computeText.includes('"C_Omega"')
   && !computeText.includes('"C_H"'),
-  "deterministic verifier uses corrected topology, controls, and sensitivity");
+  "deterministic verifier uses explicit baseline semantics, corrected topology, controls, and sensitivity");
 
 const forbiddenActiveClaims = [
   /graph\/diversity classification\s*=\s*causal/i,
@@ -255,9 +264,75 @@ record("GOV-16",
 record("GOV-17", !(await exists("decision/trace007/hypergraph.json")),
   "legacy conflated hypergraph transport is removed");
 
+const scoreDimensions = scores.dimensions ?? [];
+const scoreWeights = scores.weights ?? {};
+const baseline = protocol.baseline_contracts?.trace007 ?? {};
+const roles = baseline.roles ?? {};
+const positiveRequired = roles.positive_required ?? [];
+const positiveOptional = roles.positive_optional ?? [];
+const penaltyRequired = roles.penalty_required ?? [];
+const penaltyOptional = roles.penalty_optional ?? [];
+const excluded = roles.excluded ?? [];
+const declared = [
+  ...positiveRequired,
+  ...positiveOptional,
+  ...penaltyRequired,
+  ...penaltyOptional,
+  ...excluded
+];
+const dimensionSet = new Set(scoreDimensions);
+const optionalSet = new Set([...positiveOptional, ...penaltyOptional]);
+const duplicateBaseline = declared.filter((dimension, index) => declared.indexOf(dimension) !== index);
+const missingRequired = sorted([
+  ...positiveRequired.filter((dimension) => !dimensionSet.has(dimension)),
+  ...penaltyRequired.filter((dimension) => !dimensionSet.has(dimension))
+]);
+const unclassified = sorted(scoreDimensions.filter((dimension) => !declared.includes(dimension)));
+const staleNonoptional = sorted(declared.filter((dimension) => !dimensionSet.has(dimension) && !optionalSet.has(dimension)));
+const semantics = protocol.dimension_semantics ?? {};
+const orientationMismatch = scoreDimensions.filter((dimension) => {
+  const orientation = semantics?.[dimension]?.orientation;
+  const weight = Number(scoreWeights?.[dimension]);
+  return !["maximize", "minimize"].includes(orientation)
+    || !Number.isFinite(weight)
+    || (orientation === "maximize" ? weight < 0 : weight > 0);
+});
+const usedBySide = {
+  positive: [...positiveRequired, ...positiveOptional].filter((dimension) => dimensionSet.has(dimension)),
+  penalty: [...penaltyRequired, ...penaltyOptional].filter((dimension) => dimensionSet.has(dimension))
+};
+const groupProblems = [];
+for (const side of ["positive", "penalty"]) {
+  const groups = baseline.groups?.[side] ?? {};
+  const declaredWeight = Number(baseline[`${side}_group_weight_sum`]);
+  const actualWeight = Object.values(groups).reduce((sum, group) => sum + Number(group.weight), 0);
+  if (!Number.isFinite(declaredWeight) || Math.abs(actualWeight - declaredWeight) > 1e-12) {
+    groupProblems.push(`${side}:weight_sum`);
+  }
+  const counts = new Map();
+  for (const [name, group] of Object.entries(groups)) {
+    const used = (group.dimensions ?? []).filter((dimension) => dimensionSet.has(dimension));
+    if (used.length === 0) groupProblems.push(`${side}:${name}:empty`);
+    for (const dimension of used) counts.set(dimension, (counts.get(dimension) ?? 0) + 1);
+  }
+  for (const dimension of usedBySide[side]) {
+    if ((counts.get(dimension) ?? 0) !== 1) groupProblems.push(`${side}:${dimension}:multiplicity`);
+  }
+}
+record("GOV-18",
+  scoreDimensions.length > 0
+  && JSON.stringify(scoreDimensions) === JSON.stringify(protocol.candidate_dimensions)
+  && duplicateBaseline.length === 0
+  && missingRequired.length === 0
+  && unclassified.length === 0
+  && staleNonoptional.length === 0
+  && orientationMismatch.length === 0
+  && groupProblems.length === 0,
+  `explicit baseline schema valid; duplicate=${sorted(new Set(duplicateBaseline)).join(",") || "none"}; missing_required=${missingRequired.join(",") || "none"}; unclassified=${unclassified.join(",") || "none"}; stale=${staleNonoptional.join(",") || "none"}; orientation=${orientationMismatch.join(",") || "none"}; groups=${groupProblems.join(",") || "none"}`);
+
 const report = {
   generated_at: new Date().toISOString(),
-  validator_version: "4.0.0-structural-topology-split",
+  validator_version: "5.0.0-explicit-baseline-topology-split",
   status: failures.length ? "fail" : "pass",
   source_migration_head: sourceHeadLabel,
   pass_count: passes.length,
