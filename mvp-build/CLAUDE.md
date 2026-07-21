@@ -7,34 +7,63 @@ Updated: 2026-07-20
 
 ## Required start
 
-1. Read root/scoped `AGENTS.md`, `CODEGRAPH.md`, ratified `STANDARD.md`, and `production-readiness-program/README.md`.
-2. Read only the newest relevant indexed handoff and source/test/proof needed for the task.
-3. Validate the task contract, then run the quick gate before editing.
+1. Read root/scoped `AGENTS.md`, `CODEGRAPH.md`, ratified `STANDARD.md`, and [`decision/README.md`](decision/README.md).
+2. Read `production-readiness-program/README.md`, then only the newest relevant indexed handoff and source/test/proof needed for the task.
+3. Resolve the exact branch, base, head, migration head, applicable workstreams, and evidence contradictions.
+4. Select the computation tier and verify the required decision record before planning implementation.
+5. Validate the task contract and run the quick gate before editing.
 
 ```bash
 npm run repo:rubric -- ./task-contract.json
 npm run repo:verify:quick
 ```
 
-Current main baseline is `48b917389ed85b9652eca43a8e4a8f60b52e917b`. PR #33/source/tests are newer authority than stale plan-status prose but establish only their exact evidence. `second-half-plan/` is historical and non-canonical. Migration head remains `0072` unless current source proves otherwise.
+Current main baseline is `48b917389ed85b9652eca43a8e4a8f60b52e917b`. PR #34 exact head `e04ace7bd6fafa9e2eadaeec3f04e70043513e3a` is the stacked owner-runtime base. PR #35 branch `agent/ws06-ws07-production` is the current WS-06/07 source candidate with bounded WS-08 groundwork. Source migration head is `0076`. `second-half-plan/` is historical and non-canonical.
+
+## Computation-first rule
+
+No non-mechanical decision proceeds directly from inspection to patching.
+
+```text
+authority/evidence extraction
+→ applicable possible-decision spaces
+→ independent candidate batches
+→ Unknown/Unsupported accounting
+→ invariant and feasibility filtering
+→ computed comparison
+→ selected exploration
+→ separate implementation compression
+→ red behavioral proof
+→ implementation
+→ exact-head verification
+```
+
+Use the proportional tiers in `decision/README.md`:
+
+- `T0`: mechanical, no material choice;
+- `T1`: bounded choice, at least four vectors;
+- `T2`: consequential boundary, at least sixteen vectors and computed comparison;
+- `T3`: production/cross-workstream, at least sixty-four vectors, multi-way dependency analysis, feasible baselines, causal graph/diversity classification, and a deterministic verifier.
+
+Do not collapse bug, feature, user, operator, architecture, protocol, commercial, failure, proof, weird, and constraint spaces. Do not use decorative hypergraphs, Hodge theory, or Koopman language. Unknown evidence remains Unknown. Scores prioritize only. Exploration does not equal the patch list.
 
 ## Boundary
 
-Hermes owns employee reasoning/runtime behavior. Manager owns identity, assignment authority, capability/tool contracts, connector and credential custody, approvals, durable effects, commercial attribution, revocation, repair, and proof.
+Hermes owns employee reasoning/runtime behavior. Manager owns identity, assignment authority, capability/tool contracts, connector/provider custody, approvals, durable effects, shared rate/budget admission, commercial accounting, revocation, reconciliation, repair, and proof.
 
 Unknown, stale, revoked, cross-account, or mismatched connector/capability/assignment evidence fails closed. MCP Apps, AG-UI, Web, SMS, and signed Review are projections, not authority. Initial snapshots install only after exact scope validation; cursor/version precedes deltas; reconnect never replays accepted owner intent.
 
 ## Execution
 
-- Work on a reviewed task branch from current `main`; `main` changes only through approved merge.
+- Work on the specified reviewed branch/base; never edit `main` directly.
 - No feature expansion while a prerequisite P0 is unresolved.
-- Use Red → Green → Refactor for one behavior at a time.
+- Compute first, then use Red → Green → Refactor for one coherent selected transaction.
 - Every commit references the task ID.
-- Stop on red exact-head CI and do not weaken tests to obtain green.
-- Never report curated suite success as proof that a broader aggregate or live boundary passes.
-- Preserve exact work revision, approval snapshot, effect, receipt, recovery, and proof identity.
+- Stop on red exact-head CI and do not weaken tests for green.
+- Never report a curated suite as proof of a broader aggregate or live boundary.
+- Preserve exact request/work revision, approval, command/effect, provider receipt, accounting receipt, recovery, output, and proof identity.
 - After three failed attempts on one concrete step, preserve diagnostics and escalate.
-- Treat schemas, migrations, fixtures, contracts, harnesses, diagnostics, proof, and runbooks as implementation. Fixtures do not satisfy fixture-free acceptance.
+- Treat schemas, migrations, fixtures, contracts, harnesses, decision traces, diagnostics, proof, and runbooks as implementation. Fixtures do not satisfy fixture-free acceptance.
 
 Before pushing:
 
@@ -50,13 +79,15 @@ Before changing Hermes images, launchers, profiles, sessions, delegation, gatewa
 
 Use production-shaped local/CI PostgreSQL for routine migration, RLS, grant, function, negative-isolation, concurrency, backfill, and rollback work. Use disposable managed Supabase only for material platform-specific or release-candidate proof. Production is never the routine test target.
 
-Source, fixture, local database, documentation, old proof, and ancestor-SHA evidence cannot satisfy a live boundary they did not exercise. `production-ready` requires every non-waivable Standard gate on one exact signed deployed release.
+Computation, documentation, source, fixture, local database, old proof, and ancestor-SHA evidence cannot satisfy a stronger boundary they did not exercise. `production-ready` requires every non-waivable Standard gate on one exact signed deployed release.
 
 ## Authority files
 
-- `STANDARD.md` — normative requirements.
+- `STANDARD.md` — ratified normative requirements.
+- `decision/README.md` and `decision/protocol-v1.json` — mandatory computation-first decision contract.
 - `CODEGRAPH.md` — source topology, migration head, and evidence boundary.
 - `production-readiness-program/` — single active production-readiness route.
+- `docs/architecture/` — current source-backed explanatory map.
 - `second-half-plan/` — historical non-canonical material.
 - `memory/MEMORY.md` — sole handoff index.
 - source, migrations, tests, workflows, and proof — implementation and acceptance authority.
