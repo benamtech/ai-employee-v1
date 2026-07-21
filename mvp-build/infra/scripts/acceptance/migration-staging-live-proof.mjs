@@ -4,17 +4,22 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { requireEnv, run, writeProof, assert } from "./production-proof-lib.mjs";
 
-const migrationHead = "0073";
+const migrationHead = "0075";
 const migrationStart = "0032";
 const migrationsDir = "packages/db/migrations";
 
 requireEnv("STAGING_DATABASE_URL");
 const databaseEnv = { DATABASE_URL: process.env.STAGING_DATABASE_URL };
-const result = run("node", ["infra/scripts/acceptance/verify-worker-migrations.mjs", "--apply"], {
+const workerResult = run("node", ["infra/scripts/acceptance/verify-worker-migrations.mjs", "--apply"], {
   env: databaseEnv,
   timeout: 180_000,
 });
-assert(result.output.includes("worker_migrations_verified"), "migration_verifier_missing_success_marker");
+assert(workerResult.output.includes("worker_migrations_verified"), "migration_verifier_missing_success_marker");
+const commercialResult = run("node", ["infra/scripts/acceptance/verify-commercial-effect-migrations.mjs"], {
+  env: databaseEnv,
+  timeout: 120_000,
+});
+assert(commercialResult.output.includes("commercial_effect_migrations_verified"), "commercial_effect_migration_verifier_missing_success_marker");
 
 const files = (await readdir(migrationsDir))
   .filter((file) => /^\d{4}[a-z]?_.+\.sql$/.test(file))
@@ -45,7 +50,8 @@ await writeProof("migration-staging", "passed", {
   migration_head: migrationHead,
   migration_count: migrations.length,
   migrations,
-  verifier_tail: result.output.split("\n").slice(-20),
+  worker_verifier_tail: workerResult.output.split("\n").slice(-20),
+  commercial_verifier_tail: commercialResult.output.split("\n").slice(-20),
   status_tail: status.output.split("\n").slice(-40),
   production_mutated: false,
 });
