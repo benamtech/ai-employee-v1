@@ -1,18 +1,13 @@
 # Verification and Handoff Matrix
 
 Status: **active evidence checklist**  
-Main baseline: `48b917389ed85b9652eca43a8e4a8f60b52e917b`  
-Stacked base: PR #34 exact head `e04ace7bd6fafa9e2eadaeec3f04e70043513e3a`  
-Current source candidate: PR #35  
-Source migration head: `0076`  
+Exact candidate and migration status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
 Decision protocol: [`../decision/README.md`](../decision/README.md)
 
-## Evidence-class rule
-
-The following classes are separate and non-promoting:
+## Evidence classes
 
 ```text
-computed decision
+decision reproducibility
 → documentation
 → source
 → unit
@@ -24,106 +19,113 @@ computed decision
 → browser/channel/accessibility
 → commercial lifecycle
 → recovery/rollback
+→ signed release
 → pilot
 → deployment
 → production
 ```
 
-A higher class may depend on a lower class, but never inherits acceptance automatically.
+A higher class may depend on a lower one. It never inherits acceptance automatically.
 
-## Current gate matrix
+## Gate matrix
 
-| Gate | Required evidence | Current state |
-|---|---|---|
-| Computation-first decision | deterministic trace, required candidates/batches/dimensions/comparisons, implementation compression | `decision/trace007/` committed; exact workflow verification pending |
-| Document authority | contributor/CODEGRAPH/architecture/program/gap/remediation/test/memory routes agree | source candidate in PR #35; exact-head governance scan pending |
-| Ratified Standard | v0.2 and recorded evolution discipline | effective; current implementation status text must not overclaim |
-| Source/type/lint/contracts | exact-head workflow | pending on PR #35 |
-| Current broad regression | exact-head broad suite, no weakened assertions | pending on PR #35 |
-| Production build | exact-head build | pending on PR #35 |
-| Repository archaeology | exact-head active/orphan/stale-reference proof | pending on PR #35 |
-| Compiled browser regression | exact-head fixture Chromium | prior exact evidence only; current head pending |
-| WS-02 protocol/capability | prior exact source/CI plus live lifecycle | prior source/CI retained; live AS/provider/client open |
-| WS-03 database authority | blank ledger through `0076`, security/concurrency/integration, managed triggers | source migrations exist; PostgreSQL/managed proof pending |
-| WS-05 owner/channels | fixture-free exact owner/assignment/connector/channel journey | open |
-| WS-06 golden work | provider-backed three-role revision→approval→effect→output→proof→replay/restart | source candidate; external acceptance open |
-| WS-07 commercial/ambiguity | multi-replica rate/budget/effect/accounting/reconciliation plus provider/billing proof | source candidate; exact CI, managed DB, provider, billing open |
-| WS-08 recovery/release | fault, repair, rollback, backup/restore, telemetry, provenance, signed manifest | groundwork only |
-| WS-09 human/capacity/pilot | supported browsers, WCAG/screen readers, fairness/capacity, pilot packet | open |
-| Production | every non-waivable gate on one exact signed deployed release | open |
+| Gate | Required evidence |
+|---|---|
+| decision record | candidate matrix, split topology, equal-feasibility controls, search/weight sensitivity, implementation compression, proof plan, deterministic verifier |
+| document authority | one repository contract, one product contract, short compatibility routers, one exact-status owner, historical separation |
+| normative requirements | ratified Standard plus amendments; no document silently weakens them |
+| source/type/lint/contracts | exact-head source and generated-config checks |
+| broad regression | exact-head complete surviving suites with no weakened assertions |
+| build | exact-head production compilability |
+| repository archaeology | active/orphan/stale-reference proof |
+| database | blank forward ledger, existing-row compatibility, isolation/concurrency/security, required managed-platform proof |
+| connector/protocol | live authorization, scope, health, revocation, outage, repair, deletion, client/host conformance |
+| owner/channels | fixture-free owner, assignment, connector, snapshot/reconnect, Web/SMS/Review convergence |
+| golden work | provider-backed Website/Contractor/Bookkeeping revision → approval → effect → receipt/accounting → output/proof → replay/restart |
+| commercial ambiguity | multi-replica rate/budget/effect/accounting/reconciliation plus provider and billing proof |
+| recovery/release | fault, repair, rollback, backup/restore, telemetry, provenance, typed composition, signed manifest |
+| human/capacity/pilot | supported browsers, accessibility, fairness/capacity, pilot entry/exit/incident/rollback |
+| production | every non-waivable gate on one exact signed deployed candidate |
 
-## Computation handoff
+Current state for each gate is recorded in `../CODEGRAPH.md` and `13-resolution-ledger.json`, not duplicated here.
+
+## Decision handoff
 
 A consequential handoff records:
 
-- computation tier and protocol version;
-- authority basis and observed/unknown counts;
-- candidate batch counts and dimensions;
-- joint/utility/diversity/random comparison;
-- graph causality classification;
-- selected exploration IDs;
-- selected implementation IDs and compression rationale;
-- rejected high-value candidates and prerequisites;
-- deterministic verifier output;
+- tier and protocol revision;
+- authority basis and observed/unknown reconciliation;
+- candidate batches and dimensions;
+- candidate graph construction and allowed semantic use;
+- software invariant vertices, hyperedges, candidate mapping, and touch/fractional/complete/proved coverage;
+- one feasible domain shared by full, no-graph, no-diversity, evidence baseline, and random controls;
+- search sensitivity and weight sensitivity;
+- selected exploration and separate implementation compression;
+- complete behavioral proof plan for every selected software edge;
+- implementation ablation status and independent outcomes;
 - evidence classes not established.
 
-For PR #35:
+For Trace007:
 
 ```text
 Tier: T3
-Trace: decision/trace007
 Candidates: 64
-Random feasible baselines: 120
-Joint J: 0.5818732
-Utility-only J: 0.2346884
-Diversity-only J: 0.56291544
-Graph/diversity: causal
-Implementation: D01,D02,D03,D04,D06,D07
+Candidate topology: search-only
+Software topology: actual invariant entities/obligations
+Random feasible baselines: at least 1,000
+Search restarts: at least 32
+Weight sensitivity runs: at least 32
+Graph terms: descriptive
+Diversity terms: descriptive or selection-influencing
+Causal improvement: unestablished
+Implementation: decision/trace007/selected_implementation.json
 ```
+
+Do not copy objective snapshots or selected IDs into multiple active documents. The exact verifier output and canonical implementation file own those details.
 
 ## Source candidate boundary
 
-PR #35 source intends to establish:
+The current source transaction intends to establish:
 
 - shared PostgreSQL rate and worst-case budget admission;
-- stable request/revision/effect/provider-idempotency identity;
+- stable request/revision/effect/provider identity;
 - accepted, failed, denied, refunded, and durable ambiguous settlement;
 - accepted effect-bound accounting and conservation;
-- original-effect native-idempotency reconciliation;
+- original-effect reconciliation;
 - exact artifact revision/approval/effect/output/proof continuity;
 - projection repair without republishing;
 - reconciliation, repair, and lineage views;
 - focused behavioral and PostgreSQL tests;
 - focused exact-head workflow.
 
-None of those source statements are exact-head accepted until the workflow exists and passes.
+Intent and source shape are not accepted evidence until exact tests run and pass.
 
 ## Test and proof rules
 
 - Broad and curated suites are independently reported.
-- Computation verification is not runtime verification.
+- Decision verification is not runtime verification.
+- Candidate-edge touch is not software coverage.
+- Software completeness is not proof.
+- `software_proved` requires exact accepted behavioral evidence.
 - Fixture browser proof is not fixture-free provider/channel proof.
-- Local PostgreSQL is not managed-platform proof where a Standard trigger applies.
-- Provider mocks do not establish provider idempotency or response-loss behavior.
-- `skipped`, unavailable, and blocked remain visible and never become pass.
+- Local PostgreSQL is not managed-platform proof where a platform trigger applies.
+- Provider mocks do not establish provider idempotency or accepted-response-loss behavior.
+- `skipped`, unavailable, and blocked remain visible.
 - Documentation commits after an implementation run require final exact-head checks.
-- A successful effect requires matching evidence appropriate to that boundary.
-- Reconciliation and repair must preserve original effect identity and accepted evidence.
+- Reconciliation and repair preserve original effect identity and accepted evidence.
 
-## Handoff update transaction
+## Handoff transaction
 
 ```text
-exact branch/base/head and migration head
-→ computation result
+exact branch/base/head and source migration head
+→ decision verifier output and sensitivity
 → source/migration/test/workflow changes
-→ commands/runs and exact results
+→ exact commands/runs/results
 → external prerequisites and blocked classes
-→ program/CODEGRAPH/architecture updates
+→ CODEGRAPH/program/architecture update
 → one dated memory handoff
 → MEMORY.md index
-→ PR/release record
+→ PR or release record
 ```
 
-## Completion rule
-
-A workstream or release claim is complete only when the computed choice, executable implementation, exact-head verification, required external evidence, and active documentation agree on the same candidate.
+A workstream or release claim is complete only when the decision record, executable implementation, exact-head verification, required external evidence, and active documentation agree on the same candidate.
