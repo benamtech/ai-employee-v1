@@ -80,36 +80,12 @@ gitignore = gitignore
   .join("\n");
 await write(gitignorePath, gitignore);
 
-const candidateWorkflowPath = atRepo(".github/workflows/ws07-ws08-commercial-effect.yml");
-let candidateWorkflow = await read(candidateWorkflowPath);
-candidateWorkflow = candidateWorkflow.replace("permissions:\n  contents: write", "permissions:\n  contents: read");
-candidateWorkflow = candidateWorkflow.replace(
-  '          echo "== canonical production source generation =="\n          npm run generate:production-sources\n',
-  "",
-);
-candidateWorkflow = candidateWorkflow.replace(
-  /\n      - name: Retain generated Manager source for typed composition[\s\S]*?\n      - name: Enforce source and unit result/,
-  "\n      - name: Enforce source and unit result",
-);
-await write(candidateWorkflowPath, candidateWorkflow);
-
-const onboardingWorkflowPath = atRepo(".github/workflows/s10-onboarding-identity.yml");
-let onboardingWorkflow = await read(onboardingWorkflowPath);
-onboardingWorkflow = onboardingWorkflow
-  .replaceAll('      - "mvp-build/apps/manager/src/server.template.ts"\n', "")
-  .replaceAll('      - "mvp-build/apps/manager/src/server.generated.ts"\n', '      - "mvp-build/apps/manager/src/server.ts"\n')
-  .replaceAll('      - "mvp-build/apps/manager/scripts/generate-production-server.mjs"\n', "")
-  .replace("      - run: npm run generate:production-sources\n", "");
-await write(onboardingWorkflowPath, onboardingWorkflow);
-
 for (const path of [
   promotedPath,
   atMvp("apps/manager/src/server.template.ts"),
   atMvp("apps/manager/scripts/generate-production-server.mjs"),
   atMvp("apps/manager/scripts/patch-production-stream.mjs"),
   atMvp("apps/manager/scripts/production-admin-block.mjs"),
-  atRepo(".github/workflows/finalize-manager-typed-source.yml"),
-  scriptPath,
 ]) {
   await rm(path, { force: true });
 }
