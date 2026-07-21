@@ -36,6 +36,7 @@ import { registerOnboardingIdentityRoutes } from "./lib/onboarding-identity-rout
 import { decodeSignedToken, tokenHash, verifySignedToken } from "./lib/signed-links.js";
 import { requireOwnerSession, mintOwnerSession } from "./lib/owner-session.js";
 import { authorizeOwnerAssignment, listOwnerAssignments, loadOwnerCommandPolicyVersion } from "./lib/owner-assignment-authority.js";
+import { loadCurrentAssignmentAuthorityVersion, validateProjectedProtocolAuthority } from "./lib/protocol-projection-authority.js";
 import { deliverOwnerTurnToRuntime } from "./lib/runtime.js";
 import { executeOwnerWebTurnCommand } from "./lib/owner-turn-command.js";
 import { repairOwnerWebTurnCommand } from "./lib/owner-turn-repair.js";
@@ -397,6 +398,17 @@ export function buildApp(): Hono {
           allowed_roles: approval.required_resolver_roles,
         });
         if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
+        const protocolAuthority = await validateProjectedProtocolAuthority(
+          db,
+          authority.assignment.assignment_id,
+          {
+            protocol_assignment_id: input.protocol_assignment_id,
+            protocol_authority_version: input.protocol_authority_version,
+          },
+        );
+        if (!protocolAuthority.ok) {
+          return c.json({ error: protocolAuthority.error }, protocolAuthority.status);
+        }
         options = {
           actor: "owner",
           assignment_id: authority.assignment.assignment_id,
@@ -742,7 +754,13 @@ export function buildApp(): Hono {
     const denied = denyInternal(c);
     if (denied) return denied;
     const employeeId = c.req.param("employeeId");
-    const { owner_session_token, message, intent_id } = await c.req.json().catch(() => ({}));
+    const {
+      owner_session_token,
+      message,
+      intent_id,
+      protocol_assignment_id,
+      protocol_authority_version,
+    } = await c.req.json().catch(() => ({}));
     if (!message) return c.json({ error: "message_required" }, 400);
     if (!intent_id || !/^[A-Za-z0-9:_-]{8,160}$/.test(String(intent_id))) {
       return c.json({ error: "stable_intent_id_required" }, 400);
@@ -760,6 +778,13 @@ export function buildApp(): Hono {
     });
     if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
     const assignmentId = authority.assignment.assignment_id;
+    const protocolAuthority = await validateProjectedProtocolAuthority(db, assignmentId, {
+      protocol_assignment_id,
+      protocol_authority_version,
+    });
+    if (!protocolAuthority.ok) {
+      return c.json({ error: protocolAuthority.error }, protocolAuthority.status);
+    }
     const policyVersion = await loadOwnerCommandPolicyVersion(db, session, assignmentId);
     const result = await executeOwnerWebTurnCommand(db, {
       account_id: session.account_id,
@@ -1224,6 +1249,16 @@ export function buildApp(): Hono {
     if (!authority.ok) return c.json({ error: authority.reason }, authority.status);
     const accountId = session.account_id;
     const assignmentId = authority.assignment.assignment_id;
+    const authorityVersion = await loadCurrentAssignmentAuthorityVersion(db, assignmentId);
+    if (!authorityVersion) {
+      return c.json({ error: "assignment_authority_version_unavailable" }, 409);
+    }
+    const streamScope = {
+      account_id: accountId,
+      employee_id: employeeId,
+      assignment_id: assignmentId,
+      authority_version: authorityVersion,
+    };
     const pollMs = Number(process.env.WORK_STREAM_POLL_MS ?? 2000);
 
     return streamSSE(c, async (stream) => {
@@ -1240,26 +1275,37 @@ export function buildApp(): Hono {
           });
         return writeChain;
       };
-      const unsub = subscribeProgress({
-        account_id: accountId,
-        employee_id: employeeId,
-        assignment_id: assignmentId,
-      }, (p) => {
-        void writeSse({ event: "work_progress", data: JSON.stringify({ kind: "work_progress", ...p }) });
+      const unsub = subscribeProgress(streamScope, (p) => {
+        const event = p.kind ?? "work_progress";
+        void writeSse({ event, data: JSON.stringify({ ...streamScope, ...p, kind: event }) });
       });
       try {
         const snapshot = await buildEmployeeSnapshot(db, employeeId, accountId, assignmentId);
-        await writeSse({ event: "snapshot", data: JSON.stringify({ kind: "snapshot", snapshot }) });
         let cursor = cursorFromSnapshot(snapshot);
+        await writeSse({
+          event: "snapshot",
+          data: JSON.stringify({ ...streamScope, kind: "snapshot", snapshot, cursor }),
+        });
         while (!closed) {
           await waitForEmployeeChange(employeeId, pollMs);
           if (closed) break;
           const delta = await fetchWorkEventsSince(db, employeeId, accountId, cursor, assignmentId);
           for (const event of delta.workEvents) {
-            await writeSse({ event: "work_event", data: JSON.stringify({ kind: "work_event", event }) });
+            await writeSse({
+              event: "work_event",
+              data: JSON.stringify({ ...streamScope, kind: "work_event", event }),
+            });
           }
           for (const approval of delta.approvals) {
-            await writeSse({ event: "approval_update", data: JSON.stringify({ kind: "approval_update", approval_id: approval.id, resolution: approval.resolution }) });
+            await writeSse({
+              event: "approval_update",
+              data: JSON.stringify({
+                ...streamScope,
+                kind: "approval_update",
+                approval_id: approval.id,
+                resolution: approval.resolution,
+              }),
+            });
           }
           cursor = delta.nextCursor;
           await writeSse({ event: "ping", data: "" }); // keepalive
