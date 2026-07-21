@@ -1,5 +1,5 @@
 {
-  "schema": "amtech.trace007.selection-comparison.v2",
+  "schema": "amtech.trace007.selection-comparison.v3",
   "status": "recomputed at verification time",
   "feasible_domain": {
     "set_size": 16,
@@ -23,8 +23,13 @@
     },
     "no_graph": "full minus software_fractional, software_complete, and candidate_edge_touch",
     "no_diversity": "full minus separation_mean, von_neumann_entropy, quality_diversity_occupancy, and redundancy",
-    "evidence_baseline": "mean(Evidence, BusinessValue, VerificationFeasibility, ProofDensity, RiskReduction) minus mean(Unsupported, Cost, Scope, PrerequisiteDebt)",
-    "evaluation_rule": "All selected sets are evaluated with the full metric vector after optimization. Objective differences alone do not establish causal improvement."
+    "evidence_baseline": {
+      "contract": "../protocol-v1.json:baseline_contracts.trace007",
+      "membership": "explicit roles; no aliases, name inference, sign inference, or automatic absorption of available dimensions",
+      "aggregation": "weighted semantic group means",
+      "schema_change_behavior": "fail closed on missing required, duplicate, stale nonoptional, unclassified, orientation mismatch, or group multiplicity"
+    },
+    "evaluation_rule": "All selected sets are evaluated with the same full metric vector after optimization. Objective differences establish selection influence only, never better software."
   },
   "search": {
     "algorithm": "deterministic multi-start feasible single-swap local search",
@@ -33,12 +38,21 @@
     "weight_sensitivity_runs": 32,
     "weight_perturbation_fraction": 0.20,
     "search_sensitivity": "report unique optima, objective spread, and pairwise Jaccard stability across restarts",
-    "weight_sensitivity": "report selected-set Jaccard stability and implementation-coverage stability under bounded weight perturbations"
+    "weight_sensitivity": "report selected-set Jaccard stability and software-coverage stability under bounded weight perturbations"
   },
+  "required_report": [
+    "baseline_dimensions_used",
+    "same_feasible_domain",
+    "selection_jaccard",
+    "implementation_jaccard",
+    "full_objective_difference",
+    "independent_proof_yield_difference",
+    "causal_improvement"
+  ],
   "classifications": {
     "candidate_graph_terms": "descriptive",
     "software_invariant_graph_terms": "descriptive",
-    "diversity_terms": "selection-influencing",
+    "diversity_terms": "computed_at_verification_as_descriptive_or_selection-influencing",
     "causal_improvement": "unestablished"
   },
   "causal_gate": {
