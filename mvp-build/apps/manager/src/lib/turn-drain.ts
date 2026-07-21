@@ -13,7 +13,8 @@ import { routeEmployeeIntent } from "./channel-router.js";
 import { mustWrite } from "./db.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation } from "./metering.js";
 import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
-import { buildOwnerTurnSystemMessage } from "./owner-turn-context.js";
+import { buildOwnerTurnSystemMessage, type OwnerDecisionTurnContext } from "./owner-turn-context.js";
+import { loadApprovalAuthority } from "./approval-authority.js";
 import { publishProgress, type ProgressScope } from "./progress-bus.js";
 import { recoverEmployeeRuntime } from "./runtime-recovery.js";
 
@@ -35,13 +36,64 @@ export interface ReapResult {
   failed: number;
 }
 
+async function loadQueuedDecisionContext(db: SupabaseClient, input: {
+  account_id: string;
+  employee_id: string;
+  assignment_id: string;
+  job_input: unknown;
+}): Promise<OwnerDecisionTurnContext | null> {
+  const raw = input.job_input && typeof input.job_input === "object"
+    ? input.job_input as Record<string, unknown>
+    : {};
+  const contextId = typeof raw.decision_context_id === "string" ? raw.decision_context_id : "";
+  const approvalId = typeof raw.approval_id === "string" ? raw.approval_id : "";
+  const ownerMessageId = typeof raw.owner_message_id === "string" ? raw.owner_message_id : "";
+  if (!contextId && !approvalId && !ownerMessageId) return null;
+  if (!contextId || !approvalId || !ownerMessageId) throw new Error("queued_owner_decision_context_incomplete");
+
+  const context = await db.from("channel_decision_contexts")
+    .select("id,approval_id,account_id,employee_id,assignment_id,human_principal_id,status,expires_at")
+    .eq("id", contextId)
+    .eq("approval_id", approvalId)
+    .eq("account_id", input.account_id)
+    .eq("employee_id", input.employee_id)
+    .eq("assignment_id", input.assignment_id)
+    .maybeSingle();
+  if (context.error) throw context.error;
+  if (!context.data?.id) throw new Error("queued_owner_decision_context_scope_mismatch");
+  if (context.data.status !== "open" || Date.parse(String(context.data.expires_at)) <= Date.now()) return null;
+
+  const approval = await loadApprovalAuthority(db, approvalId);
+  if (
+    !approval
+    || approval.status !== "pending"
+    || approval.account_id !== input.account_id
+    || approval.employee_id !== input.employee_id
+    || approval.assignment_id !== input.assignment_id
+  ) return null;
+
+  return {
+    context_id: contextId,
+    approval_id: approval.approval_id,
+    owner_message_id: ownerMessageId,
+    human_principal_id: String(context.data.human_principal_id ?? ""),
+    action_key: approval.action_key,
+    summary: approval.summary,
+    risk_level: approval.risk_level,
+    resource_class: approval.resource_class,
+    resource_id: approval.resource_id,
+    snapshot_hash: approval.snapshot_hash,
+    expires_at: approval.expires_at,
+  };
+}
+
 /** Recover jobs left running after a worker crash without clobbering a late valid completion. */
 export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number } = {}): Promise<ReapResult> {
   const limit = opts.limit ?? 50;
   const nowIso = new Date().toISOString();
   const { data } = await db
     .from("employee_turn_jobs")
-    .select("id,account_id,employee_id,kind,attempts,run_id,lease_token")
+    .select("id,account_id,employee_id,assignment_id,kind,attempts,run_id,lease_token")
     .eq("status", "running")
     .lt("lease_expires_at", nowIso)
     .limit(limit);
@@ -49,6 +101,7 @@ export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number 
     id: string;
     account_id?: string | null;
     employee_id: string;
+    assignment_id?: string | null;
     kind: string;
     attempts?: number;
     run_id?: string | null;
@@ -90,6 +143,7 @@ export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number 
       await routeEmployeeIntent(db, {
         account_id: job.account_id,
         employee_id: job.employee_id,
+        assignment_id: job.assignment_id ?? null,
         intent_key: `reap:${job.id}`,
         move: "notify",
         text: "I hit a snag finishing your last message and couldn't complete it. Please send it again and I'll pick it right back up.",
@@ -120,6 +174,7 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
         await routeEmployeeIntent(db, {
           account_id: job.account_id,
           employee_id: job.employee_id,
+          assignment_id: job.assignment_id ?? null,
           intent_key: `drain-failed:${job.id}`,
           move: "notify",
           text: "I hit a snag finishing your queued message and couldn't complete it. Please send it again and I'll pick it right back up.",
@@ -145,10 +200,18 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
       const api = await resolveRuntimeApi(db, employeeId);
       const body = String((job.input as { body?: unknown }).body ?? "");
       const channel = job.kind === "owner_sms_chat" ? "sms" : "web";
+      const decisionContext = await loadQueuedDecisionContext(db, {
+        account_id: accountId,
+        employee_id: employeeId,
+        assignment_id: assignmentId,
+        job_input: job.input,
+      });
       const systemMessage = await buildOwnerTurnSystemMessage(db, {
         account_id: accountId,
         employee_id: employeeId,
+        assignment_id: assignmentId,
         channel,
+        decision_context: decisionContext,
       });
       const messageId = `assistant:${runId}`;
 
@@ -223,6 +286,7 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
       await routeEmployeeIntent(db, {
         account_id: accountId,
         employee_id: employeeId,
+        assignment_id: assignmentId,
         intent_key: `turn:${job.id}`,
         move: "notify",
         text: turn.text,
