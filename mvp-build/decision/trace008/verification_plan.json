@@ -1,0 +1,59 @@
+{
+  "schema": "amtech.trace008.verification-plan.v1",
+  "software_edge_tests": {
+    "repository_closure": [
+      "negative behavioral test",
+      "identity/replay assertion",
+      "exact-head diagnostics"
+    ],
+    "temporal_authority": [
+      "negative behavioral test",
+      "identity/replay assertion",
+      "exact-head diagnostics"
+    ],
+    "ambiguity_terminality": [
+      "negative behavioral test",
+      "identity/replay assertion",
+      "exact-head diagnostics"
+    ],
+    "durable_truth": [
+      "negative behavioral test",
+      "identity/replay assertion",
+      "exact-head diagnostics"
+    ],
+    "release": [
+      "negative behavioral test",
+      "identity/replay assertion",
+      "exact-head diagnostics"
+    ],
+    "effect_recovery": [
+      "negative behavioral test",
+      "identity/replay assertion",
+      "exact-head diagnostics"
+    ],
+    "restore": [
+      "negative behavioral test",
+      "identity/replay assertion",
+      "exact-head diagnostics"
+    ]
+  },
+  "exact_head_workflow": [
+    "trace verifier",
+    "governance",
+    "typecheck/lint",
+    "focused and broad units",
+    "PostgreSQL integration",
+    "all-workspace build",
+    "compose validation",
+    "five-service image build",
+    "digest inspection",
+    "manifest verification"
+  ],
+  "external_blocks": [
+    "managed restore",
+    "target-host drill",
+    "production key custody",
+    "25-30 capacity acceptance",
+    "pilot"
+  ]
+}

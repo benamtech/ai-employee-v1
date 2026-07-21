@@ -1,0 +1,48 @@
+{
+  "schema": "amtech.trace008.selected-exploration.v1",
+  "selection": [
+    "A01",
+    "B01",
+    "C01",
+    "D01",
+    "D02",
+    "D04",
+    "D06",
+    "D08",
+    "D09",
+    "D11",
+    "D13",
+    "D14"
+  ],
+  "coverage": {
+    "touch": 1.0,
+    "fractional": 1.0,
+    "complete": 1.0,
+    "proved": 0.0,
+    "mandatory_invariants": [
+      "acceptedEffectNoDuplicate",
+      "boundedEgress",
+      "buildReproducibility",
+      "canonicalCompose",
+      "completeBackupRestore",
+      "crashNoFalseSuccess",
+      "dockerAuthorityIsolation",
+      "exactSHAImages",
+      "fiveServiceReleaseUnit",
+      "independentProvenance",
+      "migrationCompatibility",
+      "operatorRecoverability",
+      "perEmployeeNetworkIsolation",
+      "proofRefindAfterRestore",
+      "repairUsesOriginalIdentity",
+      "rollbackPreservesAcceptedWork",
+      "secretNonExposure",
+      "stableCrashPoints",
+      "telemetryLineage",
+      "truthfulHealth",
+      "wholeReleaseRollback"
+    ],
+    "omega": true
+  },
+  "causal_improvement": "unestablished"
+}

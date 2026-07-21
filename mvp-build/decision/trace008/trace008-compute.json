@@ -1,0 +1,45 @@
+{
+  "status": "pass",
+  "candidate_count": 64,
+  "random_feasible_sets": 1024,
+  "search_restarts": 32,
+  "weight_perturbations": 32,
+  "selected_implementation": [
+    "D01",
+    "D04",
+    "D08",
+    "D14"
+  ],
+  "same_feasible_domain": true,
+  "coverage": {
+    "touch": 1.0,
+    "fractional": 1.0,
+    "complete": 1.0,
+    "proved": 0.0,
+    "mandatory_invariants": [
+      "acceptedEffectNoDuplicate",
+      "boundedEgress",
+      "buildReproducibility",
+      "canonicalCompose",
+      "completeBackupRestore",
+      "crashNoFalseSuccess",
+      "dockerAuthorityIsolation",
+      "exactSHAImages",
+      "fiveServiceReleaseUnit",
+      "independentProvenance",
+      "migrationCompatibility",
+      "operatorRecoverability",
+      "perEmployeeNetworkIsolation",
+      "proofRefindAfterRestore",
+      "repairUsesOriginalIdentity",
+      "rollbackPreservesAcceptedWork",
+      "secretNonExposure",
+      "stableCrashPoints",
+      "telemetryLineage",
+      "truthfulHealth",
+      "wholeReleaseRollback"
+    ],
+    "omega": true
+  },
+  "causal_improvement": "unestablished"
+}

@@ -1,0 +1,85 @@
+{
+  "schema": "amtech.trace008.counterexample-matrix.v1",
+  "cases": [
+    {
+      "id": "CE01",
+      "transition": "partial Docker effect then loss",
+      "expected": "same ambiguous result; retry blocked"
+    },
+    {
+      "id": "CE02",
+      "transition": "partial topology",
+      "expected": "health fails"
+    },
+    {
+      "id": "CE03",
+      "transition": "tampered manifest",
+      "expected": "verification fails"
+    },
+    {
+      "id": "CE04",
+      "transition": "mutable rollback tag",
+      "expected": "rollback denied"
+    },
+    {
+      "id": "CE05",
+      "transition": "incompatible migration",
+      "expected": "operator blocked"
+    },
+    {
+      "id": "CE06",
+      "transition": "backup lacks database",
+      "expected": "restore denied"
+    },
+    {
+      "id": "CE07",
+      "transition": "secret mismatch",
+      "expected": "restore blocked"
+    },
+    {
+      "id": "CE08",
+      "transition": "proof missing",
+      "expected": "restore not accepted"
+    },
+    {
+      "id": "CE09",
+      "transition": "unqualified SQL update",
+      "expected": "PostgreSQL fails"
+    },
+    {
+      "id": "CE10",
+      "transition": "dry-run evidence",
+      "expected": "not pass"
+    },
+    {
+      "id": "CE11",
+      "transition": "SSE queue pressure",
+      "expected": "saturation reported"
+    },
+    {
+      "id": "CE12",
+      "transition": "pilot lacks stop authority",
+      "expected": "pilot denied"
+    },
+    {
+      "id": "CE13",
+      "transition": "artifact upload fails",
+      "expected": "command truth preserved"
+    },
+    {
+      "id": "CE14",
+      "transition": "image revision mismatch",
+      "expected": "release denied"
+    },
+    {
+      "id": "CE15",
+      "transition": "pg_dump failure",
+      "expected": "backup non-restorable"
+    },
+    {
+      "id": "CE16",
+      "transition": "ambiguous replay",
+      "expected": "no redispatch"
+    }
+  ]
+}

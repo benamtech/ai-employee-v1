@@ -1,0 +1,6 @@
+{
+  "schema": "amtech.trace008.post-patch-frontier.v1",
+  "status": "pending",
+  "minimum_new_trajectories": 16,
+  "trajectories": []
+}

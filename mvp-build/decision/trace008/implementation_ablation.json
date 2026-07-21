@@ -1,0 +1,11 @@
+{
+  "schema": "amtech.trace008.implementation-ablation.v1",
+  "status": "unestablished",
+  "independent_outcomes": {
+    "defects_discovered": null,
+    "proof_yield": null,
+    "review_defects": null,
+    "unnecessary_scope": null
+  },
+  "causal_improvement": "unestablished"
+}

@@ -1,0 +1,9680 @@
+{
+  "schema": "amtech.trace008.candidate-graph.v1",
+  "vertices": [
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A07",
+    "A08",
+    "A09",
+    "A10",
+    "A11",
+    "A12",
+    "A13",
+    "A14",
+    "A15",
+    "A16",
+    "B01",
+    "B02",
+    "B03",
+    "B04",
+    "B05",
+    "B06",
+    "B07",
+    "B08",
+    "B09",
+    "B10",
+    "B11",
+    "B12",
+    "B13",
+    "B14",
+    "B15",
+    "B16",
+    "C01",
+    "C02",
+    "C03",
+    "C04",
+    "C05",
+    "C06",
+    "C07",
+    "C08",
+    "C09",
+    "C10",
+    "C11",
+    "C12",
+    "C13",
+    "C14",
+    "C15",
+    "C16",
+    "D01",
+    "D02",
+    "D03",
+    "D04",
+    "D05",
+    "D06",
+    "D07",
+    "D08",
+    "D09",
+    "D10",
+    "D11",
+    "D12",
+    "D13",
+    "D14",
+    "D15",
+    "D16"
+  ],
+  "semantic_boundary": "candidate trajectories only",
+  "forbidden_uses": [
+    "software completion",
+    "causal improvement"
+  ],
+  "edges": [
+    {
+      "source": "A01",
+      "target": "A02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A01",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "A03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "A04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "A06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "A07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "A08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "A13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A02",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A03",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "A06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "A07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "A08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "A13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A04",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "A06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "A10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "A11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "B05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "B11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A05",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "A07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "A10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "A11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "A13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A06",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "A08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "A13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A07",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "A09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "A10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "A12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "A13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "A14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "A15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A08",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "A10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "A12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "A14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "A15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A09",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "A11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "A12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "A14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "A15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A10",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "B05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "B11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A11",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "A14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "A15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A12",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "A16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A13",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "A15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A14",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A15",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "A16",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B01",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "B03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B02",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B03",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B04",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "B06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "B11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B05",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "B07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "B11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B06",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "B08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B07",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "B09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "B13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B08",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "B10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B09",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "B11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "B12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B10",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "C05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B11",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "B14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B12",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "B16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B13",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "B15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B14",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B15",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "B16",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C01",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "C03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C02",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C03",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C04",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "C06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C05",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "C07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C06",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "C08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C07",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "C09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "C13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C08",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "C10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C09",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "C11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "C12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C10",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C11",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "C14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C12",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "C16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C13",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "C15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C14",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C15",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D01",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "C16",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D02",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D01",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D03",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D02",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D04",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D03",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D05",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D04",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D06",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D05",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D07",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D06",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D08",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D07",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D09",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D08",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D09",
+      "target": "D10",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D09",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D09",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D09",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D09",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D09",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D09",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D10",
+      "target": "D11",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D10",
+      "target": "D12",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D10",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D10",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D10",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D10",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D11",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D11",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D11",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D11",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D12",
+      "target": "D13",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D12",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D12",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D13",
+      "target": "D14",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D13",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D13",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D14",
+      "target": "D15",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D14",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    },
+    {
+      "source": "D15",
+      "target": "D16",
+      "relations": [
+        "shared_boundary"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "amtech.trace008.implementation-contract.v1",
+  "must": [
+    "forward-only migrations",
+    "no blind destructive retry",
+    "immutable exact-SHA release",
+    "detached public-key verification",
+    "no dry-run promotion",
+    "no WS09 acceptance"
+  ],
+  "must_not": [
+    "edit main",
+    "edit applied migration",
+    "mutable rollback tag",
+    "partial topology healthy",
+    "restore without database secret proof continuity",
+    "Docker authority outside Host Provisioner"
+  ]
+}

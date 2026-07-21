@@ -1,0 +1,1747 @@
+{
+  "schema": "amtech.trace008.software-invariant-hypergraph.v1",
+  "vertices": [
+    "AcceptedProof",
+    "AccountingReceipt",
+    "Ambiguous",
+    "ApplicationProjection",
+    "Artifact",
+    "Audit",
+    "BackupID",
+    "Build",
+    "Command",
+    "ComposeHash",
+    "ConfigHashes",
+    "Conservation",
+    "Database",
+    "DatabaseClock",
+    "DatabaseMutation",
+    "Effect",
+    "Expiry",
+    "Filesystem",
+    "Fixtures",
+    "GitSHA",
+    "ImageDigests",
+    "Integration",
+    "Lease",
+    "Migration",
+    "MigrationHead",
+    "NonacceptanceProof",
+    "OperatorBlocked",
+    "PRProse",
+    "Proof",
+    "ProofRefinding",
+    "ProviderReceipt",
+    "RateWindow",
+    "Repair",
+    "ReplicaClock",
+    "ReservationRelease",
+    "RestoreResult",
+    "Retry",
+    "RetryPermission",
+    "ReturnedRecord",
+    "SecretVersion",
+    "SignedManifest",
+    "Source",
+    "Types",
+    "Unit",
+    "Workflow"
+  ],
+  "hyperedges": [
+    {
+      "id": "repository_closure",
+      "members": [
+        "Source",
+        "Migration",
+        "Fixtures",
+        "Types",
+        "Unit",
+        "Integration",
+        "Build",
+        "Workflow",
+        "Artifact",
+        "PRProse"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "temporal_authority",
+      "members": [
+        "ReplicaClock",
+        "DatabaseClock",
+        "RateWindow",
+        "Lease",
+        "Expiry",
+        "Retry"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "ambiguity_terminality",
+      "members": [
+        "Ambiguous",
+        "AcceptedProof",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "durable_truth",
+      "members": [
+        "DatabaseMutation",
+        "ReturnedRecord",
+        "ApplicationProjection",
+        "Audit",
+        "Conservation"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "release",
+      "members": [
+        "GitSHA",
+        "ImageDigests",
+        "ComposeHash",
+        "ConfigHashes",
+        "MigrationHead",
+        "SignedManifest"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "effect_recovery",
+      "members": [
+        "Command",
+        "Effect",
+        "ProviderReceipt",
+        "AccountingReceipt",
+        "Proof",
+        "Repair"
+      ],
+      "weight": 1
+    },
+    {
+      "id": "restore",
+      "members": [
+        "BackupID",
+        "Database",
+        "Filesystem",
+        "SecretVersion",
+        "RestoreResult",
+        "ProofRefinding"
+      ],
+      "weight": 1
+    }
+  ],
+  "candidate_mapping": {
+    "A01": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ]
+    },
+    "A02": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "A03": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release",
+        "restore"
+      ]
+    },
+    "A04": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "A05": {
+      "vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ]
+    },
+    "A06": {
+      "vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Conservation",
+        "DatabaseMutation",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "PRProse",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "repository_closure"
+      ]
+    },
+    "A07": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "A08": {
+      "vertices": [
+        "AccountingReceipt",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release"
+      ]
+    },
+    "A09": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ]
+    },
+    "A10": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery"
+      ]
+    },
+    "A11": {
+      "vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ]
+    },
+    "A12": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "A13": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "A14": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ]
+    },
+    "A15": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "A16": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "B01": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ]
+    },
+    "B02": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "B03": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release",
+        "restore"
+      ]
+    },
+    "B04": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "B05": {
+      "vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ]
+    },
+    "B06": {
+      "vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Conservation",
+        "DatabaseMutation",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "PRProse",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "repository_closure"
+      ]
+    },
+    "B07": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "B08": {
+      "vertices": [
+        "AccountingReceipt",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release"
+      ]
+    },
+    "B09": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ]
+    },
+    "B10": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery"
+      ]
+    },
+    "B11": {
+      "vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ]
+    },
+    "B12": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "B13": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "B14": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ]
+    },
+    "B15": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "B16": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "C01": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ]
+    },
+    "C02": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "C03": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release",
+        "restore"
+      ]
+    },
+    "C04": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "C05": {
+      "vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ]
+    },
+    "C06": {
+      "vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Conservation",
+        "DatabaseMutation",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "PRProse",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "repository_closure"
+      ]
+    },
+    "C07": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "C08": {
+      "vertices": [
+        "AccountingReceipt",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release"
+      ]
+    },
+    "C09": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ]
+    },
+    "C10": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery"
+      ]
+    },
+    "C11": {
+      "vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ]
+    },
+    "C12": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "C13": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "C14": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ]
+    },
+    "C15": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "C16": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "D01": {
+      "vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Lease",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "release",
+        "repository_closure",
+        "temporal_authority"
+      ]
+    },
+    "D02": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "repository_closure"
+      ]
+    },
+    "D03": {
+      "vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "D04": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "release",
+        "repository_closure"
+      ]
+    },
+    "D05": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "durable_truth",
+        "effect_recovery",
+        "repository_closure"
+      ]
+    },
+    "D06": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Effect",
+        "Expiry",
+        "Lease",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "RateWindow",
+        "Repair",
+        "ReplicaClock",
+        "ReservationRelease",
+        "Retry",
+        "RetryPermission",
+        "ReturnedRecord"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "durable_truth",
+        "effect_recovery",
+        "temporal_authority"
+      ]
+    },
+    "D07": {
+      "vertices": [
+        "AccountingReceipt",
+        "Artifact",
+        "BackupID",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release",
+        "repository_closure",
+        "restore"
+      ]
+    },
+    "D08": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Effect",
+        "Expiry",
+        "GitSHA",
+        "ImageDigests",
+        "Lease",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "RateWindow",
+        "Repair",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "temporal_authority"
+      ]
+    },
+    "D09": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "repository_closure"
+      ]
+    },
+    "D10": {
+      "vertices": [
+        "AccountingReceipt",
+        "Artifact",
+        "BackupID",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "effect_recovery",
+        "release",
+        "repository_closure",
+        "restore"
+      ]
+    },
+    "D11": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    },
+    "D12": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RestoreResult",
+        "RetryPermission",
+        "SecretVersion"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "restore"
+      ]
+    },
+    "D13": {
+      "vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ]
+    },
+    "D14": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "BackupID",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "Database",
+        "DatabaseMutation",
+        "Effect",
+        "Filesystem",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "ReturnedRecord",
+        "SecretVersion",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "repository_closure",
+        "restore"
+      ]
+    },
+    "D15": {
+      "vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Effect",
+        "Expiry",
+        "GitSHA",
+        "ImageDigests",
+        "Lease",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "RateWindow",
+        "Repair",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord",
+        "SignedManifest"
+      ],
+      "hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "temporal_authority"
+      ]
+    },
+    "D16": {
+      "vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "hyperedges": [
+        "release",
+        "repository_closure"
+      ]
+    }
+  },
+  "coverage_order": "proved <= complete <= fractional <= touch"
+}

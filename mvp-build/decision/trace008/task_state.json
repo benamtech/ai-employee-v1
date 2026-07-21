@@ -1,1 +1,118 @@
-PLACEHOLDER
+{
+  "schema": "amtech.trace008.task-state.v1",
+  "starting_sha": "0193bc2f8d87fec07fd645171c37cb4b9e66e1ff",
+  "starting_branch": "agent/ws08-ws09-release-recovery",
+  "input_blob_shas": {
+    "prior_model_sha256": "9f16f761d5a56e2cc185c88ff953b766cf8e53b8924a26c71ba9f11492c4255e"
+  },
+  "seed": 20260721,
+  "runtime": {
+    "python": "3.12.3"
+  },
+  "deterministic_commands": [
+    "python decision/trace008/generate.py",
+    "python decision/trace008/compute.py"
+  ],
+  "hypothesis_updates": [
+    {
+      "id": "H01",
+      "classification": "modified",
+      "evidence_summary": "More than one production compose or deployment entrypoint can claim canonical authority."
+    },
+    {
+      "id": "H02",
+      "classification": "confirmed",
+      "evidence_summary": "The current release unit does not bind all five required services to one exact Git SHA and immutable image digest set."
+    },
+    {
+      "id": "H03",
+      "classification": "confirmed",
+      "evidence_summary": "A partial topology can currently pass health or smoke checks."
+    },
+    {
+      "id": "H04",
+      "classification": "unresolved",
+      "evidence_summary": "At least one repair path can create a new effect identity rather than reconciling the original identity."
+    },
+    {
+      "id": "H05",
+      "classification": "confirmed",
+      "evidence_summary": "Rollback is service-local and can leave code, images, configuration, or migrations on different release identities."
+    },
+    {
+      "id": "H06",
+      "classification": "confirmed",
+      "evidence_summary": "Backup and restore do not prove refindable owner proof after database and filesystem recovery."
+    },
+    {
+      "id": "H07",
+      "classification": "confirmed",
+      "evidence_summary": "Secret versions are not included in restore or release proof, allowing technically successful recovery with stale or incompatible credentials."
+    },
+    {
+      "id": "H08",
+      "classification": "modified",
+      "evidence_summary": "Host Provisioner is not the sole transitive Docker authority."
+    },
+    {
+      "id": "H09",
+      "classification": "modified",
+      "evidence_summary": "Manager or Model Gateway can attach to employee networks without an explicit scoped authority record."
+    },
+    {
+      "id": "H10",
+      "classification": "modified",
+      "evidence_summary": "Production egress is broader than required and lacks an inspectable bounded policy."
+    },
+    {
+      "id": "H11",
+      "classification": "confirmed",
+      "evidence_summary": "Temporal decisions mix process clock and database clock, permitting stale lease, expiry, or retry behavior under skew."
+    },
+    {
+      "id": "H12",
+      "classification": "modified",
+      "evidence_summary": "Application code rewrites or normalizes database-authoritative returned records instead of validating them."
+    },
+    {
+      "id": "H13",
+      "classification": "modified",
+      "evidence_summary": "Fault injection uses unstable line or timing hooks rather than named crash points bound to semantic transitions."
+    },
+    {
+      "id": "H14",
+      "classification": "confirmed",
+      "evidence_summary": "Release provenance is self-asserted and lacks an independent verifier with a separate trust boundary."
+    },
+    {
+      "id": "H15",
+      "classification": "confirmed",
+      "evidence_summary": "Build reproducibility is not checked by rebuilding the same exact SHA and comparing declared artifacts."
+    },
+    {
+      "id": "H16",
+      "classification": "confirmed",
+      "evidence_summary": "The current CI does not build and inspect Manager, Gateway, Provisioner, Web, and Caddy as one release candidate."
+    },
+    {
+      "id": "H17",
+      "classification": "confirmed",
+      "evidence_summary": "Capacity harnesses count requests but omit open connections, SSE clients, queues, per-employee fairness, and noisy-neighbor effects."
+    },
+    {
+      "id": "H18",
+      "classification": "modified",
+      "evidence_summary": "Saturation can render as generic failure or healthy degradation without an explicit operator-visible state."
+    },
+    {
+      "id": "H19",
+      "classification": "confirmed",
+      "evidence_summary": "Pilot controls lack machine-readable stop authority, rollback target, incident owner, data boundary, and customer exit criteria."
+    },
+    {
+      "id": "H20",
+      "classification": "confirmed",
+      "evidence_summary": "The inherited WS-07 migration still contains an unqualified rate-window update that fails under PL/pgSQL output-column namespace rules."
+    }
+  ]
+}

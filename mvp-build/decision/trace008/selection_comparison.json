@@ -1,0 +1,1903 @@
+{
+  "schema": "amtech.trace008.selection-comparison.v1",
+  "same_feasible_domain": true,
+  "selection_size": 12,
+  "random_feasible_sets": 1024,
+  "random_objective_summary": {
+    "min": 0.5692526237542443,
+    "mean": 0.6086951369113899,
+    "max": 0.6271224951303555
+  },
+  "search_restarts": 32,
+  "restart_selections": [
+    [
+      "A01",
+      "A02",
+      "A10",
+      "A11",
+      "A14",
+      "A16",
+      "B05",
+      "C07",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "B02",
+      "B05",
+      "B09",
+      "C02",
+      "C09",
+      "C10",
+      "C12",
+      "D01",
+      "D04",
+      "D05",
+      "D08",
+      "D14"
+    ],
+    [
+      "A01",
+      "A05",
+      "A11",
+      "B09",
+      "B12",
+      "C01",
+      "C08",
+      "C16",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A03",
+      "A07",
+      "A10",
+      "A11",
+      "B04",
+      "C01",
+      "C09",
+      "C11",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A06",
+      "A09",
+      "B03",
+      "B11",
+      "C01",
+      "C09",
+      "C11",
+      "C12",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A05",
+      "A07",
+      "A11",
+      "B03",
+      "B09",
+      "C07",
+      "C14",
+      "D01",
+      "D04",
+      "D08",
+      "D14",
+      "D16"
+    ],
+    [
+      "A09",
+      "B02",
+      "B10",
+      "C02",
+      "C09",
+      "C10",
+      "C11",
+      "D01",
+      "D04",
+      "D08",
+      "D12",
+      "D14"
+    ],
+    [
+      "B14",
+      "B15",
+      "C05",
+      "C06",
+      "C11",
+      "C16",
+      "D01",
+      "D03",
+      "D04",
+      "D08",
+      "D14",
+      "D16"
+    ],
+    [
+      "A03",
+      "A04",
+      "A11",
+      "B14",
+      "B15",
+      "C10",
+      "D01",
+      "D04",
+      "D06",
+      "D08",
+      "D13",
+      "D14"
+    ],
+    [
+      "A06",
+      "B05",
+      "B07",
+      "B12",
+      "B14",
+      "C11",
+      "C13",
+      "C15",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A02",
+      "A10",
+      "B07",
+      "B09",
+      "C03",
+      "C11",
+      "D01",
+      "D04",
+      "D06",
+      "D08",
+      "D12",
+      "D14"
+    ],
+    [
+      "B14",
+      "B15",
+      "B16",
+      "C04",
+      "C10",
+      "D01",
+      "D04",
+      "D06",
+      "D08",
+      "D12",
+      "D14",
+      "D16"
+    ],
+    [
+      "A14",
+      "A16",
+      "B11",
+      "C09",
+      "C11",
+      "C12",
+      "C16",
+      "D01",
+      "D04",
+      "D08",
+      "D09",
+      "D14"
+    ],
+    [
+      "A02",
+      "A12",
+      "B01",
+      "B10",
+      "B11",
+      "D01",
+      "D04",
+      "D08",
+      "D09",
+      "D12",
+      "D14",
+      "D16"
+    ],
+    [
+      "A08",
+      "A11",
+      "A13",
+      "B09",
+      "C01",
+      "C09",
+      "C10",
+      "D01",
+      "D03",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A02",
+      "A05",
+      "A08",
+      "A14",
+      "B11",
+      "C09",
+      "D01",
+      "D04",
+      "D06",
+      "D08",
+      "D10",
+      "D14"
+    ],
+    [
+      "A02",
+      "A05",
+      "A13",
+      "B12",
+      "B14",
+      "C11",
+      "C13",
+      "C14",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A02",
+      "A07",
+      "A09",
+      "A10",
+      "A14",
+      "C05",
+      "D01",
+      "D04",
+      "D08",
+      "D11",
+      "D13",
+      "D14"
+    ],
+    [
+      "A13",
+      "A15",
+      "B03",
+      "B12",
+      "C04",
+      "C05",
+      "C09",
+      "C10",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A01",
+      "A05",
+      "A07",
+      "B07",
+      "C03",
+      "C09",
+      "C11",
+      "D01",
+      "D04",
+      "D08",
+      "D13",
+      "D14"
+    ],
+    [
+      "A02",
+      "A08",
+      "A11",
+      "A12",
+      "B11",
+      "B14",
+      "C01",
+      "C16",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A02",
+      "A05",
+      "B01",
+      "B08",
+      "B10",
+      "B12",
+      "C04",
+      "C11",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A04",
+      "A11",
+      "A14",
+      "B06",
+      "B13",
+      "C08",
+      "C09",
+      "C12",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A02",
+      "A10",
+      "B02",
+      "B05",
+      "B12",
+      "C08",
+      "C09",
+      "D01",
+      "D04",
+      "D08",
+      "D13",
+      "D14"
+    ],
+    [
+      "A07",
+      "B05",
+      "B10",
+      "B14",
+      "C01",
+      "C11",
+      "D01",
+      "D03",
+      "D04",
+      "D08",
+      "D10",
+      "D14"
+    ],
+    [
+      "A02",
+      "A05",
+      "A06",
+      "A11",
+      "B12",
+      "C01",
+      "C05",
+      "D01",
+      "D04",
+      "D08",
+      "D12",
+      "D14"
+    ],
+    [
+      "A09",
+      "A10",
+      "B09",
+      "B13",
+      "B15",
+      "C05",
+      "C07",
+      "C13",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A05",
+      "A09",
+      "A11",
+      "A14",
+      "B09",
+      "B16",
+      "C15",
+      "C16",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A11",
+      "B06",
+      "B11",
+      "C03",
+      "C08",
+      "C14",
+      "D01",
+      "D04",
+      "D08",
+      "D11",
+      "D13",
+      "D14"
+    ],
+    [
+      "A03",
+      "A14",
+      "B01",
+      "B10",
+      "B11",
+      "C10",
+      "C11",
+      "C16",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A05",
+      "A09",
+      "A15",
+      "B01",
+      "B05",
+      "B16",
+      "C04",
+      "C06",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ],
+    [
+      "A02",
+      "A12",
+      "A15",
+      "B14",
+      "B15",
+      "C11",
+      "C14",
+      "C16",
+      "D01",
+      "D04",
+      "D08",
+      "D14"
+    ]
+  ],
+  "modes": {
+    "full": {
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ],
+      "objective": 0.59094013,
+      "coverage": {
+        "touch": 1.0,
+        "fractional": 1.0,
+        "complete": 1.0,
+        "proved": 0.0,
+        "mandatory_invariants": [
+          "acceptedEffectNoDuplicate",
+          "boundedEgress",
+          "buildReproducibility",
+          "canonicalCompose",
+          "completeBackupRestore",
+          "crashNoFalseSuccess",
+          "dockerAuthorityIsolation",
+          "exactSHAImages",
+          "fiveServiceReleaseUnit",
+          "independentProvenance",
+          "migrationCompatibility",
+          "operatorRecoverability",
+          "perEmployeeNetworkIsolation",
+          "proofRefindAfterRestore",
+          "repairUsesOriginalIdentity",
+          "rollbackPreservesAcceptedWork",
+          "secretNonExposure",
+          "stableCrashPoints",
+          "telemetryLineage",
+          "truthfulHealth",
+          "wholeReleaseRollback"
+        ],
+        "omega": true
+      }
+    },
+    "no_graph": {
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ],
+      "objective": 0.18658531,
+      "coverage": {
+        "touch": 1.0,
+        "fractional": 1.0,
+        "complete": 1.0,
+        "proved": 0.0,
+        "mandatory_invariants": [
+          "acceptedEffectNoDuplicate",
+          "boundedEgress",
+          "buildReproducibility",
+          "canonicalCompose",
+          "completeBackupRestore",
+          "crashNoFalseSuccess",
+          "dockerAuthorityIsolation",
+          "exactSHAImages",
+          "fiveServiceReleaseUnit",
+          "independentProvenance",
+          "migrationCompatibility",
+          "operatorRecoverability",
+          "perEmployeeNetworkIsolation",
+          "proofRefindAfterRestore",
+          "repairUsesOriginalIdentity",
+          "rollbackPreservesAcceptedWork",
+          "secretNonExposure",
+          "stableCrashPoints",
+          "telemetryLineage",
+          "truthfulHealth",
+          "wholeReleaseRollback"
+        ],
+        "omega": true
+      }
+    },
+    "no_diversity": {
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ],
+      "objective": 0.46700617,
+      "coverage": {
+        "touch": 1.0,
+        "fractional": 1.0,
+        "complete": 1.0,
+        "proved": 0.0,
+        "mandatory_invariants": [
+          "acceptedEffectNoDuplicate",
+          "boundedEgress",
+          "buildReproducibility",
+          "canonicalCompose",
+          "completeBackupRestore",
+          "crashNoFalseSuccess",
+          "dockerAuthorityIsolation",
+          "exactSHAImages",
+          "fiveServiceReleaseUnit",
+          "independentProvenance",
+          "migrationCompatibility",
+          "operatorRecoverability",
+          "perEmployeeNetworkIsolation",
+          "proofRefindAfterRestore",
+          "repairUsesOriginalIdentity",
+          "rollbackPreservesAcceptedWork",
+          "secretNonExposure",
+          "stableCrashPoints",
+          "telemetryLineage",
+          "truthfulHealth",
+          "wholeReleaseRollback"
+        ],
+        "omega": true
+      }
+    },
+    "baseline": {
+      "selection": [
+        "A01",
+        "B13",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ],
+      "objective": 0.55275417,
+      "coverage": {
+        "touch": 1.0,
+        "fractional": 1.0,
+        "complete": 1.0,
+        "proved": 0.0,
+        "mandatory_invariants": [
+          "acceptedEffectNoDuplicate",
+          "boundedEgress",
+          "buildReproducibility",
+          "canonicalCompose",
+          "completeBackupRestore",
+          "crashNoFalseSuccess",
+          "dockerAuthorityIsolation",
+          "exactSHAImages",
+          "fiveServiceReleaseUnit",
+          "independentProvenance",
+          "migrationCompatibility",
+          "operatorRecoverability",
+          "perEmployeeNetworkIsolation",
+          "proofRefindAfterRestore",
+          "repairUsesOriginalIdentity",
+          "rollbackPreservesAcceptedWork",
+          "secretNonExposure",
+          "stableCrashPoints",
+          "telemetryLineage",
+          "truthfulHealth",
+          "wholeReleaseRollback"
+        ],
+        "omega": true
+      }
+    }
+  },
+  "weight_perturbations": [
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 0,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 1,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 2,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 3,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 4,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 5,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 6,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": -1,
+      "run": 7,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 0,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 1,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 2,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 3,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 4,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 5,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 6,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.1,
+      "sign": 1,
+      "run": 7,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 0,
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 1,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 2,
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 3,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 4,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 5,
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 6,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": -1,
+      "run": 7,
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 0,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 1,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 2,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D07",
+        "D08",
+        "D09",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 3,
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 4,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 5,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 6,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "pct": 0.25,
+      "sign": 1,
+      "run": 7,
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    }
+  ],
+  "extra_sensitivity": [
+    {
+      "control": "double_penalties",
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "control": "remove_IG",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_BV",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "control": "remove_N",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_Adj",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_CrossLens",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_FutureBug",
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "control": "remove_FeatureYield",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "control": "remove_ArchLeverage",
+      "selection": [
+        "A01",
+        "B01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14",
+        "D16"
+      ]
+    },
+    {
+      "control": "remove_VF",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_Testability",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_Reversibility",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_ProofDensity",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_Risk",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_Cost",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_Scope",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D08",
+        "D09",
+        "D11",
+        "D13",
+        "D14"
+      ]
+    },
+    {
+      "control": "remove_Unsupported",
+      "selection": [
+        "A01",
+        "B01",
+        "C01",
+        "D01",
+        "D02",
+        "D04",
+        "D06",
+        "D07",
+        "D08",
+        "D09",
+        "D13",
+        "D14"
+      ]
+    }
+  ],
+  "candidate_stability": [
+    {
+      "id": "A01",
+      "frequency": 0.6419753086419753
+    },
+    {
+      "id": "A02",
+      "frequency": 0.13580246913580246
+    },
+    {
+      "id": "A03",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "A04",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "A05",
+      "frequency": 0.1111111111111111
+    },
+    {
+      "id": "A06",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "A07",
+      "frequency": 0.06172839506172839
+    },
+    {
+      "id": "A08",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "A09",
+      "frequency": 0.07407407407407407
+    },
+    {
+      "id": "A10",
+      "frequency": 0.07407407407407407
+    },
+    {
+      "id": "A11",
+      "frequency": 0.13580246913580246
+    },
+    {
+      "id": "A12",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "A13",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "A14",
+      "frequency": 0.08641975308641975
+    },
+    {
+      "id": "A15",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "A16",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "B01",
+      "frequency": 0.654320987654321
+    },
+    {
+      "id": "B02",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "B03",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "B04",
+      "frequency": 0.012345679012345678
+    },
+    {
+      "id": "B05",
+      "frequency": 0.07407407407407407
+    },
+    {
+      "id": "B06",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "B07",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "B08",
+      "frequency": 0.012345679012345678
+    },
+    {
+      "id": "B09",
+      "frequency": 0.08641975308641975
+    },
+    {
+      "id": "B10",
+      "frequency": 0.06172839506172839
+    },
+    {
+      "id": "B11",
+      "frequency": 0.08641975308641975
+    },
+    {
+      "id": "B12",
+      "frequency": 0.08641975308641975
+    },
+    {
+      "id": "B13",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "B14",
+      "frequency": 0.09876543209876543
+    },
+    {
+      "id": "B15",
+      "frequency": 0.06172839506172839
+    },
+    {
+      "id": "B16",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "C01",
+      "frequency": 0.5925925925925926
+    },
+    {
+      "id": "C02",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "C03",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "C04",
+      "frequency": 0.04938271604938271
+    },
+    {
+      "id": "C05",
+      "frequency": 0.06172839506172839
+    },
+    {
+      "id": "C06",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "C07",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "C08",
+      "frequency": 0.04938271604938271
+    },
+    {
+      "id": "C09",
+      "frequency": 0.13580246913580246
+    },
+    {
+      "id": "C10",
+      "frequency": 0.08641975308641975
+    },
+    {
+      "id": "C11",
+      "frequency": 0.16049382716049382
+    },
+    {
+      "id": "C12",
+      "frequency": 0.04938271604938271
+    },
+    {
+      "id": "C13",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "C14",
+      "frequency": 0.04938271604938271
+    },
+    {
+      "id": "C15",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "C16",
+      "frequency": 0.08641975308641975
+    },
+    {
+      "id": "D01",
+      "frequency": 1.0
+    },
+    {
+      "id": "D02",
+      "frequency": 0.6049382716049383
+    },
+    {
+      "id": "D03",
+      "frequency": 0.037037037037037035
+    },
+    {
+      "id": "D04",
+      "frequency": 1.0
+    },
+    {
+      "id": "D05",
+      "frequency": 0.012345679012345678
+    },
+    {
+      "id": "D06",
+      "frequency": 0.654320987654321
+    },
+    {
+      "id": "D07",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "D08",
+      "frequency": 1.0
+    },
+    {
+      "id": "D09",
+      "frequency": 0.6296296296296297
+    },
+    {
+      "id": "D10",
+      "frequency": 0.024691358024691357
+    },
+    {
+      "id": "D11",
+      "frequency": 0.5432098765432098
+    },
+    {
+      "id": "D12",
+      "frequency": 0.06172839506172839
+    },
+    {
+      "id": "D13",
+      "frequency": 0.6666666666666666
+    },
+    {
+      "id": "D14",
+      "frequency": 1.0
+    },
+    {
+      "id": "D15",
+      "frequency": 0.0
+    },
+    {
+      "id": "D16",
+      "frequency": 0.20987654320987653
+    }
+  ],
+  "invariant_basin": [
+    {
+      "invariant": "canonicalCompose",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "fiveServiceReleaseUnit",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "dockerAuthorityIsolation",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "perEmployeeNetworkIsolation",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "boundedEgress",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "exactSHAImages",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "migrationCompatibility",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "crashNoFalseSuccess",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "acceptedEffectNoDuplicate",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "repairUsesOriginalIdentity",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "rollbackPreservesAcceptedWork",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "wholeReleaseRollback",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "completeBackupRestore",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "proofRefindAfterRestore",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "telemetryLineage",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "stableCrashPoints",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "operatorRecoverability",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "independentProvenance",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "secretNonExposure",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "truthfulHealth",
+      "frequency": 1.0
+    },
+    {
+      "invariant": "buildReproducibility",
+      "frequency": 1.0
+    }
+  ],
+  "classification": {
+    "graph_terms": "descriptive",
+    "diversity_terms": "selection-influencing",
+    "causal_improvement": "unestablished",
+    "independent_proof_yield_difference": null
+  }
+}

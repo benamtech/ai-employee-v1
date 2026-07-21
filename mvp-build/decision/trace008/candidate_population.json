@@ -1,0 +1,5460 @@
+{
+  "schema": "amtech.trace008.candidate-population.v1",
+  "frozen_after_first_48": true,
+  "batches": {
+    "direct_ws08": 16,
+    "architecture_product": 16,
+    "failure_operator_capacity": 16,
+    "recombination": 16
+  },
+  "candidates": [
+    {
+      "id": "A01",
+      "batch": "direct_ws08",
+      "title": "direct WS08: terminal destructive closure",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioner-idempotency.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/db/migrations/0078_ws07_rate_window_namespace_fix.sql",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "0078 SQL remains ambiguous and partial destructive failures release retry claims"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "terminal destructive closure",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery,repository_closure",
+      "score_vector": {
+        "IG": 0.799,
+        "BV": 0.67,
+        "N": 0.469,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.48,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.48,
+        "VF": 0.94,
+        "Testability": 0.87,
+        "Reversibility": 0.66,
+        "ProofDensity": 0.675,
+        "Risk": 0.405,
+        "Cost": 0.27,
+        "Scope": 0.285,
+        "Unsupported": 0.005
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "operatorRecoverability",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "A02",
+      "batch": "direct_ws08",
+      "title": "direct WS08: exact five-service release",
+      "evidence": [
+        {
+          "ref": "infra/deploy/docker-compose.production.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/with-git-sha.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "five images are not one immutable release identity"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "exact five-service release",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.629,
+        "BV": 0.575,
+        "N": 0.339,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "canonicalCompose",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "A03",
+      "batch": "direct_ws08",
+      "title": "direct WS08: manifest rollback restore",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/deploy-rollback.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "rollback is mutable and restore omits database secret proof continuity"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "manifest rollback restore",
+      "proof_obligation": "behavioral proof for effect_recovery,release,restore",
+      "score_vector": {
+        "IG": 0.748,
+        "BV": 0.635,
+        "N": 0.438,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.48,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.48,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.65,
+        "Risk": 0.525,
+        "Cost": 0.37,
+        "Scope": 0.285,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "operatorRecoverability",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork",
+        "wholeReleaseRollback"
+      ]
+    },
+    {
+      "id": "A04",
+      "batch": "direct_ws08",
+      "title": "direct WS08: detached provenance build",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/shared/src/release-evidence.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "provenance is self-digested and CI omits five image builds"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "detached provenance build",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.626,
+        "BV": 0.575,
+        "N": 0.336,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "independentProvenance",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "A05",
+      "batch": "direct_ws08",
+      "title": "direct WS08: temporal durable truth",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-state-machine.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-env-proof.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "process clocks and dry-run promotion overstate durable truth"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "temporal durable truth",
+      "proof_obligation": "behavioral proof for durable_truth,temporal_authority",
+      "score_vector": {
+        "IG": 0.686,
+        "BV": 0.505,
+        "N": 0.396,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "A06",
+      "batch": "direct_ws08",
+      "title": "direct WS08: capacity pilot groundwork",
+      "evidence": [
+        {
+          "ref": "infra/scripts/capacity-pod-alpha.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "production-readiness-program/09-workstream-execution-map.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "queues SSE fairness and pilot stops are absent"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Conservation",
+        "DatabaseMutation",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "PRProse",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "capacity pilot groundwork",
+      "proof_obligation": "behavioral proof for durable_truth,repository_closure",
+      "score_vector": {
+        "IG": 0.683,
+        "BV": 0.505,
+        "N": 0.393,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.59,
+        "Risk": 0.35,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "operatorRecoverability",
+        "telemetryLineage",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "A07",
+      "batch": "direct_ws08",
+      "title": "direct WS08: topology complete health",
+      "evidence": [
+        {
+          "ref": "infra/scripts/deploy-smoke.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-normal-employee-validate.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "partial topology and health none may pass"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "topology complete health",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.661,
+        "BV": 0.54,
+        "N": 0.371,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.42,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "canonicalCompose",
+        "fiveServiceReleaseUnit",
+        "operatorRecoverability",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "A08",
+      "batch": "direct_ws08",
+      "title": "direct WS08: scoped bounded egress",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/egress-policy.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "egress is optional and dry-run oriented"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "scoped bounded egress",
+      "proof_obligation": "behavioral proof for effect_recovery,release",
+      "score_vector": {
+        "IG": 0.701,
+        "BV": 0.635,
+        "N": 0.411,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.59,
+        "Risk": 0.5,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "boundedEgress",
+        "dockerAuthorityIsolation",
+        "exactSHAImages",
+        "perEmployeeNetworkIsolation",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "A09",
+      "batch": "direct_ws08",
+      "title": "direct WS08: semantic crashpoints",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "crash injection lacks stable semantic points"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "semantic crashpoints",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery",
+      "score_vector": {
+        "IG": 0.64,
+        "BV": 0.565,
+        "N": 0.37,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.87,
+        "Reversibility": 0.66,
+        "ProofDensity": 0.565,
+        "Risk": 0.38,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "A10",
+      "batch": "direct_ws08",
+      "title": "direct WS08: operator telemetry",
+      "evidence": [
+        {
+          "ref": "infra/scripts/red-health.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/repair.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "operator evidence lacks original identity lineage"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "operator telemetry",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery",
+      "score_vector": {
+        "IG": 0.671,
+        "BV": 0.505,
+        "N": 0.381,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "operatorRecoverability",
+        "telemetryLineage"
+      ]
+    },
+    {
+      "id": "A11",
+      "batch": "direct_ws08",
+      "title": "direct WS08: database clock retry",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-reconciler.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "leases and retries mix authority clocks"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "database clock retry",
+      "proof_obligation": "behavioral proof for durable_truth,temporal_authority",
+      "score_vector": {
+        "IG": 0.682,
+        "BV": 0.47,
+        "N": 0.412,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.34,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.565,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "migrationCompatibility"
+      ]
+    },
+    {
+      "id": "A12",
+      "batch": "direct_ws08",
+      "title": "direct WS08: backup secret index",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "backup has no DB or secret-version inventory"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "backup secret index",
+      "proof_obligation": "behavioral proof for effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.648,
+        "BV": 0.505,
+        "N": 0.378,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.68,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.565,
+        "Risk": 0.35,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.255
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "proofRefindAfterRestore",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "A13",
+      "batch": "direct_ws08",
+      "title": "direct WS08: image digest inspection",
+      "evidence": [
+        {
+          "ref": "infra/deploy/caddy.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/manager.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/provisioner.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/web.Dockerfile",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "revision labels are not independently verified"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "image digest inspection",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.693,
+        "BV": 0.505,
+        "N": 0.363,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.96,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.64,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": -0.01
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit"
+      ]
+    },
+    {
+      "id": "A14",
+      "batch": "direct_ws08",
+      "title": "direct WS08: ambiguity operator block",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "ambiguity has no durable retry permission"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "ambiguity operator block",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery",
+      "score_vector": {
+        "IG": 0.651,
+        "BV": 0.505,
+        "N": 0.381,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.565,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "operatorRecoverability"
+      ]
+    },
+    {
+      "id": "A15",
+      "batch": "direct_ws08",
+      "title": "direct WS08: proof refind restore",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "tests/unit/ws06-ws08-failure-manifold.test.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "host restore proof refinding is absent"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "proof refind restore",
+      "proof_obligation": "behavioral proof for effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.639,
+        "BV": 0.565,
+        "N": 0.349,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.59,
+        "Risk": 0.5,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork"
+      ]
+    },
+    {
+      "id": "A16",
+      "batch": "direct_ws08",
+      "title": "direct WS08: repository evidence closure",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "mvp-build/CODEGRAPH.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "artifact upload and prose must not redefine command truth"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "repository evidence closure",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.645,
+        "BV": 0.505,
+        "N": 0.355,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "B01",
+      "batch": "architecture_product",
+      "title": "architecture product: terminal destructive closure",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioner-idempotency.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/db/migrations/0078_ws07_rate_window_namespace_fix.sql",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "0078 SQL remains ambiguous and partial destructive failures release retry claims"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "terminal destructive closure",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery,repository_closure",
+      "score_vector": {
+        "IG": 0.778,
+        "BV": 0.67,
+        "N": 0.448,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.48,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.48,
+        "VF": 0.94,
+        "Testability": 0.87,
+        "Reversibility": 0.66,
+        "ProofDensity": 0.675,
+        "Risk": 0.405,
+        "Cost": 0.27,
+        "Scope": 0.285,
+        "Unsupported": 0.005
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "operatorRecoverability",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "B02",
+      "batch": "architecture_product",
+      "title": "architecture product: exact five-service release",
+      "evidence": [
+        {
+          "ref": "infra/deploy/docker-compose.production.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/with-git-sha.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "five images are not one immutable release identity"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "exact five-service release",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.635,
+        "BV": 0.575,
+        "N": 0.345,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "canonicalCompose",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "B03",
+      "batch": "architecture_product",
+      "title": "architecture product: manifest rollback restore",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/deploy-rollback.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "rollback is mutable and restore omits database secret proof continuity"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "manifest rollback restore",
+      "proof_obligation": "behavioral proof for effect_recovery,release,restore",
+      "score_vector": {
+        "IG": 0.691,
+        "BV": 0.635,
+        "N": 0.381,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.48,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.48,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.65,
+        "Risk": 0.525,
+        "Cost": 0.37,
+        "Scope": 0.285,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "operatorRecoverability",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork",
+        "wholeReleaseRollback"
+      ]
+    },
+    {
+      "id": "B04",
+      "batch": "architecture_product",
+      "title": "architecture product: detached provenance build",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/shared/src/release-evidence.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "provenance is self-digested and CI omits five image builds"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "detached provenance build",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.637,
+        "BV": 0.575,
+        "N": 0.347,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "independentProvenance",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "B05",
+      "batch": "architecture_product",
+      "title": "architecture product: temporal durable truth",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-state-machine.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-env-proof.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "process clocks and dry-run promotion overstate durable truth"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "temporal durable truth",
+      "proof_obligation": "behavioral proof for durable_truth,temporal_authority",
+      "score_vector": {
+        "IG": 0.651,
+        "BV": 0.505,
+        "N": 0.361,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "B06",
+      "batch": "architecture_product",
+      "title": "architecture product: capacity pilot groundwork",
+      "evidence": [
+        {
+          "ref": "infra/scripts/capacity-pod-alpha.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "production-readiness-program/09-workstream-execution-map.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "queues SSE fairness and pilot stops are absent"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Conservation",
+        "DatabaseMutation",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "PRProse",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "capacity pilot groundwork",
+      "proof_obligation": "behavioral proof for durable_truth,repository_closure",
+      "score_vector": {
+        "IG": 0.697,
+        "BV": 0.505,
+        "N": 0.407,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.59,
+        "Risk": 0.35,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "operatorRecoverability",
+        "telemetryLineage",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "B07",
+      "batch": "architecture_product",
+      "title": "architecture product: topology complete health",
+      "evidence": [
+        {
+          "ref": "infra/scripts/deploy-smoke.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-normal-employee-validate.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "partial topology and health none may pass"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "topology complete health",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.65,
+        "BV": 0.54,
+        "N": 0.36,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.42,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "canonicalCompose",
+        "fiveServiceReleaseUnit",
+        "operatorRecoverability",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "B08",
+      "batch": "architecture_product",
+      "title": "architecture product: scoped bounded egress",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/egress-policy.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "egress is optional and dry-run oriented"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "scoped bounded egress",
+      "proof_obligation": "behavioral proof for effect_recovery,release",
+      "score_vector": {
+        "IG": 0.656,
+        "BV": 0.635,
+        "N": 0.366,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.59,
+        "Risk": 0.5,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "boundedEgress",
+        "dockerAuthorityIsolation",
+        "exactSHAImages",
+        "perEmployeeNetworkIsolation",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "B09",
+      "batch": "architecture_product",
+      "title": "architecture product: semantic crashpoints",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "crash injection lacks stable semantic points"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "semantic crashpoints",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery",
+      "score_vector": {
+        "IG": 0.638,
+        "BV": 0.565,
+        "N": 0.368,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.87,
+        "Reversibility": 0.66,
+        "ProofDensity": 0.565,
+        "Risk": 0.38,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "B10",
+      "batch": "architecture_product",
+      "title": "architecture product: operator telemetry",
+      "evidence": [
+        {
+          "ref": "infra/scripts/red-health.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/repair.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "operator evidence lacks original identity lineage"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "operator telemetry",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery",
+      "score_vector": {
+        "IG": 0.662,
+        "BV": 0.505,
+        "N": 0.372,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "operatorRecoverability",
+        "telemetryLineage"
+      ]
+    },
+    {
+      "id": "B11",
+      "batch": "architecture_product",
+      "title": "architecture product: database clock retry",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-reconciler.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "leases and retries mix authority clocks"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "database clock retry",
+      "proof_obligation": "behavioral proof for durable_truth,temporal_authority",
+      "score_vector": {
+        "IG": 0.629,
+        "BV": 0.47,
+        "N": 0.359,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.34,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.565,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "migrationCompatibility"
+      ]
+    },
+    {
+      "id": "B12",
+      "batch": "architecture_product",
+      "title": "architecture product: backup secret index",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "backup has no DB or secret-version inventory"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "backup secret index",
+      "proof_obligation": "behavioral proof for effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.656,
+        "BV": 0.505,
+        "N": 0.386,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.68,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.565,
+        "Risk": 0.35,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.255
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "proofRefindAfterRestore",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "B13",
+      "batch": "architecture_product",
+      "title": "architecture product: image digest inspection",
+      "evidence": [
+        {
+          "ref": "infra/deploy/caddy.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/manager.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/provisioner.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/web.Dockerfile",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "revision labels are not independently verified"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "image digest inspection",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.725,
+        "BV": 0.505,
+        "N": 0.395,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.96,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.64,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": -0.01
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit"
+      ]
+    },
+    {
+      "id": "B14",
+      "batch": "architecture_product",
+      "title": "architecture product: ambiguity operator block",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "ambiguity has no durable retry permission"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "ambiguity operator block",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery",
+      "score_vector": {
+        "IG": 0.64,
+        "BV": 0.505,
+        "N": 0.37,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.565,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "operatorRecoverability"
+      ]
+    },
+    {
+      "id": "B15",
+      "batch": "architecture_product",
+      "title": "architecture product: proof refind restore",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "tests/unit/ws06-ws08-failure-manifold.test.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "host restore proof refinding is absent"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "proof refind restore",
+      "proof_obligation": "behavioral proof for effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.695,
+        "BV": 0.565,
+        "N": 0.405,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.59,
+        "Risk": 0.5,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork"
+      ]
+    },
+    {
+      "id": "B16",
+      "batch": "architecture_product",
+      "title": "architecture product: repository evidence closure",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "mvp-build/CODEGRAPH.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "artifact upload and prose must not redefine command truth"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "repository evidence closure",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.686,
+        "BV": 0.505,
+        "N": 0.396,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "C01",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: terminal destructive closure",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioner-idempotency.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/db/migrations/0078_ws07_rate_window_namespace_fix.sql",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "0078 SQL remains ambiguous and partial destructive failures release retry claims"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "terminal destructive closure",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery,repository_closure",
+      "score_vector": {
+        "IG": 0.708,
+        "BV": 0.67,
+        "N": 0.378,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.48,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.48,
+        "VF": 0.94,
+        "Testability": 0.87,
+        "Reversibility": 0.66,
+        "ProofDensity": 0.675,
+        "Risk": 0.405,
+        "Cost": 0.27,
+        "Scope": 0.285,
+        "Unsupported": 0.005
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "operatorRecoverability",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "C02",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: exact five-service release",
+      "evidence": [
+        {
+          "ref": "infra/deploy/docker-compose.production.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/with-git-sha.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "five images are not one immutable release identity"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "exact five-service release",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.704,
+        "BV": 0.575,
+        "N": 0.414,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "canonicalCompose",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "C03",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: manifest rollback restore",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/deploy-rollback.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "rollback is mutable and restore omits database secret proof continuity"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "manifest rollback restore",
+      "proof_obligation": "behavioral proof for effect_recovery,release,restore",
+      "score_vector": {
+        "IG": 0.744,
+        "BV": 0.635,
+        "N": 0.434,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.48,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.48,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.65,
+        "Risk": 0.525,
+        "Cost": 0.37,
+        "Scope": 0.285,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "operatorRecoverability",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork",
+        "wholeReleaseRollback"
+      ]
+    },
+    {
+      "id": "C04",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: detached provenance build",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/shared/src/release-evidence.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "provenance is self-digested and CI omits five image builds"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "detached provenance build",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.655,
+        "BV": 0.575,
+        "N": 0.365,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "independentProvenance",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "C05",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: temporal durable truth",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-state-machine.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-env-proof.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "process clocks and dry-run promotion overstate durable truth"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "temporal durable truth",
+      "proof_obligation": "behavioral proof for durable_truth,temporal_authority",
+      "score_vector": {
+        "IG": 0.664,
+        "BV": 0.505,
+        "N": 0.374,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "C06",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: capacity pilot groundwork",
+      "evidence": [
+        {
+          "ref": "infra/scripts/capacity-pod-alpha.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "production-readiness-program/09-workstream-execution-map.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "queues SSE fairness and pilot stops are absent"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Conservation",
+        "DatabaseMutation",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "PRProse",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "capacity pilot groundwork",
+      "proof_obligation": "behavioral proof for durable_truth,repository_closure",
+      "score_vector": {
+        "IG": 0.619,
+        "BV": 0.505,
+        "N": 0.329,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.59,
+        "Risk": 0.35,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "operatorRecoverability",
+        "telemetryLineage",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "C07",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: topology complete health",
+      "evidence": [
+        {
+          "ref": "infra/scripts/deploy-smoke.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-normal-employee-validate.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "partial topology and health none may pass"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "topology complete health",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.702,
+        "BV": 0.54,
+        "N": 0.412,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.42,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "canonicalCompose",
+        "fiveServiceReleaseUnit",
+        "operatorRecoverability",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "C08",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: scoped bounded egress",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/egress-policy.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "egress is optional and dry-run oriented"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "GitSHA",
+        "ImageDigests",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "scoped bounded egress",
+      "proof_obligation": "behavioral proof for effect_recovery,release",
+      "score_vector": {
+        "IG": 0.705,
+        "BV": 0.635,
+        "N": 0.415,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.46,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.59,
+        "Risk": 0.5,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "boundedEgress",
+        "dockerAuthorityIsolation",
+        "exactSHAImages",
+        "perEmployeeNetworkIsolation",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "C09",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: semantic crashpoints",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "crash injection lacks stable semantic points"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "semantic crashpoints",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery",
+      "score_vector": {
+        "IG": 0.603,
+        "BV": 0.565,
+        "N": 0.333,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.87,
+        "Reversibility": 0.66,
+        "ProofDensity": 0.565,
+        "Risk": 0.38,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "C10",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: operator telemetry",
+      "evidence": [
+        {
+          "ref": "infra/scripts/red-health.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/repair.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "operator evidence lacks original identity lineage"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "operator telemetry",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery",
+      "score_vector": {
+        "IG": 0.649,
+        "BV": 0.505,
+        "N": 0.359,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "operatorRecoverability",
+        "telemetryLineage"
+      ]
+    },
+    {
+      "id": "C11",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: database clock retry",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-reconciler.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "leases and retries mix authority clocks"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Audit",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Lease",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "database clock retry",
+      "proof_obligation": "behavioral proof for durable_truth,temporal_authority",
+      "score_vector": {
+        "IG": 0.685,
+        "BV": 0.47,
+        "N": 0.415,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.34,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.565,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "migrationCompatibility"
+      ]
+    },
+    {
+      "id": "C12",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: backup secret index",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "backup has no DB or secret-version inventory"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "backup secret index",
+      "proof_obligation": "behavioral proof for effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.596,
+        "BV": 0.505,
+        "N": 0.326,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.68,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.565,
+        "Risk": 0.35,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.255
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "proofRefindAfterRestore",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "C13",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: image digest inspection",
+      "evidence": [
+        {
+          "ref": "infra/deploy/caddy.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/manager.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/provisioner.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/web.Dockerfile",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "revision labels are not independently verified"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "image digest inspection",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.693,
+        "BV": 0.505,
+        "N": 0.363,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.96,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.64,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": -0.01
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit"
+      ]
+    },
+    {
+      "id": "C14",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: ambiguity operator block",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "ambiguity has no durable retry permission"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Command",
+        "Effect",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "ambiguity operator block",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery",
+      "score_vector": {
+        "IG": 0.618,
+        "BV": 0.505,
+        "N": 0.348,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.9,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.565,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.035
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "operatorRecoverability"
+      ]
+    },
+    {
+      "id": "C15",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: proof refind restore",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "tests/unit/ws06-ws08-failure-manifold.test.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "host restore proof refinding is absent"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "proof refind restore",
+      "proof_obligation": "behavioral proof for effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.702,
+        "BV": 0.565,
+        "N": 0.412,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.45,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.59,
+        "Risk": 0.5,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork"
+      ]
+    },
+    {
+      "id": "C16",
+      "batch": "failure_operator_capacity",
+      "title": "failure operator capacity: repository evidence closure",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "mvp-build/CODEGRAPH.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "artifact upload and prose must not redefine command truth"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "repository evidence closure",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.704,
+        "BV": 0.505,
+        "N": 0.414,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.38,
+        "ArchLeverage": 0.42,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.59,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "D01",
+      "batch": "recombination",
+      "title": "recombination: exact five-service release",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-state-machine.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/docker-compose.production.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-env-proof.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/with-git-sha.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "five images are not one immutable release identity"
+      ],
+      "software_vertices": [
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Expiry",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Lease",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "RateWindow",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "release",
+        "repository_closure",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "exact five-service release",
+      "proof_obligation": "behavioral proof for durable_truth,release,repository_closure,temporal_authority",
+      "score_vector": {
+        "IG": 0.827,
+        "BV": 0.645,
+        "N": 0.457,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.44,
+        "FeatureYield": 0.54,
+        "ArchLeverage": 0.54,
+        "VF": 0.96,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.76,
+        "Risk": 0.28,
+        "Cost": 0.31,
+        "Scope": 0.32,
+        "Unsupported": -0.01
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "canonicalCompose",
+        "crashNoFalseSuccess",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "migrationCompatibility",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "D02",
+      "batch": "recombination",
+      "title": "recombination: topology complete health",
+      "evidence": [
+        {
+          "ref": "infra/scripts/deploy-smoke.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-normal-employee-validate.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/red-health.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/repair.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "partial topology and health none may pass"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "topology complete health",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery,release,repository_closure",
+      "score_vector": {
+        "IG": 0.862,
+        "BV": 0.61,
+        "N": 0.492,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.44,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.54,
+        "VF": 0.96,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.76,
+        "Risk": 0.28,
+        "Cost": 0.31,
+        "Scope": 0.32,
+        "Unsupported": -0.01
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "canonicalCompose",
+        "fiveServiceReleaseUnit",
+        "operatorRecoverability",
+        "telemetryLineage",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "D03",
+      "batch": "recombination",
+      "title": "recombination: backup secret index",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "tests/unit/ws06-ws08-failure-manifold.test.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "backup has no DB or secret-version inventory"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "backup secret index",
+      "proof_obligation": "behavioral proof for effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.688,
+        "BV": 0.54,
+        "N": 0.398,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.42,
+        "ArchLeverage": 0.42,
+        "VF": 0.7,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.59,
+        "Risk": 0.35,
+        "Cost": 0.33,
+        "Scope": 0.25,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "D04",
+      "batch": "recombination",
+      "title": "recombination: terminal destructive closure",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/lib/provisioner-idempotency.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/db/migrations/0078_ws07_rate_window_namespace_fix.sql",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/shared/src/release-evidence.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "0078 SQL remains ambiguous and partial destructive failures release retry claims"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Effect",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "terminal destructive closure",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery,release,repository_closure",
+      "score_vector": {
+        "IG": 0.867,
+        "BV": 0.845,
+        "N": 0.477,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.51,
+        "FeatureYield": 0.7,
+        "ArchLeverage": 0.54,
+        "VF": 0.98,
+        "Testability": 0.87,
+        "Reversibility": 0.66,
+        "ProofDensity": 0.785,
+        "Risk": 0.43,
+        "Cost": 0.31,
+        "Scope": 0.32,
+        "Unsupported": -0.025
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "buildReproducibility",
+        "crashNoFalseSuccess",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "independentProvenance",
+        "migrationCompatibility",
+        "operatorRecoverability",
+        "repairUsesOriginalIdentity",
+        "secretNonExposure",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "D05",
+      "batch": "recombination",
+      "title": "recombination: capacity pilot groundwork",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/capacity-pod-alpha.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "production-readiness-program/09-workstream-execution-map.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "queues SSE fairness and pilot stops are absent"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Command",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "ReturnedRecord",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "durable_truth",
+        "effect_recovery",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "capacity pilot groundwork",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,durable_truth,effect_recovery,repository_closure",
+      "score_vector": {
+        "IG": 0.778,
+        "BV": 0.61,
+        "N": 0.428,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.44,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.54,
+        "VF": 0.72,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.735,
+        "Risk": 0.4,
+        "Cost": 0.41,
+        "Scope": 0.32,
+        "Unsupported": 0.225
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "crashNoFalseSuccess",
+        "operatorRecoverability",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints",
+        "telemetryLineage",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "D06",
+      "batch": "recombination",
+      "title": "recombination: database clock retry",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-reconciler.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "leases and retries mix authority clocks"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Effect",
+        "Expiry",
+        "Lease",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProviderReceipt",
+        "RateWindow",
+        "Repair",
+        "ReplicaClock",
+        "ReservationRelease",
+        "Retry",
+        "RetryPermission",
+        "ReturnedRecord"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "durable_truth",
+        "effect_recovery",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "database clock retry",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,durable_truth,effect_recovery,temporal_authority",
+      "score_vector": {
+        "IG": 0.844,
+        "BV": 0.54,
+        "N": 0.514,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.44,
+        "FeatureYield": 0.42,
+        "ArchLeverage": 0.54,
+        "VF": 0.92,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.71,
+        "Risk": 0.28,
+        "Cost": 0.31,
+        "Scope": 0.32,
+        "Unsupported": 0.02
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "operatorRecoverability"
+      ]
+    },
+    {
+      "id": "D07",
+      "batch": "recombination",
+      "title": "recombination: repository evidence closure",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/deploy-rollback.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "mvp-build/CODEGRAPH.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "artifact upload and prose must not redefine command truth"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "Artifact",
+        "BackupID",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release",
+        "repository_closure",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "repository evidence closure",
+      "proof_obligation": "behavioral proof for effect_recovery,release,repository_closure,restore",
+      "score_vector": {
+        "IG": 0.852,
+        "BV": 0.68,
+        "N": 0.482,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.44,
+        "FeatureYield": 0.58,
+        "ArchLeverage": 0.54,
+        "VF": 0.74,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.76,
+        "Risk": 0.4,
+        "Cost": 0.41,
+        "Scope": 0.32,
+        "Unsupported": 0.21
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "completeBackupRestore",
+        "exactSHAImages",
+        "operatorRecoverability",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork",
+        "truthfulHealth",
+        "wholeReleaseRollback"
+      ]
+    },
+    {
+      "id": "D08",
+      "batch": "recombination",
+      "title": "recombination: temporal durable truth",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-state-machine.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/egress-policy.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-env-proof.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "process clocks and dry-run promotion overstate durable truth"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Effect",
+        "Expiry",
+        "GitSHA",
+        "ImageDigests",
+        "Lease",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "RateWindow",
+        "Repair",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "temporal durable truth",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery,release,temporal_authority",
+      "score_vector": {
+        "IG": 0.807,
+        "BV": 0.68,
+        "N": 0.437,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.44,
+        "FeatureYield": 0.58,
+        "ArchLeverage": 0.54,
+        "VF": 0.74,
+        "Testability": 0.64,
+        "Reversibility": 0.72,
+        "ProofDensity": 0.76,
+        "Risk": 0.4,
+        "Cost": 0.41,
+        "Scope": 0.32,
+        "Unsupported": 0.21
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "boundedEgress",
+        "crashNoFalseSuccess",
+        "dockerAuthorityIsolation",
+        "exactSHAImages",
+        "migrationCompatibility",
+        "perEmployeeNetworkIsolation",
+        "secretNonExposure",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "D09",
+      "batch": "recombination",
+      "title": "recombination: operator telemetry",
+      "evidence": [
+        {
+          "ref": "infra/deploy/caddy.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/manager.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/provisioner.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/web.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/red-health.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/repair.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "operator evidence lacks original identity lineage"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseMutation",
+        "Effect",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReturnedRecord",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "operator telemetry",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery,release,repository_closure",
+      "score_vector": {
+        "IG": 0.883,
+        "BV": 0.61,
+        "N": 0.473,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.44,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.54,
+        "VF": 1,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.81,
+        "Risk": 0.28,
+        "Cost": 0.31,
+        "Scope": 0.32,
+        "Unsupported": -0.04
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "operatorRecoverability",
+        "telemetryLineage"
+      ]
+    },
+    {
+      "id": "D10",
+      "batch": "recombination",
+      "title": "recombination: proof refind restore",
+      "evidence": [
+        {
+          "ref": "infra/deploy/docker-compose.production.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/with-git-sha.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "tests/unit/ws06-ws08-failure-manifold.test.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "host restore proof refinding is absent"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "Artifact",
+        "BackupID",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "SecretVersion",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "effect_recovery",
+        "release",
+        "repository_closure",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "proof refind restore",
+      "proof_obligation": "behavioral proof for effect_recovery,release,repository_closure,restore",
+      "score_vector": {
+        "IG": 0.824,
+        "BV": 0.74,
+        "N": 0.454,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.51,
+        "FeatureYield": 0.58,
+        "ArchLeverage": 0.54,
+        "VF": 0.74,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.76,
+        "Risk": 0.55,
+        "Cost": 0.41,
+        "Scope": 0.32,
+        "Unsupported": 0.21
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "canonicalCompose",
+        "completeBackupRestore",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "D11",
+      "batch": "recombination",
+      "title": "recombination: detached provenance build",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/deploy-smoke.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/prod-normal-employee-validate.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/shared/src/release-evidence.ts",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "provenance is self-digested and CI omits five image builds"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "detached provenance build",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.663,
+        "BV": 0.68,
+        "N": 0.333,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.58,
+        "ArchLeverage": 0.42,
+        "VF": 0.96,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.64,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": -0.01
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "canonicalCompose",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "independentProvenance",
+        "operatorRecoverability",
+        "secretNonExposure",
+        "truthfulHealth"
+      ]
+    },
+    {
+      "id": "D12",
+      "batch": "recombination",
+      "title": "recombination: semantic crashpoints",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "crash injection lacks stable semantic points"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "BackupID",
+        "Command",
+        "Database",
+        "Effect",
+        "Filesystem",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RestoreResult",
+        "RetryPermission",
+        "SecretVersion"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "semantic crashpoints",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery,restore",
+      "score_vector": {
+        "IG": 0.73,
+        "BV": 0.67,
+        "N": 0.42,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.48,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.48,
+        "VF": 0.7,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.65,
+        "Risk": 0.525,
+        "Cost": 0.37,
+        "Scope": 0.285,
+        "Unsupported": 0.24
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "crashNoFalseSuccess",
+        "proofRefindAfterRestore",
+        "repairUsesOriginalIdentity",
+        "secretNonExposure",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "D13",
+      "batch": "recombination",
+      "title": "recombination: ambiguity operator block",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioner-idempotency.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "packages/db/migrations/0078_ws07_rate_window_namespace_fix.sql",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "ambiguity has no durable retry permission"
+      ],
+      "software_vertices": [
+        "AcceptedProof",
+        "AccountingReceipt",
+        "Ambiguous",
+        "Artifact",
+        "Build",
+        "Command",
+        "Effect",
+        "Fixtures",
+        "Integration",
+        "Migration",
+        "NonacceptanceProof",
+        "OperatorBlocked",
+        "PRProse",
+        "Proof",
+        "ProviderReceipt",
+        "Repair",
+        "ReservationRelease",
+        "RetryPermission",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "ambiguity_terminality",
+        "effect_recovery",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "ambiguity operator block",
+      "proof_obligation": "behavioral proof for ambiguity_terminality,effect_recovery,repository_closure",
+      "score_vector": {
+        "IG": 0.742,
+        "BV": 0.61,
+        "N": 0.392,
+        "Adj": 0.43,
+        "CrossLens": 0.46,
+        "FutureBug": 0.41,
+        "FeatureYield": 0.5,
+        "ArchLeverage": 0.48,
+        "VF": 0.96,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.7,
+        "Risk": 0.255,
+        "Cost": 0.27,
+        "Scope": 0.285,
+        "Unsupported": -0.01
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "acceptedEffectNoDuplicate",
+        "crashNoFalseSuccess",
+        "migrationCompatibility",
+        "operatorRecoverability",
+        "repairUsesOriginalIdentity",
+        "stableCrashPoints"
+      ]
+    },
+    {
+      "id": "D14",
+      "batch": "recombination",
+      "title": "recombination: manifest rollback restore",
+      "evidence": [
+        {
+          "ref": "infra/scripts/backup-restore.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/capacity-pod-alpha.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/deploy-rollback.mjs",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "production-readiness-program/09-workstream-execution-map.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "rollback is mutable and restore omits database secret proof continuity"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Artifact",
+        "Audit",
+        "BackupID",
+        "Build",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "Database",
+        "DatabaseMutation",
+        "Effect",
+        "Filesystem",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "Proof",
+        "ProofRefinding",
+        "ProviderReceipt",
+        "Repair",
+        "RestoreResult",
+        "ReturnedRecord",
+        "SecretVersion",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "repository_closure",
+        "restore"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "manifest rollback restore",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery,release,repository_closure,restore",
+      "score_vector": {
+        "IG": 0.908,
+        "BV": 0.705,
+        "N": 0.518,
+        "Adj": 0.53,
+        "CrossLens": 0.58,
+        "FutureBug": 0.54,
+        "FeatureYield": 0.54,
+        "ArchLeverage": 0.6,
+        "VF": 0.74,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.82,
+        "Risk": 0.575,
+        "Cost": 0.45,
+        "Scope": 0.355,
+        "Unsupported": 0.21
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "completeBackupRestore",
+        "operatorRecoverability",
+        "proofRefindAfterRestore",
+        "rollbackPreservesAcceptedWork",
+        "telemetryLineage",
+        "truthfulHealth",
+        "wholeReleaseRollback"
+      ]
+    },
+    {
+      "id": "D15",
+      "batch": "recombination",
+      "title": "recombination: scoped bounded egress",
+      "evidence": [
+        {
+          "ref": "apps/manager/src/lib/provisioning-reconciler.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "apps/manager/src/provisioner-host.ts",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/scripts/egress-policy.mjs",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "egress is optional and dry-run oriented"
+      ],
+      "software_vertices": [
+        "AccountingReceipt",
+        "ApplicationProjection",
+        "Audit",
+        "Command",
+        "ComposeHash",
+        "ConfigHashes",
+        "Conservation",
+        "DatabaseClock",
+        "DatabaseMutation",
+        "Effect",
+        "Expiry",
+        "GitSHA",
+        "ImageDigests",
+        "Lease",
+        "MigrationHead",
+        "Proof",
+        "ProviderReceipt",
+        "RateWindow",
+        "Repair",
+        "ReplicaClock",
+        "Retry",
+        "ReturnedRecord",
+        "SignedManifest"
+      ],
+      "software_hyperedges": [
+        "durable_truth",
+        "effect_recovery",
+        "release",
+        "temporal_authority"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "scoped bounded egress",
+      "proof_obligation": "behavioral proof for durable_truth,effect_recovery,release,temporal_authority",
+      "score_vector": {
+        "IG": 0.828,
+        "BV": 0.705,
+        "N": 0.478,
+        "Adj": 0.48,
+        "CrossLens": 0.52,
+        "FutureBug": 0.51,
+        "FeatureYield": 0.54,
+        "ArchLeverage": 0.54,
+        "VF": 0.72,
+        "Testability": 0.67,
+        "Reversibility": 0.56,
+        "ProofDensity": 0.735,
+        "Risk": 0.55,
+        "Cost": 0.41,
+        "Scope": 0.32,
+        "Unsupported": 0.225
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": true
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "boundedEgress",
+        "crashNoFalseSuccess",
+        "dockerAuthorityIsolation",
+        "exactSHAImages",
+        "migrationCompatibility",
+        "perEmployeeNetworkIsolation",
+        "secretNonExposure"
+      ]
+    },
+    {
+      "id": "D16",
+      "batch": "recombination",
+      "title": "recombination: image digest inspection",
+      "evidence": [
+        {
+          "ref": ".github/workflows/ws07-ws08-commercial-effect.yml",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/caddy.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/manager.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/provisioner.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "infra/deploy/web.Dockerfile",
+          "class": "source_or_exact_sha"
+        },
+        {
+          "ref": "mvp-build/CODEGRAPH.md",
+          "class": "source_or_exact_sha"
+        }
+      ],
+      "contradictions": [
+        "revision labels are not independently verified"
+      ],
+      "software_vertices": [
+        "Artifact",
+        "Build",
+        "ComposeHash",
+        "ConfigHashes",
+        "Fixtures",
+        "GitSHA",
+        "ImageDigests",
+        "Integration",
+        "Migration",
+        "MigrationHead",
+        "PRProse",
+        "SignedManifest",
+        "Source",
+        "Types",
+        "Unit",
+        "Workflow"
+      ],
+      "software_hyperedges": [
+        "release",
+        "repository_closure"
+      ],
+      "state_sequence": [
+        "intent",
+        "authority",
+        "effect",
+        "durable_observation",
+        "terminal_or_blocked",
+        "operator_proof"
+      ],
+      "partial_effect_path": "effect -> loss -> ambiguous -> original identity reconciliation",
+      "repair_rollback_path": "original identity -> inspect -> accepted|nonaccepted|blocked -> repair|rollback",
+      "operator_consequence": "identity evidence authority action terminal condition visible",
+      "capability_unlocked": "image digest inspection",
+      "proof_obligation": "behavioral proof for release,repository_closure",
+      "score_vector": {
+        "IG": 0.709,
+        "BV": 0.54,
+        "N": 0.339,
+        "Adj": 0.38,
+        "CrossLens": 0.4,
+        "FutureBug": 0.38,
+        "FeatureYield": 0.42,
+        "ArchLeverage": 0.42,
+        "VF": 1,
+        "Testability": 0.84,
+        "Reversibility": 0.82,
+        "ProofDensity": 0.69,
+        "Risk": 0.23,
+        "Cost": 0.23,
+        "Scope": 0.25,
+        "Unsupported": -0.04
+      },
+      "eligibility": {
+        "eligible": true,
+        "external_evidence_required": false
+      },
+      "rejection_reason": null,
+      "invariants": [
+        "buildReproducibility",
+        "exactSHAImages",
+        "fiveServiceReleaseUnit",
+        "truthfulHealth"
+      ]
+    }
+  ]
+}

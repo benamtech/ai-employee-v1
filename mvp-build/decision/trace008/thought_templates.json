@@ -1,0 +1,45 @@
+{
+  "schema": "amtech.trace008.thought-templates.v1",
+  "templates": [
+    {
+      "id": "T1",
+      "name": "partial_effect_ledger",
+      "instantiate": "For each destructive command, enumerate intent, first irreversible effect, durable receipt, crash points, retry permission, repair owner, and terminal evidence."
+    },
+    {
+      "id": "T2",
+      "name": "release_identity_chain",
+      "instantiate": "Bind Git SHA, source tree, migration head, compose hash, config hash, image digests, manifest signature, and verifier result."
+    },
+    {
+      "id": "T3",
+      "name": "restore_continuity",
+      "instantiate": "Bind backup ID, database snapshot, filesystem snapshot, secret version, restore target, migration compatibility, and post-restore proof refinding."
+    },
+    {
+      "id": "T4",
+      "name": "authority_clock",
+      "instantiate": "For each lease, expiry, retry, health, and rate decision, identify the clock authority, skew assumptions, stored timestamps, and stale-decision rejection."
+    },
+    {
+      "id": "T5",
+      "name": "topology_health",
+      "instantiate": "Define the full release topology and deny healthy status when any required service, network, dependency, migration, or identity binding is absent."
+    },
+    {
+      "id": "T6",
+      "name": "rollback_compatibility",
+      "instantiate": "For each release mutation, prove backward, forward, or explicitly one-way compatibility and preserve accepted work across rollback."
+    },
+    {
+      "id": "T7",
+      "name": "operator_actionability",
+      "instantiate": "Every ambiguous, failed, degraded, repairing, restored, rolled-back, saturated, or blocked state must expose identity, evidence, recommended action, authority, and terminal condition."
+    },
+    {
+      "id": "T8",
+      "name": "saturation_fairness",
+      "instantiate": "Measure per-employee and global CPU, memory, connections, queues, SSE clients, wait time, work conservation, noisy-neighbor impact, and stop thresholds."
+    }
+  ]
+}
