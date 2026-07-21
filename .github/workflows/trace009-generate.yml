@@ -1,0 +1,56 @@
+name: Trace009 Generate
+
+on:
+  push:
+    branches:
+      - agent/ws08-ws09-production
+    paths:
+      - mvp-build/decision/trace009/prior_model.json
+      - mvp-build/decision/trace009/compute.py
+      - .github/workflows/trace009-generate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trace009-generate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Assert exact branch head
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test "${GITHUB_REF_NAME}" = "agent/ws08-ws09-production"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Generate and verify Trace009
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          python decision/trace009/compute.py --write | tee /tmp/trace009-generate.log
+          python decision/trace009/compute.py --verify | tee /tmp/trace009-verify.log
+          test -s decision/trace009/selected_implementation.json
+          test -s decision/trace009/selection_comparison.json
+          test -s decision/trace009/verification_plan.json
+      - name: Commit generated public artifacts
+        run: |
+          set -euo pipefail
+          git config user.name "amtech-trace-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add mvp-build/decision/trace009
+          if git diff --cached --quiet; then
+            echo "Trace009 artifacts already current."
+            exit 0
+          fi
+          git commit -m "decision(trace009): generate computed public artifacts"
+          git push origin HEAD:agent/ws08-ws09-production
