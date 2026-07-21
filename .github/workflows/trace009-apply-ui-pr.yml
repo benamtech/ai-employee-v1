@@ -30,11 +30,26 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
       - name: Apply assertion-checked consolidation
+        id: transform
+        continue-on-error: true
         working-directory: mvp-build
         run: |
-          set -euo pipefail
-          node scripts/apply-trace009-ui-consolidation.mjs
-          node scripts/generate-ui-coverage.mjs validation/ui-presentation-coverage.json
+          set -o pipefail
+          {
+            node scripts/apply-trace009-ui-consolidation.mjs
+            node scripts/generate-ui-coverage.mjs validation/ui-presentation-coverage.json
+          } 2>&1 | tee ../trace009-ui-transform.log
+          echo "status=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+      - name: Retain transform diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trace009-ui-transform-${{ github.event.pull_request.head.sha }}
+          path: trace009-ui-transform.log
+          if-no-files-found: error
+          retention-days: 3
+      - name: Enforce transform result
+        run: test "${{ steps.transform.outputs.status }}" = "0"
       - name: Commit exact derived changes
         run: |
           set -euo pipefail
