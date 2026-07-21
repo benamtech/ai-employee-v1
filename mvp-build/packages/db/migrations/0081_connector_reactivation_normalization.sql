@@ -19,16 +19,19 @@ as $$
 declare
   v_fresh_activation boolean;
 begin
-  v_fresh_activation := new.status = 'active'
-    and new.revoked_at is null
-    and (
-      tg_op = 'INSERT'
-      or old.status is distinct from 'active'
-      or old.revoked_at is not null
-      or old.lifecycle_state in ('revoked','expired','degraded','setup_required')
-      or old.provider_verification_ref is distinct from new.provider_verification_ref
-      or old.provider_verified_at is distinct from new.provider_verified_at
-    );
+  if tg_op = 'INSERT' then
+    v_fresh_activation := new.status = 'active' and new.revoked_at is null;
+  else
+    v_fresh_activation := new.status = 'active'
+      and new.revoked_at is null
+      and (
+        old.status is distinct from 'active'
+        or old.revoked_at is not null
+        or old.lifecycle_state in ('revoked','expired','degraded','setup_required')
+        or old.provider_verification_ref is distinct from new.provider_verification_ref
+        or old.provider_verified_at is distinct from new.provider_verified_at
+      );
+  end if;
 
   if v_fresh_activation then
     new.connector_key := coalesce(nullif(new.connector_key, ''), new.provider);
@@ -63,18 +66,24 @@ declare
   v_fresh_activation boolean;
   v_event_id text;
 begin
-  v_fresh_activation := new.status = 'active'
-    and new.revoked_at is null
-    and new.lifecycle_state = 'connected'
-    and new.discovery_state = 'pending'
-    and (
-      tg_op = 'INSERT'
-      or old.status is distinct from 'active'
-      or old.revoked_at is not null
-      or old.lifecycle_state is distinct from 'connected'
-      or old.provider_verification_ref is distinct from new.provider_verification_ref
-      or old.provider_verified_at is distinct from new.provider_verified_at
-    );
+  if tg_op = 'INSERT' then
+    v_fresh_activation := new.status = 'active'
+      and new.revoked_at is null
+      and new.lifecycle_state = 'connected'
+      and new.discovery_state = 'pending';
+  else
+    v_fresh_activation := new.status = 'active'
+      and new.revoked_at is null
+      and new.lifecycle_state = 'connected'
+      and new.discovery_state = 'pending'
+      and (
+        old.status is distinct from 'active'
+        or old.revoked_at is not null
+        or old.lifecycle_state is distinct from 'connected'
+        or old.provider_verification_ref is distinct from new.provider_verification_ref
+        or old.provider_verified_at is distinct from new.provider_verified_at
+      );
+  end if;
 
   if not v_fresh_activation then
     return new;
