@@ -2,103 +2,89 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "standard_id": "amtech-standard-v0.2",
   "amendment_id": "amtech-standard-v0.2-amendment-001",
-  "task_id": "AMTECH-P0-DOC-COMPUTE-001",
+  "revision": 2,
+  "task_id": "AMTECH-P0-DOC-COMPUTE-002",
   "base_standard_blob": "83db0285649c41df6f0d5ac16928e78f5df308af",
   "base_evolution_vector": "standard-v0.2-evolution-vector.json",
   "effective_date": "2026-07-20",
-  "approval_basis": "Explicit AMTECH human-operator directive requiring comprehensive mvp-build repository-wide documentation cleanup and all required computation before decision modeling or implementation across possible-decision vectors.",
-  "change_class": ["expansion", "reorientation", "satisfaction"],
+  "approval_basis": "Explicit AMTECH human-operator directives requiring computation before patching, repository-wide document consolidation, separation of candidate topology from software-invariant topology, equal-feasibility controls, sensitivity analysis, and separation of selection influence from causal improvement.",
+  "change_class": ["expansion", "reorientation", "narrowing", "satisfaction"],
   "destructive_modification": 0,
   "lost_protection": [],
   "production_ready": false,
   "clauses": [
     {
-      "id": "ENG-12.1A",
-      "motion": "expansion",
-      "base_clause": "ENG-12.1",
-      "change": "Adds decision tier, authority/evidence/Unknown extraction, trace location, and selected implementation identity to task contracts.",
-      "implementation_refs": ["mvp-build/AGENTS.md", "mvp-build/CLAUDE.md", "mvp-build/decision/README.md", "mvp-build/decision/protocol-v1.json"]
-    },
-    {
       "id": "ENG-12.3A",
       "motion": "reorientation",
-      "base_clause": "ENG-12.3",
-      "change": "Reorients execution from Explore→Act to authority→compute→compress→red proof→implement→exact verification.",
-      "implementation_refs": ["mvp-build/decision/README.md", "mvp-build/docs/architecture/11-agent-orientation-and-role-map.md"]
+      "change": "Places the simple evidence-and-invariants baseline, split topology, equal-feasibility controls, and sensitivity before implementation compression.",
+      "implementation_refs": ["mvp-build/decision/README.md", "mvp-build/decision/protocol-v1.json"]
     },
     {
       "id": "ENG-12.3B",
       "motion": "expansion",
-      "base_clause": "ENG-12.3",
-      "change": "Defines proportional T0-T3 computation tiers with candidate and baseline minima.",
-      "implementation_refs": ["mvp-build/decision/protocol-v1.json", "mvp-build/decision/trace007/"]
-    },
-    {
-      "id": "ENG-12.3C",
-      "motion": "expansion",
-      "base_clause": "REVP-9.2, REVP-9.5, ENG-12.3",
-      "change": "Requires independent concurrent spaces and preserves Unknown as Unsupported rather than evidence.",
-      "implementation_refs": ["mvp-build/decision/README.md", "mvp-build/decision/trace007/task_state.json"]
+      "change": "Raises T3 search robustness to at least 1,000 feasible random baselines, 32 search restarts, and 32 weight perturbations.",
+      "implementation_refs": ["mvp-build/decision/protocol-v1.json", "mvp-build/decision/trace007/selection_comparison.json"]
     },
     {
       "id": "ENG-12.3D",
       "motion": "narrowing",
-      "base_clause": "REVP-9.1, REVP-9.2, REVP-9.3",
-      "change": "Narrows mathematical use to valid hypergraph, simplicial/Hodge, Koopman, and deterministic spectral prerequisites; prohibits decorative mathematics.",
-      "implementation_refs": ["mvp-build/decision/README.md", "mvp-build/decision/trace007/compute.py"]
+      "change": "Separates candidate search topology from software-invariant topology and forbids candidate-edge coverage from representing software completion.",
+      "implementation_refs": ["mvp-build/decision/trace007/candidate_graph.json", "mvp-build/decision/trace007/software_invariant_hypergraph.json"]
     },
     {
       "id": "ENG-12.3E",
-      "motion": "expansion",
-      "base_clause": "ENG-12.3, ENG-12.7",
-      "change": "Separates selected exploration from coherent implementation compression.",
-      "implementation_refs": ["mvp-build/decision/trace007/selected_exploration.json", "mvp-build/decision/trace007/selected_implementation.json", "mvp-build/decision/trace007/implementation_contract.json"]
+      "motion": "narrowing",
+      "change": "Requires every control to use one feasible domain and makes mandatory coverage a constraint rather than an objective reward.",
+      "implementation_refs": ["mvp-build/decision/trace007/selection_comparison.json", "mvp-build/decision/trace007/compute.py"]
+    },
+    {
+      "id": "ENG-12.3F",
+      "motion": "narrowing",
+      "change": "Distinguishes selection influence from causal improvement and requires independent implementation outcomes for causal promotion.",
+      "implementation_refs": ["mvp-build/decision/trace007/implementation_ablation.json", "mvp-build/decision/trace007/decision_record.md"]
+    },
+    {
+      "id": "ENG-12.3G",
+      "motion": "narrowing",
+      "change": "Disables predictive latent models when they do not beat a simple baseline and prohibits unimplemented COCONUT/continuous-thought claims.",
+      "implementation_refs": ["mvp-build/decision/README.md", "mvp-build/AGENTS.md"]
     },
     {
       "id": "ENG-12.4A",
-      "motion": "reorientation",
-      "base_clause": "ENG-12.4, DTEP-10.4, DTEP-10.5",
-      "change": "Places test design after computed implementation selection and limits tests to selected invariants and the minimum failure manifold.",
-      "implementation_refs": ["mvp-build/production-readiness-program/10-test-suite-disposition.md", "mvp-build/tests/unit/ws06-ws08-failure-manifold.test.ts"]
-    },
-    {
-      "id": "ENG-12.7A",
       "motion": "expansion",
-      "base_clause": "ENG-12.7",
-      "change": "Adds decision traces and deterministic verifiers as first-class scaffolding.",
-      "implementation_refs": ["mvp-build/decision/trace007/"]
+      "change": "Requires every selected software-invariant hyperedge to map to complete behavioral proof or an explicit blocker.",
+      "implementation_refs": ["mvp-build/decision/trace007/verification_plan.json", "mvp-build/production-readiness-program/10-test-suite-disposition.md"]
     },
     {
       "id": "ENG-12.8A",
       "motion": "satisfaction",
-      "base_clause": "ENG-12.8, ENG-12.9",
-      "change": "Corrects document families to one computation protocol, one active production program, one active trace per consequential transaction, and historical second-half plans/audits.",
-      "implementation_refs": ["mvp-build/GAPS.md", "mvp-build/REMEDIATION.md", "mvp-build/second-half-plan/README.md", "mvp-build/docs/architecture/12-document-control-memory-and-handoff-map.md"]
+      "change": "Consolidates contributor policy into one root contract, one product contract, compatibility routers, and one exact product-status owner.",
+      "implementation_refs": ["AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "mvp-build/AGENTS.md", "mvp-build/CLAUDE.md", "mvp-build/CODEGRAPH.md"]
     },
     {
       "id": "STD-13.3A",
-      "motion": "satisfaction",
-      "base_clause": "STD-13.3",
-      "change": "Updates current source status from migration 0072 to PR #35 source candidate through migration 0076 while keeping all stronger evidence classes open.",
-      "implementation_refs": ["mvp-build/CODEGRAPH.md", "mvp-build/production-readiness-program/13-resolution-ledger.json"]
+      "motion": "narrowing",
+      "change": "Removes transient release status from normative and compatibility mirrors; exact status is owned by mvp-build/CODEGRAPH.md and exact workflow/release evidence.",
+      "implementation_refs": ["mvp-build/CODEGRAPH.md", "mvp-build/docs/architecture/12-document-control-memory-and-handoff-map.md"]
     }
   ],
   "summary": {
-    "added_clause_ids": 10,
     "musts_removed_or_weakened": 0,
-    "dominant_motion": "computation_first_reorientation",
+    "dominant_motion": "semantic_correction_and_authority_consolidation",
+    "decision_topology": "candidate_graph_plus_software_invariant_hypergraph",
+    "graph_terms": "descriptive",
+    "diversity_terms": "descriptive_or_selection_influencing",
+    "causal_improvement": "unestablished",
     "evidence_tier": "ratified_governance_and_source_candidate",
     "open_gates": [
-      "exact-head computation/document/source/unit/PostgreSQL/broad CI",
+      "exact-head trace governance source unit integration type lint build",
       "managed database",
       "live provider and connector",
-      "target host/runtime",
-      "fixture-free browser/channel/golden work",
+      "target host runtime and typed server composition",
+      "fixture-free browser channel and golden work",
       "commercial lifecycle",
-      "recovery and rollback",
-      "signed release",
-      "accessibility and capacity",
-      "pilot, deployment, and production"
+      "recovery rollback telemetry and signed release",
+      "accessibility capacity pilot deployment and production"
     ]
   }
 }
