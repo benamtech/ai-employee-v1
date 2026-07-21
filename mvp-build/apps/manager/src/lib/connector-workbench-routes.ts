@@ -19,7 +19,8 @@ async function ownerScope(c: Context, action: string, denyInternal: InternalGate
   const body = await c.req.json().catch(() => ({})) as Record<string, unknown>;
   const db = serviceClient();
   const session = await requireOwnerSession(db, String(body.owner_session_token ?? ""));
-  if (!session?.human_principal_id) return { denied: c.json({ error: "owner_session_invalid" }, 401) } as const;
+  const humanPrincipalId = String(session?.human_principal_id ?? "");
+  if (!session || !humanPrincipalId) return { denied: c.json({ error: "owner_session_invalid" }, 401) } as const;
   const authority = await authorizeOwnerAssignment(db, {
     session,
     employee_id: employeeId,
@@ -29,7 +30,7 @@ async function ownerScope(c: Context, action: string, denyInternal: InternalGate
     allowed_roles: ["owner", "manager", "operator"],
   });
   if (!authority.ok) return { denied: c.json({ error: authority.reason }, authority.status) } as const;
-  return { db, session, authority, body, employeeId } as const;
+  return { db, session, humanPrincipalId, authority, body, employeeId } as const;
 }
 
 export function registerConnectorWorkbenchRoutes(app: Hono, denyInternal: InternalGate): void {
@@ -56,7 +57,7 @@ export function registerConnectorWorkbenchRoutes(app: Hono, denyInternal: Intern
       account_id: scope.session.account_id,
       employee_id: scope.employeeId,
       assignment_id: scope.authority.assignment.assignment_id,
-      requested_by_principal_id: scope.session.human_principal_id,
+      requested_by_principal_id: scope.humanPrincipalId,
       connector,
       owner_context: scope.body.owner_context && typeof scope.body.owner_context === "object"
         ? scope.body.owner_context as Record<string, unknown>
@@ -99,7 +100,7 @@ export function registerConnectorWorkbenchRoutes(app: Hono, denyInternal: Intern
       binding_id: typeof scope.body.binding_id === "string" ? scope.body.binding_id : null,
       connector_key: typeof scope.body.connector_key === "string" ? scope.body.connector_key : null,
       reason,
-      actor_principal_id: scope.session.human_principal_id,
+      actor_principal_id: scope.humanPrincipalId,
     });
     const audit_id = await writeAudit(scope.db, {
       assignment_id: scope.authority.assignment.assignment_id,
