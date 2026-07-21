@@ -1,50 +1,52 @@
 # Computation-First Decision Protocol
 
-Status: **active and mandatory for non-mechanical work**  
-Protocol: `amtech.computed-decision.v1`  
-Machine-readable contract: [`protocol-v1.json`](protocol-v1.json)  
-Current production example: [`trace007/`](trace007/)
+Status: **active for non-mechanical `mvp-build` work**  
+Machine contract: [`protocol-v1.json`](protocol-v1.json)  
+Current example: [`trace007/`](trace007/)
 
 ## Purpose
 
-AMTECH should maximize useful possibility-space per task, then compress action into one high-leverage implementation. Planning prose, intuition, remembered architecture, trajectory language, or a single favored solution must not become implementation authority before the applicable computation is complete.
+Expand useful possibility space, then compress action into the smallest coherent implementation. Computation is valuable only when repository evidence feeds it and its result changes a decision, proof obligation, or rejection. It is not a ritual layer between inspection and a patch already chosen.
 
-This protocol preserves the useful parts of forced dreaming, latent-space exploration, manifold interdimensional vectors, graph reasoning, and counterfactual recombination without allowing decorative mathematics, architectural sprawl, or excessive testing.
+The default baseline is always the simpler evidence-and-invariants analysis. Mathematics earns causal status only through ablation against that baseline.
 
-## Mandatory order
+## Required order
 
 ```text
-authority extraction
-→ evidence/unknown matrix
-→ applicable decision tier
-→ independent possible-decision vectors
-→ feasibility and invariant filtering
-→ computed comparison
-→ multi-way dependency analysis when justified
-→ selected exploration set
-→ separate coherent implementation compression
-→ red behavioral proof
-→ implementation
-→ exact-head verification
-→ documentation and handoff update
+authority and evidence extraction
+→ Observed / Inferred / Hypothesis / Unknown / NotApplicable matrix
+→ proportional tier
+→ independent candidate batches
+→ invariant and prerequisite filtering
+→ simple evidence-and-invariants baseline
+→ candidate search topology when useful
+→ software invariant topology when useful
+→ equal-feasibility controls
+→ search and weight sensitivity
+→ selected exploration
+→ separate implementation compression
+→ complete behavioral proof plan
+→ Red → Green → Refactor
+→ exact-head and required external verification
+→ current-document and handoff update
 ```
 
-No implementation decision may be justified by a score, graph, model, or note created after the implementation choice was already made.
+No score, graph, model, or note created after implementation selection may be used to justify that implementation.
 
-## Decision tiers
+## Tiers
 
-| Tier | Use | Minimum computation | Graph requirement |
-|---|---|---|---|
-| `T0 mechanical` | exact typo, generated hash refresh, deterministic rename, unambiguous source correction | authority check, one invariant, exact verification command | none |
-| `T1 bounded` | one-file or one-boundary choice with meaningful alternatives | at least 4 candidate vectors, evidence/unknown labels, feasibility filter, explicit rejection reasons | only when dependencies are genuinely multi-way |
-| `T2 consequential` | security, database, protocol, commercial, provider, recovery, owner-surface, or cross-file behavior | at least 16 candidate vectors across 3 independent batches, weighted dimensions, utility-only comparison, coherent compression | hypergraph or explicit dependency matrix when pairwise edges lose information |
-| `T3 production/cross-workstream` | production boundary, multiple workstreams, release gate, or architecture mutation | at least 64 vectors across current/feature/counterfactual/recombination batches, baseline comparison, sparse multi-way graph, causal graph/diversity check, separate implementation frontier | required unless the record proves pairwise structure is sufficient |
+| Tier | Use | Minimum |
+|---|---|---|
+| `T0 mechanical` | deterministic correction with no material choice | authority check, one invariant, exact verification |
+| `T1 bounded` | local choice with real alternatives | 4 candidates, 2 batches, evidence labels, rejection reasons |
+| `T2 consequential` | security, database, protocol, commercial, provider, recovery, owner surface | 16 candidates, 3 batches, simple baseline, equal-feasibility controls, search/weight sensitivity |
+| `T3 production/cross-workstream` | release boundary or architecture mutation | 64 candidates in 4 batches, two topology layers, 1,000 feasible random baselines, 32 search restarts, 32 weight perturbations, implementation ablation or explicit non-causal result |
 
-A task may move to a lower tier only when the computation record explains why no material decision space exists. Tier reduction cannot be used to evade risk, evidence, or dependency analysis.
+A task may move down only when the record proves that no material choice exists.
 
-## Concurrent spaces
+## Concurrent possibility spaces
 
-Do not model one flattened possibility space. Build applicable concurrent spaces over the same task:
+Use only source-grounded spaces that matter to the task:
 
 ```text
 Z = Z_bug ⊕ Z_feature ⊕ Z_user ⊕ Z_operator ⊕ Z_architecture
@@ -52,199 +54,183 @@ Z = Z_bug ⊕ Z_feature ⊕ Z_user ⊕ Z_operator ⊕ Z_architecture
   ⊕ Z_market ⊕ Z_weird ⊕ Z_constraint
 ```
 
-Only include spaces that are applicable and source-grounded. Record excluded spaces and why. Dimensions from different spaces must not be silently mixed into one coordinate system.
+Do not silently mix dimensions from different spaces. Generate `current`, `feature`, and `counterfactual` candidates independently before `recombination`.
 
-Typical prompts include:
+Unknown remains Unknown and increases `Unsupported`.
 
-- What defect or violated invariant exists now?
-- What future capability becomes possible if it is fixed correctly?
-- What operator workflow, recovery path, or misuse is implied?
-- What customer trust or proof problem is hidden here?
-- What architecture mutation becomes natural, and what prerequisite debt does it create?
-- What adjacent or strange use case reveals a more general primitive?
-- What future failure appears if only half the boundary is fixed?
+## Candidate scoring
 
-## Authority and evidence matrix
+Candidate dimensions may include:
 
-Before candidates are generated, extract:
+`Applicability`, `Transfer`, `Evidence`, `CrossLens`, `Unsupported`, `BusinessValue`, `VerificationFeasibility`, `ProofDensity`, `Reversibility`, `ArchitectureLeverage`, `RiskReduction`, `Cost`, `Scope`, `PrerequisiteDebt`, `OperatorBurden`, and `FutureOptionality`.
 
-1. exact repository, branch, base, and current head;
-2. applicable Standard clauses and active program/workstream coordinates;
-3. source, migration, test, workflow, proof, PR, and newest-memory evidence;
-4. known contradictions and authority order;
-5. explicit `Observed`, `Inferred`, `Hypothesis`, `Unknown`, and `Not applicable` coordinates.
+Weights and direction must be declared. Scores prioritize candidates; they do not prove architecture, implementation, or acceptance.
 
-Unknown evidence remains Unknown. It increases `Unsupported`; it cannot be silently converted into zero risk or positive evidence.
+## Two separate topology layers
 
-For structured tasks, define the basis explicitly, for example:
+### 1. Candidate search graph
 
-\[
-\mathcal B = W \times L \times H
-\]
+Vertices are candidate trajectories such as `A01` or `D07`.
 
-where `W` is workstream or boundary, `L` is lens/space, and `H` is evidence or hypothesis class. Cardinality, observed count, unknown count, and non-applicable count must reconcile exactly.
+Edges may mean:
 
-## Independent candidate generation
+- variants of the same concept;
+- shared implementation boundary;
+- recombination lineage;
+- semantic similarity;
+- common evidence.
 
-Candidates must be generated in isolated batches so the first favored solution does not collapse the frontier:
+This graph supports candidate separation, redundancy, diversity, lineage, and **candidate-edge touch**. It cannot report software-invariant completion.
 
-- `current`: direct repairs and invariant restorations;
-- `feature`: capabilities unlocked by a correct repair;
-- `counterfactual`: alternate architectures, failures, and operator constraints;
-- `recombination`: cross-lens trajectories built only after the first batches exist.
+### 2. Software invariant hypergraph
 
-Candidates carry stable IDs, source/evidence references, prerequisites, affected boundaries, expected proof, reversibility, and explicit failure modes.
+Vertices are actual system entities or obligations, for example:
 
-## Required candidate dimensions
+```text
+Revision, ApprovalSnapshot, AssignmentAuthority, BudgetReservation,
+Effect, ProviderAttempt, ProviderReceipt, Settlement, AccountingReceipt,
+ProofProjection, OwnerRefinding, Reconciliation, Repair
+```
 
-Use normalized `[0,1]` values where possible. Applicable dimensions are:
+Hyperedges represent non-decomposable software transactions. Candidates declare which software vertices they represent.
 
-- `Applicability`
-- `Transfer`
-- `Evidence`
-- `CrossLens`
-- `Unsupported`
-- `BusinessValue`
-- `VerificationFeasibility`
-- `ProofDensity`
-- `Reversibility`
-- `ArchitectureLeverage`
-- `RiskReduction`
-- `Cost`
-- `Scope`
-- `PrerequisiteDebt`
-- `OperatorBurden`
-- `FutureOptionality`
+Only this structure reports:
 
-A default quality score is:
+- `C_touch`: weighted fraction of invariant edges with any represented member;
+- `C_fractional`: weighted mean represented-member fraction;
+- `C_complete`: weighted fraction with every member represented;
+- `C_proved`: weighted fraction complete **and** accepted by independent behavioral proof on the exact candidate.
+
+Representation is not proof. A complete edge with pending tests contributes to `C_complete`, not `C_proved`.
+
+## Feasible-domain controls
+
+Mandatory coverage and invariants define the feasible domain:
 
 \[
-q(c)=\sum_d w_d r_{c,d}-w_U\,Unsupported(c)-w_P\,PrerequisiteDebt(c)
+\mathcal F=\{D:|D|=k,\ MandatoryCoverage(D)=1,\ Invariants(D)=1\}
 \]
 
-Weights must be recorded and sum to a declared total. Scores are prioritization evidence, never implementation or acceptance evidence.
+Mandatory coverage is a constraint, not an objective reward.
 
-## Feasibility and invariant filter
-
-Before optimization, reject any candidate that:
-
-- violates Manager/Hermes authority, assignment isolation, exact approval, effect, receipt, commercial, migration, or evidence-class invariants;
-- requires an unresolved prerequisite while pretending it does not;
-- duplicates an accepted effect or makes ambiguity look like failure/success;
-- creates a parallel ontology, runtime, plan, or authority source;
-- expands architecture without a concrete current or near-term use;
-- cannot name a behavioral proof or an honest blocked proof;
-- promotes source/fixture/local/ancestor evidence into a stronger class.
-
-Rejected candidates remain in the trace with rejection reasons.
-
-## Multi-way dependency computation
-
-Use a hypergraph when a relationship is genuinely multi-way. Pairwise graphs are sufficient only when decomposition preserves the dependency.
-
-For incidence matrix `H`, edge weights `W_e`, vertex degrees `D_v`, and edge degrees `D_e`, the normalized hypergraph Laplacian is:
+For `T2/T3`, optimize and compare inside the same `F`:
 
 \[
-L = I-D_v^{-1/2} H W_e D_e^{-1}H^T D_v^{-1/2}
+D^*_{full}=\arg\max_{D\in\mathcal F}J_{full}(D)
 \]
-
-Use Hodge Laplacians only when the task constructs a true simplicial complex. Do not relabel arbitrary tuples as simplices.
-
-Use Koopman propagation only when there are repeated, comparable plan-state trajectories and a computed linear latent propagator with held-out error. It is not a decorative synonym for “future state.” Excessive coherence can collapse diversity; any Koopman objective must include residual/diversity control.
-
-## Joint selection and causality check
-
-A default joint objective for selected set `S` is:
 
 \[
-J(S)=.30\bar q+.20C_\Omega+.10C_H+.10Sep_{min}+.10Sep_{mean}+.10VNE+.10QD-.15Redundancy
+D^*_{no\ graph}=\arg\max_{D\in\mathcal F}(J_{full}-GraphTerms)
 \]
 
-Where:
+\[
+D^*_{no\ diversity}=\arg\max_{D\in\mathcal F}(J_{full}-DiversityTerms)
+\]
 
-- `C_Ω` is required-space/workstream coverage;
-- `C_H` is weighted hyperedge coverage;
-- `Sep` is candidate-vector separation;
-- `VNE` is normalized von Neumann entropy of the selected similarity kernel;
-- `QD` is occupied quality-diversity cells;
-- `Redundancy` is mean off-diagonal similarity.
+\[
+D^*_{baseline}=\arg\max_{D\in\mathcal F}[Evidence+Value+Testability-Risk-Scope]
+\]
 
-The exact objective may change, but every term and weight must be declared.
+Evaluate every selected set with the same full metric vector. Do not compare a feasible set against a control that fails mandatory coverage.
 
-For `T2/T3`, compare at least:
+## Selection influence versus causal improvement
 
-1. joint selection;
-2. utility-only selection;
-3. diversity/dependency-only selection;
-4. feasible random baselines (`T3`: at least 100).
+A term is **selection-influencing** when it changes the selected set inside the same feasible domain.
 
-Graph/diversity terms are `causal` only when they materially change selected candidates, coverage, feasibility, or implementation compression. Otherwise label them `descriptive` and do not use them to justify complexity.
+A term is **causally improving** only when an implementation ablation improves independent outcomes such as:
 
-## Separate implementation compression
+- defects discovered;
+- complete invariant proof obligations;
+- implementation coherence;
+- review defects;
+- unnecessary scope;
+- executable verification yield.
 
-Exploration is not the patch list. Compress the selected frontier into the smallest coherent implementation transaction that:
+Ranking differences, objective deltas, edge touch, or node representation do not establish causal improvement. Without independent outcomes, classify graph terms as `descriptive` and diversity terms as `descriptive` or `selection-influencing`.
 
-- preserves all non-negotiable invariants;
-- resolves the highest-value current boundary;
-- creates reusable primitives rather than parallel subsystems;
-- has bounded files and migration surface;
-- has a direct red behavioral test or explicit blocked proof;
-- does not require unrelated cleanup or speculative architecture.
+## Sensitivity
 
-Record selected implementation IDs separately from selected exploration IDs. The implementation set must be a subset or a clearly documented recombination of the computed frontier.
+`T2/T3` must report:
 
-## Verification discipline
+- search restarts, unique optima, objective spread, and selected-set Jaccard stability;
+- declared weight perturbations, selected-set stability, and software-coverage stability;
+- any instability that changes implementation or proof obligations.
 
-Computation precedes test design, but implementation still follows Red → Green → Refactor.
+Do not choose a favorable seed and hide the rest.
 
-Required order:
+## Mathematical prerequisites
 
-1. computation record verifies;
-2. narrow behavioral tests fail for the intended reason;
-3. source/migration change;
-4. narrow tests pass;
-5. affected suites;
-6. broad exact-head gates;
-7. managed/provider/target-host/browser/commercial/recovery evidence only when required and available.
+- Hypergraphs require genuine multi-way dependencies.
+- Hodge Laplacians require a true simplicial complex.
+- Koopman or another predictive latent model requires repeated comparable trajectories, fitted propagation, held-out evaluation, and residual/diversity control.
+- Predictive models remain disabled when they do not outperform the simple baseline on held-out outcomes.
+- COCONUT, continuous hidden-state reasoning, latent BFS, manifold, or phase-switching language may inspire exploration. Do not claim the model or product implements those mechanisms without executable implementation and verification.
 
-Do not create a test for every imagined vector. Test the selected transaction, its invariant boundaries, and the smallest failure manifold needed to prove convergence.
+## Implementation compression
 
-## Required artifacts
+Exploration is not the patch list. The implementation transaction must:
 
-`T2/T3` traces use one directory under `decision/traceNNN/`:
+- preserve all non-negotiable invariants;
+- resolve the highest-value current boundary;
+- reuse existing authority rather than create a parallel ontology or runtime;
+- bound files, migrations, and operational burden;
+- map every selected software dependency edge to a complete behavioral proof plan or explicit blocker;
+- exclude unrelated cleanup and speculative architecture.
 
-- `task_state.json`
-- `thought_templates.json`
-- `candidate_population.json`
-- `candidate_scores.json`
-- `hypergraph.json` or `dependency_matrix.json`
-- `selection_comparison.json`
-- `selected_exploration.json`
-- `selected_implementation.json`
-- `counterexample_matrix.json`
-- `implementation_contract.json`
-- `verification_plan.json`
-- `decision_record.md`
-- one deterministic verifier such as `compute.py`
+When mathematics is non-causal, use the simpler evidence-and-invariants result and record the mathematics as descriptive.
 
-Large matrices should be regenerated from compact descriptors and hashes rather than committed as duplicated opaque payloads. One active trace exists per active transaction; earlier complete traces are historical, and incomplete transports are removed.
+## Verification and evidence
+
+```text
+decision verifier
+→ narrow red behavioral proof
+→ source/migration change
+→ narrow green
+→ affected suites
+→ broad exact-head gates
+→ managed/provider/browser/host/commercial/release evidence when required
+```
+
+Do not test every imagined vector. Test the selected transaction and the minimum failure manifold that proves its invariants.
+
+Decision records, documentation, source, unit, integration, CI, managed database, provider, browser/channel, target host, commercial lifecycle, signed release, pilot, deployment, and production are separate evidence classes.
+
+## Trace artifacts
+
+A `T2/T3` trace contains:
+
+```text
+task_state.json
+thought_templates.json
+candidate_population.json
+candidate_scores.json
+candidate_graph.json
+software_invariant_hypergraph.json
+selection_comparison.json
+selected_exploration.json
+selected_implementation.json
+implementation_ablation.json
+counterexample_matrix.json
+implementation_contract.json
+verification_plan.json
+decision_record.md
+compute.py
+```
+
+Large matrices should be regenerated from compact descriptors. Keep one active trace per active transaction; preserve complete historical traces only as historical evidence and remove incomplete duplicate transports.
 
 ## Documentation transaction
 
-When a decision changes current authority, update in the same transaction:
+When current authority changes, reconcile in one transaction:
 
 ```text
-source/migrations/tests/workflows
-→ active decision trace
-→ production-readiness issue/workstream/test/evidence maps
-→ architecture map and scoped CODEGRAPH
-→ contributor/read-order docs
+source / migrations / tests / workflows
+→ active trace
+→ active production program and evidence map
+→ architecture and scoped CODEGRAPH
+→ contributor routing
 → one dated handoff and MEMORY.md
-→ PR/release record
+→ PR or release record
 ```
 
-Historical handoffs and audits are preserved as point-in-time evidence. Active-looking stale entrypoints become explicit routing stubs or move to `docs/archive/`.
-
-## Non-claims
-
-Computation does not establish implementation, test, CI, provider, managed-database, target-host, browser/channel, commercial, pilot, deployment, or production acceptance. It improves the quality and auditability of the choice; evidence establishes the state.
+Computation improves how a choice is made. Evidence establishes what is true.
