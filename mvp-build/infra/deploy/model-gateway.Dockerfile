@@ -17,7 +17,8 @@ RUN npm run build --workspace @amtech/shared \
   && npm run build --workspace @amtech/manager \
   && test -f apps/manager/dist/model-gateway-server.js \
   && test -f apps/manager/dist/lib/model-gateway-http.js \
-  && test -f apps/manager/dist/lib/model-gateway-admission.js
+  && test -f apps/manager/dist/lib/model-gateway-commercial.js \
+  && test -f apps/manager/dist/lib/durable-command-runtime.js
 
 FROM node:22-bookworm-slim AS runtime
 ARG AMTECH_GIT_SHA
@@ -39,7 +40,8 @@ COPY --from=build /app/packages ./packages
 
 RUN test -f apps/manager/dist/model-gateway-server.js \
   && test -f apps/manager/dist/lib/model-gateway-http.js \
-  && test -f apps/manager/dist/lib/model-gateway-admission.js
+  && test -f apps/manager/dist/lib/model-gateway-commercial.js \
+  && test -f apps/manager/dist/lib/durable-command-runtime.js
 
 EXPOSE 8092
 CMD ["node", "apps/manager/dist/model-gateway-server.js"]
