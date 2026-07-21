@@ -1,105 +1,107 @@
 # 11 — Coding-Agent Orientation and Role Map
 
-Status: **active operating map**  
+Status: active explanatory map  
 Updated: 2026-07-20
 
-This file explains role selection after repository authority and computation have been established. It does not replace `AGENTS.md`, `CLAUDE.md`, `CODEGRAPH.md`, `STANDARD.md`, [`../../decision/README.md`](../../decision/README.md), or exact source/evidence.
+This file helps choose an implementation role after authority and decision prerequisites are established. It does not replace root/scoped `AGENTS.md`, `CODEGRAPH.md`, the Standard, the decision protocol, or executable evidence.
 
-## Cold-session sequence
+## Cold-session route
 
 ```text
 identity.md
-→ root/scoped contributor rules and CODEGRAPH
-→ STANDARD.md
-→ decision/README.md and protocol-v1.json
-→ production-readiness-program/README.md
-→ memory/MEMORY.md and newest relevant handoff
-→ architecture index and applicable subsystem docs
-→ source, migrations, executable tests, workflows, proof, PR, and diff
-→ computed decision record
+→ root repository contract and routing
+→ mvp-build product contract and exact-status CODEGRAPH
+→ Standard and ratified amendments
+→ decision protocol
+→ active program/current transaction
+→ exact source, migrations, tests, workflows, and proof
+→ newest relevant indexed handoff when needed
+→ decision record
 → implementation
 ```
 
-Do not begin from a screenshot, old handoff, PR description, test name, trajectory score, or favored solution.
+Do not begin from a screenshot, old handoff, PR description, test name, score, candidate ID, or favored solution.
 
-## One primary role per implementation compression
+## One primary role per implementation transaction
 
-An exploration frontier may cross roles. The selected implementation transaction names one primary role and explicit dependency interfaces so the patch does not become a second architecture.
+Exploration may cross roles. Implementation names one primary role and explicit interfaces so the patch does not become a second architecture.
 
 | Role | Primary boundary | Must preserve | Required proof |
 |---|---|---|---|
-| Repository/document authority | stale routing, source/docs reconciliation, archive cleanup | historical integrity; one active program/trace/index; no status promotion | exact files reviewed, source-backed discrepancies, updated routes, proof boundary |
-| Shared contracts | schemas, IDs, finite vocabularies, DTOs | one canonical schema/registry; exhaustive consumer parity; migration/compatibility | type/build of consumers, representative contract tests, packed compatibility when applicable |
-| Database/authority | principals, assignments, RLS, approvals, effects, commercial state | assignment is scope; current authority at effect time; forward migrations; durable ambiguity; service RPC isolation | blank ledger, concurrency/RLS/revocation matrices, managed proof when required |
-| Runtime/network/provisioning | Docker, Caddy, Manager↔Hermes, gateway, lifecycle | Caddy ingress; Host Provisioner Docker authority; employee isolation; scoped credentials; Hermes substrate | image/source inclusion, target-host topology and isolation, teardown/replacement evidence |
-| Events/connectors | webhooks, normalization, inbox, retries, dead letters | verify before insert; raw provider content is untrusted; event dedupe differs from effect idempotency; ambiguity is not success | duplicate/order/binding/crash/retry/dead-letter/replay matrix; provider IDs for provider claims |
-| Hermes/context/capability | sessions, profiles, memory, MCP, business brain | Manager authority; strict context; static identity vs live state; observed capability is not authority | exact runtime/capability observation, registry/schema parity, persisted effective-capability evidence |
-| Owner UI/UX | Web, WorkResource, approvals, signed Review, accessibility | stable operating point; role-safe projection; exact durable IDs; visible fixtures; protocol faults remain faults | compiled browser matrix, keyboard/target/overflow/responsive/reduced-motion/a11y, provider-backed work proof for live claims |
-| Reliability/commercial/proof | idempotency, budgets, rate, receipts, accounting, repair | stable identity before effect; reserve before dispatch; accepted receipt before success; conservation; ambiguity/compensation visibility | concurrency/crash matrix, provider/accounting reconciliation, exact proof IDs |
-| Deployment/release | migrations, secrets, images, DNS/TLS, rollback, attestation | one frozen SHA/digest set; approved target; backup/rollback; no fixture shortcut | migration/advisor, secrets/rotation, target-host, provider/channel/commercial/recovery/rollback, signed manifest |
-| Research/trajectory | emergent capability, cross-lens possibilities | evidence labels; honest assumptions; no mathematical promotion; no production dependency without approved transition | applicable spaces, candidate frontier, computed comparison, selected implementation compression, acceptance predicate |
+| repository/document authority | routing, current/historical separation, governance | one repository contract, one product contract, one exact-status owner, structural validation | route/reference/schema/evidence checks and exact-head broad gates |
+| shared contracts | schemas, IDs, finite vocabularies, DTOs | one canonical schema/registry and exhaustive consumer parity | type/build, representative contract tests, compatibility evidence |
+| database/authority | principals, assignments, RLS, approvals, effects, commercial state | assignment scope, current authority at effect time, forward migrations, durable ambiguity | blank ledger, isolation/concurrency/revocation matrices, managed proof when required |
+| runtime/network/provisioning | ingress, Manager↔Hermes, gateway, Docker lifecycle | Host Provisioner authority, employee isolation, scoped credentials, exact image | target-host topology/isolation/lifecycle evidence |
+| events/connectors | webhooks, normalization, retries, dead letters | verify before insert, untrusted provider content, event dedupe distinct from effect idempotency | duplicate/order/binding/crash/replay/provider-ID matrix |
+| Hermes/context/capability | sessions, profiles, memory, MCP, runtime tools | Manager authority, strict context, observed capability not authority | exact runtime observation and persisted effective-capability evidence |
+| owner UI/UX | Web, approvals, signed Review, accessibility | role-safe projection, exact durable IDs, faults remain faults | compiled browser matrix and provider-backed proof for live claims |
+| reliability/commercial/proof | idempotency, budgets, rate, receipts, accounting, repair | reserve before dispatch, one effect, accepted receipt before success, conservation | concurrency/crash/provider/accounting/proof reconciliation |
+| deployment/release | migrations, secrets, images, DNS/TLS, rollback, attestation | one frozen candidate/digest set, backup/rollback, no fixture shortcut | target-host/provider/channel/commercial/recovery and signed manifest |
+| research/decision | candidate generation, topology, controls, sensitivity | evidence labels, baseline, no mathematical promotion | reproducible matrix, equal-feasibility controls, implementation ablation or non-causal result |
 
-## Computation obligations by role
+## Decision obligations by role
 
-Every role uses the same tier system in `decision/README.md`.
-
-- Repository cleanup is not automatically mechanical. Moving authority files, deleting traces, or changing current status is at least `T1`; cross-program cleanup is `T2`.
+- Repository cleanup that changes authority or current routing is at least `T1`; cross-program cleanup is `T2`.
 - Database, security, provider, commercial, durable-effect, and recovery changes are at least `T2`.
 - Cross-workstream production or release work is `T3`.
-- A truly deterministic one-line correction may be `T0` when authority, invariant, and exact verification are explicit.
+- A deterministic one-line correction may be `T0` when authority, invariant, and exact verification are explicit.
 
-Role-specific candidate generation happens only after the shared evidence matrix. A database engineer cannot score architecture feasibility from stale docs; a UX engineer cannot promote a fixture; a trajectory analyst cannot select provider behavior without source evidence.
+Every role starts from the same evidence matrix. A database engineer cannot infer platform acceptance from docs; a UX engineer cannot promote fixtures; a decision analyst cannot invent provider behavior.
 
-## Possible-decision spaces
+## Candidate and software topology
 
-Select only applicable spaces, but consider them independently before recombination:
+Decision work uses two structures:
 
 ```text
-bug | feature | user | operator | architecture | protocol
-commercial | failure | proof | market | weird | constraint
+candidate graph
+  vertices: candidate trajectories
+  use: search diversity, lineage, redundancy, similarity
+
+software invariant hypergraph
+  vertices: real entities/obligations
+  use: touch, fractional, complete, proved coverage
 ```
 
-Examples:
-
-- Database/authority: race, stale authority, backfill, rollback, operator repair, future shared-assignment use.
-- Runtime: namespace reachability, restart, image drift, secret custody, future fleet scaling.
-- UI: owner comprehension, interruption/recovery, proof refinding, accessibility, channel convergence.
-- Commercial: reservation, settlement, refund, invoice, suspension, abuse, customer trust.
-- Research: adjacent use case, architecture mutation, prerequisite wall, false attractor, future failure from a half-fix.
+Do not compute software completion from candidate IDs.
 
 ## Mathematics discipline
 
-- Hypergraphs model genuine multi-way dependencies.
-- Pairwise edges are preferred when they preserve the relationship.
-- Hodge Laplacians require a true simplicial complex.
-- Koopman propagation requires repeated comparable trajectories, a fitted operator, held-out error, and residual/diversity control.
-- Spectral entropy, separation, occupancy, and redundancy are useful only when reconstructed by a deterministic verifier.
-- A computed result is causal only when it changes selection, coverage, feasibility, or implementation compression.
+- Mandatory coverage is a feasible-domain constraint, not an objective reward.
+- Full, no-graph, no-diversity, evidence baseline, and random controls use the same feasible domain.
+- Search restarts and weight perturbations are reported.
+- Hodge requires a true simplicial complex.
+- Koopman or another predictive model requires comparable trajectories, held-out evaluation, and better performance than the simple baseline.
+- COCONUT, continuous hidden-state reasoning, latent BFS, manifold, or phase-switching language is inspiration only without executable implementation.
+- A term is selection-influencing when it changes the selected set under equal feasibility.
+- A term is causal only when independent implementation outcomes improve in an ablation.
 
 ## Implementation and proof discipline
 
-The selected implementation is smaller than the exploration set. It must name:
+The implementation is smaller than the exploration set. It names:
 
 1. protected invariants;
-2. exact files/migrations;
-3. selected candidate IDs;
-4. rejected high-value alternatives and why;
-5. red behavioral proof;
-6. affected and broad verification;
-7. evidence classes still open;
-8. documentation/handoff updates.
+2. exact source/migration surfaces;
+3. coherent transaction identity;
+4. high-value alternatives and rejection reasons;
+5. software invariant edges represented;
+6. complete behavioral proof mapping for each selected edge;
+7. affected and broad verification;
+8. external evidence still open;
+9. documentation and handoff changes.
 
-Do not create excessive tests for discarded possibilities. Test the selected transaction, the minimum counterexample manifold, and the exact evidence boundary.
+Do not create tests for every discarded possibility. Test the selected transaction, minimum failure manifold, and exact evidence boundary.
 
 ## Handoff minimum
 
 A handoff records:
 
-- branch/base/head and migration head;
-- decision tier and trace;
+- exact branch/base/head and source migration head;
+- tier and protocol revision;
 - authority/evidence contradictions resolved;
-- selected exploration and implementation IDs;
+- candidate graph and software invariant graph status;
+- equal-feasibility controls and sensitivity;
+- implementation compression and ablation status;
 - source/tests/workflows changed;
-- exact commands or CI runs and results;
+- exact commands or CI runs/results;
 - unestablished evidence classes;
 - next safe action and stop conditions.
