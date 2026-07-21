@@ -6,6 +6,7 @@ on:
       - agent/ws08-ws09-release-recovery
     paths:
       - mvp-build/decision/trace008/.generate.py.gz.b64
+      - .github/workflows/trace008-materialize.yml
 
 permissions:
   contents: write
