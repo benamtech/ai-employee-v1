@@ -2,12 +2,10 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 /**
- * Integration tests run against REAL provider creds (Supabase/Twilio/Stripe/Gmail)
- * and are excluded from `test:unit`. Each test self-gates on the env it needs
- * (describe.skipIf), so a missing live env produces a clean skip, never a mock pass.
- * Provider mocks are forbidden here (00-source-of-truth-and-rules.md "Realness Rules").
- * Workspace aliases keep collection source-exact on a clean checkout without making
- * an unrelated prebuild a prerequisite for PostgreSQL integration evidence.
+ * Integration tests run against real provider/database boundaries and are excluded
+ * from unit tests. Missing provider credentials produce explicit skips. Direct
+ * PostgreSQL suites share one disposable ledger, so files run serially; queue and
+ * fixed-identity tests create their own run-scoped data or isolated database.
  */
 if (!process.env.STAGING_DATABASE_URL && process.env.DATABASE_URL) {
   process.env.STAGING_DATABASE_URL = process.env.DATABASE_URL;
@@ -24,6 +22,7 @@ export default defineConfig({
     environment: "node",
     include: ["tests/integration/**/*.test.ts"],
     exclude: ["node_modules/**"],
+    fileParallelism: false,
     testTimeout: 30_000,
     hookTimeout: 30_000,
   },
