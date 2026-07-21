@@ -1,5 +1,6 @@
 {
   "schema": "amtech.computed-decision.v1",
+  "protocol_revision": 2,
   "status": "active",
   "scope": "mvp-build non-mechanical planning and implementation decisions",
   "order": [
@@ -8,13 +9,16 @@
     "tier_selection",
     "independent_candidate_batches",
     "feasibility_invariant_filter",
-    "computed_comparison",
-    "multiway_dependency_analysis_when_justified",
+    "simple_evidence_invariants_baseline",
+    "candidate_search_topology",
+    "software_invariant_topology",
+    "equal_feasibility_comparison",
+    "weight_and_search_sensitivity",
     "selected_exploration",
     "coherent_implementation_compression",
-    "red_behavioral_proof",
-    "implementation",
-    "exact_head_verification",
+    "complete_behavioral_proof_plan",
+    "red_green_refactor",
+    "exact_head_and_external_verification",
     "documentation_handoff_update"
   ],
   "tiers": {
@@ -22,27 +26,47 @@
       "minimum_candidates": 1,
       "minimum_batches": 1,
       "required": ["authority_check", "protected_invariant", "exact_verification"],
-      "graph": "not_required"
+      "topology": "none"
     },
     "T1_bounded": {
       "minimum_candidates": 4,
       "minimum_batches": 2,
       "required": ["evidence_labels", "feasibility_filter", "rejection_reasons", "implementation_choice"],
-      "graph": "only_if_genuinely_multiway"
+      "topology": "only_when_it_changes_a_material_decision"
     },
     "T2_consequential": {
       "minimum_candidates": 16,
       "minimum_batches": 3,
-      "required": ["weighted_dimensions", "utility_only_comparison", "separate_implementation_compression", "behavioral_failure_manifold"],
-      "graph": "hypergraph_or_dependency_matrix_when_pairwise_loses_information"
+      "minimum_search_restarts": 8,
+      "minimum_weight_sensitivity_runs": 8,
+      "required": [
+        "weighted_dimensions",
+        "simple_baseline",
+        "equal_feasibility_controls",
+        "separate_implementation_compression",
+        "behavioral_failure_manifold"
+      ]
     },
     "T3_production_cross_workstream": {
       "minimum_candidates": 64,
       "minimum_batches": 4,
       "batch_names": ["current", "feature", "counterfactual", "recombination"],
-      "minimum_random_baselines": 100,
-      "required": ["explicit_basis", "observed_unknown_reconciliation", "weighted_dimensions", "sparse_multiway_graph", "joint_utility_diversity_random_comparison", "graph_causality_classification", "separate_implementation_compression", "behavioral_failure_manifold"],
-      "graph": "required_unless_pairwise_sufficiency_is_proved"
+      "minimum_random_feasible_baselines": 1000,
+      "minimum_search_restarts": 32,
+      "minimum_weight_sensitivity_runs": 32,
+      "required": [
+        "explicit_basis",
+        "observed_unknown_reconciliation",
+        "candidate_graph",
+        "software_invariant_hypergraph",
+        "touch_fractional_complete_proved_coverage",
+        "equal_feasibility_full_no_graph_no_diversity_evidence_controls",
+        "search_sensitivity",
+        "weight_sensitivity",
+        "implementation_ablation_or_noncausal_classification",
+        "separate_implementation_compression",
+        "complete_behavioral_proof_plan"
+      ]
     }
   },
   "possible_spaces": [
@@ -78,43 +102,63 @@
     "OperatorBurden",
     "FutureOptionality"
   ],
-  "default_joint_objective": {
-    "q_bar": 0.3,
-    "required_space_coverage": 0.2,
-    "weighted_hyperedge_coverage": 0.1,
-    "minimum_separation": 0.1,
-    "mean_separation": 0.1,
-    "normalized_von_neumann_entropy": 0.1,
-    "quality_diversity_occupancy": 0.1,
-    "redundancy": -0.15
+  "topology_contract": {
+    "candidate_graph": {
+      "vertices": "candidate trajectories",
+      "relations": ["same concept", "shared implementation boundary", "recombination lineage", "semantic similarity", "common evidence"],
+      "allowed_metrics": ["candidate edge touch", "separation", "redundancy", "search diversity"],
+      "forbidden_claim": "software invariant completion"
+    },
+    "software_invariant_hypergraph": {
+      "vertices": "actual software entities or obligations",
+      "candidate_mapping": "candidates declare represented software vertices",
+      "coverage": ["touch", "fractional", "complete", "proved"],
+      "proved_rule": "complete representation plus accepted independent behavioral proof on the exact candidate"
+    }
   },
-  "required_comparisons_T2_T3": ["joint", "utility_only", "diversity_dependency_only", "feasible_random"],
-  "graph_causality": {
-    "causal": "materially changes selected candidates, required coverage, feasibility, or coherent implementation compression",
-    "descriptive": "does not materially change the decision and cannot justify added complexity"
+  "feasible_domain": {
+    "rule": "All objective variants and baselines use the same mandatory-coverage and invariant-feasible domain.",
+    "mandatory_coverage": "constraint_not_objective_bonus"
+  },
+  "required_controls_T2_T3": ["full", "no_graph", "no_diversity", "evidence_baseline", "feasible_random"],
+  "causality": {
+    "selection_influencing": "the term changes a selected candidate set inside the same feasible domain",
+    "causal_improvement": "an equal-feasibility implementation ablation improves independent outcomes such as defects found, complete proof obligations, coherence, review defects, unnecessary scope, or executable verification yield",
+    "default_without_ablation": "descriptive_or_selection_influencing",
+    "forbidden_evidence": ["ranking difference alone", "objective delta alone", "candidate edge touch", "software node representation alone"]
+  },
+  "sensitivity": {
+    "search": "report unique optima, objective spread, and selected-set stability across deterministic restarts",
+    "weights": "report selected-set and software-coverage stability under declared bounded perturbations",
+    "failure_rule": "instability is reported and reduces confidence; it is not hidden by choosing a favorable run"
   },
   "mathematics_guards": {
-    "hypergraph": "use for genuine multiway dependencies",
+    "hypergraph": "separate candidate topology from software invariant topology",
     "hodge": "use only for a true simplicial complex",
-    "koopman": "use only with repeated comparable trajectories, fitted propagation, held-out error, and diversity/residual control",
+    "koopman": "use only with repeated comparable trajectories, fitted propagation, held-out evaluation, and diversity or residual control",
+    "predictive_models": "disabled when they do not outperform a simpler evidence-and-invariants baseline on held-out outcomes",
+    "continuous_thought": "COCONUT, latent BFS, hidden-state recursion, manifold, or continuous-thought language is inspiration only unless executable implementation and verification exist",
     "unknown": "never coerce to observed, zero risk, or positive evidence"
   },
   "implementation_compression": {
-    "must_be_separate_from_exploration": true,
+    "separate_from_exploration": true,
     "must_preserve_invariants": true,
-    "must_have_behavioral_proof_or_honest_blocker": true,
+    "must_have_complete_behavioral_proof_plan_or_honest_blocker": true,
     "must_avoid_parallel_ontology_or_runtime": true,
-    "must_minimize_unrelated_scope": true
+    "must_minimize_unrelated_scope": true,
+    "may_use_simple_baseline_when_math_is_noncausal": true
   },
   "required_trace_artifacts_T2_T3": [
     "task_state.json",
     "thought_templates.json",
     "candidate_population.json",
     "candidate_scores.json",
-    "hypergraph.json_or_dependency_matrix.json",
+    "candidate_graph.json",
+    "software_invariant_hypergraph.json",
     "selection_comparison.json",
     "selected_exploration.json",
     "selected_implementation.json",
+    "implementation_ablation.json",
     "counterexample_matrix.json",
     "implementation_contract.json",
     "verification_plan.json",
@@ -122,7 +166,7 @@
     "deterministic_verifier"
   ],
   "evidence_nonpromotion": [
-    "computation",
+    "decision",
     "documentation",
     "source",
     "unit",
@@ -133,6 +177,7 @@
     "target_host",
     "browser_channel",
     "commercial",
+    "signed_release",
     "pilot",
     "deployment",
     "production"
