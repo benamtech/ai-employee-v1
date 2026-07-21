@@ -1,111 +1,61 @@
-# AGENTS.md — AI Employee implementation contract
+# AGENTS.md — executable AI Employee agent interface
 
-Status: active  
-Updated: 2026-07-20
+Status: active
 
-Root `../AGENTS.md` and `../CONTRIBUTING.md` apply. Exact branch, candidate, migration, workstream, and gate status lives only in `CODEGRAPH.md`.
+## Start
 
-## Required start
+1. Read `../identity.md`, root `AGENTS.md`, this file, `CODEGRAPH.md`, and `authority-map.json`.
+2. Read `STANDARD.md` plus ratified amendments.
+3. Resolve the active transaction through `decision/active.json` and the active production route.
+4. Inspect only the exact source, tests, workflows, and evidence required.
+5. For non-mechanical work, commit the next `decision/traceNNN/` checkpoint before implementation.
+6. Stop stronger claims on red exact-head evidence.
 
-1. Read `../identity.md`, root rules, and root routing.
-2. Read this file and `CODEGRAPH.md`.
-3. Read `STANDARD.md` plus ratified amendments.
-4. Read `decision/README.md` before any non-mechanical choice.
-5. Read the active program/current transaction and only the exact source/test/proof needed.
-6. Resolve contradictions by evidence class before editing.
-
-## Compute before patching
-
-Use the smallest tier that honestly represents the decision.
+## Compute-frontloaded loop
 
 ```text
-authority/evidence/Unknown extraction
-→ independent applicable candidate spaces
-→ invariant and prerequisite filter
-→ simple evidence-and-invariants baseline
-→ candidate search topology when useful
-→ software invariant topology when useful
-→ equal-feasibility controls
-→ search and weight sensitivity
-→ selected exploration
-→ separate implementation compression
-→ complete behavioral proof plan
-→ implementation
-→ exact-head and external verification
+Q=(goal, non-goals, authority, evidence boundary, maximum patch)
+→ observations + explicit Unknowns
+→ typed hypotheses and counterexamples
+→ evidence-and-invariants baseline
+→ bounded candidate search
+→ software-invariant hypergraph
+→ implementation compression (at most four trajectories)
+→ executable verification
+→ prediction/outcome calibration
 ```
 
-Binding rules:
+Typed nodes only: `Observation`, `Hypothesis`, `Counterexample`, `Invariant`, `Candidate`, `Prediction`, `Test`, `Outcome`.
 
-- No mathematical term is causal without an implementation-level ablation that improves independent outcomes over the simple baseline.
-- Candidate trajectories and software entities are separate topologies.
-- Candidate-edge touch is not software coverage.
-- Software coverage distinguishes `touch`, `fractional`, `complete`, and `proved`.
-- Mandatory coverage is a feasibility constraint, not an objective bonus.
-- `T2/T3` reports weight and search sensitivity; instability is evidence, not noise to hide.
-- Hodge requires a true simplicial complex.
-- Koopman or another predictive latent model requires repeated comparable trajectories, held-out evaluation, and better performance than the simple baseline. Otherwise it remains disabled.
-- Continuous-thought, latent BFS, COCONUT, manifold, and hidden-state language is inspiration only unless the executable system implements and verifies it.
-- Unknown remains Unknown and increases Unsupported.
-- Exploration may be broad. The patch is the smallest coherent transaction preserving invariants.
+Valid transformations include:
 
-## Product authority
+- `Hypothesis + Evidence → RevisedHypothesis`
+- `Candidate + Counterexample → RejectedCandidate`
+- `Invariant + Generator → ExecutableTest`
+- `Prediction + Outcome → CalibrationUpdate`
+
+Store inspectable evidence, decisions, rejected alternatives, predictions, and outcomes. Do not store private chain-of-thought as repository authority.
+
+## Mathematical guards
+
+- Hypergraphs encode genuine many-way correctness obligations. Pairwise projection must not erase the obligation.
+- Pareto, DPP, MCTS, spectral analysis, Tree/Graph of Thoughts, or other search layers affect action only when they alter or outperform the simple evidence-and-invariants baseline.
+- Koopman, DMDc, or EDMDc is longitudinal instrumentation only. Fit only homogeneous, consistently sampled, task-conditioned episodes; compare held-out one-step and multistep error with persistence and ordinary regression.
+- Hand-authored scores, graph density, eigenvalues, candidate-edge touch, and representation coverage are not architecture proof or causal evidence.
+- Unknown is never zero. Representation is never proof.
+
+## Stable runtime roots
+
+`apps/`, `packages/`, `infra/`, `tests/`, and `scripts/` are executable paths. Do not move them for documentation aesthetics. Before any path mutation derive:
 
 ```text
-trigger
-→ authenticated principal
-→ exact account / employee / assignment / current authority and entitlement
-→ immutable request or work revision
-→ Hermes reasoning or deterministic Manager work
-→ current effective capability
-→ exact approval when required
-→ atomic PostgreSQL rate and budget admission
-→ one durable command/effect + provider idempotency identity
-→ accepted | failed | ambiguous receipt
-→ accepted effect-bound accounting receipt
-→ output and proof projection
-→ original-effect reconciliation or replay-safe repair
+Impact(f)=imports ∪ callers ∪ scripts ∪ tests ∪ workflows ∪ docs
 ```
 
-- Manager owns identity, assignment authority, connector/provider custody, approvals, durable effects, commercial state, reconciliation, repair, and proof.
-- Hermes owns reasoning, runs, sessions, runtime-local memory, and tool execution inside Manager authority.
-- Web, SMS, signed Review, MCP Apps, AG-UI, models, connectors, and caller payloads are bounded mechanisms; they cannot mint authority or select credentials/provider/commercial state.
-- Initial snapshots install only after exact scope validation; cursor/version precedes ordered deltas.
-- Reconnect and retry never repeat accepted owner intent or an accepted effect.
-- Ambiguous consequential outcomes reconcile against the original effect identity before retry.
-- Cross-account, stale-assignment, stale-entitlement, stale-approval, duplicate, and reordered requests fail closed.
-- Applied migrations are immutable; additions are forward-only.
+## Authority and evidence
 
-## Engineering execution
+`authority-map.json` is the machine router. Normative requirements, current topology, active plan, source, tests, workflows, and retained evidence remain distinct. CI is not provider proof; source is not deployment; fixtures are not production acceptance.
 
-- Work only on the reviewed branch/base named in `CODEGRAPH.md` or the task contract.
-- No feature expansion while a prerequisite P0 is unresolved.
-- Use Red → Green → Refactor for the selected transaction.
-- Test selected invariants and the minimum failure manifold; do not create ceremonial tests for rejected candidates.
-- Every selected software dependency edge maps to a complete behavioral test or explicit blocker.
-- Do not let structural document tests carry product semantics already owned by Standard, source, migrations, and behavioral tests.
-- Fixtures, source, unit, integration, CI, managed platform, provider, browser/channel, target host, commercial lifecycle, signed release, pilot, deployment, and production are distinct evidence classes.
-- Stop on red exact-head CI and preserve diagnostics.
+## Finish
 
-## Verification
-
-```bash
-python decision/trace007/compute.py
-npm run repo:rubric -- ./task-contract.json
-npm run repo:verify:quick
-npm run test:ws07-ws08
-npm run repo:verify:full
-npm run test:unit
-```
-
-Run the complete applicable matrix available in the environment. Report unavailable external prerequisites rather than substituting weaker evidence.
-
-## Document ownership
-
-- `STANDARD.md` and amendments — normative requirements.
-- `decision/README.md` — decision method.
-- `CODEGRAPH.md` — sole exact current status and executable topology.
-- `production-readiness-program/` — one active production route.
-- `docs/architecture/` — explanatory architecture.
-- `memory/MEMORY.md` — sole handoff index.
-- `second-half-plan/`, `GAPS.md`, `REMEDIATION.md` — historical provenance/routing only.
-- source, migrations, executable tests, workflows, and proof — implementation/acceptance truth.
+Run the applicable focused matrix, then the repository map and governance checks. Run broad tests and builds when available. Record unavailable external gates as blockers, never as passes. Preserve managed database, provider, browser/channel, target-host, signed-release, pilot, deployment, and production as separate evidence classes.

@@ -1,8 +1,3 @@
-# CLAUDE.md — mvp-build entrypoint
+# CLAUDE.md
 
-Status: active  
-Updated: 2026-07-20
-
-Follow `AGENTS.md` as the complete scoped contract. Read `CODEGRAPH.md` for current topology and evidence, `STANDARD.md` plus ratified amendments for normative requirements, and `decision/README.md` before non-mechanical planning.
-
-This file intentionally does not duplicate those documents. `AGENTS.md` controls on any apparent conflict.
+Compatibility router only. Read `../identity.md`, root `AGENTS.md`, then `mvp-build/AGENTS.md`, `CODEGRAPH.md`, `authority-map.json`, and `decision/active.json`. Do not duplicate product status or decision policy here.
