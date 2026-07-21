@@ -7,11 +7,13 @@ Updated: 2026-07-20
 
 ## Required start
 
-1. Read root/scoped `AGENTS.md`, `CODEGRAPH.md`, ratified `STANDARD.md`, and [`decision/README.md`](decision/README.md).
+1. Read root/scoped `AGENTS.md`, `CODEGRAPH.md`, ratified `STANDARD.md`, `STANDARD-V0.2-AMENDMENT-001.md`, and [`decision/README.md`](decision/README.md).
 2. Read `production-readiness-program/README.md`, then only the newest relevant indexed handoff and source/test/proof needed for the task.
 3. Resolve the exact branch, base, head, migration head, applicable workstreams, and evidence contradictions.
 4. Select the computation tier and verify the required decision record before planning implementation.
 5. Validate the task contract and run the quick gate before editing.
+
+The amendment controls where the base Standard still shows the superseded execution loop, old document-family routing, migration `0072`, or the earlier source map.
 
 ```bash
 npm run repo:rubric -- ./task-contract.json
@@ -83,7 +85,7 @@ Computation, documentation, source, fixture, local database, old proof, and ance
 
 ## Authority files
 
-- `STANDARD.md` — ratified normative requirements.
+- `STANDARD.md` plus `STANDARD-V0.2-AMENDMENT-001.md` — ratified normative requirements and current computation/document/status amendment.
 - `decision/README.md` and `decision/protocol-v1.json` — mandatory computation-first decision contract.
 - `CODEGRAPH.md` — source topology, migration head, and evidence boundary.
 - `production-readiness-program/` — single active production-readiness route.
