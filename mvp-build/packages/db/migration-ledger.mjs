@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const APPLIED_HEAD = 76;
+const APPLIED_HEAD = 77;
 const MIGRATION_NAME = /^(\d{4})([a-z]?)_[a-z0-9][a-z0-9_]*\.sql$/;
 
 /**
