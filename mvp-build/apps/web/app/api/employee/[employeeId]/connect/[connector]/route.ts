@@ -25,6 +25,10 @@ function providerSetupUrl(value: unknown, allowedHosts: string[]): URL | null {
   }
 }
 
+function lifecycleReturnPath(employeeId: string, connectorKey: string, deskReturnTo: string): string {
+  return `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(connectorKey)}?returnTo=${encodeURIComponent(deskReturnTo)}`;
+}
+
 async function ownerSessionOrLogin(req: Request): Promise<{ token: string } | { redirect: NextResponse }> {
   const cookieStore = await cookies();
   const token = cookieStore.get("amtech_owner_session")?.value;
@@ -61,9 +65,13 @@ export async function GET(
     return NextResponse.redirect(target);
   }
 
+  // Provider callbacks return here first, not directly to the desk. The result
+  // page refreshes assignment-bound lifecycle/capability evidence before the owner
+  // continues normal work, so "connected" is never optimistic UI state.
+  const callbackReturnTo = lifecycleReturnPath(employeeId, managed.key, returnTo);
   const response = await managerPost(`/manager/employee/${encodeURIComponent(employeeId)}/workbench/connect/${encodeURIComponent(managed.key)}`, {
     owner_session_token: owner.token,
-    return_to: returnTo,
+    return_to: callbackReturnTo,
   });
   const json = await response.json().catch(() => ({})) as {
     error?: string;
@@ -104,5 +112,7 @@ export async function POST(
   const target = new URL(`/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(connector)}`, req.url);
   target.searchParams.set("state", response.ok ? "revoked" : "error");
   target.searchParams.set("returnTo", returnTo);
-  return NextResponse.redirect(target);
+  // POST/Redirect/GET: 303 prevents browsers from replaying the revoke POST at the
+  // result page and makes the disconnect lifecycle idempotent from the UI.
+  return NextResponse.redirect(target, 303);
 }
