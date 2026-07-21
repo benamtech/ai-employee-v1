@@ -61,12 +61,33 @@ export default async function Connect({
   const returnTo = safeReturnPath(rawReturnTo, employeeId);
   const deskHref = returnTo;
   const retryHref = `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(runtime.key)}?returnTo=${encodeURIComponent(returnTo)}`;
+  const verifyHref = `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(runtime.key)}?state=connected&returnTo=${encodeURIComponent(returnTo)}`;
   const startHref = `/api/employee/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(runtime.key)}?returnTo=${encodeURIComponent(returnTo)}`;
   const snapshot = state === "connected" || state === "requested" || state === "revoked" ? await lifecycle(employeeId) : null;
   const binding = snapshot?.bindings?.find((row) => row.connector_key === runtime.key || row.provider === runtime.key);
   const intent = snapshot?.setup_intents?.find((row) => row.connector_key === runtime.key);
+  const observedConnected = binding?.lifecycle_state === "connected";
 
-  if (state === "connected") {
+  if (state === "connected" && !observedConnected) {
+    return (
+      <Shell employeeId={employeeId} note="Verification required">
+        <div className="cn-result">
+          <p className="cn-kicker">Not ready yet</p>
+          <h1>{runtime.label} returned, but readiness is not proved<span className="p">.</span></h1>
+          <p className="cn-sub">The provider callback completed, but AMTECH did not observe a current assignment-bound connected lifecycle with capability evidence. No employee capability is promoted from the callback parameter alone.</p>
+          <div className="cn-proof-grid">
+            <Proof label="Observed lifecycle" value={binding?.lifecycle_state ?? "unavailable"} />
+            <Proof label="Capability promotion" value="Blocked" />
+            <Proof label="Credential custody" value="Not exposed" />
+          </div>
+          <div className="cn-insurance"><strong>Safe next step</strong><span>Check the lifecycle again. If evidence remains unavailable, reconnect through the normal setup flow; ordinary employee work remains available without granting this connector authority.</span></div>
+          <div className="cn-cta-row"><Link className="cn-cta" href={verifyHref}>Check again</Link><Link className="cn-cta quiet" href={retryHref}>Reconnect</Link><Link className="cn-cta quiet" href={deskHref}>Return to the work</Link></div>
+        </div>
+      </Shell>
+    );
+  }
+
+  if (state === "connected" && observedConnected) {
     return (
       <Shell employeeId={employeeId} note="Connected and ready">
         <div className="cn-result">
@@ -74,18 +95,18 @@ export default async function Connect({
           <h1>{runtime.label} is part of the employee<span className="p">.</span></h1>
           <p className="cn-sub">AMTECH discovered what this account can do, kept credentials outside the employee runtime, and projected only assignment-bound capabilities. Events can wake the employee when the provider supports them.</p>
           <div className="cn-proof-grid">
-            <Proof label="Lifecycle" value={binding?.lifecycle_state ?? "connected"} />
+            <Proof label="Lifecycle" value={binding.lifecycle_state} />
             <Proof label="Event awareness" value={runtime.supports_webhooks ? "Available" : runtime.supports_polling ? "Scheduled checks" : "On demand"} />
             <Proof label="Credential custody" value="AMTECH Manager" />
           </div>
-          {binding?.capabilities?.length ? (
+          {binding.capabilities?.length ? (
             <div className="cn-capabilities"><strong>Available to this employee</strong><ul>{binding.capabilities.map((capability) => <li key={capability.capability_key}><span>{capability.label}</span><small>{capability.event_driven ? "event aware" : capability.effect_class.replace(/_/g, " ")}</small></li>)}</ul></div>
           ) : null}
           <div className="cn-insurance"><strong>How approvals work</strong><span>The owner can answer naturally on web, SMS, or voice. AMTECH binds the decision to the exact held work; it does not ask for a code on every interaction.</span></div>
           <div className="cn-cta-row">
             <Link className="cn-cta" href={deskHref}>Return to the work</Link>
             <form action={`/api/employee/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(runtime.key)}`} method="post">
-              <input type="hidden" name="binding_id" value={binding?.id ?? ""} />
+              <input type="hidden" name="binding_id" value={binding.id} />
               <input type="hidden" name="return_to" value={returnTo} />
               <input type="hidden" name="reason" value="owner_requested_disconnect" />
               <button className="cn-cta danger" type="submit">Disconnect</button>
