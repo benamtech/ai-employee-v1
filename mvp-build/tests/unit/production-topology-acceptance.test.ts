@@ -1,19 +1,11 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { inspectRepositoryMigrationLedger } from "../../packages/db/migration-ledger.mjs";
 
 const root = process.cwd();
 const source = (path: string) => readFile(join(root, path), "utf8");
-
-async function currentMigrationHead(): Promise<string> {
-  const files = (await readdir(join(root, "packages/db/migrations")))
-    .filter((file) => /^\d{4}[a-z]?_.+\.sql$/.test(file))
-    .sort((left, right) => left.localeCompare(right));
-  const head = files.at(-1)?.match(/^(\d{4})/)?.[1];
-  if (!head) throw new Error("migration_head_not_found");
-  return head;
-}
 
 describe("target-host production topology acceptance", () => {
   it("keeps replacement and teardown behind governed lifecycle commands", async () => {
@@ -41,13 +33,17 @@ describe("target-host production topology acceptance", () => {
     expect(harness).toContain("employee B changed during A teardown");
   });
 
-  it("binds staging migration proof to the complete current migration range", async () => {
+  it("derives staging migration proof from the complete immutable ledger", async () => {
     const proof = await source("infra/scripts/acceptance/migration-staging-live-proof.mjs");
-    const migrationHead = await currentMigrationHead();
-    expect(proof).toContain(`const migrationHead = "${migrationHead}"`);
-    expect(proof).toContain("readdir");
+    const ledger = inspectRepositoryMigrationLedger();
+    expect(ledger.appliedHead).toBeGreaterThanOrEqual(77);
+    expect(proof).toContain('import { inspectRepositoryMigrationLedger } from "../../../packages/db/migration-ledger.mjs"');
+    expect(proof).toContain("const migrationLedger = inspectRepositoryMigrationLedger()");
+    expect(proof).toContain("migrationLedger.appliedHead");
+    expect(proof).toContain("migration_ledger_sha256: migrationLedger.ledgerSha256");
     expect(proof).toContain("migration_head: migrationHead");
     expect(proof).toContain("migration_count: migrations.length");
+    expect(proof).not.toMatch(/const migrationHead = "\d{4}"/);
     expect(proof).not.toContain("number <= 38");
   });
 
