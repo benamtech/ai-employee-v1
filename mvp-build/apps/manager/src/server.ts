@@ -1240,7 +1240,11 @@ export function buildApp(): Hono {
           });
         return writeChain;
       };
-      const unsub = subscribeProgress(employeeId, (p) => {
+      const unsub = subscribeProgress({
+        account_id: accountId,
+        employee_id: employeeId,
+        assignment_id: assignmentId,
+      }, (p) => {
         void writeSse({ event: "work_progress", data: JSON.stringify({ kind: "work_progress", ...p }) });
       });
       try {
