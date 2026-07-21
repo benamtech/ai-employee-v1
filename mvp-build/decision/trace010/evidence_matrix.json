@@ -80,10 +80,10 @@
     },
     {
       "id": "C12",
-      "name": "sms_action_step_up",
+      "name": "cross_surface_natural_language_decision_context",
       "base_state": "absent",
-      "evidence": ["apps/manager/src/webhooks/twilio.ts", "apps/manager/src/lib/approval-authority.ts"],
-      "gap": "SMS possession is not a typed, target-bound, single-use verification factor for a consequential approval or effect."
+      "evidence": ["apps/manager/src/webhooks/twilio.ts", "apps/manager/src/lib/approval-authority.ts", "wiki/principle-deliverable-driven-surfaces.md"],
+      "gap": "SMS reaches the live employee, but the inbound turn does not carry a durable pointer to the exact approval/work object. A natural reply such as 'yeah, send it' therefore cannot safely enter the existing immutable approval resolver."
     },
     {
       "id": "C13",
@@ -105,21 +105,21 @@
       "name": "one_more_native_connector",
       "covers": ["C01", "C02", "C03", "C05", "C06", "C07"],
       "feasible": false,
-      "rejection": "Does not close provider-neutral discovery, revoke, SMS step-up, or adaptive activation."
+      "rejection": "Does not close provider-neutral discovery, revoke, conversational owner decisions, or adaptive activation."
     },
     {
       "id": "B",
       "name": "generic_lifecycle_only",
       "covers": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10"],
       "feasible": false,
-      "rejection": "Leaves SMS step-up and first-use activation disconnected from the lifecycle."
+      "rejection": "Leaves natural cross-surface owner decisions and first-use activation disconnected from the lifecycle."
     },
     {
       "id": "C",
       "name": "adaptive_context_only",
       "covers": ["C04", "C08", "C13"],
       "feasible": false,
-      "rejection": "Improves recommendations without proving custody, revoke, or consequential action verification."
+      "rejection": "Improves recommendations without proving custody, revoke, or exact conversational decision binding."
     },
     {
       "id": "D",
