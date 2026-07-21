@@ -2,12 +2,12 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "standard_id": "amtech-standard-v0.2",
   "amendment_id": "amtech-standard-v0.2-amendment-001",
-  "revision": 2,
+  "revision": 3,
   "task_id": "AMTECH-P0-DOC-COMPUTE-002",
   "base_standard_blob": "83db0285649c41df6f0d5ac16928e78f5df308af",
   "base_evolution_vector": "standard-v0.2-evolution-vector.json",
   "effective_date": "2026-07-20",
-  "approval_basis": "Explicit AMTECH human-operator directives requiring computation before patching, repository-wide document consolidation, separation of candidate topology from software-invariant topology, equal-feasibility controls, sensitivity analysis, and separation of selection influence from causal improvement.",
+  "approval_basis": "Explicit AMTECH human-operator directives requiring computation before patching, repository-wide document consolidation, explicit score and baseline semantics, separation of candidate topology from software-invariant topology, equal-feasibility controls, sensitivity analysis, exact-head workflow evidence, and separation of selection influence from causal improvement.",
   "change_class": ["expansion", "reorientation", "narrowing", "satisfaction"],
   "destructive_modification": 0,
   "lost_protection": [],
@@ -16,7 +16,7 @@
     {
       "id": "ENG-12.3A",
       "motion": "reorientation",
-      "change": "Places the simple evidence-and-invariants baseline, split topology, equal-feasibility controls, and sensitivity before implementation compression.",
+      "change": "Places explicit score semantics and the simple evidence-and-invariants baseline before topology, controls, and implementation compression.",
       "implementation_refs": ["mvp-build/decision/README.md", "mvp-build/decision/protocol-v1.json"]
     },
     {
@@ -28,23 +28,29 @@
     {
       "id": "ENG-12.3D",
       "motion": "narrowing",
-      "change": "Separates candidate search topology from software-invariant topology and forbids candidate-edge coverage from representing software completion.",
-      "implementation_refs": ["mvp-build/decision/trace007/candidate_graph.json", "mvp-build/decision/trace007/software_invariant_hypergraph.json"]
+      "change": "Requires every score dimension to have an exact declared meaning, orientation, baseline role, and semantic group; new unclassified dimensions fail closed.",
+      "implementation_refs": ["mvp-build/decision/protocol-v1.json", "mvp-build/decision/trace007/compute.py", "mvp-build/scripts/verify-repository-governance.mjs"]
     },
     {
       "id": "ENG-12.3E",
       "motion": "narrowing",
-      "change": "Requires every control to use one feasible domain and makes mandatory coverage a constraint rather than an objective reward.",
-      "implementation_refs": ["mvp-build/decision/trace007/selection_comparison.json", "mvp-build/decision/trace007/compute.py"]
+      "change": "Separates candidate search topology from software-invariant topology and forbids candidate-edge coverage from representing software completion.",
+      "implementation_refs": ["mvp-build/decision/trace007/candidate_graph.json", "mvp-build/decision/trace007/software_invariant_hypergraph.json"]
     },
     {
       "id": "ENG-12.3F",
+      "motion": "narrowing",
+      "change": "Requires every control to use one feasible domain, makes mandatory coverage a constraint, and requires baseline/comparison diagnostics.",
+      "implementation_refs": ["mvp-build/decision/trace007/selection_comparison.json", "mvp-build/decision/trace007/compute.py"]
+    },
+    {
+      "id": "ENG-12.3G",
       "motion": "narrowing",
       "change": "Distinguishes selection influence from causal improvement and requires independent implementation outcomes for causal promotion.",
       "implementation_refs": ["mvp-build/decision/trace007/implementation_ablation.json", "mvp-build/decision/trace007/decision_record.md"]
     },
     {
-      "id": "ENG-12.3G",
+      "id": "ENG-12.3H",
       "motion": "narrowing",
       "change": "Disables predictive latent models when they do not beat a simple baseline and prohibits unimplemented COCONUT/continuous-thought claims.",
       "implementation_refs": ["mvp-build/decision/README.md", "mvp-build/AGENTS.md"]
@@ -62,6 +68,12 @@
       "implementation_refs": ["AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "mvp-build/AGENTS.md", "mvp-build/CLAUDE.md", "mvp-build/CODEGRAPH.md"]
     },
     {
+      "id": "ENG-12.9A",
+      "motion": "narrowing",
+      "change": "Requires focused PR workflows claiming exact-head evidence to check out and assert the branch head SHA and retain candidate-scoped logs.",
+      "implementation_refs": [".github/workflows/ws07-ws08-commercial-effect.yml", "mvp-build/decision/README.md"]
+    },
+    {
       "id": "STD-13.3A",
       "motion": "narrowing",
       "change": "Removes transient release status from normative and compatibility mirrors; exact status is owned by mvp-build/CODEGRAPH.md and exact workflow/release evidence.",
@@ -70,14 +82,15 @@
   ],
   "summary": {
     "musts_removed_or_weakened": 0,
-    "dominant_motion": "semantic_correction_and_authority_consolidation",
+    "dominant_motion": "semantic_correction_authority_consolidation_and_exact_evidence",
+    "score_schema": "explicit_exact_dimension_semantics_and_grouped_baseline",
     "decision_topology": "candidate_graph_plus_software_invariant_hypergraph",
     "graph_terms": "descriptive",
     "diversity_terms": "descriptive_or_selection_influencing",
     "causal_improvement": "unestablished",
     "evidence_tier": "ratified_governance_and_source_candidate",
     "open_gates": [
-      "exact-head trace governance source unit integration type lint build",
+      "exact-head source unit broad integration type lint build",
       "managed database",
       "live provider and connector",
       "target host runtime and typed server composition",
