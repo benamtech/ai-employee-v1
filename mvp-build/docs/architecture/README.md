@@ -8,9 +8,9 @@ This directory explains executable architecture. It does not promote source, doc
 ## System boundary
 
 - **Web:** employee operating environment—durable workspace, streaming conversation/activity, connected apps, approvals, artifacts, receipts, proof, and recovery.
-- **Manager:** identity, assignment, authority, context, capability/tool contracts, connector/provider custody, approvals, effects, shared commercial admission/accounting, reconciliation, repair, and proof.
+- **Manager:** committed typed route composition owning identity, assignment, authority, context, capability/tool contracts, connector/provider custody, approvals, effects, shared commercial admission/accounting, reconciliation, repair, and proof.
 - **Hermes:** per-employee reasoning, runs, sessions, memory, runtime-local tool use, and runtime recovery.
-- **Model Gateway:** assignment-scoped model effect, rate, budget, provider identity/receipt, accounting, ambiguity, and proof boundary.
+- **Model Gateway:** assignment-scoped model effect, finite request economics, rate, budget, provider identity/receipt, accounting, ambiguity, and proof boundary.
 - **PostgreSQL/Supabase:** durable identity, authority, idempotency, rate, budget, effects, accounting, lineage, and reconciliation.
 - **Host Provisioner:** bounded target-host lifecycle authority.
 - **Protocols/channels:** replaceable projections and transports; never authority.
@@ -19,12 +19,13 @@ This directory explains executable architecture. It does not promote source, doc
 
 ```text
 owner, ambient, scheduled, or delegated intent
-→ exact account + employee + assignment + authority/entitlement
+→ exact account + employee + assignment + current authority/entitlement
 → immutable request or work revision
 → Hermes reasoning or deterministic Manager work
 → current effective capability
 → exact approval when required
-→ atomic shared rate + worst-case budget reservation
+→ finite request economics
+→ database-owned rate + worst-case budget reservation
 → one durable command/effect + provider idempotency identity
 → accepted | failed | ambiguous receipt
 → accepted effect-bound accounting receipt
@@ -32,6 +33,32 @@ owner, ambient, scheduled, or delegated intent
 → owner/operator proof projection
 → original-effect reconciliation or replay-safe projection repair
 ```
+
+## Direct Manager composition
+
+```text
+apps/manager/src/server.ts
+→ all workspace typechecks
+→ tsc build
+→ apps/manager/dist/server.js
+→ package and Docker entrypoints
+```
+
+The previous template, generated source, generation hooks, and string-patch transforms were removed. Structural governance rejects their reintroduction.
+
+## Projected action and stream authority
+
+Protocol and UI projections carry claims; they do not create authority.
+
+```text
+owner session
+→ exact account + employee + assignment
+→ current non-revoked assignment authority version
+→ projected assignment/version comparison
+→ command/tool dispatch or scoped stream projection
+```
+
+Owner stream frames bind account, employee, assignment, authority version, and cursor. Progress subscriptions use the same account/employee/assignment scope, preventing cross-assignment projection.
 
 ## Architecture decision method
 
@@ -41,7 +68,7 @@ Architecture choices follow [`../../decision/README.md`](../../decision/README.m
 authority/evidence/Unknown extraction
 → independent candidates
 → invariant/prerequisite filter
-→ simple evidence-and-invariants baseline
+→ explicit evidence-and-invariants baseline
 → candidate search topology when useful
 → software invariant topology when useful
 → equal-feasibility controls
@@ -60,23 +87,24 @@ COCONUT, continuous hidden-state reasoning, latent BFS, manifold, Hodge, Koopman
 1. principal, account, employee, assignment, authority, and entitlement;
 2. immutable request/work revision;
 3. strict snapshot scope and cursor/version before deltas;
-4. duplicate, stale, reordered, cross-account, and stale-assignment rejection;
-5. connector custody, scope, health, revocation, and final effective-capability check;
-6. generated/protocol actions re-enter Manager authority;
-7. approval binds the exact revision;
-8. shared database rate/budget admission precedes dispatch;
-9. one durable effect and provider identity;
-10. ambiguity reconciles before retry;
-11. accepted effect binds accounting;
-12. output/effect/proof identity remains continuous;
-13. repair projects/refinds proof without replaying accepted effect;
-14. evidence classes remain non-promoting.
+4. current assignment authority version before projected action dispatch or stream projection;
+5. duplicate, stale, reordered, cross-account, and stale-assignment rejection;
+6. connector custody, scope, health, revocation, and final effective-capability check;
+7. approval bound to the exact revision;
+8. finite token, timeout, price, and usage envelope;
+9. database-owned rate and budget authority before dispatch;
+10. one durable effect and provider identity;
+11. ambiguity reconciliation before retry;
+12. accepted effect-bound accounting and conservation;
+13. output/effect/proof identity continuity;
+14. repair without replaying accepted effect;
+15. non-promoting evidence classes.
 
 ## Current source topology
 
 ```text
 Web / SMS / signed Review
-  └─ Manager owner/session/assignment authority
+  └─ typed Manager owner/session/assignment/current-authority boundary
       ├─ Hermes runs and runtime-local tools
       ├─ connector registry + effective capability
       ├─ artifact revision + approval + publication effect
@@ -85,41 +113,16 @@ Web / SMS / signed Review
       └─ Host Provisioner bounded lifecycle
 
 PostgreSQL/Supabase
-  ├─ identity and assignment
+  ├─ identity, assignment, and authority versions
   ├─ requests, work revisions, commands, effects, receipts
-  ├─ rate windows, reservations, settlements, adjustments
-  ├─ accounting and lineage
+  ├─ database-owned rate windows, reservations, settlements, adjustments
+  ├─ accounting, conservation, and lineage
   └─ ambiguity, reconciliation, repair, and proof projection
 ```
 
-## Known architectural liabilities
+## Remaining architectural risks
 
-- Production Manager assembly still uses generated server source and string-based patch transforms. Replace it with typed server composition before adding more semantic behavior there.
-- Structural tests have historically carried transient document semantics; governance must stay structural and behavior must remain in Standard/source/migrations/tests.
-- Decision trace payloads must use compact descriptors and regenerated derivatives rather than opaque duplicated matrices.
-- Exact current status must remain in one place: `mvp-build/CODEGRAPH.md`.
-
-## Reading route
-
-1. `../../CODEGRAPH.md` — exact current topology and gates.
-2. system/network/runtime documents.
-3. ingress, events, egress, Hermes context, capabilities, and Web surfaces.
-4. effects, failure, commercial state, reconciliation, and observability.
-5. `09-current-bug-risk-and-production-gap-register.md`.
-6. `11-agent-orientation-and-role-map.md`.
-7. `12-document-control-memory-and-handoff-map.md`.
-8. active production program and current transaction.
-
-## Non-negotiable invariants
-
-1. Manager owns authority, custody, commercial state, reconciliation, repair, and proof.
-2. Hermes reasons within bound capabilities.
-3. Unknown evidence remains Unknown.
-4. Browser, channel, model, runtime, connector, or provider content cannot select authority, credentials, scopes, hosts, approvals, budgets, or effects.
-5. Reconnect never resubmits accepted owner intent.
-6. Shared rate and budget authority is database-backed, not process-local.
-7. Consequential effects reserve once and end in accepted, failed, or ambiguous evidence.
-8. Accepted success requires the receipts appropriate to the boundary.
-9. Repair cannot erase accepted effects or invent completion.
-10. Applied migrations are immutable and additions are forward-only.
-11. Exact-candidate evidence controls every production claim.
+- Managed-platform, provider, target-host, browser/channel, billing, recovery, and release behavior still requires external acceptance.
+- Structural tests must not regain semantic responsibility that belongs in typed source and behavioral tests.
+- Decision trace payloads should use compact descriptors and regenerated derivatives rather than opaque duplicated matrices.
+- Exact transient candidate status must remain in workflow or release evidence, not mirrored across documents.
