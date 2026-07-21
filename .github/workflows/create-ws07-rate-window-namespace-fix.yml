@@ -1,0 +1,30 @@
+name: Create WS07 Rate Window Namespace Fix
+
+on:
+  pull_request:
+    branches:
+      - agent/ws05-ws06-owner-runtime
+    paths:
+      - "mvp-build/scripts/create-ws07-rate-window-namespace-fix.mjs"
+      - ".github/workflows/create-ws07-rate-window-namespace-fix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  create:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - run: node mvp-build/scripts/create-ws07-rate-window-namespace-fix.mjs
+      - run: |
+          set -euo pipefail
+          git config user.name "amtech-ci"
+          git config user.email "actions@users.noreply.github.com"
+          git add mvp-build/packages/db/migrations/0078_ws07_rate_window_namespace_fix.sql
+          git commit -m "WS07 fix rate-window namespace collision forward-only"
+          git push origin "HEAD:${GITHUB_HEAD_REF}"
