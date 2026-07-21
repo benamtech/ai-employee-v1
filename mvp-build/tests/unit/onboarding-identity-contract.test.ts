@@ -39,15 +39,14 @@ describe("S10.1 onboarding identity source contracts", () => {
   });
 
   it("binds employee activation to verified identity, canonical assignment, and accepted C3 receipt", async () => {
-    const [migration, completionFix, activationFix, registry, verifiedTool, ownerSession, template, generated] = await Promise.all([
+    const [migration, completionFix, activationFix, registry, verifiedTool, ownerSession, server] = await Promise.all([
       readFile(new URL("../../packages/db/migrations/0064_onboarding_identity_activation_authority.sql", import.meta.url), "utf8"),
       readFile(new URL("../../packages/db/migrations/0065_onboarding_identity_completion_status_qualification.sql", import.meta.url), "utf8"),
       readFile(new URL("../../packages/db/migrations/0066_onboarding_identity_activation_output_qualification.sql", import.meta.url), "utf8"),
       readFile(new URL("../../apps/manager/src/tools/registry.ts", import.meta.url), "utf8"),
       readFile(new URL("../../apps/manager/src/tools/verified-provisioning.stub.ts", import.meta.url), "utf8"),
       readFile(new URL("../../apps/manager/src/lib/owner-session.ts", import.meta.url), "utf8"),
-      readFile(new URL("../../apps/manager/src/server.template.ts", import.meta.url), "utf8"),
-      readFile(new URL("../../apps/manager/src/server.generated.ts", import.meta.url), "utf8"),
+      readFile(new URL("../../apps/manager/src/server.ts", import.meta.url), "utf8"),
     ]);
     expect(migration).toContain("reserve_onboarding_identity_verification");
     expect(migration).toContain("amtech_activate_verified_employee");
@@ -66,7 +65,8 @@ describe("S10.1 onboarding identity source contracts", () => {
     expect(verifiedTool).toContain('receipt_status: "accepted"');
     expect(ownerSession).toContain("owner_account_membership_not_active");
     expect(ownerSession).not.toContain("owner_assignment_not_active");
-    expect(template).toContain("registerOnboardingIdentityRoutes(app, denyInternal)");
-    expect(generated).toContain("canonical_onboarding_activation_route_required");
+    expect(server).toContain("registerOnboardingIdentityRoutes(app, denyInternal)");
+    expect(server).toContain("canonical_onboarding_activation_route_required");
+    expect(server).not.toContain("server.generated");
   });
 });
