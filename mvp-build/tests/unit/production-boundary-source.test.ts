@@ -163,7 +163,7 @@ describe("owner session containment", () => {
   it("keeps the owner bearer out of browser JSON and private-hop URLs", async () => {
     const login = await source("apps/web/app/api/auth/login/route.ts");
     const stream = await source("apps/web/app/api/employee/[employeeId]/events/route.ts");
-    const generator = await source("apps/manager/scripts/generate-production-server.mjs");
+    const managerServer = await source("apps/manager/src/server.ts");
 
     expect(login).toContain("delete safeJson.owner_session_token");
     expect(login).toContain('httpOnly: true');
@@ -174,8 +174,9 @@ describe("owner session containment", () => {
     expect(stream).not.toContain("owner_session_token=");
     expect(stream).not.toContain("encodeURIComponent(token)");
 
-    expect(generator).toContain('c.req.header("X-AMTECH-Owner-Session")');
-    expect(generator).toContain('"owner_stream_session_header"');
+    expect(managerServer).toContain('c.req.header("X-AMTECH-Owner-Session")');
+    expect(managerServer).toContain('"owner_stream_session_header"');
+    expect(managerServer).not.toContain("server.generated");
   });
 });
 
