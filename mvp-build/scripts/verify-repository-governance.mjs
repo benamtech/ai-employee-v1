@@ -330,9 +330,46 @@ record("GOV-18",
   && groupProblems.length === 0,
   `explicit baseline schema valid; duplicate=${sorted(new Set(duplicateBaseline)).join(",") || "none"}; missing_required=${missingRequired.join(",") || "none"}; unclassified=${unclassified.join(",") || "none"}; stale=${staleNonoptional.join(",") || "none"}; orientation=${orientationMismatch.join(",") || "none"}; groups=${groupProblems.join(",") || "none"}`);
 
+const directManagerSource = await read("apps/manager/src/server.ts");
+const managerPackage = parseJson("manager-package", await read("apps/manager/package.json"));
+const managerDockerfile = await read("infra/deploy/manager.Dockerfile");
+const provisionerDockerfile = await read("infra/deploy/provisioner.Dockerfile");
+const focusedWorkflow = texts["../.github/workflows/ws07-ws08-commercial-effect.yml"];
+const removedManagerAssembly = [
+  "apps/manager/src/server.template.ts",
+  "apps/manager/src/server.promoted.ts",
+  "apps/manager/src/server.generated.ts",
+  "apps/manager/scripts/generate-production-server.mjs",
+  "apps/manager/scripts/patch-production-stream.mjs",
+  "apps/manager/scripts/production-admin-block.mjs",
+];
+const lingeringManagerAssembly = [];
+for (const path of removedManagerAssembly) if (await exists(path)) lingeringManagerAssembly.push(path);
+const rootScriptText = Object.values(pkg.scripts ?? {}).map(String).join("\n");
+record("GOV-19",
+  directManagerSource.includes("export function buildApp(): Hono")
+  && directManagerSource.includes("validateProjectedProtocolAuthority")
+  && directManagerSource.includes("subscribeProgress(streamScope")
+  && managerPackage.main === "./dist/server.js"
+  && managerPackage.scripts?.start === "node dist/server.js"
+  && managerPackage.scripts?.build === "tsc -p tsconfig.json"
+  && managerPackage.scripts?.typecheck === "tsc -p tsconfig.json --noEmit"
+  && !managerPackage.scripts?.pretypecheck
+  && !managerPackage.scripts?.["generate:production-server"]
+  && !pkg.scripts?.prepare
+  && !pkg.scripts?.["generate:production-sources"]
+  && !rootScriptText.includes("server.generated")
+  && managerDockerfile.includes("apps/manager/dist/server.js")
+  && !managerDockerfile.includes("server.generated")
+  && !provisionerDockerfile.includes("server.generated")
+  && !focusedWorkflow.includes("generate:production-sources")
+  && focusedWorkflow.includes("contents: read")
+  && lingeringManagerAssembly.length === 0,
+  `Manager direct typed composition is canonical; lingering=${lingeringManagerAssembly.join(",") || "none"}`);
+
 const report = {
   generated_at: new Date().toISOString(),
-  validator_version: "5.0.0-explicit-baseline-topology-split",
+  validator_version: "6.0.0-direct-typed-manager",
   status: failures.length ? "fail" : "pass",
   source_migration_head: sourceHeadLabel,
   pass_count: passes.length,
