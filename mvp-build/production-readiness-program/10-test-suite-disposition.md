@@ -1,69 +1,100 @@
 # Test Suite Disposition
 
-Status: **active test-authority map; WS-01 normalized; hardened WS-02 source/CI accepted**  
-WS-01 evidence head: `1460960f415fafc20582313b1dd2117b781a63f7`  
-Hardened WS-02 implementation evidence head: `16dc18e0535ac14f867875989dfe5aee596f89c0`
+Status: **active test-authority map**  
+Decision protocol: [`../decision/README.md`](../decision/README.md)  
+Current source candidate: PR #35  
+Source migration head: `0076`
 
-A suite is evidence only for the boundary it exercises.
+A suite is evidence only for the boundary and exact SHA it exercises. Computation chooses the coherent implementation transaction and minimum counterexample manifold; it does not justify testing every discarded possible-decision vector.
+
+## Test-design order
+
+```text
+verified computation record
+→ selected implementation contract
+→ narrow red behavioral proof
+→ source/migration change
+→ narrow green
+→ affected suites
+→ broad exact-head gates
+→ required external acceptance
+```
+
+Rules:
+
+- `T0` verifies the exact mechanical invariant.
+- `T1` tests the selected behavior and decisive rejection boundary.
+- `T2/T3` tests the selected transaction, concurrency/authority/effect boundaries, and the smallest failure manifold proving convergence.
+- Discarded exploration vectors do not automatically become tests.
+- A score or graph is not a test oracle; expected behavior comes from Standard/source invariants.
+- Unknown external prerequisites remain blocked, not mocked into acceptance.
 
 ## Current authoritative suites
 
 | Suite / harness | Authority |
 |---|---|
-| `test:standard` | Standard, connector registry/setup/binding contracts |
+| `python decision/trace007/compute.py` | reproducibility of the current candidate frontier, graph hashes, comparisons, and implementation compression; not runtime evidence |
+| `test:standard` | Standard and connector registry/setup/binding contracts |
 | `test:s10-onboarding` | identity/onboarding source contract |
 | `test:lane1-scope` | assignment/authorization scope |
 | `test:lane10-evidence` | release-evidence shape, not signed deployed proof |
-| `test:production-boundary` | named source/unit authority, streaming, protocol, gateway, topology, workbench contracts |
+| `test:production-boundary` | named source/unit boundaries including gateway, topology, workbench, streaming, protocol |
+| `test:ws07-ws08` | focused PR #35 commercial admission, ambiguity, partial-success repair, gateway isolation, PostgreSQL ledger |
 | `test:ui:contracts` | typed/fixture UI, MCP Apps, AG-UI, operating snapshot contracts |
-| `repo:verify:quick/full` | repository governance, typecheck, lint |
-| `test:unit` | complete surviving broad regression after shared/database builds |
+| `db:verify:commercial-effect-migrations` | source-target database security/authority shape after migrations apply |
+| `repo:verify:quick/full` | repository/document governance, contracts, typecheck, lint |
+| `test:unit` | complete surviving broad regression after workspace builds |
+| `test:integration` | PostgreSQL integration boundaries; environment-gated tests remain explicit |
 | `build` | production compilability |
-| Main Integration | canonical merge gate: governance/source, broad, build, archaeology, compiled Chromium |
+| `.github/workflows/ws07-ws08-commercial-effect.yml` | exact-head PR #35 decision/source/unit/PostgreSQL gate when a run exists |
+| Main Integration | canonical merge gate only for the exact candidate it runs |
 
-## WS-01 historical normalization
+## Historical exact evidence
 
-- 63 loader failures were repaired by building workspace dependencies first.
-- 27 obsolete pre-ratification suites were removed atomically rather than skipped.
-- In governance vocabulary, obsolete suites were removed atomically rather than skipped.
-- Three reusable assertions were corrected.
-- **106 test files passed** and **613 tests passed** on the WS-01 implementation head.
-- No skip list or quarantine was introduced.
-- Curated and broad results are independently reported.
+WS-01 and hardened WS-02 pass counts and workflow IDs remain historical evidence for their exact heads. They are not inherited by PR #35. Active docs may cite them only with exact SHA/scope and without implying current-head green.
 
-## Hardened WS-02 regression boundary
+## PR #35 selected failure manifold
 
-On implementation head `16dc18e`:
+The current transaction tests:
 
-- **110 test files / 635 tests passed**;
-- Standard/governance `29735429854`, Hermes Review `29735429873`, and Main Integration `29735429859` passed;
-- source/type/lint/contracts, production build, repository archaeology, and compiled Chromium passed;
-- Remote MCP metadata/audience/PKCE/state/token-custody attacks were covered;
-- owner-visible progress isolation was tested across two assignments sharing one employee;
-- MCP Apps sandbox/hash/document-CSP/host-method/action projection was covered;
-- MCP App intents were proven to route through the protocol-action and current Manager assignment/version checks;
-- AG-UI ordering/scope/finite command, stable failure projection, and streaming source boundaries were covered;
-- effective capability freshness/entitlement plus final current assignment-policy/authority-version revalidation was covered;
-- the 15-dimensional generator produced exactly 105 pairs and 357 meaningful triples;
-- no current assertion was weakened to achieve green.
+1. concurrent same-revision admission;
+2. stale/wrong revision identity;
+3. shared budget reservation conflict;
+4. cross-worker rate exhaustion;
+5. provider failure before proven acceptance;
+6. accepted-response loss and durable ambiguity;
+7. original-effect reconciliation without redispatch;
+8. crash after receipt before proof projection;
+9. partial multi-step success followed by retry;
+10. duplicate/stale/reordered replay;
+11. refund/adjustment conservation;
+12. restart and proof refinding.
 
-## Useful but incomplete / environment-gated
+The mandatory partial-success case accepts the effect, injects projection failure, retries the same identity, and requires one effect, conserved value, no false failure, and refindable proof.
 
-- integration/worker-migration/local-production harnesses;
-- live production-boundary scripts;
-- golden work journeys;
-- provider, connector, recovery, deployment, and capacity harnesses;
-- compiled fixture Web is deterministic regression, not fixture-free channel acceptance.
+## Useful but incomplete or external
+
+- blank migration and worker-migration harnesses;
+- disposable managed Supabase application/advisors/security proof;
+- live provider request-ID/idempotency/accepted-response-loss reconciliation;
+- fixture-free Website/Contractor/Bookkeeping journeys;
+- target-host topology, recovery, rollback, backup/restore;
+- supported-browser/channel, accessibility, capacity, pilot, deployment, signed release.
+
+Compiled fixture Web remains deterministic regression, not fixture-free channel acceptance.
 
 ## Flakiness and blocked evidence
 
-No suite is labeled proven flaky without repeatable exact-environment evidence. Missing provider/host/database/browser prerequisites are `blocked`, not pass. Fix product or harness invariants rather than adding blind retries.
+No suite is labeled flaky without repeatable exact-environment evidence. Missing provider, host, database, browser, billing, or signing prerequisites are `blocked`, not pass. Fix product or harness invariants rather than adding blind retries.
 
 ## Preservation rules
 
-- Discovery tests cannot substitute for execution tests.
-- Source-order assertions must match invocation boundaries, not imports.
-- Under-scoped generated UI remains display-only instead of manufacturing authority.
-- A started Hermes run may poll the same run after stream loss, never silently create another run.
-- Unscoped progress producers may not broadcast owner-visible live state.
-- Live release claims require exact external evidence beyond these suites.
+- Do not weaken a current invariant for green.
+- Discovery cannot substitute for execution.
+- Source-order assertions follow invocation boundaries, not imports.
+- Under-scoped generated UI remains display-only.
+- A started Hermes run may resume/poll the same run after stream loss, never create another silently.
+- Unscoped progress cannot broadcast owner-visible state.
+- Ambiguous provider outcome is not ordinary failure or success.
+- Accepted success requires the boundary's provider/effect/accounting/proof evidence.
+- A lower evidence class cannot satisfy a higher one.
