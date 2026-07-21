@@ -1,0 +1,47 @@
+name: WS08 UI Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - agent/ws06-ws07-production
+    paths:
+      - 'mvp-build/apps/web/**'
+      - 'mvp-build/packages/shared/**'
+      - 'mvp-build/scripts/verify-ui-architecture.mjs'
+      - 'mvp-build/scripts/generate-ui-coverage.mjs'
+      - 'mvp-build/validation/ui-*'
+      - '.github/workflows/ws08-ui-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Assert exact candidate
+        run: test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+      - name: Run architecture fitness and coverage
+        continue-on-error: true
+        working-directory: mvp-build
+        run: |
+          set -o pipefail
+          {
+            node scripts/verify-ui-architecture.mjs
+            cp validation/ui-presentation-coverage.json /tmp/ui-presentation-coverage.json
+            node scripts/generate-ui-coverage.mjs validation/ui-presentation-coverage.json
+            diff -u /tmp/ui-presentation-coverage.json validation/ui-presentation-coverage.json
+          } 2>&1 | tee ../ws08-ui-diagnostic.log
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ws08-ui-diagnostic-${{ github.event.pull_request.head.sha }}
+          path: ws08-ui-diagnostic.log
+          if-no-files-found: error
+          retention-days: 3
+      - name: Enforce result
+        run: grep -q '"status": "ok"' ws08-ui-diagnostic.log && ! grep -q '^[-+][^-+]' ws08-ui-diagnostic.log
