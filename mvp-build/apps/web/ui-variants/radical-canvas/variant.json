@@ -1,0 +1,15 @@
+{
+  "schema": "amtech.ui-variant.v1",
+  "id": "radical-canvas",
+  "name": "Radical spatial canvas",
+  "description": "An intentionally unfamiliar spatial operating canvas proving visual freedom beyond the normal Web client.",
+  "contract_version": 1,
+  "entry": "index.tsx",
+  "conformance": "web_client_capable",
+  "status": "experiment",
+  "adapters": ["owner_web", "boundless_website"],
+  "capabilities": ["conversation", "work", "attention", "approvals", "connections", "evidence", "outputs"],
+  "intentionally_omitted": [],
+  "features": ["canvas"],
+  "packages": []
+}
