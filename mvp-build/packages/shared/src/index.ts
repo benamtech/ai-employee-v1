@@ -2,6 +2,7 @@ export * from "./ids.js";
 export * from "./envelope.js";
 export * from "./manifest.js";
 export * from "./employee-ui-presentation.js";
+export * from "./ui-variant.js";
 export * from "./ui-lab-preset.js";
 export * from "./ui-lab-assignment-resolution.js";
 export * from "./routes.js";
