@@ -21,12 +21,14 @@ const children = [];
 
 if (args.has("--doctor")) {
   runDoctor();
+  runChecked(process.execPath, [join(root, "scripts", "ui-variant.mjs"), "doctor"], "UI variant doctor");
   process.exit(0);
 }
 
 runDoctor();
 runChecked("npm", ["run", "build", "--workspace", "@amtech/shared"], "shared contract build");
 runChecked(process.execPath, [join(root, "scripts", "ui-lab-registry.mjs"), "validate"], "UI Lab registry validation");
+runChecked(process.execPath, [join(root, "scripts", "ui-variant.mjs"), "doctor"], "UI variant doctor");
 
 const env = {
   ...process.env,
@@ -38,13 +40,14 @@ const env = {
   AMTECH_MVP_BUILD_ROOT: root,
 };
 
+children.push(spawnLogged("variant-watch", process.execPath, [join(root, "scripts", "ui-variant.mjs"), "watch"], env));
 children.push(spawnLogged("shared-watch", process.execPath, [tscBin, "-p", join(root, "packages", "shared", "tsconfig.json"), "--watch", "--preserveWatchOutput"], env));
 children.push(spawnLogged("web-types", process.execPath, [tscBin, "-p", join(root, "apps", "web", "tsconfig.json"), "--noEmit", "--watch", "--preserveWatchOutput"], env));
 children.push(spawnLogged("next", process.execPath, [nextBin, "dev", join(root, "apps", "web"), "-p", String(port), "-H", host, "--turbopack"], env));
 
 const url = `http://${host}:${port}/ui-lab`;
 await waitForUrl(url, 60_000);
-process.stdout.write(`\nUI Lab is ready.\n  Workbench: ${url}\n  Direct preview example: http://${host}:${port}/ui-lab/preview/clothing-ops\n  Repository writes: enabled only for this loopback development process\n  Stop: Ctrl+C\n\n`);
+process.stdout.write(`\nUI Lab is ready.\n  Workbench: ${url}\n  Variant gallery: http://${host}:${port}/ui-lab/variants\n  Direct variant example: http://${host}:${port}/ui-lab/variant/radical-canvas/clothing-ops\n  Repository writes: enabled only for this loopback development process\n  Stop: Ctrl+C\n\n`);
 if (shouldOpen) openUrl(url);
 
 for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {
@@ -55,7 +58,7 @@ process.on("exit", () => shutdown());
 function runDoctor() {
   const major = Number(process.versions.node.split(".")[0]);
   if (!Number.isInteger(major) || major < 20) throw new Error(`ui_lab_requires_node_20_or_newer:actual_${process.versions.node}`);
-  for (const path of [nextBin, tscBin, join(root, "apps", "web", "package.json"), join(root, "ui-lab", "assignments.json")]) {
+  for (const path of [nextBin, tscBin, join(root, "apps", "web", "package.json"), join(root, "ui-lab", "assignments.json"), join(root, "scripts", "ui-variant.mjs"), join(root, "apps", "web", "ui-variants", "contract.ts")]) {
     try {
       accessSync(path, fsConstants.R_OK);
     } catch {
