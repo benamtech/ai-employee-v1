@@ -1,12 +1,41 @@
 # Current UX System Map
 
 Status: active  
-Updated: 2026-07-19  
-Purpose: map current UX surfaces to implementation, contracts, evidence level, and release boundary
+Updated: 2026-07-22  
+Purpose: map current UX surfaces, presentation adapters, UI Lab, contracts, evidence level, and release boundaries
 
-## Primary Owner Surface
+## Employee UI presentation architecture
 
-The current owner route is `/agent/[employeeId]`. It is an adaptive operating surface built from:
+AMTECH now separates one employee UI port from high-level Web adapters and presentation strategies:
+
+```text
+employee UI port
+├─ owner_web adapter
+├─ public_form adapter
+└─ boundless_website adapter
+
+adapter presentation
+├─ theme
+├─ layout
+├─ component set
+├─ density
+└─ brand tokens
+```
+
+A theme, palette, card style, density, or region ordering is a strategy, not an adapter. Approved UI Lab presets can select those strategies for profile, business-kind, or employee-type selectors without changing the loaded employee payload.
+
+Primary contracts:
+
+- `packages/shared/src/employee-ui-presentation.ts`;
+- `packages/shared/src/ui-lab-preset.ts`;
+- `packages/shared/src/ui-lab-assignment-resolution.ts`;
+- `apps/web/app/_components/employee-ui/EmployeeUiPort.tsx`.
+
+## Authenticated owner Web adapter
+
+The current owner route is `/agent/[employeeId]`. `LiveEmployeeOperatingShell` provides a Talk-first client and `AgentSurface` provides the richer Workspace. Both consume the existing production projection/controller path.
+
+The operating experience may include:
 
 - guidance;
 - owner attention and decisions;
@@ -19,65 +48,101 @@ The current owner route is `/agent/[employeeId]`. It is an adaptive operating su
 - inspectable owner-safe context and layout rationale;
 - contextual command.
 
-The browser consumes `ResourcePayload`, `OperatingContextManifest`, `OperatingSurfaceState`, `AdaptiveLayoutPlan`, `WorkResource`, `WorkAction`, `ConnectionSurface`, `CapabilityGraphNode`, `SurfaceEnvelope`, and `ResurfaceItem`.
+The browser consumes typed resource, operating-state, layout, work-resource, action, connection, capability, and resurface contracts. Presentation presets may change visual identity, density, layout, component variants, labels, and prioritization. They do not require a separate page fork per employee type.
 
-The surface does not infer emotion, personality, fatigue, vulnerability, or persuasion susceptibility. Adaptation uses typed work/risk state, explicit owner experience/density, bounded owner-safe context, viewport, and accessibility preferences.
+## Public-form adapter
 
-## Signed Mobile Review
+The existing `/free-estimator` route is wrapped by the `public_form` adapter as a non-canonical acquisition and regression surface. It demonstrates a bounded conversational employee workflow and may seed future multimodal estimator products.
 
-`/agent/[employeeId]/review?t=...` is the no-login scoped approval surface. It renders one `WorkResource`, reuses the approval/reply grammar, and must remain visually aligned with owner Home. It is the mobile permission moment for SMS.
+It remains distinct from the authenticated owner client and does not define the canonical production employee experience.
 
-## Fixture Operating Lab
+## Boundless-website adapter
 
-`/ui-lab` and `/ui-lab/[scenario]` are fixture-only experimental surfaces. They are unavailable unless the fixture guard allows the environment.
+`boundless_website` is the high-level adapter for an employee-dominant public website. It is registered and exercisable in UI Lab. A production public employee homepage remains a separate product and deployment decision.
 
-Current scenarios:
+## UI Lab live workbench
 
-- contractor employee;
-- employee as website;
-- multi-person, multi-role office;
-- personal operating brain;
-- research employee;
-- independent clothing operations employee with Shopify, email, business-brain context, material requirements, supplier pricing, production capacity, fulfillment risk, margin impact, and a held purchase decision.
+`/ui-lab` is the standard development and review environment for employee Web presentation.
 
-The lab uses typed operating state and deterministic owner-safe heartbeat frames. It can simulate a heartbeat gap, stalled projection, fresh-snapshot recovery without replay, fixture commands, delegation, decisions, active saves, and draft evidence.
+```text
+/ui-lab/[scenario]
+└─ workbench chrome
+   ├─ scenario and fixture controls
+   ├─ adapter and presentation controls
+   ├─ viewport controls
+   ├─ immutable preset/version browser
+   ├─ local draft capture
+   └─ same-origin iframe
+      └─ /ui-lab/preview/[scenario]
+         └─ production employee components + deterministic fixture data
+```
 
-Evidence level is always `fixture_demonstration`. The lab cannot create a provider, customer, money, publishing, inventory, credential, runtime, or durable external effect. It does not count as fixture-free acceptance.
+The workbench runs under the real Next development application. `npm run ui:lab` starts shared/Web type watchers and Next Fast Refresh, so ordinary UI edits do not require a production rebuild.
 
-The compiled browser matrix may enable fixture data in a Next production build only through the exact CI-only tuple defined by `app/_lib/ui-fixtures.ts`. Staging, pod, and production environment names remain denied.
+UI Lab fixture scenarios currently include contractor operations, employee-as-website, multi-role office, personal operating brain, research, and clothing/e-commerce operations.
 
-## Hermes Stream Boundary
+UI Lab can simulate deterministic work, decisions, saves, runtime projection changes, heartbeat gaps, stalled state, recovery without intent replay, and fixture commands. Evidence remains fixture-render or compiled-browser evidence, never live-provider or production acceptance.
 
-The current owner stream vocabulary remains:
+Canonical UI Lab files:
 
-- snapshot;
-- work event;
-- work progress;
-- approval update;
-- run completed.
+- `ui-lab/README.md`;
+- `ui-lab/AGENTS.md`;
+- `docs/ux/10-ui-lab-live-workbench.md`;
+- `decision/trace012/**`;
+- `scripts/ui-lab-dev.mjs`;
+- `scripts/ui-lab-registry.mjs`;
+- `infra/scripts/ui/fixture-browser-v2.mjs`.
 
-`docs/ui/HERMES_HEARTBEAT_UI_ARCHITECTURE.md` defines the fixture-first optional heartbeat projection. Heartbeats indicate liveness only; they do not prove authority, correctness, completion, an external effect, or a durable receipt. Raw tool logs, CPU/RSS/PID data, private context layers, and browser-triggered recovery remain outside the owner surface.
+## UI preset and assignment lifecycle
 
-## Admin
+Presets are immutable JSON versions under `ui-lab/presets/<id>/vNNNN.json`.
 
-`/admin` is operator-facing, not owner-facing. It may expose readiness, proofs, repairs, support actions, and diagnostics behind role, support reason, and redaction. It may be denser than owner UI.
+A draft may record dirty source for comparison. An approved preset requires clean exact Git provenance, passing evidence, and deliberate human review. Approved presets may be assigned through `ui-lab/assignments.json`; a generated TypeScript registry makes the selected presentation available to the production resolver without runtime filesystem reads.
 
-Future support diagnostics may retain exact run/session/profile/assignment identity, transport state, sequence, bounded throughput, dropped-line counts, failure class, and recovery records. They remain separately authorized and do not turn the owner surface into an engineering console.
+## Signed mobile Review
 
-## Generative UI Layer
+`/agent/[employeeId]/review?t=...` is the scoped no-login review surface. It renders one exact work resource and remains separate from the owner client and UI Lab. Presentation alignment does not change its resource or action scope.
 
-Manager can compile typed work views into MCP-UI `ui://` resources using `@mcp-ui/server`. The owner web client renders those resources in a sandboxed iframe and routes intents back through the same host approval/respond handlers.
+## Hermes stream boundary
 
-This is source-wired and locally unit-tested, but live LLM-driven exercise is pending funded provider/Hermes tool-loop proof. Generative UI is not raw model HTML. Manager owns templates, action grammar, sandbox, approval binding, fallback, and proof path.
+The owner stream vocabulary remains snapshot, work event, work progress, approval update, and run completed. Heartbeat projections indicate liveness only and do not prove correctness, completion, external effect, or durable receipt.
 
-## Surfaces Needing Alignment
+Raw tool logs, private context, credentials, low-level runtime process data, and unrestricted recovery controls remain outside ordinary owner presentation.
 
-- Public front door and real create/claim/login/account flows.
-- Customer estimate portal.
-- Billing and connected-account setup pages.
-- Admin visual language.
-- Artifact/output HTML.
-- Public marketing site and clearly labeled product demonstrations.
-- Provider-backed owner-safe runtime heartbeat and long-running progress proof.
+## Admin/operator
 
-The public estimator is outdated and non-canonical. Preserve it only as a clearly separated regression/acquisition harness where useful; do not treat it as a product surface, flagship UX, pricing authority, profile authority, or launch-acceptance path.
+`/admin` is operator-facing. It may expose readiness, repairs, proof, support actions, and diagnostics under separate authorization. It may be denser than owner UI and should not be treated as another theme of the owner adapter.
+
+## Generated and embedded views
+
+Manager can compile typed work views into sandboxed `ui://` resources. These are bounded embedded views, not arbitrary model-generated DOM. The host resolves current resource/actions and handles fallback.
+
+## Evidence classes
+
+Use these labels:
+
+- source-inferred;
+- unit-contract verified;
+- fixture-render verified;
+- compiled-browser verified;
+- human visually approved;
+- live observed;
+- production accepted.
+
+A screenshot proves only the rendered fixture/source combination named in its metadata. A green test does not constitute aesthetic approval.
+
+## Surfaces still needing product or acceptance work
+
+- public front door and real create/claim/login/account flows;
+- customer estimate portal;
+- billing and connected-account setup;
+- admin visual language;
+- artifact/output HTML;
+- production public employee website deployment;
+- provider-backed progress and recovery;
+- fixture-free browser/channel journeys;
+- complete accessibility and controlled visual-regression evidence for every approved commercial preset.
+
+## Historical guidance
+
+Older fixed-tab, single-theme, screenshot-only, or direct fixture-lab instructions are historical when they conflict with this map, `docs/ux/10-ui-lab-live-workbench.md`, executable source, or exact-head tests. Preserve historical files for audit, but do not use them as current implementation instructions.
