@@ -1,0 +1,84 @@
+{
+  "schema": "amtech.ui-lab-affected-files.v1",
+  "task_id": "AMTECH-UI-LAB-001",
+  "groups": [
+    {
+      "name": "presentation_port_and_runtime_resolution",
+      "files": [
+        { "path": "packages/shared/src/employee-ui-presentation.ts", "reason": "Defines adapter, theme, layout, component-set, density, brand-token contracts and deterministic presentation resolution." },
+        { "path": "packages/shared/src/ui-lab-preset.ts", "reason": "Defines immutable preset, provenance, review, status, target, and assignment schemas." },
+        { "path": "packages/shared/src/ui-lab-assignment-resolution.ts", "reason": "Resolves approved preset assignments before heuristic profile matching." },
+        { "path": "packages/shared/src/ui-lab-runtime-registry.generated.ts", "reason": "Generated runtime-safe assignment data consumed without filesystem access." },
+        { "path": "packages/shared/src/index.ts", "reason": "Exports UI port, preset, and assignment contracts." },
+        { "path": "packages/shared/src/manifest.ts", "reason": "Allows onboarding-generated presentation hints." },
+        { "path": "packages/shared/src/profile-package.ts", "reason": "Allows profile-package presentation hints." },
+        { "path": "apps/manager/src/lib/profile-context.ts", "reason": "Projects profile and onboarding presentation hints into the existing Web payload." },
+        { "path": "apps/web/app/_components/employee-ui/EmployeeUiPort.tsx", "reason": "Hosts adapters and presentation strategies around unchanged employee payloads." },
+        { "path": "apps/web/app/agent/[employeeId]/page.tsx", "reason": "Mounts the authenticated owner Web adapter." },
+        { "path": "apps/web/app/free-estimator/page.tsx", "reason": "Mounts the public-form adapter around the existing estimator client." }
+      ]
+    },
+    {
+      "name": "live_workbench",
+      "files": [
+        { "path": "apps/web/app/ui-lab/page.tsx", "reason": "Entry index for fixture scenarios and reusable UI versions." },
+        { "path": "apps/web/app/ui-lab/layout.tsx", "reason": "Scopes UI-Lab-only stylesheet and route metadata." },
+        { "path": "apps/web/app/ui-lab/ui-lab.css", "reason": "Workbench chrome and isolated preview presentation; must not style product routes." },
+        { "path": "apps/web/app/ui-lab/ui-lab-config.ts", "reason": "Owns viewport, preview-mode, query, and scenario default configuration." },
+        { "path": "apps/web/app/ui-lab/[scenario]/page.tsx", "reason": "Routes scenarios into the workbench shell." },
+        { "path": "apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx", "reason": "Provides controls, preset browsing, draft capture, review links, viewport selection, and preview messaging." },
+        { "path": "apps/web/app/ui-lab/preview/[scenario]/page.tsx", "reason": "Creates a same-origin isolated canvas route." },
+        { "path": "apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", "reason": "Renders production employee components with deterministic fixture state inside the isolated canvas." },
+        { "path": "apps/web/app/api/ui-lab/presets/route.ts", "reason": "Lists presets and permits bounded loopback-only development draft writes." },
+        { "path": "apps/web/app/_lib/ui-lab-registry.server.ts", "reason": "Reads and atomically creates immutable preset files with Git provenance." }
+      ]
+    },
+    {
+      "name": "source_controlled_product_line",
+      "files": [
+        { "path": "ui-lab/presets/ecommerce-manager/v0001.json", "reason": "Initial named e-commerce/clothing operations UI checkpoint." },
+        { "path": "ui-lab/presets/marketing-agency/v0001.json", "reason": "Initial named marketing-agency UI checkpoint." },
+        { "path": "ui-lab/assignments.json", "reason": "Canonical approved-preset-to-profile selector mapping." }
+      ]
+    },
+    {
+      "name": "scripts_and_validation",
+      "files": [
+        { "path": "scripts/ui-lab-dev.mjs", "reason": "One-command doctor, shared build/watch, Web type watch, and Next Fast Refresh development loop." },
+        { "path": "scripts/ui-lab-registry.mjs", "reason": "Lists, validates, promotes, assigns, and generates runtime preset registry data." },
+        { "path": "scripts/verify-ui-architecture.mjs", "reason": "Proves the workbench/canvas/production-renderer topology and write/promotion guards." },
+        { "path": "scripts/generate-ui-coverage.mjs", "reason": "Extends deterministic coverage generation with adapter and preset dimensions." },
+        { "path": "infra/scripts/ui/fixture-browser.mjs", "reason": "Compatibility entrypoint for the production fixture browser matrix." },
+        { "path": "infra/scripts/ui/fixture-browser-v2.mjs", "reason": "Captures preset-aware screenshots, interactions, viewports, accessibility and provenance evidence." },
+        { "path": "tests/unit/employee-ui-port.test.ts", "reason": "Tests deterministic adapter and strategy resolution." },
+        { "path": "tests/unit/ui-architecture-fitness.test.ts", "reason": "Executes the UI architecture verifier." },
+        { "path": "tests/unit/ui-lab-registry.test.ts", "reason": "Tests preset chain, provenance, assignment collision and generated registry behavior." },
+        { "path": "tests/unit/ui-lab-workbench-contract.test.ts", "reason": "Tests workbench, preview route, local write guard, and script contracts." },
+        { "path": "package.json", "reason": "Exposes the standard UI Lab development, registry, promotion, assignment and test commands." }
+      ]
+    },
+    {
+      "name": "decisions_and_documentation",
+      "files": [
+        { "path": "decision/trace011/task_state.json", "reason": "Records the employee UI port and adapter decision." },
+        { "path": "decision/trace012/task_state.json", "reason": "Records UI Lab objective, constraints and evidence boundary." },
+        { "path": "decision/trace012/research-and-decision-record.md", "reason": "Records hypothesis, research, alternatives, decisions and second/third-order effects." },
+        { "path": "decision/trace012/validation-vectors.json", "reason": "Machine-readable pass/fail validation matrix." },
+        { "path": "decision/trace012/affected-files.json", "reason": "Machine-readable impact ledger for this task." },
+        { "path": "decision/trace012/script-inventory.json", "reason": "Machine-readable script ownership and invocation ledger." },
+        { "path": "docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md", "reason": "Architecture decision for port, adapter and strategy boundaries." },
+        { "path": "ui-lab/README.md", "reason": "Collaborator operating manual." },
+        { "path": "ui-lab/AGENTS.md", "reason": "Dedicated coding-agent onboarding and guardrails." },
+        { "path": "docs/ux/09-ui-lab-live-workbench.md", "reason": "Canonical UI Lab architecture and lifecycle documentation." },
+        { "path": "../docs/ui/README.md", "reason": "Canonical UI documentation router updated to the workbench and preset system." },
+        { "path": "docs/ux/02-current-ux-system-map.md", "reason": "Current UX topology updated with port, adapter, workbench, canvas and promotion flow." }
+      ]
+    },
+    {
+      "name": "inherited_consistency_repair",
+      "files": [
+        { "path": "packages/db/migration-ledger.mjs", "reason": "Advances the applied source ledger constant from 80 to the already-existing migration head 82; no migration content changes." }
+      ]
+    }
+  ]
+}
