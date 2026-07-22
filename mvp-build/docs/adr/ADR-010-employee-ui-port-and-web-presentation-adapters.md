@@ -3,8 +3,10 @@
 Status: **implemented candidate; exact-head type, unit, build, and browser evidence pending**  
 Decision date: 2026-07-22  
 Repository: `benamtech/ai-employee-v1`  
-Starting SHA: `c20adaede64d45c24d74b8531507935ad7a8ce02`  
-Branch: `agent/ui-semantic-adapters`
+Starting SHA: `712599ff31599e1a259157dd0e34915d0777d5f6`  
+Branch: `agent/employee-ui-port-adapters`
+
+The initial source inspection used PR #36 head `c20adaede64d45c24d74b8531507935ad7a8ce02`. GitHub comparison proved that its tree is identical to integrated PR #36 merge commit `712599ff31599e1a259157dd0e34915d0777d5f6`; the final review branch was recreated from the integrated merge commit.
 
 ## Decision in one sentence
 
