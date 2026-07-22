@@ -1,0 +1,127 @@
+{
+  "schema": "amtech.ui-lab-script-inventory.v1",
+  "task_id": "AMTECH-UI-LAB-001",
+  "commands": [
+    {
+      "command": "npm run ui:lab",
+      "owner": "scripts/ui-lab-dev.mjs",
+      "purpose": "Run doctor checks, build shared contracts, validate preset registry, start shared and Web type watchers, and start the real Next Web app with Fast Refresh, fixtures, and bounded local draft writes.",
+      "normal_user": "UI collaborator or coding agent",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:lab:open",
+      "owner": "scripts/ui-lab-dev.mjs",
+      "purpose": "Start the workbench and open the local UI Lab URL.",
+      "normal_user": "UI collaborator",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:lab:doctor",
+      "owner": "scripts/ui-lab-dev.mjs",
+      "purpose": "Verify Node, Git, dependencies, loopback host, port, assignments file, and required application paths.",
+      "normal_user": "Contributor onboarding and troubleshooting",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:lab:presets",
+      "owner": "scripts/ui-lab-registry.mjs list",
+      "purpose": "List all immutable UI preset versions and statuses.",
+      "normal_user": "Reviewer, product owner, or coding agent",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:lab:registry:validate",
+      "owner": "scripts/ui-lab-registry.mjs validate",
+      "purpose": "Validate schema, contiguous version chains, parent references, approved-source provenance, selector collisions, assignments, and generated runtime registry parity.",
+      "normal_user": "Every UI change and CI",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:lab:registry:generate",
+      "owner": "scripts/ui-lab-registry.mjs generate",
+      "purpose": "Generate the runtime-safe approved preset assignment registry from canonical presets and assignments.",
+      "normal_user": "Promotion and assignment workflows",
+      "writes_repository": true,
+      "written_paths": ["packages/shared/src/ui-lab-runtime-registry.generated.ts"]
+    },
+    {
+      "command": "npm run ui:lab:promote -- <preset-ref> --reviewer <name> --evidence <evidence.json> [selectors]",
+      "owner": "scripts/ui-lab-registry.mjs promote",
+      "purpose": "Create a new immutable approved preset version from a validated draft, record human review and exact clean Git provenance, update selectors, and regenerate runtime registry data.",
+      "normal_user": "Human reviewer after code commit and validation",
+      "writes_repository": true,
+      "preconditions": ["clean Git worktree", "matching exact-head PASS evidence", "at least one profile, business-kind, or employee-type selector"]
+    },
+    {
+      "command": "npm run ui:lab:assign -- <approved-preset-ref> --reviewer <name> [selectors]",
+      "owner": "scripts/ui-lab-registry.mjs assign",
+      "purpose": "Assign an already-approved reproducible preset to new selectors and regenerate runtime registry data.",
+      "normal_user": "Product owner or maintainer",
+      "writes_repository": true,
+      "preconditions": ["clean Git worktree", "approved reproducible preset", "at least one selector"]
+    },
+    {
+      "command": "npm run ui:lab:test",
+      "owner": "infra/scripts/ui/fixture-browser.mjs -> fixture-browser-v2.mjs",
+      "purpose": "Run the deterministic production-component workbench and preview browser matrix and write exact-head evidence and screenshots.",
+      "normal_user": "Contributor and CI",
+      "writes_repository": false,
+      "writes_local_artifacts": true
+    },
+    {
+      "command": "npm run ui:lab:test:headed",
+      "owner": "infra/scripts/ui/fixture-browser.mjs -> fixture-browser-v2.mjs",
+      "purpose": "Run the same browser matrix visibly and keep the browser/server open for interactive diagnosis.",
+      "normal_user": "UI collaborator or reviewer",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:validate",
+      "owner": "scripts/validate-ui-system.mjs and scripts/ui-lab-registry.mjs",
+      "purpose": "Validate UI source conventions and UI Lab registry consistency.",
+      "normal_user": "Every UI change and CI",
+      "writes_repository": false
+    },
+    {
+      "command": "node scripts/verify-ui-architecture.mjs",
+      "owner": "scripts/verify-ui-architecture.mjs",
+      "purpose": "Verify singleton production projection architecture, workbench-to-isolated-preview routing, production component reuse, bounded draft writes, immutable versions, and reproducible promotion.",
+      "normal_user": "Every architecture-affecting UI change and CI",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run test:ui:contracts",
+      "owner": "Vitest focused UI contract set",
+      "purpose": "Run UI port, registry, workbench, fixture guard, renderer, stream and protocol source contracts.",
+      "normal_user": "Every UI change and CI",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run repo:merge:check",
+      "owner": "package.json aggregate",
+      "purpose": "Run complete repository governance, typecheck, lint, unit and workspace build gates before merge.",
+      "normal_user": "Final exact-head verification",
+      "writes_repository": false
+    }
+  ],
+  "browser_write_boundary": {
+    "route": "POST /api/ui-lab/presets",
+    "guards": [
+      "NEXT_PUBLIC_AMTECH_UI_FIXTURES=1",
+      "NODE_ENV=development",
+      "AMTECH_UI_LAB_WRITE=1",
+      "loopback request hostname",
+      "same-origin Origin header",
+      "Zod-validated preset request",
+      "atomic exclusive create under ui-lab/presets only"
+    ],
+    "forbidden": [
+      "arbitrary path input",
+      "overwrite of an existing preset version",
+      "production-like environment writes",
+      "browser-driven approval or assignment",
+      "database or remote filesystem writes"
+    ]
+  }
+}
