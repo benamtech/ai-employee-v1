@@ -57,6 +57,18 @@ interface PreviewStateMessage {
   running: boolean;
 }
 
+interface PresetDraftState {
+  id: string;
+  display_name: string;
+  description: string;
+  profile_keys: string;
+  business_kinds: string;
+  employee_types: string;
+  tags: string;
+  captured_by: string;
+  notes: string;
+}
+
 export function UiLabWorkbenchClient({
   scenarioId,
 }: {
@@ -74,7 +86,7 @@ export function UiLabWorkbenchClient({
   const [fixtureCommand, setFixtureCommand] = useState("");
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "failed">("idle");
   const [saveMessage, setSaveMessage] = useState("");
-  const [draft, setDraft] = useState(() => ({
+  const [draft, setDraft] = useState<PresetDraftState>(() => ({
     id: scenarioId === "clothing-ops" ? "ecommerce-manager" : scenarioId === "office" ? "marketing-agency" : `${scenarioId}-ui`,
     display_name: `${readable(scenarioId)} UI`,
     description: `Presentation checkpoint for the ${readable(scenarioId)} fixture scenario.`,
