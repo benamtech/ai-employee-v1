@@ -2,9 +2,9 @@
   "schema": "amtech.decision.task-state.v1",
   "task_id": "AMTECH-UI-PORT-001",
   "tier": "T2",
-  "starting_sha": "712599ff31599e1a259157dd0e34915d0777d5f6",
-  "branch": "agent/employee-ui-port-adapters",
-  "authority_note": "The initial source inspection used PR #36 head c20adaede64d45c24d74b8531507935ad7a8ce02. Its tree is identical to integrated merge commit 712599ff31599e1a259157dd0e34915d0777d5f6; the final branch was recreated from the integrated merge commit before review.",
+  "starting_sha": "9eae981441820729ca9cf038141f9965d7b12adc",
+  "branch": "agent/employee-ui-port-adapters-current",
+  "authority_note": "The final product-review branch was created from the then-current PR #35 stacked head 9eae981441820729ca9cf038141f9965d7b12adc. Earlier inspection used PR #36 head c20adaede64d45c24d74b8531507935ad7a8ce02 and its tree-identical merge commit 712599ff31599e1a259157dd0e34915d0777d5f6; the patch was transplanted onto the newer stacked head before review.",
   "goal": "Introduce one typed employee UI port, high-level web adapters for owner_web, public_form and boundless_website, and swappable theme/layout/component/density strategies that can make Web clients materially different without changing the loaded employee payload.",
   "terminology": {
     "port": "The stable purposeful employee UI conversation contract.",
