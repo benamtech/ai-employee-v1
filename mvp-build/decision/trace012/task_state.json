@@ -24,32 +24,43 @@
   ],
   "initial_hypothesis": "Use Next development mode as the live compiler; retain the production-component workbench for strategy and preset work; add a sibling folder-first variant product line with a neutral capability contract, generated literal lazy registry, containment host, bounded intent bridge, deterministic fixture routes, folder-local agent guidance, and an executable doctor that rejects boundary violations.",
   "evidence_boundary": {
-    "source_and_unit": "established for the recorded code head",
-    "compiled_build": "established for the recorded code head",
+    "source_and_unit": "established",
+    "compiled_build": "established",
     "compiled_browser": "not yet established by a headed all-variant desktop/mobile run",
     "live_provider_or_production": "out of scope",
     "visual_quality_judgment": "human review remains required even when automated vectors pass"
   },
   "verification_snapshot": {
-    "code_head": "69ea9c2e23da78ea04c97af88922f529466bebb9",
+    "verification_basis_head": "e432213af522a68b453884b261de0039577f59ce",
     "merge_gate": {
-      "run_id": 29941013090,
+      "run_id": 29941579869,
       "result": "PASS"
     },
     "release_candidate": {
-      "run_id": 29941013083,
+      "run_id": 29941579864,
+      "result": "PASS",
       "source_and_ui": "PASS",
       "postgres_integration": "PASS",
-      "container_release": "IN_PROGRESS_AT_SNAPSHOT"
+      "container_release": "PASS",
+      "five_exact_sha_images": "PASS",
+      "image_identity": "PASS",
+      "signed_release_manifest_verification": "PASS"
     },
     "unit_tests": {
       "result": "PASS",
       "files": 132,
       "tests": 743
     },
+    "repository_governance_typecheck_lint": "PASS",
     "web_production_build": "PASS",
+    "ui_variant_doctor": "PASS",
+    "generated_registry_parity": "PASS",
     "headed_browser_matrix": "NOT_RUN",
     "production_readiness_claim": false
   },
-  "status": "source_and_build_verified_browser_pending"
+  "documentation_reconciliation": {
+    "changes_after_verification_basis": "machine-readable evidence and affected-file ledgers only",
+    "requires_exact_head_ci": true
+  },
+  "status": "source_build_and_release_verified_browser_pending"
 }
