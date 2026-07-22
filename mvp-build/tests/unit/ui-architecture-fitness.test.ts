@@ -11,14 +11,33 @@ describe("Trace009 executable UI architecture fitness", () => {
     expect(output).toContain('"status": "ok"');
   });
 
-  it("routes UI Lab to the production projection and isolates the legacy fixture client", () => {
+  it("routes UI Lab to production components and makes it an adapter strategy matrix", () => {
     const page = read("apps/web/app/ui-lab/[scenario]/page.tsx");
     const shell = read("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx");
     expect(page).toContain("ProductionFixtureLabClient");
     expect(page).not.toContain('from "./FixtureLabClient"');
     expect(shell).toContain("<AgentSurface");
     expect(shell).toContain("fixturePayload={payload}");
+    expect(shell).toContain("<EmployeeUiPortHost");
+    expect(shell).toContain("Port adapter");
+    expect(shell).toContain("Theme");
+    expect(shell).toContain("Layout");
+    expect(shell).toContain("Components");
     expect(shell).toContain("Fixture truth");
+  });
+
+  it("keeps adapter selection distinct from presentation strategies", () => {
+    const port = read("apps/web/app/_components/employee-ui/EmployeeUiPort.tsx");
+    const ownerPage = read("apps/web/app/agent/[employeeId]/page.tsx");
+    const estimatorPage = read("apps/web/app/free-estimator/page.tsx");
+    expect(port).toContain("owner_web");
+    expect(port).toContain("public_form");
+    expect(port).toContain("boundless_website");
+    expect(port).toContain("data-ui-theme");
+    expect(port).toContain("data-ui-layout");
+    expect(port).toContain("data-ui-components");
+    expect(ownerPage).toContain('adapterKey="owner_web"');
+    expect(estimatorPage).toContain('adapterKey="public_form"');
   });
 
   it("keeps generated embedded views on the one compiler and validating host boundary", () => {
