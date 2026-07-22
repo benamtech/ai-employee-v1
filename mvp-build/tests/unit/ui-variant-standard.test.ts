@@ -4,7 +4,9 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = resolve(__dirname, "../..");
+const repositoryRoot = resolve(root, "..");
 const read = (path: string) => readFileSync(resolve(root, path), "utf8");
+const readRepository = (path: string) => readFileSync(resolve(repositoryRoot, path), "utf8");
 
 describe("UI variant standard", () => {
   it("defines a neutral capability model rather than a Web-client layout contract", () => {
@@ -37,6 +39,19 @@ describe("UI variant standard", () => {
     expect(launcher).toContain("ui-variant.mjs");
     expect(launcher).toContain("ui-lab-dev.mjs");
     expect(launcher).toContain("launchAgent");
+  });
+
+  it("provides a downloadable first-run script that asks only for the variant name", () => {
+    const bootstrap = readRepository("ui-vibe.sh");
+    const quickstart = readRepository("UI_VIBE_QUICKSTART.md");
+    expect(bootstrap).toContain("sudo pacman -Syu --needed --noconfirm");
+    expect(bootstrap).toContain("git clone");
+    expect(bootstrap).toContain("npm run local:browser-install");
+    expect(bootstrap).toContain("npm install -g @anthropic-ai/claude-code");
+    expect(bootstrap).toContain('read -r -p "Variant name: " VARIANT');
+    expect(bootstrap).toContain("ui-variant-collaborator.mjs");
+    expect(quickstart).toContain("bash ~/Downloads/ui-vibe.sh");
+    expect(quickstart).toContain("only required creative input is the variant name");
   });
 
   it("validates every checked-in folder and generated registry", () => {
