@@ -115,5 +115,5 @@ console.log(JSON.stringify({
 if (uncovered.size) process.exit(1);
 
 function product(arrays) {
-  return arrays.reduce((rows, values) => rows.flatMap((row, values) => values.map((value) => [...row, value])), [[]]);
+  return arrays.reduce((rows, entries) => rows.flatMap((row) => entries.map((value) => [...row, value])), [[]]);
 }
