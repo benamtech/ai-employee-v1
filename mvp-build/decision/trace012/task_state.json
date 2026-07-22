@@ -1,0 +1,27 @@
+{
+  "schema": "amtech.decision.task-state.v1",
+  "task_id": "AMTECH-UI-LAB-001",
+  "tier": "T2",
+  "starting_sha": "b42ebc704534c85692810f73d2bb93af72b69ece",
+  "branch": "agent/employee-ui-port-adapters-current",
+  "goal": "Make UI Lab the production-faithful live design workbench for AMTECH employee Web adapters, with Fast Refresh, isolated viewport previews, immutable named preset versions, reproducible promotion, profile assignment, executable validation, complete UI documentation, and dedicated agent onboarding.",
+  "user_outcome": "A collaborator can run one command, edit the real React/CSS implementation with any coding agent, see changes immediately, save named design checkpoints, compare versions, and promote an approved design to one or more employee profile selectors without rebuilding or maintaining a second UI application.",
+  "hard_constraints": [
+    "Use the actual Next.js Web application and production employee components.",
+    "Do not include or depend on a coding agent.",
+    "Do not require a production build for the normal edit-preview loop.",
+    "Do not persist promoted designs that cannot be reproduced from source control.",
+    "Do not expose repository file-write APIs outside an explicit loopback development mode.",
+    "Do not add Storybook as a parallel primary application.",
+    "Do not add a database migration or runtime service for source-controlled design presets.",
+    "Keep UI Lab unavailable in normal production-like environments."
+  ],
+  "initial_hypothesis": "Use Next development mode as the live compiler, place a workbench around a same-origin isolated preview route that renders production components with fixture data, store immutable preset versions as validated JSON, allow dirty-tree draft checkpoints, require a clean Git commit for approved promotion, and generate a small runtime assignment registry consumed by the existing employee UI resolver.",
+  "evidence_boundary": {
+    "source_and_unit": "may be established on exact head",
+    "compiled_browser": "may be established by existing and new Playwright harnesses",
+    "live_provider_or_production": "out of scope",
+    "visual_quality_judgment": "human review remains required even when automated vectors pass"
+  },
+  "status": "implementation_in_progress"
+}
