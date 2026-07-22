@@ -11,7 +11,8 @@ describe("UI variant standard", () => {
     const contract = read("packages/shared/src/ui-variant.ts");
     expect(contract).toContain("EmployeeExperienceModelV1");
     expect(contract).toContain("reference_client");
-    expect(contract).toContain("bounded");
+    expect(contract).toContain("UiVariantIntentRequest");
+    expect(contract).toContain('availability: "direct"|"reference_client"|"unavailable"');
     expect(contract).not.toContain("sidebar_width");
     expect(contract).not.toContain("card_layout");
   });
