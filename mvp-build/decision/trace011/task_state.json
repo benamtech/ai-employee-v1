@@ -1,0 +1,42 @@
+{
+  "schema": "amtech.decision.task-state.v1",
+  "task_id": "AMTECH-UI-PORT-001",
+  "tier": "T2",
+  "starting_sha": "c20adaede64d45c24d74b8531507935ad7a8ce02",
+  "goal": "Introduce a reusable employee UI port and pluggable UI adapters for normal web clients, boundless employee-as-website experiments, embedded surfaces, UI Lab, and future MCP Apps while allowing reusable layouts, profile-generated themes, and explicit custom overrides.",
+  "non_goals": [
+    "Do not deploy a public employee homepage.",
+    "Do not add a database migration.",
+    "Do not replace the current operating-state model or renderer tree.",
+    "Do not add a visual design framework or heavyweight optimization dependency.",
+    "Do not claim browser screenshots or production evidence when execution is unavailable."
+  ],
+  "authority": [
+    "identity.md",
+    "AGENTS.md",
+    "mvp-build/AGENTS.md",
+    "mvp-build/CODEGRAPH.md",
+    "mvp-build/decision/README.md",
+    "mvp-build/production-readiness-program/README.md",
+    "mvp-build/docs/adr/ADR-009-production-ui-projection-path.md",
+    "current shared, Manager, Web, UI Lab, onboarding, profile and browser-test source"
+  ],
+  "observations": [
+    "The repository already has one operating projection compiler, one layout planner, one renderer registry and one production AgentSurface.",
+    "Employee profile key/version, business kind, dominant domains, owner experience and density already reach the operating context.",
+    "Onboarding captures branding facts but has no first-class UI presentation profile.",
+    "Talk and Workspace styling is largely component-local and hard-coded.",
+    "UI Lab already routes fixtures through production AgentSurface but cannot select adapter/layout/theme combinations from the route.",
+    "The existing browser harness can render screenshots but does not define an adapter matrix with adapter-specific provenance."
+  ],
+  "unknowns": [
+    "Visual quality of new adapter combinations until Playwright runs in a dependency-complete environment.",
+    "Which custom public employee surfaces will be productized first.",
+    "Whether MCP Apps should consume this exact visual registry or only the same UI port contract."
+  ],
+  "maximum_patch": {
+    "trajectories": 4,
+    "database_migrations": 0,
+    "new_runtime_dependencies": 0
+  }
+}
