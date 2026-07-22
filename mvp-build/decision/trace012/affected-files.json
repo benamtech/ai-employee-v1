@@ -103,8 +103,9 @@
       "name": "decisions_and_documentation",
       "files": [
         { "path": "decision/trace011/task_state.json", "reason": "Records the employee UI port and adapter decision." },
-        { "path": "decision/trace012/task_state.json", "reason": "Records UI Lab plus folder-first variant objectives, constraints, evidence boundary, and verification snapshot." },
+        { "path": "decision/trace012/task_state.json", "reason": "Records UI Lab plus folder-first variant objectives, constraints, evidence boundary, and final verification snapshot." },
         { "path": "decision/trace012/research-and-decision-record.md", "reason": "Records hypotheses, research, alternatives, decisions, and second/third-order effects." },
+        { "path": "decision/trace012/folder-first-ui-variant-extension.md", "reason": "Records the folder-first full-variant extension, retained and rejected architecture hypotheses, verified evidence, and remaining browser boundary." },
         { "path": "decision/trace012/validation-vectors.json", "reason": "Machine-readable pass/fail validation matrix." },
         { "path": "decision/trace012/affected-files.json", "reason": "Machine-readable impact ledger for the complete workstream." },
         { "path": "decision/trace012/script-inventory.json", "reason": "Machine-readable script ownership and invocation ledger." },
