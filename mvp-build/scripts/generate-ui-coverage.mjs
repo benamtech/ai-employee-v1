@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
@@ -65,6 +66,7 @@ while (uncovered.size) {
   for (const entry of best.coverage) uncovered.delete(entry);
 }
 
+const canonicalCases = JSON.stringify(selected);
 const output = {
   schema: "amtech.ui-presentation-coverage.v2",
   method: "deterministic greedy constrained covering array",
@@ -86,9 +88,11 @@ const output = {
   factors,
   unconstrained_combination_count: product(keys.map((key) => factors[key])).length,
   valid_combination_count: candidates.length,
+  requirement_count: requirements.size,
   generated_case_count: selected.length,
-  cases: selected,
+  selected_case_digest_sha256: createHash("sha256").update(canonicalCases).digest("hex"),
   uncovered_combinations: [...uncovered].sort(),
+  ...(process.argv.includes("--include-cases") ? { cases: selected } : {}),
   nonclaims: [
     "Generated combinations are test plans, not executed browser evidence.",
     "UI Lab cases remain fixture demonstrations even when production components render them.",
@@ -96,12 +100,20 @@ const output = {
     "Browser, accessibility, capacity, pilot, deployment, and production acceptance remain separate.",
   ],
 };
-const out = resolve(process.argv[2] ?? "validation/ui-presentation-coverage.json");
+const positional = process.argv.slice(2).find((value) => !value.startsWith("--"));
+const out = resolve(positional ?? "validation/ui-presentation-coverage.json");
 mkdirSync(dirname(out), { recursive: true });
 writeFileSync(out, `${JSON.stringify(output, null, 2)}\n`);
-console.log(JSON.stringify({ status: uncovered.size ? "incomplete" : "ok", out, cases: selected.length, uncovered: uncovered.size }));
+console.log(JSON.stringify({
+  status: uncovered.size ? "incomplete" : "ok",
+  out,
+  cases: selected.length,
+  uncovered: uncovered.size,
+  digest: output.selected_case_digest_sha256,
+  cases_included: Boolean(output.cases),
+}));
 if (uncovered.size) process.exit(1);
 
 function product(arrays) {
-  return arrays.reduce((rows, values) => rows.flatMap((row) => values.map((value) => [...row, value])), [[]]);
+  return arrays.reduce((rows, values) => rows.flatMap((row, values) => values.map((value) => [...row, value])), [[]]);
 }
