@@ -74,7 +74,7 @@ export const UiLabHumanReview = z.object({
 });
 export type UiLabHumanReview = z.infer<typeof UiLabHumanReview>;
 
-export const UiLabPreset = z.object({
+const UiLabPresetFields = z.object({
   schema: z.literal(UI_LAB_PRESET_SCHEMA),
   id: UiLabPresetId,
   version: z.number().int().positive(),
@@ -96,6 +96,36 @@ export const UiLabPreset = z.object({
   notes: z.string().max(8000).optional(),
   source: UiLabSourceProvenance,
   human_review: UiLabHumanReview.optional(),
+});
+
+export const UiLabPreset = UiLabPresetFields.superRefine((preset, context) => {
+  const expectedRef = `${preset.id}@v${String(preset.version).padStart(4, "0")}`;
+  if (preset.preset_ref !== expectedRef) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["preset_ref"], message: `Expected ${expectedRef}` });
+  }
+  if (preset.version === 1 && preset.parent_ref) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["parent_ref"], message: "Version 1 cannot have a parent" });
+  }
+  if (preset.version > 1) {
+    const expectedParent = `${preset.id}@v${String(preset.version - 1).padStart(4, "0")}`;
+    if (preset.parent_ref !== expectedParent) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["parent_ref"], message: `Expected ${expectedParent}` });
+    }
+  }
+  if (preset.source.reproducible && (preset.source.dirty || !preset.source.git_sha)) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["source", "reproducible"], message: "Reproducible source requires a clean worktree and Git SHA" });
+  }
+  if (preset.source.dirty && preset.source.changed_paths.length === 0) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["source", "changed_paths"], message: "Dirty source must identify changed paths" });
+  }
+  if (preset.status === "approved") {
+    if (!preset.source.reproducible || preset.source.dirty || !preset.source.git_sha) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["source"], message: "Approved presets require reproducible clean Git source" });
+    }
+    if (preset.human_review?.decision !== "approve" || !preset.human_review.validation_run) {
+      context.addIssue({ code: z.ZodIssueCode.custom, path: ["human_review"], message: "Approved presets require an approving human review and validation run" });
+    }
+  }
 });
 export type UiLabPreset = z.infer<typeof UiLabPreset>;
 
@@ -133,7 +163,7 @@ export const UiLabAssignmentRegistry = z.object({
 });
 export type UiLabAssignmentRegistry = z.infer<typeof UiLabAssignmentRegistry>;
 
-export const UiLabPresetSummary = UiLabPreset.pick({
+export const UiLabPresetSummary = UiLabPresetFields.pick({
   id: true,
   version: true,
   preset_ref: true,
