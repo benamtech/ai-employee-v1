@@ -1,295 +1,164 @@
 # UI Lab Agent Onboarding
 
-Status: active collaborator entrypoint  
-Scope: live UI design and implementation against the real AMTECH Web client  
+Status: architecture correction in progress — do not hand this workflow to a collaborator until the variant harness scripts described below exist and pass  
 Repository: `benamtech/ai-employee-v1`  
-Working branch: `agent/employee-ui-port-adapters-current`
+Branch: `agent/employee-ui-port-adapters-current`
 
-## One-command operating model
+## Correct operating boundary
 
-UI Lab is not a second mock application. It runs the real Next.js Web application in development mode, renders production employee components through deterministic fixture scenarios, and places the preview inside an isolated same-origin canvas.
+A UI collaborator or coding agent must not receive general write scope over the production Web client.
 
-The one script-backed command is:
-
-```bash
-npm run ui:lab:open
-```
-
-That package command invokes `scripts/ui-lab-dev.mjs`. The script:
-
-- checks Node, Git, required files, loopback host, and port;
-- builds the shared contracts once;
-- validates the UI preset registry;
-- starts the shared TypeScript watcher;
-- starts the Web TypeScript diagnostic watcher;
-- starts the real Next.js application with Turbopack and Fast Refresh;
-- enables fixture-only, loopback-only UI Lab draft writes;
-- opens `http://127.0.0.1:3000/ui-lab`.
-
-Do not replace this command with `next build`, Storybook, a separate Vite app, or a hand-built mock renderer for ordinary UI iteration.
-
-## Fresh Manjaro setup
-
-```bash
-sudo pacman -Syu --needed git nodejs npm base-devel \
-  nss atk at-spi2-core cups libdrm dbus libxkbcommon mesa \
-  pango cairo alsa-lib gtk3
-
-mkdir -p "$HOME/src"
-cd "$HOME/src"
-git clone https://github.com/benamtech/ai-employee-v1.git
-cd ai-employee-v1
-git fetch origin
-git switch --track origin/agent/employee-ui-port-adapters-current
-cd mvp-build
-npm install
-npm run local:browser-install
-npm run ui:lab:doctor
-npm run ui:lab:open
-```
-
-For a repository that is already cloned:
-
-```bash
-cd /path/to/ai-employee-v1
-git fetch origin
-git switch agent/employee-ui-port-adapters-current
-git pull --ff-only origin agent/employee-ui-port-adapters-current
-cd mvp-build
-npm install
-npm run local:browser-install
-npm run ui:lab:doctor
-npm run ui:lab:open
-```
-
-Leave that terminal running. Open a second terminal in the same `mvp-build` directory for the coding agent.
-
-## What the collaborator sees
-
-The workbench route is:
+The intended editing unit is one self-contained UI variant directory:
 
 ```text
-http://127.0.0.1:3000/ui-lab
+apps/web/ui-variants/<variant-slug>/
 ```
 
-A scenario route is:
+The agent may create and edit files inside that directory. It may read the rest of the repository for context, but it must not modify application routes, production employee components, shared schemas, generated registries, preset history, assignments, tests, or scripts during an ordinary visual experiment.
+
+This follows a filesystem-first rule:
 
 ```text
-http://127.0.0.1:3000/ui-lab/clothing-ops
+A UI variant is a directory.
 ```
 
-The workbench can change:
+The folder is loose enough to support radically different React structures, CSS, assets, and local components. Integration remains bounded by a small manifest and one typed UI data contract.
 
-- fixture scenario;
-- high-level Web adapter;
-- theme;
-- layout;
-- component set;
-- density;
-- brand tokens;
-- desktop, tablet, mobile, or responsive viewport;
-- deterministic runtime state;
-- named UI preset version.
-
-The iframe preview renders production components. Changes to normal React, TypeScript, and CSS source should appear through Next.js Fast Refresh without rebuilding the project.
-
-## Source ownership
-
-Edit source when changing the actual UI:
-
-- `apps/web/app/_components/employee-ui/EmployeeUiPort.tsx` — adapter host and presentation strategy application;
-- `apps/web/app/agent/[employeeId]/` — standard owner Web-client experience;
-- `apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx` — production-component fixture host;
-- `apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx` — workbench controls only;
-- `apps/web/app/ui-lab/ui-lab.css` — workbench chrome only;
-- `apps/web/app/globals.css` and component-local styles — product UI styling;
-- `packages/shared/src/employee-ui-presentation.ts` — typed adapter/theme/layout/component-set contracts;
-- `apps/web/app/agent/[employeeId]/fixture-runtime.ts` — deterministic fixture scenarios and transitions.
-
-Do not directly edit generated or lifecycle files during normal visual work:
-
-- `packages/shared/src/ui-lab-runtime-registry.generated.ts`;
-- `ui-lab/assignments.json` unless deliberately assigning an approved preset;
-- an existing `ui-lab/presets/**/vNNNN.json` file;
-- browser evidence under `infra/.local/`.
-
-Existing preset versions are immutable. Use the workbench to save the next draft version.
-
-## Vibe-coding loop
-
-1. Start `npm run ui:lab:open` and leave it running.
-2. Select the closest fixture scenario and preview mode.
-3. Set the target adapter, viewport, and existing preset before editing.
-4. Give the coding agent one bounded visual objective.
-5. Tell it to inspect this file and the source files it will modify before editing.
-6. Let it edit React/CSS source while watching the browser preview.
-7. After each coherent change, inspect desktop and mobile in the workbench.
-8. Exercise fixture reset, heartbeat gap, recovery, and one fixture interaction when the edited surface contains runtime state.
-9. Review `git diff` before accepting the iteration.
-10. Save a named immutable draft in the workbench only after the visual state is worth retaining.
-11. Run focused validation before committing.
-
-The browser is the visual feedback instrument. The coding agent edits files and runs checks; it does not need to own or embed the browser server.
-
-## Recommended agent prompt
-
-Use this as the first prompt in Claude Code, Codex, or Cursor Agent:
+## Target folder shape
 
 ```text
-Read UI_LAB_AGENT_ONBOARDING.md first. UI Lab is already running at http://127.0.0.1:3000/ui-lab through npm run ui:lab:open. Work only in this repository and preserve the production-component fixture architecture. Do not create a second renderer, Storybook app, Vite app, or static mockup. Inspect the selected scenario, EmployeeUiPort, production employee components, relevant CSS, and current git diff before editing.
-
-Goal: <describe one concrete visual or interaction outcome>.
-Target scenario: <scenario>.
-Target adapter: <owner_web | public_form | boundless_website>.
-Target preset or defaults: <preset-ref or unsaved defaults>.
-Required viewports: desktop and mobile.
-
-Make the smallest coherent source change. Keep UI Lab workbench chrome separate from product UI styles. Do not edit existing preset versions or the generated runtime registry. After editing, run the focused checks in this file, summarize changed files and risks, and stop before commit or promotion.
+apps/web/ui-variants/<variant-slug>/
+├── variant.json          # identity, compatibility, entrypoint, experiment status
+├── instructions.md       # local intent, constraints, and design notes
+├── index.tsx             # variant entry component
+├── styles.module.css     # optional; styling technology is not prescribed
+├── components/           # optional local components
+├── assets/               # optional local assets
+└── README.md             # optional human notes
 ```
 
-## Claude Code
+Only `variant.json` and `index.tsx` are required. The standard does not prescribe a visual style, HTML structure, CSS methodology, component library, or layout system.
 
-Install and validate:
+## Stable integration contract
+
+Every variant receives the same versioned employee UI model rather than importing private application internals.
+
+The V1 contract should expose these categories:
+
+```text
+identity
+profile and business context
+adapter and presentation selection
+runtime status
+conversation data
+current work
+owner-attention items
+waiting or return conditions
+changes
+connections and capabilities
+evidence and outputs
+bounded interaction intents
+fixture and evidence metadata
+```
+
+A variant may reorganize, hide, emphasize, rename, or visually transform these fields. It must not obtain additional application data by importing route components, API clients, Manager modules, fixture internals, or database code.
+
+## Two variant modes
+
+The manifest declares one of two modes:
+
+- `shell`: receives the stable model plus production interaction slots. This is the default and safest mode for normal reusable employee layouts.
+- `full`: receives the stable model plus bounded UI intents and may replace the visual tree completely. This is experimental until its interaction contract has executable coverage.
+
+Themes, layout ideas, and component choices remain internal to the folder. They do not require new global enums for every experiment.
+
+## Discovery and compilation
+
+A generator must scan `apps/web/ui-variants/*/variant.json`, validate every folder, and generate a static Next.js registry. The generated registry is the only production source file that references variant entrypoints.
+
+This is necessary because Next.js and React lazy loading work best with statically discoverable imports. The collaborator should add a folder, not manually register imports in application code.
+
+Expected scripts:
 
 ```bash
-npm install -g @anthropic-ai/claude-code
-claude doctor
+npm run ui:variant:new -- <slug>
+npm run ui:variant:validate -- <slug>
+npm run ui:variant:generate
+npm run ui:variant:watch
 ```
 
-Run from the repository scope that contains this file:
+`npm run ui:lab:open` should eventually start `ui:variant:watch` automatically so adding or changing a folder updates the live UI Lab preview.
+
+## Import boundary
+
+Variant validation must reject:
+
+- relative imports that escape the variant directory;
+- imports from `apps/web/app/agent`, route handlers, Manager, database, or infrastructure code;
+- direct imports of fixture implementations;
+- writes outside the active variant folder;
+- edits to generated registries;
+- network or filesystem access from the variant component;
+- undeclared package dependencies.
+
+Allowed imports should be limited to:
+
+- React;
+- the public UI variant contract module;
+- dependencies explicitly allowed by the manifest;
+- files inside the same variant directory.
+
+## Agent workflow after the harness exists
+
+Terminal 1:
 
 ```bash
 cd /path/to/ai-employee-v1/mvp-build
+npm run ui:lab:open
+```
+
+Terminal 2:
+
+```bash
+cd /path/to/ai-employee-v1/mvp-build
+npm run ui:variant:new -- <variant-slug>
+cd apps/web/ui-variants/<variant-slug>
 claude
+# or: codex
+# or open this exact folder in Cursor
 ```
 
-Then paste the recommended agent prompt. Keep terminal-command approval enabled. Use `claude -c` to continue the latest session after restarting.
+The coding agent must be launched from the variant directory, not from the repository root. Its first instruction should be:
 
-## OpenAI Codex CLI
-
-Install:
-
-```bash
-curl -fsSL https://chatgpt.com/codex/install.sh | sh
+```text
+Read instructions.md and the repository UI_LAB_AGENT_ONBOARDING.md. You may modify only the current UI variant directory. You may read repository files for context. Do not modify files outside this directory. Use only the public variant contract and local files. Keep UI Lab running, inspect desktop and mobile after coherent changes, and run the variant validation command before stopping.
 ```
 
-Open a new shell if the installer updates `PATH`, then run:
+## Promotion boundary
 
-```bash
-cd /path/to/ai-employee-v1/mvp-build
-codex
+An experimental folder is not automatically a reusable product UI.
+
+Promotion requires:
+
+```text
+valid manifest
++ import-boundary pass
++ TypeScript pass
++ UI Lab browser pass
++ desktop/mobile review
++ clean Git source
++ named immutable preset/version
++ deliberate human assignment
 ```
 
-Sign in with ChatGPT when prompted, then paste the recommended agent prompt. Review proposed commands and diffs before approval.
+The coding agent may prepare a candidate. It must not silently promote or assign its own variant.
 
-Alternative npm installation:
+## Current hold
 
-```bash
-npm install -g @openai/codex
-```
-
-## Cursor desktop or Cursor CLI
-
-For Cursor desktop, open the `mvp-build` directory, allow codebase indexing to finish, open Agent with `Ctrl+I`, and paste the recommended prompt. Keep the existing UI Lab terminal running outside or inside Cursor.
-
-Cursor CLI installation and startup:
+The existing UI Lab can still be started for inspection with:
 
 ```bash
-curl https://cursor.com/install -fsS | bash
-cd /path/to/ai-employee-v1/mvp-build
-cursor-agent
-```
-
-Cursor CLI reads repository `AGENTS.md` and `CLAUDE.md`; this file remains the specific UI Lab operating guide. Review changes with the CLI review command before accepting them.
-
-## Focused validation during iteration
-
-Run these from `mvp-build` in a separate terminal while UI Lab remains running:
-
-```bash
-npm run ui:lab:registry:validate
-npm run test:ui:contracts
-npm run typecheck --workspace @amtech/web
-```
-
-Run the headed browser matrix when the coherent iteration is ready for review:
-
-```bash
-npm run ui:lab:test:headed
-```
-
-Run the complete repository-level UI and build checks before requesting promotion:
-
-```bash
-npm run ui:validate
-npm run repo:verify:full
-npm run test:unit
-npm run build
-```
-
-Generate the full deterministic UI coverage case list when changing adapters, strategy axes, scenarios, or validation topology:
-
-```bash
-node scripts/generate-ui-coverage.mjs /tmp/amtech-ui-coverage.json --include-cases
-```
-
-## Draft, commit, and promotion boundary
-
-A workbench draft records the selected adapter and presentation configuration plus Git provenance. A dirty-tree draft is useful for comparison but is deliberately non-reproducible.
-
-Before treating a design as reusable:
-
-```bash
-git status --short
-git diff --check
-npm run ui:validate
-npm run test:ui:contracts
-npm run ui:lab:test
-```
-
-Then commit the React/CSS/source changes. Promotion and assignment are separate deliberate operations and require clean source, exact-SHA evidence, and human review. Do not ask a coding agent to silently promote its own design.
-
-## Troubleshooting
-
-If port 3000 is busy:
-
-```bash
-npm run ui:lab -- --port 3100 --open
-```
-
-If dependencies changed:
-
-```bash
-rm -rf node_modules apps/web/.next packages/shared/dist
-npm install
-npm run ui:lab:doctor
 npm run ui:lab:open
 ```
 
-If Fast Refresh performs a full reload repeatedly, inspect the edited component file for anonymous default components or non-component exports used outside the React tree. Move shared constants into a separate module where appropriate.
-
-If Chromium is missing:
-
-```bash
-npm run local:browser-install
-```
-
-If the workbench loads but saving is disabled, confirm it was started through `npm run ui:lab:open`, is using a loopback hostname, and is in development fixture mode.
-
-## Completion report expected from an agent
-
-Every UI coding session should end with:
-
-```text
-Objective completed:
-Scenario and adapter tested:
-Files changed:
-Desktop result:
-Mobile result:
-Runtime states exercised:
-Preset saved, if any:
-Commands run:
-Passing checks:
-Remaining failures or uncertainty:
-No commit/promotion performed unless explicitly requested.
-```
+Do not instruct a collaborator to edit production source through that session. The folder-first loader, contract, scaffold command, registry generator, boundary validator, and watch integration must be implemented before this document becomes the active collaborator workflow.
