@@ -1,5 +1,5 @@
 {
-  "schema": "amtech.ui-lab-script-inventory.v1",
+  "schema": "amtech.ui-lab-script-inventory.v2",
   "task_id": "AMTECH-UI-LAB-001",
   "commands": [
     {
@@ -22,6 +22,72 @@
       "purpose": "Verify Node, Git, dependencies, loopback host, port, assignments file, and required application paths.",
       "normal_user": "Contributor onboarding and troubleshooting",
       "writes_repository": false
+    },
+    {
+      "command": "npm run ui:variant:new -- <variant-slug>",
+      "owner": "scripts/ui-variant.mjs new",
+      "purpose": "Create one complete folder-first variant scaffold with manifest, React entry, CSS module, task file, shared local instructions, Claude guidance, AGENTS.md, and nested Cursor rules, then regenerate the static registry.",
+      "normal_user": "UI collaborator or coding agent",
+      "writes_repository": true,
+      "written_paths": [
+        "apps/web/ui-variants/<variant-slug>/**",
+        "apps/web/app/_components/ui-variant/registry.generated.ts"
+      ]
+    },
+    {
+      "command": "npm run ui:variant:validate -- [variant-slug]",
+      "owner": "scripts/ui-variant.mjs validate",
+      "purpose": "Validate one variant or every checked-in variant for manifest correctness, folder confinement, declared dependencies, forbidden server/network/storage access, and declared Worker/WASM features.",
+      "normal_user": "Every variant change and CI",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:variant:generate",
+      "owner": "scripts/ui-variant.mjs generate",
+      "purpose": "Regenerate the alphabetic static registry with literal manifest imports and literal lazy component imports.",
+      "normal_user": "Variant creation, rename, removal, or manifest change",
+      "writes_repository": true,
+      "written_paths": ["apps/web/app/_components/ui-variant/registry.generated.ts"]
+    },
+    {
+      "command": "npm run ui:variant:watch",
+      "owner": "scripts/ui-variant.mjs watch",
+      "purpose": "Watch variant manifests and entries and regenerate the static registry after changes.",
+      "normal_user": "UI Lab development loop",
+      "writes_repository": true,
+      "written_paths": ["apps/web/app/_components/ui-variant/registry.generated.ts"]
+    },
+    {
+      "command": "npm run ui:variant:list",
+      "owner": "scripts/ui-variant.mjs list",
+      "purpose": "List variant slug, lifecycle status, display name, and production eligibility.",
+      "normal_user": "Collaborator, reviewer, or coding agent",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:variant:prompt -- <variant-slug>",
+      "owner": "scripts/ui-variant.mjs prompt",
+      "purpose": "Print a concise folder-local task prompt that preserves the write and capability boundaries.",
+      "normal_user": "Coding-agent operator",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:variant:doctor",
+      "owner": "scripts/ui-variant.mjs doctor",
+      "purpose": "Validate all variants, prove generated-registry parity, and assert the neutral contract, public variant contract, and host are present.",
+      "normal_user": "Every variant change and CI",
+      "writes_repository": false
+    },
+    {
+      "command": "npm run ui:variant:collaborate -- <variant-slug> --agent <claude|codex|cursor|none>",
+      "owner": "scripts/ui-variant-collaborator.mjs",
+      "purpose": "Scaffold when absent, generate tool-specific local instructions, validate, regenerate, start UI Lab and registry watching, open the exact scenario route, and launch the selected agent with the variant folder as working directory.",
+      "normal_user": "Beginner, designer, or advanced collaborator",
+      "writes_repository": true,
+      "written_paths": [
+        "apps/web/ui-variants/<variant-slug>/**",
+        "apps/web/app/_components/ui-variant/registry.generated.ts"
+      ]
     },
     {
       "command": "npm run ui:lab:presets",
@@ -93,14 +159,14 @@
     {
       "command": "npm run test:ui:contracts",
       "owner": "Vitest focused UI contract set",
-      "purpose": "Run UI port, registry, workbench, fixture guard, renderer, stream and protocol source contracts.",
+      "purpose": "Run UI port, registry, workbench, fixture guard, renderer, stream, and protocol source contracts.",
       "normal_user": "Every UI change and CI",
       "writes_repository": false
     },
     {
       "command": "npm run repo:merge:check",
       "owner": "package.json aggregate",
-      "purpose": "Run complete repository governance, typecheck, lint, unit and workspace build gates before merge.",
+      "purpose": "Run complete repository governance, typecheck, lint, unit, and workspace build gates before merge.",
       "normal_user": "Final exact-head verification",
       "writes_repository": false
     }
@@ -122,6 +188,20 @@
       "production-like environment writes",
       "browser-driven approval or assignment",
       "database or remote filesystem writes"
+    ]
+  },
+  "variant_execution_boundary": {
+    "root": "apps/web/ui-variants/<variant-slug>/",
+    "host_inputs": ["EmployeeExperienceModelV1", "bounded dispatchIntent", "optional slots.reference_client"],
+    "forbidden": [
+      "relative import escaping the variant folder",
+      "private application imports",
+      "undeclared package dependencies",
+      "Node or server modules",
+      "direct fetch, XMLHttpRequest, WebSocket, or EventSource",
+      "localStorage, sessionStorage, or indexedDB",
+      "undeclared Worker use",
+      "undeclared WebAssembly use"
     ]
   }
 }
