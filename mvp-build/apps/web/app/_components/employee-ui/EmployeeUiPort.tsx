@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import {
+  resolveApprovedUiPreset,
   resolveEmployeeUiPort,
   type EmployeeUiAdapterKey,
   type EmployeeUiPortContract,
@@ -81,14 +82,28 @@ export function EmployeeUiPortHost({
   }, [employeeId, payload]);
 
   const context = observedPayload?.operating_state?.context;
+  const generatedProfileHintPresent = context?.signals?.some((signal) =>
+    String(signal.key ?? "").toLowerCase().includes("ui_presentation")) ?? false;
+  const approvedPreset = useMemo(() => resolveApprovedUiPreset({
+    adapter_key: adapterKey,
+    profile_key: context?.profile_key,
+    business_kind: context?.business_kind,
+    dominant_domains: context?.dominant_domains,
+  }), [adapterKey, context]);
+  const assignmentOverride = presentationOverride || generatedProfileHintPresent
+    ? undefined
+    : approvedPreset?.presentation;
   const port = useMemo(() => resolveEmployeeUiPort({
     adapter_key: adapterKey,
     business_kind: context?.business_kind,
     profile_key: context?.profile_key,
     dominant_domains: context?.dominant_domains,
     signals: context?.signals,
-    explicit: presentationOverride,
-  }), [adapterKey, context, presentationOverride]);
+    explicit: presentationOverride ?? assignmentOverride,
+  }), [adapterKey, assignmentOverride, context, presentationOverride]);
+  const appliedPresetRef = presentationOverride || generatedProfileHintPresent
+    ? undefined
+    : approvedPreset?.preset_ref;
   const tokens = themeTokens(port.presentation.theme_key, port.presentation.brand);
   const variables = {
     "--employee-canvas": tokens.canvas,
@@ -124,6 +139,7 @@ export function EmployeeUiPortHost({
         data-ui-components={port.presentation.component_set_key}
         data-ui-density={port.presentation.density}
         data-ui-source={port.presentation.source}
+        data-ui-preset={appliedPresetRef}
         style={variables}
       >
         <style>{PORT_CSS}</style>
