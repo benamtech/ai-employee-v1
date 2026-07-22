@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { resolveEmployeeUiPort, type UiVariantIntentRequest, type UiVariantIntentResult } from "@amtech/shared";
-import { EmployeeUiPortHost } from "../../../../../_components/employee-ui/EmployeeUiPort";
-import { UiVariantHost } from "../../../../../_components/ui-variant/UiVariantHost";
-import { buildEmployeeExperienceModel } from "../../../../../_components/ui-variant/buildEmployeeExperienceModel";
-import { AgentSurface } from "../../../../../agent/[employeeId]/AgentSurface";
+import { EmployeeUiPortHost } from "../../../../_components/employee-ui/EmployeeUiPort";
+import { UiVariantHost } from "../../../../_components/ui-variant/UiVariantHost";
+import { buildEmployeeExperienceModel } from "../../../../_components/ui-variant/buildEmployeeExperienceModel";
+import { AgentSurface } from "../../../../agent/[employeeId]/AgentSurface";
 import {
   fixtureRuntimeForEmployee,
   planFixtureCommand,
   type FixtureRuntimeFrame,
   type FixtureScenarioId,
-} from "../../../../../agent/[employeeId]/fixture-runtime";
-import type { UiLabPreviewConfig } from "../../../../[scenario]/ProductionFixtureLabClient";
+} from "../../../../agent/[employeeId]/fixture-runtime";
+import type { UiLabPreviewConfig } from "../../../[scenario]/ProductionFixtureLabClient";
 
 export function VariantFixtureLabClient({
   variantId,
