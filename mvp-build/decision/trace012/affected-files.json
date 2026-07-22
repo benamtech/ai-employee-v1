@@ -1,5 +1,5 @@
 {
-  "schema": "amtech.ui-lab-affected-files.v1",
+  "schema": "amtech.ui-lab-affected-files.v2",
   "task_id": "AMTECH-UI-LAB-001",
   "groups": [
     {
@@ -8,8 +8,8 @@
         { "path": "packages/shared/src/employee-ui-presentation.ts", "reason": "Defines adapter, theme, layout, component-set, density, brand-token contracts and deterministic presentation resolution." },
         { "path": "packages/shared/src/ui-lab-preset.ts", "reason": "Defines immutable preset, provenance, review, status, target, and assignment schemas." },
         { "path": "packages/shared/src/ui-lab-assignment-resolution.ts", "reason": "Resolves approved preset assignments before heuristic profile matching." },
-        { "path": "packages/shared/src/ui-lab-runtime-registry.generated.ts", "reason": "Generated runtime-safe assignment data consumed without filesystem access." },
-        { "path": "packages/shared/src/index.ts", "reason": "Exports UI port, preset, and assignment contracts." },
+        { "path": "packages/shared/src/ui-lab-runtime-registry.generated.ts", "reason": "Generated runtime-safe preset assignment data; regenerated to canonical empty-registry digest." },
+        { "path": "packages/shared/src/index.ts", "reason": "Exports UI port, preset, assignment, and UI-variant contracts." },
         { "path": "packages/shared/src/manifest.ts", "reason": "Allows onboarding-generated presentation hints." },
         { "path": "packages/shared/src/profile-package.ts", "reason": "Allows profile-package presentation hints." },
         { "path": "apps/manager/src/lib/profile-context.ts", "reason": "Projects profile and onboarding presentation hints into the existing Web payload." },
@@ -21,59 +21,114 @@
     {
       "name": "live_workbench",
       "files": [
-        { "path": "apps/web/app/ui-lab/page.tsx", "reason": "Entry index for fixture scenarios and reusable UI versions." },
         { "path": "apps/web/app/ui-lab/layout.tsx", "reason": "Scopes UI-Lab-only stylesheet and route metadata." },
-        { "path": "apps/web/app/ui-lab/ui-lab.css", "reason": "Workbench chrome and isolated preview presentation; must not style product routes." },
+        { "path": "apps/web/app/ui-lab/ui-lab.css", "reason": "Workbench chrome and isolated preview presentation; does not style product routes." },
         { "path": "apps/web/app/ui-lab/ui-lab-config.ts", "reason": "Owns viewport, preview-mode, query, and scenario default configuration." },
         { "path": "apps/web/app/ui-lab/[scenario]/page.tsx", "reason": "Routes scenarios into the workbench shell." },
-        { "path": "apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx", "reason": "Provides controls, preset browsing, draft capture, review links, viewport selection, and preview messaging." },
-        { "path": "apps/web/app/ui-lab/preview/[scenario]/page.tsx", "reason": "Creates a same-origin isolated canvas route." },
+        { "path": "apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx", "reason": "Provides controls, preset browsing, draft capture, review links, viewport selection, and preview messaging; draft fields are explicitly string-typed." },
+        { "path": "apps/web/app/ui-lab/preview/[scenario]/page.tsx", "reason": "Creates a same-origin isolated production-component canvas route." },
         { "path": "apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", "reason": "Renders production employee components with deterministic fixture state inside the isolated canvas." },
         { "path": "apps/web/app/api/ui-lab/presets/route.ts", "reason": "Lists presets and permits bounded loopback-only development draft writes." },
         { "path": "apps/web/app/_lib/ui-lab-registry.server.ts", "reason": "Reads and atomically creates immutable preset files with Git provenance." }
       ]
     },
     {
-      "name": "source_controlled_product_line",
+      "name": "folder_first_variant_contract_and_host",
       "files": [
-        { "path": "ui-lab/presets/ecommerce-manager/v0001.json", "reason": "Initial named e-commerce/clothing operations UI checkpoint." },
-        { "path": "ui-lab/presets/marketing-agency/v0001.json", "reason": "Initial named marketing-agency UI checkpoint." },
-        { "path": "ui-lab/assignments.json", "reason": "Canonical approved-preset-to-profile selector mapping." }
+        { "path": "packages/shared/src/ui-variant.ts", "reason": "Defines the neutral EmployeeExperienceModelV1, manifest schema, runtime-feature declarations, bounded intent request/result contract, and evidence metadata." },
+        { "path": "apps/web/ui-variants/contract.ts", "reason": "Publishes the minimal React component contract, host slots, and defineUiVariant helper available to variant folders." },
+        { "path": "apps/web/app/_components/ui-variant/buildEmployeeExperienceModel.ts", "reason": "Projects production payload and runtime projection into the neutral model without exposing private Web components." },
+        { "path": "apps/web/app/_components/ui-variant/UiVariantHost.tsx", "reason": "Lazy-loads variants under Suspense, applies CSS/layout/paint containment and container-query context, and dispatches only declared intents." },
+        { "path": "apps/web/app/_components/ui-variant/registry.generated.ts", "reason": "Generated alphabetic registry with literal manifest imports and literal lazy component imports for Next.js chunk discovery." },
+        { "path": "apps/web/app/ui-lab/variants/page.tsx", "reason": "Lists checked-in variants and links each to deterministic scenario routes." },
+        { "path": "apps/web/app/ui-lab/variant/[variant]/[scenario]/page.tsx", "reason": "Validates fixture mode, registry id, and scenario before mounting a selected variant." },
+        { "path": "apps/web/app/ui-lab/variant/[variant]/[scenario]/VariantFixtureLabClient.tsx", "reason": "Bridges deterministic fixture runtime transitions and bounded intents into the selected variant while retaining the optional production reference-client slot." }
       ]
     },
     {
-      "name": "scripts_and_validation",
+      "name": "checked_in_variant_product_line",
+      "files": [
+        { "path": "apps/web/ui-variants/reference-client/variant.json", "reason": "Declares the production Web client as one conforming optional-reference variant." },
+        { "path": "apps/web/ui-variants/reference-client/index.tsx", "reason": "Renders slots.reference_client and proves the current production client conforms." },
+        { "path": "apps/web/ui-variants/radical-canvas/variant.json", "reason": "Declares a materially different employee experience and its browser/runtime capabilities." },
+        { "path": "apps/web/ui-variants/radical-canvas/index.tsx", "reason": "Demonstrates a full visual and structural replacement while retaining neutral employee capabilities." },
+        { "path": "apps/web/ui-variants/radical-canvas/styles.module.css", "reason": "Contains the radical variant's visual system inside its folder." },
+        { "path": "apps/web/ui-variants/editorial-studio/variant.json", "reason": "Declares a conventional readable React/CSS example for designers and beginner collaborators." },
+        { "path": "apps/web/ui-variants/editorial-studio/index.tsx", "reason": "Implements the editorial employee experience against the neutral model." },
+        { "path": "apps/web/ui-variants/editorial-studio/styles.module.css", "reason": "Contains the editorial visual system; selectors are scoped to local CSS-module classes for production build compatibility." }
+      ]
+    },
+    {
+      "name": "variant_agent_boundaries_and_onboarding",
+      "files": [
+        { "path": "apps/web/ui-variants/README.md", "reason": "Defines the folder-first standard, contract boundary, supported runtime features, and collaborator workflow." },
+        { "path": "apps/web/ui-variants/AGENTS.md", "reason": "Defines repository-level UI-variant agent scope and completion reporting." },
+        { "path": "apps/web/ui-variants/CLAUDE.md", "reason": "Routes Claude Code to the shared variant instructions." },
+        { "path": "apps/web/ui-variants/.cursor/rules/ui-variant-standard.mdc", "reason": "Applies nested Cursor rules to all variant work." },
+        { "path": "UI_LAB_AGENT_ONBOARDING.md", "reason": "Active Manjaro onboarding for repository checkout, agents, one-command launch, variant creation, validation, runtime-state testing, and promotion boundaries." },
+        { "path": "AGENTS.md", "reason": "Routes scoped UI work into the dedicated UI Lab and variant guidance." }
+      ]
+    },
+    {
+      "name": "scripts_validation_and_browser_evidence",
       "files": [
         { "path": "scripts/ui-lab-dev.mjs", "reason": "One-command doctor, shared build/watch, Web type watch, and Next Fast Refresh development loop." },
         { "path": "scripts/ui-lab-registry.mjs", "reason": "Lists, validates, promotes, assigns, and generates runtime preset registry data." },
+        { "path": "scripts/ui-variant.mjs", "reason": "Scaffolds, validates, generates, watches, lists, prompts, and doctors folder-first variants." },
+        { "path": "scripts/ui-variant-collaborator.mjs", "reason": "Scaffolds when absent, writes tool-local guidance, validates, regenerates, starts UI Lab/watchers, opens the exact route, and launches the selected agent inside the variant folder." },
         { "path": "scripts/verify-ui-architecture.mjs", "reason": "Proves the workbench/canvas/production-renderer topology and write/promotion guards." },
         { "path": "scripts/generate-ui-coverage.mjs", "reason": "Extends deterministic coverage generation with adapter and preset dimensions." },
         { "path": "infra/scripts/ui/fixture-browser.mjs", "reason": "Compatibility entrypoint for the production fixture browser matrix." },
-        { "path": "infra/scripts/ui/fixture-browser-v2.mjs", "reason": "Captures preset-aware screenshots, interactions, viewports, accessibility and provenance evidence." },
+        { "path": "infra/scripts/ui/fixture-browser-v2.mjs", "reason": "Captures preset-aware screenshots, interactions, viewports, accessibility, and provenance evidence." },
         { "path": "tests/unit/employee-ui-port.test.ts", "reason": "Tests deterministic adapter and strategy resolution." },
         { "path": "tests/unit/ui-architecture-fitness.test.ts", "reason": "Executes the UI architecture verifier." },
-        { "path": "tests/unit/ui-lab-registry.test.ts", "reason": "Tests preset chain, provenance, assignment collision and generated registry behavior." },
+        { "path": "tests/unit/ui-lab-registry.test.ts", "reason": "Tests preset chain, provenance, assignment collision, and generated registry parity." },
         { "path": "tests/unit/ui-lab-workbench-contract.test.ts", "reason": "Tests workbench, preview route, local write guard, and script contracts." },
-        { "path": "package.json", "reason": "Exposes the standard UI Lab development, registry, promotion, assignment and test commands." }
+        { "path": "tests/unit/ui-presentation-coverage.test.ts", "reason": "Verifies constrained pairwise and selected three-way presentation coverage." },
+        { "path": "tests/unit/ui-variant-standard.test.ts", "reason": "Tests the neutral contract, optional reference client, literal lazy registry, live route, collaborator launcher, doctor, and Claude/Codex/Cursor guidance." },
+        { "path": "package.json", "reason": "Exposes UI Lab and ui:variant:new, validate, generate, watch, list, prompt, doctor, and collaborate aliases." }
+      ]
+    },
+    {
+      "name": "source_controlled_presets",
+      "files": [
+        { "path": "ui-lab/presets/ecommerce-manager/v0001.json", "reason": "Initial named e-commerce/clothing operations UI checkpoint." },
+        { "path": "ui-lab/presets/marketing-agency/v0001.json", "reason": "Initial named marketing-agency UI checkpoint." },
+        { "path": "ui-lab/assignments.json", "reason": "Canonical approved-preset-to-profile selector mapping." },
+        { "path": "ui-lab/README.md", "reason": "Collaborator operating manual for presets and promotion." },
+        { "path": "ui-lab/AGENTS.md", "reason": "Dedicated preset/workbench coding-agent guardrails." }
       ]
     },
     {
       "name": "decisions_and_documentation",
       "files": [
         { "path": "decision/trace011/task_state.json", "reason": "Records the employee UI port and adapter decision." },
-        { "path": "decision/trace012/task_state.json", "reason": "Records UI Lab objective, constraints and evidence boundary." },
-        { "path": "decision/trace012/research-and-decision-record.md", "reason": "Records hypothesis, research, alternatives, decisions and second/third-order effects." },
+        { "path": "decision/trace012/task_state.json", "reason": "Records UI Lab plus folder-first variant objectives, constraints, evidence boundary, and verification snapshot." },
+        { "path": "decision/trace012/research-and-decision-record.md", "reason": "Records hypotheses, research, alternatives, decisions, and second/third-order effects." },
         { "path": "decision/trace012/validation-vectors.json", "reason": "Machine-readable pass/fail validation matrix." },
-        { "path": "decision/trace012/affected-files.json", "reason": "Machine-readable impact ledger for this task." },
+        { "path": "decision/trace012/affected-files.json", "reason": "Machine-readable impact ledger for the complete workstream." },
         { "path": "decision/trace012/script-inventory.json", "reason": "Machine-readable script ownership and invocation ledger." },
-        { "path": "docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md", "reason": "Architecture decision for port, adapter and strategy boundaries." },
-        { "path": "ui-lab/README.md", "reason": "Collaborator operating manual." },
-        { "path": "ui-lab/AGENTS.md", "reason": "Dedicated coding-agent onboarding and guardrails." },
+        { "path": "decision/trace012/ui-documentation-disposition.json", "reason": "Records canonical, retained, superseded, and historical UI documentation dispositions." },
+        { "path": "docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md", "reason": "Architecture decision for port, adapter, and strategy boundaries." },
         { "path": "docs/ux/10-ui-lab-live-workbench.md", "reason": "Canonical UI Lab architecture and lifecycle documentation." },
         { "path": "docs/ux/README.md", "reason": "Routes UX contributors through the current map and UI Lab workflow." },
-        { "path": "../docs/ui/README.md", "reason": "Canonical UI documentation router updated to the workbench and preset system." },
-        { "path": "docs/ux/02-current-ux-system-map.md", "reason": "Current UX topology updated with port, adapter, workbench, canvas and promotion flow." },
-        { "path": "AGENTS.md", "reason": "Routes scoped UI work into the dedicated UI Lab agent onboarding file." }
+        { "path": "docs/ux/02-current-ux-system-map.md", "reason": "Current UX topology with port, adapter, workbench, canvas, variants, and promotion flow." },
+        { "path": "../docs/ui/README.md", "reason": "Repository-level canonical UI documentation router." }
+      ]
+    },
+    {
+      "name": "ci_evidenced_repairs",
+      "files": [
+        { "path": "apps/web/app/_components/ui-variant/buildEmployeeExperienceModel.ts", "reason": "Parenthesizes nullish-coalescing runtime fallback for TypeScript parsing." },
+        { "path": "apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx", "reason": "Uses an explicit string-valued preset draft state instead of scenario-union inference." },
+        { "path": "apps/web/app/ui-lab/variant/[variant]/[scenario]/VariantFixtureLabClient.tsx", "reason": "Corrects nested route import depth." },
+        { "path": "apps/web/app/ui-lab/variant/[variant]/[scenario]/page.tsx", "reason": "Corrects nested route import depth." },
+        { "path": "apps/web/app/_components/ui-variant/registry.generated.ts", "reason": "Regenerated exactly from sorted variant folders." },
+        { "path": "packages/shared/src/ui-lab-runtime-registry.generated.ts", "reason": "Regenerated exactly from canonical empty assignments." },
+        { "path": "apps/web/ui-variants/editorial-studio/styles.module.css", "reason": "Scopes element selectors under local module classes so Next production build passes." },
+        { "path": "tests/unit/capability-drawer-setup-contract.test.ts", "reason": "Aligns string-based assertions with the stronger shared connector resolver without weakening provider-boundary invariants." },
+        { "path": "tests/unit/adaptive-connector-runtime.test.ts", "reason": "Preserves the source behavior that retains all-uppercase business-system acronyms." },
+        { "path": "tests/unit/ui-variant-standard.test.ts", "reason": "Replaces a token-only bounded assertion with concrete intent-request and availability assertions." }
       ]
     },
     {
