@@ -1,6 +1,7 @@
 export * from "./ids.js";
 export * from "./envelope.js";
 export * from "./manifest.js";
+export * from "./employee-ui-presentation.js";
 export * from "./routes.js";
 export * from "./event-types.js";
 export * from "./work-events.js";

@@ -41,6 +41,10 @@ function slot(key: string, title: string, priority: number, slotFacts: ProfileCo
   return { key, title, priority, facts: slotFacts };
 }
 
+function serializedPresentation(manifest: OnboardingManifest): string | undefined {
+  return manifest.ui_presentation ? JSON.stringify(manifest.ui_presentation) : undefined;
+}
+
 function contractorEstimatorContext(packageKey: string, manifest: OnboardingManifest): ProfileContext {
   const answers = manifest.seven_question_answers ?? {};
   return {
@@ -48,6 +52,7 @@ function contractorEstimatorContext(packageKey: string, manifest: OnboardingMani
     generated_from: "onboarding_manifest",
     memory_limits: DEFAULT_MEMORY_LIMITS,
     resource_pointers: [...MANAGER_RESOURCES],
+    ui_presentation: manifest.ui_presentation,
     slots: [
       slot("business_identity", "Business identity", 10, facts([
         fact("business_name", manifest.business_display_name),
@@ -82,6 +87,7 @@ function contractorEstimatorContext(packageKey: string, manifest: OnboardingMani
       ]),
       slot("standing_preferences", "Standing preferences", 60, facts([
         fact("profile_prompt", manifest.profile_prompt),
+        fact("ui_presentation", serializedPresentation(manifest)),
       ])),
       slot("live_state_pointers", "Live state pointers", 70, MANAGER_RESOURCES.map((uri) => ({
         key: uri.replace("amtech://manager/", ""),
@@ -98,6 +104,7 @@ function genericPackageContext(packageKey: string, manifest: OnboardingManifest)
     generated_from: "onboarding_manifest",
     memory_limits: DEFAULT_MEMORY_LIMITS,
     resource_pointers: [...MANAGER_RESOURCES],
+    ui_presentation: manifest.ui_presentation,
     slots: [
       slot("business_identity", "Business identity", 10, facts([
         fact("business_name", manifest.business_display_name),
@@ -118,6 +125,9 @@ function genericPackageContext(packageKey: string, manifest: OnboardingManifest)
         ...sourcedFacts("branding", manifest.branding_facts),
         ...sourcedFacts("customer", manifest.customer_job_facts),
       ]),
+      slot("standing_preferences", "Standing preferences", 60, facts([
+        fact("ui_presentation", serializedPresentation(manifest)),
+      ])),
       slot("live_state_pointers", "Live state pointers", 70, MANAGER_RESOURCES.map((uri) => ({
         key: uri.replace("amtech://manager/", ""),
         value: uri,
