@@ -65,7 +65,7 @@ export function buildEmployeeExperienceModel(input: {
       phase: projection?.phase ?? null,
       summary: projection?.summary ?? operating?.guidance?.summary ?? payload.runtime_health?.message ?? "Runtime state is not yet available.",
       progress: projection?.progress ?? null,
-      running: projection?.running ?? runtimeStatus === "active" || runtimeStatus === "recovering",
+      running: projection?.running ?? (runtimeStatus === "active" || runtimeStatus === "recovering"),
       observed_at: projection?.observed_at ?? payload.runtime_health?.checked_at ?? null,
       sequence: projection?.sequence ?? null,
     },
