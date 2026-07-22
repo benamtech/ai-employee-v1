@@ -1,0 +1,15 @@
+{
+  "schema": "amtech.ui-variant.v1",
+  "id": "standard-reference",
+  "name": "Standard capability reference",
+  "description": "A neutral reference proving the complete employee experience contract without copying production layout.",
+  "contract_version": 1,
+  "entry": "index.tsx",
+  "conformance": "web_client_capable",
+  "status": "candidate",
+  "adapters": ["owner_web", "public_form", "boundless_website"],
+  "capabilities": ["conversation", "work", "attention", "approvals", "connections", "evidence", "outputs"],
+  "intentionally_omitted": [],
+  "features": [],
+  "packages": []
+}
