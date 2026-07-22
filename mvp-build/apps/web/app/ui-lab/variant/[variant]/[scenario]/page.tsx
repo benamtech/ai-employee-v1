@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
-import { uiFixtureMode } from "../../../../../_lib/ui-fixtures";
-import { FIXTURE_SCENARIOS, type FixtureScenarioId } from "../../../../../agent/[employeeId]/fixture-runtime";
-import { isUiVariantRegistryId } from "../../../../../_components/ui-variant/registry.generated";
-import { parseUiLabPreviewConfig } from "../../../../ui-lab-config";
+import { uiFixtureMode } from "../../../../_lib/ui-fixtures";
+import { FIXTURE_SCENARIOS, type FixtureScenarioId } from "../../../../agent/[employeeId]/fixture-runtime";
+import { isUiVariantRegistryId } from "../../../../_components/ui-variant/registry.generated";
+import { parseUiLabPreviewConfig } from "../../../ui-lab-config";
 import { VariantFixtureLabClient } from "./VariantFixtureLabClient";
 
 export const metadata = { title: "UI Variant Lab — AMTECH" };
