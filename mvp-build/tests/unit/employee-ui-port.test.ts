@@ -3,6 +3,7 @@ import {
   EmployeeUiPortContract,
   EmployeeUiPresentationOverride,
   OnboardingManifest,
+  resolveApprovedUiPreset,
   resolveEmployeeUiPort,
 } from "@amtech/shared";
 
@@ -25,6 +26,14 @@ describe("employee UI port and presentation strategies", () => {
       .toMatchObject({ theme_key: "studio", layout_key: "canvas", source: "profile_match" });
     expect(resolveEmployeeUiPort({ adapter_key: "owner_web", business_kind: "residential painting contractor" }).presentation)
       .toMatchObject({ theme_key: "field_notebook", layout_key: "conversation_workspace", source: "profile_match" });
+  });
+
+  it("has no approved assignment before deliberate promotion", () => {
+    expect(resolveApprovedUiPreset({
+      adapter_key: "owner_web",
+      profile_key: "marketing_agency",
+      business_kind: "marketing agency",
+    })).toBeNull();
   });
 
   it("turns onboarding brand facts into scoped design tokens", () => {
