@@ -69,9 +69,11 @@
         { "path": "docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md", "reason": "Architecture decision for port, adapter and strategy boundaries." },
         { "path": "ui-lab/README.md", "reason": "Collaborator operating manual." },
         { "path": "ui-lab/AGENTS.md", "reason": "Dedicated coding-agent onboarding and guardrails." },
-        { "path": "docs/ux/09-ui-lab-live-workbench.md", "reason": "Canonical UI Lab architecture and lifecycle documentation." },
+        { "path": "docs/ux/10-ui-lab-live-workbench.md", "reason": "Canonical UI Lab architecture and lifecycle documentation." },
+        { "path": "docs/ux/README.md", "reason": "Routes UX contributors through the current map and UI Lab workflow." },
         { "path": "../docs/ui/README.md", "reason": "Canonical UI documentation router updated to the workbench and preset system." },
-        { "path": "docs/ux/02-current-ux-system-map.md", "reason": "Current UX topology updated with port, adapter, workbench, canvas and promotion flow." }
+        { "path": "docs/ux/02-current-ux-system-map.md", "reason": "Current UX topology updated with port, adapter, workbench, canvas and promotion flow." },
+        { "path": "AGENTS.md", "reason": "Routes scoped UI work into the dedicated UI Lab agent onboarding file." }
       ]
     },
     {
