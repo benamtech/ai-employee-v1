@@ -4,57 +4,61 @@ Status: active folder-first workflow
 Repository: `benamtech/ai-employee-v1`  
 Branch: `agent/employee-ui-port-adapters-current`
 
-## The standard in one sentence
+## Standard
 
-**A UI variant is a directory that receives the complete neutral employee experience model and may invent any frontend appearance or interaction grammar without importing private application internals.**
+A UI variant is a directory that receives the complete neutral employee experience model and may invent any frontend appearance or interaction grammar without importing private application internals.
 
-Capability and information fidelity to the normal Web client are required. Visual, structural, and layout similarity are not.
+Capability and information fidelity to the normal Web client are required. Visual, structural, terminology, navigation, DOM, component, and layout similarity are not.
 
 ```text
 normal Web-client capabilities ⊂ UI variant capability space
 ```
 
-The production Web client is available as an optional `slots.reference_client` reference implementation. It is not the visual template.
+The production Web client is available only as optional `slots.reference_client` evidence. It is not the visual template.
 
-## Fastest complete path on Manjaro
+## Environment-adaptive setup contract
 
-Install system dependencies:
+The coding agent preparing the workspace must first inspect the real environment: operating system, architecture, shell, Git, Node.js, npm, browser tooling, repository state, permissions, and whether the checkout already contains work.
 
-```bash
-sudo pacman -Syu --needed git nodejs npm base-devel \
-  nss atk at-spi2-core cups libdrm dbus libxkbcommon mesa \
-  pango cairo alsa-lib gtk3 xdg-utils
+The setup method is environment-specific. The required end state is not:
+
+```text
+repository available locally
++ exact branch checked out
++ Node.js >= 20 and npm available
++ mvp-build dependencies installed
++ UI test browser available
++ UI variant doctor passing
++ collaborator launcher runnable
 ```
 
-Clone and prepare the exact branch:
+Safety invariants:
+
+- never run an unattended operating-system upgrade;
+- never overwrite, clean, reset, stash, or pull over user work;
+- do not assume macOS, Windows, Linux, WSL, a container, or a particular package manager;
+- use the host's normal installation mechanism and explain any machine-level change;
+- reuse working prerequisites rather than reinstalling them;
+- install or repair browser tooling only when evidence shows it is missing or broken;
+- preserve the exact branch and report any inability to fast-forward safely.
+
+The non-technical handoff prompt is maintained at repository root in `UI_VIBE_QUICKSTART.md`.
+
+## Canonical preparation and preflight
+
+Once the repository and runtime are ready, run from `mvp-build`:
 
 ```bash
-mkdir -p "$HOME/src"
-cd "$HOME/src"
-git clone https://github.com/benamtech/ai-employee-v1.git
-cd ai-employee-v1
-git fetch origin
-git switch --track origin/agent/employee-ui-port-adapters-current
-cd mvp-build
 npm install
 npm run local:browser-install
 node scripts/ui-variant.mjs doctor
 ```
 
-Install one coding agent:
+`npm run local:browser-install` is a bootstrap or repair operation, not a mandatory repeat-session operation. On later sessions, synchronize dependencies only when the lockfile or installed dependency state requires it, then run the doctor.
 
-```bash
-# Claude Code
-npm install -g @anthropic-ai/claude-code
-claude doctor
+## Launch
 
-# OR OpenAI Codex CLI
-npm install -g @openai/codex
-
-# OR install Cursor/Cursor CLI using Cursor's current installer
-```
-
-Launch the complete collaborator environment:
+Launch the complete collaborator environment from `mvp-build`:
 
 ```bash
 node scripts/ui-variant-collaborator.mjs my-first-variant --agent claude
@@ -68,37 +72,45 @@ node scripts/ui-variant-collaborator.mjs my-first-variant --agent cursor
 node scripts/ui-variant-collaborator.mjs my-first-variant --agent none
 ```
 
-The command:
+When the outer coding agent is already controlling the terminal, prefer `--agent none`; the outer agent should then continue inside the generated variant folder. This avoids launching a nested agent unnecessarily.
 
-1. creates the variant folder if it does not exist;
+Use another deterministic scenario when needed:
+
+```bash
+node scripts/ui-variant-collaborator.mjs my-first-variant --agent none --scenario contractor
+```
+
+The launcher:
+
+1. creates the variant folder if absent;
 2. writes local Claude, Codex, and Cursor instructions;
 3. validates the folder and manifest;
 4. generates literal lazy imports for Next.js;
-5. starts the UI Lab, TypeScript watchers, and variant watcher;
+5. starts UI Lab, TypeScript watchers, and the variant watcher;
 6. opens the exact live route;
-7. launches the selected coding agent with its working directory set to the variant folder.
+7. optionally launches the selected coding agent with the variant folder as its working directory.
 
-Default live route:
+Default route:
 
 ```text
 http://127.0.0.1:3000/ui-lab/variant/my-first-variant/clothing-ops
 ```
 
-Use another deterministic scenario:
+Gallery:
 
-```bash
-node scripts/ui-variant-collaborator.mjs my-first-variant --agent claude --scenario contractor
+```text
+http://127.0.0.1:3000/ui-lab/variants
 ```
 
 ## Folder boundary
 
-The agent may write only here:
+During an ordinary design session the agent may write only here:
 
 ```text
 apps/web/ui-variants/<variant-slug>/
 ```
 
-A new scaffold contains:
+A scaffold contains:
 
 ```text
 <variant-slug>/
@@ -112,9 +124,9 @@ A new scaffold contains:
 └── .cursor/rules/ui-variant.mdc
 ```
 
-The agent may add any local files and folders beneath that directory, including components, assets, workers, shaders, generated art data, and WASM glue. It must not modify files outside the directory during an ordinary design session.
+The agent may add local files and folders beneath that directory, including components, assets, workers, shaders, generated art data, and WASM glue. It must not modify files outside the directory during an ordinary design session.
 
-## What is standardized
+## Standardized boundary
 
 The boundary standardizes only:
 
@@ -128,16 +140,7 @@ The boundary standardizes only:
 - performance containment policy;
 - validation, evidence, and promotion gates.
 
-It does **not** standardize:
-
-- visual style;
-- page or component layout;
-- HTML element choices;
-- navigation grammar;
-- cards, panels, tabs, rails, chat bubbles, or dashboards;
-- CSS methodology;
-- terminology or information order;
-- whether the result resembles an application, publication, game, artwork, spatial canvas, website, terminal, or something else.
+It does not standardize visual style, page structure, HTML choices, navigation grammar, cards, panels, tabs, rails, chat bubbles, dashboards, CSS methodology, terminology, or information order.
 
 ## Neutral model
 
@@ -148,31 +151,13 @@ apps/web/ui-variants/contract.ts
 packages/shared/src/ui-variant.ts
 ```
 
-The model includes:
+The model includes identity, business/profile context, presentation context, runtime and recovery state, conversation, work loops and tasks, approvals and decisions, waiting and return conditions, changes, connections, abilities and capabilities, evidence, outputs, bounded interaction intents, and fixture/evidence metadata.
 
-```text
-identity
-business/profile context
-presentation context
-runtime and recovery state
-conversation
-work loops and tasks
-approvals and decisions
-waiting/return conditions
-changes
-connections
-abilities and capabilities
-evidence
-outputs
-bounded interaction intents
-fixture/evidence metadata
-```
+A variant may reorganize, transform, summarize, hide, or visually reinterpret these fields. It cannot fetch additional product data, import route internals, fabricate unavailable capabilities, or bypass the intent bridge.
 
-A variant can reorganize, transform, summarize, hide, or visually reinterpret these fields. It cannot fetch additional product data, import route internals, fabricate unavailable capabilities, or bypass the intent bridge.
+## Files to read
 
-## Files the agent should read
-
-Inside its folder:
+Inside the variant folder:
 
 ```text
 TASK.md
@@ -183,7 +168,7 @@ styles.module.css
 ../contract.ts
 ```
 
-For broader context, read-only:
+For broader read-only context:
 
 ```text
 UI_LAB_AGENT_ONBOARDING.md
@@ -198,82 +183,23 @@ packages/shared/src/operating-system.ts
 
 Do not edit the generated registry manually.
 
-## Three collaborator levels
+## Collaborator levels
 
-### Graphic designer or first-time vibe coder
+A first-time vibe coder should primarily edit `index.tsx`, `styles.module.css`, and `TASK.md`. Describe the desired composition, references, and what should feel different. Ask the agent to test one visual hypothesis at a time.
 
-Edit primarily:
-
-```text
-index.tsx
-styles.module.css
-TASK.md
-```
-
-Describe the desired composition in `TASK.md`, including references and what should feel different. Ask the agent to make one visual hypothesis at a time. Ignore Workers, WASM, Canvas, and advanced manifest features.
-
-Example prompt:
+Example creative prompt:
 
 ```text
 Read all local instruction files. Turn this employee experience into an expressive editorial control room for a small creative studio. It must not resemble a SaaS dashboard. Preserve all important work, waiting, approval, output, and recovery information. Work only in this folder. Check desktop and mobile and run the local validation command before stopping.
 ```
 
-### Product/UX designer who codes
+A product or UX designer may use local React components, CSS Modules, SVG, container queries, interaction state, and the intent bridge.
 
-Use local React components, CSS Modules, SVG, container queries, interaction state, and the intent bridge. Test multiple fixture scenarios and runtime states. The host is a query container, so components can use `@container` rather than assuming full viewport ownership.
+An advanced frontend or creative technologist may declare `canvas_2d`, `webgl`, `webgpu`, `web_worker`, `wasm`, `audio`, or `video` in the manifest. These tools do not grant product API, filesystem, storage, or network access.
 
-### Advanced frontend or creative technologist
+## Manifest and dependencies
 
-Manifest-declared features can include:
-
-```text
-canvas_2d
-webgl
-webgpu
-web_worker
-wasm
-audio
-video
-```
-
-These remain subject to the same neutral data and intent boundary. Heavy graphics should prefer Worker/OffscreenCanvas patterns where practical. WASM may provide computation, simulation, codecs, layout, or rendering support; it does not grant product API or filesystem access.
-
-## Manifest
-
-`variant.json` declares compatibility, not appearance:
-
-```json
-{
-  "schema": "amtech.ui-variant.v1",
-  "id": "my-first-variant",
-  "name": "My First Variant",
-  "summary": "A distinct employee experience experiment.",
-  "contract_version": 1,
-  "entry": "./index.tsx",
-  "status": "experiment",
-  "supported_adapters": ["owner_web"],
-  "capabilities": {
-    "required": ["identity", "runtime", "work"],
-    "optional": ["attention", "waiting", "outputs", "intents", "reference_client"],
-    "intentionally_omitted": []
-  },
-  "runtime_features": ["dom", "css", "svg"],
-  "dependencies": ["react"],
-  "isolation": "host_contained",
-  "performance": {
-    "containment": "layout_paint_style",
-    "content_visibility": "visible",
-    "initial_render": "lazy"
-  },
-  "production": {
-    "eligibility": "lab_only",
-    "requires_reference_client": false
-  },
-  "tags": ["experiment"]
-}
-```
-
-Adding package dependencies requires a maintainer decision. An ordinary variant agent must not change package files.
+`variant.json` declares compatibility, not appearance. Adding package dependencies requires a maintainer decision. An ordinary variant agent must not change package files.
 
 ## Commands
 
@@ -288,29 +214,16 @@ node scripts/ui-variant.mjs watch
 node scripts/ui-variant.mjs list
 node scripts/ui-variant.mjs prompt <slug>
 node scripts/ui-variant.mjs doctor
-```
-
-Run UI Lab normally:
-
-```bash
 npm run ui:lab:open
 ```
 
-Gallery:
-
-```text
-http://127.0.0.1:3000/ui-lab/variants
-```
-
-## Validation loop
-
-After each coherent iteration:
+After each coherent iteration, from inside the variant folder:
 
 ```bash
 node ../../../../scripts/ui-variant.mjs validate <variant-slug>
 ```
 
-From `mvp-build`, before review:
+Before review, from `mvp-build`:
 
 ```bash
 node scripts/ui-variant.mjs doctor
@@ -325,53 +238,21 @@ Test at minimum:
 - desktop and mobile;
 - active work;
 - waiting or needs-you state;
-- heartbeat interruption/stall;
+- heartbeat interruption or stall;
 - recovery;
-- empty/quiet state when applicable;
+- empty or quiet state when applicable;
 - keyboard focus and reduced motion;
 - long labels and multiple work items.
 
-## Safety and performance rules
+## Enforced safety and performance
 
-The validator rejects:
+The validator rejects imports escaping the folder except the public `../contract` module, undeclared packages, Node/server modules, direct network access, ambient browser storage, undeclared Worker or WASM use, invalid manifest identity, and stale generated registry state.
 
-- relative imports escaping the folder, except the public `../contract` module;
-- undeclared package imports;
-- Node/server modules;
-- direct network access;
-- ambient browser storage;
-- undeclared Worker or WASM use;
-- missing or mismatched manifest identity;
-- stale generated registry state.
-
-The host provides:
-
-- one lazy-loaded chunk per variant through literal imports;
-- React Suspense fallback;
-- CSS layout/style/paint containment according to the manifest;
-- an inline-size query container;
-- deterministic fixture data;
-- a bounded interaction bridge;
-- the production client as an optional slot.
-
-`content-visibility: auto` is opt-in for long surfaces, not a universal default.
+The host provides a lazy-loaded chunk per variant, React Suspense, CSS containment, an inline-size query container, deterministic fixture data, a bounded interaction bridge, and the production client as an optional slot.
 
 ## Promotion boundary
 
-A folder marked `experiment` or `lab_only` is not a product assignment.
-
-Promotion requires:
-
-```text
-manifest and import-boundary pass
-+ shared/Web TypeScript pass
-+ browser matrix evidence
-+ capability coverage review
-+ desktop/mobile/accessibility review
-+ clean exact Git SHA
-+ deliberate human approval
-+ explicit assignment
-```
+A folder marked `experiment` or `lab_only` is not a product assignment. Promotion requires manifest and import-boundary success, shared/Web TypeScript success, browser-matrix evidence, capability coverage review, desktop/mobile/accessibility review, a clean exact Git SHA, deliberate human approval, and explicit assignment.
 
 The variant agent must not promote or assign itself.
 
@@ -390,6 +271,7 @@ Runtime states exercised:
 Advanced browser features used:
 Commands run:
 Passing checks:
+Machine-level changes made during setup:
 Remaining uncertainty:
 No files outside the variant folder changed.
 No promotion or assignment performed.
