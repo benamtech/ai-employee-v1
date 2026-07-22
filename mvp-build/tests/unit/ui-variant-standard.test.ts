@@ -53,9 +53,9 @@ describe("UI variant standard", () => {
     expect(quickstart).not.toContain("ui-vibe.sh");
     expect(quickstart).not.toContain("sudo pacman");
 
-    expect(onboarding).toContain("Environment setup contract");
-    expect(onboarding).toContain("must not run package managers");
-    expect(onboarding).toContain("Repeat-session preflight");
+    expect(onboarding).toContain("Environment-adaptive setup contract");
+    expect(onboarding).toContain("never run an unattended operating-system upgrade");
+    expect(onboarding).toContain("bootstrap or repair operation, not a mandatory repeat-session operation");
   });
 
   it("validates every checked-in folder and generated registry", () => {
