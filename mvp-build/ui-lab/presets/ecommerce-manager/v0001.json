@@ -1,0 +1,43 @@
+{
+  "schema": "amtech.ui-lab-preset.v1",
+  "id": "ecommerce-manager",
+  "version": 1,
+  "preset_ref": "ecommerce-manager@v0001",
+  "display_name": "E-commerce operations canvas",
+  "description": "A dense but visual operations canvas for e-commerce employees, emphasizing orders, inventory, supplier decisions, fulfillment, margins, and owner approvals.",
+  "status": "draft",
+  "scenario_id": "clothing-ops",
+  "adapter_key": "owner_web",
+  "presentation": {
+    "theme_key": "studio",
+    "layout_key": "canvas",
+    "component_set_key": "compact",
+    "density": "dense",
+    "brand": {
+      "primary": "#6d28d9",
+      "secondary": "#0f766e",
+      "accent": "#ddd6fe",
+      "canvas": "#f5f3ff",
+      "surface": "#ffffff",
+      "ink": "#1f1633",
+      "muted": "#6f6680"
+    }
+  },
+  "targets": {
+    "profile_keys": ["ecommerce_manager", "shopify_operations"],
+    "business_kinds": ["e-commerce", "ecommerce", "online retail", "clothing company"],
+    "employee_types": ["ecommerce_manager_employee"]
+  },
+  "review_viewports": ["desktop", "tablet", "mobile"],
+  "tags": ["ecommerce", "shopify", "inventory", "operations", "owner-web"],
+  "notes": "Seed design only. Human visual review and promotion are required before assignment.",
+  "source": {
+    "git_sha": "b42ebc704534c85692810f73d2bb93af72b69ece",
+    "git_branch": "agent/employee-ui-port-adapters-current",
+    "dirty": false,
+    "changed_paths": [],
+    "reproducible": true,
+    "captured_at": "2026-07-22T06:00:00.000Z",
+    "captured_by": "AMTECH seed"
+  }
+}
