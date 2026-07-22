@@ -48,13 +48,28 @@ requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /openOwnerProjec
 requireText("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", /openOwnerProjectionController/, "talk_uses_controller");
 requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /compileOperatingProjection/, "workspace_uses_compiler");
 requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /registeredOperatingRegions/, "workspace_uses_registry");
-requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /ProductionFixtureLabClient/, "ui_lab_routes_to_thin_shell");
+
+requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /UiLabWorkbenchClient/, "ui_lab_routes_to_workbench");
+requireText("apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx", /<iframe[\s\S]*src=\{previewUrl\}/, "ui_lab_uses_isolated_preview_canvas");
+requireText("apps/web/app/ui-lab/preview/[scenario]/page.tsx", /ProductionFixtureLabClient/, "ui_lab_preview_routes_to_thin_shell");
 requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /<AgentSurface[\s\S]*fixturePayload=/, "ui_lab_reuses_production_surface");
-requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /fixture_demonstration|Fixture truth/, "ui_lab_evidence_class_explicit");
+requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /Fixture data|fixture projection|Fixture intent/, "ui_lab_evidence_class_explicit");
+requireText("apps/web/app/api/ui-lab/presets/route.ts", /AMTECH_UI_LAB_WRITE/, "ui_lab_repository_writes_explicitly_gated");
+requireText("apps/web/app/_lib/ui-lab-registry.server.ts", /open\(path, "wx"\)/, "ui_lab_preset_versions_write_exclusively");
+requireText("packages/shared/src/ui-lab-preset.ts", /Approved presets require reproducible clean Git source/, "ui_lab_promotion_requires_reproducible_source");
 
 forbidActive(/new EventSource\(/, "no_surface_local_eventsource", ["apps/web/app/agent/[employeeId]/owner-projection-controller.ts"]);
 forbidActive(/function fallbackOperatingState\(/, "no_active_fallback_compiler");
 forbidActive(/function deriveOperatingState\(/, "no_active_lab_compiler");
-requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /ProductionFixtureLabClient/, "legacy_lab_isolated_from_route");
 
-console.log(JSON.stringify({ status: "ok", checked_files: activeText.length, event_source_owner: "owner-projection-controller.ts", legacy_fixture_lab: "isolated_not_routed" }, null, 2));
+console.log(JSON.stringify({
+  status: "ok",
+  checked_files: activeText.length,
+  event_source_owner: "owner-projection-controller.ts",
+  ui_lab: {
+    workbench: "UiLabWorkbenchClient.tsx",
+    preview_route: "ui-lab/preview/[scenario]/page.tsx",
+    production_preview: "ProductionFixtureLabClient.tsx",
+    legacy_fixture_lab: "isolated_not_routed",
+  },
+}, null, 2));
