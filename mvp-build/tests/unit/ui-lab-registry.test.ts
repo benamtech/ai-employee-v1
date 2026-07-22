@@ -58,13 +58,17 @@ describe("UI Lab preset registry", () => {
     }).success).toBe(true);
   });
 
-  it("requires approved presets to carry human review and reproducible source when assigned", () => {
-    const invalidApproved = UiLabPreset.safeParse({
-      ...readJson("ui-lab/presets/marketing-agency/v0001.json"),
+  it("rejects approved presets without clean source, approving review, and validation evidence", () => {
+    const seed = readJson("ui-lab/presets/marketing-agency/v0001.json");
+    expect(UiLabPreset.safeParse({
+      ...seed,
       status: "approved",
-      source: { ...readJson("ui-lab/presets/marketing-agency/v0001.json").source, dirty: true, reproducible: false },
-    });
-    expect(invalidApproved.success).toBe(true);
-    expect(invalidApproved.success && invalidApproved.data.source.reproducible).toBe(false);
+      source: { ...seed.source, dirty: true, changed_paths: ["apps/web/example.tsx"], reproducible: false },
+    }).success).toBe(false);
+    expect(UiLabPreset.safeParse({
+      ...seed,
+      status: "approved",
+      human_review: { reviewer: "Owner", reviewed_at: new Date().toISOString(), decision: "approve" },
+    }).success).toBe(false);
   });
 });
