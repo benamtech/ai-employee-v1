@@ -11,6 +11,15 @@ Status: active
 5. For non-mechanical work, commit the next `decision/traceNNN/` checkpoint before implementation.
 6. Stop stronger claims on red exact-head evidence.
 
+For employee UI, presentation adapters, themes, layouts, component variants, fixture scenarios, UI presets, or UI Lab work, also read in order:
+
+1. `ui-lab/AGENTS.md`;
+2. `ui-lab/README.md`;
+3. `docs/ux/02-current-ux-system-map.md`;
+4. `docs/ux/10-ui-lab-live-workbench.md`;
+5. `docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md`;
+6. the active UI decision trace and exact source/tests/scripts it names.
+
 ## Compute-frontloaded loop
 
 ```text
@@ -55,6 +64,14 @@ Impact(f)=imports ∪ callers ∪ scripts ∪ tests ∪ workflows ∪ docs
 ## Authority and evidence
 
 `authority-map.json` is the machine router. Normative requirements, current topology, active plan, source, tests, workflows, and retained evidence remain distinct. CI is not provider proof; source is not deployment; fixtures are not production acceptance.
+
+For UI work, also keep these distinctions:
+
+- a theme/layout/component strategy is not an adapter;
+- a UI Lab preset is not a page fork;
+- a dirty draft is not reproducible or assignable;
+- a green browser test is not aesthetic approval;
+- a fixture screenshot is not live or production evidence.
 
 ## Finish
 
