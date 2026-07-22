@@ -41,17 +41,21 @@ describe("UI variant standard", () => {
     expect(launcher).toContain("launchAgent");
   });
 
-  it("provides a downloadable first-run script that asks only for the variant name", () => {
-    const bootstrap = readRepository("ui-vibe.sh");
+  it("provides environment-adaptive agent onboarding with a lightweight repeat path", () => {
     const quickstart = readRepository("UI_VIBE_QUICKSTART.md");
-    expect(bootstrap).toContain("sudo pacman -Syu --needed --noconfirm");
-    expect(bootstrap).toContain("git clone");
-    expect(bootstrap).toContain("npm run local:browser-install");
-    expect(bootstrap).toContain("npm install -g @anthropic-ai/claude-code");
-    expect(bootstrap).toContain('read -r -p "Variant name: " VARIANT');
-    expect(bootstrap).toContain("ui-variant-collaborator.mjs");
-    expect(quickstart).toContain("bash ~/Downloads/ui-vibe.sh");
-    expect(quickstart).toContain("only required creative input is the variant name");
+    const onboarding = read("UI_LAB_AGENT_ONBOARDING.md");
+
+    expect(quickstart).toContain("First inspect the operating system, architecture, shell");
+    expect(quickstart).toContain("Do not perform an unattended operating-system upgrade");
+    expect(quickstart).toContain("--agent none --scenario clothing-ops");
+    expect(quickstart).toContain("Every later session");
+    expect(quickstart).toContain("Do not repeat operating-system setup or browser installation");
+    expect(quickstart).not.toContain("ui-vibe.sh");
+    expect(quickstart).not.toContain("sudo pacman");
+
+    expect(onboarding).toContain("Environment setup contract");
+    expect(onboarding).toContain("must not run package managers");
+    expect(onboarding).toContain("Repeat-session preflight");
   });
 
   it("validates every checked-in folder and generated registry", () => {
