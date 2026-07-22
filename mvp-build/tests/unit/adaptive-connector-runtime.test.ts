@@ -41,7 +41,7 @@ describe("adaptive connector operating substrate", () => {
       tool_name: "lookup_work_order",
       category: "office",
     });
-    expect(action?.label).toBe("Acme Production Erp");
+    expect(action?.label).toBe("Acme Production ERP");
     expect(action?.self_service).toBe(false);
   });
 
