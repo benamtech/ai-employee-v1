@@ -1,0 +1,40 @@
+{
+  "schema": "amtech.task.v1",
+  "id": "AMTECH-PROMPT-COMPRESSION-001",
+  "title": "Repository-native prompt compression with phase-local manifold scheduling",
+  "goal": "Implement and evaluate a deterministic Prompt IR, phase-local activation frontier, invariant-hypergraph closure, model-tokenizer accounting, verified renderers, and adversarial benchmark so coding-agent prompts minimize token cost without weakening repository authority, exact commands, stop conditions, or evidence boundaries.",
+  "scope": [
+    "mvp-build/decision/engine",
+    "mvp-build/decision/benchmarks/prompt-compression",
+    "mvp-build/tests",
+    "mvp-build/research/prompt-compression"
+  ],
+  "constraints": [
+    "No product runtime changes",
+    "Compressed prompts remain derived projections; canonical authority and task capsules remain semantic owners",
+    "Token cost must be measured per tokenizer, never inferred from character count",
+    "Mandatory invariant hyperedges must remain complete",
+    "Symbolic and hypervector methods require baseline outperformance and held-out evaluation",
+    "No P0/P1/P2/P3 result promotes itself to P4"
+  ],
+  "success": [
+    "At least 50 percent median token reduction versus canonical prose on declared tokenizers",
+    "Zero critical invariant loss on adversarial benchmark cases",
+    "Deterministic expansion and digest verification",
+    "Non-inferior execution behavior established within a declared margin on available model runs",
+    "Exact-head repository tests and build pass"
+  ],
+  "falsifiers": [
+    "Any branch, worktree-preservation, authority, negation, exact-command, stop-condition, or evidence-boundary invariant is lost",
+    "Symbolic rendering increases token count or execution variance without compensating benefit",
+    "Hypervector retrieval fails to outperform deterministic diffusion or introduces authority drift",
+    "Compression/decompression overhead exceeds saved inference cost",
+    "The mathematical layer does not alter selection, proof obligations, or verification"
+  ],
+  "research_inputs": [
+    "arXiv:2602.20338",
+    "arXiv:2310.05736",
+    "arXiv:2310.06839",
+    "Chung et al., Physical Review X 8, 031003 (2018)"
+  ]
+}
