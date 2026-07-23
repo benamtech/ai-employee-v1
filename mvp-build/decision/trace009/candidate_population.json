@@ -1,0 +1,1285 @@
+{
+  "candidates": [
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "Two active EventSource controllers independently implement reconnect and scope validation."
+      ],
+      "files": [
+        "apps/web/app/agent/[employeeId]/owner-projection-controller.ts",
+        "apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx",
+        "apps/web/app/agent/[employeeId]/AgentSurface.tsx"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_authority_machine"
+      ],
+      "id": "A01",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.36,
+        "Experimentability": 0.78,
+        "IG": 0.95,
+        "Proof": 0.9,
+        "Reuse": 0.86,
+        "Risk": 0.3,
+        "Scope": 0.46,
+        "Unsupported": 0.12,
+        "Value": 0.88
+      },
+      "software_vertices": [
+        "ProjectionController",
+        "Talk",
+        "Workspace",
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Isolation"
+      ],
+      "title": "shared owner projection controller"
+    },
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "Manager compiler is canonical; AgentSurface fallback and UI Lab deriveOperatingState duplicate browser semantics."
+      ],
+      "files": [
+        "packages/shared/src/operating-projection.ts",
+        "apps/web/app/agent/[employeeId]/AgentSurface.tsx",
+        "apps/web/app/ui-lab/[scenario]/FixtureLabClient.tsx"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_experiment_conformance"
+      ],
+      "id": "A02",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.3,
+        "Experimentability": 0.82,
+        "IG": 0.92,
+        "Proof": 0.86,
+        "Reuse": 0.92,
+        "Risk": 0.28,
+        "Scope": 0.42,
+        "Unsupported": 0.1,
+        "Value": 0.83
+      },
+      "software_vertices": [
+        "SemanticCompiler",
+        "LayoutPlanner",
+        "SameTruth",
+        "UILab",
+        "Workspace"
+      ],
+      "title": "shared payload semantic compiler"
+    },
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "WorkObjectRenderer is singular, but UI Lab has a parallel card tree."
+      ],
+      "files": [
+        "apps/web/app/agent/[employeeId]/components/OperatingProjection.tsx",
+        "apps/web/app/agent/[employeeId]/AgentSurface.tsx",
+        "apps/web/app/ui-lab/[scenario]/FixtureLabClient.tsx"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_experiment_conformance"
+      ],
+      "id": "A03",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.35,
+        "Experimentability": 0.86,
+        "IG": 0.91,
+        "Proof": 0.88,
+        "Reuse": 0.93,
+        "Risk": 0.34,
+        "Scope": 0.48,
+        "Unsupported": 0.1,
+        "Value": 0.82
+      },
+      "software_vertices": [
+        "WorkResourceRenderer",
+        "ProductionRenderer",
+        "UILab",
+        "Workspace",
+        "RendererRegistry"
+      ],
+      "title": "production renderer extraction for UI Lab"
+    },
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "Manager compiler and Web host form one typed embedded boundary."
+      ],
+      "files": [
+        "scripts/verify-ui-architecture.mjs",
+        "tests/unit/ui-architecture-fitness.test.ts"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_executable_governance"
+      ],
+      "id": "A04",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.16,
+        "Experimentability": 0.65,
+        "IG": 0.82,
+        "Proof": 0.86,
+        "Reuse": 0.91,
+        "Risk": 0.18,
+        "Scope": 0.2,
+        "Unsupported": 0.08,
+        "Value": 0.74
+      },
+      "software_vertices": [
+        "EmbeddedViewCompiler",
+        "MCPApps",
+        "RendererRegistry",
+        "FitnessFunction",
+        "Isolation"
+      ],
+      "title": "embedded compiler and host fitness"
+    },
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "No single exhaustive case table covers all consequential UI transitions."
+      ],
+      "files": [
+        "validation/ui-state-machine-cases.json",
+        "tests/unit/ui-state-machine-conformance.test.ts"
+      ],
+      "hyperedges": [
+        "E_authority_machine",
+        "E_executable_governance"
+      ],
+      "id": "A05",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.24,
+        "Experimentability": 0.94,
+        "IG": 0.96,
+        "Proof": 0.98,
+        "Reuse": 0.84,
+        "Risk": 0.22,
+        "Scope": 0.32,
+        "Unsupported": 0.07,
+        "Value": 0.89
+      },
+      "software_vertices": [
+        "StateMachine",
+        "BehavioralTest",
+        "SnapshotAuthority",
+        "Approval",
+        "Effect",
+        "Ambiguity",
+        "RetryPermission",
+        "ReceiptOracle",
+        "ProofOracle",
+        "Isolation"
+      ],
+      "title": "consequential UI state-machine cases"
+    },
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "Fixture browser uses hand-authored cases and emits no uncovered set."
+      ],
+      "files": [
+        "scripts/generate-ui-coverage.mjs",
+        "validation/ui-presentation-coverage.json"
+      ],
+      "hyperedges": [
+        "E_experiment_conformance",
+        "E_executable_governance"
+      ],
+      "id": "A06",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.2,
+        "Experimentability": 0.96,
+        "IG": 0.88,
+        "Proof": 0.88,
+        "Reuse": 0.86,
+        "Risk": 0.16,
+        "Scope": 0.28,
+        "Unsupported": 0.08,
+        "Value": 0.73
+      },
+      "software_vertices": [
+        "BehavioralTest",
+        "UncoveredCombinations",
+        "PresentationPolicy",
+        "SameTruth",
+        "SameAuthority",
+        "SameActions"
+      ],
+      "title": "constrained presentation coverage"
+    },
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "No short exact-SHA ADR owns this consolidation."
+      ],
+      "files": [
+        "docs/adr/ADR-009-production-ui-projection-path.md"
+      ],
+      "hyperedges": [
+        "E_executable_governance"
+      ],
+      "id": "A07",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.08,
+        "Experimentability": 0.72,
+        "IG": 0.78,
+        "Proof": 0.76,
+        "Reuse": 0.83,
+        "Risk": 0.1,
+        "Scope": 0.14,
+        "Unsupported": 0.06,
+        "Value": 0.68
+      },
+      "software_vertices": [
+        "ADR",
+        "ReviewQuestion",
+        "FitnessFunction"
+      ],
+      "title": "computational ADR"
+    },
+    {
+      "batch": "direct",
+      "eligible": true,
+      "evidence": [
+        "PR36 has generator and Dockerfile but no verifier, compose switch, or exact-image workflow."
+      ],
+      "files": [
+        "infra/scripts/verify-release-manifest.mjs",
+        "infra/deploy/docker-compose.production.yml",
+        ".github/workflows/ws08-ws09-release.yml"
+      ],
+      "hyperedges": [
+        "E_release_closure"
+      ],
+      "id": "A08",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.3,
+        "Experimentability": 0.9,
+        "IG": 0.99,
+        "Proof": 0.98,
+        "Reuse": 0.91,
+        "Risk": 0.26,
+        "Scope": 0.38,
+        "Unsupported": 0.05,
+        "Value": 0.95
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact"
+      ],
+      "title": "exact release verifier and gateway identity"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "No runtime change."
+      ],
+      "files": [
+        "docs/adr/**"
+      ],
+      "hyperedges": [
+        "E_executable_governance"
+      ],
+      "id": "B01",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.05,
+        "Experimentability": 0.18,
+        "IG": 0.34,
+        "Proof": 0.15,
+        "Reuse": 0.3,
+        "Risk": 0.08,
+        "Scope": 0.08,
+        "Unsupported": 0.55,
+        "Value": 0.25
+      },
+      "software_vertices": [
+        "ADR"
+      ],
+      "title": "document only"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "Unbounded rewrite while WS08 unfinished."
+      ],
+      "files": [
+        "apps/web/**"
+      ],
+      "hyperedges": [
+        "E_release_closure",
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_authority_machine",
+        "E_experiment_conformance",
+        "E_executable_governance"
+      ],
+      "id": "B02",
+      "rejection_reason": "bounded implementation violation",
+      "score_vector": {
+        "Cost": 0.95,
+        "Experimentability": 0.7,
+        "IG": 0.74,
+        "Proof": 0.62,
+        "Reuse": 0.45,
+        "Risk": 0.94,
+        "Scope": 0.98,
+        "Unsupported": 0.48,
+        "Value": 0.82
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact",
+        "ProjectionController",
+        "SemanticCompiler",
+        "LayoutPlanner",
+        "RendererRegistry",
+        "WorkResourceRenderer",
+        "EmbeddedViewCompiler",
+        "Talk",
+        "Workspace",
+        "Review",
+        "MCPApps",
+        "Operator",
+        "UILab",
+        "ProjectionController",
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Approval",
+        "Effect",
+        "Ambiguity",
+        "RetryPermission",
+        "ReceiptOracle",
+        "ProofOracle",
+        "Isolation",
+        "SameTruth",
+        "SameAuthority",
+        "SameActions",
+        "PresentationPolicy",
+        "UILab",
+        "ProductionRenderer",
+        "StateMachine",
+        "BehavioralTest",
+        "ReviewQuestion",
+        "FitnessFunction",
+        "ADR",
+        "UncoveredCombinations"
+      ],
+      "title": "rewrite all UI"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "Divergence remains."
+      ],
+      "files": [
+        "apps/web/**"
+      ],
+      "hyperedges": [
+        "E_thin_surfaces"
+      ],
+      "id": "B03",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.1,
+        "Experimentability": 0.25,
+        "IG": 0.52,
+        "Proof": 0.28,
+        "Reuse": 0.4,
+        "Risk": 0.26,
+        "Scope": 0.12,
+        "Unsupported": 0.4,
+        "Value": 0.38
+      },
+      "software_vertices": [
+        "Talk",
+        "Workspace",
+        "ReviewQuestion"
+      ],
+      "title": "comments around duplicate streams"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "Explicitly forbidden parallel UI."
+      ],
+      "files": [
+        "apps/ui-lab/**"
+      ],
+      "hyperedges": [
+        "E_experiment_conformance"
+      ],
+      "id": "B04",
+      "rejection_reason": "no_parallel_runtime violation",
+      "score_vector": {
+        "Cost": 0.8,
+        "Experimentability": 0.76,
+        "IG": 0.48,
+        "Proof": 0.22,
+        "Reuse": 0.34,
+        "Risk": 0.86,
+        "Scope": 0.88,
+        "Unsupported": 0.46,
+        "Value": 0.4
+      },
+      "software_vertices": [
+        "UILab",
+        "PresentationPolicy"
+      ],
+      "title": "parallel UI Lab runtime"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "Loses experiment surface."
+      ],
+      "files": [
+        "apps/web/app/ui-lab/**"
+      ],
+      "hyperedges": [
+        "E_thin_surfaces"
+      ],
+      "id": "B05",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.16,
+        "Experimentability": 0.04,
+        "IG": 0.62,
+        "Proof": 0.4,
+        "Reuse": 0.2,
+        "Risk": 0.24,
+        "Scope": 0.28,
+        "Unsupported": 0.2,
+        "Value": 0.35
+      },
+      "software_vertices": [
+        "UILab"
+      ],
+      "title": "delete UI Lab"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "No durable oracle."
+      ],
+      "files": [
+        "infra/scripts/ui/fixture-browser.mjs"
+      ],
+      "hyperedges": [
+        "E_executable_governance"
+      ],
+      "id": "B06",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.16,
+        "Experimentability": 0.54,
+        "IG": 0.46,
+        "Proof": 0.28,
+        "Reuse": 0.3,
+        "Risk": 0.12,
+        "Scope": 0.2,
+        "Unsupported": 0.32,
+        "Value": 0.3
+      },
+      "software_vertices": [
+        "BehavioralTest"
+      ],
+      "title": "screenshots only"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "Planner already shared."
+      ],
+      "files": [
+        "packages/shared/src/operating-layout.ts"
+      ],
+      "hyperedges": [
+        "E_single_projection_path"
+      ],
+      "id": "B07",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.08,
+        "Experimentability": 0.55,
+        "IG": 0.4,
+        "Proof": 0.26,
+        "Reuse": 0.72,
+        "Risk": 0.08,
+        "Scope": 0.1,
+        "Unsupported": 0.28,
+        "Value": 0.32
+      },
+      "software_vertices": [
+        "LayoutPlanner"
+      ],
+      "title": "share planner only"
+    },
+    {
+      "batch": "counterfactual",
+      "eligible": false,
+      "evidence": [
+        "Can drift authority."
+      ],
+      "files": [
+        "apps/web/**"
+      ],
+      "hyperedges": [
+        "E_experiment_conformance"
+      ],
+      "id": "B08",
+      "rejection_reason": "experiment authority violation",
+      "score_vector": {
+        "Cost": 0.48,
+        "Experimentability": 0.88,
+        "IG": 0.55,
+        "Proof": 0.3,
+        "Reuse": 0.38,
+        "Risk": 0.62,
+        "Scope": 0.66,
+        "Unsupported": 0.34,
+        "Value": 0.52
+      },
+      "software_vertices": [
+        "PresentationPolicy",
+        "Talk",
+        "Workspace",
+        "UILab"
+      ],
+      "title": "component-local experiments"
+    },
+    {
+      "batch": "ws08",
+      "eligible": true,
+      "evidence": [
+        "Closes unfinished release identity only."
+      ],
+      "files": [
+        "infra/**"
+      ],
+      "hyperedges": [
+        "E_release_closure"
+      ],
+      "id": "C01",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.28,
+        "Experimentability": 0.88,
+        "IG": 0.98,
+        "Proof": 0.98,
+        "Reuse": 0.9,
+        "Risk": 0.22,
+        "Scope": 0.34,
+        "Unsupported": 0.04,
+        "Value": 0.94
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact"
+      ],
+      "title": "release closure only"
+    },
+    {
+      "batch": "ws08",
+      "eligible": true,
+      "evidence": [
+        "Release first with guard only."
+      ],
+      "files": [
+        "infra/**",
+        "scripts/verify-ui-architecture.mjs"
+      ],
+      "hyperedges": [
+        "E_release_closure",
+        "E_executable_governance"
+      ],
+      "id": "C02",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.24,
+        "Experimentability": 0.78,
+        "IG": 0.96,
+        "Proof": 0.94,
+        "Reuse": 0.91,
+        "Risk": 0.2,
+        "Scope": 0.3,
+        "Unsupported": 0.05,
+        "Value": 0.91
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact",
+        "FitnessFunction",
+        "ADR"
+      ],
+      "title": "release plus UI fitness"
+    },
+    {
+      "batch": "ws08",
+      "eligible": true,
+      "evidence": [
+        "Release plus active authority consolidation."
+      ],
+      "files": [
+        "infra/**",
+        "apps/web/**"
+      ],
+      "hyperedges": [
+        "E_release_closure",
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_authority_machine"
+      ],
+      "id": "C03",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.44,
+        "Experimentability": 0.8,
+        "IG": 0.95,
+        "Proof": 0.95,
+        "Reuse": 0.88,
+        "Risk": 0.42,
+        "Scope": 0.56,
+        "Unsupported": 0.08,
+        "Value": 0.93
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact",
+        "ProjectionController",
+        "Talk",
+        "Workspace",
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Isolation"
+      ],
+      "title": "release plus shared stream"
+    },
+    {
+      "batch": "ws08",
+      "eligible": true,
+      "evidence": [
+        "Bounded production architecture correction."
+      ],
+      "files": [
+        "infra/**",
+        "packages/shared/**",
+        "apps/web/app/ui-lab/**"
+      ],
+      "hyperedges": [
+        "E_release_closure",
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_experiment_conformance"
+      ],
+      "id": "C04",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.42,
+        "Experimentability": 0.88,
+        "IG": 0.94,
+        "Proof": 0.94,
+        "Reuse": 0.94,
+        "Risk": 0.38,
+        "Scope": 0.54,
+        "Unsupported": 0.08,
+        "Value": 0.92
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact",
+        "SemanticCompiler",
+        "LayoutPlanner",
+        "WorkResourceRenderer",
+        "ProductionRenderer",
+        "UILab"
+      ],
+      "title": "release plus canonical fixture projection"
+    },
+    {
+      "batch": "ws08",
+      "eligible": true,
+      "evidence": [
+        "Executable evidence while closing release identity."
+      ],
+      "files": [
+        "infra/**",
+        "validation/**",
+        "tests/**"
+      ],
+      "hyperedges": [
+        "E_release_closure",
+        "E_executable_governance"
+      ],
+      "id": "C05",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.3,
+        "Experimentability": 0.91,
+        "IG": 0.97,
+        "Proof": 0.98,
+        "Reuse": 0.9,
+        "Risk": 0.25,
+        "Scope": 0.4,
+        "Unsupported": 0.05,
+        "Value": 0.9
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact",
+        "StateMachine",
+        "BehavioralTest",
+        "ReviewQuestion",
+        "FitnessFunction",
+        "ADR",
+        "UncoveredCombinations"
+      ],
+      "title": "release plus conformance harness"
+    },
+    {
+      "batch": "ws08",
+      "eligible": false,
+      "evidence": [
+        "Known duplicate controller remains."
+      ],
+      "files": [
+        "infra/**"
+      ],
+      "hyperedges": [
+        "E_release_closure"
+      ],
+      "id": "C06",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.1,
+        "Experimentability": 0.28,
+        "IG": 0.66,
+        "Proof": 0.7,
+        "Reuse": 0.74,
+        "Risk": 0.08,
+        "Scope": 0.12,
+        "Unsupported": 0.18,
+        "Value": 0.62
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "signed_manifest",
+        "independent_verifier"
+      ],
+      "title": "defer UI until WS08 green"
+    },
+    {
+      "batch": "ws08",
+      "eligible": false,
+      "evidence": [
+        "WS09 groundwork, not blocker."
+      ],
+      "files": [
+        "infra/**",
+        "apps/web/**"
+      ],
+      "hyperedges": [
+        "E_experiment_conformance"
+      ],
+      "id": "C07",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.55,
+        "Experimentability": 0.78,
+        "IG": 0.52,
+        "Proof": 0.45,
+        "Reuse": 0.54,
+        "Risk": 0.52,
+        "Scope": 0.68,
+        "Unsupported": 0.36,
+        "Value": 0.58
+      },
+      "software_vertices": [
+        "Operator",
+        "PresentationPolicy"
+      ],
+      "title": "capacity UI telemetry"
+    },
+    {
+      "batch": "ws08",
+      "eligible": false,
+      "evidence": [
+        "Depends on missing release packet."
+      ],
+      "files": [
+        "apps/manager/**"
+      ],
+      "hyperedges": [
+        "E_thin_surfaces",
+        "E_authority_machine"
+      ],
+      "id": "C08",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.52,
+        "Experimentability": 0.62,
+        "IG": 0.64,
+        "Proof": 0.64,
+        "Reuse": 0.7,
+        "Risk": 0.48,
+        "Scope": 0.62,
+        "Unsupported": 0.28,
+        "Value": 0.72
+      },
+      "software_vertices": [
+        "Operator",
+        "ReceiptOracle",
+        "ProofOracle",
+        "signed_manifest"
+      ],
+      "title": "operator release projection"
+    },
+    {
+      "batch": "recombination",
+      "eligible": true,
+      "evidence": [
+        "A08+C01."
+      ],
+      "files": [
+        "infra/scripts/verify-release-manifest.mjs",
+        "infra/deploy/docker-compose.production.yml",
+        ".github/workflows/ws08-ws09-release.yml"
+      ],
+      "hyperedges": [
+        "E_release_closure"
+      ],
+      "id": "D01",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.28,
+        "Experimentability": 0.92,
+        "IG": 0.99,
+        "Proof": 0.99,
+        "Reuse": 0.93,
+        "Risk": 0.22,
+        "Scope": 0.34,
+        "Unsupported": 0.03,
+        "Value": 0.96
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact"
+      ],
+      "title": "exact release closure transaction"
+    },
+    {
+      "batch": "recombination",
+      "eligible": true,
+      "evidence": [
+        "A01 plus authority state coverage."
+      ],
+      "files": [
+        "apps/web/app/agent/[employeeId]/owner-projection-controller.ts",
+        "apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx",
+        "apps/web/app/agent/[employeeId]/AgentSurface.tsx"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_authority_machine"
+      ],
+      "id": "D02",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.38,
+        "Experimentability": 0.84,
+        "IG": 0.98,
+        "Proof": 0.96,
+        "Reuse": 0.92,
+        "Risk": 0.36,
+        "Scope": 0.5,
+        "Unsupported": 0.05,
+        "Value": 0.91
+      },
+      "software_vertices": [
+        "ProjectionController",
+        "Talk",
+        "Workspace",
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Isolation",
+        "RetryPermission"
+      ],
+      "title": "single owner projection controller"
+    },
+    {
+      "batch": "recombination",
+      "eligible": true,
+      "evidence": [
+        "A02+A03+A04."
+      ],
+      "files": [
+        "packages/shared/src/operating-projection.ts",
+        "apps/web/app/agent/[employeeId]/components/OperatingProjection.tsx",
+        "apps/web/app/ui-lab/[scenario]/FixtureLabClient.tsx"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_experiment_conformance"
+      ],
+      "id": "D03",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.44,
+        "Experimentability": 0.92,
+        "IG": 0.98,
+        "Proof": 0.96,
+        "Reuse": 0.96,
+        "Risk": 0.4,
+        "Scope": 0.56,
+        "Unsupported": 0.05,
+        "Value": 0.94
+      },
+      "software_vertices": [
+        "SemanticCompiler",
+        "LayoutPlanner",
+        "RendererRegistry",
+        "WorkResourceRenderer",
+        "ProductionRenderer",
+        "EmbeddedViewCompiler",
+        "Talk",
+        "Workspace",
+        "Review",
+        "MCPApps",
+        "Operator",
+        "UILab",
+        "SameTruth",
+        "SameAuthority",
+        "SameActions",
+        "PresentationPolicy"
+      ],
+      "title": "canonical compiler and thin UI Lab"
+    },
+    {
+      "batch": "recombination",
+      "eligible": true,
+      "evidence": [
+        "A05+A06+A07."
+      ],
+      "files": [
+        "validation/ui-state-machine-cases.json",
+        "scripts/generate-ui-coverage.mjs",
+        "scripts/verify-ui-architecture.mjs",
+        "tests/unit/ui-state-machine-conformance.test.ts",
+        "docs/adr/ADR-009-production-ui-projection-path.md"
+      ],
+      "hyperedges": [
+        "E_authority_machine",
+        "E_executable_governance"
+      ],
+      "id": "D04",
+      "rejection_reason": null,
+      "score_vector": {
+        "Cost": 0.26,
+        "Experimentability": 0.97,
+        "IG": 0.98,
+        "Proof": 0.99,
+        "Reuse": 0.94,
+        "Risk": 0.2,
+        "Scope": 0.36,
+        "Unsupported": 0.03,
+        "Value": 0.88
+      },
+      "software_vertices": [
+        "StateMachine",
+        "BehavioralTest",
+        "ReviewQuestion",
+        "FitnessFunction",
+        "ADR",
+        "UncoveredCombinations",
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Approval",
+        "Effect",
+        "Ambiguity",
+        "RetryPermission",
+        "ReceiptOracle",
+        "ProofOracle",
+        "Isolation"
+      ],
+      "title": "executable conformance and ADR"
+    },
+    {
+      "batch": "recombination",
+      "eligible": false,
+      "evidence": [
+        "Unbounded."
+      ],
+      "files": [
+        "apps/**",
+        "infra/**"
+      ],
+      "hyperedges": [
+        "E_release_closure",
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_authority_machine",
+        "E_experiment_conformance",
+        "E_executable_governance"
+      ],
+      "id": "D05",
+      "rejection_reason": "bounded implementation violation",
+      "score_vector": {
+        "Cost": 0.94,
+        "Experimentability": 0.95,
+        "IG": 0.9,
+        "Proof": 0.86,
+        "Reuse": 0.68,
+        "Risk": 0.92,
+        "Scope": 0.99,
+        "Unsupported": 0.3,
+        "Value": 0.96
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact",
+        "ProjectionController",
+        "SemanticCompiler",
+        "LayoutPlanner",
+        "RendererRegistry",
+        "WorkResourceRenderer",
+        "EmbeddedViewCompiler",
+        "Talk",
+        "Workspace",
+        "Review",
+        "MCPApps",
+        "Operator",
+        "UILab",
+        "ProjectionController",
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Approval",
+        "Effect",
+        "Ambiguity",
+        "RetryPermission",
+        "ReceiptOracle",
+        "ProofOracle",
+        "Isolation",
+        "SameTruth",
+        "SameAuthority",
+        "SameActions",
+        "PresentationPolicy",
+        "UILab",
+        "ProductionRenderer",
+        "StateMachine",
+        "BehavioralTest",
+        "ReviewQuestion",
+        "FitnessFunction",
+        "ADR",
+        "UncoveredCombinations"
+      ],
+      "title": "full rewrite plus release"
+    },
+    {
+      "batch": "recombination",
+      "eligible": false,
+      "evidence": [
+        "Duplicates remain."
+      ],
+      "files": [
+        "infra/**",
+        "scripts/**"
+      ],
+      "hyperedges": [
+        "E_release_closure",
+        "E_executable_governance"
+      ],
+      "id": "D06",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.2,
+        "Experimentability": 0.74,
+        "IG": 0.91,
+        "Proof": 0.92,
+        "Reuse": 0.9,
+        "Risk": 0.16,
+        "Scope": 0.24,
+        "Unsupported": 0.06,
+        "Value": 0.87
+      },
+      "software_vertices": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact",
+        "FitnessFunction",
+        "ADR"
+      ],
+      "title": "release plus guard only"
+    },
+    {
+      "batch": "recombination",
+      "eligible": false,
+      "evidence": [
+        "Controller remains duplicated."
+      ],
+      "files": [
+        "packages/shared/**",
+        "apps/web/**"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_experiment_conformance"
+      ],
+      "id": "D07",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.3,
+        "Experimentability": 0.88,
+        "IG": 0.84,
+        "Proof": 0.8,
+        "Reuse": 0.92,
+        "Risk": 0.26,
+        "Scope": 0.38,
+        "Unsupported": 0.1,
+        "Value": 0.76
+      },
+      "software_vertices": [
+        "SemanticCompiler",
+        "LayoutPlanner",
+        "RendererRegistry",
+        "WorkResourceRenderer",
+        "EmbeddedViewCompiler",
+        "UILab"
+      ],
+      "title": "compiler only"
+    },
+    {
+      "batch": "recombination",
+      "eligible": false,
+      "evidence": [
+        "Lab remains parallel."
+      ],
+      "files": [
+        "apps/web/**"
+      ],
+      "hyperedges": [
+        "E_single_projection_path",
+        "E_thin_surfaces",
+        "E_authority_machine"
+      ],
+      "id": "D08",
+      "rejection_reason": "mandatory edges incomplete",
+      "score_vector": {
+        "Cost": 0.3,
+        "Experimentability": 0.76,
+        "IG": 0.86,
+        "Proof": 0.84,
+        "Reuse": 0.88,
+        "Risk": 0.24,
+        "Scope": 0.4,
+        "Unsupported": 0.1,
+        "Value": 0.79
+      },
+      "software_vertices": [
+        "ProjectionController",
+        "Talk",
+        "Workspace",
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Isolation"
+      ],
+      "title": "controller only"
+    }
+  ],
+  "count": 32,
+  "freeze_after": 24,
+  "schema": "trace009.population.v1"
+}

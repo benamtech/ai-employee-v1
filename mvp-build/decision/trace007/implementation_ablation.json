@@ -1,0 +1,28 @@
+{
+  "schema": "amtech.trace007.implementation-ablation.v1",
+  "status": "unestablished",
+  "question": "Did graph or diversity terms improve the final implementation and proof yield over equal-feasibility simpler baselines?",
+  "arms": [
+    "full",
+    "no_graph",
+    "no_diversity",
+    "evidence_baseline"
+  ],
+  "required_common_domain": "selection_comparison.json:feasible_domain",
+  "required_independent_outcomes": {
+    "defects_discovered": null,
+    "complete_invariant_proof_obligations": null,
+    "implementation_coherence": null,
+    "review_defects": null,
+    "unnecessary_scope": null,
+    "executable_verification_yield": null
+  },
+  "current_findings": {
+    "candidate_graph_terms": "descriptive",
+    "software_invariant_graph_terms": "descriptive",
+    "diversity_terms": "selection-influencing",
+    "causal_improvement": "unestablished"
+  },
+  "promotion_rule": "No term becomes causal from ranking differences, objective deltas, candidate-edge touch, or software-node representation alone. Independent implementation and proof outcomes must favor the term under equal feasibility.",
+  "non_claim": "Trace007 may explain and reproduce selection influence. It currently does not prove that its mathematics produced a better patch than the evidence-and-invariants baseline."
+}

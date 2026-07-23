@@ -61,10 +61,18 @@ describe("WS-02 hardening regressions", () => {
     expect(source).not.toContain("authority_version_matches: true");
   });
 
-  it("requires the generated Manager server to reject stale projected actions", async () => {
-    const source = await readFile("apps/manager/scripts/patch-production-stream.mjs", "utf8");
-    expect(source).toContain("protocol_assignment_mismatch");
-    expect(source).toContain("protocol_authority_version_stale");
-    expect(source).toContain("protocol_authority_incomplete");
+  it("rejects stale projected owner actions through one typed current-authority gate", async () => {
+    const [server, authority] = await Promise.all([
+      readFile("apps/manager/src/server.ts", "utf8"),
+      readFile("apps/manager/src/lib/protocol-projection-authority.ts", "utf8"),
+    ]);
+    expect(server).toContain("validateProjectedProtocolAuthority");
+    expect(server).toContain("loadCurrentAssignmentAuthorityVersion");
+    expect(authority).toContain("protocol_assignment_mismatch");
+    expect(authority).toContain("protocol_authority_version_stale");
+    expect(authority).toContain("protocol_authority_incomplete");
+    expect(authority).toContain('from("authority_versions")');
+    expect(authority).toContain('eq("scope_type", "employee_assignment")');
+    expect(authority).toContain('is("revoked_at", null)');
   });
 });

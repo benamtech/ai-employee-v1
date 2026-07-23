@@ -1,0 +1,75 @@
+{
+  "schema": "amtech.ws09-capacity-groundwork.v1",
+  "status": "groundwork_only",
+  "mvp_target": {
+    "linux_hosts": 1,
+    "memory_gib": 64,
+    "employee_runtime_range": [25, 30]
+  },
+  "future_pressure_only": {
+    "employee_runtime_range": [200, 500],
+    "implemented": false,
+    "accepted": false
+  },
+  "required_measurements": {
+    "host": ["cpu_count", "load_1m", "total_memory_bytes", "free_memory_bytes"],
+    "runtime_per_employee": ["running", "restart_count", "pss_kb", "fd_count", "log_bytes", "dns_status"],
+    "queue_per_employee": ["depth", "oldest_age_ms", "throughput_per_minute"],
+    "sse_per_employee": ["active_connections", "disconnects", "reconnects", "buffered_events"],
+    "connections": ["database_total", "database_by_state", "manager_open_sockets", "gateway_open_sockets"]
+  },
+  "fairness": {
+    "metrics": ["resource_distribution_jain_index", "pss_max_to_median", "queue_max_to_median", "sse_reconnect_max_to_median"],
+    "minimum_jain_index": 0.75,
+    "maximum_skew_ratio": 4.0,
+    "meaning": "Descriptor for noisy-neighbor detection. It is not a capacity guarantee."
+  },
+  "saturation_states": {
+    "unmeasured": "one or more required telemetry classes are absent",
+    "unproven": "required telemetry exists but no clean measured tier reaches 25 runtimes",
+    "healthy_candidate": "a clean 25-30 tier exists and all declared thresholds pass",
+    "watch": "no hard stop is crossed but one or more warning thresholds are crossed",
+    "saturated": "a hard stop threshold is crossed"
+  },
+  "thresholds": {
+    "minimum_free_memory_ratio": 0.20,
+    "maximum_load_per_cpu": 0.80,
+    "maximum_queue_depth": 20,
+    "maximum_queue_oldest_age_ms": 60000,
+    "maximum_sse_reconnect_ratio": 0.10,
+    "maximum_database_connections": 120,
+    "maximum_buffered_sse_events_per_employee": 100
+  },
+  "pilot_stop": {
+    "authority": "platform_operator",
+    "triggers": [
+      "saturation_state=saturated",
+      "clean_tier_below_25",
+      "free_memory_ratio_below_threshold",
+      "queue_oldest_age_above_threshold",
+      "SSE_reconnect_ratio_above_threshold",
+      "fairness_below_threshold",
+      "database_connections_above_threshold",
+      "cross_employee_isolation_failure",
+      "false_health_or_unrefindable_proof"
+    ],
+    "actions": [
+      "stop new employee activation",
+      "preserve current durable work",
+      "capture diagnostics",
+      "repair or reconcile ambiguous work",
+      "run whole-release rollback when release-related",
+      "offer customer exit and data export when required"
+    ],
+    "rollback_command": "npm run deploy:rollback",
+    "customer_exit_state": "available",
+    "incident_owner_required": true
+  },
+  "evidence_nonpromotion": [
+    "schema is not measurement",
+    "synthetic load is not representative capacity acceptance",
+    "local Docker evidence is not target-host evidence",
+    "25-30 runtime evidence does not establish 200-500 runtime capacity",
+    "capacity evidence does not establish pilot or production acceptance"
+  ]
+}

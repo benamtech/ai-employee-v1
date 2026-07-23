@@ -119,12 +119,17 @@ describe("AMTECH runtime design tokens", () => {
 });
 
 describe("adaptive operating surface", () => {
-  it("uses stable intents and operating primitives without a fixed tab shell", async () => {
+  it("uses stable intents and operating primitives through the single projection controller without a fixed tab shell", async () => {
     const surface = await source("apps/web/app/agent/[employeeId]/AgentSurface.tsx");
+    const controller = await source("apps/web/app/agent/[employeeId]/owner-projection-controller.ts");
     const contracts = await source("packages/shared/src/operating-system.ts");
-    for (const marker of ["EventSource", "snapshot", "intent_id", "OperatingSurfaceState", "ActiveSave", "DelegatedWorkUnit", "OperatingEvidence"]) {
+    for (const marker of ["intent_id", "OperatingSurfaceState", "ActiveSave", "DelegatedWorkUnit", "OperatingEvidence"]) {
       expect(surface + contracts).toContain(marker);
     }
+    for (const marker of ["EventSource", "snapshot", "installOwnerSnapshot", "validateScopedFrame"]) {
+      expect(controller).toContain(marker);
+    }
+    expect(surface).toContain("openOwnerProjectionController");
     expect(surface).toContain("WorkObjectRenderer");
     expect(surface).not.toContain("type PrimaryView");
     expect(surface).not.toContain('role="tablist"');

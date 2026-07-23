@@ -30,6 +30,45 @@ async function existingByKey(db: SupabaseClient, key: string, assignmentId?: str
   return orThrow(await query.maybeSingle(), "employee_turn_jobs.by_key") as any | null;
 }
 
+/**
+ * Migration 0053 added assignment scope to durable turn jobs after the original
+ * claim RPC signatures had already been applied. Migration 0073 returns that
+ * scope directly. During a rolling deploy against a pre-0073 database, recover
+ * only from the exact durable claimed row and fail closed on any mismatch.
+ */
+async function hydrateClaimedTurnScope(db: SupabaseClient, row: any): Promise<ClaimedTurnJob> {
+  const claimed = { ...row, input: row?.input ?? {} } as ClaimedTurnJob;
+  if (claimed.kind === "public_estimator_chat" || claimed.assignment_id) return claimed;
+  const durable = orThrow(
+    await db.from("employee_turn_jobs")
+      .select("id,account_id,employee_id,assignment_id,kind")
+      .eq("id", claimed.id)
+      .maybeSingle(),
+    "employee_turn_jobs.claim_scope_hydration",
+  ) as {
+    id?: string;
+    account_id?: string | null;
+    employee_id?: string;
+    assignment_id?: string | null;
+    kind?: EmployeeTurnKind;
+  } | null;
+  if (
+    !durable?.id ||
+    durable.id !== claimed.id ||
+    durable.employee_id !== claimed.employee_id ||
+    durable.kind !== claimed.kind ||
+    (claimed.account_id && durable.account_id && claimed.account_id !== durable.account_id)
+  ) {
+    throw new Error("employee_turn_claim_scope_mismatch");
+  }
+  if (!durable.assignment_id) throw new Error("employee_turn_claim_assignment_missing");
+  return {
+    ...claimed,
+    account_id: durable.account_id ?? claimed.account_id ?? null,
+    assignment_id: durable.assignment_id,
+  };
+}
+
 export async function enqueueEmployeeTurn(db: SupabaseClient, input: EmployeeTurnInput): Promise<{ id: string; duplicate: boolean; status: string; output?: Record<string, unknown> }> {
   const id = newId(ID_PREFIX.turnJob);
   const ins = await insertDedup(
@@ -66,7 +105,7 @@ export async function claimNextEmployeeTurn(db: SupabaseClient, employeeId: stri
     ) as any[] | null;
     const row = rows?.[0];
     if (!row) return null;
-    const claimed = { ...row, input: row.input ?? {} } as ClaimedTurnJob;
+    const claimed = await hydrateClaimedTurnScope(db, row);
     if (assignmentId && claimed.assignment_id !== assignmentId) {
       await releaseEmployeeTurn(db, claimed);
       return null;
@@ -86,7 +125,7 @@ export async function claimNextEmployeeTurn(db: SupabaseClient, employeeId: stri
     db.from("employee_turn_jobs").update({ status: "running", attempts: Number(row.attempts ?? 0) + 1, lease_token: leaseToken }).eq("id", row.id),
     "employee_turn_jobs.claim.fake_update",
   );
-  return { ...row, attempts: Number(row.attempts ?? 0) + 1, lease_token: leaseToken, input: row.input ?? {} } as ClaimedTurnJob;
+  return hydrateClaimedTurnScope(db, { ...row, attempts: Number(row.attempts ?? 0) + 1, lease_token: leaseToken, input: row.input ?? {} });
 }
 
 export async function claimAnyQueuedTurn(db: SupabaseClient): Promise<ClaimedTurnJob | null> {
@@ -100,7 +139,7 @@ export async function claimAnyQueuedTurn(db: SupabaseClient): Promise<ClaimedTur
       "employee_turn_jobs.claim_any",
     ) as any[] | null;
     const row = rows?.[0];
-    return row ? { ...row, input: row.input ?? {} } as ClaimedTurnJob : null;
+    return row ? hydrateClaimedTurnScope(db, row) : null;
   }
   const row = orThrow(
     await db.from("employee_turn_jobs").select("*").eq("status", "queued").order("created_at", { ascending: true }).limit(1).maybeSingle(),
@@ -112,7 +151,7 @@ export async function claimAnyQueuedTurn(db: SupabaseClient): Promise<ClaimedTur
     db.from("employee_turn_jobs").update({ status: "running", attempts: Number(row.attempts ?? 0) + 1, lease_token: leaseToken }).eq("id", row.id),
     "employee_turn_jobs.claim_any.fake_update",
   );
-  return { ...row, attempts: Number(row.attempts ?? 0) + 1, lease_token: leaseToken, input: row.input ?? {} } as ClaimedTurnJob;
+  return hydrateClaimedTurnScope(db, { ...row, attempts: Number(row.attempts ?? 0) + 1, lease_token: leaseToken, input: row.input ?? {} });
 }
 
 export async function releaseEmployeeTurn(db: SupabaseClient, job: ClaimedTurnJob): Promise<void> {

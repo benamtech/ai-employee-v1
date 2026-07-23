@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 const queuedTurn = (over: Record<string, any> = {}) => ({
-  id: "turn_q", account_id: "acct_1", employee_id: "emp_1", kind: "owner_sms_chat",
+  id: "turn_q", account_id: "acct_1", employee_id: "emp_1", assignment_id: "asn_1", kind: "owner_sms_chat",
   idempotency_key: "twilio:SMx", status: "queued", input: { body: "Can you do Tuesday?", channel: "sms" },
   output: {}, attempts: 0, lease_token: null, lease_expires_at: null, run_id: "run_queued",
   created_at: "2026-07-03T00:00:00.000Z", ...over,
@@ -51,7 +51,7 @@ describe("turn-drain drainQueuedTurns", () => {
     expect(await drainQueuedTurns(drainDb([]).asClient())).toEqual([]);
   });
 
-  it("executes a queued owner turn and delivers the reply via the router", async () => {
+  it("executes a scoped queued owner turn and delivers the reply via the router", async () => {
     const db = drainDb([queuedTurn()]);
     const results = await drainQueuedTurns(db.asClient());
     expect(results).toEqual([{ job_id: "turn_q", employee_id: "emp_1", status: "delivered" }]);
@@ -60,7 +60,9 @@ describe("turn-drain drainQueuedTurns", () => {
     expect(db.tables.employee_turn_jobs[0].output.message_id).toMatch(/^msg_/);
     expect(db.tables.employee_messages).toHaveLength(1);
     expect(db.tables.employee_messages[0]).toMatchObject({
+      account_id: "acct_1",
       employee_id: "emp_1",
+      assignment_id: "asn_1",
       direction: "to_owner",
       source: "employee",
       channel: "sms",
@@ -108,7 +110,7 @@ describe("turn-drain drainQueuedTurns", () => {
 });
 
 const runningTurn = (over: Record<string, any> = {}) => ({
-  id: "turn_r", account_id: "acct_1", employee_id: "emp_1", kind: "owner_sms_chat",
+  id: "turn_r", account_id: "acct_1", employee_id: "emp_1", assignment_id: "asn_1", kind: "owner_sms_chat",
   idempotency_key: "twilio:SMr", status: "running", input: { body: "hi", channel: "sms" },
   output: {}, attempts: 1, lease_token: "worker:dead", run_id: "run_queued",
   created_at: "2026-07-03T00:00:00.000Z", ...over,
@@ -124,7 +126,7 @@ const reapDb = (jobs: Record<string, any>[]) => makeFakeDb({
 }, { uniques: SCHEMA_UNIQUES });
 
 describe("reapStuckTurns", () => {
-  const past = "2026-07-03T00:01:00.000Z"; // lease long expired vs Date.now()
+  const past = "2026-07-03T00:01:00.000Z";
 
   it("requeues an owner-chat turn stuck in running with an expired lease (so the drain lane re-runs it)", async () => {
     const db = reapDb([runningTurn({ attempts: 1, lease_expires_at: past })]);
@@ -134,7 +136,6 @@ describe("reapStuckTurns", () => {
     const job = db.tables.employee_turn_jobs.find((j) => j.id === "turn_r");
     expect(job?.status).toBe("queued");
     expect(job?.lease_token).toBeNull();
-    // stale lock dropped
     expect(db.tables.employee_turn_locks).toHaveLength(0);
   });
 
@@ -143,9 +144,7 @@ describe("reapStuckTurns", () => {
     const res = await reapStuckTurns(db.asClient());
     expect(res.failed).toBe(1);
     expect(db.tables.employee_turn_jobs.find((j) => j.id === "turn_r")?.status).toBe("failed");
-    // The owner was told through the router (a delivery decision was recorded).
     expect((db.tables.delivery_decisions ?? []).length).toBe(1);
-    // The work run was closed out as failed.
     expect(db.tables.work_runs.find((r) => r.id === "run_queued")?.status).toBe("failed");
   });
 
@@ -162,11 +161,6 @@ describe("reapStuckTurns", () => {
     const client = db.asClient() as any;
     const originalFrom = client.from.bind(client);
     let injected = false;
-    // The reaper's stale-lock delete (employee_turn_locks) runs between its
-    // initial SELECT and its guarded UPDATE. Hook that call to simulate a
-    // different worker's complete_employee_turn_job landing in that exact
-    // window — the reaper's guarded UPDATE (lease_token + status='running')
-    // must then match zero rows instead of clobbering the completed turn.
     vi.spyOn(client, "from").mockImplementation((table: string) => {
       const builder = originalFrom(table);
       if (table === "employee_turn_locks" && !injected) {
@@ -188,7 +182,7 @@ describe("reapStuckTurns", () => {
     const res = await reapStuckTurns(client);
     expect(res).toEqual({ requeued: 0, failed: 0 });
     const job = db.tables.employee_turn_jobs.find((j) => j.id === "turn_r");
-    expect(job?.status).toBe("succeeded"); // NOT clobbered back to queued/failed
+    expect(job?.status).toBe("succeeded");
     expect(job?.output).toEqual({ reply: "raced" });
   });
 });

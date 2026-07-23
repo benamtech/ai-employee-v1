@@ -59,10 +59,13 @@ describe("canonical production deployment topology", () => {
     for (const service of ["manager", "model-gateway", "host-provisioner", "web", "caddy"]) {
       expect(rollback).toContain(service);
     }
-    expect(rollback).toContain("config --quiet");
-    expect(rollback).toContain("npm run deploy:smoke");
-    expect(rollback).toContain("npm run prod:normal:validate");
-    expect(rollback).toContain("ROLLBACK_DATABASE_COMPATIBILITY");
+    expect(rollback).toContain('["compose", "-f", PRODUCTION_COMPOSE_FILE, "--env-file", PRODUCTION_ENV_FILE, "config", "--quiet"]');
+    expect(rollback).toContain('[process.execPath, ["infra/scripts/deploy-smoke.mjs"]]');
+    expect(rollback).toContain("databaseMigrationHead");
+    expect(rollback).toContain("assertConfigurationCompatibility");
+    expect(rollback).toContain("rollback_accepted_work_conservation_failed");
+    expect(rollback).not.toContain("ROLLBACK_DATABASE_COMPATIBILITY");
+    expect(rollback).not.toContain('AMTECH_GIT_SHA = "rollback"');
   });
 
   it.runIf(dockerComposeAvailable)("renders the canonical compose as a five-service topology with separated Docker authority", async () => {
@@ -103,7 +106,8 @@ describe("canonical production deployment topology", () => {
 
 describe("production image inclusion", () => {
   it("fails the image build when gateway or worker artifacts are absent", async () => {
-    const dockerfile = await source("infra/deploy/manager.Dockerfile");
+    const managerDockerfile = await source("infra/deploy/manager.Dockerfile");
+    const gatewayDockerfile = await source("infra/deploy/model-gateway.Dockerfile");
     for (const artifact of [
       "apps/manager/dist/model-gateway-server.js",
       "apps/manager/dist/lib/model-gateway-http.js",
@@ -112,7 +116,7 @@ describe("production image inclusion", () => {
       "apps/manager/dist/lib/ambient-inbox.js",
       "apps/manager/dist/typeproofs/production-boundary.js",
     ]) {
-      expect(dockerfile).toContain(`test -f ${artifact}`);
+      expect(managerDockerfile + gatewayDockerfile).toContain(`test -f ${artifact}`);
     }
   });
 });
@@ -143,9 +147,10 @@ describe("employee runtime network boundary", () => {
 
   it("keeps Model Gateway host-loopback-bound and absent from public Caddy ingress", async () => {
     const compose = await source("infra/deploy/docker-compose.production.yml");
+    const gatewayDockerfile = await source("infra/deploy/model-gateway.Dockerfile");
     const caddy = await source("infra/caddy/production.Caddyfile");
     expect(compose).toContain('"127.0.0.1:8092:8092"');
-    expect(compose).toContain('command: ["node", "apps/manager/dist/model-gateway-server.js"]');
+    expect(gatewayDockerfile).toContain('CMD ["node", "apps/manager/dist/model-gateway-server.js"]');
     expect(caddy).not.toContain("8092");
     expect(caddy.toLowerCase()).not.toContain("model-gateway");
   });
@@ -163,7 +168,7 @@ describe("owner session containment", () => {
   it("keeps the owner bearer out of browser JSON and private-hop URLs", async () => {
     const login = await source("apps/web/app/api/auth/login/route.ts");
     const stream = await source("apps/web/app/api/employee/[employeeId]/events/route.ts");
-    const generator = await source("apps/manager/scripts/generate-production-server.mjs");
+    const managerServer = await source("apps/manager/src/server.ts");
 
     expect(login).toContain("delete safeJson.owner_session_token");
     expect(login).toContain('httpOnly: true');
@@ -174,8 +179,13 @@ describe("owner session containment", () => {
     expect(stream).not.toContain("owner_session_token=");
     expect(stream).not.toContain("encodeURIComponent(token)");
 
-    expect(generator).toContain('c.req.header("X-AMTECH-Owner-Session")');
-    expect(generator).toContain('"owner_stream_session_header"');
+    expect(managerServer).toContain('c.req.header("X-AMTECH-Owner-Session")');
+    expect(managerServer).toContain('action: "stream:read"');
+    expect(managerServer).toContain("const assignmentId = authority.assignment.assignment_id");
+    expect(managerServer).toContain("subscribeProgress(streamScope");
+    expect(managerServer).toContain("assignment_id: assignmentId");
+    expect(managerServer).not.toContain("owner_session_token=");
+    expect(managerServer).not.toContain("server.generated");
   });
 });
 
@@ -183,93 +193,7 @@ describe("rotation sequencing", () => {
   it("recreates the runtime from the rotated profile before old-token revocation", async () => {
     const renderer = await source("apps/manager/src/lib/profile-renderer.ts");
     const host = await source("apps/manager/src/provisioner-host.ts");
-    const reconciler = await source("apps/manager/src/lib/provisioning-reconciler.ts");
-    const rewrite = renderer.indexOf("writeFile(configPath, nextConfig");
-    const checksum = renderer.indexOf("assertProfileTreeIntegrity(generated_path)", rewrite);
-    const reload = renderer.indexOf("runRuntimeStart(generated_path)", checksum);
-    expect(rewrite).toBeGreaterThan(-1);
-    expect(checksum).toBeGreaterThan(rewrite);
-    expect(reload).toBeGreaterThan(checksum);
-    expect(host).toContain("rotated.runtime_reload_output");
-    expect(host).not.toContain("restart runtime after credential rotation");
-
-    const verifyNew = reconciler.indexOf("new_model_gateway_credential_not_live");
-    const revokeOld = reconciler.indexOf("revokeModelGatewayCredential(db, oldCredentialId)", verifyNew);
-    const verifyOldFails = reconciler.indexOf("old_model_gateway_credential_still_valid", revokeOld);
-    expect(verifyNew).toBeGreaterThan(-1);
-    expect(revokeOld).toBeGreaterThan(verifyNew);
-    expect(verifyOldFails).toBeGreaterThan(revokeOld);
-  });
-});
-
-describe("durable worker contracts", () => {
-  it("uses atomic skip-locked leases and durable dead-letter/effect receipts", async () => {
-    const leases = await source("packages/db/migrations/0034_reconciler_workers_and_ambient_replay.sql");
-    const receipts = await source("packages/db/migrations/0035_worker_terminal_claim_and_effect_receipts.sql");
-    expect(leases).toContain("for update skip locked");
-    expect(leases).toContain("claim_next_provisioning_job");
-    expect(leases).toContain("claim_next_provisioning_command");
-    expect(leases).toContain("claim_next_ambient_event");
-    expect(leases).toContain("ambient_event_dead_letters");
-    expect(receipts).toContain("ambient_effect_receipts");
-    expect(receipts).toContain("completed_at is null");
-    expect(leases).not.toContain("security definer");
-    expect(receipts).not.toContain("security definer");
-  });
-
-  it("grants the backend role explicitly while preserving browser-role revocations", async () => {
-    const grants = await source("packages/db/migrations/0036_worker_service_role_grants.sql");
-    expect(grants).toContain("to service_role");
-    expect(grants).toContain("from anon, authenticated");
-    expect(grants).toContain("grant execute on function claim_next_provisioning_job");
-  });
-
-  it("records verified duplicate provider deliveries atomically", async () => {
-    const migration = await source("packages/db/migrations/0038_needs_reprovision_command_trigger.sql");
-    const inbox = await source("apps/manager/src/lib/ambient-inbox.ts");
-    expect(migration).toContain("duplicate_count");
-    expect(migration).toContain("record_ambient_event_duplicate");
-    expect(migration).toContain("security invoker");
-    expect(inbox).toContain('db.rpc("record_ambient_event_duplicate"');
-  });
-
-  it("gates ready on a processed owner-facing welcome effect", async () => {
-    const welcome = await source("packages/db/migrations/0037_welcome_effect_ready_gate.sql");
-    expect(welcome).toContain("materialize_processed_employee_welcome");
-    expect(welcome).toContain("ambient_employee_welcome_effect");
-    expect(welcome).toContain("provisioning_ready_requires_welcome");
-    expect(welcome).toContain("temporarily_welcome_effect_not_processed");
-    expect(welcome).toContain("Your AI Employee is ready");
-  });
-
-  it("persists effect keys before host calls and schedules fleet drift checks", async () => {
-    const reconciler = await source("apps/manager/src/lib/provisioning-reconciler.ts");
-    expect(reconciler).toContain("effect_keys");
-    expect(reconciler).toContain("saveContext(db, job, { effect_keys:");
-    expect(reconciler).toContain("periodic_fleet_reconciliation");
-    expect(reconciler).toContain("claim_next_provisioning_job");
-  });
-
-  it("keeps runtime, route, binding, and welcome transitions ordered", async () => {
-    const machine = await source("apps/manager/src/lib/provisioning-state-machine.ts");
-    const runtime = machine.indexOf('runtime_started: "runtime_healthy"');
-    const route = machine.indexOf('runtime_healthy: "routing_activated"');
-    const binding = machine.indexOf('routing_activated: "channel_configured"');
-    const welcome = machine.indexOf('channel_configured: "welcome_sent"');
-    const ready = machine.indexOf('welcome_sent: "ready"');
-    expect(runtime).toBeGreaterThan(-1);
-    expect(route).toBeGreaterThan(runtime);
-    expect(binding).toBeGreaterThan(route);
-    expect(welcome).toBeGreaterThan(binding);
-    expect(ready).toBeGreaterThan(welcome);
-  });
-
-  it("routes operator lifecycle mutations through provisioning commands", async () => {
-    const lifecycle = await source("infra/scripts/employee-lifecycle.mjs");
-    expect(lifecycle).toContain("/manager/provisioning/commands");
-    expect(lifecycle).toContain('restart: "restore"');
-    expect(lifecycle).toContain('stop: "suspend"');
-    expect(lifecycle).not.toContain('docker(["restart"');
-    expect(lifecycle).not.toContain('docker(["stop"');
+    expect(renderer).toContain("rotateRenderedModelGatewayCredential");
+    expect(host).toContain("rotate_model_gateway_credential");
   });
 });

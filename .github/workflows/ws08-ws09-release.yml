@@ -1,0 +1,276 @@
+name: WS08-WS09 Release Candidate
+
+on:
+  pull_request:
+    branches:
+      - agent/ws06-ws07-production
+    paths:
+      - 'mvp-build/**'
+      - '.github/workflows/ws08-ws09-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ws08-ws09-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  source-and-ui:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - name: Assert exact candidate
+        run: test "$(git rev-parse HEAD)" = "${CANDIDATE_SHA}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install
+        working-directory: mvp-build
+        run: npm ci
+      - name: Verify computed decisions
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          python decision/trace008/compute.py --verify
+          python decision/trace009/compute.py --verify
+      - name: Verify architecture fitness and generated coverage
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          mkdir -p infra/proofs/ci-source
+          {
+            node scripts/verify-ui-architecture.mjs
+            node scripts/generate-ui-coverage.mjs /tmp/ui-presentation-coverage.json
+            diff -u validation/ui-presentation-coverage.json /tmp/ui-presentation-coverage.json
+          } 2>&1 | tee infra/proofs/ci-source/architecture.log
+      - name: Build generated source dependencies
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          {
+            npm run build --workspace @amtech/shared
+            npm run build --workspace @amtech/db
+          } 2>&1 | tee -a infra/proofs/ci-source/source.log
+      - name: Focused WS08 UI and recovery tests
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          npx vitest run \
+            tests/unit/ui-architecture-fitness.test.ts \
+            tests/unit/ui-state-machine-conformance.test.ts \
+            tests/unit/ui-presentation-coverage.test.ts \
+            tests/unit/web-operating-snapshot-contract.test.ts \
+            tests/unit/amtech-agent-ui-contract.test.ts \
+            tests/unit/ui-resources.test.ts \
+            tests/unit/ui-fixture-guard.test.ts \
+            tests/unit/ws06-ws08-failure-manifold.test.ts \
+            tests/unit/ws08-release-authority.test.ts \
+            tests/unit/ws09-capacity-groundwork.test.ts \
+            tests/unit/production-topology-acceptance.test.ts \
+            tests/unit/ops-proof-scripts.test.ts \
+            --reporter=verbose 2>&1 | tee -a infra/proofs/ci-source/source.log
+      - name: Repository governance typecheck and lint
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          {
+            npm run test:repo-governance
+            npm run typecheck
+            npm run lint
+          } 2>&1 | tee -a infra/proofs/ci-source/source.log
+      - name: Broad unit and workspace build
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          {
+            npm run test:unit
+            npm run build
+          } 2>&1 | tee -a infra/proofs/ci-source/source.log
+      - name: Retain source diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ws08-source-${{ env.CANDIDATE_SHA }}
+          path: |
+            mvp-build/infra/proofs/ci-source
+            mvp-build/validation/ui-presentation-coverage.json
+            mvp-build/decision/trace008/selection_comparison.json
+            mvp-build/decision/trace009/selection_comparison.json
+          if-no-files-found: error
+          retention-days: 5
+
+  postgres-integration:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: amtech_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d amtech_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_test
+      SUPABASE_DB_URL: postgresql://postgres:postgres@127.0.0.1:5432/amtech_test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - name: Assert exact candidate
+        run: test "$(git rev-parse HEAD)" = "${CANDIDATE_SHA}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: mvp-build/package-lock.json
+      - name: Install
+        working-directory: mvp-build
+        run: npm ci
+      - name: Bootstrap Supabase-compatible roles and schemas
+        working-directory: mvp-build
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f infra/scripts/ci/supabase-postgres-bootstrap.sql
+      - name: Apply blank forward ledger
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          mkdir -p infra/proofs/ci-postgres
+          npm run db:migrate 2>&1 | tee infra/proofs/ci-postgres/postgres.log
+      - name: Verify migration and commercial authority
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          {
+            npm run db:status
+            npm run db:verify:commercial-effect-migrations
+            npx vitest run --config vitest.integration.config.ts tests/integration/ws07-commercial-ledger.test.ts --reporter=verbose
+          } 2>&1 | tee -a infra/proofs/ci-postgres/postgres.log
+      - name: Full PostgreSQL integration aggregate
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          npm run test:integration 2>&1 | tee -a infra/proofs/ci-postgres/postgres.log
+      - name: Retain PostgreSQL diagnostics
+        if: always()
+        working-directory: mvp-build
+        run: |
+          mkdir -p infra/proofs/ci-postgres
+          psql "$DATABASE_URL" -XAt -c "select name, applied_at from _migrations order by name" > infra/proofs/ci-postgres/migration-ledger.txt 2>> infra/proofs/ci-postgres/postgres.log || true
+      - name: Upload PostgreSQL diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ws08-postgres-${{ env.CANDIDATE_SHA }}
+          path: mvp-build/infra/proofs/ci-postgres
+          if-no-files-found: error
+          retention-days: 5
+
+  container-release:
+    runs-on: ubuntu-24.04
+    needs: source-and-ui
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          fetch-depth: 0
+      - name: Assert exact candidate
+        run: test "$(git rev-parse HEAD)" = "${CANDIDATE_SHA}"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Initialize release diagnostics
+        working-directory: mvp-build
+        run: |
+          mkdir -p infra/proofs/ci-release
+          : > infra/proofs/ci-release/build.log
+      - name: Validate canonical compose
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          : > infra/deploy/.env.production
+          {
+            AMTECH_GIT_SHA="$CANDIDATE_SHA" docker compose -f infra/deploy/docker-compose.production.yml --env-file infra/deploy/.env.production config > /tmp/compose.json
+            AMTECH_GIT_SHA="$CANDIDATE_SHA" docker compose -f infra/deploy/docker-compose.production.yml --env-file infra/deploy/.env.production config --quiet
+          } 2>&1 | tee -a infra/proofs/ci-release/build.log
+      - name: Build five exact-SHA images
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          build_image() {
+            local service="$1"
+            local dockerfile="$2"
+            echo "BUILD ${service} ${CANDIDATE_SHA}" | tee -a infra/proofs/ci-release/build.log
+            docker build --build-arg AMTECH_GIT_SHA="$CANDIDATE_SHA" -f "$dockerfile" -t "amtech-ai-employee-${service}:$CANDIDATE_SHA" . 2>&1 | tee -a infra/proofs/ci-release/build.log
+          }
+          build_image manager infra/deploy/manager.Dockerfile
+          build_image model-gateway infra/deploy/model-gateway.Dockerfile
+          build_image host-provisioner infra/deploy/provisioner.Dockerfile
+          build_image web infra/deploy/web.Dockerfile
+          build_image caddy infra/deploy/caddy.Dockerfile
+      - name: Inspect image identity
+        working-directory: mvp-build
+        run: |
+          set -euo pipefail
+          for service in manager model-gateway host-provisioner web caddy; do
+            docker image inspect "amtech-ai-employee-${service}:$CANDIDATE_SHA" > "infra/proofs/ci-release/${service}.json"
+            test "$(docker image inspect "amtech-ai-employee-${service}:$CANDIDATE_SHA" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')" = "$CANDIDATE_SHA"
+          done
+          jq -r '.[0].Id' infra/proofs/ci-release/*.json | sort -u | wc -l | grep -qx '5'
+      - name: Generate ephemeral CI signing identity
+        working-directory: mvp-build
+        run: |
+          node --input-type=module <<'NODE'
+          import { generateKeyPairSync, createHash } from 'node:crypto';
+          import { writeFileSync, appendFileSync } from 'node:fs';
+          const { privateKey, publicKey } = generateKeyPairSync('ed25519');
+          const privatePem = privateKey.export({ type:'pkcs8', format:'pem' });
+          const publicPem = publicKey.export({ type:'spki', format:'pem' });
+          const fingerprint = createHash('sha256').update(publicKey.export({ type:'spki', format:'der' })).digest('hex');
+          writeFileSync('/tmp/release-private.pem', privatePem);
+          writeFileSync('infra/proofs/ci-release/release-public.pem', publicPem);
+          appendFileSync(process.env.GITHUB_ENV, `AMTECH_RELEASE_PRIVATE_KEY_PEM<<KEY\n${privatePem}KEY\nAMTECH_RELEASE_PUBLIC_KEY_PEM<<PUB\n${publicPem}PUB\nAMTECH_RELEASE_EXPECTED_PUBLIC_KEY_FINGERPRINT=${fingerprint}\n`);
+          NODE
+      - name: Generate and independently verify release manifest
+        working-directory: mvp-build
+        env:
+          AMTECH_GIT_SHA: ${{ env.CANDIDATE_SHA }}
+          AMTECH_SECRET_VERSION_REFS: '{"ci_database":"ci-v1","ci_gateway":"ci-v1","ci_provisioner":"ci-v1"}'
+          AMTECH_RELEASE_MANIFEST_OUT: infra/proofs/ci-release/release-manifest.json
+        run: |
+          set -euo pipefail
+          node infra/scripts/release-manifest.mjs 2>&1 | tee -a infra/proofs/ci-release/build.log
+          node infra/scripts/verify-release-manifest.mjs infra/proofs/ci-release/release-manifest.json | tee infra/proofs/ci-release/verification.json
+          rm -f /tmp/release-private.pem
+      - name: Retain exact release diagnostics
+        if: always()
+        working-directory: mvp-build
+        run: |
+          mkdir -p infra/proofs/ci-release
+          cp /tmp/compose.json infra/proofs/ci-release/compose.json || true
+      - name: Upload exact release diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ws08-release-${{ env.CANDIDATE_SHA }}
+          path: mvp-build/infra/proofs/ci-release
+          if-no-files-found: error
+          retention-days: 5

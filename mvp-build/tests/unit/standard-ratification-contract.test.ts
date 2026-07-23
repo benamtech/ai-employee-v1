@@ -20,9 +20,32 @@ interface EvolutionVector {
   }>;
 }
 
+interface DecisionProtocol {
+  protocol_revision: number;
+  candidate_dimensions: string[];
+  dimension_semantics: Record<string, { meaning: string; orientation: "maximize" | "minimize" }>;
+  baseline_contracts: Record<
+    string,
+    {
+      roles: {
+        positive_required: string[];
+        positive_optional: string[];
+        penalty_required: string[];
+        penalty_optional: string[];
+        excluded: string[];
+      };
+    }
+  >;
+}
+
 describe("AMTECH Standard v0.2 ratification", () => {
-  it("is effective, preserves hard production gates, and records the database TDD boundary", async () => {
-    const standard = await readFile("STANDARD.md", "utf8");
+  it("is effective, preserves hard production gates, and ratifies explicit decision semantics", async () => {
+    const [standard, amendment, protocolText] = await Promise.all([
+      readFile("STANDARD.md", "utf8"),
+      readFile("STANDARD-V0.2-AMENDMENT-001.md", "utf8"),
+      readFile("decision/protocol-v1.json", "utf8"),
+    ]);
+    const protocol = JSON.parse(protocolText) as DecisionProtocol;
 
     expect(standard).toContain("# AMTECH Standard v0.2 — Ratified Production Standard");
     expect(standard).toContain("Status: **ratified and effective**");
@@ -32,7 +55,26 @@ describe("AMTECH Standard v0.2 ratification", () => {
     expect(standard).toContain("MCP Apps");
     expect(standard).toContain("AG-UI shared state is a synchronized projection, not the source of durable authority.");
     expect(standard).toContain("Every AMTECH-supported native connector MUST be described by a declarative setup manifest");
-    expect(standard).toContain("Current implementation remains source-wired and exact-head CI-accepted through migration `0072`");
+
+    expect(amendment).toContain("Status: **ratified additive amendment and effective**");
+    expect(amendment).toContain("## ENG-12.3D — Explicit score and baseline semantics");
+    expect(amendment).toContain("## ENG-12.9A — Exact-candidate workflow evidence");
+    expect(amendment).toContain("New dimensions MUST fail with `unclassified_baseline_dimensions`");
+    expect(amendment).toContain("GitHub's synthetic merge ref is merge-candidate evidence, not branch-head evidence.");
+
+    expect(protocol.protocol_revision).toBeGreaterThanOrEqual(3);
+    expect(Object.keys(protocol.dimension_semantics)).toEqual(protocol.candidate_dimensions);
+    expect(protocol.baseline_contracts.trace007).toBeDefined();
+    const roles = protocol.baseline_contracts.trace007.roles;
+    const declared = [
+      ...roles.positive_required,
+      ...roles.positive_optional,
+      ...roles.penalty_required,
+      ...roles.penalty_optional,
+      ...roles.excluded,
+    ];
+    expect(new Set(declared).size).toBe(declared.length);
+    expect(new Set(declared)).toEqual(new Set(protocol.candidate_dimensions));
   });
 
   it("keeps every evolution dimension grounded and prohibits unapproved destructive motion", async () => {
@@ -67,16 +109,30 @@ describe("AMTECH Standard v0.2 ratification", () => {
     }
   });
 
-  it("routes all current planning through one canonical production program", async () => {
-    const planIndex = await readFile("second-half-plan/README.md", "utf8");
-    const activePlan = await readFile(
-      "second-half-plan/2026-07-19-ratified-standard-production-program/README.md",
-      "utf8",
-    );
+  it("routes current planning through one active program without transient status mirrors", async () => {
+    const historicalIndex = await readFile("second-half-plan/README.md", "utf8");
+    const activePlan = await readFile("production-readiness-program/README.md", "utf8");
 
-    expect(planIndex).toContain("2026-07-19-ratified-standard-production-program/README.md");
-    expect(planIndex).toContain("single active production program");
+    expect(historicalIndex).toContain("historical and non-canonical");
+    expect(historicalIndex).toContain("production-readiness-program/README.md");
     expect(activePlan).toContain("Status: **active and canonical**");
-    expect(activePlan).toContain("Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.");
+    expect(activePlan).toContain("[`../CODEGRAPH.md`](../CODEGRAPH.md)");
+    expect(activePlan).toContain("Provider and connector adapters do not create authority.");
+
+    for (const route of [
+      "04-dependency-ordered-production-plan.md",
+      "08-production-issue-vector.json",
+      "13-resolution-ledger.json",
+      "09-workstream-execution-map.md",
+      "20-ws06-ws08-commercial-effect-transaction.md",
+      "10-test-suite-disposition.md",
+      "07-verification-and-handoff-matrix.md",
+    ]) {
+      expect(activePlan).toContain(`\`${route}\``);
+    }
+
+    expect(activePlan).not.toMatch(/^Main baseline:/m);
+    expect(activePlan).not.toMatch(/^Stacked base:/m);
+    expect(activePlan).not.toMatch(/^Source migration head:/m);
   });
 });

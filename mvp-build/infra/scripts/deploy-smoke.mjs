@@ -80,7 +80,9 @@ function composeHealth(service) {
     };
   }
   const [container_state, health] = inspect.stdout.trim().split("\t");
-  const ok = container_state === "running" && (health === "healthy" || health === "none");
+  // Every canonical production service declares a health check. A running
+  // container with no health state is partial topology, never release health.
+  const ok = container_state === "running" && health === "healthy";
   return { name: `compose:${service}`, status: ok ? "pass" : "fail", container_id: id, container_state, health };
 }
 
@@ -153,7 +155,9 @@ function employeeNetworkTopology() {
 
 function gitSha() {
   try {
-    return execFileSync("git", ["rev-parse", "--short=12", "HEAD"], { encoding: "utf8" }).trim();
+    const value = process.env.AMTECH_GIT_SHA
+      ?? execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+    return /^[a-f0-9]{40}$/.test(value) ? value : null;
   } catch {
     return null;
   }
@@ -180,12 +184,14 @@ for (const check of checks) {
   console.log(`${prefix} ${check.name}${check.http_status ? ` ${check.http_status}` : ""}${check.error ? ` ${check.error}` : ""}`);
 }
 
+const exactGitSha = gitSha();
+if (!exactGitSha) checks.push({ name: "release:exact-git-sha", status: "fail", error: "exact_git_sha_unavailable" });
 const proof = {
   kind: "deploy_smoke",
   status: checks.some((check) => check.status === "fail") ? "fail" : "pass",
   checked_at: new Date().toISOString(),
   host: hostname(),
-  git_sha: gitSha(),
+  git_sha: exactGitSha,
   compose_file: PRODUCTION_COMPOSE_FILE,
   control_services: PRODUCTION_CONTROL_SERVICES,
   checks,

@@ -4,7 +4,6 @@ import { appendFile, mkdir, rm } from "node:fs/promises";
 import { dirname } from "node:path";
 import type { ProvisionerOperation, ProvisionerRequest, ProvisionerResult } from "@amtech/shared";
 import {
-  failureResult,
   inspectRenderedProfile,
   renderProfilePackage,
   rotateRenderedModelGatewayCredential,
@@ -12,6 +11,10 @@ import {
   writeAndActivateCaddySnippet,
 } from "./lib/profile-renderer.js";
 import { runCommandString } from "./lib/command-runner.js";
+import {
+  runDestructiveDockerStep,
+  type DestructiveDockerEvidence,
+} from "./lib/destructive-docker.js";
 import { createProvisionerIdempotencyStore } from "./lib/provisioner-idempotency.js";
 
 const MAX_BODY_BYTES = 1024 * 1024;
@@ -34,6 +37,12 @@ const ALLOWED_OPERATIONS = new Set<ProvisionerOperation>([
 
 type HostProvisionerRequest = ProvisionerRequest & Required<Pick<ProvisionerRequest, "request_id" | "operation" | "issued_at" | "expires_at" | "nonce" | "idempotency_key">>;
 
+type StructuredProvisionerError = Error & {
+  outcome?: "failed" | "ambiguous";
+  failure_state?: string;
+  evidence?: Record<string, unknown>;
+};
+
 function requiredEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`${name} missing.`);
@@ -50,6 +59,10 @@ function auditPath(): string {
 
 function stateRoot(): string {
   return process.env.PROVISIONER_STATE_DIR ?? "/var/lib/amtech/provisioner";
+}
+
+function destructiveTimeoutMs(): number {
+  return Math.max(1_000, Number(process.env.PROVISIONER_DOCKER_DESTRUCTIVE_TIMEOUT_MS ?? 30_000));
 }
 
 function safeId(value: unknown): string {
@@ -145,6 +158,75 @@ async function bestEffortCommand(command: string, label: string): Promise<string
   }
 }
 
+async function destructiveStep(input: {
+  action: string;
+  args: string[];
+  expected_stdout?: string;
+  allow_empty_stdout?: boolean;
+}): Promise<DestructiveDockerEvidence> {
+  return runDestructiveDockerStep({ ...input, timeout_ms: destructiveTimeoutMs() });
+}
+
+async function appendDestructiveStep(
+  steps: DestructiveDockerEvidence[],
+  input: { action: string; args: string[]; expected_stdout?: string; allow_empty_stdout?: boolean },
+): Promise<DestructiveDockerEvidence> {
+  try {
+    const evidence = await destructiveStep(input);
+    steps.push(evidence);
+    return evidence;
+  } catch (err) {
+    const structured = err as StructuredProvisionerError;
+    const failedStep = structured.evidence?.["destructive_docker"];
+    if (steps.length > 0) {
+      structured.outcome = "ambiguous";
+      structured.failure_state = "docker_destructive_partial_failure";
+    }
+    structured.evidence = {
+      ...(structured.evidence ?? {}),
+      destructive_steps: [...steps, ...(failedStep ? [failedStep] : [])],
+      accepted_steps_before_failure: steps.length,
+    };
+    throw structured;
+  }
+}
+
+function partialLifecycleFailure(
+  err: unknown,
+  failureState: string,
+  destructiveSteps: unknown[],
+  downstreamEvidence: Record<string, unknown> = {},
+): StructuredProvisionerError {
+  const structured = err instanceof Error ? err as StructuredProvisionerError : new Error(String(err)) as StructuredProvisionerError;
+  structured.outcome = "ambiguous";
+  structured.failure_state = failureState;
+  structured.evidence = {
+    ...(structured.evidence ?? {}),
+    destructive_steps: destructiveSteps,
+    downstream_error: String(structured.message ?? err).slice(0, 2_000),
+    ...downstreamEvidence,
+  };
+  return structured;
+}
+
+function assertPostDestructiveRuntimeInspection(drift: Record<string, unknown>): void {
+  const profile = drift.profile && typeof drift.profile === "object" ? drift.profile as Record<string, unknown> : {};
+  if (drift.container_present !== true || drift.network_present !== true || profile.exists !== true) {
+    throw new Error("runtime_post_destructive_inspection_unverified");
+  }
+}
+
+function hostFailureResult(err: unknown): ProvisionerResult {
+  const structured = err as StructuredProvisionerError;
+  return {
+    status: "failed",
+    outcome: structured.outcome ?? "failed",
+    failure_state: structured.failure_state ?? "host_provisioner_failed",
+    evidence: structured.evidence ?? { error_type: structured.name ?? "Error" },
+    logs: [String(structured.message ?? err).slice(0, 2_000)],
+  };
+}
+
 async function inspectRuntime(req: HostProvisionerRequest): Promise<Record<string, unknown>> {
   const container = `amtech-hermes-${req.employee_id}`;
   const network = `amtech-employee-${req.employee_id}`;
@@ -218,26 +300,26 @@ async function removeRuntime(req: HostProvisionerRequest): Promise<ProvisionerRe
   const network = `amtech-employee-${req.employee_id}`;
   const managerContainer = optionalContainerName("MANAGER_CONTAINER_NAME");
   const modelGatewayContainer = optionalContainerName("MODEL_GATEWAY_CONTAINER_NAME");
-  const removedContainer = await bestEffortCommand(`docker rm -f ${container}`, "remove runtime");
-  const detachedManager = managerContainer
-    ? await bestEffortCommand(`docker network disconnect -f ${network} ${managerContainer}`, "detach manager from runtime network")
-    : "manager_detach:not_configured";
-  const detachedGateway = modelGatewayContainer
-    ? await bestEffortCommand(`docker network disconnect -f ${network} ${modelGatewayContainer}`, "detach model gateway from runtime network")
-    : "model_gateway_detach:not_configured";
-  const removedNetwork = await bestEffortCommand(`docker network rm ${network}`, "remove runtime network");
+  const steps: DestructiveDockerEvidence[] = [];
+
+  await appendDestructiveStep(steps, { action: "remove_runtime_container", args: ["rm", "-f", container], expected_stdout: container });
+  if (managerContainer) {
+    await appendDestructiveStep(steps, { action: "detach_manager_runtime_network", args: ["network", "disconnect", "-f", network, managerContainer], allow_empty_stdout: true });
+  }
+  if (modelGatewayContainer) {
+    await appendDestructiveStep(steps, { action: "detach_model_gateway_runtime_network", args: ["network", "disconnect", "-f", network, modelGatewayContainer], allow_empty_stdout: true });
+  }
+  await appendDestructiveStep(steps, { action: "remove_runtime_network", args: ["network", "rm", network], expected_stdout: network });
+
   return {
     status: "ok",
+    outcome: "accepted",
     request_id: req.request_id,
     operation: req.operation,
     container_name: container,
     network_name: network,
-    logs: [
-      `container:${removedContainer}`,
-      `manager:${detachedManager}`,
-      `model_gateway:${detachedGateway}`,
-      `network:${removedNetwork}`,
-    ],
+    evidence: { destructive_steps: steps },
+    logs: steps.map((step) => `${step.action}:${step.outcome}`),
   };
 }
 
@@ -265,14 +347,21 @@ async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> 
   if (req.operation === "remove_runtime") return removeRuntime(req);
   if (req.operation === "suspend_runtime") {
     const container = `amtech-hermes-${req.employee_id}`;
-    const stopped = await bestEffortCommand(`docker stop ${container}`, "suspend runtime");
-    return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, logs: [`stop:${stopped}`] };
+    const steps: DestructiveDockerEvidence[] = [];
+    const stopped = await appendDestructiveStep(steps, { action: "suspend_runtime", args: ["stop", container], expected_stdout: container });
+    return { status: "ok", outcome: "accepted", request_id: req.request_id, operation: req.operation, container_name: container, evidence: { destructive_steps: steps }, logs: [`stop:${stopped.outcome}`] };
   }
   if (req.operation === "restart_runtime") {
     const container = `amtech-hermes-${req.employee_id}`;
-    const restarted = await bestEffortCommand(`docker restart ${container}`, "restart runtime");
-    if (restarted.startsWith("failed:")) throw new Error(restarted);
-    return { status: "ok", request_id: req.request_id, operation: req.operation, container_name: container, drift: await inspectRuntime(req), smoke_output: restarted, logs: [`restart:${restarted}`] };
+    const steps: DestructiveDockerEvidence[] = [];
+    const restarted = await appendDestructiveStep(steps, { action: "restart_runtime", args: ["restart", container], expected_stdout: container });
+    try {
+      const drift = await inspectRuntime(req);
+      assertPostDestructiveRuntimeInspection(drift);
+      return { status: "ok", outcome: "accepted", request_id: req.request_id, operation: req.operation, container_name: container, drift, smoke_output: restarted.stdout.trim(), evidence: { destructive_steps: steps }, logs: [`restart:${restarted.outcome}`] };
+    } catch (err) {
+      throw partialLifecycleFailure(err, "restart_runtime_verification_ambiguous", steps);
+    }
   }
   if (req.operation === "rotate_model_gateway_credential") {
     const rotated = await rotateRenderedModelGatewayCredential(req);
@@ -298,8 +387,20 @@ async function execute(req: HostProvisionerRequest): Promise<ProvisionerResult> 
     return { ...ensured, operation: req.operation, drift: { before, after: await inspectRuntime(req) }, logs: [...(ensured.logs ?? []), "repair_drift_reconciled_via_ensure_runtime"] };
   }
   if (req.operation === "replace_runtime" || req.operation === "restore_runtime") {
-    await removeRuntime(req);
-    return ensureRuntime(req);
+    const removed = await removeRuntime(req);
+    const destructiveSteps = ((removed.evidence ?? {})["destructive_steps"] as unknown[] | undefined) ?? [];
+    try {
+      const ensured = await ensureRuntime(req);
+      return {
+        ...ensured,
+        outcome: "accepted",
+        operation: req.operation,
+        evidence: { destructive_steps: destructiveSteps },
+        logs: [...(removed.logs ?? []), ...(ensured.logs ?? [])],
+      };
+    } catch (err) {
+      throw partialLifecycleFailure(err, `${req.operation}_after_remove_ambiguous`, destructiveSteps, { remove_completed: true });
+    }
   }
   return ensureRuntime(req);
 }
@@ -325,12 +426,32 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     }
     const result = await execute(parsed);
     await storeResult(parsed.idempotency_key, result);
-    await audit({ request_id: parsed.request_id, idempotency_key: parsed.idempotency_key, nonce: parsed.nonce, account_id: parsed.account_id, employee_id: parsed.employee_id, operation: parsed.operation, result: result.status, evidence: { profile_checksum: result.profile_checksum ?? null, drift: result.drift ?? null } });
+    await audit({
+      request_id: parsed.request_id,
+      idempotency_key: parsed.idempotency_key,
+      nonce: parsed.nonce,
+      account_id: parsed.account_id,
+      employee_id: parsed.employee_id,
+      operation: parsed.operation,
+      result: result.status,
+      outcome: result.outcome ?? "accepted",
+      evidence: { profile_checksum: result.profile_checksum ?? null, drift: result.drift ?? null, operation: result.evidence ?? null },
+    });
     return send(res, 200, result);
   } catch (err) {
     if (parsed?.idempotency_key) await releaseFailedIdempotencyClaim(parsed.idempotency_key).catch(() => {});
-    const result = failureResult("host_provisioner_failed", err);
-    await audit({ request_id: parsed?.request_id ?? null, account_id: parsed?.account_id ?? null, employee_id: parsed?.employee_id ?? null, operation: parsed?.operation ?? null, result: "failed", error: String((err as Error).message ?? err) });
+    const result = hostFailureResult(err);
+    await audit({
+      request_id: parsed?.request_id ?? null,
+      account_id: parsed?.account_id ?? null,
+      employee_id: parsed?.employee_id ?? null,
+      operation: parsed?.operation ?? null,
+      result: "failed",
+      outcome: result.outcome ?? "failed",
+      failure_state: result.failure_state ?? "host_provisioner_failed",
+      evidence: result.evidence ?? null,
+      error: String((err as Error).message ?? err),
+    });
     return send(res, 400, result);
   }
 }

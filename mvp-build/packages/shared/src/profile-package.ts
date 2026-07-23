@@ -1,5 +1,9 @@
 import { z } from "zod";
 import type { ModelGatewayPolicy } from "./model-gateway.js";
+import {
+  EmployeeUiPresentationOverride,
+  type EmployeeUiPresentationProfile,
+} from "./employee-ui-presentation.js";
 
 export const ProfilePackage = z.object({
   key: z.string().min(1),
@@ -19,6 +23,8 @@ export const ProfilePackage = z.object({
     user_chars: z.number().int().positive().default(1375),
   }).default({ memory_chars: 2200, user_chars: 1375 }),
   resource_pointers: z.array(z.string().min(1)).default([]),
+  /** Default strategies for any web adapter that installs this package. */
+  ui_presentation: EmployeeUiPresentationOverride.optional(),
   template_source: z.object({
     name: z.string(),
     url: z.string().optional(),
@@ -56,6 +62,8 @@ export interface ProfileContext {
     user_chars: number;
   };
   resource_pointers: string[];
+  /** Serialized into the profile context so Web can resolve it without a new table. */
+  ui_presentation?: EmployeeUiPresentationProfile | EmployeeUiPresentationOverride;
   slots: ProfileContextSlot[];
 }
 
@@ -79,6 +87,7 @@ export interface ProfileBuildParams {
   seed_skills: string[];
   api_server_key?: string;
   profile_context: ProfileContext;
+  ui_presentation?: EmployeeUiPresentationProfile | EmployeeUiPresentationOverride;
   direct_mcp_connectors?: import("./connector-registry.js").DirectMcpConnectorSpec[];
   model_gateway: ModelGatewayPolicy;
 }
@@ -118,6 +127,7 @@ export interface ProvisionerRequest {
 
 export interface ProvisionerResult {
   status: "ok" | "failed";
+  outcome?: "accepted" | "failed" | "ambiguous";
   request_id?: string;
   operation?: ProvisionerOperation;
   idempotent_replay?: boolean;
@@ -142,5 +152,6 @@ export interface ProvisionerResult {
   failure_state?: string;
   logs?: string[];
   drift?: Record<string, unknown>;
+  evidence?: Record<string, unknown>;
   model_gateway_credential_version?: number;
 }

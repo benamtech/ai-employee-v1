@@ -1,0 +1,63 @@
+{
+  "selected_D_star": [
+    "T1_destructive_executor",
+    "T2_host_evidence",
+    "T3_manager_projection_guard",
+    "T4_red_and_regression_tests"
+  ],
+  "objective": 13.498753,
+  "selected_nodes": [
+    "destructive_command_executor",
+    "docker_output_validation",
+    "docker_timeout_ambiguity",
+    "focused_contract_tests",
+    "host_audit_evidence",
+    "host_failure_response",
+    "manager_command_failure_record",
+    "manager_require_provisioner",
+    "remove_runtime",
+    "replace_restore_remove_phase",
+    "suspend_runtime",
+    "ws05_health_projection_guard"
+  ],
+  "rejected_modes": [
+    {
+      "trajectory": "T5_full_ws04_acceptance",
+      "nodes": ["full_ws04_acceptance"],
+      "reason": "broader than the destructive Docker failure invariant and lacks target-host proof"
+    },
+    {
+      "trajectory": "T6_dns_tls",
+      "nodes": ["dns_tls"],
+      "reason": "non-adjacent DNS/TLS scope"
+    },
+    {
+      "trajectory": "T7_real_secret_store",
+      "nodes": ["real_secret_store"],
+      "reason": "real secret-store is explicitly out of scope"
+    },
+    {
+      "trajectory": "T8_registry_release_evidence",
+      "nodes": ["registry_release_evidence"],
+      "reason": "registry/digest release work is non-adjacent"
+    },
+    {
+      "trajectory": "T9_db_p0_02_07",
+      "nodes": ["db_p0_02_07"],
+      "reason": "DB-P0-02..07 are not prerequisites for this patch"
+    },
+    {
+      "trajectory": "T10_broad_ws05",
+      "nodes": ["broad_ws05"],
+      "reason": "only the lifecycle health projection guard is adjacent; broad WS-05 is rejected"
+    }
+  ],
+  "unresolved_nodes": [
+    "full_ws04_acceptance",
+    "dns_tls",
+    "real_secret_store",
+    "registry_release_evidence",
+    "db_p0_02_07",
+    "broad_ws05"
+  ]
+}

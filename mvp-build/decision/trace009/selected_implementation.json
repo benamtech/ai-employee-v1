@@ -1,0 +1,24 @@
+{
+  "causal": "unestablished",
+  "ceiling": 4,
+  "coverage": {
+    "complete": 1.0,
+    "fractional": 1.0,
+    "proved": 0.0,
+    "touch": 1.0
+  },
+  "patch_order": [
+    "release closure",
+    "projection controller",
+    "compiler/renderer path",
+    "conformance/fitness/ADR"
+  ],
+  "schema": "trace009.implementation.v1",
+  "selected_ids": [
+    "D01",
+    "D02",
+    "D03",
+    "D04"
+  ],
+  "trajectory_count": 4
+}

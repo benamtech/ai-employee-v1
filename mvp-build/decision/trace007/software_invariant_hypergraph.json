@@ -1,0 +1,119 @@
+{
+  "schema": "amtech.trace007.software-invariant-hypergraph.v1",
+  "purpose": "represent actual software obligations and compute touch, fractional, complete, and proved coverage",
+  "vertices": [
+    "Revision",
+    "ApprovalSnapshot",
+    "AssignmentAuthority",
+    "Entitlement",
+    "RateWindow",
+    "BudgetReservation",
+    "Command",
+    "Effect",
+    "ProviderAttempt",
+    "ProviderIdempotencyKey",
+    "ProviderReceipt",
+    "AmbiguousOutcome",
+    "Reconciliation",
+    "RetryDenial",
+    "Settlement",
+    "Release",
+    "Adjustment",
+    "AccountingReceipt",
+    "Output",
+    "ProofProjection",
+    "OwnerRefinding",
+    "Repair"
+  ],
+  "hyperedges": [
+    {
+      "id": "SI-01",
+      "name": "exact approval authorizes exact effect",
+      "members": ["Revision", "ApprovalSnapshot", "AssignmentAuthority", "Effect"],
+      "weight": 1.3,
+      "proof_obligations": ["approval revision mismatch fails closed", "accepted effect binds the approved revision"],
+      "proof_status": "unestablished"
+    },
+    {
+      "id": "SI-02",
+      "name": "shared admission through settlement and release",
+      "members": ["Entitlement", "RateWindow", "BudgetReservation", "Command", "ProviderAttempt", "Settlement", "Release"],
+      "weight": 1.5,
+      "proof_obligations": ["cross-worker rate exhaustion", "concurrent reservation conflict", "unused reservation release"],
+      "proof_status": "unestablished"
+    },
+    {
+      "id": "SI-03",
+      "name": "provider identity and durable receipt continuity",
+      "members": ["Effect", "ProviderAttempt", "ProviderIdempotencyKey", "ProviderReceipt"],
+      "weight": 1.4,
+      "proof_obligations": ["one provider identity per effect", "accepted response loss does not redispatch"],
+      "proof_status": "unestablished"
+    },
+    {
+      "id": "SI-04",
+      "name": "accepted effect binds commercial accounting",
+      "members": ["Effect", "ProviderReceipt", "Settlement", "AccountingReceipt"],
+      "weight": 1.5,
+      "proof_obligations": ["accounting rejects missing or mismatched accepted receipt", "accepted usage settles once"],
+      "proof_status": "unestablished"
+    },
+    {
+      "id": "SI-05",
+      "name": "golden work completion and owner refinding",
+      "members": ["Revision", "ApprovalSnapshot", "Effect", "Output", "ProofProjection", "OwnerRefinding"],
+      "weight": 1.5,
+      "proof_obligations": ["output and proof identify the same revision and effect", "owner can refind proof after restart"],
+      "proof_status": "unestablished"
+    },
+    {
+      "id": "SI-06",
+      "name": "ambiguous outcome reconciles before retry",
+      "members": ["AmbiguousOutcome", "ProviderIdempotencyKey", "Reconciliation", "RetryDenial", "ProviderReceipt"],
+      "weight": 1.5,
+      "proof_obligations": ["ambiguous outcome blocks new dispatch", "reconciliation resolves only the original provider identity"],
+      "proof_status": "unestablished"
+    },
+    {
+      "id": "SI-07",
+      "name": "accepted effect proof repair",
+      "members": ["Effect", "ProviderReceipt", "ProofProjection", "Repair", "OwnerRefinding"],
+      "weight": 1.4,
+      "proof_obligations": ["projection failure preserves accepted effect", "repair projects proof without repeating publication"],
+      "proof_status": "unestablished"
+    },
+    {
+      "id": "SI-08",
+      "name": "commercial conservation",
+      "members": ["BudgetReservation", "Settlement", "Release", "Adjustment", "AccountingReceipt"],
+      "weight": 1.3,
+      "proof_obligations": ["reservation commit release and adjustments conserve value", "refund and reversal history is immutable"],
+      "proof_status": "unestablished"
+    }
+  ],
+  "concept_representations": {
+    "atomic commercial admission": ["AssignmentAuthority", "Entitlement", "RateWindow", "BudgetReservation", "Command"],
+    "durable settlement state machine": ["BudgetReservation", "Settlement", "Release", "Adjustment", "AccountingReceipt"],
+    "provider idempotency identity": ["Effect", "ProviderAttempt", "ProviderIdempotencyKey", "AmbiguousOutcome", "Reconciliation", "RetryDenial"],
+    "accepted effect bridge": ["Effect", "ProviderReceipt", "Settlement", "AccountingReceipt"],
+    "refund and reversal ledger": ["BudgetReservation", "Settlement", "Release", "Adjustment", "AccountingReceipt"],
+    "golden completion transaction": ["Revision", "ApprovalSnapshot", "AssignmentAuthority", "Effect", "ProviderReceipt", "Output", "ProofProjection", "OwnerRefinding"],
+    "proof projection repair": ["Effect", "ProviderReceipt", "ProofProjection", "Repair", "OwnerRefinding"],
+    "lineage query": ["Revision", "Effect", "ProviderReceipt", "AccountingReceipt", "ProofProjection", "OwnerRefinding"],
+    "expired reservation sweeper": ["BudgetReservation", "Release", "Repair"],
+    "already-achieved classification": ["Revision", "Output", "ProofProjection", "Repair", "RetryDenial"],
+    "entitlement snapshot": ["AssignmentAuthority", "Entitlement", "Revision"],
+    "fault injection harness": ["ProviderAttempt", "AmbiguousOutcome", "Reconciliation", "Repair"],
+    "reconciliation metrics": ["AmbiguousOutcome", "Reconciliation", "Settlement", "ProofProjection"],
+    "proof refinding surface": ["Revision", "Output", "ProofProjection", "OwnerRefinding"],
+    "commercial conservation assertion": ["BudgetReservation", "Settlement", "Release", "Adjustment", "AccountingReceipt"],
+    "canonical trace generator": []
+  },
+  "coverage_definitions": {
+    "touch": "weighted fraction of software hyperedges with at least one represented member",
+    "fractional": "weighted mean represented-member fraction across software hyperedges",
+    "complete": "weighted fraction of software hyperedges whose every member is represented",
+    "proved": "weighted fraction of complete software hyperedges whose independent behavioral proof status is accepted on the exact candidate"
+  },
+  "evidence_boundary": "Representation is decision-trace coverage. proof_status remains unestablished until exact executable evidence is attached; source or candidate selection cannot set it to accepted."
+}

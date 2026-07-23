@@ -1,22 +1,21 @@
 /**
  * Turn drain lane. Owner chat turns are normally executed on the request path that
- * enqueued them. When a turn arrives while the employee brain is busy it is left
- * queued (its request returns "working on it"); this drain — run from the scheduler —
- * processes those stragglers in FIFO order and delivers each reply out-of-band through
- * the Channel/Session/Presence router, so a queued owner message is never left
- * unanswered. Event-wake turns are not drainable (they deliver inline within their own
- * claim and carry event context that a bare drain lacks); a queued one is failed closed.
+ * enqueued them. When an employee is already busy, this scheduled drain processes
+ * queued owner turns FIFO and projects the same assignment-scoped token stream used
+ * by the immediate Web path.
  */
 import type { SupabaseClient } from "@amtech/db";
 import { ID_PREFIX, newId } from "@amtech/shared";
-import { executeHermesTurnStreaming, resolveRuntimeApi } from "./hermes-client.js";
+import { resolveRuntimeApi } from "./hermes-client.js";
+import { executeHermesTurnLive } from "./hermes-live-turn.js";
 import { claimAnyQueuedTurn, completeEmployeeTurn } from "./turn-queue.js";
 import { routeEmployeeIntent } from "./channel-router.js";
 import { mustWrite } from "./db.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation } from "./metering.js";
 import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
-import { buildOwnerTurnSystemMessage } from "./owner-turn-context.js";
-import { publishProgress } from "./progress-bus.js";
+import { buildOwnerTurnSystemMessage, type OwnerDecisionTurnContext } from "./owner-turn-context.js";
+import { loadApprovalAuthority } from "./approval-authority.js";
+import { publishProgress, type ProgressScope } from "./progress-bus.js";
 import { recoverEmployeeRuntime } from "./runtime-recovery.js";
 
 export interface DrainResult {
@@ -26,7 +25,6 @@ export interface DrainResult {
   error?: string;
 }
 
-/** Owner-chat turns are safe to retry; a straggler is re-run by the drain lane. */
 const MAX_TURN_ATTEMPTS = 5;
 
 async function sleep(ms: number): Promise<void> {
@@ -38,39 +36,83 @@ export interface ReapResult {
   failed: number;
 }
 
-/**
- * Recover turns stuck in `running` because their worker died mid-execution (crash,
- * OOM, redeploy). The claim lease has expired but the job row is still `running`, so
- * the drain lane (which only claims `queued`) never re-picks it and the owner's
- * message is silently lost with no reply and no error. This scheduled reaper requeues
- * owner-chat turns under the attempt budget (the drain lane then re-runs them); past
- * the budget it fails the turn and tells the owner to resend. Event-wake turns carry
- * lost event context and aren't drainable, so they are failed directly.
- */
+async function loadQueuedDecisionContext(db: SupabaseClient, input: {
+  account_id: string;
+  employee_id: string;
+  assignment_id: string;
+  job_input: unknown;
+}): Promise<OwnerDecisionTurnContext | null> {
+  const raw = input.job_input && typeof input.job_input === "object"
+    ? input.job_input as Record<string, unknown>
+    : {};
+  const contextId = typeof raw.decision_context_id === "string" ? raw.decision_context_id : "";
+  const approvalId = typeof raw.approval_id === "string" ? raw.approval_id : "";
+  const ownerMessageId = typeof raw.owner_message_id === "string" ? raw.owner_message_id : "";
+  if (!contextId && !approvalId && !ownerMessageId) return null;
+  if (!contextId || !approvalId || !ownerMessageId) throw new Error("queued_owner_decision_context_incomplete");
+
+  const context = await db.from("channel_decision_contexts")
+    .select("id,approval_id,account_id,employee_id,assignment_id,human_principal_id,status,expires_at")
+    .eq("id", contextId)
+    .eq("approval_id", approvalId)
+    .eq("account_id", input.account_id)
+    .eq("employee_id", input.employee_id)
+    .eq("assignment_id", input.assignment_id)
+    .maybeSingle();
+  if (context.error) throw context.error;
+  if (!context.data?.id) throw new Error("queued_owner_decision_context_scope_mismatch");
+  if (context.data.status !== "open" || Date.parse(String(context.data.expires_at)) <= Date.now()) return null;
+
+  const approval = await loadApprovalAuthority(db, approvalId);
+  if (
+    !approval
+    || approval.status !== "pending"
+    || approval.account_id !== input.account_id
+    || approval.employee_id !== input.employee_id
+    || approval.assignment_id !== input.assignment_id
+  ) return null;
+
+  return {
+    context_id: contextId,
+    approval_id: approval.approval_id,
+    owner_message_id: ownerMessageId,
+    human_principal_id: String(context.data.human_principal_id ?? ""),
+    action_key: approval.action_key,
+    summary: approval.summary,
+    risk_level: approval.risk_level,
+    resource_class: approval.resource_class,
+    resource_id: approval.resource_id,
+    snapshot_hash: approval.snapshot_hash,
+    expires_at: approval.expires_at,
+  };
+}
+
+/** Recover jobs left running after a worker crash without clobbering a late valid completion. */
 export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number } = {}): Promise<ReapResult> {
   const limit = opts.limit ?? 50;
   const nowIso = new Date().toISOString();
   const { data } = await db
     .from("employee_turn_jobs")
-    .select("id,account_id,employee_id,kind,attempts,run_id,lease_token")
+    .select("id,account_id,employee_id,assignment_id,kind,attempts,run_id,lease_token")
     .eq("status", "running")
     .lt("lease_expires_at", nowIso)
     .limit(limit);
-  const stuck = (data ?? []) as Array<{ id: string; account_id?: string | null; employee_id: string; kind: string; attempts?: number; run_id?: string | null; lease_token?: string | null }>;
+  const stuck = (data ?? []) as Array<{
+    id: string;
+    account_id?: string | null;
+    employee_id: string;
+    assignment_id?: string | null;
+    kind: string;
+    attempts?: number;
+    run_id?: string | null;
+    lease_token?: string | null;
+  }>;
   let requeued = 0;
   let failed = 0;
   for (const job of stuck) {
-    // Drop the dead worker's stale lock so the employee is unblocked either way.
     if (job.lease_token) {
       await db.from("employee_turn_locks").delete().eq("employee_id", job.employee_id).eq("lease_token", job.lease_token);
     }
-    // job.lease_token is guaranteed set here (this row was read with
-    // status='running', which only the claim RPC sets, always together with a
-    // lease_token). Guarding both writes below on it (like
-    // complete_employee_turn_job's WHERE clause does) closes a lost-update
-    // race: a worker that's genuinely still finishing right as its lease
-    // crosses the reap threshold must not have its legitimate completion
-    // clobbered back to queued/failed by this scan.
     const isOwnerTurn = job.kind === "owner_web_chat" || job.kind === "owner_sms_chat";
     if (isOwnerTurn && Number(job.attempts ?? 0) < MAX_TURN_ATTEMPTS) {
       const requeuedRows = await mustWrite(
@@ -82,11 +124,7 @@ export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number 
           .select("id"),
         "employee_turn_jobs.reap_requeue",
       );
-      if (!requeuedRows || (requeuedRows as unknown[]).length === 0) {
-        // Lost the race: the job legitimately completed (or was reclaimed)
-        // between our stale-turn scan and this write. Not a real reap.
-        continue;
-      }
+      if (!requeuedRows || (requeuedRows as unknown[]).length === 0) continue;
       requeued += 1;
       continue;
     }
@@ -99,16 +137,13 @@ export async function reapStuckTurns(db: SupabaseClient, opts: { limit?: number 
         .select("id"),
       "employee_turn_jobs.reap_fail",
     );
-    if (!failedRows || (failedRows as unknown[]).length === 0) {
-      // Same lost-race case on the fail path: don't finish/notify a run that
-      // isn't the reaper's to close.
-      continue;
-    }
+    if (!failedRows || (failedRows as unknown[]).length === 0) continue;
     await finishWorkRun(db, job.run_id ?? null, "failed");
     if (isOwnerTurn && job.account_id) {
       await routeEmployeeIntent(db, {
         account_id: job.account_id,
         employee_id: job.employee_id,
+        assignment_id: job.assignment_id ?? null,
         intent_key: `reap:${job.id}`,
         move: "notify",
         text: "I hit a snag finishing your last message and couldn't complete it. Please send it again and I'll pick it right back up.",
@@ -139,6 +174,7 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
         await routeEmployeeIntent(db, {
           account_id: job.account_id,
           employee_id: job.employee_id,
+          assignment_id: job.assignment_id ?? null,
           intent_key: `drain-failed:${job.id}`,
           move: "notify",
           text: "I hit a snag finishing your queued message and couldn't complete it. Please send it again and I'll pick it right back up.",
@@ -148,32 +184,66 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
       results.push({ job_id: job.id, employee_id: job.employee_id, status: "failed", error: "max_turn_attempts_exhausted" });
       continue;
     }
+
     const startedAt = Date.now();
+    const accountId = job.account_id ?? "";
+    const employeeId = job.employee_id;
+    const assignmentId = job.assignment_id ?? "";
+    const runId = job.run_id ?? job.id;
+    const progressScope: ProgressScope | null = accountId && assignmentId
+      ? { account_id: accountId, employee_id: employeeId, assignment_id: assignmentId }
+      : null;
+
     try {
-      // CE-3: rotate before the turn if the transcript is full (under the lock).
-      await rotateSessionIfNeeded(db, { account_id: job.account_id ?? "", employee_id: job.employee_id });
-      const api = await resolveRuntimeApi(db, job.employee_id);
+      if (!progressScope) throw new Error("queued_owner_turn_scope_missing");
+      await rotateSessionIfNeeded(db, { account_id: accountId, employee_id: employeeId });
+      const api = await resolveRuntimeApi(db, employeeId);
       const body = String((job.input as { body?: unknown }).body ?? "");
       const channel = job.kind === "owner_sms_chat" ? "sms" : "web";
-      const accountId = job.account_id ?? "";
-      const employeeId = job.employee_id;
+      const decisionContext = await loadQueuedDecisionContext(db, {
+        account_id: accountId,
+        employee_id: employeeId,
+        assignment_id: assignmentId,
+        job_input: job.input,
+      });
       const systemMessage = await buildOwnerTurnSystemMessage(db, {
         account_id: accountId,
         employee_id: employeeId,
+        assignment_id: assignmentId,
         channel,
+        decision_context: decisionContext,
       });
-      const runId = job.run_id ?? job.id;
-      const execute = () => executeHermesTurnStreaming(api, {
+      const messageId = `assistant:${runId}`;
+
+      const execute = () => executeHermesTurnLive(api, {
         input: body,
         system_message: systemMessage,
         work_run_id: job.run_id ?? null,
-      }, (p) => publishProgress(job.employee_id, { run_id: runId, verb: p.verb, state: p.state }));
+      }, (event) => {
+        if (event.kind === "assistant_delta") {
+          publishProgress(progressScope, {
+            kind: "assistant_delta",
+            run_id: runId,
+            message_id: messageId,
+            sequence: event.sequence,
+            delta: event.delta,
+          });
+          return;
+        }
+        publishProgress(progressScope, {
+          kind: "work_progress",
+          run_id: runId,
+          verb: event.verb,
+          state: event.state,
+        });
+      });
+
       async function executeWithRecovery() {
         try {
           return await execute();
         } catch (err) {
           if (String((err as Error).message ?? err) !== "runtime_unreachable") throw err;
-          publishProgress(employeeId, { run_id: runId, verb: "Restarting employee", state: "started" });
+          publishProgress(progressScope!, { kind: "work_progress", run_id: runId, verb: "Restarting employee", state: "started" });
           await recoverEmployeeRuntime(db, { account_id: accountId, employee_id: employeeId });
           let last: unknown = err;
           for (let attempt = 0; attempt < 12; attempt += 1) {
@@ -188,18 +258,23 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
           throw last;
         }
       }
+
       const turn = await executeWithRecovery();
       await recordExternalRuntimeRun(db, job.run_id ?? null, { provider: "hermes", external_run_id: turn.external_run_id ?? null });
       await recordSessionOccupancy(db, {
-        account_id: job.account_id ?? "", employee_id: job.employee_id,
-        transcript_session_id: api.sessionId, memory_session_key: api.sessionKey,
+        account_id: accountId,
+        employee_id: employeeId,
+        transcript_session_id: api.sessionId,
+        memory_session_key: api.sessionKey,
         usage: turn.usage,
       });
-      const messageId = newId(ID_PREFIX.message);
+      const durableMessageId = newId(ID_PREFIX.message);
       await mustWrite(
         db.from("employee_messages").insert({
-          id: messageId,
-          employee_id: job.employee_id,
+          id: durableMessageId,
+          assignment_id: assignmentId,
+          account_id: accountId,
+          employee_id: employeeId,
           direction: "to_owner",
           source: "employee",
           channel,
@@ -209,19 +284,20 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
         "employee_messages.insert.drain",
       );
       await routeEmployeeIntent(db, {
-        account_id: job.account_id ?? "",
-        employee_id: job.employee_id,
+        account_id: accountId,
+        employee_id: employeeId,
+        assignment_id: assignmentId,
         intent_key: `turn:${job.id}`,
         move: "notify",
         text: turn.text,
-        message_id: messageId,
+        message_id: durableMessageId,
         run_id: job.run_id ?? null,
       });
-      await completeEmployeeTurn(db, job, "succeeded", { reply: turn.text, message_id: messageId });
+      await completeEmployeeTurn(db, job, "succeeded", { reply: turn.text, message_id: durableMessageId });
       await recordToolInvocation(db, {
         run_id: job.run_id ?? null,
-        account_id: job.account_id ?? null,
-        employee_id: job.employee_id,
+        account_id: accountId,
+        employee_id: employeeId,
         tool_name: "drain_owner_turn",
         actor: "manager",
         status: "succeeded",
@@ -229,7 +305,8 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
         provider_proof_id: turn.external_run_id ?? null,
       });
       await finishWorkRun(db, job.run_id ?? null, "succeeded");
-      results.push({ job_id: job.id, employee_id: job.employee_id, status: "delivered" });
+      publishProgress(progressScope, { kind: "run_completed", run_id: runId, status: "succeeded" });
+      results.push({ job_id: job.id, employee_id: employeeId, status: "delivered" });
     } catch (err) {
       const message = String((err as Error).message ?? err);
       await completeEmployeeTurn(db, job, "failed", {}, message);
@@ -244,6 +321,7 @@ export async function drainQueuedTurns(db: SupabaseClient, opts: { limit?: numbe
         error_code: "drain_failed",
       });
       await finishWorkRun(db, job.run_id ?? null, "failed");
+      if (progressScope) publishProgress(progressScope, { kind: "run_completed", run_id: runId, status: "failed" });
       results.push({ job_id: job.id, employee_id: job.employee_id, status: "failed", error: message });
     }
   }

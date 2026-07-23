@@ -1,0 +1,41 @@
+{
+  "hypothesis_updates": {
+    "H01": "modified",
+    "H02": "modified",
+    "H03": "modified",
+    "H04": "confirmed",
+    "H05": "confirmed",
+    "H06": "confirmed",
+    "H07": "modified",
+    "H08": "modified",
+    "H09": "modified",
+    "H10": "contradicted",
+    "H11": "unresolved",
+    "H12": "confirmed",
+    "H13": "confirmed",
+    "H14": "unresolved",
+    "H15": "unresolved",
+    "H16": "confirmed",
+    "H17": "contradicted",
+    "H18": "modified"
+  },
+  "observations": [
+    "one layout planner",
+    "one WorkResource renderer",
+    "one embedded compiler plus validating host",
+    "two active SSE controllers",
+    "three semantic compilation paths",
+    "parallel UI Lab renderer",
+    "unfinished PR36 verifier/compose/workflow"
+  ],
+  "schema": "trace009.task.v1",
+  "seed": 90920260721,
+  "starting_sha": "feb88e1259d0018286e6c06ff77a5c51078a1963",
+  "unknowns": [
+    "operator parity",
+    "browser outcome",
+    "Actions image build",
+    "external signing",
+    "target host"
+  ]
+}

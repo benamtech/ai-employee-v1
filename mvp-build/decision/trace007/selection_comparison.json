@@ -1,0 +1,76 @@
+{
+  "schema": "amtech.trace007.selection-comparison.v3",
+  "status": "recomputed at verification time",
+  "feasible_domain": {
+    "set_size": 16,
+    "candidate_status": "validated",
+    "mandatory_coverage": [
+      "all task_state.basis.workstreams",
+      "all task_state.z_spaces"
+    ],
+    "rule": "Every control and baseline is optimized or sampled inside the same feasible domain. Mandatory coverage is a constraint, not an objective reward."
+  },
+  "objectives": {
+    "full": {
+      "q_bar": 0.45,
+      "software_fractional": 0.15,
+      "software_complete": 0.10,
+      "candidate_edge_touch": 0.05,
+      "separation_mean": 0.08,
+      "von_neumann_entropy": 0.08,
+      "quality_diversity_occupancy": 0.06,
+      "redundancy": -0.08
+    },
+    "no_graph": "full minus software_fractional, software_complete, and candidate_edge_touch",
+    "no_diversity": "full minus separation_mean, von_neumann_entropy, quality_diversity_occupancy, and redundancy",
+    "evidence_baseline": {
+      "contract": "../protocol-v1.json:baseline_contracts.trace007",
+      "membership": "explicit roles; no aliases, name inference, sign inference, or automatic absorption of available dimensions",
+      "aggregation": "weighted semantic group means",
+      "schema_change_behavior": "fail closed on missing required, duplicate, stale nonoptional, unclassified, orientation mismatch, or group multiplicity"
+    },
+    "evaluation_rule": "All selected sets are evaluated with the same full metric vector after optimization. Objective differences establish selection influence only, never better software."
+  },
+  "search": {
+    "algorithm": "deterministic multi-start feasible single-swap local search",
+    "restarts_per_objective": 32,
+    "random_feasible_baselines": 1024,
+    "weight_sensitivity_runs": 32,
+    "weight_perturbation_fraction": 0.20,
+    "search_sensitivity": "report unique optima, objective spread, and pairwise Jaccard stability across restarts",
+    "weight_sensitivity": "report selected-set Jaccard stability and software-coverage stability under bounded weight perturbations"
+  },
+  "required_report": [
+    "baseline_dimensions_used",
+    "same_feasible_domain",
+    "selection_jaccard",
+    "implementation_jaccard",
+    "full_objective_difference",
+    "independent_proof_yield_difference",
+    "causal_improvement"
+  ],
+  "classifications": {
+    "candidate_graph_terms": "descriptive",
+    "software_invariant_graph_terms": "descriptive",
+    "diversity_terms": "computed_at_verification_as_descriptive_or_selection-influencing",
+    "causal_improvement": "unestablished"
+  },
+  "causal_gate": {
+    "required": "equal-feasibility implementation ablation with independent outcomes",
+    "independent_outcomes": [
+      "defects discovered",
+      "complete invariant proof obligations",
+      "implementation coherence",
+      "review defects",
+      "unnecessary scope",
+      "executable verification yield"
+    ],
+    "record": "implementation_ablation.json"
+  },
+  "legacy_correction": {
+    "previous_joint_J": 0.5818732,
+    "previous_utility_control_J": 0.2346884,
+    "reason_invalid_for_causality": "The previous control did not satisfy the same mandatory-coverage feasibility condition, while binary coverage contributed directly to the objective. Candidate-edge touch was also mislabeled as hypergraph completion.",
+    "disposition": "historical descriptive snapshot only"
+  }
+}

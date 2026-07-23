@@ -47,14 +47,16 @@ describe("employee snapshot strict reads", () => {
   });
 
   it("routes every production owner and employee context entry point through strict reads", async () => {
-    const generator = await readFile(join(process.cwd(), "apps/manager/scripts/generate-production-server.mjs"), "utf8");
+    const server = await readFile(join(process.cwd(), "apps/manager/src/server.ts"), "utf8");
     const operatingRoutes = await readFile(join(process.cwd(), "apps/manager/src/lib/onboarding-identity-routes.ts"), "utf8");
     const previews = await readFile(join(process.cwd(), "apps/manager/src/lib/preview-render.ts"), "utf8");
     const mcp = await readFile(join(process.cwd(), "apps/manager/src/lib/mcp-server.ts"), "utf8");
     const brain = await readFile(join(process.cwd(), "apps/manager/src/lib/business-brain.ts"), "utf8");
 
-    expect(generator).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
-    expect(generator).toContain("fetchWorkEventsSinceStrict as fetchWorkEventsSince");
+    expect(server).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
+    expect(server).toContain("fetchWorkEventsSinceStrict as fetchWorkEventsSince");
+    expect(server).toContain("buildEmployeeSnapshot(db, employeeId, accountId, assignmentId)");
+    expect(server).toContain("fetchWorkEventsSince(db, employeeId, accountId, cursor, assignmentId)");
     expect(operatingRoutes).toContain("buildEmployeeSnapshotStrict as buildEmployeeSnapshot");
     expect(operatingRoutes).toContain("buildToolCapabilityCatalog(strictSnapshotClient(db), snapshot)");
     expect(operatingRoutes).toContain("buildOperatingSurfaceState(strictSnapshotClient(db), enriched)");

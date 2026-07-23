@@ -1,0 +1,64 @@
+{
+  "schema": "trace013.implementation-contract.v1",
+  "selected_candidate": "R05",
+  "title": "Minimal complete repository-native software experiment compiler vertical slice",
+  "write_set": [
+    "mvp-build/decision/engine/",
+    "mvp-build/decision/trace013/",
+    "mvp-build/tests/unit/decision-engine-contract.test.ts",
+    "mvp-build/package.json",
+    "mvp-build/scripts/verify-agentic-repository.mjs",
+    "mvp-build/AGENTS.md",
+    "mvp-build/decision/README.md",
+    "mvp-build/decision/representation-contract.md",
+    "mvp-build/decision/active.json",
+    "mvp-build/authority-map.json",
+    "mvp-build/CODEGRAPH.md",
+    "mvp-build/README.md",
+    "mvp-build/production-readiness-program/",
+    "mvp-build/memory/"
+  ],
+  "required_components": {
+    "repository_facts": "Content-address every tracked file and extract observable file, symbol, import, package-script, workflow, test, reference, and authority relations with exact SHA provenance.",
+    "representation_registry": "Register implemented and future dialects with inputs, generator, verifier, admission conditions, supported claims, proof ceiling, cost, and fidelity requirement.",
+    "authority_dag": "Compile authority routing and evidence-class ordering from repository facts.",
+    "dependency_graph": "Compile observed dependency and proof/execution relations from repository facts.",
+    "invariant_hypergraph": "Generate genuine cardinality-three-or-greater joint obligations from source, dependency, test, execution, and authority relations.",
+    "correspondence": "Verify hypergraph membership and provenance against source facts as P2 evidence.",
+    "spectral_certificate": "Compute a deterministic dominant eigenpair of the declared normalized hypergraph operator and verify its residual as a P1 model-property certificate.",
+    "task_diffusion": "Use task-seeded dependency and hypergraph diffusion to rank mandatory context without claiming correctness.",
+    "effect_frontier": "Compile typed first-through-fourth-order relationship effects with direction, evidence, uncertainty, and falsifier.",
+    "task_capsule": "Bind task, exact base, fact/authority/model digests, selected representations, mandatory context, hard invariants, predictions, proof obligations, stop conditions, maximum patch, evidence classes, and blockers.",
+    "plan_admission": "Reject source edits before plan admission and retain immutable experiment-root chronology.",
+    "evaluation": "Run argv-based executable verification, compare changed paths with impact analysis, bind outcomes to predictions, and produce a non-promoting evidence ledger.",
+    "finish": "Require valid certificate, correspondence, capsule, admitted plan, evidence ledger, prediction outcomes, and final transaction envelope.",
+    "query_interface": "Expose deterministic authority, impact, invariant, proof, effect, and evidence queries as JSON.",
+    "self_test": "Exercise start, admit, source edit, evaluate, finish, and verify in an isolated temporary Git repository."
+  },
+  "proof_contract": {
+    "P0": "representation calculation or hypothesis generator",
+    "P1": "machine-verified property of an explicit formal model",
+    "P2": "verified source-to-representation correspondence",
+    "P3": "executable evidence on an exact software candidate",
+    "P4": "external or production acceptance",
+    "nonpromotion": "No class automatically implies a stronger class."
+  },
+  "security_contract": [
+    "No task-time package download.",
+    "No remote mutable skill dependency.",
+    "Verification commands are argv arrays executed without a shell.",
+    "All output paths are confined to the repository root.",
+    "P1 certificates name assumptions, model digest, correspondence digest, tolerance, residual, verifier, and excluded claims.",
+    "Dirty work is rejected by default and never silently reset or stashed."
+  ],
+  "deferred": [
+    "transition-system/model-checking implementation",
+    "SMT integration",
+    "e-graph/equality-saturation implementation",
+    "queueing/control implementation",
+    "Koopman/DMD implementation",
+    "simplicial/Hodge implementation",
+    "learned embeddings",
+    "mandatory enforcement based on causal outcome superiority"
+  ]
+}

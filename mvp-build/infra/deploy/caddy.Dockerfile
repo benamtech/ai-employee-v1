@@ -9,6 +9,6 @@ FROM caddy:2.10-alpine
 ARG AMTECH_GIT_SHA
 LABEL org.opencontainers.image.title="AMTECH Caddy" \
       org.opencontainers.image.revision="${AMTECH_GIT_SHA}" \
-      ai.amtech.runtime="edge"
+      ai.amtech.runtime="caddy"
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy

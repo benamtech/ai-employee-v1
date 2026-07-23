@@ -1,0 +1,79 @@
+{
+  "schema": "trace010.task.v1",
+  "status": "bootstrap_pending_inventory",
+  "repository": "benamtech/ai-employee-v1",
+  "parent_pr": 36,
+  "parent_branch": "agent/ws08-ws09-production",
+  "starting_sha": "65985e8a75737e5485a7eb02514ecaadc67d7bb1",
+  "working_branch": "agent/mvp-build-agentic-overhaul",
+  "mission": "Restructure and rewrite mvp-build as a compact, machine-readable, repository-search-native and experiment-calibrated agentic engineering environment without changing working runtime behavior or promoting evidence classes.",
+  "bound": {
+    "Goal": "one authority system, one active production plan, compact contributor routers, machine-readable topology, preserved provenance and executable drift detection",
+    "NonGoals": [
+      "runtime feature expansion",
+      "provider, target-host, pilot, deployment or production acceptance",
+      "decorative mathematical dependencies",
+      "claims about neural latent state or hidden reasoning"
+    ],
+    "Authority": [
+      "exact source and generated configuration",
+      "tests and scripts",
+      "workflows and exact-head evidence",
+      "ratified requirements",
+      "current source-backed architecture",
+      "historical provenance"
+    ],
+    "EvidenceBoundary": "tracked repository state at starting_sha plus independently retrieved primary research; later CI is a distinct evidence class",
+    "MaximumPatch": "documentation, repository interface, decision tooling, path-safe tests and workflow references required for one coherent mvp-build information-architecture transaction"
+  },
+  "typed_nodes": [
+    "Observation",
+    "Hypothesis",
+    "Counterexample",
+    "Invariant",
+    "Candidate",
+    "Prediction",
+    "Test",
+    "Outcome"
+  ],
+  "allowed_transformations": [
+    "Hypothesis+Evidence->RevisedHypothesis",
+    "Candidate+Counterexample->RejectedCandidate",
+    "Invariant+Generator->ExecutableTest",
+    "Prediction+Outcome->CalibrationUpdate"
+  ],
+  "evidence_labels": [
+    "Observed",
+    "Inferred",
+    "Hypothesis",
+    "Unknown",
+    "NotApplicable"
+  ],
+  "pre_edit_gates": {
+    "complete_tracked_inventory": "pending",
+    "sha256_for_every_tracked_mvp_build_file": "pending",
+    "generated_file_classification": "pending",
+    "reverse_path_reference_index": "pending",
+    "execution_and_generation_path_index": "pending",
+    "file_vectors_with_extraction_rules": "pending",
+    "eight_independent_interpretations": "pending",
+    "at_least_32_unranked_hypotheses": "pending",
+    "software_invariant_hypergraph": "pending",
+    "baseline_before_optional_math": "pending"
+  },
+  "unknowns": [
+    "complete current mvp-build tree",
+    "all path-sensitive callers and workflows",
+    "generated versus retained evidence files",
+    "which explanatory documents remain source-current",
+    "which historical paths require compatibility routers",
+    "whether DPP, spectral, MCTS or Koopman layers add decision utility"
+  ],
+  "prohibitions": [
+    "no non-trace restructure before inventory is generated and committed",
+    "no Unknown value is coerced to zero or confidence",
+    "no representation is reported as proof",
+    "no mathematical layer is causal without equal-feasibility implementation ablation",
+    "no runtime move without reverse-reference and execution-path evidence"
+  ]
+}

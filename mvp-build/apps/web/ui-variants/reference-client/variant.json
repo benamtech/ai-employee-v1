@@ -1,0 +1,21 @@
+{
+  "schema": "amtech.ui-variant.v1",
+  "id": "reference-client",
+  "name": "Reference Client",
+  "summary": "Capability-faithful projection that renders the production Web-client slot without prescribing its appearance as the standard.",
+  "contract_version": 1,
+  "entry": "./index.tsx",
+  "status": "approved",
+  "supported_adapters": ["owner_web", "public_form", "boundless_website"],
+  "capabilities": {
+    "required": ["identity", "runtime", "reference_client"],
+    "optional": ["context", "presentation", "conversation", "work", "attention", "waiting", "changes", "connections", "capabilities", "evidence", "outputs", "intents", "fixture_metadata"],
+    "intentionally_omitted": []
+  },
+  "runtime_features": ["dom", "css", "svg"],
+  "dependencies": ["react"],
+  "isolation": "host_contained",
+  "performance": { "containment": "layout_style", "content_visibility": "visible", "initial_render": "eager" },
+  "production": { "eligibility": "approved", "requires_reference_client": true },
+  "tags": ["reference", "conformance", "production-client"]
+}

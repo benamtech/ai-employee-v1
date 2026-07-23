@@ -1,74 +1,102 @@
-# AGENTS.md — AI Employee Implementation Rules
+# AGENTS.md — executable AI Employee agent interface
 
 Status: active  
-Updated: 2026-07-20
+Updated: 2026-07-23
 
-Root rules and `../CONTRIBUTING.md` apply.
+## Start
 
-## Mandatory read order
-
-1. `../identity.md`
-2. root agent rules, CONTRIBUTING, CODEGRAPH
-3. this file and scoped CODEGRAPH
-4. ratified `STANDARD.md`
-5. single active production program
-6. newest relevant indexed handoff
-7. architecture index
-8. applicable source, migrations, tests, workflows, proof, and diff
-
-## Current implementation state
-
-- New work starts on reviewed branches from current `main`.
-- Merged baseline: PR `#30`, `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`.
-- WS-02 implementation evidence: `6f792eabe44a9ca1e9635fd4fe5329fa7daca6c4`, Standard `29731384034`, Hermes `29731384166`, Main Integration `29731384039`.
-- Broad regression: **109 files / 630 tests**. Migration head: `0072`. Standard: ratified v0.2.
-- Source/CI accepted: streaming-first Hermes/Web, assignment/version-scoped stream, Remote MCP authorization contracts, sealed token custody, MCP Apps host boundary, AG-UI projection/transport, persisted effective capability, and MCP execution interceptor.
-- Live connector/provider, managed database, target-host, fixture-free channel, commercial, recovery, deployment, pilot, and production acceptance remain open.
-
-## Canonical boundary
-
-```text
-trigger → principal → assignment/current authority
-→ durable intent/work → Hermes/deterministic processing
-→ broad discovery + current effective capability
-→ approval → one effect reservation
-→ accepted | failed | ambiguous receipt
-→ replay/repair → role-safe stream/materialization
-```
-
-Hermes owns reasoning, runs, sessions, memory, and runtime-local tool use. Manager owns identity, assignment, authority, connector/token custody, approval, effects, commercial attribution, repair, and proof.
-
-## Connector and protocol rules
-
-- Declarative connector registry/setup owns identity, risk, custody, tools, scopes, hosts, continuation, and owner-safe copy.
-- Unknown/consequential connectors default to Manager custody.
-- Remote protected MCP uses discovered metadata, exact audience, PKCE/state/redirect binding, and sealed Manager token custody.
-- `tools/list` may be broad; `tools/call` is re-authorized using current effective-capability evidence.
-- MCP Apps and AG-UI are bounded projections. They cannot access raw credentials, databases, providers, or direct effects.
-- Harmless text/activity streams immediately. Consequential actions re-enter Manager commands and existing approval/effect boundaries.
-
-## Engineering execution
-
-Every task declares ID, branch, objective, success criteria, files, tests, blockers, commit ceiling, and six rubric scores.
+1. Read `../identity.md`, root `AGENTS.md`, this file, `CODEGRAPH.md`, and `authority-map.json`.
+2. Read `STANDARD.md` plus ratified amendments.
+3. Resolve the current transaction through `decision/active.json`.
+4. For every non-mechanical task, run the repository-owned experiment compiler before source edits:
 
 ```bash
-npm run repo:rubric -- ./task-contract.json
-npm run repo:verify:quick
-npm run repo:verify:full
-npm run test:unit
+node decision/engine/repoctl.mjs start --task <task.json> --out decision/<trace-or-transaction>
 ```
 
-Do not weaken tests. Stop on red CI. Use forward migrations. Treat schemas, fixtures, contracts, harnesses, diagnostics, proof, and runbooks as first-class code.
+5. Use the generated `task-capsule.json` as the machine contract and `TASK-CAPSULE.md` as its compact language view.
+6. Generate candidates, predictions, proof obligations, maximum patch, and argv-based verification in a plan; then admit it before implementation:
 
-## Hermes upstream review
+```bash
+node decision/engine/repoctl.mjs admit-plan --transaction <path> --plan <plan.json>
+```
 
-Before changing Hermes images, launchers, sessions, streaming, tool discovery, runtime capabilities, gateway behavior, or Hermes-derived UI, run `npm run hermes:upstream:check`. Production remains pinned until exact-image release gates pass.
+7. After implementation, run:
 
-## Document authority
+```bash
+node decision/engine/repoctl.mjs evaluate --transaction <path>
+node decision/engine/repoctl.mjs finish --transaction <path>
+```
 
-- `STANDARD.md` — normative requirements.
-- `CODEGRAPH.md` — current topology/evidence boundary.
-- `second-half-plan/README.md` — sole active-plan route.
-- active program — roadmap, issue vector, resolution ledger, workstreams, test authority, WS-02 manifold/closure.
-- `memory/MEMORY.md` — sole handoff index.
-- executable source and exact evidence decide implementation/acceptance.
+8. Stop stronger claims on red exact-head evidence. Never reset, clean, stash, or overwrite user work to satisfy the compiler.
+
+The compiler is vendor-neutral. Claude Code, Codex, Cursor, Pi, local models, deterministic scripts, and humans use the same task capsule, representations, certificates, and evidence ledger.
+
+For UI Lab or full employee UI-variant work, begin at `ui-lab/README.md`, then read `ui-lab/AGENTS.md` and the exact UI trace/source/tests named by the capsule.
+
+## Representation cascade
+
+Every non-mechanical task passes through the selector in `decision/engine/representation-registry.json`.
+
+Always-on substrate:
+
+```text
+content-addressed repository facts
+→ authority/evidence DAG
+→ dependency graph
+→ genuine software-invariant hypergraph
+→ P2 source-to-model correspondence
+→ task-local graph/hypergraph diffusion
+→ typed first-through-fourth-order effect frontier
+→ experiment contract and task capsule
+```
+
+The first specialized representation is a normalized spectral hypergraph operator with a small certificate verifier. Additional state-machine, SMT, e-graph, queueing, Koopman, topology, and embedding dialects activate only when their registered admission conditions and data prerequisites hold.
+
+Natural language is a generated interoperability, review, and audit view. It is not the mandatory reasoning substrate.
+
+## Proof taxonomy
+
+- **P0:** representation calculation, simulation, ranking, or hypothesis.
+- **P1:** machine-verified property of an explicit formal model. Eigenpairs, spectra, solver certificates, model-checker results, and other formal objects may be decisive proof instruments when their assumptions and verifiers pass.
+- **P2:** verified correspondence between the representation and exact repository/source boundary.
+- **P3:** accepted executable evidence on the exact software candidate.
+- **P4:** external or production acceptance.
+
+No class silently promotes itself. A P1 certificate may satisfy a software gate only when a verified P2 correspondence contract makes that implication sound. Causal engineering benefit requires outcomes; external acceptance remains separate.
+
+## Retained artifact requirements
+
+Every retained non-language artifact exposes or links to:
+
+- generator and input digests;
+- schema, dimensions, units, domains, and missing-value semantics;
+- exact source SHA and locations;
+- transformation, algorithm, parameters, seeds, and tolerances;
+- assumptions and admissibility conditions;
+- residuals, parity checks, counterexamples, or held-out validation;
+- exact proof class and excluded claims;
+- a compact language bridge.
+
+Do not retain private chain-of-thought as authority. Retain typed observations, hypotheses, candidates, counterexamples, invariants, predictions, tests, outcomes, representations, transformations, and certificates.
+
+## Queries
+
+Use deterministic JSON queries instead of frontloading the repository into context:
+
+```bash
+node decision/engine/repoctl.mjs query authority --transaction <path> --entity <name>
+node decision/engine/repoctl.mjs query impact --transaction <path> --path <repo-path>
+node decision/engine/repoctl.mjs query invariants --transaction <path> --entity <name>
+node decision/engine/repoctl.mjs query proofs --transaction <path> --hyperedge <id>
+node decision/engine/repoctl.mjs query effects --transaction <path> --depth 4
+node decision/engine/repoctl.mjs query evidence --transaction <path> --claim <id>
+```
+
+## Stable runtime roots and evidence
+
+`apps/`, `packages/`, `infra/`, `tests/`, and `scripts/` are executable roots. Do not move them for documentation aesthetics.
+
+`authority-map.json` routes authority; `CODEGRAPH.md` owns structural status; source, model certificates, unit/integration/CI, managed database, provider, target host, browser/channel/accessibility, commercial, recovery, trusted signing, pilot, deployment, and production are distinct evidence classes.
+
+Before completion, run the applicable compiler verifier, focused proof matrix, repository governance, broad tests, and builds. Record unavailable external gates as blockers, never as passes.

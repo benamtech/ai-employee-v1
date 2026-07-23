@@ -1,170 +1,145 @@
-# 12 — Document Control, Memory, Handoff, and Plan Map
+# 12 — Document Control, Decision, Memory, and Handoff Map
 
-Status: **active repository documentation-routing contract**  
-Updated: 2026-07-20  
-Current baseline: `main@5e5b8d7c7a5e20490d58855ffb4450b13b53cd03`
+Status: active routing contract  
+Updated: 2026-07-20
 
-This document defines authority and routing without physically moving historical Markdown or breaking inbound references.
-
-## One cold-start chain
+## Cold-start chain
 
 ```text
-root identity.md
-→ root AGENTS.md or CLAUDE.md
-→ root CONTRIBUTING.md
-→ root CODEGRAPH.md
-→ mvp-build/AGENTS.md or CLAUDE.md
-→ mvp-build/CODEGRAPH.md
-→ ratified mvp-build/STANDARD.md
-→ mvp-build/second-half-plan/README.md and its one active program
-→ mvp-build/memory/MEMORY.md and newest relevant handoff
-→ docs/architecture/README.md
-→ relevant source, migrations, tests, workflows, proof, current PR, and diff
+identity.md
+→ root AGENTS.md + CONTRIBUTING.md + root CODEGRAPH.md
+→ mvp-build/AGENTS.md + mvp-build/CODEGRAPH.md
+→ STANDARD.md + ratified amendments
+→ decision/README.md + protocol-v1.json
+→ production-readiness-program/README.md + current transaction
+→ exact source, migrations, tests, workflows, and proof
+→ newest relevant indexed handoff when needed
+→ applicable architecture documents
 ```
 
-Do not concatenate every historical handoff or select authority by filename date alone.
+Do not select authority by filename date, concatenate historical handoffs, or treat a score as source truth.
+
+## Contributor-document consolidation
+
+| File | Owns | Must not own |
+|---|---|---|
+| `/AGENTS.md` | repository-wide authority, evidence rules, routing, generic Git discipline | product topology, current PR/SHA, migration head, workstream state |
+| `/mvp-build/AGENTS.md` | product authority invariants and task execution | duplicated exact status or root repository mechanics |
+| `/CLAUDE.md` | short compatibility router to root `AGENTS.md` | independent policy |
+| `/mvp-build/CLAUDE.md` | short compatibility router to scoped `AGENTS.md` | independent policy |
+| `/CODEGRAPH.md` | repository routing and major ownership boundaries | product implementation detail or exact status |
+| `/mvp-build/CODEGRAPH.md` | sole exact product status and executable topology | contributor-policy duplication |
+
+The exact branch, candidate, migration head, workstream status, and gate state must not be maintained in four or more mirrors.
 
 ## Authority classes
 
-### Class 1 — operating and release authority
+### Normative and operating
 
-| File/family | Purpose | Update trigger |
-|---|---|---|
-| `identity.md` | company/product identity | deliberate company/product posture change |
-| root/scoped `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md` | contributor rules and scope routing | repository boundary or execution invariant change |
-| root `CODEGRAPH.md` | repository purpose, current baseline, routing, repository-wide status | branch/product/repository authority change |
-| `mvp-build/CODEGRAPH.md` | implementation topology, source hubs, migration head, evidence boundary | substantial implementation/migration/proof change |
-| `mvp-build/STANDARD.md` | ratified non-waivable product and engineering requirements | approved Standard amendment |
-| `mvp-build/validation/standard-v0.2-evolution-vector.json` | original-to-ratified clause/implementation motion | Standard or implementation-satisfaction change |
-| `mvp-build/second-half-plan/README.md` | sole active-plan index | active program supersession or routing change |
-| active production program | roadmap, issue vector, workstreams, test authority, gates | gate/order/task/evidence change |
-| merged PR `#23` and current task PR | cutover record and current diff/exact-head evidence | branch head or evidence change |
+- `identity.md` — company/product identity.
+- root/scoped `AGENTS.md` — execution contracts.
+- `STANDARD.md` plus ratified amendments — non-waivable requirements.
+- `decision/README.md` and `protocol-v1.json` — decision method.
+- `mvp-build/CODEGRAPH.md` — exact current product topology/status.
+- `production-readiness-program/` — single active dependency/issue/workstream/test/evidence route.
+- source, migrations, generated configuration, executable tests, workflows, deployed proof, and release records — implementation/acceptance truth.
 
-These files must not disagree about baseline, migration head, current plan, Standard status, test state, or production-ready meaning.
+### Explanatory
 
-PR `#23` merged the cutover into `main` on 2026-07-20. Its final evidence head was `d131dd09`; merge SHA `5e5b8d7` is the current `main` baseline. `employee-production-tuesday` and `research` are historical context.
+- `docs/architecture/`;
+- current UX/runtime derivations;
+- canonical runbooks.
 
-### Class 2 — current explanatory authority
+These explain current source. They do not establish stronger evidence.
 
-- `mvp-build/docs/architecture/README.md` and indexed current companions;
-- `mvp-build/docs/architecture/16-standard-research-basis-and-protocol-disposition.md`;
-- `mvp-build/docs/ux/`;
-- canonical production runbooks.
+### Decision records
 
-These explain source and requirements. They do not establish deployed acceptance.
+- one active `decision/traceNNN/` per consequential transaction;
+- candidate graph and software invariant hypergraph remain separate;
+- complete prior traces are historical evidence;
+- incomplete duplicate transports are removed;
+- computation selects/describes work and records non-causality when it does not beat the simple baseline.
 
-### Class 3 — durable narrative and factual evidence
+### Narrative evidence
 
-- `mvp-build/memory/` — dated handoffs; indexed only by `memory/MEMORY.md`;
-- `wiki/MVP/implementation-records/` — historical factual implementation/proof ledger;
-- exact CI artifacts and release records.
+- `memory/` contains dated handoffs; `MEMORY.md` is the sole index;
+- `wiki/MVP/implementation-records/` is point-in-time factual history;
+- exact CI artifacts and release records retain their original candidate scope.
 
-Point-in-time evidence never carries forward automatically.
+Point-in-time evidence does not carry forward automatically.
 
-### Class 4 — historical plans and research
+### Historical plans and audits
 
-- `mvp-build/second-half-plan/phase-2-standard-remediation-execution.md`;
-- `mvp-build/second-half-plan/2026-07-20-capability-production-closure/`;
-- `mvp-build/second-half-plan/phase-00-*` through `phase-06-*`;
-- `mvp-build/second-half-plan/context-engineering/`;
-- `wiki/MVP/build-plan-current/` and `wiki/MVP/old-build-plan/`;
-- older architecture, UX, handoff, research, and implementation-record packets.
+- `second-half-plan/` is historical and non-canonical;
+- old audits, architecture packets, and handoffs remain readable as provenance;
+- obsolete active-looking entrypoints become routing stubs or archives rather than rewritten pseudo-current documents.
 
-Historical materials remain readable and retain their original facts. Their indexes or banners route current work to Class 1.
+## Active route
 
-## Root and scoped responsibilities
+```text
+production-readiness-program/README.md
+├─ 04-dependency-ordered-production-plan.md
+├─ 08-production-issue-vector.json
+├─ 13-resolution-ledger.json
+├─ 09-workstream-execution-map.md
+├─ 20-ws06-ws08-commercial-effect-transaction.md
+├─ 10-test-suite-disposition.md
+└─ 07-verification-and-handoff-matrix.md
 
-### Root `CODEGRAPH.md`
-
-Owns repository boundary, canonical product/offer, root read order, current `main` baseline, reviewed-branch rule, current Standard/plan route, evidence headline, and repository-wide invariants.
-
-### `mvp-build/CODEGRAPH.md`
-
-Owns executable topology, source hubs, migration head, connector/protocol state, database evidence ladder, current proof boundary, and dependency gates.
-
-### `mvp-build/STANDARD.md`
-
-Owns non-waivable requirements and evidence vocabulary. It does not contain current incident narrative or detailed task sequencing.
-
-### Active production program
-
-Owns the sole dependency order, issue vector, workstream contracts, test-suite disposition, exit criteria, stop rules, and handoff matrix. No other plan file is current execution authority.
-
-### Memory
-
-Owns narrative: what changed, why, incidents, unresolved risks, exact proof, and next-agent handoff. `MEMORY.md` is the sole index.
-
-### Wiki
-
-Owns strategy, rationale, research history, historical plans, and factual records. A wiki page does not become implementation authority because it is newer or more detailed.
-
-## Plan-family decision
-
-The active program is:
-
-`mvp-build/second-half-plan/2026-07-19-ratified-standard-production-program/`
-
-Its canonical execution files are:
-
-- `04-dependency-ordered-production-plan.md`;
-- `08-production-issue-vector.json` and `.md`;
-- `09-workstream-execution-map.md`;
-- `10-test-suite-disposition.md`.
-
-Superseded plans remain in place. `mvp-build/second-half-plan/README.md` is the only current plan selector. Creating another “current” plan without updating that index and explicitly superseding the prior active program in the same transaction is prohibited.
-
-## Handoff selection
-
-After the Class 1 cold start, select only handoffs relevant to the subsystem:
-
-| Work | Current handoff requirement | Optional history |
-|---|---|---|
-| Standard/plan/docs | newest post-merge roadmap handoff | ratification/Gate 0 and prior document-authority handoffs |
-| connector/MCP/protocol | newest post-merge roadmap plus ratification handoff | Hermes/UI congruence and MCP/tool records |
-| database/migrations | newest post-merge roadmap plus ratification handoff | production-boundary and lane records |
-| runtime/network/deploy | newest post-merge roadmap handoff | reconciler and production-run handoffs |
-| UI/generated work | newest post-merge roadmap handoff | UI/runtime and generative UI predecessors |
-| authority/approval/effects | newest post-merge roadmap plus ratification handoff | S2–S9 and Lane 1/Lane 3 predecessors |
-
-Verify every carried-forward claim against current source and exact proof.
+decision/trace007/
+├─ candidate_population.json
+├─ candidate_graph.json
+├─ software_invariant_hypergraph.json
+├─ selection_comparison.json
+├─ selected_implementation.json
+├─ implementation_ablation.json
+├─ verification_plan.json
+└─ compute.py
+```
 
 ## Update transaction
 
-A substantial source, Standard, plan, or status change is complete only when applicable layers are synchronized:
-
 ```text
-source/migration/test/workflow when implementation changed
-→ Standard/vector when normative motion changed
-→ active program when dependency/order/evidence changed
-→ issue/workstream/test maps
-→ architecture/UX explanation
-→ scoped CODEGRAPH
-→ root CODEGRAPH/README/contributor routing when repository status changed
-→ one dated memory handoff
-→ memory/MEMORY.md
-→ wiki/root supersession routing only when stale readers could be misled
-→ exact-head workflows
-→ current PR or merged-release record
+authority/evidence/Unknown extraction
+→ baseline, candidate matrix, topology, controls, sensitivity
+→ implementation compression and proof plan
+→ source / migrations / behavioral tests / workflows
+→ active trace
+→ program issue/workstream/test/evidence maps
+→ mvp-build/CODEGRAPH exact status
+→ architecture explanation
+→ root routing only when ownership changes
+→ one dated handoff and MEMORY.md
+→ PR or release record
 ```
 
-A documentation-only SHA does not inherit an ancestor's workflow matrix. Curated suite success does not prove a known red broad aggregate.
+A current claim is incomplete when any required map points to another candidate, migration, workstream state, trace, or evidence class.
+
+## Governance boundary
+
+Repository governance validates:
+
+- required authority routes exist;
+- JSON schemas and references are valid;
+- compressed trace payloads decode and hash correctly;
+- candidate and software topology semantics are distinct;
+- software edges have behavioral proof mappings;
+- evidence classes do not promote;
+- exact product status is not duplicated;
+- deterministic verification entrypoints exist.
+
+It does **not** hard-pin PR numbers, SHAs, migration values, issue counts, selected candidate IDs, objective values, causal labels, or prose fragments.
 
 ## Anti-context-rot rules
 
-- One ratified Standard.
-- One active production program.
-- One memory index.
-- CODEGRAPH is a current map, not an incident journal.
-- Memory is a handoff layer, not a competing plan.
-- Historical records are not rewritten to appear current.
-- Dates and filenames do not determine authority.
-- Current claims use exact source/evidence instead of copied historical pass counts.
-- Stale point-in-time audits receive supersession routing.
-- Repository archaeology detects candidate stale references; human/source review decides whether they are defects.
-- A merged PR or branch cannot remain described as current active work.
-
-## Completion predicate
-
-Gate 0 document resolution remains complete when root/scoped/wiki indexes route to ratified Standard v0.2 and one active program, old plans are explicitly historical, terminology matches current source/research disposition, and exact evidence does not claim unclosed live gates.
-
-`AMTECH-P0-PLAN-003` completes when the post-merge baseline, expanded roadmap, issue vector, workstream map, test disposition, architecture, memory, governance checks, and current PR agree on one final candidate.
+1. One Standard family.
+2. One decision protocol.
+3. One active production program.
+4. One active trace per active transaction.
+5. One exact product-status owner.
+6. One memory index.
+7. Compatibility files route; they do not mirror policy.
+8. Memory is a handoff layer, not a second plan.
+9. Historical material remains point-in-time evidence.
+10. Unknown stays Unknown.
+11. Documentation, computation, source, fixtures, local tests, and ancestor evidence do not prove stronger gates.

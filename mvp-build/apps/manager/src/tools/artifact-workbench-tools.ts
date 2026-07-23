@@ -11,6 +11,7 @@ import {
   verifyArtifactPublication,
 } from "../lib/artifact-revisions.js";
 import { executeApprovedAction, loadApprovalAuthority } from "../lib/approval-authority.js";
+import { loadArtifactEffectProofs, projectArtifactEffectProof } from "../lib/effect-proof-projection.js";
 
 export const ARTIFACT_WORKBENCH_TOOL_NAMES = [
   "create_artifact_revision",
@@ -83,13 +84,21 @@ async function authority(
 
 const createRevision: ToolHandler = async (ctx, raw) => {
   const input = raw as {
-    account_id: string; employee_id: string; artifact_id?: string; kind: string;
-    payload: Record<string, unknown>; mime_type?: string; storage_ref?: string;
-    source_manifest?: Record<string, unknown>; created_run?: string;
+    account_id: string;
+    employee_id: string;
+    artifact_id?: string;
+    kind: string;
+    payload: Record<string, unknown>;
+    mime_type?: string;
+    storage_ref?: string;
+    source_manifest?: Record<string, unknown>;
+    created_run?: string;
   };
   const authorized = await authority(ctx, input, "artifact:create");
   if (!authorized.ok) return failed("unauthorized", "Artifact revision is outside this assignment.", {
-    account_id: input.account_id, employee_id: input.employee_id, assignment_id: ctx.assignment_id ?? null,
+    account_id: input.account_id,
+    employee_id: input.employee_id,
+    assignment_id: ctx.assignment_id ?? null,
     proof: { denial_reason: authorized.reason },
   });
   try {
@@ -109,7 +118,11 @@ const createRevision: ToolHandler = async (ctx, raw) => {
       action: "tool:create_artifact_revision",
       resource: revision.artifact_id,
       result: "ok",
-      details: { revision_id: revision.revision_id, revision_number: revision.revision_number, content_sha256: revision.content_sha256 },
+      details: {
+        revision_id: revision.revision_id,
+        revision_number: revision.revision_number,
+        content_sha256: revision.content_sha256,
+      },
     });
     return ok({
       assignment_id: authorized.assignment.assignment_id,
@@ -133,12 +146,22 @@ const createRevision: ToolHandler = async (ctx, raw) => {
 
 const validateRevision: ToolHandler = async (ctx, raw) => {
   const input = raw as {
-    account_id: string; employee_id: string; artifact_id: string; revision_id?: string;
-    validations: Array<{ validator_key: string; status: "passed" | "failed" | "warning" | "skipped"; summary: string; evidence?: Record<string, unknown> }>;
+    account_id: string;
+    employee_id: string;
+    artifact_id: string;
+    revision_id?: string;
+    validations: Array<{
+      validator_key: string;
+      status: "passed" | "failed" | "warning" | "skipped";
+      summary: string;
+      evidence?: Record<string, unknown>;
+    }>;
   };
   const authorized = await authority(ctx, input, "artifact:render");
   if (!authorized.ok) return failed("unauthorized", "Artifact validation is outside this assignment.", {
-    account_id: input.account_id, employee_id: input.employee_id, assignment_id: ctx.assignment_id ?? null,
+    account_id: input.account_id,
+    employee_id: input.employee_id,
+    assignment_id: ctx.assignment_id ?? null,
     proof: { denial_reason: authorized.reason },
   });
   const result = await validateArtifactRevision(ctx.db, {
@@ -177,7 +200,10 @@ const getHistory: ToolHandler = async (ctx, raw) => {
   const input = raw as { account_id: string; employee_id: string; artifact_id: string };
   const authorized = await authority(ctx, input, "artifact:render");
   if (!authorized.ok) return failed("unauthorized", "Artifact history is outside this assignment.");
-  const history = await loadArtifactRevisionHistory(ctx.db, input.artifact_id, authorized.assignment.assignment_id);
+  const [history, effectProofs] = await Promise.all([
+    loadArtifactRevisionHistory(ctx.db, input.artifact_id, authorized.assignment.assignment_id),
+    loadArtifactEffectProofs(ctx.db, input.artifact_id, authorized.assignment.assignment_id),
+  ]);
   return ok({
     assignment_id: authorized.assignment.assignment_id,
     account_id: input.account_id,
@@ -186,10 +212,12 @@ const getHistory: ToolHandler = async (ctx, raw) => {
       artifact_id: input.artifact_id,
       revision_count: history.revisions.length,
       validation_count: history.validations.length,
+      effect_proof_count: effectProofs.length,
       revisions_json: JSON.stringify(history.revisions),
       validations_json: JSON.stringify(history.validations),
+      effect_proofs_json: JSON.stringify(effectProofs),
     },
-    user_facing_summary_hint: `Loaded ${history.revisions.length} artifact revisions.`,
+    user_facing_summary_hint: `Loaded ${history.revisions.length} artifact revisions and ${effectProofs.length} durable effect proofs.`,
   });
 };
 
@@ -203,9 +231,15 @@ const publishSandbox: ToolHandler = async (ctx, raw) => {
   }
   if (approval.action_key !== "publish_artifact_sandbox" || String(approval.resource_class) !== "artifact" || approval.resource_id !== input.artifact_id) {
     return failed("unauthorized", "Approval does not authorize this artifact publish.", {
-      proof: { approval_action_key: approval.action_key, approval_resource_class: String(approval.resource_class), approval_resource_id: approval.resource_id },
+      proof: {
+        approval_action_key: approval.action_key,
+        approval_resource_class: String(approval.resource_class),
+        approval_resource_id: approval.resource_id,
+      },
     });
   }
+
+  let acceptedReceiptId: string | null = null;
   try {
     const execution = await executeApprovedAction(ctx.db, {
       approval_id: input.approval_id,
@@ -228,6 +262,15 @@ const publishSandbox: ToolHandler = async (ctx, raw) => {
         };
       },
     });
+    acceptedReceiptId = execution.receipt_id;
+    const projection = await projectArtifactEffectProof(ctx.db, {
+      assignment_id: authorized.assignment.assignment_id,
+      effect_receipt_id: execution.receipt_id,
+      approval_id: input.approval_id,
+      artifact_id: input.artifact_id,
+      revision_id: execution.result.revision_id,
+      publication_ref: execution.result.publication_ref,
+    });
     const audit_id = await writeAudit(ctx.db, {
       assignment_id: authorized.assignment.assignment_id,
       account_id: input.account_id,
@@ -236,24 +279,69 @@ const publishSandbox: ToolHandler = async (ctx, raw) => {
       action: "tool:publish_artifact_sandbox",
       resource: input.artifact_id,
       result: "ok",
-      details: { approval_id: input.approval_id, effect_receipt_id: execution.receipt_id, replayed: execution.replayed },
+      details: {
+        approval_id: input.approval_id,
+        revision_id: execution.result.revision_id,
+        effect_receipt_id: execution.receipt_id,
+        effect_proof_projection_id: projection.id,
+        replayed: execution.replayed,
+      },
     });
     return ok({
       assignment_id: authorized.assignment.assignment_id,
       account_id: input.account_id,
       employee_id: input.employee_id,
-      changed_resources: [`artifact:${input.artifact_id}`, `effect_receipt:${execution.receipt_id}`],
-      proof: { ...execution.result, approval_id: input.approval_id, effect_receipt_id: execution.receipt_id, idempotent: execution.replayed },
-      user_facing_summary_hint: execution.replayed ? "The approved artifact was already published to the sandbox." : "Artifact published to the approved sandbox target.",
+      changed_resources: [
+        `artifact:${input.artifact_id}`,
+        `effect_receipt:${execution.receipt_id}`,
+        `effect_proof_projection:${projection.id}`,
+      ],
+      proof: {
+        ...execution.result,
+        approval_id: input.approval_id,
+        effect_receipt_id: execution.receipt_id,
+        effect_proof_projection_id: projection.id,
+        owner_proof_ref: projection.proof_ref,
+        proof_projection_state: projection.state,
+        idempotent: execution.replayed,
+      },
+      user_facing_summary_hint: execution.replayed
+        ? "The exact approved artifact effect already existed; its owner proof is now projected."
+        : "Artifact published to the approved sandbox target with durable owner proof.",
       next_suggested_action: "Verify the published target and record the observation receipt.",
       audit_id,
     });
   } catch (error) {
-    return failed("provider_error", "Approved artifact publish did not complete.", {
+    const message = String((error as Error).message ?? error);
+    const audit_id = await writeAudit(ctx.db, {
       assignment_id: authorized.assignment.assignment_id,
       account_id: input.account_id,
       employee_id: input.employee_id,
-      proof: { failure_reason: String((error as Error).message ?? error) },
+      actor: ctx.actor,
+      action: "tool:publish_artifact_sandbox",
+      resource: input.artifact_id,
+      result: "failed",
+      details: {
+        approval_id: input.approval_id,
+        accepted_effect_receipt_id: acceptedReceiptId,
+        proof_projection_pending: Boolean(acceptedReceiptId),
+        failure_reason: message,
+      },
+    });
+    return failed("provider_error", acceptedReceiptId
+      ? "The exact approved artifact effect was accepted, but owner proof projection is pending repair. Retry resumes proof projection without republishing."
+      : "Approved artifact publish did not complete.", {
+      assignment_id: authorized.assignment.assignment_id,
+      account_id: input.account_id,
+      employee_id: input.employee_id,
+      audit_id,
+      proof: {
+        failure_reason: message,
+        approval_id: input.approval_id,
+        effect_receipt_id: acceptedReceiptId,
+        effect_accepted: Boolean(acceptedReceiptId),
+        proof_projection_pending: Boolean(acceptedReceiptId),
+      },
     });
   }
 };
@@ -284,7 +372,7 @@ const verifyPublication: ToolHandler = async (ctx, raw) => {
       changed_resources: [`artifact:${input.artifact_id}`, `artifact_validation:${result.receipt_id}`],
       proof: result,
       user_facing_summary_hint: "Published artifact verification passed.",
-      next_suggested_action: "Present the verified artifact and receipts to the owner.",
+      next_suggested_action: "Present the verified artifact, accepted effect receipt, and owner proof to the owner.",
       audit_id,
     });
   } catch (error) {

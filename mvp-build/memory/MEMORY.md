@@ -1,69 +1,31 @@
-# mvp-build durable memory — index and writing protocol
+# AMTECH Memory Index — newest first
 
-Status: active  
-Updated: 2026-07-20
+Status: active handoff index  
+Updated: 2026-07-23
 
-This folder is the versioned narrative handoff layer. `MEMORY.md` is the sole index.
+Read only the newest entry relevant to the task, then verify it against current source, migrations, tests, workflows, certificates, PRs, and the active program. Memory is narrative handoff, not normative or acceptance authority.
 
-## Current branch note
+1. [`2026-07-23-trace013-experiment-compiler-and-stack-ready.md`](2026-07-23-trace013-experiment-compiler-and-stack-ready.md) — repository-native software experiment compiler, P1/P2/P3 proof chain, retrospective benchmark, Trace013 closure, Trace014 reservation, and top-down stack operation.
+2. [`2026-07-23-stack-reconciliation-and-main-readiness.md`](2026-07-23-stack-reconciliation-and-main-readiness.md) — pre-Trace013 authority and stack cleanup; subordinate to the newer compiler handoff.
+3. [`2026-07-20-ws01-ws07-production-boundary-cleanup.md`](2026-07-20-ws01-ws07-production-boundary-cleanup.md) — typed Manager, authority interception, commercial substrate, and migration history.
+4. [`2026-07-20-ws07-loose-ends-topology-and-document-authority.md`](2026-07-20-ws07-loose-ends-topology-and-document-authority.md) — Trace007 topology split and baseline semantics.
+5. [`2026-07-20-ws05-owner-runtime-and-program-relocation.md`](2026-07-20-ws05-owner-runtime-and-program-relocation.md) — owner runtime and program relocation.
+6. [`2026-07-20-ws04-destructive-host-failure-verification.md`](2026-07-20-ws04-destructive-host-failure-verification.md) — host lifecycle history.
+7. [`2026-07-20-post-merge-production-roadmap-reconciliation.md`](2026-07-20-post-merge-production-roadmap-reconciliation.md) — historical roadmap reconciliation.
+8. [`2026-07-20-ws02-mirror-cabinet-streaming-protocol-hardening.md`](2026-07-20-ws02-mirror-cabinet-streaming-protocol-hardening.md) — WS-02 history.
+9. [`2026-07-20-ws02-runtime-ui-capability-boundary.md`](2026-07-20-ws02-runtime-ui-capability-boundary.md) — WS-02 runtime/UI history.
+10. [`2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md`](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Standard ratification history.
 
-- New work starts on reviewed branches from current `main`.
-- Merged baseline: current `main@1eb8ad82bd76116b6fa20aaf2bfc5647181db366`.
-- PR `#31` is the current reviewed WS-02 branch and is not merged at this document transaction.
-- WS-01 evidence: `1460960f415fafc20582313b1dd2117b781a63f7`, broad 106/613.
-- Hardened WS-02 implementation evidence: `16dc18e0535ac14f867875989dfe5aee596f89c0`.
-- Exact implementation workflows: Standard `29735429854`, Hermes `29735429873`, Main Integration `29735429859`.
-- Broad current aggregate: **110 files / 635 tests**. Migration head: `0072`. Standard: ratified v0.2.
-- Source/CI accepted: WS-01, provider authority, assignment-scoped streaming Web, remote MCP auth/custody, MCP Apps CSP/host mediation, AG-UI, persisted effective capability, and final MCP policy/version execution revalidation.
-- Remaining WS-02: live connector/provider lifecycle and external protocol-host evidence (`ISS-011`).
-- WS-03 P0 is prepared in active-program documents `17` and `18`, but implementation has not started.
-- Current source/CI must not be promoted into managed database, target host, fixture-free channel, commercial, recovery, deployment, pilot, or production acceptance.
+## Current routing
 
-## Read order
+- Product identity: `../../identity.md`.
+- Repository contract: `../../AGENTS.md`.
+- Product contract and status: `../AGENTS.md`, `../CODEGRAPH.md`.
+- Machine authority: `../authority-map.json`.
+- Decision state: `../decision/active.json`.
+- Experiment compiler: `../decision/engine/repoctl.mjs`.
+- Active program: `../production-readiness-program/README.md`.
+- Architecture: `../docs/architecture/README.md`.
+- Historical plans: `../second-half-plan/`.
 
-Read CODEGRAPH, Standard, active program, architecture, then the newest relevant handoff. Verify carried claims against current source and exact evidence. Do not concatenate all historical handoffs.
-
-## Index — newest first
-
-### Current production boundary
-
-- [2026-07-20 — WS-02 Mirror Cabinet hardening and WS-03 frontier](2026-07-20-ws02-mirror-cabinet-hardening-ws03-frontier.md) — Exact-head correction, assignment-scoped live projection, current authority revalidation, MCP App CSP/protocol mediation, AG-UI error hardening, 110/635 evidence, documentation ownership map, and guarded WS-03 P0 preparation.
-- [2026-07-20 — WS-02 streaming and protocol source/CI closure](2026-07-20-ws02-streaming-protocol-source-ci-closure.md) — Original streaming employee OS, Remote MCP authorization/custody, MCP Apps, AG-UI, effective capability, manifold, and source/CI evidence record; superseded for hardening details by the entry above.
-- [2026-07-20 — WS-01 green and WS-02 provider-authority lock](2026-07-20-ws01-green-ws02-provider-authority-lock.md) — Broad-suite normalization, CI de-bloat, and Model Gateway authority lock.
-- [2026-07-20 — Post-merge roadmap CI closure](2026-07-20-post-merge-roadmap-ci-closure.md) — PR `#29` planning evidence.
-- [2026-07-20 — Post-merge production roadmap reconciliation](2026-07-20-post-merge-production-roadmap-reconciliation.md) — 38-issue/nine-workstream roadmap baseline.
-- [2026-07-20 — Standard v0.2 ratification and protocol reorientation](2026-07-20-standard-v0.2-ratification-and-protocol-reorientation.md) — Ratified protocol predecessor.
-- [2026-07-20 — Capability surface CI closure](2026-07-20-capability-surface-ci-closure-and-next-plan.md) — migration `0072` predecessor.
-- [2026-07-19 — Final document authority and production handoff](2026-07-19-final-document-authority-infra-test-production-handoff.md).
-- [2026-07-19 — Repository archaeology and agent orientation](2026-07-19-repository-archaeology-architecture-and-agent-orientation.md).
-- [2026-07-19 — Hermes/WebUI congruence](2026-07-19-hermes-webui-ui-congruence-pass.md).
-- [2026-07-19 — UI/runtime production readiness](2026-07-19-ui-runtime-production-readiness-handoff.md).
-- [2026-07-18 — S2–S9 authority/runtime checkpoint](2026-07-18-s2-s9-authority-runtime-checkpoint.md).
-
-### Standard remediation and integration history
-
-- [2026-07-18 — CI-green production plan digest](2026-07-18-ci-green-plan-digest.md)
-- [2026-07-18 — Lane 1 scope and Lane 10 evidence](2026-07-18-lane1-scope-lane10-evidence-spine.md)
-- [2026-07-18 — Lane 3 integration cleanup](2026-07-18-lane3-integration-and-repository-boundary-cleanup.md)
-- [2026-07-18 — Standard remediation checkpoint](2026-07-18-standard-remediation-lane1-lane3-handoff.md)
-- [2026-07-18 — Standard enforcement audit](2026-07-18-amtech-phase-2-standard-enforcement-audit.md)
-
-### Runtime/deployment/event history
-
-- [2026-07-17 — Employee-work reconciler](2026-07-17-employee-work-production-boundary-reconciler-pass.md)
-- [2026-07-17 — Production sequence/generative UI](2026-07-17-production-next-sequence-and-generative-ui-reconciliation.md)
-- [2026-07-17 — WS1/WS2 documentation reconciliation](2026-07-17-ws1-ws2-documentation-reconciliation-and-website-frontier.md)
-- [2026-07-16 — WS1/WS2 production boundary](2026-07-16-ws1-ws2-production-boundary-pass.md)
-- [2026-07-16 — Production overlay](2026-07-16-2000-prod-env-overlay-system.md)
-- [2026-07-16 — Web runtime recovery](2026-07-16-1323-web-message-runtime-recovery.md)
-- [2026-07-16 — Full live production predecessor](2026-07-16-0538-provisioner-failure-live-production-handoff.md)
-
-## Status vocabulary
-
-`planned`, `research-specified`, `source-wired`, `locally-proven`, `ci-accepted`, `database-accepted`, `runtime-accepted`, `provider-accepted`, `browser/channel-accepted`, `commercial-accepted`, `live-accepted`, `production-ready`, `blocked`, `failed`, `pending`.
-
-Never infer live acceptance from source, mocks, fixtures, manually injected events, old hosts, or historical counts.
-
-## Writing protocol
-
-A substantial handoff records coordinates, purpose/invariant, exact changes, before/after behavior, external effects, evidence state, exact tests/workflows, failed attempts, unresolved risks, next dependency move, and synchronized authority documents.
+Do not concatenate handoffs into a synthetic current plan. Resolve conflicts using the evidence hierarchy and executable compiler artifacts.

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@amtech/db";
-import { OnboardingManifest } from "@amtech/shared";
+import { compileAdaptiveConnectorPlan, OnboardingManifest } from "@amtech/shared";
 import type { EmployeeSnapshot } from "./employee-stream.js";
 import { buildProfileContext } from "./profile-context.js";
 import { orThrow } from "./db.js";
@@ -92,11 +92,22 @@ export async function buildBusinessBrainIndex(db: SupabaseClient, input: {
     })),
   })) ?? [];
 
+  const activationPlan = compileAdaptiveConnectorPlan(parsedManifest.success ? {
+    business_kind: parsedManifest.data.business_kind,
+    business_description: `${parsedManifest.data.business_display_name} ${parsedManifest.data.seven_question_answers?.business ?? ""}`,
+    tools_mentioned: parsedManifest.data.tools_mentioned,
+    top_workflows: parsedManifest.data.top_workflows,
+    connected_connector_keys: (snapshot?.connectors ?? []).map((connector) => String(connector.connector_key || connector.provider)),
+  } : {
+    connected_connector_keys: (snapshot?.connectors ?? []).map((connector) => String(connector.connector_key || connector.provider)),
+  });
+
   return {
     brain_index: {
       profile_package: packageKey,
       employee_status: employee.status ?? "unknown",
       context_slots: contextSlots,
+      activation_plan: activationPlan,
       native_memory: {
         status: buildRow?.install_status === "installed" ? "rendered" : "pending",
         memory_md: "memories/MEMORY.md",
@@ -124,6 +135,7 @@ export async function buildBusinessBrainIndex(db: SupabaseClient, input: {
       open_approval_count: snapshot?.approvals.length ?? 0,
       work_queue_count: (snapshot?.tasks ?? []).length,
       capability_count: (snapshot?.capabilities ?? []).length,
+      activation_recommendation_count: activationPlan.recommendations.filter((item) => item.recommendation_class === "activate_now" || item.recommendation_class === "high_gain").length,
     },
   };
 }

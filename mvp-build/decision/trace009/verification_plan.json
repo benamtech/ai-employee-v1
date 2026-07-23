@@ -1,0 +1,95 @@
+{
+  "mapping": {
+    "E_authority_machine": {
+      "behavioral_test": "tests/unit/trace009-authority-machine.test.ts",
+      "evidence_status": "planned",
+      "fitness_function": "scripts/verify-ui-architecture.mjs",
+      "review_question": "Does exact candidate preserve E_authority_machine without evidence promotion?",
+      "state_machine": [
+        "SnapshotAuthority",
+        "StreamAuthority",
+        "Approval",
+        "Effect",
+        "Ambiguity",
+        "RetryPermission",
+        "ReceiptOracle",
+        "ProofOracle",
+        "Isolation"
+      ]
+    },
+    "E_executable_governance": {
+      "behavioral_test": "tests/unit/trace009-executablgovernance.test.ts",
+      "evidence_status": "planned",
+      "fitness_function": "scripts/verify-ui-architecture.mjs",
+      "review_question": "Does exact candidate preserve E_executable_governance without evidence promotion?",
+      "state_machine": [
+        "StateMachine",
+        "BehavioralTest",
+        "ReviewQuestion",
+        "FitnessFunction",
+        "ADR",
+        "UncoveredCombinations"
+      ]
+    },
+    "E_experiment_conformance": {
+      "behavioral_test": "tests/unit/trace009-experiment-conformance.test.ts",
+      "evidence_status": "planned",
+      "fitness_function": "scripts/verify-ui-architecture.mjs",
+      "review_question": "Does exact candidate preserve E_experiment_conformance without evidence promotion?",
+      "state_machine": [
+        "SameTruth",
+        "SameAuthority",
+        "SameActions",
+        "PresentationPolicy",
+        "UILab",
+        "ProductionRenderer"
+      ]
+    },
+    "E_release_closure": {
+      "behavioral_test": "tests/unit/trace009-releasclosure.test.ts",
+      "evidence_status": "planned",
+      "fitness_function": "infra/scripts/verify-release-manifest.mjs",
+      "review_question": "Does exact candidate preserve E_release_closure without evidence promotion?",
+      "state_machine": [
+        "exact_sha",
+        "five_images",
+        "gateway_image",
+        "compose_hash",
+        "image_digests",
+        "signed_manifest",
+        "independent_verifier",
+        "workflow_artifact"
+      ]
+    },
+    "E_single_projection_path": {
+      "behavioral_test": "tests/unit/trace009-singlprojection-path.test.ts",
+      "evidence_status": "planned",
+      "fitness_function": "scripts/verify-ui-architecture.mjs",
+      "review_question": "Does exact candidate preserve E_single_projection_path without evidence promotion?",
+      "state_machine": [
+        "ProjectionController",
+        "SemanticCompiler",
+        "LayoutPlanner",
+        "RendererRegistry",
+        "WorkResourceRenderer",
+        "EmbeddedViewCompiler"
+      ]
+    },
+    "E_thin_surfaces": {
+      "behavioral_test": "tests/unit/trace009-thin-surfaces.test.ts",
+      "evidence_status": "planned",
+      "fitness_function": "scripts/verify-ui-architecture.mjs",
+      "review_question": "Does exact candidate preserve E_thin_surfaces without evidence promotion?",
+      "state_machine": [
+        "Talk",
+        "Workspace",
+        "Review",
+        "MCPApps",
+        "Operator",
+        "UILab",
+        "ProjectionController"
+      ]
+    }
+  },
+  "schema": "trace009.verification.v1"
+}

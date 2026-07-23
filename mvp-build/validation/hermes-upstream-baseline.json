@@ -2,15 +2,17 @@
   "schema_version": 1,
   "upstream_repository": "NousResearch/hermes-agent",
   "default_branch": "main",
-  "reviewed_at": "2026-07-20T04:47:00Z",
-  "reviewed_main_sha": "e702a45b5d35aeae8793ea2ce11aa61005251470",
+  "reviewed_at": "2026-07-20T21:54:16Z",
+  "reviewed_main_sha": "a41d280f95c69f67380358b305b62345934ecaf3",
   "production_runtime_pin": "nousresearch/hermes-agent:v2026.7.1",
   "review_window_days": 14,
   "watched_paths": {
-    "hermes_cli/__init__.py": "3a6233f03249e0e975e7fb596f81d0dbf064a5ed",
+    "hermes_cli/__init__.py": "a10935a68f05a162b7ea31fbf1a0de498cccc842",
     "web/src/App.tsx": "79f7e4853504663289906caf29f70173da134857"
   },
   "reviewed_insights": [
+    "The 2026-07-20 watched CLI change updates only package version and release-date metadata; UTF-8 stream repair behavior is unchanged and the watched Hermes web entrypoint is unchanged.",
+    "Current Hermes API capability discovery advertises run_submission, run_events_sse, object-valued endpoint descriptors, and string-valued session header metadata; AMTECH must normalize that exact public shape before selecting streaming versus polling.",
     "Per-run toolset restriction should remain a server-side intersection and preserve explicit deny-all semantics.",
     "Task recovery must clear every stale claim field in one transaction rather than reporting a partial unblock as success.",
     "Background delegation and transient UI disconnects must not transfer or destroy session ownership.",

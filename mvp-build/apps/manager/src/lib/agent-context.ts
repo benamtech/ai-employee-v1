@@ -7,7 +7,13 @@ const MAX_ESTIMATED_TOKENS = 2000;
 const SESSION_TARGET_TOKENS = 400000;
 const MAX_CHARS = MAX_ESTIMATED_TOKENS * 4;
 
-type BrainIndex = Awaited<ReturnType<typeof buildBusinessBrainIndex>>;
+type CurrentBrainIndex = Awaited<ReturnType<typeof buildBusinessBrainIndex>>;
+type BrainIndex = Omit<CurrentBrainIndex, "brain_index"> & {
+  brain_index: Omit<CurrentBrainIndex["brain_index"], "activation_plan"> & {
+    /** Retained pre-0080 snapshots remain readable; absence means no recommendation. */
+    activation_plan?: CurrentBrainIndex["brain_index"]["activation_plan"];
+  };
+};
 
 export function estimatedTokens(text: string): number {
   return Math.ceil(text.length / 4);
@@ -54,6 +60,7 @@ export function buildAgentContext(input: {
   if (input.policy?.primer_emphasis) pushLine(lines, input.policy.primer_emphasis);
   pushLine(lines, `Session budget target: stay under ${SESSION_TARGET_TOKENS} total tokens; rotate before compaction in CE-3.`);
   pushLine(lines, "Custody: money and customer-facing actions are prepared for owner approval; read-only connectors are used directly.");
+  pushLine(lines, "Capability posture: reason and discover broadly; narrow only at the final consequential effect boundary.");
   const priorEmployeeReplies = (s.messages ?? []).filter((m) => m.direction === "to_owner").length;
   if (priorEmployeeReplies === 0) {
     pushLine(lines, "First owner contact: give a light orientation in business language, show one useful next step, and avoid subsystem/tool jargon.");
@@ -65,10 +72,20 @@ export function buildAgentContext(input: {
   }
   pushLine(lines, `Business brain index: ${b.resources.brain}`);
   pushLine(lines, `Explicit facts resource: ${b.resources.facts}`);
-  pushLine(lines, `Recall: use Hermes session_search before asking the owner to repeat prior context.`);
+  pushLine(lines, "Recall: use Hermes session_search before asking the owner to repeat prior context.");
   pushLine(lines, `Profile package: ${b.brain_index.profile_package}; slots: ${b.brain_index.context_slots.map((slot) => slot.key).join(", ") || "none"}.`);
   pushLine(lines, `Counts: facts ${b.proof.fact_count}, connectors ${b.proof.connector_count}, artifacts ${b.proof.artifact_count}, open approvals ${b.proof.open_approval_count}, work items ${b.proof.work_queue_count}, capabilities ${b.proof.capability_count}.`);
   pushLine(lines, `Resources: ${Object.values(b.resources).join(", ")}.`);
+
+  const activationRecommendations = (b.brain_index.activation_plan?.recommendations ?? [])
+    .filter((item) => item.recommendation_class === "activate_now" || item.recommendation_class === "high_gain")
+    .slice(0, 4);
+  for (const recommendation of activationRecommendations) {
+    pushLine(lines, `Connection opportunity: ${recommendation.label} [${recommendation.recommendation_class}] because ${recommendation.reasons.join("; ")}.`);
+  }
+  if (activationRecommendations.length) {
+    pushLine(lines, "Recommend at most one concrete connection or automation at a time, tied to a current business workflow. Do not turn the conversation into a setup checklist.");
+  }
 
   for (const slot of (b.brain_index.context_slots ?? []).slice(0, 6)) {
     const facts = "facts" in slot && Array.isArray(slot.facts) ? slot.facts : [];

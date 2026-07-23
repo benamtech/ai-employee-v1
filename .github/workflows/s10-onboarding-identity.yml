@@ -11,9 +11,7 @@ on:
       - "mvp-build/apps/manager/src/lib/owner-session.ts"
       - "mvp-build/apps/manager/src/tools/verified-provisioning.stub.ts"
       - "mvp-build/apps/manager/src/tools/registry.ts"
-      - "mvp-build/apps/manager/src/server.template.ts"
-      - "mvp-build/apps/manager/src/server.generated.ts"
-      - "mvp-build/apps/manager/scripts/generate-production-server.mjs"
+      - "mvp-build/apps/manager/src/server.ts"
       - "mvp-build/tests/unit/onboarding-identity-contract.test.ts"
       - "mvp-build/tests/integration/onboarding-identity-boundary.test.ts"
       - "mvp-build/package.json"
@@ -28,9 +26,7 @@ on:
       - "mvp-build/apps/manager/src/lib/owner-session.ts"
       - "mvp-build/apps/manager/src/tools/verified-provisioning.stub.ts"
       - "mvp-build/apps/manager/src/tools/registry.ts"
-      - "mvp-build/apps/manager/src/server.template.ts"
-      - "mvp-build/apps/manager/src/server.generated.ts"
-      - "mvp-build/apps/manager/scripts/generate-production-server.mjs"
+      - "mvp-build/apps/manager/src/server.ts"
       - "mvp-build/tests/unit/onboarding-identity-contract.test.ts"
       - "mvp-build/tests/integration/onboarding-identity-boundary.test.ts"
       - "mvp-build/package.json"
@@ -59,7 +55,6 @@ jobs:
           cache: npm
           cache-dependency-path: mvp-build/package-lock.json
       - run: npm ci
-      - run: npm run generate:production-sources
       - run: npm run typecheck --workspace @amtech/shared
       - run: npm run build --workspace @amtech/shared
       - run: npm run typecheck --workspace @amtech/db

@@ -3,15 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "main": "./dist/server.generated.js",
+  "main": "./dist/server.js",
   "scripts": {
-    "generate:production-server": "node scripts/generate-production-server.mjs && node scripts/patch-production-stream.mjs",
-    "predev": "npm run generate:production-server",
-    "dev": "tsx watch src/server.generated.ts",
-    "start": "node dist/server.generated.js",
-    "prebuild": "npm run generate:production-server",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
     "build": "tsc -p tsconfig.json",
-    "pretypecheck": "npm run generate:production-server",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

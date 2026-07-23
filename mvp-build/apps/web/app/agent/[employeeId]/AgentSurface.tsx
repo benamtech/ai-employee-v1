@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ResourcePayload, WorkEventRow } from "./surface-types";
+import type { ResourcePayload } from "./surface-types";
 import {
-  planAdaptiveOperatingLayout,
+  compileOperatingProjection,
   type ActiveSave,
   type AdaptiveLayoutRegion,
   type DelegatedWorkUnit,
@@ -19,6 +19,9 @@ import {
 } from "@amtech/shared";
 import { fixtureResourcePayload } from "./fixtures";
 import { WorkObjectRenderer } from "./components/WorkObjectRenderer";
+import { applyOwnerWorkEvent, protocolAuthority, type OwnerStreamScope } from "./owner-stream-state";
+import { openOwnerProjectionController } from "./owner-projection-controller";
+import { registeredOperatingRegions } from "./operating-renderer-registry";
 
 type StreamState = "connecting" | "live" | "reconnecting" | "offline";
 type Notice = { tone: "info" | "success" | "error"; text: string } | null;
@@ -26,6 +29,8 @@ type Notice = { tone: "info" | "success" | "error"; text: string } | null;
 interface Props {
   employeeId: string;
   fixtureMode: boolean;
+  fixturePayload?: ResourcePayload;
+  embedded?: boolean;
 }
 
 const EMPTY: ResourcePayload = {
@@ -49,8 +54,9 @@ const EMPTY: ResourcePayload = {
   tasks: [],
 };
 
-export function AgentSurface({ employeeId, fixtureMode }: Props) {
-  const [res, setRes] = useState<ResourcePayload>(() => fixtureMode ? fixtureResourcePayload(employeeId) : EMPTY);
+export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded = false }: Props) {
+  const fixtureSource = useMemo(() => fixturePayload ?? fixtureResourcePayload(employeeId), [employeeId, fixturePayload]);
+  const [res, setRes] = useState<ResourcePayload>(() => fixtureMode ? fixtureSource : EMPTY);
   const [input, setInput] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
   const [loading, setLoading] = useState(!fixtureMode);
@@ -61,12 +67,29 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
   const [contextOpen, setContextOpen] = useState(false);
   const retryIntent = useRef<{ message: string; intentId: string } | null>(null);
   const refreshTimer = useRef<number | null>(null);
+  const streamScope = useRef<OwnerStreamScope | null>(null);
+  const resourcesRef = useRef<ResourcePayload>(res);
+
+  const installResources = useCallback((next: ResourcePayload) => {
+    resourcesRef.current = next;
+    setRes(next);
+  }, []);
+
+  useEffect(() => {
+    resourcesRef.current = res;
+  }, [res]);
 
   const refresh = useCallback(async () => {
     if (fixtureMode) {
-      setRes(fixtureResourcePayload(employeeId));
+      installResources(fixtureSource);
       setLoading(false);
       setStreamState("live");
+      return;
+    }
+    const scope = streamScope.current;
+    if (!scope) {
+      setNotice({ tone: "error", text: "AMTECH has not established the exact account, employee, assignment, and authority version. No owner action was sent." });
+      setStreamState("offline");
       return;
     }
     try {
@@ -77,7 +100,12 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
         setStreamState("offline");
         return;
       }
-      setRes({ ...EMPTY, ...json });
+      if (json.account_id !== scope.account_id || json.employee_id !== scope.employee_id || json.assignment_id !== scope.assignment_id) {
+        setNotice({ tone: "error", text: "AMTECH denied a resource projection that did not match the installed account, employee, and assignment." });
+        setStreamState("offline");
+        return;
+      }
+      installResources({ ...EMPTY, ...json });
       setNotice(null);
     } catch {
       setNotice({ tone: "error", text: "The operating surface could not reach AMTECH. No command was resent." });
@@ -85,7 +113,7 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [employeeId, fixtureMode]);
+  }, [employeeId, fixtureMode, fixtureSource, installResources]);
 
   const scheduleRefresh = useCallback(() => {
     if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
@@ -93,73 +121,77 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
   }, [refresh]);
 
   useEffect(() => {
-    void refresh();
+    streamScope.current = null;
+    retryIntent.current = null;
+    const initial = fixtureMode ? fixtureSource : EMPTY;
+    installResources(initial);
+    setInput("");
+    setNotice(null);
+    setLoading(!fixtureMode);
+    setProgress("");
+    setStreamState(fixtureMode ? "live" : "connecting");
+    setFocusLoopId(null);
+  }, [employeeId, fixtureMode, fixtureSource, installResources]);
+
+  useEffect(() => {
+    if (fixtureMode) void refresh();
     return () => {
       if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
     };
-  }, [refresh]);
+  }, [fixtureMode, refresh]);
 
   useEffect(() => {
     if (fixtureMode) return;
-    let source: EventSource | null = null;
-    let closed = false;
-    let reconnectDelay = 1000;
-
-    function connect() {
-      if (closed) return;
-      setStreamState((current) => current === "offline" ? "reconnecting" : "connecting");
-      source = new EventSource(`/api/employee/${employeeId}/events`);
-      source.addEventListener("open", () => {
-        reconnectDelay = 1000;
-        setStreamState("live");
-      });
-      source.addEventListener("snapshot", () => {
-        setStreamState("live");
-        scheduleRefresh();
-      });
-      source.addEventListener("work_event", (event) => {
-        try {
-          const payload = JSON.parse((event as MessageEvent).data);
-          const next = payload?.event as WorkEventRow | undefined;
-          if (next?.id) {
-            setRes((current) => ({
-              ...current,
-              work_events: [next, ...current.work_events.filter((item) => item.id !== next.id)],
-            }));
+    return openOwnerProjectionController({
+      employeeId,
+      eventKinds: ["work_event", "work_progress", "approval_update"],
+      initialReconnectDelayMs: 1000,
+      onState: setStreamState,
+      onSnapshot(snapshot, scope) {
+        streamScope.current = scope;
+        installResources({ ...EMPTY, ...snapshot });
+        setLoading(false);
+        setProgress("");
+        setNotice(null);
+      },
+      onEvent(kind, payload, scope) {
+        streamScope.current = scope;
+        if (kind === "work_event") {
+          const applied = applyOwnerWorkEvent(resourcesRef.current, payload, scope);
+          if (applied.accepted) {
+            streamScope.current = applied.scope;
+            installResources(applied.resources);
+          } else if (applied.reason === "scope_mismatch" || applied.reason === "invalid_event") {
+            setStreamState("offline");
+            setNotice({ tone: "error", text: "AMTECH denied an invalid owner-state projection (" + ownerError(applied.reason) + "). No command was sent or replayed." });
           }
-        } finally {
-          scheduleRefresh();
+          return;
         }
-      });
-      source.addEventListener("work_progress", (event) => {
-        try {
-          const payload = JSON.parse((event as MessageEvent).data);
-          const verb = typeof payload?.verb === "string" ? payload.verb : "Working";
-          const state = typeof payload?.state === "string" ? payload.state : "working";
+        if (kind === "work_progress") {
+          const verb = typeof payload.verb === "string" ? payload.verb : "Working";
+          const state = typeof payload.state === "string" ? payload.state : "working";
           setProgress(state === "completed" ? "" : verb);
           if (state === "completed") scheduleRefresh();
-        } catch {
-          setProgress("");
+          return;
         }
-      });
-      source.addEventListener("approval_update", scheduleRefresh);
-      source.onerror = () => {
-        source?.close();
-        if (closed) return;
-        setStreamState("reconnecting");
-        window.setTimeout(connect, reconnectDelay);
-        reconnectDelay = Math.min(reconnectDelay * 2, 15000);
-      };
-    }
+        if (kind === "approval_update") scheduleRefresh();
+      },
+      onDenied(reason) {
+        streamScope.current = null;
+        setLoading(false);
+        setProgress("");
+        setNotice({ tone: "error", text: "AMTECH denied an invalid owner-state projection (" + ownerError(reason) + "). No command was sent or replayed." });
+      },
+    });
+  }, [employeeId, fixtureMode, installResources, scheduleRefresh]);
 
-    connect();
-    return () => {
-      closed = true;
-      source?.close();
-    };
-  }, [employeeId, fixtureMode, scheduleRefresh]);
-
-  const operating = useMemo(() => res.operating_state ?? fallbackOperatingState(res, employeeId), [employeeId, res]);
+  const operating = useMemo(() => compileOperatingProjection(res, {
+    evidence_class: fixtureMode ? "fixture_demonstration" : "production",
+    employee_id: employeeId,
+    business_name: fixtureMode ? "Fixture business" : null,
+    business_kind: fixtureMode ? "demonstration" : null,
+    context_fingerprint: fixtureMode ? "fixture:" + employeeId : undefined,
+  }), [employeeId, fixtureMode, res]);
   const employeeName = res.employee?.name ?? operating.context.employee_name ?? "Your employee";
   const selectedLoopId = focusLoopId ?? operating.focus_loop_id ?? operating.layout.focus_loop_id ?? operating.loops[0]?.id ?? null;
   const selectedLoop = operating.loops.find((loop) => loop.id === selectedLoopId) ?? null;
@@ -168,22 +200,31 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
   async function sendMessage(messageOverride?: string) {
     const body = (messageOverride ?? input).trim();
     if (!body || sending) return;
+    const authority = fixtureMode ? null : protocolAuthority(streamScope.current);
+    if (!fixtureMode && !authority) {
+      setNotice({ tone: "error", text: "AMTECH is restoring the exact assignment authority. This owner intent was not sent; retry after the surface is live." });
+      return;
+    }
     const previous = retryIntent.current;
     const intentId = previous?.message === body ? previous.intentId : createIntentId(employeeId);
     retryIntent.current = { message: body, intentId };
     setSending(true);
-    setNotice({ tone: "info", text: "Starting this work with the exact employee, assignment, and current operating context." });
+    setNotice({ tone: "info", text: "Starting this work with the exact employee, assignment, authority version, and current operating context." });
 
     if (fixtureMode) {
       const now = new Date().toISOString();
-      setRes((current) => ({
-        ...current,
-        messages: [
-          ...current.messages,
-          { id: `fixture-owner-${Date.now()}`, direction: "from_owner", body, status: "delivered", created_at: now },
-          { id: `fixture-employee-${Date.now()}`, direction: "to_owner", body: "I picked that up. I will form the work, delegate bounded parts where useful, bring back decisions and active saves, and leave evidence after accepted effects.", status: "delivered", created_at: now },
-        ],
-      }));
+      setRes((current) => {
+        const next = {
+          ...current,
+          messages: [
+            ...current.messages,
+            { id: `fixture-owner-${Date.now()}`, direction: "from_owner", body, status: "delivered", created_at: now },
+            { id: `fixture-employee-${Date.now()}`, direction: "to_owner", body: "I picked that up. I will form the work, delegate bounded parts where useful, bring back decisions and active saves, and leave evidence after accepted effects.", status: "delivered", created_at: now },
+          ],
+        };
+        resourcesRef.current = next;
+        return next;
+      });
       setInput("");
       retryIntent.current = null;
       setSending(false);
@@ -195,7 +236,7 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
       const response = await fetch(`/api/employee/${employeeId}/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: body, intent_id: intentId }),
+        body: JSON.stringify({ message: body, intent_id: intentId, ...authority }),
       });
       const json = await response.json().catch(() => ({}));
       if (!response.ok) {
@@ -205,11 +246,10 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
       }
       setInput("");
       retryIntent.current = null;
-      setNotice({ tone: response.status === 202 ? "info" : "success", text: response.status === 202 ? "The turn started but is not terminal. AMTECH is reconciling it; do not resend." : "The turn was accepted. The operating state will update as work changes." });
-      await refresh();
+      setNotice({ tone: response.status === 202 ? "info" : "success", text: response.status === 202 ? "The turn started but is not terminal. AMTECH is reconciling it; do not resend." : "The turn was accepted. Durable state will update through the validated stream; reconnect will not resend it." });
     } catch {
       setInput(body);
-      setNotice({ tone: "error", text: "The connection ended before AMTECH could prove acceptance. Retry keeps the same intent; it does not create a second turn." });
+      setNotice({ tone: "error", text: "The connection ended before AMTECH could prove acceptance. Retry keeps the same intent; reconnect itself does not create a second turn." });
     } finally {
       setSending(false);
     }
@@ -217,17 +257,26 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
 
   async function resolveApproval(approvalId: string, response: "approved" | "rejected") {
     if (!approvalId) return;
-    setNotice({ tone: "info", text: response === "approved" ? "Submitting approval through the current assignment and policy." : "Recording the decline. The held action will not proceed." });
-    const result = await fetch(`/api/employee/${employeeId}/approval/resolve`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ approval_id: approvalId, owner_response: response }),
-    });
-    const json = await result.json().catch(() => ({}));
-    setNotice(result.ok
-      ? { tone: "success", text: json.user_facing_summary_hint ?? (response === "approved" ? "Approved. The employee can continue only within this gate." : "Declined. The employee will not perform that action.") }
-      : { tone: "error", text: ownerError(json.error ?? "The decision was not accepted.") });
-    await refresh();
+    const authority = fixtureMode ? null : protocolAuthority(streamScope.current);
+    if (!fixtureMode && !authority) {
+      setNotice({ tone: "error", text: "AMTECH is restoring the exact approval authority. The decision was not sent." });
+      return;
+    }
+    setNotice({ tone: "info", text: response === "approved" ? "Submitting approval through the exact current assignment and authority version." : "Recording the decline against the exact held revision. The action will not proceed." });
+    try {
+      const result = await fetch(`/api/employee/${employeeId}/approval/resolve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ approval_id: approvalId, owner_response: response, ...authority }),
+      });
+      const json = await result.json().catch(() => ({}));
+      setNotice(result.ok
+        ? { tone: "success", text: json.user_facing_summary_hint ?? (response === "approved" ? "Approved. The employee can continue only within this exact gate." : "Declined. The employee will not perform that action.") }
+        : { tone: "error", text: ownerError(json.error ?? "The decision was not accepted.") });
+      if (result.ok) scheduleRefresh();
+    } catch {
+      setNotice({ tone: "error", text: "The connection ended before AMTECH could prove the approval decision. It was not replayed." });
+    }
   }
 
   async function handleObjectAction(resource: WorkResource, action: WorkAction["action"], note?: string) {
@@ -242,8 +291,9 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
     if (action === "acknowledge") await sendMessage(`${resource.title}: acknowledged.`);
   }
 
+  const Root = embedded ? "section" : "main";
   return (
-    <main className="os-root">
+    <Root className="os-root">
       <style>{OPERATING_CSS}</style>
       <header className="os-header">
         <div className="os-identity">
@@ -255,7 +305,7 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
         </div>
         <button className="os-runtime" type="button" onClick={() => setContextOpen((value) => !value)} aria-expanded={contextOpen}>
           <span className={`os-dot ${streamState}`} aria-hidden />
-          <span>{streamState === "live" ? "Live" : streamState === "reconnecting" ? "Restoring state" : readable(streamState)}</span>
+          <span>{streamState === "live" ? "Live" : streamState === "reconnecting" ? "Restoring state" : streamState === "offline" ? "Unavailable" : "Validating state"}</span>
           <small>{operating.context.dominant_domains.slice(0, 3).map(readable).join(" · ") || "General operations"}</small>
         </button>
       </header>
@@ -284,11 +334,11 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
         ) : null}
 
         {contextOpen ? <ContextPanel context={operating.context} runtime={res.runtime_health?.message} onClose={() => setContextOpen(false)} /> : null}
-        {loading ? <QuietState title={`Resolving ${employeeName}'s operating state`} body="AMTECH is loading the exact assignment, runtime, current work, active saves, delegated units, and evidence." /> : null}
+        {loading ? <QuietState title={`Resolving ${employeeName}'s operating state`} body="AMTECH is validating the exact account, employee, assignment, authority version, cursor, current work, active saves, delegated units, and evidence." /> : null}
 
         {!loading ? (
           <div className="os-regions">
-            {operating.layout.ordered_regions.map((region) => (
+            {registeredOperatingRegions(operating.layout.ordered_regions).map((region) => (
               <OperatingRegion
                 key={region.kind}
                 region={region}
@@ -321,12 +371,12 @@ export function AgentSurface({ employeeId, fixtureMode }: Props) {
               placeholder="Example: Watch the campaign through Friday, delegate the source review, and bring it back if cost per lead rises above $85."
               aria-label={`Command ${employeeName}`}
             />
-            <button type="button" disabled={!input.trim() || sending} onClick={() => void sendMessage()}>{sending ? "Starting…" : "Send"}</button>
+            <button type="button" disabled={!input.trim() || sending || (!fixtureMode && streamState !== "live")} onClick={() => void sendMessage()}>{sending ? "Starting…" : streamState === "reconnecting" ? "Restoring…" : "Send"}</button>
           </div>
-          <small>External effects remain governed by assignment, policy, approval, C3, and durable receipts.</small>
+          <small>Owner intent is assignment- and authority-version-bound. External effects remain governed by policy, approval, C3, one durable reservation, and terminal receipts.</small>
         </section>
       </div>
-    </main>
+    </Root>
   );
 }
 
@@ -478,39 +528,6 @@ function ContextPanel({ context, runtime, onClose }: { context: OperatingContext
 
 function QuietState({ title, body }: { title: string; body: string }) {
   return <div className="os-quiet"><strong>{title}</strong><p>{body}</p></div>;
-}
-
-function fallbackOperatingState(res: ResourcePayload, employeeId: string): OperatingSurfaceState {
-  const now = new Date().toISOString();
-  const loops: OperatingWorkLoop[] = (res.tasks ?? []).map((task) => ({
-    id: `loop:${task.id}`,
-    title: task.title,
-    summary: task.summary,
-    state: task.status === "in_progress" ? "active" : task.status === "scheduled" ? "waiting" : task.status,
-    horizon: task.status === "scheduled" ? "later" : "now",
-    domain: "custom",
-    updated_at: task.created_at ?? null,
-    next_step: task.status === "needs_you" ? "Owner input" : task.status === "blocked" ? "Clear the dependency" : "Continue",
-    return_condition: task.status === "scheduled" ? { kind: "time", description: task.summary ?? "Return at the scheduled time", due_at: task.created_at ?? null } : null,
-    source_envelope_ids: [],
-    target: task.target_id ? { kind: task.type, id: task.target_id } : null,
-    proof: { assignment_id: res.assignment_id ?? null, source_table: "fixture_tasks", source_id: task.id },
-  }));
-  const saves: ActiveSave[] = (res.resurface_items ?? []).map((item) => ({
-    id: `save:${item.id}`,
-    title: item.title,
-    why_held: item.why,
-    state: item.status === "scheduled" ? "scheduled" : item.status === "needs_you" ? "needs_you" : item.status === "blocked" || item.status === "failed" ? "blocked" : "waiting",
-    return_condition: { kind: item.status === "scheduled" ? "time" : item.status === "needs_you" ? "owner" : item.kind === "connector" ? "dependency" : "event", description: item.why, due_at: item.resurface_at ?? null, source: item.channel },
-    target: item.target ?? null,
-    proof: { ...item.proof, assignment_id: res.assignment_id ?? null },
-  }));
-  const decisions: OperatingDecision[] = (res.approvals ?? []).map((approval) => ({ id: `decision:${approval.id}`, title: approval.summary, consequence: "This action is held until an authorized owner decides.", risk: approval.risk_level === "low" ? "low" : approval.risk_level === "medium" ? "medium" : "high", target: { kind: "approval", id: approval.id }, proof: { approval_id: approval.id, assignment_id: res.assignment_id ?? null } }));
-  const changes: OperatingSystemChange[] = (res.work_events ?? []).map((event) => ({ id: `change:${event.id}`, title: event.work_event_descriptor?.title ?? readable(event.event_type), summary: event.work_event_descriptor?.summary, source: "fixture", state: event.status === "failed" ? "failed" : "observed", occurred_at: event.created_at, proof: { inbound_event_id: event.id, assignment_id: res.assignment_id ?? null } }));
-  const evidence: OperatingEvidence[] = (res.outputs ?? []).map((output) => ({ id: `evidence:${output.id}`, title: output.title, summary: output.summary, state: output.status === "failed" ? "failed" : output.status === "draft" ? "draft" : "recorded", recorded_at: output.created_at ?? null, href: output.href ?? null, proof: { artifact_id: output.artifact_id ?? null, assignment_id: res.assignment_id ?? null } }));
-  const context: OperatingContextManifest = { version: 1, generated_at: now, account_id: res.account_id, assignment_id: res.assignment_id ?? "fixture_assignment", employee_id: res.employee_id ?? employeeId, employee_name: res.employee?.name ?? "Avery", business_name: "Fixture business", business_kind: "demonstration", profile_key: res.employee?.profile_id ?? "fixture", profile_version: "fixture", session_id: "fixture-session", session_last_active: now, runtime_context_version: "fixture", doctrine_versions: { design_system: "fixture", agent_interface: "fixture" }, dominant_domains: ["customer", "finance", "operations"], owner_experience: "guided", preferred_density: "balanced", signals: [] };
-  const layout = planAdaptiveOperatingLayout({ generated_at: now, context_fingerprint: "fixture", owner_experience: context.owner_experience, preferred_density: context.preferred_density, loops, active_saves: saves, decisions, changes, delegated_work: [], evidence, connection_attention_count: (res.connection_surfaces ?? []).filter((connection) => connection.state === "needs_you").length });
-  return { version: 1, generated_at: now, guidance: decisions.length ? { headline: `${context.employee_name} has ${decisions.length} decisions ready`, summary: "Fixture operating state shows how work, future intentions, decisions, and evidence return to the owner.", suggested_prompt: "Explain the most important decision and what happens next.", mode: "needs_you" } : { headline: `${context.employee_name} is ready`, summary: "Give the employee a business outcome to carry across time and systems.", suggested_prompt: "Here is the outcome I need next...", mode: "quiet" }, focus_loop_id: layout.focus_loop_id, loops, active_saves: saves, decisions, changes, delegated_work: [], evidence, context, layout };
 }
 
 function guidanceEyebrow(operating: OperatingSurfaceState): string {

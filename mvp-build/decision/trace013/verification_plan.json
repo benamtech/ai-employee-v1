@@ -1,0 +1,91 @@
+{
+  "schema": "trace013.verification-plan.v1",
+  "phases": [
+    {
+      "id": "V01",
+      "name": "engine doctor",
+      "command": ["node", "decision/engine/repoctl.mjs", "doctor"],
+      "proves": ["registry uniqueness", "implemented generator presence", "implemented verifier presence", "selector validity", "schema presence"]
+    },
+    {
+      "id": "V02",
+      "name": "isolated lifecycle self-test",
+      "command": ["node", "decision/engine/repoctl.mjs", "self-test"],
+      "proves": ["content-addressed extraction", "P2 correspondence", "P1 spectral residual verification", "capsule generation", "plan chronology", "argv verification", "impact coverage", "prediction outcomes", "finish transaction"]
+    },
+    {
+      "id": "V03",
+      "name": "unit contract",
+      "command": ["npx", "vitest", "run", "tests/unit/decision-engine-contract.test.ts"],
+      "proves": ["CLI and registry contract", "future dialect registration", "dirty-tree refusal", "full temporary-repository lifecycle", "query output"]
+    },
+    {
+      "id": "V04",
+      "name": "agentic repository check",
+      "command": ["npm", "run", "repo:agentic:check"],
+      "proves": ["authority routing", "Trace013 active/completed state", "engine doctor and self-test", "no string-only substitution for executable engine"]
+    },
+    {
+      "id": "V05",
+      "name": "full repository verification",
+      "command": ["npm", "run", "repo:verify:full"],
+      "proves": ["governance", "typecheck", "lint", "UI registries", "agentic compiler integration"]
+    },
+    {
+      "id": "V06",
+      "name": "broad unit regression",
+      "command": ["npm", "run", "test:unit"],
+      "proves": ["existing unit behavior remains green", "new decision-engine unit behavior"]
+    },
+    {
+      "id": "V07",
+      "name": "workspace production build",
+      "command": ["npm", "run", "build"],
+      "proves": ["all production workspaces still compile"]
+    },
+    {
+      "id": "V08",
+      "name": "exact-head release candidate workflows",
+      "external": true,
+      "proves": ["exact branch head", "PostgreSQL integration", "Compose validation", "five exact-SHA images", "image identity", "signed-manifest recomputation"]
+    },
+    {
+      "id": "V09",
+      "name": "stack reconciliation",
+      "external": true,
+      "sequence": [
+        "verify PR40 exact head",
+        "merge PR40 into PR35 branch",
+        "verify PR35 exact head",
+        "merge PR35 into PR34 branch",
+        "verify PR34 exact head",
+        "mark PR34 ready as the only main-targeting PR"
+      ]
+    }
+  ],
+  "certificate_checks": [
+    "claim names the exact operator property",
+    "model and certificate digests match retained artifacts",
+    "P2 correspondence is verified",
+    "positive-weight and nonzero-degree assumptions hold",
+    "residual is recomputed independently",
+    "reported residual matches recomputation",
+    "P1 excluded-claim boundary contains runtime, causality, and production nonclaims"
+  ],
+  "transaction_checks": [
+    "capsule exact base and artifact digests agree",
+    "selected representations are implemented and registered",
+    "all hard hyperedges have proof obligations",
+    "predictions exist before plan admission",
+    "no source path changes before plan admission",
+    "changed paths are covered or recorded as discovered later",
+    "verification commands use argv arrays and pass",
+    "every prediction has an outcome before finish",
+    "evidence ledger maximum class is not promoted",
+    "external blockers remain explicit"
+  ],
+  "claim_boundary": {
+    "established_by_this_trace": ["engine source", "schemas", "registered dialects", "P1/P2 verifier chain", "isolated lifecycle self-test", "repository integration tests"],
+    "not_established": ["causal engineering improvement", "retrospective benchmark superiority", "prospective benchmark superiority", "managed database", "provider", "target host", "human accessibility", "pilot", "deployment", "production"]
+  }
+}

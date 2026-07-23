@@ -1,0 +1,211 @@
+{
+  "coverage": {
+    "complete": 1.0,
+    "detail": {
+      "E_ambiguity_terminality": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_capacity_groundwork": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_docker_authority": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_durable_truth": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_effect_recovery": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_network_isolation": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_operator_recovery": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_release": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_repository_closure": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_restore": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_temporal_authority": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_truthful_health": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      },
+      "E_whole_release_rollback": {
+        "complete": true,
+        "fractional": 1.0,
+        "proved": false,
+        "touch": true
+      }
+    },
+    "fractional": 1.0,
+    "proved": 0.0,
+    "represented_vertices": [
+      "accepted_proof",
+      "accepted_work_check",
+      "accounting_receipt",
+      "ambiguous",
+      "application_projection",
+      "artifact",
+      "audit",
+      "backup_id",
+      "bounded_egress",
+      "build",
+      "caddy_digest",
+      "command",
+      "compose_config",
+      "compose_hash",
+      "config_hash",
+      "connection_count",
+      "conservation",
+      "cross_employee_denial",
+      "database_backup",
+      "database_clock",
+      "database_mutation",
+      "degraded_state",
+      "dependency_health",
+      "diagnostic_bundle",
+      "docker_socket",
+      "effect",
+      "employee_id",
+      "employee_network",
+      "expiry",
+      "failure_state",
+      "fairness",
+      "filesystem_backup",
+      "five_service_state",
+      "fixtures",
+      "gateway_attachment",
+      "gateway_denial",
+      "gateway_digest",
+      "git_sha",
+      "hermes_attachment",
+      "host_provisioner",
+      "idempotency",
+      "image_set",
+      "independent_verifier",
+      "integration",
+      "lease",
+      "manager_attachment",
+      "manager_denial",
+      "manager_digest",
+      "migration",
+      "migration_compatibility",
+      "migration_head",
+      "migration_readiness",
+      "nonacceptance_proof",
+      "operator_blocked",
+      "pilot_stop_schema",
+      "pr_prose",
+      "prior_manifest",
+      "proof",
+      "proof_refinding",
+      "provider_receipt",
+      "provisioner_digest",
+      "public_route",
+      "queue_depth",
+      "rate_window",
+      "repair",
+      "replica_clock",
+      "reservation_release",
+      "resource_sample",
+      "restore_result",
+      "retry",
+      "retry_permission",
+      "returned_record",
+      "rollback_proof",
+      "rollback_smoke",
+      "safe_next_action",
+      "saturation_state",
+      "secret_version",
+      "signed_manifest",
+      "signed_request",
+      "source",
+      "sse_count",
+      "stable_crash_point",
+      "types",
+      "unit",
+      "web_digest",
+      "workflow"
+    ],
+    "touch": 1.0
+  },
+  "invariants": [
+    "no_false_success",
+    "no_blind_retry",
+    "no_stranded_ambiguity",
+    "host_provisioner_only_docker",
+    "exact_release_identity",
+    "restore_proof_refinding",
+    "accepted_work_preserved"
+  ],
+  "mathematical_causality": "unestablished",
+  "objective": 0.6822404,
+  "patch_surfaces": [
+    ".github/workflows/ws08-ws09-release.yml",
+    "infra/scripts/backup-restore.mjs",
+    "infra/scripts/capacity-pod-alpha.mjs",
+    "infra/scripts/deploy-rollback.mjs",
+    "infra/scripts/deploy-smoke.mjs",
+    "infra/scripts/operator-recovery.mjs",
+    "infra/scripts/release-fault-injection.mjs",
+    "infra/scripts/release-manifest.mjs",
+    "infra/scripts/release-telemetry.mjs",
+    "infra/scripts/restore-verify.mjs",
+    "tests/unit/ws08-release-authority.test.ts",
+    "tests/unit/ws09-capacity-groundwork.test.ts"
+  ],
+  "schema": "amtech.trace008.selected-implementation.v1",
+  "selected_ids": [
+    "D01",
+    "D02",
+    "D03",
+    "D04",
+    "D06",
+    "D09"
+  ],
+  "trajectory_count": 6
+}

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
-  resolveManagedSetupForCapability,
+  resolveConnectorSetupActionForCapability,
   type OperatingWorkLoop,
   type ResourcePayload,
   type TaskCapabilityMatch,
@@ -239,7 +239,7 @@ export function CapabilityDrawer({ employeeId, fixtureMode = false }: Props) {
               ) : null}
 
               <div className="tc-focus">
-                <div><p>Mapped to</p><h3>{activeLoop?.title ?? "Available employee capabilities"}</h3><span>{activeLoop?.summary ?? "Owner-safe capabilities discovered across Manager MCP, direct MCP, and Hermes-native toolsets."}</span></div>
+                <div><p>Mapped to</p><h3>{activeLoop?.title ?? "Available employee capabilities"}</h3><span>{activeLoop?.summary ?? "Owner-safe capabilities discovered across Manager, connected business systems, and the employee runtime."}</span></div>
                 <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find a capability" aria-label="Find a capability" />
               </div>
 
@@ -276,17 +276,15 @@ function LoopButton({ loop, selected, onSelect }: { loop: OperatingWorkLoop; sel
 interface CapabilitySetupAction {
   href: string;
   label: string;
+  actionLabel: string;
 }
 
 function capabilitySetupAction(employeeId: string, capability: ToolCapabilityDescriptor): CapabilitySetupAction | null {
   if (capability.availability !== "needs_connection") return null;
-  /**
-   * Why: setup resolution belongs to the shared connector manifest. Category and
-   * tool-name branches in the browser would re-create a provider whitelist.
-   */
-  const setup = resolveManagedSetupForCapability({
+  const setup = resolveConnectorSetupActionForCapability({
     connector_id: capability.connector_id,
     server_id: capability.server_id,
+    server_label: capability.server_label,
     tool_name: capability.tool_name,
     category: capability.category,
   });
@@ -295,6 +293,7 @@ function capabilitySetupAction(employeeId: string, capability: ToolCapabilityDes
   return {
     href: `/agent/${encodeURIComponent(employeeId)}/connect/${encodeURIComponent(setup.key)}?returnTo=${encodeURIComponent(returnTo)}`,
     label: setup.label,
+    actionLabel: setup.self_service ? `Connect ${setup.label}` : `Set up ${setup.label}`,
   };
 }
 
@@ -311,10 +310,10 @@ function CapabilityCard({ employeeId, capability, match, onStage }: { employeeId
         {capability.requires_approval ? <span>approval required</span> : null}
         <span>{capability.evidence.level.replace(/_/g, " ")}</span>
       </div>
-      {capability.setup_requirement ? <div className="tc-blocker"><strong>Blocked by</strong><span>{capability.setup_requirement}</span></div> : null}
+      {capability.setup_requirement ? <div className="tc-blocker"><strong>What is needed</strong><span>{capability.setup_requirement}</span></div> : null}
       <div className="tc-card-actions">
         {match ? <button type="button" onClick={() => onStage(match.suggested_prompt)}>{capability.can_run_now ? "Use for this work" : "Plan the unblock"}</button> : null}
-        {setupAction ? <Link href={setupAction.href}>Connect {setupAction.label}</Link> : null}
+        {setupAction ? <Link href={setupAction.href}>{setupAction.actionLabel}</Link> : null}
       </div>
     </article>
   );

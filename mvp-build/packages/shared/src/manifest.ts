@@ -11,6 +11,7 @@
  */
 
 import { z } from "zod";
+import { EmployeeUiPresentationOverride } from "./employee-ui-presentation.js";
 
 /** How phone ownership was proven (clean A2P/TCPA record). */
 export const VerificationMethod = z.enum(["twilio_verify", "sms_inbound"]);
@@ -75,6 +76,12 @@ export const OnboardingManifest = z.object({
   pricing_facts: z.array(SourcedFact).default([]),
   branding_facts: z.array(SourcedFact).default([]),
   customer_job_facts: z.array(SourcedFact).default([]),
+
+  /**
+   * Optional profile/onboarding presentation hint. The adapter remains selected
+   * by the host; this only chooses theme/layout/component strategies within it.
+   */
+  ui_presentation: EmployeeUiPresentationOverride.optional(),
 
   // raw contract + provenance
   seven_question_answers: SevenQuestionAnswers.partial().optional(),

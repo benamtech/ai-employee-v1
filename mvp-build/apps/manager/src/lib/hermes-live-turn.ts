@@ -3,7 +3,6 @@ import {
   executeHermesTurnStreaming,
   getRuntimeCapabilities,
   parseSseFrames,
-  supportsRunEvents,
   supportsRuns,
   supportsSessionKey,
   type HermesTurnInput,
@@ -55,8 +54,57 @@ function usageFrom(value: RunResponse): Record<string, unknown> | undefined {
   return value.usage ?? value.result?.usage;
 }
 
+function record(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {};
+}
+
+function advertisedFeature(capabilities: HermesCapabilities | null, names: readonly string[]): boolean {
+  const features = record(capabilities?.features);
+  return names.some((name) => {
+    const value = features[name];
+    return value === true || (typeof value === "string" && value.trim().length > 0) || (typeof value === "number" && value > 0);
+  });
+}
+
+function endpointPath(value: unknown): string {
+  if (typeof value === "string") return value;
+  const descriptor = record(value);
+  return typeof descriptor.path === "string" ? descriptor.path : "";
+}
+
+function advertisedEndpoint(capabilities: HermesCapabilities | null, keys: readonly string[], paths: readonly string[]): boolean {
+  const endpoints = record(capabilities?.endpoints);
+  return Object.entries(endpoints).some(([key, value]) => {
+    if (keys.includes(key)) return true;
+    const path = endpointPath(value);
+    return paths.some((candidate) => path === candidate || path.includes(candidate));
+  });
+}
+
+/** Current Hermes advertises `run_submission` and an object-valued `runs` endpoint. */
+export function supportsLiveRuns(capabilities: HermesCapabilities | null): boolean {
+  return supportsRuns(capabilities)
+    || advertisedFeature(capabilities, ["run_submission", "run_status"])
+    || advertisedEndpoint(capabilities, ["runs", "run_status"], ["/v1/runs"]);
+}
+
+/**
+ * Current Hermes advertises `run_events_sse` and `{ path: ... }` endpoint
+ * descriptors. Older AMTECH detection only recognized `run_events`, which made a
+ * streaming runtime look poll-only and delayed the owner until terminal output.
+ */
+export function supportsLiveRunEvents(capabilities: HermesCapabilities | null): boolean {
+  return advertisedFeature(capabilities, ["run_events_sse", "run_events", "runs_events", "run_stream"])
+    || advertisedEndpoint(capabilities, ["run_events", "run_events_sse"], ["/v1/runs/{run_id}/events", "/v1/runs/{id}/events"]);
+}
+
+function supportsLiveSessionKey(capabilities: HermesCapabilities | null): boolean {
+  return supportsSessionKey(capabilities)
+    || advertisedFeature(capabilities, ["session_key_header", "session_continuity_header"]);
+}
+
 function sessionHeaders(api: RuntimeApi, capabilities: HermesCapabilities | null): Record<string, string> {
-  return supportsSessionKey(capabilities) ? { "X-Hermes-Session-Key": api.sessionKey } : {};
+  return supportsLiveSessionKey(capabilities) ? { "X-Hermes-Session-Key": api.sessionKey } : {};
 }
 
 async function runtimeFetch(api: RuntimeApi, path: string, init: RequestInit): Promise<Response> {
@@ -123,6 +171,21 @@ async function pollCreatedRun(
   throw new Error("runtime_run_timeout");
 }
 
+async function executeFallback(
+  api: RuntimeApi,
+  input: HermesTurnInput,
+  onEvent?: HermesLiveSink,
+): Promise<HermesTurnResult> {
+  const result = await executeHermesTurnStreaming(api, input, (progress) => {
+    onEvent?.({ kind: "work_progress", verb: progress.verb, state: progress.state });
+  });
+  // Poll/session fallbacks cannot provide first-token latency, but the final text
+  // still enters the same projection protocol instead of appearing only after a
+  // separate resource refresh.
+  if (result.text) onEvent?.({ kind: "assistant_delta", sequence: 0, delta: result.text });
+  return result;
+}
+
 /**
  * Streaming-first Hermes execution for Web/AG-UI/MCP hosts. Harmless text and
  * owner-safe activity are forwarded as soon as Hermes emits them. A started run is
@@ -135,10 +198,8 @@ export async function executeHermesTurnLive(
   onEvent?: HermesLiveSink,
 ): Promise<HermesTurnResult> {
   const capabilities = await getRuntimeCapabilities(api);
-  if (!supportsRuns(capabilities) || !supportsRunEvents(capabilities)) {
-    return executeHermesTurnStreaming(api, input, (progress) => {
-      onEvent?.({ kind: "work_progress", verb: progress.verb, state: progress.state });
-    });
+  if (!supportsLiveRuns(capabilities) || !supportsLiveRunEvents(capabilities)) {
+    return executeFallback(api, input, onEvent);
   }
 
   const create = await runtimeFetch(api, "/v1/runs", {
@@ -153,11 +214,7 @@ export async function executeHermesTurnLive(
   });
   const created = await create.json().catch(() => ({})) as RunResponse;
   if (!create.ok) {
-    if ([404, 405, 501].includes(create.status)) {
-      return executeHermesTurnStreaming(api, input, (progress) => {
-        onEvent?.({ kind: "work_progress", verb: progress.verb, state: progress.state });
-      });
-    }
+    if ([404, 405, 501].includes(create.status)) return executeFallback(api, input, onEvent);
     throw new Error(created.error ?? `runtime_${create.status}`);
   }
   const runId = created.run_id ?? created.id;

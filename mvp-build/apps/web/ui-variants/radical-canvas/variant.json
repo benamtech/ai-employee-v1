@@ -1,0 +1,21 @@
+{
+  "schema": "amtech.ui-variant.v1",
+  "id": "radical-canvas",
+  "name": "Radical Canvas",
+  "summary": "A full-canvas operational experiment that remaps employee state into an asymmetric command environment without resembling the production client.",
+  "contract_version": 1,
+  "entry": "./index.tsx",
+  "status": "experiment",
+  "supported_adapters": ["owner_web", "boundless_website"],
+  "capabilities": {
+    "required": ["identity", "runtime", "work", "attention", "intents"],
+    "optional": ["context", "conversation", "waiting", "changes", "connections", "capabilities", "evidence", "outputs", "fixture_metadata", "reference_client"],
+    "intentionally_omitted": []
+  },
+  "runtime_features": ["dom", "css", "svg", "canvas_2d"],
+  "dependencies": ["react"],
+  "isolation": "host_contained",
+  "performance": { "containment": "layout_paint_style", "content_visibility": "visible", "initial_render": "lazy" },
+  "production": { "eligibility": "lab_only", "requires_reference_client": false },
+  "tags": ["experimental", "canvas", "operations"]
+}
