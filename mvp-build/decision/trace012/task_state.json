@@ -5,14 +5,14 @@
   "starting_sha": "b42ebc704534c85692810f73d2bb93af72b69ece",
   "branch": "agent/employee-ui-port-adapters-current",
   "goal": "Provide both a production-faithful UI Lab workbench and a folder-first UI-variant standard in which collaborators can replace the complete employee experience behind a neutral capability model without inheriting the production Web client's visual grammar.",
-  "user_outcome": "A collaborator can run one command, create or open apps/web/ui-variants/<variant-slug>/, work with Claude Code, Codex, Cursor, or no agent inside that bounded folder, see the exact variant against deterministic employee scenarios, validate it, and preserve production employee capabilities without preserving the Web client's layout, terminology, DOM hierarchy, or component model.",
+  "user_outcome": "A collaborator can use the canonical agent prompt, create or open apps/web/ui-variants/<variant-slug>/, work inside that bounded folder, see the exact variant against deterministic employee scenarios, validate it, and preserve production employee capabilities without preserving the Web client's layout, terminology, DOM hierarchy, or component model.",
   "hard_constraints": [
     "Use the actual Next.js Web application and production employee data contracts.",
     "Keep the production Web client available only as an optional reference-client capability slot.",
     "Project payloads into the neutral EmployeeExperienceModelV1 contract before variant rendering.",
     "Do not require variants to preserve production appearance, layout, navigation, terminology, DOM hierarchy, or component model.",
     "Do not allow variant imports to escape their folder or reach private application modules.",
-    "Do not allow direct network access, ambient browser storage, undeclared dependencies, Node modules, Workers, or WASM.",
+    "Do not allow direct network access, ambient browser storage, undeclared dependencies, Node modules, Workers, or WASM without explicit declared and reviewed support.",
     "Generate a static registry with literal lazy imports so Next.js can discover and split every checked-in variant.",
     "Do not include or depend on a coding agent.",
     "Do not require a production build for the normal edit-preview loop.",
@@ -22,22 +22,22 @@
     "Do not add a database migration or runtime service for source-controlled UI variants or presets.",
     "Keep UI Lab unavailable in normal production-like environments."
   ],
-  "initial_hypothesis": "Use Next development mode as the live compiler; retain the production-component workbench for strategy and preset work; add a sibling folder-first variant product line with a neutral capability contract, generated literal lazy registry, containment host, bounded intent bridge, deterministic fixture routes, folder-local agent guidance, and an executable doctor that rejects boundary violations.",
+  "selected_architecture": "Use Next development mode as the live compiler; retain the production-component workbench for strategy and preset work; add a sibling folder-first variant product line with a neutral capability contract, generated literal lazy registry, containment host, bounded intent bridge, deterministic fixture routes, folder-local agent guidance, and an executable doctor that rejects boundary violations.",
   "evidence_boundary": {
-    "source_and_unit": "established",
-    "compiled_build": "established",
-    "compiled_browser": "not yet established by a headed all-variant desktop/mobile run",
-    "live_provider_or_production": "out of scope",
-    "visual_quality_judgment": "human review remains required even when automated vectors pass"
+    "source_and_unit": "established on historical exact candidates",
+    "typecheck_lint_and_build": "established on historical exact candidates",
+    "postgres_integration": "established on historical exact candidates",
+    "five_image_build_identity_and_signed_manifest": "established on historical exact candidates",
+    "headed_all_variant_supported_browser_matrix": "not established",
+    "human_visual_and_manual_accessibility_review": "not established",
+    "live_provider_or_production": "out of scope and not established",
+    "rule": "Every descendant documentation or merge commit requires new exact-head verification; ancestor evidence remains historical."
   },
-  "verification_snapshot": {
-    "verification_basis_head": "e432213af522a68b453884b261de0039577f59ce",
-    "merge_gate": {
-      "run_id": 29941579869,
-      "result": "PASS"
-    },
+  "historical_verification_snapshot": {
+    "verification_basis_head": "86ed155643530b5dc75ff31287fd547da211e630",
+    "merge_gate": {"run_id": 29976940420, "result": "PASS"},
     "release_candidate": {
-      "run_id": 29941579864,
+      "run_id": 29976940427,
       "result": "PASS",
       "source_and_ui": "PASS",
       "postgres_integration": "PASS",
@@ -46,21 +46,17 @@
       "image_identity": "PASS",
       "signed_release_manifest_verification": "PASS"
     },
-    "unit_tests": {
-      "result": "PASS",
-      "files": 132,
-      "tests": 743
-    },
-    "repository_governance_typecheck_lint": "PASS",
-    "web_production_build": "PASS",
-    "ui_variant_doctor": "PASS",
-    "generated_registry_parity": "PASS",
     "headed_browser_matrix": "NOT_RUN",
     "production_readiness_claim": false
   },
   "documentation_reconciliation": {
-    "changes_after_verification_basis": "machine-readable evidence and affected-file ledgers only",
-    "requires_exact_head_ci": true
+    "reconciled_at": "2026-07-23",
+    "authority_router": "../../authority-map.json",
+    "decision_router": "../active.json",
+    "active_program": "../../production-readiness-program/README.md",
+    "memory": "../../memory/2026-07-23-stack-reconciliation-and-main-readiness.md",
+    "requires_current_descendant_exact_head_ci": true
   },
-  "status": "source_build_and_release_verified_browser_pending"
+  "status": "implementation_complete_historical_exact_candidate_verified_headed_browser_and_human_review_pending",
+  "completion_rule": "Trace012 is the latest completed decision trace. It is not an open planning transaction and does not authorize Trace013 selections."
 }
