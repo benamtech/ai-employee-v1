@@ -3,7 +3,7 @@
 Status: active implementation home  
 Updated: 2026-07-23
 
-This directory contains the executable product: Manager, Hermes integration, owner web surface, PostgreSQL authority, connectors, Model Gateway, commercial/effect state, provisioning, deployment, tests, decision traces, memory, UI Lab, and release proof.
+This directory contains the executable product: Manager, Hermes integration, owner web surface, PostgreSQL authority, connectors, Model Gateway, commercial/effect state, provisioning, deployment, tests, decision traces, machine-native representations, memory, UI Lab, and release proof.
 
 Current structural status lives in [`CODEGRAPH.md`](CODEGRAPH.md). Exact transient SHA, workflow run, and conclusion live in the current PR, workflow, or retained release record.
 
@@ -14,8 +14,9 @@ Current structural status lives in [`CODEGRAPH.md`](CODEGRAPH.md). Exact transie
 → AGENTS.md + authority-map.json + CODEGRAPH.md
 → STANDARD.md + ratified amendments
 → decision/active.json + decision/README.md
+→ decision/representation-contract.md
 → production-readiness-program/README.md
-→ exact source, tests, workflows, and proof
+→ exact source, representations, certificates, tests, workflows, and proof
 ```
 
 ```bash
@@ -48,13 +49,24 @@ exact principal and assignment
 → original-effect reconciliation or projection repair
 ```
 
+## Machine-native reasoning and proof
+
+Agents may reason primarily with vectors, matrices, tensors, embeddings, AST/CFG/data-flow/dependency graphs, genuine hypergraphs, incidence operators, eigenspaces, transition systems, state machines, formal constraints, proof terms, model-checker traces, and valid geometric/topological or state-space models.
+
+Natural language is the audit and interoperability layer, not the mandatory reasoning substrate.
+
+A verified eigenstructure, theorem, solver certificate, or model-checker result is legitimate formal proof for the exact property of its declared model. It becomes executable-software proof when the representation-to-source/runtime correspondence required by the gate is established. External acceptance remains separately defined.
+
+See [`decision/representation-contract.md`](decision/representation-contract.md).
+
 ## Active authority
 
-- [`authority-map.json`](authority-map.json) — machine-readable authority router.
+- [`authority-map.json`](authority-map.json) — machine-readable authority router and proof-class map.
 - [`CODEGRAPH.md`](CODEGRAPH.md) — sole current product/workstream status owner.
 - [`STANDARD.md`](STANDARD.md) plus ratified amendments — normative requirements.
 - [`decision/active.json`](decision/active.json) — current decision router; currently no new decision transaction is open.
 - [`decision/README.md`](decision/README.md) — computation protocol.
+- [`decision/representation-contract.md`](decision/representation-contract.md) — machine-native representation, formal certificate, fidelity, executable-proof, and external-evidence contract.
 - [`decision/trace007/`](decision/trace007/) through [`decision/trace010/`](decision/trace010/) — current production-authority, release, UI-architecture, and connector decisions.
 - [`decision/trace011/`](decision/trace011/) and [`decision/trace012/`](decision/trace012/) — completed UI port and UI Lab/folder-first variant decisions.
 - [`production-readiness-program/`](production-readiness-program/) — single active production route.
@@ -81,7 +93,7 @@ npm run build
 node scripts/ui-variant.mjs doctor
 ```
 
-Each command proves only the boundary and exact candidate it exercises. Missing managed database, live provider, browser/channel/accessibility, target-host, commercial lifecycle, recovery rehearsal, trusted signing, pilot, deployment, or production prerequisites remain blocked rather than mocked into acceptance.
+Each formal verifier or command proves only the declared property, boundary, and exact candidate it exercises. Missing representation fidelity, managed database, live provider, browser/channel/accessibility, target-host, commercial lifecycle, recovery rehearsal, trusted signing, pilot, deployment, or production prerequisites remain blocked rather than mocked into acceptance.
 
 ## Directory map
 
@@ -92,7 +104,7 @@ packages/shared/                contracts and connector/capability manifests
 packages/db/                    forward migrations, clients, generated types
 infra/                          topology, deploy, lifecycle, acceptance, release operations
 tests/                          behavioral unit, PostgreSQL integration, browser matrices
-decision/                       protocol, active router, and completed traces
+decision/                       protocol, representation contract, routers, traces, generators, certificates
 ui-lab/                         canonical agent-first UI Lab entry and source-owned presets
 validation/                     Standard evolution, rubric, upstream, evidence artifacts
 docs/architecture/              current explanatory architecture
