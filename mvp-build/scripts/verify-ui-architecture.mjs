@@ -49,8 +49,13 @@ requireText("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", /o
 requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /compileOperatingProjection/, "workspace_uses_compiler");
 requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /registeredOperatingRegions/, "workspace_uses_registry");
 
-requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /UiLabWorkbenchClient/, "ui_lab_routes_to_workbench");
-requireText("apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx", /<iframe[\s\S]*src=\{previewUrl\}/, "ui_lab_uses_isolated_preview_canvas");
+requireText("apps/web/app/ui-lab/page.tsx", /MANAGER_API\.ownerDashboard/, "ui_lab_routes_to_live_owner_dashboard");
+requireText("apps/web/app/ui-lab/employee/[employeeId]/layout.tsx", /LiveEmployeeProvider/, "ui_lab_employee_layout_owns_live_provider");
+requireText("apps/web/app/_components/live-employee/LiveEmployeeProvider.tsx", /openOwnerProjectionController/, "ui_lab_provider_uses_controller");
+requireText("apps/web/app/_components/live-employee/UiLabShell.tsx", /evidenceLevel: "live"/, "ui_lab_variant_uses_live_evidence");
+requireText("apps/web/app/ui-lab/fixtures/page.tsx", /Explicit fixture evidence/, "ui_lab_fixture_route_explicit");
+requireText("apps/web/app/ui-lab/[scenario]/page.tsx", /redirect\(`\/ui-lab\/fixtures/, "legacy_fixture_front_door_redirects");
+requireText("apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx", /<iframe[\s\S]*src=\{previewUrl\}/, "ui_lab_fixture_workbench_uses_isolated_preview_canvas");
 requireText("apps/web/app/ui-lab/preview/[scenario]/page.tsx", /ProductionFixtureLabClient/, "ui_lab_preview_routes_to_thin_shell");
 requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /<AgentSurface[\s\S]*fixturePayload=/, "ui_lab_reuses_production_surface");
 requireText("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx", /Fixture data|fixture projection|Fixture intent/, "ui_lab_evidence_class_explicit");
@@ -67,7 +72,8 @@ console.log(JSON.stringify({
   checked_files: activeText.length,
   event_source_owner: "owner-projection-controller.ts",
   ui_lab: {
-    workbench: "UiLabWorkbenchClient.tsx",
+    workbench: "ui-lab/employee/[employeeId]",
+    fixtures: "ui-lab/fixtures",
     preview_route: "ui-lab/preview/[scenario]/page.tsx",
     production_preview: "ProductionFixtureLabClient.tsx",
     legacy_fixture_lab: "isolated_not_routed",

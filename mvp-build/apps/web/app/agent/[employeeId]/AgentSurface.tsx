@@ -22,6 +22,7 @@ import { WorkObjectRenderer } from "./components/WorkObjectRenderer";
 import { applyOwnerWorkEvent, protocolAuthority, type OwnerStreamScope } from "./owner-stream-state";
 import { openOwnerProjectionController } from "./owner-projection-controller";
 import { registeredOperatingRegions } from "./operating-renderer-registry";
+import type { LiveEmployeeProjectionState } from "../../_components/live-employee/LiveEmployeeProvider";
 
 type StreamState = "connecting" | "live" | "reconnecting" | "offline";
 type Notice = { tone: "info" | "success" | "error"; text: string } | null;
@@ -31,6 +32,7 @@ interface Props {
   fixtureMode: boolean;
   fixturePayload?: ResourcePayload;
   embedded?: boolean;
+  liveProjection?: LiveEmployeeProjectionState;
 }
 
 const EMPTY: ResourcePayload = {
@@ -54,15 +56,16 @@ const EMPTY: ResourcePayload = {
   tasks: [],
 };
 
-export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded = false }: Props) {
+export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded = false, liveProjection }: Props) {
+  const controlledLive = Boolean(liveProjection);
   const fixtureSource = useMemo(() => fixturePayload ?? fixtureResourcePayload(employeeId), [employeeId, fixturePayload]);
-  const [res, setRes] = useState<ResourcePayload>(() => fixtureMode ? fixtureSource : EMPTY);
+  const [res, setRes] = useState<ResourcePayload>(() => liveProjection?.resources ?? (fixtureMode ? fixtureSource : EMPTY));
   const [input, setInput] = useState("");
   const [notice, setNotice] = useState<Notice>(null);
-  const [loading, setLoading] = useState(!fixtureMode);
+  const [loading, setLoading] = useState(!fixtureMode && !liveProjection);
   const [sending, setSending] = useState(false);
   const [progress, setProgress] = useState("");
-  const [streamState, setStreamState] = useState<StreamState>(fixtureMode ? "live" : "connecting");
+  const [streamState, setStreamState] = useState<StreamState>(liveProjection?.streamState ?? (fixtureMode ? "live" : "connecting"));
   const [focusLoopId, setFocusLoopId] = useState<string | null>(null);
   const [contextOpen, setContextOpen] = useState(false);
   const retryIntent = useRef<{ message: string; intentId: string } | null>(null);
@@ -79,7 +82,21 @@ export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded
     resourcesRef.current = res;
   }, [res]);
 
+  useEffect(() => {
+    if (!liveProjection) return;
+    streamScope.current = liveProjection.scope;
+    installResources(liveProjection.resources);
+    setLoading(liveProjection.loading);
+    setStreamState(liveProjection.streamState);
+    setProgress(liveProjection.progress);
+    setNotice(liveProjection.notice ? { tone: liveProjection.streamState === "offline" ? "error" : "info", text: liveProjection.notice } : null);
+  }, [installResources, liveProjection]);
+
   const refresh = useCallback(async () => {
+    if (liveProjection) {
+      await liveProjection.refresh();
+      return;
+    }
     if (fixtureMode) {
       installResources(fixtureSource);
       setLoading(false);
@@ -113,7 +130,7 @@ export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded
     } finally {
       setLoading(false);
     }
-  }, [employeeId, fixtureMode, fixtureSource, installResources]);
+  }, [employeeId, fixtureMode, fixtureSource, installResources, liveProjection]);
 
   const scheduleRefresh = useCallback(() => {
     if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
@@ -121,6 +138,7 @@ export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded
   }, [refresh]);
 
   useEffect(() => {
+    if (controlledLive) return;
     streamScope.current = null;
     retryIntent.current = null;
     const initial = fixtureMode ? fixtureSource : EMPTY;
@@ -131,16 +149,18 @@ export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded
     setProgress("");
     setStreamState(fixtureMode ? "live" : "connecting");
     setFocusLoopId(null);
-  }, [employeeId, fixtureMode, fixtureSource, installResources]);
+  }, [controlledLive, employeeId, fixtureMode, fixtureSource, installResources]);
 
   useEffect(() => {
+    if (controlledLive) return;
     if (fixtureMode) void refresh();
     return () => {
       if (refreshTimer.current) window.clearTimeout(refreshTimer.current);
     };
-  }, [fixtureMode, refresh]);
+  }, [controlledLive, fixtureMode, refresh]);
 
   useEffect(() => {
+    if (controlledLive) return;
     if (fixtureMode) return;
     return openOwnerProjectionController({
       employeeId,
@@ -183,7 +203,7 @@ export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded
         setNotice({ tone: "error", text: "AMTECH denied an invalid owner-state projection (" + ownerError(reason) + "). No command was sent or replayed." });
       },
     });
-  }, [employeeId, fixtureMode, installResources, scheduleRefresh]);
+  }, [controlledLive, employeeId, fixtureMode, installResources, scheduleRefresh]);
 
   const operating = useMemo(() => compileOperatingProjection(res, {
     evidence_class: fixtureMode ? "fixture_demonstration" : "production",
@@ -200,6 +220,15 @@ export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded
   async function sendMessage(messageOverride?: string) {
     const body = (messageOverride ?? input).trim();
     if (!body || sending) return;
+    if (liveProjection) {
+      setSending(true);
+      setNotice({ tone: "info", text: "Sending through the UI Lab live action bridge." });
+      const result = await liveProjection.sendMessage(body);
+      if (result.ok) setInput("");
+      setNotice({ tone: result.ok ? "success" : "error", text: result.message });
+      setSending(false);
+      return;
+    }
     const authority = fixtureMode ? null : protocolAuthority(streamScope.current);
     if (!fixtureMode && !authority) {
       setNotice({ tone: "error", text: "AMTECH is restoring the exact assignment authority. This owner intent was not sent; retry after the surface is live." });
@@ -257,6 +286,12 @@ export function AgentSurface({ employeeId, fixtureMode, fixturePayload, embedded
 
   async function resolveApproval(approvalId: string, response: "approved" | "rejected") {
     if (!approvalId) return;
+    if (liveProjection) {
+      setNotice({ tone: "info", text: "Submitting through the UI Lab live approval bridge." });
+      const result = await liveProjection.resolveApproval(approvalId, response);
+      setNotice({ tone: result.ok ? "success" : "error", text: result.message });
+      return;
+    }
     const authority = fixtureMode ? null : protocolAuthority(streamScope.current);
     if (!fixtureMode && !authority) {
       setNotice({ tone: "error", text: "AMTECH is restoring the exact approval authority. The decision was not sent." });

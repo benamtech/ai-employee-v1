@@ -7,8 +7,8 @@ Executable engine: [`engine/repoctl.mjs`](engine/repoctl.mjs)
 Representation registry: [`engine/representation-registry.json`](engine/representation-registry.json)  
 Representation contract: [`representation-contract.md`](representation-contract.md)  
 Transaction router: [`active.json`](active.json)  
-Latest completed trace: [`trace013/`](trace013/)  
-Next trace: `trace014`, reserved and not created
+Latest completed trace: [`trace018/`](trace018/) via [`active.json`](active.json)
+Next trace: `trace019`, reserved and not created
 
 ## Purpose
 
@@ -91,7 +91,7 @@ No class silently promotes itself. Causal engineering benefit requires appropria
 - Bound paths, file count, rollback, and stop conditions.
 - Record discovered-later paths rather than silently broadening scope.
 
-Trace013 implements the complete initial vertical slice and a six-case retrospective benchmark. Its causal superiority remains unestablished until prospective matched tasks produce independent outcomes.
+Trace013 implements the complete initial vertical slice and a six-case retrospective benchmark. It remains the compiler implementation baseline. Later traces advance the active router through [`active.json`](active.json); causal superiority remains unestablished until prospective matched tasks produce independent outcomes.
 
 ## Queries
 

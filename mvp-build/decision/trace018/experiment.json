@@ -1,0 +1,198 @@
+{
+  "content_digest": "sha256:5f66f309b3683aed40a64bdc44ff94ec2fdbc7b5fa2a6062169e8c99b8d97d73",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T23:06:15.570Z",
+  "payload": {
+    "baseline": {
+      "id": "evidence-and-invariants",
+      "same_prerequisite_domain": true
+    },
+    "evidence_classes": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "lineage": {
+      "previous_digest": "sha256:c6ffd85f2bee97ea68f4f6d24271966f433fe375fd84aeb23db5ef790d2e3f01",
+      "root_digest": "sha256:46f7936aa79f85178288619ab2e8d349bf1faf037aa4b6f16cf92bdb4aae9102"
+    },
+    "metrics": [
+      "changed_file_recall",
+      "required_test_recall",
+      "missed_invariant_edges",
+      "unnecessary_scope",
+      "time_to_valid_plan",
+      "time_to_exact_head_green",
+      "review_defects",
+      "context_volume"
+    ],
+    "outcomes": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-impact-recall",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          "hyperedge:authority-obligation:file:AGENTS.md:1b61f9e2a321",
+          "hyperedge:authority-obligation:file:mvp-build/AGENTS.md:9bca59df372f",
+          "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:3dcbceb3acca",
+          "hyperedge:authority-obligation:file:mvp-build/decision/engine/representation-registry.json:42cddd8727da",
+          "hyperedge:authority-obligation:file:mvp-build/decision/protocol-v1.json:75a680dc9d1e",
+          "hyperedge:authority-obligation:file:mvp-build/decision/README.md:bcae2ce9c63a",
+          "hyperedge:authority-obligation:file:mvp-build/decision/representation-contract.md:19a6bbdececd",
+          "hyperedge:authority-obligation:file:mvp-build/decision/SESSION_ONBOARDING.md:5309d2aa7996",
+          "hyperedge:authority-obligation:file:mvp-build/GAPS.md:ee2797c85105",
+          "hyperedge:authority-obligation:file:mvp-build/memory/2026-07-23-production-state-after-c83c23b.md:ee461432557f",
+          "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:90b42a7462c9",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:e8ca03086641",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:2bd8208fc691",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/13-resolution-ledger.json:a44533579fd6",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/README.md:5c127a3f419b",
+          "hyperedge:authority-obligation:file:mvp-build/REMEDIATION.md:9be6a5827c03",
+          "hyperedge:authority-obligation:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:00786e2d17a3",
+          "hyperedge:authority-obligation:file:mvp-build/STANDARD.md:971bd3281e12",
+          "hyperedge:authority-routing:authority-map:dfd4abfc460e",
+          "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/ui/fixture-browser.mjs:4e5a6f2dd5d3",
+          "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/ui/product-shell-browser.mjs:782c7fdc0875",
+          "hyperedge:behavioral-obligation:file:mvp-build/scripts/validate-ui-system.mjs:3dd97d2bfac2",
+          "hyperedge:behavioral-obligation:file:mvp-build/scripts/verify-agentic-repository.mjs:6a697a0d0a1f"
+        ],
+        "observed": {
+          "passed": false,
+          "value": 23
+        },
+        "prediction_id": "prediction-invariant-coverage",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/AGENTS.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/ui-lab/README.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/authority-map.json"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/memory/MEMORY.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/STANDARD.md",
+            "file:mvp-build/memory/MEMORY.md"
+          ]
+        ],
+        "observed": {
+          "passed": false,
+          "value": 8
+        },
+        "prediction_id": "prediction-authority-consistency",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-evidence-nonpromotion",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "predictions": [
+      {
+        "claim": "Every changed source path is present in the generated impact frontier or explicitly recorded as discovered later.",
+        "expected": 0,
+        "falsifier": "The final diff contains an uncovered path.",
+        "horizon": 1,
+        "id": "prediction-impact-recall",
+        "metric": "uncovered_changed_paths",
+        "type": "direct"
+      },
+      {
+        "claim": "Every hard invariant hyperedge touched by the change has an accepted proof obligation or an explicit blocker.",
+        "expected": 0,
+        "falsifier": "A touched hard hyperedge has neither accepted evidence nor a blocker.",
+        "horizon": 2,
+        "id": "prediction-invariant-coverage",
+        "metric": "unresolved_hard_hyperedges",
+        "type": "verification"
+      },
+      {
+        "claim": "The final handoff preserves Manager authority and keeps UI Lab as a bounded projection without competing current-status ownership.",
+        "expected": 0,
+        "falsifier": "Authority verification finds a cycle, duplicate status owner, stale active router, or browser-held Hermes credential path.",
+        "horizon": 3,
+        "id": "prediction-authority-consistency",
+        "metric": "authority_errors",
+        "type": "architecture"
+      },
+      {
+        "claim": "The final evidence ledger does not promote source, fixture, browser, or local executable evidence into P4 production acceptance.",
+        "expected": 0,
+        "falsifier": "The evidence ledger claims a class stronger than its evidence.",
+        "horizon": 4,
+        "id": "prediction-evidence-nonpromotion",
+        "metric": "evidence_promotions",
+        "type": "production-system"
+      }
+    ],
+    "status": "finished",
+    "stop_conditions": [
+      "hard invariant violation",
+      "red exact-head gate",
+      "evidence-class promotion",
+      "unbounded patch scope"
+    ],
+    "task_id": "TRACE018-UI-LAB-LIVE-AE-PHASE1"
+  },
+  "provenance": {
+    "chronology": "immutable root experiment retained in experiment.initial.json",
+    "generator": "decision/engine/repoctl.mjs"
+  },
+  "schema": "experiment.design.v1",
+  "source_sha": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205"
+}

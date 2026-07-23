@@ -106,6 +106,10 @@ function buildIntents(payload: ResourcePayload, fixture: boolean): EmployeeExper
   for (const approval of payload.approvals) {
     intents.push({ id: `approve:${approval.id}`, kind: "approve", label: "Review approval", description: approval.summary, availability: "reference_client", risk: approval.risk_level === "high" ? "high" : "medium", target: { kind: "approval", id: approval.id }, input: { kind: "confirmation" } });
   }
+  for (const output of payload.outputs ?? []) {
+    if (!output.href) continue;
+    intents.push({ id: `open:${output.id}`, kind: "open_resource", label: `Open ${output.title}`, description: output.summary ?? "Open an owner-safe generated resource.", availability: "direct", risk: "low", target: { kind: output.type, id: output.id }, input: { kind: "none" } });
+  }
   if (fixture) {
     intents.push(
       { id: "fixture-reset", kind: "reset_fixture", label: "Reset fixture", description: "Restore deterministic fixture state.", availability: "direct", risk: "none", input: { kind: "none" } },

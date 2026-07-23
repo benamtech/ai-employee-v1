@@ -4,13 +4,13 @@
   "updated_at": "2026-07-23",
   "self": {
     "path": "mvp-build/authority-map.json",
-    "last_reconciliation": "Trace017 production state documentation after c83c23b local production mirror proof",
+    "last_reconciliation": "Trace018 UI Lab Phase 1 live AE workbench after exact local P3 verification",
     "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions or secret values."
   },
   "exact_status": {
     "owner": "mvp-build/CODEGRAPH.md",
     "transient_acceptance": "GitHub Actions, retained release records, and retained infra proof files",
-    "branch_record": "task/new-task-20260723 at c83c23be7d9bc5c36c164579ff47c16c45bb97a0",
+    "branch_record": "task/ui-lab-live-ae-phase-1-20260723 at 7fc40dc8dc7c60f3a8ec3e79dff59e6181566205 plus working-tree Trace018 candidate",
     "merge_descendant_rule": "the future main merge commit requires its own exact-head evidence"
   },
   "normative": ["mvp-build/STANDARD.md", "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"],
@@ -28,9 +28,9 @@
     "representation_contract": "mvp-build/decision/representation-contract.md",
     "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
     "representation_registry": "mvp-build/decision/engine/representation-registry.json",
-    "latest_completed_trace": "mvp-build/decision/trace017/",
+    "latest_completed_trace": "mvp-build/decision/trace018/",
     "trace016_state": "source/proof repair retained; repoctl finish not claimed because admitted impact was exceeded",
-    "next_trace_reserved": "mvp-build/decision/trace018/",
+    "next_trace_reserved": "mvp-build/decision/trace019/",
     "next_trace_state": "not_created_until_fresh_task_branch_after_main_merge"
   },
   "proof_classes": {
@@ -58,7 +58,8 @@
     "trace014": "canonical session bootstrap enforcement",
     "trace015": "repair frontier and generated full-stack strategy map",
     "trace016": "production Caddy/upstream/runtime repair with retained P3 local mirror proof; transaction finish not claimed",
-    "trace017": "production state authority, ledger, and memory reconciliation"
+    "trace017": "production state authority, ledger, and memory reconciliation",
+    "trace018": "UI Lab Phase 1 live-first owner-visible AI Employee workbench"
   },
   "architecture": "mvp-build/docs/architecture/",
   "memory": {

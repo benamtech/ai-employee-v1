@@ -1,0 +1,183 @@
+{
+  "content_digest": "sha256:9815ebce687e802a8ea8fdd3bd4835f105e0ed5736df6cc99bf370e7534b64e3",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T21:55:46.716Z",
+  "payload": {
+    "capsule_digest": "sha256:3e7d7f514bc0c1322188addfc0d9200c03f07d759f6ff8f375e866bc2fc8ed6c",
+    "current_head_at_admission": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205",
+    "discovered_later_policy": "must be recorded with evidence before evaluation",
+    "experiment_digest": "sha256:b0bd0562cac3bad06c7488ebac3b46219eb7a7cf199486be353424e33e99d875",
+    "experiment_root_digest": "sha256:46f7936aa79f85178288619ab2e8d349bf1faf037aa4b6f16cf92bdb4aae9102",
+    "new_paths_before_admission": [],
+    "plan_digest": "sha256:077a9fabe58f776487d80cca4c285019f8946e79a7a3b040e9a9793f64857bad",
+    "proof_obligations": [
+      {
+        "candidate_evidence": [
+          "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished"
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:fbf13dae8240",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished"
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/authority-map.json:17da23e0261c",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished"
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/decision/active.json:75fdded1162e",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "npm run test:ui:contracts",
+          "npm run ui:lab:test",
+          "npm run ui:test:shell"
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/apps/web/app/agent/[employeeId]/AgentSurface.tsx:005214",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "npm run test:ui:contracts",
+          "node scripts/verify-ui-architecture.mjs"
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/apps/web/app/agent/[employeeId]/owner-projection-controller.ts:002880",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "npm run test:ui:contracts"
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-lab-workbench-contract.test.ts:a5d66cc5b844",
+        "status": "planned"
+      }
+    ],
+    "selected_candidates": [
+      "C1-live-owner-projection-provider-with-injected-shell-state",
+      "C2-route-backed-ui-lab-layout-with-explicit-fixtures",
+      "C3-extend-existing-variant-contract-to-live-evidence"
+    ],
+    "task_id": "TRACE018-UI-LAB-LIVE-AE-PHASE1",
+    "verification_commands": [
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "doctor"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "self-test"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "build",
+          "--workspace",
+          "@amtech/shared"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "typecheck",
+          "--workspace",
+          "@amtech/shared"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "typecheck",
+          "--workspace",
+          "@amtech/web"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:ui:contracts"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "node",
+          "scripts/verify-ui-architecture.mjs"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "ui:validate"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "ui:lab:test"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "ui:test:shell"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:full"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:unit"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "timeout_ms": 900000
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs admit-plan"
+  },
+  "schema": "plan.admission.v1",
+  "source_sha": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205"
+}

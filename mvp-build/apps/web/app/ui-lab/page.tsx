@@ -1,42 +1,53 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { uiFixtureMode } from "../_lib/ui-fixtures";
-import { FIXTURE_SCENARIOS } from "../agent/[employeeId]/fixture-runtime";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { MANAGER_API } from "@amtech/shared";
+import { managerPost } from "../api/_lib/manager";
 
-export const metadata = { title: "Fixture Operating Lab — AMTECH" };
+export const metadata = { title: "UI Lab — AMTECH" };
 
-export default function FixtureLabIndexPage() {
-  if (!uiFixtureMode()) notFound();
+export default async function UiLabIndexPage() {
+  const token = (await cookies()).get("amtech_owner_session")?.value;
+  if (!token) redirect(`/login?next=${encodeURIComponent("/ui-lab")}`);
+  const response = await managerPost(MANAGER_API.ownerDashboard, { owner_session_token: token });
+  if (response.status === 401) redirect(`/login?next=${encodeURIComponent("/ui-lab")}`);
+  const dashboard = await response.json().catch(() => ({})) as {
+    account?: { display_name?: string | null } | null;
+    employees?: Array<{ id: string; name?: string | null; status?: string | null; profile_package_key?: string | null }>;
+  };
+  const employees = dashboard.employees ?? [];
+  if (employees.length === 1) redirect(`/ui-lab/employee/${employees[0].id}`);
+  const remembered = (await cookies()).get("amtech_ui_lab_employee")?.value ?? null;
+  const rememberedAuthorized = employees.some((employee) => employee.id === remembered) ? remembered : null;
 
   return (
-    <main className="lab-index">
-      <style>{INDEX_CSS}</style>
+    <main className="ui-lab-live-index">
+      <style>{CSS}</style>
       <section>
-        <p>Fixture demonstration only</p>
-        <h1>AI Employee Operating Lab</h1>
-        <span>
-          Run optimistic employee shapes through typed work loops, decisions, saves, delegation,
-          connected-system state, evidence, and owner-safe heartbeat projections before provider wiring.
-        </span>
-        <div>
-          {FIXTURE_SCENARIOS.map((scenario) => (
-            <Link key={scenario.id} href={`/ui-lab/${scenario.id}`}>
-              <small>{scenario.shortLabel}</small>
-              <strong>{scenario.label}</strong>
-              <span>{scenario.summary}</span>
-              <b>Open scenario</b>
+        <p>Live owner workbench</p>
+        <h1>{dashboard.account?.display_name ?? "UI Lab"}</h1>
+        <span>Choose an employee authorized by the current owner session. Remembered preference only highlights an authorized employee; it never grants access.</span>
+        <div className="selector">
+          {employees.map((employee) => (
+            <Link className={employee.id === rememberedAuthorized ? "remembered" : ""} key={employee.id} href={`/ui-lab/employee/${employee.id}`}>
+              <small>{readable(employee.status ?? "unknown")}</small>
+              <strong>{employee.name ?? "AI employee"}</strong>
+              <span>{readable(employee.profile_package_key ?? "General employee")}</span>
+              <b>{employee.id === rememberedAuthorized ? "Remembered and authorized" : "Open live workbench"}</b>
             </Link>
           ))}
+          {!employees.length ? <div className="empty"><strong>No authorized employees</strong><span>The current owner dashboard did not return an employee for UI Lab.</span></div> : null}
         </div>
+        <Link className="fixtures" href="/ui-lab/fixtures">Open explicit fixture gallery</Link>
       </section>
     </main>
   );
 }
 
-const INDEX_CSS = `
-  .lab-index{min-height:100dvh;padding:clamp(24px,6vw,72px);background:radial-gradient(circle at 8% 0%,rgba(223,246,255,.95),transparent 32rem),radial-gradient(circle at 92% 8%,rgba(225,29,42,.06),transparent 28rem),var(--amtech-canvas);color:var(--amtech-ink)}
-  .lab-index>section{width:min(1180px,100%);margin:0 auto}.lab-index>section>p{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amtech-red)}.lab-index h1{max-width:840px;margin:10px 0 16px;font-size:clamp(40px,8vw,82px);line-height:.95;letter-spacing:-.055em}.lab-index>section>span{display:block;max-width:760px;color:var(--amtech-muted);font-size:17px;line-height:1.65}
-  .lab-index>section>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;margin-top:36px}.lab-index a{min-height:240px;padding:24px;display:grid;align-content:start;gap:10px;border:1px solid var(--amtech-line);border-radius:var(--amtech-radius-card);background:rgba(255,255,255,.88);box-shadow:var(--amtech-shadow-card);text-decoration:none;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.lab-index a:hover{transform:translateY(-2px);border-color:rgba(225,29,42,.28);box-shadow:var(--amtech-shadow-float)}.lab-index a small{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--amtech-red)}.lab-index a strong{font-size:24px;line-height:1.08}.lab-index a span{color:var(--amtech-muted);line-height:1.55}.lab-index a b{align-self:end;margin-top:auto;color:var(--amtech-red);font-size:13px}
-  @media(max-width:640px){.lab-index{padding:28px 16px}.lab-index a{min-height:210px}}
-  @media(prefers-reduced-motion:reduce){.lab-index a{transition:none}.lab-index a:hover{transform:none}}
+const CSS = `
+  .ui-lab-live-index{min-height:100dvh;padding:clamp(24px,6vw,72px);background:#f7f9fc;color:#111;font-family:Inter,ui-sans-serif,system-ui,sans-serif}.ui-lab-live-index>section{width:min(1040px,100%);margin:0 auto}.ui-lab-live-index p{margin:0 0 10px;color:#e11d2a;font-size:11px;font-weight:850;letter-spacing:.12em;text-transform:uppercase}.ui-lab-live-index h1{margin:0;font-size:clamp(38px,7vw,72px);line-height:.96;letter-spacing:-.055em}.ui-lab-live-index>section>span{display:block;max-width:720px;margin-top:16px;color:#667085;font-size:16px;line-height:1.6}.selector{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px;margin-top:30px}.selector a,.empty{min-height:190px;padding:20px;display:grid;align-content:start;gap:8px;border:1px solid rgba(17,17,17,.1);border-radius:8px;background:#fff;text-decoration:none;color:#111}.selector a.remembered{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.selector small{color:#e11d2a;font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.1em}.selector strong{font-size:22px}.selector span,.empty span{color:#667085}.selector b{margin-top:auto;color:#1d4ed8;font-size:13px}.fixtures{display:inline-flex;min-height:44px;align-items:center;margin-top:18px;color:#111;font-weight:800}
 `;
+
+function readable(value?: string | null): string {
+  return String(value ?? "AI employee").replace(/[_:-]+/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}

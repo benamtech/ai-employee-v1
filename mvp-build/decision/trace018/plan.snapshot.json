@@ -1,0 +1,262 @@
+{
+  "browser_acceptance": {
+    "blocker": "Live owner employee data remains bounded by the existing amtech_owner_session cookie and cannot be faked as live acceptance.",
+    "scope": "Phase 1 route presence and workbench layout only unless an authenticated local owner session is available."
+  },
+  "discovered_later": [],
+  "maximum_patch": {
+    "allowed_paths": [
+      "apps/web/app/ui-lab",
+      "apps/web/app/agent/[employeeId]",
+      "apps/web/app/_components/ui-variant",
+      "apps/web/app/_components/live-employee",
+      "apps/web/ui-variants",
+      "packages/shared/src/index.ts",
+      "packages/shared/src/ui-variant.ts",
+      "packages/shared/src/employee-ui-presentation.ts",
+      "tests/unit",
+      "infra/scripts/ui",
+      "scripts/verify-ui-architecture.mjs",
+      "scripts/validate-ui-system.mjs",
+      "docs/adr",
+      "docs/ui-lab",
+      "decision/trace018",
+      "decision/active.json",
+      "CODEGRAPH.md",
+      "authority-map.json",
+      "memory/MEMORY.md",
+      "memory/2026-07-23-ui-lab-phase-1-live-workbench.md",
+      "production-readiness-program/13-resolution-ledger.json"
+    ],
+    "expansion_rule": "Record discovered-later paths in this plan before evaluation; stop rather than expanding into Manager, database, Hermes, provider, deployment, replay storage, launcher rewrite, or generated runtime Phase 2-5 work.",
+    "maximum_files": 42
+  },
+  "predictions": [
+    {
+      "claim": "Every changed source path is present in the generated impact frontier or explicitly recorded as discovered later.",
+      "expected": 0,
+      "falsifier": "The final diff contains an uncovered path.",
+      "horizon": 1,
+      "id": "prediction-impact-recall",
+      "metric": "uncovered_changed_paths",
+      "type": "direct"
+    },
+    {
+      "claim": "Every hard invariant hyperedge touched by the change has an accepted proof obligation or an explicit blocker.",
+      "expected": 0,
+      "falsifier": "A touched hard hyperedge has neither accepted evidence nor a blocker.",
+      "horizon": 2,
+      "id": "prediction-invariant-coverage",
+      "metric": "unresolved_hard_hyperedges",
+      "type": "verification"
+    },
+    {
+      "claim": "The final handoff preserves Manager authority and keeps UI Lab as a bounded projection without competing current-status ownership.",
+      "expected": 0,
+      "falsifier": "Authority verification finds a cycle, duplicate status owner, stale active router, or browser-held Hermes credential path.",
+      "horizon": 3,
+      "id": "prediction-authority-consistency",
+      "metric": "authority_errors",
+      "type": "architecture"
+    },
+    {
+      "claim": "The final evidence ledger does not promote source, fixture, browser, or local executable evidence into P4 production acceptance.",
+      "expected": 0,
+      "falsifier": "The evidence ledger claims a class stronger than its evidence.",
+      "horizon": 4,
+      "id": "prediction-evidence-nonpromotion",
+      "metric": "evidence_promotions",
+      "type": "production-system"
+    }
+  ],
+  "proof_obligations": [
+    {
+      "candidate_evidence": [
+        "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished"
+      ],
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:fbf13dae8240",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished"
+      ],
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/authority-map.json:17da23e0261c",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished"
+      ],
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/decision/active.json:75fdded1162e",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "npm run test:ui:contracts",
+        "npm run ui:lab:test",
+        "npm run ui:test:shell"
+      ],
+      "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/apps/web/app/agent/[employeeId]/AgentSurface.tsx:005214",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "npm run test:ui:contracts",
+        "node scripts/verify-ui-architecture.mjs"
+      ],
+      "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/apps/web/app/agent/[employeeId]/owner-projection-controller.ts:002880",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "npm run test:ui:contracts"
+      ],
+      "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-lab-workbench-contract.test.ts:a5d66cc5b844",
+      "status": "planned"
+    }
+  ],
+  "rejected_alternatives": [
+    {
+      "id": "R1-new-manager-ui-lab-endpoints",
+      "reason": "Rejected because Phase 1 must reuse the existing Manager owner session and owner projection endpoints without adding Manager authority surface."
+    },
+    {
+      "id": "R2-fixture-fallback-on-live-error",
+      "reason": "Rejected because live failures must remain live failures; fixtures are explicit secondary evidence at /ui-lab/fixtures only."
+    },
+    {
+      "id": "R3-second-employee-read-model",
+      "reason": "Rejected because ResourcePayload remains canonical and EmployeeExperienceModelV1 is derived from it."
+    },
+    {
+      "id": "R4-browser-direct-hermes-access",
+      "reason": "Rejected because browser UI must not receive Hermes credentials, URLs, or provider custody."
+    }
+  ],
+  "selected_candidates": [
+    "C1-live-owner-projection-provider-with-injected-shell-state",
+    "C2-route-backed-ui-lab-layout-with-explicit-fixtures",
+    "C3-extend-existing-variant-contract-to-live-evidence"
+  ],
+  "stop_conditions": [
+    "hard invariant violation",
+    "red exact-head gate",
+    "evidence-class promotion",
+    "unbounded patch scope",
+    "need for Manager, database, Hermes, provider, deployment, replay, or launcher topology changes"
+  ],
+  "verification": {
+    "commands": [
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "doctor"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "self-test"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "build",
+          "--workspace",
+          "@amtech/shared"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "typecheck",
+          "--workspace",
+          "@amtech/shared"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "typecheck",
+          "--workspace",
+          "@amtech/web"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:ui:contracts"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "node",
+          "scripts/verify-ui-architecture.mjs"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "ui:validate"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "ui:lab:test"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "ui:test:shell"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:full"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:unit"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "timeout_ms": 900000
+      }
+    ]
+  }
+}

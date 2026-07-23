@@ -11,12 +11,18 @@ describe("Trace009 and Trace012 executable UI architecture fitness", () => {
     expect(output).toContain('"status": "ok"');
   });
 
-  it("routes UI Lab through a workbench and isolated production preview", () => {
-    const page = read("apps/web/app/ui-lab/[scenario]/page.tsx");
+  it("routes UI Lab through live workbench and explicit fixture preview", () => {
+    const page = read("apps/web/app/ui-lab/page.tsx");
+    const employeeLayout = read("apps/web/app/ui-lab/employee/[employeeId]/layout.tsx");
+    const legacy = read("apps/web/app/ui-lab/[scenario]/page.tsx");
+    const fixtures = read("apps/web/app/ui-lab/fixtures/page.tsx");
     const workbench = read("apps/web/app/ui-lab/[scenario]/UiLabWorkbenchClient.tsx");
     const previewPage = read("apps/web/app/ui-lab/preview/[scenario]/page.tsx");
     const preview = read("apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx");
-    expect(page).toContain("UiLabWorkbenchClient");
+    expect(page).toContain("MANAGER_API.ownerDashboard");
+    expect(employeeLayout).toContain("LiveEmployeeProvider");
+    expect(legacy).toContain("redirect(`/ui-lab/fixtures");
+    expect(fixtures).toContain("Explicit fixture evidence");
     expect(workbench).toContain("<iframe");
     expect(workbench).toContain("Saved version");
     expect(workbench).toContain("Brand tokens");
