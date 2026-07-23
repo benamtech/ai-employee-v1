@@ -1,7 +1,9 @@
 # Verification and Handoff Matrix
 
 Status: **active evidence checklist**  
-Exact candidate and migration status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Updated: 2026-07-23  
+Exact structural status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Decision state: [`../decision/active.json`](../decision/active.json)  
 Decision protocol: [`../decision/README.md`](../decision/README.md)
 
 ## Evidence classes
@@ -19,55 +21,75 @@ decision reproducibility
 → browser/channel/accessibility
 → commercial lifecycle
 → recovery/rollback
-→ signed release
+→ trusted signed release
 → pilot
 → deployment
 → production
 ```
 
-A higher class may depend on a lower one. It never inherits acceptance automatically.
+A higher class may depend on a lower one. It never inherits acceptance automatically. Source-built signing and independent verification are not the same evidence class as trusted production signing, registry retention, or deployment.
 
 ## Gate matrix
 
 | Gate | Required evidence |
 |---|---|
-| decision record | explicit baseline semantics, split topology, equal-feasibility controls, search/weight sensitivity, implementation compression, proof plan, deterministic verifier |
-| document authority | one repository contract, one product contract, short compatibility routers, one exact-status owner, historical separation |
-| direct Manager source | committed `server.ts`, direct typecheck/build/package/Docker entrypoints, no template/generated/string-patch assembly, structural anti-regression gate |
-| source/type/lint/contracts | exact-candidate source and contract checks |
-| broad regression | exact-candidate surviving unit and lint suites with no weakened assertions |
-| build | exact-candidate production workspace compilation |
-| database | blank immutable forward ledger, security, isolation, concurrency, namespace, receipt-chain, and applicable managed-platform proof |
-| connector/protocol | live authorization, scope, health, revocation, outage, repair, deletion, client and host conformance |
+| decision record | proportional tier; authority/Unknown extraction; baseline; topology only when useful; equal-feasibility controls; sensitivity; separate implementation compression; proof plan; deterministic reproduction |
+| document authority | repository and product contracts; `authority-map.json`; `decision/active.json`; one exact-status owner; historical/completed-trace separation; indexed handoff |
+| direct Manager source | committed `server.ts`; direct typecheck/build/package/Docker entrypoints; no template/generated/string-patch assembly; structural anti-regression gate |
+| source/type/lint/contracts | exact-candidate source, generated-registry, architecture, security, UI, and contract checks |
+| broad regression | exact-candidate broad unit/lint suites with no weakened assertions |
+| build | all production workspaces compile; UI production build and generated registries agree |
+| local database | blank immutable ledger through source head; RLS; grants; security-definer; isolation; concurrency; namespace and receipt-chain tests |
+| release-build identity | canonical Compose; five exact-SHA images; image identity; manifest recomputation; independent signature verification |
+| managed database | disposable managed application; existing-row/backfill; security/advisors; backup/restore and rollback evidence |
+| connector/protocol | live authorization, scope, health, refresh/expiry, revocation, outage, repair, deletion, client and host conformance |
 | owner/channels | fixture-free owner, assignment, connector, current-authority stream, reconnect, Web/SMS/Review convergence |
 | golden work | provider-backed Website/Contractor/Bookkeeping revision → approval → effect → receipt/accounting → output/proof → replay/restart |
 | commercial ambiguity | multi-replica rate/budget/effect/accounting/reconciliation plus provider and billing proof |
-| target host/release | secret custody, isolation, lifecycle, fault, repair, rollback, backup/restore, telemetry, provenance, signed manifest |
-| human/capacity/pilot | supported browsers, accessibility, fairness/capacity, pilot entry/exit/incident/rollback |
-| production | every non-waivable gate on one exact signed deployed candidate |
+| target host/recovery | secret custody, isolation, lifecycle, fault, repair, rollback, backup/restore, telemetry, accepted-work conservation |
+| browser/accessibility | supported Chromium/Firefox/WebKit/mobile-Safari plus keyboard, screen-reader, zoom, focus, reflow, reduced-motion, and human visual review |
+| capacity/pilot | representative fairness/noisy-neighbor/SSE measurement and pilot entry/exit/incident/rollback/customer-exit packet |
+| production | every non-waivable gate on one exact trusted-signed deployed candidate |
 
-Current structural state lives in `../CODEGRAPH.md` and `13-resolution-ledger.json`. Transient SHA, run number, and conclusion live only in GitHub Actions or release records.
+Current structural state lives in `../CODEGRAPH.md` and `13-resolution-ledger.json`. Transient SHA, run number, and conclusion live only in the current PR, GitHub Actions, or retained release records.
 
-## Exact-candidate local matrix
+## Current exact-candidate matrix
 
-The focused workflow uses the PR branch head, asserts the checkout SHA, and runs:
+The cumulative branch workflows assert the pull-request head SHA and currently compose:
 
 ```text
-Trace007 deterministic verifier
-→ structural repository governance
-→ all workspace typechecks
-→ focused WS-01–07 production-boundary units
-→ migration ledger and quick contracts
-→ full repository verification
-→ complete unit regression
+Trace007 / Trace008 / Trace009 / Trace010 deterministic checks where applicable
+→ agentic and structural repository governance
+→ migration ledger and generated-contract parity
+→ all workspace typechecks and lint
+→ focused production-boundary, UI-port, UI-Lab, UI-variant, release, recovery, connector, and commercial units
+→ complete broad unit regression
 → all production workspace builds
 → blank-ledger migrations
 → commercial migration/security verifier
-→ focused WS-07 PostgreSQL matrix
-→ complete PostgreSQL integration aggregate
+→ focused and complete PostgreSQL integration aggregate
+→ canonical production Compose validation
+→ five exact-SHA image builds
+→ image-identity inspection
+→ independent release-manifest recomputation and signature verification
 ```
 
-Artifact upload is diagnostic. A missing retained log fails the evidence step; artifact-service failure alone does not rewrite command truth.
+Artifact upload is diagnostic. A missing required retained log fails the evidence step; artifact-service failure alone does not rewrite an already completed command conclusion.
+
+The last verified ancestor cannot certify documentation or merge descendants. Every stack merge requires new exact-head CI.
+
+## Current stack handoff
+
+```text
+PR #40 exact head green
+→ merge into PR #35 head branch
+→ verify new PR #35 exact head
+→ merge into PR #34 head branch
+→ verify new PR #34 exact head
+→ mark PR #34 ready as the single integration into main
+```
+
+The historical PR #35 coordinate is red. It is not independently promoted before PR #40’s cumulative repair is merged into it.
 
 ## Decision handoff
 
@@ -75,39 +97,29 @@ A consequential handoff records:
 
 - tier and protocol revision;
 - authority basis and observed/unknown reconciliation;
-- exact score schema, orientation, roles, groups, and optional dimensions;
+- score schema and orientation when scoring is used;
+- baseline roles and semantic groups when weighted comparison is used;
 - candidate batches and candidate-graph semantic boundary;
-- software invariant vertices, hyperedges, candidate mapping, and touch/fractional/complete/proved coverage;
-- one feasible domain shared by full, no-graph, no-diversity, evidence baseline, and random controls;
+- software-invariant vertices, genuine hyperedges, candidate mapping, and touch/fractional/complete/proved coverage;
+- one feasible domain shared by compared controls;
 - search and weight sensitivity;
 - selected exploration and separate implementation compression;
-- complete behavioral proof plan for every selected software edge;
+- complete behavioral proof plan or explicit blocker for each selected software edge;
 - implementation ablation status and independent outcomes;
 - evidence classes not established.
 
-For Trace007:
+Eigenvectors, centrality, spectral gaps, graph density, ranking changes, objective differences, and represented nodes remain descriptive or selection-supporting unless independent implementation outcomes establish more.
 
-```text
-Tier: T3
-Candidates: 64
-Random feasible baselines: 1,024
-Search restarts: 32
-Weight sensitivity runs: 32
-Candidate graph: descriptive
-Software invariant graph: descriptive
-Diversity: descriptive or selection-influencing
-Causal improvement: unestablished
-```
-
-Do not duplicate objective snapshots or selected IDs across active documents. The exact verifier output and canonical implementation artifact own those details.
+Trace012 is the latest completed trace. No transaction is currently open. Trace013 begins only on the next branch with new authority extraction and computation.
 
 ## Source boundary
 
-The current source establishes or intends to establish locally:
+The cumulative source establishes or intends to establish locally:
 
 - direct typed Manager route composition;
 - current assignment and authority-version interception for projected owner actions and streams;
 - strict account/employee/assignment/authority-version stream framing and cursor-before-delta ordering;
+- provider-neutral connector discovery, setup, lifecycle, revoke/reconnect, and exact conversational decisions;
 - shared PostgreSQL rate and worst-case budget admission;
 - finite request economics and bounded provider timeout;
 - stable request, revision, command, effect, and provider identity;
@@ -116,30 +128,34 @@ The current source establishes or intends to establish locally:
 - original-effect reconciliation;
 - exact artifact revision/approval/effect/output/proof continuity;
 - projection repair without republishing;
-- reconciliation, repair, and lineage views;
-- forward migrations through the source-derived head.
+- reconciliation, repair, rollback, restore, and proof-refinding views;
+- forward migrations through `0082`;
+- one production UI projection path plus neutral folder-first UI variants;
+- five image identities and independently verified source-built release metadata.
 
-Source and local CI do not establish managed, provider, host, browser, billing, release, pilot, deployment, or production evidence.
+Source and local CI do not establish managed, live provider, target-host, fixture-free channel, billing, manual accessibility, representative capacity, trusted production signing, pilot, deployment, or production evidence.
 
 ## Test and proof rules
 
 - Broad and curated suites are independently reported.
 - Decision verification is not runtime verification.
 - Candidate-edge touch is not software coverage.
-- Software completeness is not proof.
-- `software_proved` requires exact accepted behavioral evidence.
+- Hypergraph node or edge representation is not behavioral proof.
+- `software_proved` requires exact accepted independent behavioral evidence.
 - Fixture browser proof is not fixture-free provider/channel proof.
+- A UI-variant doctor or screenshot is not aesthetic or accessibility approval.
 - Local PostgreSQL is not managed-platform proof.
 - Provider mocks do not establish provider idempotency or accepted-response-loss behavior.
+- Source-built image/signature verification is not target-host, registry, trusted-signing, or deployment acceptance.
 - `skipped`, unavailable, and blocked remain visible.
 - Reconciliation and repair preserve original effect identity and accepted evidence.
-- Documentation commits require final exact-candidate checks.
+- Documentation and merge commits require final exact-candidate checks.
 
 ## Handoff transaction
 
 ```text
 branch/base and source migration head
-→ decision verifier and sensitivity output
+→ decision state and applicable verifier/sensitivity output
 → source/migration/test/workflow changes
 → exact candidate commands and results
 → external prerequisites and blocked classes
@@ -149,4 +165,4 @@ branch/base and source migration head
 → PR or release record
 ```
 
-A workstream or release claim is complete only when the decision record, executable implementation, exact-candidate verification, required external evidence, and active documentation agree.
+A workstream or release claim is complete only when the decision record when required, executable implementation, exact-candidate verification, required external evidence, and active documentation agree.
