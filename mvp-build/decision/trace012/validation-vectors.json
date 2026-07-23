@@ -1,0 +1,149 @@
+{
+  "schema": "amtech.ui-lab.validation-vectors.v1",
+  "task_id": "AMTECH-UI-LAB-001",
+  "configuration_axes": {
+    "scenario": ["website", "office", "personal-brain", "research", "contractor", "clothing-ops"],
+    "adapter": ["owner_web", "public_form", "boundless_website"],
+    "theme": ["amtech_light", "brand", "field_notebook", "ledger", "studio", "editorial", "midnight", "high_contrast", "custom:<slug>"],
+    "layout": ["conversation_workspace", "focus", "canvas", "form_chat", "boundless", "custom:<slug>"],
+    "component_set": ["standard", "compact", "editorial", "terminal", "form_forward", "custom:<slug>"],
+    "density": ["calm", "balanced", "dense"],
+    "viewport": ["responsive", "desktop", "tablet", "mobile"],
+    "preset_state": ["unsaved", "dirty_draft", "clean_draft", "approved", "deprecated"],
+    "runtime_state": ["initial", "forming", "active", "waiting", "needs_you", "stalled", "recovering", "completed"],
+    "evidence": ["source_contract", "unit", "development_browser", "compiled_browser", "human_review"]
+  },
+  "pass_vectors": [
+    {
+      "id": "PV-01-live-edit",
+      "condition": "A TSX or CSS edit under apps/web updates the isolated preview through Next Fast Refresh without running next build.",
+      "evidence": ["ui:lab development harness", "manual development observation"]
+    },
+    {
+      "id": "PV-02-production-components",
+      "condition": "The preview imports AgentSurface and EmployeeUiPortHost from production source rather than a parallel mock renderer.",
+      "evidence": ["source contract", "architecture fitness test"]
+    },
+    {
+      "id": "PV-03-isolated-preview",
+      "condition": "Workbench chrome is outside a same-origin iframe and preview viewport dimensions are controlled independently.",
+      "evidence": ["compiled browser smoke", "screenshot"]
+    },
+    {
+      "id": "PV-04-draft-save",
+      "condition": "A valid draft creates exactly one new vNNNN JSON file atomically and never overwrites an existing version.",
+      "evidence": ["unit tests", "registry validator"]
+    },
+    {
+      "id": "PV-05-dirty-provenance",
+      "condition": "Dirty worktrees may save drafts but the preset is marked reproducible=false with changed paths.",
+      "evidence": ["unit tests", "API contract"]
+    },
+    {
+      "id": "PV-06-clean-promotion",
+      "condition": "Promotion rejects a dirty worktree and an invalid or non-existent source preset.",
+      "evidence": ["registry CLI tests", "script contract"]
+    },
+    {
+      "id": "PV-07-assignment",
+      "condition": "An approved preset can be assigned to multiple profile keys and the generated runtime registry resolves deterministically.",
+      "evidence": ["unit tests", "generated-registry parity check"]
+    },
+    {
+      "id": "PV-08-write-confinement",
+      "condition": "Repository writes require development mode, fixture mode, explicit write enablement, loopback host, same-origin request, valid slug, and a path under ui-lab/presets.",
+      "evidence": ["route unit/source contract", "negative request tests"]
+    },
+    {
+      "id": "PV-09-production-denial",
+      "condition": "UI Lab remains unavailable and write-disabled in normal production-like environments.",
+      "evidence": ["existing fixture guard tests", "new route contract"]
+    },
+    {
+      "id": "PV-10-responsive",
+      "condition": "Every approved preset renders without horizontal overflow at desktop, tablet, and mobile review widths.",
+      "evidence": ["Playwright browser matrix"]
+    },
+    {
+      "id": "PV-11-accessible-controls",
+      "condition": "Workbench controls have stable accessible names, keyboard operation, visible focus, and reduced-motion-safe transitions.",
+      "evidence": ["Playwright", "ARIA snapshot or role assertions"]
+    },
+    {
+      "id": "PV-12-documentation",
+      "condition": "Every executable UI path, preset lifecycle command, validation script, and evidence boundary is reachable from the UI agent onboarding document.",
+      "evidence": ["documentation contract test"]
+    }
+  ],
+  "fail_vectors": [
+    {
+      "id": "FV-01-second-renderer",
+      "failure": "UI Lab implements or preserves a parallel fake renderer that diverges from production components.",
+      "response": "fail architecture fitness"
+    },
+    {
+      "id": "FV-02-full-build-loop",
+      "failure": "The documented normal iteration command invokes next build after each edit.",
+      "response": "fail script contract"
+    },
+    {
+      "id": "FV-03-localstorage-only",
+      "failure": "Named versions exist only in browser storage or query parameters.",
+      "response": "fail durability contract"
+    },
+    {
+      "id": "FV-04-uncommitted-approval",
+      "failure": "A dirty or uncommitted design can be assigned as approved.",
+      "response": "promotion command exits non-zero"
+    },
+    {
+      "id": "FV-05-overwrite",
+      "failure": "Saving a version mutates or overwrites an earlier vNNNN file.",
+      "response": "atomic exclusive-create failure"
+    },
+    {
+      "id": "FV-06-arbitrary-write",
+      "failure": "Client input controls an arbitrary repository path or writes non-JSON source.",
+      "response": "route rejects before filesystem access"
+    },
+    {
+      "id": "FV-07-production-write",
+      "failure": "Preset writes are reachable in production, staging, or non-loopback development.",
+      "response": "404 or 403; no filesystem mutation"
+    },
+    {
+      "id": "FV-08-stale-generated-registry",
+      "failure": "Assignments and generated runtime registry disagree.",
+      "response": "registry validator and CI fail"
+    },
+    {
+      "id": "FV-09-screenshot-only-proof",
+      "failure": "A screenshot is treated as proof of interactions, runtime correctness, or production acceptance.",
+      "response": "evidence classification fails"
+    },
+    {
+      "id": "FV-10-unbounded-matrix",
+      "failure": "CI attempts the full Cartesian product of every strategy on every change.",
+      "response": "replace with adapter smoke + approved-preset matrix + pairwise exploration"
+    }
+  ],
+  "promotion_gate": {
+    "all_required": [
+      "preset_schema_valid",
+      "version_path_matches_payload",
+      "clean_git_source",
+      "source_commit_recorded",
+      "registry_parity",
+      "focused_ui_unit_green",
+      "ui_lab_browser_green",
+      "human_review_recorded"
+    ],
+    "explicitly_not_proved": [
+      "live provider behavior",
+      "target-host deployment",
+      "production authorization",
+      "commercial acceptance",
+      "aesthetic quality without human judgment"
+    ]
+  }
+}

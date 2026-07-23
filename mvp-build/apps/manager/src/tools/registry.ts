@@ -22,6 +22,7 @@ import { connectEmailWithOwnerReturn } from "./gmail-connect-owner.js";
 import { connectQuickBooksWithOwnerReturn } from "./qbo-connect-owner.js";
 import { artifactWorkbenchTools } from "./artifact-workbench-tools.js";
 import { requestApprovalWithArtifactSupport } from "./artifact-approval-authority.js";
+import { managerExtensionTools } from "./manager-extension-tools.js";
 
 const merged: Partial<Record<ToolName, ToolHandler>> = {
   ...identityTools,
@@ -59,9 +60,12 @@ export function buildToolRegistry(): Map<ToolName, ToolHandler> {
   if (missing.length) {
     throw new Error(`Tool registry incomplete — missing handlers: ${missing.join(", ")}`);
   }
-  // Artifact workbench tools intentionally extend the existing Manager surface
-  // without rewriting the historical phase registry or creating another engine.
+  // Artifact workbench and experience tools extend the historical phase registry
+  // without creating a second dispatcher or weakening Manager custody.
   for (const [name, handler] of Object.entries(artifactWorkbenchTools)) {
+    reg.set(name as ToolName, handler);
+  }
+  for (const [name, handler] of Object.entries(managerExtensionTools)) {
     reg.set(name as ToolName, handler);
   }
   return reg;

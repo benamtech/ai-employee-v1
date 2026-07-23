@@ -8,7 +8,6 @@ coverage/
 .turbo/
 .vercel/
 hermes-data/
-mvp-build/apps/manager/src/server.generated.ts
 mvp-build/.artifacts/
 local-prod/reports/
 

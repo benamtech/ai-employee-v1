@@ -293,12 +293,17 @@ export function ownerOAuthConnectorSetups(): OwnerOAuthConnectorSetup[] {
  * Resolve owner setup from capability metadata without relying on category or
  * tool-name branches in the Web client. Exact manifest tool membership is data,
  * not a broad domain-category inference.
+ *
+ * Category is accepted as an untrusted string hint because third-party MCP
+ * metadata is not guaranteed to use AMTECH's enum. It is deliberately ignored
+ * for provider selection; only exact connector/server/tool identity can select a
+ * native authorization descriptor.
  */
 export function resolveManagedSetupForCapability(input: {
   connector_id?: string | null;
   server_id?: string | null;
   tool_name?: string | null;
-  category?: CapabilityCategory | null;
+  category?: CapabilityCategory | string | null;
 }): OwnerManagedConnectorSetup | null {
   const candidates = [input.connector_id, input.server_id];
   for (const candidate of candidates) {

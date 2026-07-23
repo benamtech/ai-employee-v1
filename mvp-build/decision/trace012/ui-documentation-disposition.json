@@ -1,0 +1,151 @@
+{
+  "schema": "amtech.ui-documentation-disposition.v1",
+  "task_id": "AMTECH-UI-LAB-001",
+  "rule": "Executable source and exact-head evidence outrank prose. Historical evidence remains preserved but does not provide current implementation instructions.",
+  "active_doctrine": [
+    {
+      "path": "../docs/AMTECH_WEB_DESIGN_SYSTEM.md",
+      "purpose": "Shared visual foundations and design tokens."
+    },
+    {
+      "path": "../docs/AMTECH_AGENT_INTERFACE_STANDARD.md",
+      "purpose": "Employee interface behavior and operating primitives."
+    },
+    {
+      "path": "../docs/AMTECH_UI_VALIDATION_STANDARD.md",
+      "purpose": "Validation, accessibility, browser and evidence requirements."
+    },
+    {
+      "path": "STANDARD.md",
+      "purpose": "Ratified product standard; UI documents cannot silently amend it."
+    }
+  ],
+  "active_architecture_and_workflow": [
+    {
+      "path": "docs/ux/README.md",
+      "purpose": "Active UX router and reading order."
+    },
+    {
+      "path": "docs/ux/02-current-ux-system-map.md",
+      "purpose": "Current UI surface, adapter, workbench and evidence topology."
+    },
+    {
+      "path": "docs/ux/10-ui-lab-live-workbench.md",
+      "purpose": "Canonical UI Lab architecture, preset lifecycle and effects."
+    },
+    {
+      "path": "docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md",
+      "purpose": "Port, adapter and strategy decision."
+    },
+    {
+      "path": "ui-lab/README.md",
+      "purpose": "Collaborator operating manual."
+    },
+    {
+      "path": "ui-lab/AGENTS.md",
+      "purpose": "Dedicated coding-agent onboarding and guardrails."
+    },
+    {
+      "path": "../docs/ui/README.md",
+      "purpose": "Repository-wide canonical UI documentation router."
+    },
+    {
+      "path": "docs/architecture/05-web-client-work-surfaces-and-tool-agnostic-ag-ui.md",
+      "purpose": "Cross-system Web, materialization and embedded-view boundary."
+    },
+    {
+      "path": "docs/ux/06-fixture-production-ui-policy.md",
+      "purpose": "Fixture versus production evidence and environment policy."
+    }
+  ],
+  "active_machine_records": [
+    "decision/trace011/task_state.json",
+    "decision/trace012/task_state.json",
+    "decision/trace012/research-and-decision-record.md",
+    "decision/trace012/validation-vectors.json",
+    "decision/trace012/affected-files.json",
+    "decision/trace012/script-inventory.json",
+    "decision/trace012/ui-documentation-disposition.json",
+    "validation/ui-presentation-coverage.json"
+  ],
+  "informative_dated_or_specialized": [
+    {
+      "path": "../docs/ui/AMTECH_AI_EMPLOYEE_UI_RUNTIME_DEEP_DIVE_2026-07-19.md",
+      "disposition": "Dated runtime review; valid facts remain informative, but current source and UX maps supersede topology/status."
+    },
+    {
+      "path": "../docs/ui/HERMES_RUNTIME_UI_DERIVATIONS.md",
+      "disposition": "Runtime-derived constraints; does not define current Web presentation architecture."
+    },
+    {
+      "path": "../docs/ui/HERMES_HEARTBEAT_UI_ARCHITECTURE.md",
+      "disposition": "Heartbeat and fixture-state constraints; not the general UI Lab workflow."
+    },
+    {
+      "path": "docs/ux/03-research-source-ledger.md",
+      "disposition": "Research provenance and questions."
+    },
+    {
+      "path": "docs/ux/04-implementation-coverage-audit.md",
+      "disposition": "Coverage audit; exact source and current validation artifacts determine present status."
+    },
+    {
+      "path": "docs/ux/05-generative-ui-frontier.md",
+      "disposition": "Generated/embedded-view frontier, separate from employee presentation presets."
+    },
+    {
+      "path": "docs/ux/08-speculative-ui-research-disposition.md",
+      "disposition": "Controls speculative methods and non-release-path ideas."
+    },
+    {
+      "path": "docs/ux/09-hermes-programmatic-integration-and-webui-findings.md",
+      "disposition": "Hermes integration findings; current AMTECH source remains product authority."
+    },
+    {
+      "path": "docs/ux/07-post-release-ui-roadmap.md",
+      "disposition": "Future work; not current behavior."
+    },
+    {
+      "path": "../docs/AMTECH_WEB_DESIGN_SYSTEM_IMPLEMENTATION.md",
+      "disposition": "Implementation ledger; cannot redefine doctrine or exact current source."
+    },
+    {
+      "path": "STANDARD_UI_RUNTIME_AMENDMENT_2026-07-19.md",
+      "disposition": "Proposed amendment only unless ratified."
+    }
+  ],
+  "historical_or_superseded": [
+    {
+      "path_glob": "docs/archive/ui-handoff-2026-07-14/**",
+      "reason": "Historical collaborator packets, screenshots, data catalogs and experiments."
+    },
+    {
+      "path_glob": "ui-redesign/**",
+      "reason": "Earlier design exploration; current port, strategy and UI Lab source supersede fixed visual assumptions."
+    },
+    {
+      "path_glob": "memory/*ui*",
+      "reason": "Durable chronological handoffs, not active instructions."
+    },
+    {
+      "path_glob": "wiki/MVP/**",
+      "reason": "Planning and implementation history unless explicitly routed by current authority."
+    },
+    {
+      "path": "apps/web/app/ui-lab/[scenario]/FixtureLabClient.tsx",
+      "reason": "Legacy parallel fixture client isolated from active routes; retained only until deletion is separately justified."
+    }
+  ],
+  "superseded_concepts": [
+    "one fixed visual identity for every employee",
+    "one React page fork per employee type",
+    "themes or layouts described as adapters",
+    "UI Lab as a direct in-page fixture renderer without an isolated canvas",
+    "browser localStorage as the durable UI version store",
+    "production rebuild required for each visual edit",
+    "screenshots treated as interaction, runtime or production proof",
+    "dirty uncommitted designs assignable to customer employees",
+    "fixed Home/Talk/Proof/Connected tab doctrine",
+    "single black-shell or ink/white/red-only visual requirement"
+  ]
+}

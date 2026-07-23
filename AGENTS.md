@@ -1,78 +1,51 @@
-# AGENTS.md — Repository Agent Rules
+# AGENTS.md — Repository contract
 
 Status: active  
-Updated: 2026-07-20
+Updated: 2026-07-23
 
-## Mandatory read order
+## Start
 
-1. `identity.md`
-2. this file or `CLAUDE.md`
-3. `CONTRIBUTING.md`
-4. root `CODEGRAPH.md`
-5. nearest scoped `AGENTS.md`, `CLAUDE.md`, and `CODEGRAPH.md`
-6. ratified `mvp-build/STANDARD.md`
-7. `mvp-build/production-readiness-program/README.md`
-8. `mvp-build/memory/MEMORY.md`, then the newest relevant handoff
-9. `mvp-build/docs/architecture/README.md`
-10. relevant source, migrations, tests, workflows, proof, release records, PRs, and current diff
-
-Authority order: deployed release proof → applied migrations/durable state → executable source/generated production config → exact-SHA tests/acceptance → ratified Standard/current production-readiness program → CODEGRAPH/architecture → newest indexed memory → historical records.
-
-## Repository routing
-
-- AI Employee implementation and production authority: `mvp-build/`.
-- Ratified requirements: `mvp-build/STANDARD.md`.
-- Single active program: `mvp-build/production-readiness-program/`.
-- Historical plans: `mvp-build/second-half-plan/`; non-canonical.
-- Current architecture: `mvp-build/docs/architecture/`.
-- Sole handoff index: `mvp-build/memory/MEMORY.md`.
-- Historical factual ledger: `wiki/MVP/implementation-records/`.
-- Hyper Site lives in `benamtech/hyper-site`; do not recreate it here.
-- The public estimator is outdated and non-canonical.
-
-## Current integration boundary
-
-- Current `main` baseline for this work is `48b917389ed85b9652eca43a8e4a8f60b52e917b`.
-- PR #33/source/tests are newer authority than stale plan-status prose, but establish only their exact lifecycle/source/test evidence.
-- Remote MCP, MCP Apps, AG-UI, effective capability, and streaming Web retain only their exact source/test evidence.
-- Live connector authorization/revocation, third-party host conformance, managed database, target host, provider, fixture-free Web/SMS/Review, commercial, recovery, deployment, pilot, and production acceptance remain distinct and open unless exact current evidence closes them.
-- WS-05 and WS-06 may use WS-07/08/09 only as read-only dependencies or future frontier nodes.
-
-## Product and protocol invariants
-
-1. AMTECH is governed AI labor, not a generic chat or tool wrapper.
-2. Every consequential path resolves an authenticated principal plus explicit assignment or approved platform/system context.
-3. Identity, ownership, employment, access, authority, custody, payer, and beneficiary remain separate.
-4. Hermes owns reasoning/runtime behavior; Manager owns assignment authority, capability/tool contracts, connector/token custody, approvals, effects, commercial attribution, revocation, repair, and proof.
-5. Capability discovery may be broad. Execution requires current effective capability evidence.
-6. MCP core, MCP Apps, AG-UI, Web, SMS, and signed Review are interoperability/presentation layers, not authority.
-7. Generated UI and shared state cannot invent work, actions, approval, credentials, provider routing, or effects.
-8. Harmless Hermes text/activity should stream immediately; authority gates apply when crossing into commands, credentials, approvals, or external effects.
-9. Unknown, stale, revoked, cross-account, mismatched, or unprobed evidence fails closed.
-10. Provider master credentials and connector tokens never enter employee profiles, Hermes runtimes, browser payloads, or generated UI.
-11. Consequential effects reserve once and terminate with accepted, failed, or ambiguous durable receipts; ambiguous reconciles before retry.
-12. Reconnect never resubmits accepted owner intent.
-13. Public and release claims never exceed exact-candidate evidence.
-
-## Required contributor gate
-
-From `mvp-build/`:
+1. Read `identity.md`, this file, `CONTRIBUTING.md`, and `CODEGRAPH.md`.
+2. Enter the target subtree and read its nearest `AGENTS.md`, `authority-map.json`, and `CODEGRAPH.md`.
+3. For non-mechanical `mvp-build` work, run the repository-owned experiment compiler before source edits:
 
 ```bash
-npm ci
-npm run hooks:install
-npm run repo:rubric -- ./task-contract.json
-npm run repo:verify:quick
-npm run repo:verify:full
-npm run test:unit
+cd mvp-build
+node decision/engine/repoctl.mjs start --task <task.json> --out decision/<trace-or-transaction>
 ```
 
-CI is authoritative only when an exact run exists for the exact claimed SHA. Do not weaken tests, hide blocked evidence, or promote fixtures into live acceptance.
+4. Use the generated task capsule, admit the plan, implement within its maximum patch, evaluate, and finish.
+5. Stop stronger claims on red exact-head evidence.
 
-## Hermes upstream review
+Historical plans, completed traces, audits, and handoffs are provenance, not active instructions.
 
-Before changing Hermes integration, launch, sessions, tool discovery, streaming, gateway behavior, runtime capabilities, or Hermes-derived UI, run `npm run hermes:upstream:check`. The pinned image/digest changes only through exact-image compatibility and release gates.
+## Authority and evidence
 
-## Git discipline
+`mvp-build/CODEGRAPH.md` owns current product status. The proof classes are:
 
-Create a reviewed task branch from current `main`. Every commit references the task ID. Stop downstream work on red CI. Merge only when required checks pass and source, program, memory, and PR evidence agree.
+```text
+P0 representation calculation
+P1 verified formal-model property
+P2 verified model/repository correspondence
+P3 exact-candidate executable software evidence
+P4 external or production acceptance
+```
+
+No class silently promotes itself. Source is not CI. CI is not provider proof. Fixtures are not live acceptance. Ancestor evidence is not descendant evidence.
+
+## Agent-native engineering
+
+Natural language is an interoperability and audit layer, not the mandatory reasoning substrate. Agents may use graphs, genuine hypergraphs, vectors, matrices, tensors, spectral operators, formal systems, state machines, constraints, geometric/topological structures, and validated learned representations under the scoped registry and proof contract.
+
+Retain typed artifacts, generators, provenance, assumptions, certificates, predictions, tests, and outcomes—not private chain-of-thought.
+
+## Routing
+
+- `mvp-build/` — executable product and experiment compiler.
+- `mvp-build/decision/engine/repoctl.mjs` — universal non-mechanical task interface.
+- `mvp-build/STANDARD.md` plus amendments — normative requirements.
+- `mvp-build/production-readiness-program/` — active production route.
+- `mvp-build/memory/MEMORY.md` — handoff index.
+- `wiki/` — strategy and research, never implementation authority.
+
+Work on the reviewed branch/base, never directly on `main`. Do not weaken tests, hide blockers, reset user work, or broaden evidence beyond the boundary exercised.

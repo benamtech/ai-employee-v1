@@ -4,12 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ResourcePayload } from "./surface-types";
 import { AgentSurface } from "./AgentSurface";
 import { fixtureResourcePayload } from "./fixtures";
-import {
-  installOwnerSnapshot,
-  protocolAuthority,
-  validateScopedFrame,
-  type OwnerStreamScope,
-} from "./owner-stream-state";
+import { protocolAuthority, type OwnerStreamScope } from "./owner-stream-state";
+import { openOwnerProjectionController } from "./owner-projection-controller";
 
 type PrimaryMode = "talk" | "operate";
 type StreamState = "connecting" | "live" | "reconnecting" | "offline";
@@ -111,146 +107,62 @@ export function LiveEmployeeOperatingShell({
       scopeRef.current = null;
       return;
     }
-    let source: EventSource | null = null;
-    let closed = false;
-    let reconnectDelay = 500;
-
-    function denyProjection(message: string) {
-      source?.close();
-      scopeRef.current = null;
-      setStreamState("offline");
-      setStatus(message);
-    }
-
-    function consumeScoped(event: Event, kind: "assistant_delta" | "work_progress" | "run_completed") {
-      try {
-        const payload = JSON.parse((event as MessageEvent).data) as Record<string, unknown>;
-        const scope = scopeRef.current;
-        if (!scope || !validateScopedFrame(payload, scope, kind)) {
-          denyProjection("AMTECH stopped an invalid live conversation projection. No owner action was replayed.");
+    return openOwnerProjectionController({
+      employeeId,
+      eventKinds: ["assistant_delta", "work_progress", "run_completed", "approval_update"],
+      onState: setStreamState,
+      onSnapshot(snapshot, scope) {
+        scopeRef.current = scope;
+        installResources(snapshot);
+        setStatus("");
+      },
+      onEvent(kind, payload, scope) {
+        scopeRef.current = scope;
+        if (kind === "approval_update") {
+          void refreshResources();
           return;
         }
         const runId = typeof payload.run_id === "string" ? payload.run_id : "";
         if (!runId) return;
-
         if (kind === "assistant_delta") {
-          const messageId = typeof payload.message_id === "string" ? payload.message_id : `assistant:${runId}`;
+          const messageId = typeof payload.message_id === "string" ? payload.message_id : "assistant:" + runId;
           const delta = typeof payload.delta === "string" ? payload.delta : "";
           const sequence = Number(payload.sequence ?? -1);
           if (!delta || !Number.isInteger(sequence) || sequence < 0) return;
           setRuns((current) => {
             const previous = current[runId];
             if (previous && sequence <= previous.lastSequence) return current;
-            return {
-              ...current,
-              [runId]: {
-                runId,
-                messageId,
-                text: `${previous?.text ?? ""}${delta}`,
-                activity: previous?.activity ?? "Responding",
-                status: "streaming",
-                lastSequence: sequence,
-                startedAt: previous?.startedAt ?? Date.now(),
-              },
-            };
+            return { ...current, [runId]: { runId, messageId, text: (previous?.text ?? "") + delta, activity: previous?.activity ?? "Responding", status: "streaming", lastSequence: sequence, startedAt: previous?.startedAt ?? Date.now() } };
           });
           setDispatching(false);
           setStatus("");
           return;
         }
-
         if (kind === "work_progress") {
           const activity = typeof payload.verb === "string" ? payload.verb : "Working";
           const state = typeof payload.state === "string" ? payload.state : "step";
           setRuns((current) => {
-            const previous = current[runId] ?? {
-              runId,
-              messageId: `assistant:${runId}`,
-              text: "",
-              activity,
-              status: "streaming" as const,
-              lastSequence: -1,
-              startedAt: Date.now(),
-            };
-            return {
-              ...current,
-              [runId]: {
-                ...previous,
-                activity,
-                status: state === "completed" ? previous.status : "streaming",
-              },
-            };
+            const previous = current[runId] ?? { runId, messageId: "assistant:" + runId, text: "", activity, status: "streaming" as const, lastSequence: -1, startedAt: Date.now() };
+            return { ...current, [runId]: { ...previous, activity, status: state === "completed" ? previous.status : "streaming" } };
           });
           setDispatching(false);
           return;
         }
-
         const terminalStatus = String(payload.status ?? "completed");
         setRuns((current) => {
           const previous = current[runId];
           if (!previous) return current;
           const failed = terminalStatus === "failed";
-          return {
-            ...current,
-            [runId]: {
-              ...previous,
-              activity: failed ? "Needs attention" : "Saved to workspace",
-              status: failed ? "failed" : "completed",
-            },
-          };
+          return { ...current, [runId]: { ...previous, activity: failed ? "Needs attention" : "Saved to workspace", status: failed ? "failed" : "completed" } };
         });
         setDispatching(false);
         window.setTimeout(() => { void refreshResources(); }, 120);
-      } catch {
-        denyProjection("AMTECH stopped a malformed live conversation frame. Durable state remains unchanged.");
-      }
-    }
-
-    function connect() {
-      if (closed) return;
-      scopeRef.current = null;
-      setStreamState((current) => current === "offline" ? "reconnecting" : "connecting");
-      source = new EventSource(`/api/employee/${employeeId}/events`);
-      source.addEventListener("open", () => {
-        reconnectDelay = 500;
-      });
-      source.addEventListener("snapshot", (event) => {
-        try {
-          const payload = JSON.parse((event as MessageEvent).data);
-          const installed = installOwnerSnapshot(payload, employeeId);
-          if (!installed.ok) {
-            denyProjection("AMTECH could not validate the employee conversation snapshot.");
-            return;
-          }
-          scopeRef.current = installed.scope;
-          installResources(installed.snapshot);
-          setStreamState("live");
-          setStatus("");
-        } catch {
-          denyProjection("AMTECH could not parse the employee conversation snapshot.");
-        }
-      });
-      source.addEventListener("assistant_delta", (event) => consumeScoped(event, "assistant_delta"));
-      source.addEventListener("work_progress", (event) => consumeScoped(event, "work_progress"));
-      source.addEventListener("run_completed", (event) => consumeScoped(event, "run_completed"));
-      source.addEventListener("approval_update", () => { void refreshResources(); });
-      source.onerror = () => {
-        source?.close();
+      },
+      onDenied(reason) {
         scopeRef.current = null;
-        if (closed) return;
-        setStreamState("reconnecting");
-        reconnectTimer.current = window.setTimeout(connect, reconnectDelay);
-        reconnectDelay = Math.min(reconnectDelay * 2, 10_000);
-      };
-    }
-
-    connect();
-    return () => {
-      closed = true;
-      scopeRef.current = null;
-      source?.close();
-      if (reconnectTimer.current) window.clearTimeout(reconnectTimer.current);
-    };
+        setStatus("AMTECH stopped an invalid live conversation projection (" + reason + "). No owner action was replayed.");
+      },
+    });
   }, [employeeId, fixtureMode, installResources, mode, refreshResources]);
 
   const employeeName = res.employee?.name ?? res.operating_state?.context.employee_name ?? "Your employee";

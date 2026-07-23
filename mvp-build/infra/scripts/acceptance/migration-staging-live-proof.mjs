@@ -2,19 +2,26 @@
 import { createHash } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { inspectRepositoryMigrationLedger } from "../../../packages/db/migration-ledger.mjs";
 import { requireEnv, run, writeProof, assert } from "./production-proof-lib.mjs";
 
-const migrationHead = "0073";
+const migrationLedger = inspectRepositoryMigrationLedger();
+const migrationHead = String(migrationLedger.appliedHead).padStart(4, "0");
 const migrationStart = "0032";
 const migrationsDir = "packages/db/migrations";
 
 requireEnv("STAGING_DATABASE_URL");
 const databaseEnv = { DATABASE_URL: process.env.STAGING_DATABASE_URL };
-const result = run("node", ["infra/scripts/acceptance/verify-worker-migrations.mjs", "--apply"], {
+const workerResult = run("node", ["infra/scripts/acceptance/verify-worker-migrations.mjs", "--apply"], {
   env: databaseEnv,
   timeout: 180_000,
 });
-assert(result.output.includes("worker_migrations_verified"), "migration_verifier_missing_success_marker");
+assert(workerResult.output.includes("worker_migrations_verified"), "migration_verifier_missing_success_marker");
+const commercialResult = run("node", ["infra/scripts/acceptance/verify-commercial-effect-migrations.mjs"], {
+  env: databaseEnv,
+  timeout: 120_000,
+});
+assert(commercialResult.output.includes("commercial_effect_migrations_verified"), "commercial_effect_migration_verifier_missing_success_marker");
 
 const files = (await readdir(migrationsDir))
   .filter((file) => /^\d{4}[a-z]?_.+\.sql$/.test(file))
@@ -23,6 +30,12 @@ const files = (await readdir(migrationsDir))
 assert(files.length > 0, "migration_proof_range_empty", { migrationStart, migrationHead });
 assert(files[0].startsWith(`${migrationStart}_`), "migration_proof_start_missing", { first: files[0] });
 assert(files.at(-1)?.startsWith(`${migrationHead}_`), "migration_proof_head_missing", { last: files.at(-1) });
+assert(
+  files.filter((file) => file.slice(0, 4) === migrationHead).length
+    === migrationLedger.entries.filter((entry) => entry.number === migrationLedger.appliedHead).length,
+  "migration_proof_head_file_count_mismatch",
+  { migrationHead },
+);
 
 const status = run("node", ["packages/db/migrate.mjs", "--status"], {
   env: databaseEnv,
@@ -43,9 +56,11 @@ await writeProof("migration-staging", "passed", {
   database_ref: process.env.STAGING_SUPABASE_PROJECT_REF ?? "database-url-only",
   migration_start: migrationStart,
   migration_head: migrationHead,
+  migration_ledger_sha256: migrationLedger.ledgerSha256,
   migration_count: migrations.length,
   migrations,
-  verifier_tail: result.output.split("\n").slice(-20),
+  worker_verifier_tail: workerResult.output.split("\n").slice(-20),
+  commercial_verifier_tail: commercialResult.output.split("\n").slice(-20),
   status_tail: status.output.split("\n").slice(-40),
   production_mutated: false,
 });

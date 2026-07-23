@@ -1,0 +1,12 @@
+---
+description: AMTECH folder-first UI variant standard
+globs: "**/*"
+alwaysApply: true
+---
+
+- Read `README.md`, `AGENTS.md`, `contract.ts`, and the selected variant's local instruction files.
+- During ordinary design work, edit only the selected variant directory.
+- Preserve employee capability and information fidelity; do not preserve production-client appearance or layout by default.
+- Use only the neutral model, bounded intent dispatcher, local files, declared dependencies, and optional reference-client slot.
+- Never fetch product data, use ambient storage, or import application internals.
+- Run `node ../../../../scripts/ui-variant.mjs validate <slug>` before stopping.

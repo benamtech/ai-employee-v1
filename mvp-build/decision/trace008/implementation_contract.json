@@ -1,0 +1,13 @@
+{
+  "max_trajectories": 6,
+  "schema": "amtech.trace008.implementation-contract.v1",
+  "selected_ids": [
+    "D01",
+    "D02",
+    "D03",
+    "D04",
+    "D06",
+    "D09"
+  ],
+  "source_edits_forbidden_until_this_artifact": true
+}

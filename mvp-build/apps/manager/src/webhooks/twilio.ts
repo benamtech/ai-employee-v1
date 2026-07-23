@@ -8,6 +8,7 @@ import { sendSms } from "../lib/twilio.js";
 import { deliverOwnerTurnToRuntime } from "../lib/runtime.js";
 import { resolveEmployeeSmsSender } from "../lib/sms-sender.js";
 import { stampChannelPresence } from "../lib/channel-router.js";
+import { loadSmsDecisionContextForTurn } from "../lib/channel-decisions.js";
 import { mustWrite } from "../lib/db.js";
 import {
   AmbientEffectAmbiguousError,
@@ -212,9 +213,10 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
       if (existingInbound.data?.assignment_id && existingInbound.data.assignment_id !== assignmentId) {
         throw new Error("twilio_inbound_cross_assignment_replay");
       }
+      const inboundMessageId = existingInbound.data?.id ? String(existingInbound.data.id) : newId(ID_PREFIX.message);
       if (!existingInbound.data) {
         const inbound = await db.from("employee_messages").insert({
-          id: newId(ID_PREFIX.message),
+          id: inboundMessageId,
           assignment_id: assignmentId,
           account_id: accountId,
           employee_id: employeeId,
@@ -238,6 +240,23 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
         });
       }
 
+      let decisionContext = null;
+      let decisionContextError: string | null = null;
+      try {
+        decisionContext = await loadSmsDecisionContextForTurn(db, {
+          account_id: accountId,
+          employee_id: employeeId,
+          assignment_id: assignmentId,
+          phone_e164: ownerFrom,
+          owner_message_id: inboundMessageId,
+        });
+      } catch (error) {
+        decisionContextError = String((error as Error)?.message ?? error).slice(0, 180);
+        await db.from("employee_messages").update({
+          decision_context: { projection_error: decisionContextError },
+        }).eq("id", inboundMessageId).eq("assignment_id", assignmentId);
+      }
+
       const turn = await deliverOwnerTurnToRuntime(db, {
         account_id: accountId,
         employee_id: employeeId,
@@ -245,6 +264,19 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
         body: params.Body ?? "",
         channel: "sms",
         idempotency_key: `twilio:${assignmentId}:${inboundProviderId}`,
+        decision_context: decisionContext ? {
+          context_id: decisionContext.context_id,
+          approval_id: decisionContext.approval_id,
+          owner_message_id: decisionContext.owner_message_id,
+          human_principal_id: decisionContext.human_principal_id,
+          action_key: decisionContext.action_key,
+          summary: decisionContext.summary,
+          risk_level: decisionContext.risk_level,
+          resource_class: decisionContext.resource_class,
+          resource_id: decisionContext.resource_id,
+          snapshot_hash: decisionContext.snapshot_hash,
+          expires_at: decisionContext.expires_at,
+        } : null,
       });
       const response = turn.reply || (turn.status === "queued" ? "I got it. I'm working on that now." : "I hit a snag. I saved your message and will pick it back up.");
       let sent: { sid: string; status: string };
@@ -286,8 +318,11 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
         connector_binding_id: scoped.connector_binding_id,
         command_id: scoped.command_id,
         inbound_message_id: inboundProviderId,
+        durable_inbound_message_id: inboundMessageId,
         outbound_message_id: sent.sid,
         runtime_turn_status: turn.status,
+        decision_context_id: decisionContext?.context_id ?? null,
+        decision_context_error: decisionContextError,
       };
       return {
         result,
@@ -296,6 +331,8 @@ async function processEmployeeInbound(db: SupabaseClient, event: AmbientInboxRow
           status: sent.status,
           assignment_id: assignmentId,
           connector_binding_id: scoped.connector_binding_id,
+          decision_context_id: decisionContext?.context_id ?? null,
+          decision_context_error: decisionContextError,
           to_suffix: ownerFrom.slice(-4),
           from_suffix: fromNumber.slice(-4),
         },

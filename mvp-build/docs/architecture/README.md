@@ -1,99 +1,128 @@
-# AMTECH AI Employee — Canonical Source-Backed Architecture
+# AMTECH AI Employee — Source-Backed Architecture
 
-Status: **current source map; live acceptance incomplete**  
-Main baseline: `48b917389ed85b9652eca43a8e4a8f60b52e917b`  
-Newer stacked source/test authority: PR #33 merge `943f2613243ebcbcc9fb703e6273e83a5edc0a24`  
-Standard: ratified v0.2  
-Active program: `../../production-readiness-program/`
+Status: current explanatory map; exact acceptance is tracked in [`../../CODEGRAPH.md`](../../CODEGRAPH.md)  
+Updated: 2026-07-20
 
-This directory describes executable architecture and separates source implementation from exact test, live, and release acceptance.
+This directory explains executable architecture. It does not promote source, documentation, or decision computation into CI, managed database, provider, target-host, browser/channel, commercial, release, pilot, deployment, or production evidence.
 
 ## System boundary
 
-- **Web:** employee operating environment—durable workspace plus streaming conversation/activity, connected apps, approvals, artifacts, receipts, proof, and recovery.
-- **Manager:** identity, assignment, authority, context, capability/tool contracts, connector/OAuth custody, approvals, effects, receipts, metering, repair, proof.
-- **Hermes:** per-employee reasoning, runs, sessions, memory, runtime-local tool use and recovery.
-- **Model Gateway:** employee-scoped model/commercial boundary.
-- **PostgreSQL/Supabase:** durable authority, evidence, idempotency, and reconciliation state.
-- **Protocol/channel adapters:** replaceable projections and transports that never become authority.
+- **Web:** employee operating environment—durable workspace, streaming conversation/activity, connected apps, approvals, artifacts, receipts, proof, and recovery.
+- **Manager:** committed typed route composition owning identity, assignment, authority, context, capability/tool contracts, connector/provider custody, approvals, effects, shared commercial admission/accounting, reconciliation, repair, and proof.
+- **Hermes:** per-employee reasoning, runs, sessions, memory, runtime-local tool use, and runtime recovery.
+- **Model Gateway:** assignment-scoped model effect, finite request economics, rate, budget, provider identity/receipt, accounting, ambiguity, and proof boundary.
+- **PostgreSQL/Supabase:** durable identity, authority, idempotency, rate, budget, effects, accounting, lineage, and reconciliation.
+- **Host Provisioner:** bounded target-host lifecycle authority.
+- **Protocols/channels:** replaceable projections and transports; never authority.
 
-## Reading order
+## Canonical work/effect topology
 
-1. product/system context
-2. network/runtime topology
-3. ingress/egress
-4. Hermes context/capabilities
-5. Web/work surfaces/AG-UI
-6. effects/failure/observability
-7. capability manifold
-8. archaeology/audit
-9. current risk register
-10. role/document maps
-11. artifact workbench
-12. Standard research/protocol disposition
-13. Hermes upstream review
-14. streaming, Remote MCP, MCP Apps, AG-UI, and effective capability
-15. `../../production-readiness-program/09-workstream-execution-map.md`
+```text
+owner, ambient, scheduled, or delegated intent
+→ exact account + employee + assignment + current authority/entitlement
+→ immutable request or work revision
+→ Hermes reasoning or deterministic Manager work
+→ current effective capability
+→ exact approval when required
+→ finite request economics
+→ database-owned rate + worst-case budget reservation
+→ one durable command/effect + provider idempotency identity
+→ accepted | failed | ambiguous receipt
+→ accepted effect-bound accounting receipt
+→ output/publication bound to the same revision and effect
+→ owner/operator proof projection
+→ original-effect reconciliation or replay-safe projection repair
+```
 
-## Current authority and evidence
+## Direct Manager composition
 
-PR #33, current source, and executable tests supersede stale program-status prose only for the exact boundary they exercise. They do not establish exact-head CI on this branch, live provider, fixture-free Web/SMS/Review, managed database, target-host, pilot, deployment, or production acceptance.
+```text
+apps/manager/src/server.ts
+→ all workspace typechecks
+→ tsc build
+→ apps/manager/dist/server.js
+→ package and Docker entrypoints
+```
 
-| Plane | Current boundary |
-|---|---|
-| repository/test truth | current source and exact tests where run; broader exact-head CI open |
-| owner snapshot/stream | full durable snapshot contract exists; browser atomic-install/cursor/scope/reconnect evidence is WS-05 work |
-| Web/SMS/signed Review | bounded projections; exact fixture-free convergence open |
-| work/approval/effect/receipt/proof | durable model/source foundations; provider-backed golden journeys and proof refinding open |
-| Remote MCP/MCP Apps/AG-UI/effective capability | retain only exact prior source/test evidence; live provider/host/client lifecycle open |
-| connectors | source foundations; live setup, scope change, revocation, outage, repair, deletion open |
-| database/target host/commercial/recovery/release | all named acceptance gates remain distinct and open |
+The previous template, generated source, generation hooks, and string-patch transforms were removed. Structural governance rejects their reintroduction.
 
-## Owner runtime and work continuity topology
+## Projected action and stream authority
+
+Protocol and UI projections carry claims; they do not create authority.
 
 ```text
 owner session
-→ exact account + employee + assignment + authority version
-→ validated snapshot installed atomically
-→ cursor/version established
-→ ordered scoped deltas
-→ reconnect from durable state without replaying accepted intent
-→ Web / SMS / signed Review projection of one work revision
-→ approval snapshot bound to that revision
-→ one idempotent external effect
-→ accepted | failed | ambiguous terminal receipt
-→ reconciliation / replay-safe recovery
-→ assignment-isolated refindable proof
+→ exact account + employee + assignment
+→ current non-revoked assignment authority version
+→ projected assignment/version comparison
+→ command/tool dispatch or scoped stream projection
 ```
+
+Owner stream frames bind account, employee, assignment, authority version, and cursor. Progress subscriptions use the same account/employee/assignment scope, preventing cross-assignment projection.
+
+## Architecture decision method
+
+Architecture choices follow [`../../decision/README.md`](../../decision/README.md):
+
+```text
+authority/evidence/Unknown extraction
+→ independent candidates
+→ invariant/prerequisite filter
+→ explicit evidence-and-invariants baseline
+→ candidate search topology when useful
+→ software invariant topology when useful
+→ equal-feasibility controls
+→ search and weight sensitivity
+→ separate implementation compression
+→ complete behavioral proof plan
+→ source change and exact verification
+```
+
+Candidate graph vertices are candidate trajectories. Software invariant hypergraph vertices are actual entities or obligations. Candidate-edge touch cannot establish software completion. Graph terms are descriptive; diversity is at most selection-influencing; causal improvement requires independent implementation outcomes.
+
+COCONUT, continuous hidden-state reasoning, latent BFS, manifold, Hodge, Koopman, and phase-switching language is not an implemented architecture claim unless executable source and verification establish it.
 
 ## Hardened interception points
 
-1. owner session and assignment authorization;
-2. exact account/employee/assignment/authority validation before snapshot install;
-3. cursor/version establishment before deltas;
-4. duplicate, stale, reordered, cross-account, and stale-assignment delta rejection;
-5. reconnect without owner-intent replay;
-6. connector metadata, scope, custody, health, revocation, and final effective-capability checks;
-7. generated/protocol action mediation through current Manager authority;
-8. approval bound to exact work revision;
-9. one durable effect reservation and terminal receipt;
-10. ambiguous reconciliation before retry;
-11. receipt-backed completion and proof refinding;
-12. fixture-free acceptance guards.
+1. principal, account, employee, assignment, authority, and entitlement;
+2. immutable request/work revision;
+3. strict snapshot scope and cursor/version before deltas;
+4. current assignment authority version before projected action dispatch or stream projection;
+5. duplicate, stale, reordered, cross-account, and stale-assignment rejection;
+6. connector custody, scope, health, revocation, and final effective-capability check;
+7. approval bound to the exact revision;
+8. finite token, timeout, price, and usage envelope;
+9. database-owned rate and budget authority before dispatch;
+10. one durable effect and provider identity;
+11. ambiguity reconciliation before retry;
+12. accepted effect-bound accounting and conservation;
+13. output/effect/proof identity continuity;
+14. repair without replaying accepted effect;
+15. non-promoting evidence classes.
 
-## Workstream boundary
+## Current source topology
 
-WS-05 and WS-06 are active and incomplete. WS-07, WS-08, and WS-09 may appear only as read-only dependencies, predicted future states, or unresolved frontier nodes until separately opened.
+```text
+Web / SMS / signed Review
+  └─ typed Manager owner/session/assignment/current-authority boundary
+      ├─ Hermes runs and runtime-local tools
+      ├─ connector registry + effective capability
+      ├─ artifact revision + approval + publication effect
+      ├─ Model Gateway admission + provider effect + accounting
+      ├─ reconciliation + repair + proof projection
+      └─ Host Provisioner bounded lifecycle
 
-## Non-negotiable invariants
+PostgreSQL/Supabase
+  ├─ identity, assignment, and authority versions
+  ├─ requests, work revisions, commands, effects, receipts
+  ├─ database-owned rate windows, reservations, settlements, adjustments
+  ├─ accounting, conservation, and lineage
+  └─ ambiguity, reconciliation, repair, and proof projection
+```
 
-1. Manager owns authority and custody.
-2. Hermes reasons within bound capabilities.
-3. Harmless stream projection should be low latency; effect gates remain strict.
-4. Browser, channel, protocol, runtime, or provider content cannot select authority, credentials, scopes, hosts, approvals, or effects.
-5. Unknown, stale, revoked, cross-account, mismatched, or unprobed evidence fails closed.
-6. Reconnect never resubmits accepted owner intent.
-7. Consequential effects reserve once and end in accepted, failed, or ambiguous receipt.
-8. Completion is receipt-backed and proof remains refindable.
-9. Applied migrations are immutable and forward changes are hash-recorded.
-10. Exact-candidate evidence controls every production claim.
+## Remaining architectural risks
+
+- Managed-platform, provider, target-host, browser/channel, billing, recovery, and release behavior still requires external acceptance.
+- Structural tests must not regain semantic responsibility that belongs in typed source and behavioral tests.
+- Decision trace payloads should use compact descriptors and regenerated derivatives rather than opaque duplicated matrices.
+- Exact transient candidate status must remain in workflow or release evidence, not mirrored across documents.

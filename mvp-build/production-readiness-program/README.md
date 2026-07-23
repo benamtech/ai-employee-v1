@@ -1,55 +1,75 @@
 # AMTECH Production Readiness Program
 
 Status: **active and canonical**  
-Canonical path: `mvp-build/production-readiness-program/`  
-Updated: 2026-07-20  
-Current integration baseline: `main@48b917389ed85b9652eca43a8e4a8f60b52e917b`  
-Newer source/test authority incorporated: PR `#33` merge `943f2613243ebcbcc9fb703e6273e83a5edc0a24`
+Updated: 2026-07-23  
+Structural status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Decision state: [`../decision/active.json`](../decision/active.json)
 
-New work starts on reviewed task branches from current `main` or an explicitly named stacked dependency.
+This is the single active production-readiness route. Exact candidate conclusions belong to the current PR, workflows, or retained release records. Historical plans, audits, completed traces, and ancestor results remain provenance only.
 
 ## Authority
 
-This root-level folder is the repository's single current production-readiness program. `mvp-build/second-half-plan/` is historical and non-canonical. The old second-half plan was superseded by successful prototype work and never established production readiness.
+```text
+P0 representation calculation
+P1 verified formal-model property
+P2 verified representation correspondence
+P3 exact-candidate executable evidence
+P4 external or production acceptance
+```
 
-Authority is resolved in this order: deployed release proof; applied durable state; executable source/generated production config; exact-SHA tests and acceptance; ratified Standard and this program; CODEGRAPH/architecture; newest indexed memory; historical records.
+No class silently promotes itself. Provider and connector adapters do not create authority. Manager remains the authority plane; Hermes is the reasoning/runtime substrate; all UI and protocol surfaces are bounded projections.
 
-PR #33, current source, and executable tests are newer authority than stale plan-status prose. PR #33 establishes only the exact lifecycle/source/test evidence it contains. It does not establish CI on this branch, live provider or connector acceptance, managed database acceptance, target-host acceptance, fixture-free Web/SMS/Review acceptance, pilot acceptance, or production readiness.
+## Current position
 
-## Product target
+The cumulative source candidate includes typed Manager authority, migrations through `0082`, connector and commercial substrates, release/recovery machinery, the production owner projection, employee UI adapters, UI Lab, folder-first variants, and Trace013’s repository-native software experiment compiler.
 
-AMTECH installs governed persistent AI Employees. The owner experience must preserve exact account, employee, assignment, authority, channel, work revision, approval snapshot, effect, receipt, recovery, and proof identity. Manager remains the authority plane; Hermes remains the reasoning/runtime substrate. Web, SMS, signed Review, MCP, MCP Apps, and AG-UI are bounded projections rather than authority.
+Trace013 is completed. `decision/active.json` records no open transaction. Trace014 begins only on a new post-merge branch via `repoctl start`.
 
-Gmail, QuickBooks, and Stripe are shipped adapters. They are not the connector ontology.
+## Program route
 
-## Current workstream boundary
+1. `04-dependency-ordered-production-plan.md` — dependency order and stack checkpoint.
+2. `08-production-issue-vector.json` — issue baseline.
+3. `13-resolution-ledger.json` — resolution/control state.
+4. `09-workstream-execution-map.md` — completion and stop contracts.
+5. `20-ws06-ws08-commercial-effect-transaction.md` — durable effect/recovery transaction.
+6. `10-test-suite-disposition.md` — test/evidence authority.
+7. `07-verification-and-handoff-matrix.md` — evidence and handoff boundary.
+8. `../decision/active.json` — transaction router.
+9. `../decision/README.md` — executable experiment protocol.
+10. `../decision/engine/` — generators, representations, certificates, task capsules, and trusted verifiers.
+11. `../decision/trace007/` through `../decision/trace013/` — completed scoped decisions.
+12. current source, immutable migrations, tests, workflows, proof, and newest indexed memory.
 
-- WS-01 and WS-02 retain only their exact accepted evidence.
-- PR #33/source evidence is newer than stale WS-03/WS-04 status prose.
-- WS-05 and WS-06 are active production-readiness workstreams, but neither is complete without exact fixture-free, cross-account, channel, provider/effect, receipt, recovery, and proof evidence.
-- WS-07, WS-08, and WS-09 remain downstream. They may be inspected as dependencies or future states but are not independently implemented by WS-05/WS-06 work.
-- Source wiring, fixtures, local-only proof, and ancestor-SHA evidence do not satisfy live or production gates.
+## Current integration checkpoint
 
-## Canonical execution route
+```text
+verify final PR #40 head
+→ merge PR #40 into PR #35 branch
+→ verify cumulative PR #35 head
+→ merge PR #35 into PR #34 branch
+→ verify cumulative PR #34 head
+→ leave PR #34 as the single ready-to-review integration into main
+```
 
-1. `04-dependency-ordered-production-plan.md` — dependency-ordered roadmap.
-2. `08-production-issue-vector.json` and `.md` — issue baseline and current summary.
-3. `13-resolution-ledger.json` — closure/control state.
-4. `09-workstream-execution-map.md` — workstream completion contracts.
-5. `10-test-suite-disposition.md` — test authority and claim boundaries.
-6. `07-verification-and-handoff-matrix.md` — exact evidence boundary.
-7. `14-ws02-runtime-ui-capability-contract.json` and `15-ws02-capability-manifold/` — bounded WS-02 evidence.
-8. `16-ws02-streaming-protocol-source-ci-closure.md` — historical exact WS-02 closure record.
-9. `17-ws03-p0-fisher-frontier.md` and `18-ws03-p0-task-contract.json` — guarded WS-03 evidence, subordinate to newer source/PR state.
-10. current source, migrations, executable tests, workflows, proof, and newest indexed memory.
+No ancestor workflow certifies a descendant merge commit.
+
+## Open P4 gates
+
+- managed platform migration, security, backup, restore, and rollback;
+- live OAuth/MCP/provider authorization, idempotency, response-loss, revoke, outage, and repair;
+- target-host secrets, two-employee isolation, destructive recovery, and trusted signing;
+- fixture-free Web/SMS/Review convergence and provider-backed golden work;
+- supported browsers, human visual/accessibility, representative capacity, and fairness;
+- controlled pilot, deployment, and production.
 
 ## Stop rules
 
+- Run `repoctl start` before non-mechanical source edits.
 - Do not weaken tests for green.
-- Do not infer authority or acceptance from filenames, dates, fixtures, UI labels, or stale prose.
-- Preserve exact account/employee/assignment/authority identity across snapshot, stream, reconnect, retry, channel, work, approval, effect, receipt, and proof projections.
-- Reconnect must not replay accepted owner intent.
-- A work object may reach completion only through terminal, receipt-backed evidence; ambiguous outcomes reconcile before retry.
-- Cross-account or stale-assignment requests fail closed.
-- Fixture state cannot satisfy fixture-free acceptance.
-- Do not claim CI, provider, channel, database, target-host, pilot, or production acceptance without exact evidence on the claimed candidate.
+- Do not hand-author representations or weights to justify an intended patch.
+- Do not demote valid formal proof of its exact property.
+- Do not promote P1/P2/P3 into P4 without the missing evidence.
+- Unknown is not zero.
+- Ambiguous effects reconcile original identity before retry.
+- Repair cannot erase accepted work or invent completion.
+- Fixtures cannot satisfy fixture-free acceptance.

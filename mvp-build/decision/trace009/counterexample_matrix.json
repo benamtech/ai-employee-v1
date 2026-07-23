@@ -1,0 +1,13 @@
+{
+  "cases": [
+    "dual stream reconnect",
+    "lab local approval",
+    "fixture semantic drift",
+    "stale authority action",
+    "ambiguous retry",
+    "changed compose manifest",
+    "shared gateway image",
+    "fixture production claim"
+  ],
+  "schema": "trace009.counterexamples.v1"
+}

@@ -10,19 +10,13 @@ COPY packages/shared/package.json packages/shared/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/agent-template/package.json packages/agent-template/package.json
 
-# Root npm prepare generates the canonical Manager server. Copy its complete,
-# hash-pinned input closure before npm ci so lifecycle scripts cannot fail or
-# silently generate from a partial source tree.
-COPY apps/manager/scripts/generate-production-server.mjs apps/manager/scripts/generate-production-server.mjs
-COPY apps/manager/scripts/production-admin-block.mjs apps/manager/scripts/production-admin-block.mjs
-COPY apps/manager/src/server.template.ts apps/manager/src/server.template.ts
 RUN npm ci
 
 COPY . .
 RUN npm run build --workspace @amtech/shared \
   && npm run build --workspace @amtech/db \
   && npm run build --workspace @amtech/manager \
-  && test -f apps/manager/dist/server.generated.js \
+  && test -f apps/manager/dist/server.js \
   && test -f apps/manager/dist/model-gateway-server.js \
   && test -f apps/manager/dist/lib/model-gateway-http.js \
   && test -f apps/manager/dist/lib/provisioner-idempotency.js \
@@ -49,7 +43,7 @@ COPY --from=build /app/apps/manager ./apps/manager
 COPY --from=build /app/packages ./packages
 COPY --from=build /app/infra ./infra
 
-RUN test -f apps/manager/dist/server.generated.js \
+RUN test -f apps/manager/dist/server.js \
   && test -f apps/manager/dist/model-gateway-server.js \
   && test -f apps/manager/dist/lib/model-gateway-http.js \
   && test -f apps/manager/dist/lib/provisioner-idempotency.js \
@@ -58,4 +52,4 @@ RUN test -f apps/manager/dist/server.generated.js \
   && test -f apps/manager/dist/typeproofs/production-boundary.js
 
 EXPOSE 8080
-CMD ["node", "apps/manager/dist/server.generated.js"]
+CMD ["node", "apps/manager/dist/server.js"]

@@ -1,0 +1,133 @@
+{
+  "schema": "amtech.connector-substrate-evidence.v1",
+  "base_sha": "712599ff31599e1a259157dd0e34915d0777d5f6",
+  "computed_at": "2026-07-21T16:20:00Z",
+  "classification_rule": {
+    "complete": "Repository evidence proves one provider-neutral transaction across the named boundary.",
+    "partial": "A component exists, but the lifecycle is provider-specific, projection-only, or lacks a symmetric fail-closed transition.",
+    "absent": "No executable repository evidence closes the boundary."
+  },
+  "invariants": [
+    {
+      "id": "C01",
+      "name": "owner_initiated_setup",
+      "base_state": "complete",
+      "evidence": ["packages/shared/src/connector-setup.ts", "apps/web/app/agent/[employeeId]/connect/[connector]/page.tsx", "apps/manager/src/lib/artifact-workbench-routes.ts"]
+    },
+    {
+      "id": "C02",
+      "name": "credential_custody",
+      "base_state": "complete",
+      "evidence": ["packages/shared/src/connector-registry.ts", "packages/shared/src/connector-setup.ts"]
+    },
+    {
+      "id": "C03",
+      "name": "assignment_binding",
+      "base_state": "complete",
+      "evidence": ["packages/db/migrations/0046_connector_binding_lifecycle.sql", "apps/manager/src/lib/connector-custody.ts"]
+    },
+    {
+      "id": "C04",
+      "name": "provider_neutral_capability_discovery",
+      "base_state": "partial",
+      "evidence": ["apps/manager/src/lib/mcp-capability-authority.ts", "apps/manager/src/lib/effective-capability-evidence.ts"],
+      "gap": "Execution evidence exists, but no connector lifecycle manifest projects discovered capabilities and revocation state symmetrically."
+    },
+    {
+      "id": "C05",
+      "name": "fresh_execution_interception",
+      "base_state": "complete",
+      "evidence": ["apps/manager/src/lib/mcp-capability-authority.ts"]
+    },
+    {
+      "id": "C06",
+      "name": "verified_event_ingress",
+      "base_state": "complete",
+      "evidence": ["apps/manager/src/lib/connector-custody.ts", "apps/manager/src/webhooks/gmail.ts", "apps/manager/src/webhooks/quickbooks.ts", "apps/manager/src/webhooks/stripe.ts", "apps/manager/src/webhooks/twilio.ts"]
+    },
+    {
+      "id": "C07",
+      "name": "durable_event_egress",
+      "base_state": "complete",
+      "evidence": ["apps/manager/src/lib/durable-command-runtime.ts", "apps/manager/src/webhooks/twilio.ts"]
+    },
+    {
+      "id": "C08",
+      "name": "owner_visible_lifecycle_proof",
+      "base_state": "partial",
+      "evidence": ["apps/manager/src/lib/employee-stream.ts", "apps/web/app/agent/[employeeId]/connect/[connector]/page.tsx"],
+      "gap": "Connection surfaces exist, but there is no provider-neutral lifecycle receipt containing discovery, verification freshness, event posture, and revocation evidence."
+    },
+    {
+      "id": "C09",
+      "name": "generic_revoke_transaction",
+      "base_state": "absent",
+      "evidence": ["apps/manager/src/lib/connector-custody.ts"],
+      "gap": "The generic custody module ends at binding upsert and contains no symmetric revoke transaction."
+    },
+    {
+      "id": "C10",
+      "name": "revoked_use_fails_closed",
+      "base_state": "partial",
+      "evidence": ["packages/shared/src/connector-custody.ts", "apps/manager/src/lib/mcp-capability-authority.ts"],
+      "gap": "Inactive bindings are denied, but provider account rows, grants, capability projections, and owner surfaces are not revoked through one atomic lifecycle."
+    },
+    {
+      "id": "C11",
+      "name": "sms_primary_session",
+      "base_state": "complete",
+      "evidence": ["apps/manager/src/webhooks/twilio.ts", "apps/manager/src/lib/runtime.ts"]
+    },
+    {
+      "id": "C12",
+      "name": "cross_surface_natural_language_decision_context",
+      "base_state": "absent",
+      "evidence": ["apps/manager/src/webhooks/twilio.ts", "apps/manager/src/lib/approval-authority.ts", "wiki/principle-deliverable-driven-surfaces.md"],
+      "gap": "SMS reaches the live employee, but the inbound turn does not carry a durable pointer to the exact approval/work object. A natural reply such as 'yeah, send it' therefore cannot safely enter the existing immutable approval resolver."
+    },
+    {
+      "id": "C13",
+      "name": "adaptive_first_use_activation",
+      "base_state": "partial",
+      "evidence": ["packages/shared/src/connector-registry.ts", "apps/manager/src/lib/agent-context.ts", "apps/manager/src/lib/business-brain.ts"],
+      "gap": "The primer has limited contractor/bookkeeper emphasis but does not compile business context, tools, workflows, event posture, and connection state into a highest-gain activation plan."
+    }
+  ],
+  "computed_summary": {
+    "complete": 7,
+    "partial": 4,
+    "absent": 2,
+    "complete_fraction": 0.5384615385
+  },
+  "candidate_trajectories": [
+    {
+      "id": "A",
+      "name": "one_more_native_connector",
+      "covers": ["C01", "C02", "C03", "C05", "C06", "C07"],
+      "feasible": false,
+      "rejection": "Does not close provider-neutral discovery, revoke, conversational owner decisions, or adaptive activation."
+    },
+    {
+      "id": "B",
+      "name": "generic_lifecycle_only",
+      "covers": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10"],
+      "feasible": false,
+      "rejection": "Leaves natural cross-surface owner decisions and first-use activation disconnected from the lifecycle."
+    },
+    {
+      "id": "C",
+      "name": "adaptive_context_only",
+      "covers": ["C04", "C08", "C13"],
+      "feasible": false,
+      "rejection": "Improves recommendations without proving custody, revoke, or exact conversational decision binding."
+    },
+    {
+      "id": "D",
+      "name": "connector_operating_substrate",
+      "covers": ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13"],
+      "feasible": true,
+      "selection_basis": "Only candidate satisfying every mandatory invariant; no weighted score or graph term is required."
+    }
+  ],
+  "selected": "D"
+}

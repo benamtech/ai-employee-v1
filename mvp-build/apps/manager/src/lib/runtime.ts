@@ -5,7 +5,7 @@ import { executeHermesTurnLive } from "./hermes-live-turn.js";
 import { runEmployeeTurn } from "./turn-queue.js";
 import { finishWorkRun, recordExternalRuntimeRun, recordToolInvocation, startWorkRun } from "./metering.js";
 import { recordSessionOccupancy, rotateSessionIfNeeded } from "./session-rotation.js";
-import { buildOwnerTurnSystemMessage } from "./owner-turn-context.js";
+import { buildOwnerTurnSystemMessage, type OwnerDecisionTurnContext } from "./owner-turn-context.js";
 import { publishProgress, type ProgressScope } from "./progress-bus.js";
 import { recoverEmployeeRuntime } from "./runtime-recovery.js";
 
@@ -26,6 +26,7 @@ export async function deliverOwnerTurnToRuntime(
     body: string;
     channel: "sms" | "web";
     idempotency_key: string;
+    decision_context?: OwnerDecisionTurnContext | null;
   },
 ): Promise<{ status: "succeeded" | "queued" | "duplicate" | "failed"; reply?: string; job_id: string; error?: string; run_id: string }> {
   const runId = await startWorkRun(db, {
@@ -43,7 +44,9 @@ export async function deliverOwnerTurnToRuntime(
     const systemMessage = await buildOwnerTurnSystemMessage(db, {
       account_id: params.account_id,
       employee_id: params.employee_id,
+      assignment_id: params.assignment_id,
       channel: params.channel,
+      decision_context: params.decision_context ?? null,
     });
     const messageId = `assistant:${runId}`;
     const turn = await executeHermesTurnLive(api, {
@@ -97,7 +100,13 @@ export async function deliverOwnerTurnToRuntime(
       assignment_id: params.assignment_id,
       kind: params.channel === "sms" ? "owner_sms_chat" : "owner_web_chat",
       idempotency_key: params.idempotency_key,
-      input: { body: params.body, channel: params.channel },
+      input: {
+        body: params.body,
+        channel: params.channel,
+        decision_context_id: params.decision_context?.context_id ?? null,
+        approval_id: params.decision_context?.approval_id ?? null,
+        owner_message_id: params.decision_context?.owner_message_id ?? null,
+      },
       run_id: runId,
     },
     async () => {

@@ -1,0 +1,20 @@
+{
+  "schema": "amtech.trace007.selected-implementation.v2",
+  "selected_ids": ["D01", "D02", "D03", "D04", "D06", "D07"],
+  "transaction": "database-authoritative admission → dispatch → receipt → accounting → output/proof → repair",
+  "selection_basis": "repository evidence, production invariants, dependency prerequisites, and coherent transaction compression",
+  "mathematical_role": "supporting search description only",
+  "mathematical_causality": "unestablished",
+  "coherence": [
+    "atomic shared admission",
+    "durable settlement and conservation",
+    "one provider idempotency identity",
+    "original-effect ambiguity reconciliation",
+    "accepted effect and accounting continuity",
+    "exact revision completion",
+    "convergent proof repair"
+  ],
+  "software_invariant_coverage": "computed from software_invariant_hypergraph.json; candidate-group edges are not used",
+  "proof_plan": "verification_plan.json:software_edge_tests",
+  "evidence_boundary": "The transaction remains justified by the simpler evidence-and-invariants baseline even if graph/diversity terms are removed. Causal improvement requires implementation_ablation.json independent outcomes."
+}

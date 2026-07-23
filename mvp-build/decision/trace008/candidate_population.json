@@ -1,0 +1,4537 @@
+{
+  "batches": [
+    "direct_ws08",
+    "architecture_product",
+    "failure_operator_capacity",
+    "recombination"
+  ],
+  "candidates": [
+    {
+      "baseline_j0": 0.3236459,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: canonical five-service compose closure; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "b4e12df73b6d0cda6682bc0daa43e6397609e8eb",
+          "observed": true,
+          "path": "infra/deploy/docker-compose.production.yml"
+        },
+        {
+          "blob_sha": "9617b9b711c77dc64049fb75acd29b4b6a7eb9d9",
+          "observed": true,
+          "path": "infra/scripts/production-topology.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_truthful_health"
+      ],
+      "id": "A01",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for canonical five-service compose closure.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/deploy/docker-compose.production.yml",
+        "infra/scripts/production-topology.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for canonical five-service compose closure.",
+      "q": 0.40634168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.8,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.35,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.633333,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "compose_hash",
+        "config_hash",
+        "dependency_health",
+        "five_service_state"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "release",
+      "title": "canonical five-service compose closure"
+    },
+    {
+      "baseline_j0": 0.3643125,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: separate exact-SHA gateway image; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/deploy/model-gateway.Dockerfile"
+        },
+        {
+          "blob_sha": "b4e12df73b6d0cda6682bc0daa43e6397609e8eb",
+          "observed": true,
+          "path": "infra/deploy/docker-compose.production.yml"
+        }
+      ],
+      "hyperedges": [
+        "E_release"
+      ],
+      "id": "A02",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for separate exact-SHA gateway image.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/deploy/model-gateway.Dockerfile",
+        "infra/deploy/docker-compose.production.yml"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for separate exact-SHA gateway image.",
+      "q": 0.417725,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.8,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.645,
+        "N": 0.35,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.6,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "gateway_digest",
+        "git_sha",
+        "manager_digest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "release",
+      "title": "separate exact-SHA gateway image"
+    },
+    {
+      "baseline_j0": 0.3236459,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: truthful aggregate topology health; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "2069509bfc22243d82afe933cd8961d27d2963e0",
+          "observed": true,
+          "path": "infra/scripts/deploy-smoke.mjs"
+        },
+        {
+          "blob_sha": "b4e12df73b6d0cda6682bc0daa43e6397609e8eb",
+          "observed": true,
+          "path": "infra/deploy/docker-compose.production.yml"
+        }
+      ],
+      "hyperedges": [
+        "E_truthful_health"
+      ],
+      "id": "A03",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for truthful aggregate topology health.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/deploy-smoke.mjs",
+        "infra/deploy/docker-compose.production.yml"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for truthful aggregate topology health.",
+      "q": 0.40634168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.8,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.35,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.633333,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "degraded_state",
+        "dependency_health",
+        "five_service_state",
+        "migration_readiness"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "health",
+      "title": "truthful aggregate topology health"
+    },
+    {
+      "baseline_j0": 0.3578125,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: recomputable release manifest; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-manifest.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release"
+      ],
+      "id": "A04",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for recomputable release manifest.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-manifest.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for recomputable release manifest.",
+      "q": 0.442925,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.8,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.51,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.35,
+        "ProofDensity": 0.845,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.55,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "caddy_digest",
+        "compose_hash",
+        "config_hash",
+        "gateway_digest",
+        "git_sha",
+        "manager_digest",
+        "migration_head",
+        "provisioner_digest",
+        "web_digest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "provenance",
+      "title": "recomputable release manifest"
+    },
+    {
+      "baseline_j0": 0.3043125,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: independent manifest signing and verification; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-manifest.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/verify-release-manifest.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_restore"
+      ],
+      "id": "A05",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for independent manifest signing and verification.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-manifest.mjs",
+        "infra/scripts/verify-release-manifest.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for independent manifest signing and verification.",
+      "q": 0.418725,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.8,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.51,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.795,
+        "N": 0.35,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.6,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "independent_verifier",
+        "secret_version",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "provenance",
+      "title": "independent manifest signing and verification"
+    },
+    {
+      "baseline_j0": 0.2418125,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: deterministic release fault injection; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-fault-injection.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery"
+      ],
+      "id": "A06",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for deterministic release fault injection.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-fault-injection.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for deterministic release fault injection.",
+      "q": 0.362125,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.72,
+        "N": 0.35,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "diagnostic_bundle",
+        "failure_state",
+        "stable_crash_point"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "deterministic release fault injection"
+    },
+    {
+      "baseline_j0": 0.2966459,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: whole-release rollback executor; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "d7aab81ccd8636c9240d5fd226d2841a83135ad0",
+          "observed": true,
+          "path": "infra/scripts/deploy-rollback.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_whole_release_rollback"
+      ],
+      "id": "A07",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for whole-release rollback executor.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/deploy-rollback.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for whole-release rollback executor.",
+      "q": 0.37209168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.495,
+        "N": 0.35,
+        "ProofDensity": 0.735,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.483333,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accepted_work_check",
+        "compose_config",
+        "image_set",
+        "migration_compatibility",
+        "prior_manifest",
+        "rollback_proof",
+        "rollback_smoke"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "rollback",
+      "title": "whole-release rollback executor"
+    },
+    {
+      "baseline_j0": 0.3736459,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: complete backup bundle; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "364abb0b7e4a57bdf98d273b0034cecf5f9922af",
+          "observed": true,
+          "path": "infra/scripts/backup-restore.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_restore"
+      ],
+      "id": "A08",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for complete backup bundle.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/backup-restore.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for complete backup bundle.",
+      "q": 0.39184168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.495,
+        "N": 0.35,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.383333,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "backup_id",
+        "database_backup",
+        "filesystem_backup",
+        "secret_version"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "restore",
+      "title": "complete backup bundle"
+    },
+    {
+      "baseline_j0": 0.2743125,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: restore continuity and proof refinding; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "364abb0b7e4a57bdf98d273b0034cecf5f9922af",
+          "observed": true,
+          "path": "infra/scripts/backup-restore.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/restore-verify.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_restore",
+        "E_whole_release_rollback"
+      ],
+      "id": "A09",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for restore continuity and proof refinding.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/backup-restore.mjs",
+        "infra/scripts/restore-verify.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for restore continuity and proof refinding.",
+      "q": 0.362625,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.645,
+        "N": 0.35,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.6,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accepted_work_check",
+        "proof_refinding",
+        "restore_result"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "restore",
+      "title": "restore continuity and proof refinding"
+    },
+    {
+      "baseline_j0": 0.3491459,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: release and effect telemetry lineage; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-telemetry.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_docker_authority",
+        "E_durable_truth",
+        "E_effect_recovery",
+        "E_operator_recovery"
+      ],
+      "id": "A10",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for release and effect telemetry lineage.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-telemetry.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for release and effect telemetry lineage.",
+      "q": 0.40019168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.35,
+        "ProofDensity": 0.735,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.483333,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accounting_receipt",
+        "audit",
+        "command",
+        "diagnostic_bundle",
+        "effect",
+        "proof",
+        "provider_receipt"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "telemetry",
+      "title": "release and effect telemetry lineage"
+    },
+    {
+      "baseline_j0": 0.2735625,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: Docker authority negative proof; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_docker_authority",
+        "E_durable_truth"
+      ],
+      "id": "A11",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for Docker authority negative proof.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for Docker authority negative proof.",
+      "q": 0.416475,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.8,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.72,
+        "N": 0.35,
+        "ProofDensity": 0.68,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.45,
+        "Testability": 0.8125,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "audit",
+        "docker_socket",
+        "gateway_denial",
+        "host_provisioner",
+        "manager_denial",
+        "signed_request"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "authority",
+      "title": "Docker authority negative proof"
+    },
+    {
+      "baseline_j0": 0.3217291,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: employee network isolation proof; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "c7577e6b2513e9d69a947aeb3756022da14521a4",
+          "observed": true,
+          "path": "infra/scripts/acceptance/target-host-two-employee-isolation.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_network_isolation"
+      ],
+      "id": "A12",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for employee network isolation proof.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/acceptance/target-host-two-employee-isolation.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for employee network isolation proof.",
+      "q": 0.35245832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.35,
+        "ProofDensity": 0.625,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.416667,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.35
+      },
+      "software_vertices": [
+        "cross_employee_denial",
+        "employee_network",
+        "gateway_attachment",
+        "hermes_attachment",
+        "manager_attachment"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "network",
+      "title": "employee network isolation proof"
+    },
+    {
+      "baseline_j0": 0.3693125,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: bounded egress descriptor and verifier; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "964a83eb0c63fa57146493ac6f92319a05e2bf6b",
+          "observed": true,
+          "path": "infra/scripts/egress-policy.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_network_isolation",
+        "E_operator_recovery"
+      ],
+      "id": "A13",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for bounded egress descriptor and verifier.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/egress-policy.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for bounded egress descriptor and verifier.",
+      "q": 0.381225,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.35,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "bounded_egress",
+        "diagnostic_bundle",
+        "employee_network"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "network",
+      "title": "bounded egress descriptor and verifier"
+    },
+    {
+      "baseline_j0": 0.2418125,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: migration rollback compatibility contract; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/migration-rollback-compatibility.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_whole_release_rollback"
+      ],
+      "id": "A14",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for migration rollback compatibility contract.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/migration-rollback-compatibility.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for migration rollback compatibility contract.",
+      "q": 0.355125,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.35,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accepted_work_check",
+        "migration_compatibility",
+        "migration_head"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "migration",
+      "title": "migration rollback compatibility contract"
+    },
+    {
+      "baseline_j0": 0.3361459,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: operator recovery terminality; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/operator-recovery.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_ambiguity_terminality",
+        "E_operator_recovery"
+      ],
+      "id": "A15",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for operator recovery terminality.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/operator-recovery.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for operator recovery terminality.",
+      "q": 0.38934168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.35,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.383333,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "failure_state",
+        "operator_blocked",
+        "retry_permission",
+        "safe_next_action"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "operator",
+      "title": "operator recovery terminality"
+    },
+    {
+      "baseline_j0": 0.3421459,
+      "batch": "direct_ws08",
+      "capability_unlocked": "Current capability: exact-SHA reproducible image workflow; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": ".github/workflows/ws08-ws09-release.yml"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_repository_closure"
+      ],
+      "id": "A16",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for exact-SHA reproducible image workflow.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        ".github/workflows/ws08-ws09-release.yml"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for exact-SHA reproducible image workflow.",
+      "q": 0.40704168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.85,
+        "ArchLeverage": 0.35,
+        "BV": 0.83,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.35,
+        "ProofDensity": 0.9,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.683333,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "artifact",
+        "build",
+        "caddy_digest",
+        "gateway_digest",
+        "git_sha",
+        "integration",
+        "manager_digest",
+        "provisioner_digest",
+        "source",
+        "types",
+        "unit",
+        "web_digest",
+        "workflow"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "build",
+      "title": "exact-SHA reproducible image workflow"
+    },
+    {
+      "baseline_j0": 0.2924375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: release identity diff viewer; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-diff.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_whole_release_rollback"
+      ],
+      "id": "B01",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for release identity diff viewer.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-diff.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for release identity diff viewer.",
+      "q": 0.401525,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.9,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "independent_verifier",
+        "prior_manifest",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "product",
+      "title": "release identity diff viewer"
+    },
+    {
+      "baseline_j0": 0.2067709,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: restore trust packet; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/restore-verify.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_restore"
+      ],
+      "id": "B02",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for restore trust packet.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/restore-verify.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for restore trust packet.",
+      "q": 0.37454168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.9,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.383333,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "backup_id",
+        "diagnostic_bundle",
+        "proof_refinding",
+        "restore_result"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "product",
+      "title": "restore trust packet"
+    },
+    {
+      "baseline_j0": 0.3299375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: operator release dashboard projection; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "d1ffefcae4f0625ad3dac6f68433101dbdf618ff",
+          "observed": true,
+          "path": "apps/manager/src/lib/admin.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_truthful_health"
+      ],
+      "id": "B03",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for operator release dashboard projection.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "apps/manager/src/lib/admin.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for operator release dashboard projection.",
+      "q": 0.371025,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "degraded_state",
+        "five_service_state",
+        "safe_next_action"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "operator",
+      "title": "operator release dashboard projection"
+    },
+    {
+      "baseline_j0": 0.3599375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: pilot saturation stop schema; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "34c1a6199bcda5b791c1bb279f24bb791a4fee1d",
+          "observed": true,
+          "path": "packages/shared/src/release-evidence.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork",
+        "E_operator_recovery"
+      ],
+      "id": "B04",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for pilot saturation stop schema.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "packages/shared/src/release-evidence.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for pilot saturation stop schema.",
+      "q": 0.400625,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "pilot_stop_schema",
+        "safe_next_action",
+        "saturation_state"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "pilot",
+      "title": "pilot saturation stop schema"
+    },
+    {
+      "baseline_j0": 0.3686041,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: per-employee fairness report; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "c8f83f6854fb89b879c5b8e7a788ea3da6a7c950",
+          "observed": true,
+          "path": "infra/scripts/capacity-pod-alpha.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "B05",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for per-employee fairness report.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/capacity-pod-alpha.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for per-employee fairness report.",
+      "q": 0.40785832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.625,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.416667,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "connection_count",
+        "employee_id",
+        "fairness",
+        "queue_depth",
+        "sse_count"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "capacity",
+      "title": "per-employee fairness report"
+    },
+    {
+      "baseline_j0": 0.2924375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: release manifest as support correlation key; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-telemetry.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_release"
+      ],
+      "id": "B06",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for release manifest as support correlation key.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-telemetry.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for release manifest as support correlation key.",
+      "q": 0.405525,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.51,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.9,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "diagnostic_bundle",
+        "git_sha",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "product",
+      "title": "release manifest as support correlation key"
+    },
+    {
+      "baseline_j0": 0.3299375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: backup inventory retention policy; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "364abb0b7e4a57bdf98d273b0034cecf5f9922af",
+          "observed": true,
+          "path": "infra/scripts/backup-restore.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_restore"
+      ],
+      "id": "B07",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for backup inventory retention policy.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/backup-restore.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for backup inventory retention policy.",
+      "q": 0.378025,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "backup_id",
+        "database_backup",
+        "filesystem_backup"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "restore",
+      "title": "backup inventory retention policy"
+    },
+    {
+      "baseline_j0": 0.2024375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: secret-version release binding; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-manifest.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_restore"
+      ],
+      "id": "B08",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for secret-version release binding.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-manifest.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for secret-version release binding.",
+      "q": 0.344925,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "config_hash",
+        "secret_version",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "secret",
+      "title": "secret-version release binding"
+    },
+    {
+      "baseline_j0": 0.2924375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: migration compatibility preview; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/migration-rollback-compatibility.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_release",
+        "E_whole_release_rollback"
+      ],
+      "id": "B09",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for migration compatibility preview.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/migration-rollback-compatibility.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for migration compatibility preview.",
+      "q": 0.375525,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "migration_compatibility",
+        "migration_head",
+        "safe_next_action"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "migration",
+      "title": "migration compatibility preview"
+    },
+    {
+      "baseline_j0": 0.2924375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: degraded topology owner message; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "apps/web/app/api/health/route.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_truthful_health"
+      ],
+      "id": "B10",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for degraded topology owner message.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "apps/web/app/api/health/route.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for degraded topology owner message.",
+      "q": 0.401525,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.9,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "degraded_state",
+        "five_service_state",
+        "safe_next_action"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "product",
+      "title": "degraded topology owner message"
+    },
+    {
+      "baseline_j0": 0.2967709,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: release evidence retention index; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-evidence-index.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_repository_closure",
+        "E_restore",
+        "E_whole_release_rollback"
+      ],
+      "id": "B11",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for release evidence retention index.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-evidence-index.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for release evidence retention index.",
+      "q": 0.41064168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.8,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.383333,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "artifact",
+        "backup_id",
+        "rollback_proof",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "provenance",
+      "title": "release evidence retention index"
+    },
+    {
+      "baseline_j0": 0.2924375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: crash-point registry; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-fault-injection.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_ambiguity_terminality",
+        "E_operator_recovery"
+      ],
+      "id": "B12",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for crash-point registry.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-fault-injection.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for crash-point registry.",
+      "q": 0.382525,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "failure_state",
+        "retry_permission",
+        "stable_crash_point"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "crash-point registry"
+    },
+    {
+      "baseline_j0": 0.3599375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: capacity partition recommendation; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "c8f83f6854fb89b879c5b8e7a788ea3da6a7c950",
+          "observed": true,
+          "path": "infra/scripts/capacity-pod-alpha.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "B13",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for capacity partition recommendation.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/capacity-pod-alpha.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for capacity partition recommendation.",
+      "q": 0.400625,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "fairness",
+        "resource_sample",
+        "saturation_state"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "future",
+      "title": "capacity partition recommendation"
+    },
+    {
+      "baseline_j0": 0.0856041,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: multi-host pressure descriptor; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": false,
+      "evidence": [
+        {
+          "blob_sha": "426b9aaee80b4b8c8d8db519ccc1fb75de624a33",
+          "observed": true,
+          "path": "production-readiness-program/09-workstream-execution-map.md"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "B14",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for multi-host pressure descriptor.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "production-readiness-program/09-workstream-execution-map.md"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for multi-host pressure descriptor.",
+      "q": 0.34500832,
+      "rejection_reason": "external_or_unsupported_prerequisite",
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.7,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.46,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.316667,
+        "Testability": 0.6625,
+        "Unsupported": 0.75,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "pilot_stop_schema",
+        "saturation_state"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "future",
+      "title": "multi-host pressure descriptor"
+    },
+    {
+      "baseline_j0": 0.2399375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: release rollback dry-run planner; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "d7aab81ccd8636c9240d5fd226d2841a83135ad0",
+          "observed": true,
+          "path": "infra/scripts/deploy-rollback.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_whole_release_rollback"
+      ],
+      "id": "B15",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for release rollback dry-run planner.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/deploy-rollback.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for release rollback dry-run planner.",
+      "q": 0.347425,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.7025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "migration_compatibility",
+        "prior_manifest",
+        "safe_next_action"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "rollback",
+      "title": "release rollback dry-run planner"
+    },
+    {
+      "baseline_j0": 0.1274375,
+      "batch": "architecture_product",
+      "capability_unlocked": "Current capability: proof-refinding customer assurance; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": false,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/restore-verify.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_restore"
+      ],
+      "id": "B16",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for proof-refinding customer assurance.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/restore-verify.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for proof-refinding customer assurance.",
+      "q": 0.367525,
+      "rejection_reason": "external_or_unsupported_prerequisite",
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.7,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.9,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.6625,
+        "Unsupported": 0.75,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "proof_refinding",
+        "restore_result",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "product",
+      "title": "proof-refinding customer assurance"
+    },
+    {
+      "baseline_j0": 0.344875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: Caddy healthy while upstream missing; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_truthful_health"
+      ],
+      "id": "C01",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for Caddy healthy while upstream missing.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for Caddy healthy while upstream missing.",
+      "q": 0.42835,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "degraded_state",
+        "dependency_health",
+        "public_route"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "Caddy healthy while upstream missing"
+    },
+    {
+      "baseline_j0": 0.344875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: gateway shares manager tag and drifts command; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_release"
+      ],
+      "id": "C02",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for gateway shares manager tag and drifts command.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for gateway shares manager tag and drifts command.",
+      "q": 0.42835,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "gateway_digest",
+        "git_sha",
+        "manager_digest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "gateway shares manager tag and drifts command"
+    },
+    {
+      "baseline_j0": 0.254875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: rollback omits gateway coordinate; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_whole_release_rollback"
+      ],
+      "id": "C03",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for rollback omits gateway coordinate.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for rollback omits gateway coordinate.",
+      "q": 0.39775,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "image_set",
+        "prior_manifest",
+        "rollback_proof"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "rollback omits gateway coordinate"
+    },
+    {
+      "baseline_j0": 0.254875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: restore archive valid but database absent; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_restore"
+      ],
+      "id": "C04",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for restore archive valid but database absent.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for restore archive valid but database absent.",
+      "q": 0.39775,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "backup_id",
+        "database_backup",
+        "restore_result"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "restore archive valid but database absent"
+    },
+    {
+      "baseline_j0": 0.254875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: restore succeeds but proof cannot be refound; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_ambiguity_terminality",
+        "E_restore"
+      ],
+      "id": "C05",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for restore succeeds but proof cannot be refound.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for restore succeeds but proof cannot be refound.",
+      "q": 0.39775,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "operator_blocked",
+        "proof_refinding",
+        "restore_result"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "restore succeeds but proof cannot be refound"
+    },
+    {
+      "baseline_j0": 0.2592084,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: fault after first destructive release step; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery"
+      ],
+      "id": "C06",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for fault after first destructive release step.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for fault after first destructive release step.",
+      "q": 0.40136668,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.383333,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "diagnostic_bundle",
+        "failure_state",
+        "safe_next_action",
+        "stable_crash_point"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "fault after first destructive release step"
+    },
+    {
+      "baseline_j0": 0.357875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: retry after ambiguous release mutation; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_ambiguity_terminality",
+        "E_operator_recovery"
+      ],
+      "id": "C07",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for retry after ambiguous release mutation.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for retry after ambiguous release mutation.",
+      "q": 0.4392,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.68,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.45,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accepted_proof",
+        "ambiguous",
+        "nonacceptance_proof",
+        "operator_blocked",
+        "reservation_release",
+        "retry_permission"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "retry after ambiguous release mutation"
+    },
+    {
+      "baseline_j0": 0.3535416,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: application projection diverges from returned database record; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_docker_authority",
+        "E_durable_truth"
+      ],
+      "id": "C08",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for application projection diverges from returned database record.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for application projection diverges from returned database record.",
+      "q": 0.43558332,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.625,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.416667,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "application_projection",
+        "audit",
+        "conservation",
+        "database_mutation",
+        "returned_record"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "application projection diverges from returned database record"
+    },
+    {
+      "baseline_j0": 0.3535416,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: replica clock expires shared lease early; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_temporal_authority"
+      ],
+      "id": "C09",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for replica clock expires shared lease early.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for replica clock expires shared lease early.",
+      "q": 0.43558332,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.625,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.416667,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "database_clock",
+        "expiry",
+        "lease",
+        "replica_clock",
+        "retry"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "replica clock expires shared lease early"
+    },
+    {
+      "baseline_j0": 0.254875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: Manager receives Docker socket; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_docker_authority"
+      ],
+      "id": "C10",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for Manager receives Docker socket.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for Manager receives Docker socket.",
+      "q": 0.39775,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "docker_socket",
+        "host_provisioner",
+        "manager_denial"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "Manager receives Docker socket"
+    },
+    {
+      "baseline_j0": 0.344875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: cross-employee network attachment; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_network_isolation"
+      ],
+      "id": "C11",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for cross-employee network attachment.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for cross-employee network attachment.",
+      "q": 0.42835,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "bounded_egress",
+        "cross_employee_denial",
+        "employee_network"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "cross-employee network attachment"
+    },
+    {
+      "baseline_j0": 0.2505416,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: secret value enters release diagnostics; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_restore"
+      ],
+      "id": "C12",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for secret value enters release diagnostics.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for secret value enters release diagnostics.",
+      "q": 0.39413332,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.6725,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.25,
+        "FutureBug": 0.95,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.46,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.316667,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "diagnostic_bundle",
+        "secret_version"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "secret value enters release diagnostics"
+    },
+    {
+      "baseline_j0": 0.3792084,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: one noisy employee starves another; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws09-capacity-groundwork.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "C13",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for one noisy employee starves another.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws09-capacity-groundwork.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for one noisy employee starves another.",
+      "q": 0.45456668,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.85,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.383333,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "employee_id",
+        "fairness",
+        "queue_depth",
+        "saturation_state"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "capacity",
+      "title": "one noisy employee starves another"
+    },
+    {
+      "baseline_j0": 0.3792084,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: SSE fanout exhausts descriptors; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws09-capacity-groundwork.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "C14",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for SSE fanout exhausts descriptors.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws09-capacity-groundwork.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for SSE fanout exhausts descriptors.",
+      "q": 0.45456668,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.85,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.383333,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "connection_count",
+        "employee_id",
+        "resource_sample",
+        "sse_count"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "capacity",
+      "title": "SSE fanout exhausts descriptors"
+    },
+    {
+      "baseline_j0": 0.374875,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: pilot continues after saturation; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws09-capacity-groundwork.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork",
+        "E_operator_recovery"
+      ],
+      "id": "C15",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for pilot continues after saturation.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws09-capacity-groundwork.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for pilot continues after saturation.",
+      "q": 0.45095,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.85,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.515,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.35,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "pilot_stop_schema",
+        "safe_next_action",
+        "saturation_state"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "pilot",
+      "title": "pilot continues after saturation"
+    },
+    {
+      "baseline_j0": 0.3705416,
+      "batch": "failure_operator_capacity",
+      "capability_unlocked": "Current capability: 200-500 pressure becomes current claim; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws09-capacity-groundwork.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "C16",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for 200-500 pressure becomes current claim.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws09-capacity-groundwork.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for 200-500 pressure becomes current claim.",
+      "q": 0.44733332,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.6475,
+        "ArchLeverage": 0.35,
+        "BV": 0.7925,
+        "Cost": 0.3,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.75,
+        "FutureBug": 0.85,
+        "IG": 0.775,
+        "N": 0.7,
+        "ProofDensity": 0.46,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.316667,
+        "Testability": 0.95,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "pilot_stop_schema",
+        "saturation_state"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "future",
+      "title": "200-500 pressure becomes current claim"
+    },
+    {
+      "baseline_j0": 0.3394375,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: signed five-image release and repository closure transaction; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-manifest.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": ".github/workflows/ws08-ws09-release.yml"
+        },
+        {
+          "blob_sha": "2069509bfc22243d82afe933cd8961d27d2963e0",
+          "observed": true,
+          "path": "infra/scripts/deploy-smoke.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_repository_closure",
+        "E_truthful_health"
+      ],
+      "id": "D01",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for signed five-image release and repository closure transaction.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-manifest.mjs",
+        ".github/workflows/ws08-ws09-release.yml",
+        "infra/scripts/deploy-smoke.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for signed five-image release and repository closure transaction.",
+      "q": 0.442875,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.8,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.9,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 1.0,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "artifact",
+        "build",
+        "caddy_digest",
+        "compose_hash",
+        "config_hash",
+        "degraded_state",
+        "dependency_health",
+        "five_service_state",
+        "fixtures",
+        "gateway_digest",
+        "git_sha",
+        "independent_verifier",
+        "integration",
+        "manager_digest",
+        "migration",
+        "migration_head",
+        "migration_readiness",
+        "pr_prose",
+        "provisioner_digest",
+        "public_route",
+        "signed_manifest",
+        "source",
+        "types",
+        "unit",
+        "web_digest",
+        "workflow"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "release",
+      "title": "signed five-image release and repository closure transaction"
+    },
+    {
+      "baseline_j0": 0.1781875,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: fault ambiguity durable-truth and operator recovery transaction; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-fault-injection.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/operator-recovery.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-telemetry.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_ambiguity_terminality",
+        "E_docker_authority",
+        "E_durable_truth",
+        "E_effect_recovery",
+        "E_operator_recovery",
+        "E_temporal_authority"
+      ],
+      "id": "D02",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for fault ambiguity durable-truth and operator recovery transaction.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-fault-injection.mjs",
+        "infra/scripts/operator-recovery.mjs",
+        "infra/scripts/release-telemetry.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for fault ambiguity durable-truth and operator recovery transaction.",
+      "q": 0.409525,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.8,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.51,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.8325,
+        "N": 0.7,
+        "ProofDensity": 0.9,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 1.0,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accepted_proof",
+        "accounting_receipt",
+        "ambiguous",
+        "application_projection",
+        "audit",
+        "command",
+        "conservation",
+        "database_clock",
+        "database_mutation",
+        "diagnostic_bundle",
+        "effect",
+        "expiry",
+        "failure_state",
+        "lease",
+        "nonacceptance_proof",
+        "operator_blocked",
+        "proof",
+        "provider_receipt",
+        "rate_window",
+        "repair",
+        "replica_clock",
+        "reservation_release",
+        "retry",
+        "retry_permission",
+        "returned_record",
+        "safe_next_action",
+        "stable_crash_point"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "recovery",
+      "title": "fault ambiguity durable-truth and operator recovery transaction"
+    },
+    {
+      "baseline_j0": 0.2429375,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: backup-restore-proof transaction; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "364abb0b7e4a57bdf98d273b0034cecf5f9922af",
+          "observed": true,
+          "path": "infra/scripts/backup-restore.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/restore-verify.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_restore"
+      ],
+      "id": "D03",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for backup-restore-proof transaction.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/backup-restore.mjs",
+        "infra/scripts/restore-verify.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for backup-restore-proof transaction.",
+      "q": 0.372475,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.7025,
+        "IG": 0.645,
+        "N": 0.7,
+        "ProofDensity": 0.68,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.7,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "backup_id",
+        "database_backup",
+        "filesystem_backup",
+        "proof_refinding",
+        "restore_result",
+        "secret_version"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "restore",
+      "title": "backup-restore-proof transaction"
+    },
+    {
+      "baseline_j0": 0.2522709,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: whole-release rollback with accepted-work guard; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "d7aab81ccd8636c9240d5fd226d2841a83135ad0",
+          "observed": true,
+          "path": "infra/scripts/deploy-rollback.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_whole_release_rollback"
+      ],
+      "id": "D04",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for whole-release rollback with accepted-work guard.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/deploy-rollback.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for whole-release rollback with accepted-work guard.",
+      "q": 0.37109168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.7025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.735,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.483333,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accepted_work_check",
+        "compose_config",
+        "image_set",
+        "migration_compatibility",
+        "prior_manifest",
+        "rollback_proof",
+        "rollback_smoke"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "rollback",
+      "title": "whole-release rollback with accepted-work guard"
+    },
+    {
+      "baseline_j0": 0.3286041,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: topology health and release identity; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "2069509bfc22243d82afe933cd8961d27d2963e0",
+          "observed": true,
+          "path": "infra/scripts/deploy-smoke.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-manifest.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_truthful_health"
+      ],
+      "id": "D05",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for topology health and release identity.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/deploy-smoke.mjs",
+        "infra/scripts/release-manifest.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for topology health and release identity.",
+      "q": 0.42395832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.8,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.645,
+        "N": 0.7,
+        "ProofDensity": 0.625,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.666667,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "degraded_state",
+        "dependency_health",
+        "five_service_state",
+        "migration_readiness",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "health",
+      "title": "topology health and release identity"
+    },
+    {
+      "baseline_j0": 0.2265209,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: Docker and network authority proof; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws08-release-authority.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_docker_authority",
+        "E_durable_truth",
+        "E_network_isolation"
+      ],
+      "id": "D06",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for Docker and network authority proof.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "tests/unit/ws08-release-authority.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for Docker and network authority proof.",
+      "q": 0.42594168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.8,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.7025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.9,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.683333,
+        "Testability": 0.8125,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "audit",
+        "bounded_egress",
+        "cross_employee_denial",
+        "docker_socket",
+        "employee_network",
+        "gateway_attachment",
+        "gateway_denial",
+        "hermes_attachment",
+        "host_provisioner",
+        "idempotency",
+        "manager_attachment",
+        "manager_denial",
+        "signed_request"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "authority",
+      "title": "Docker and network authority proof"
+    },
+    {
+      "baseline_j0": 0.3091041,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: effect recovery and release telemetry; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-telemetry.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_effect_recovery",
+        "E_operator_recovery",
+        "E_release"
+      ],
+      "id": "D07",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for effect recovery and release telemetry.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-telemetry.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for effect recovery and release telemetry.",
+      "q": 0.40280832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.79,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.516667,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accounting_receipt",
+        "command",
+        "diagnostic_bundle",
+        "effect",
+        "proof",
+        "provider_receipt",
+        "repair",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "telemetry",
+      "title": "effect recovery and release telemetry"
+    },
+    {
+      "baseline_j0": 0.3111041,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: exact build to retained evidence closure; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": ".github/workflows/ws08-ws09-release.yml"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_repository_closure"
+      ],
+      "id": "D08",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for exact build to retained evidence closure.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        ".github/workflows/ws08-ws09-release.yml"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for exact build to retained evidence closure.",
+      "q": 0.40870832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.9,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.616667,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "artifact",
+        "build",
+        "fixtures",
+        "integration",
+        "migration",
+        "pr_prose",
+        "signed_manifest",
+        "source",
+        "types",
+        "unit",
+        "workflow"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "build",
+      "title": "exact build to retained evidence closure"
+    },
+    {
+      "baseline_j0": 0.3903541,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: capacity fairness and pilot stop groundwork; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "c8f83f6854fb89b879c5b8e7a788ea3da6a7c950",
+          "observed": true,
+          "path": "infra/scripts/capacity-pod-alpha.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "tests/unit/ws09-capacity-groundwork.test.ts"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "D09",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for capacity fairness and pilot stop groundwork.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/capacity-pod-alpha.mjs",
+        "tests/unit/ws09-capacity-groundwork.test.ts"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for capacity fairness and pilot stop groundwork.",
+      "q": 0.44490832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.8625,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.9,
+        "FutureBug": 0.6025,
+        "IG": 0.645,
+        "N": 0.7,
+        "ProofDensity": 0.79,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.766667,
+        "Testability": 0.8125,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "connection_count",
+        "employee_id",
+        "fairness",
+        "pilot_stop_schema",
+        "queue_depth",
+        "resource_sample",
+        "saturation_state",
+        "sse_count"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "capacity",
+      "title": "capacity fairness and pilot stop groundwork"
+    },
+    {
+      "baseline_j0": 0.2022709,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: restore and rollback compatibility envelope; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "364abb0b7e4a57bdf98d273b0034cecf5f9922af",
+          "observed": true,
+          "path": "infra/scripts/backup-restore.mjs"
+        },
+        {
+          "blob_sha": "d7aab81ccd8636c9240d5fd226d2841a83135ad0",
+          "observed": true,
+          "path": "infra/scripts/deploy-rollback.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_restore",
+        "E_whole_release_rollback"
+      ],
+      "id": "D10",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for restore and rollback compatibility envelope.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/backup-restore.mjs",
+        "infra/scripts/deploy-rollback.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for restore and rollback compatibility envelope.",
+      "q": 0.38559168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.8,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.735,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.733333,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "accepted_work_check",
+        "backup_id",
+        "migration_compatibility",
+        "prior_manifest",
+        "proof_refinding",
+        "restore_result",
+        "rollback_proof"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "recovery",
+      "title": "restore and rollback compatibility envelope"
+    },
+    {
+      "baseline_j0": 0.2386041,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: truthful health under destructive faults; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-fault-injection.mjs"
+        },
+        {
+          "blob_sha": "2069509bfc22243d82afe933cd8961d27d2963e0",
+          "observed": true,
+          "path": "infra/scripts/deploy-smoke.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_truthful_health"
+      ],
+      "id": "D11",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for truthful health under destructive faults.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-fault-injection.mjs",
+        "infra/scripts/deploy-smoke.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for truthful health under destructive faults.",
+      "q": 0.36885832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.7025,
+        "IG": 0.645,
+        "N": 0.7,
+        "ProofDensity": 0.625,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.666667,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "degraded_state",
+        "dependency_health",
+        "failure_state",
+        "five_service_state",
+        "stable_crash_point"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "failure",
+      "title": "truthful health under destructive faults"
+    },
+    {
+      "baseline_j0": 0.1742709,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: secret-safe independent provenance; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-manifest.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/verify-release-manifest.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_operator_recovery",
+        "E_release",
+        "E_restore"
+      ],
+      "id": "D12",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for secret-safe independent provenance.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/release-manifest.mjs",
+        "infra/scripts/verify-release-manifest.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for secret-safe independent provenance.",
+      "q": 0.38674168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.8,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.795,
+        "N": 0.7,
+        "ProofDensity": 0.57,
+        "Reversibility": 0.555,
+        "Risk": 0.65,
+        "Scope": 0.633333,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "diagnostic_bundle",
+        "independent_verifier",
+        "secret_version",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "provenance",
+      "title": "secret-safe independent provenance"
+    },
+    {
+      "baseline_j0": 0.3004375,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: database-clock recovery permission; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/operator-recovery.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_ambiguity_terminality",
+        "E_temporal_authority"
+      ],
+      "id": "D13",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for database-clock recovery permission.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/operator-recovery.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for database-clock recovery permission.",
+      "q": 0.434075,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.8,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.7025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.68,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.45,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "database_clock",
+        "expiry",
+        "lease",
+        "operator_blocked",
+        "reservation_release",
+        "retry"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "authority",
+      "title": "database-clock recovery permission"
+    },
+    {
+      "baseline_j0": 0.2686041,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: proof-refinding release acceptance packet; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/restore-verify.mjs"
+        },
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/release-evidence-index.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_release",
+        "E_repository_closure",
+        "E_restore",
+        "E_whole_release_rollback"
+      ],
+      "id": "D14",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for proof-refinding release acceptance packet.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/restore-verify.mjs",
+        "infra/scripts/release-evidence-index.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for proof-refinding release acceptance packet.",
+      "q": 0.38945832,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.795,
+        "N": 0.7,
+        "ProofDensity": 0.625,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.666667,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "artifact",
+        "proof_refinding",
+        "restore_result",
+        "rollback_proof",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "proof",
+      "title": "proof-refinding release acceptance packet"
+    },
+    {
+      "baseline_j0": 0.3722709,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: 25-30 runtime saturation envelope; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": "c8f83f6854fb89b879c5b8e7a788ea3da6a7c950",
+          "observed": true,
+          "path": "infra/scripts/capacity-pod-alpha.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_capacity_groundwork"
+      ],
+      "id": "D15",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for 25-30 runtime saturation envelope.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/capacity-pod-alpha.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for 25-30 runtime saturation envelope.",
+      "q": 0.42429168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.8625,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.9,
+        "FutureBug": 0.6025,
+        "IG": 0.495,
+        "N": 0.7,
+        "ProofDensity": 0.735,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.483333,
+        "Testability": 0.6625,
+        "Unsupported": 0.15,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "connection_count",
+        "employee_id",
+        "fairness",
+        "queue_depth",
+        "resource_sample",
+        "saturation_state",
+        "sse_count"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "capacity",
+      "title": "25-30 runtime saturation envelope"
+    },
+    {
+      "baseline_j0": 0.3047709,
+      "batch": "recombination",
+      "capability_unlocked": "Current capability: operator-visible release lifecycle; no higher evidence class is promoted.",
+      "contradictions": [],
+      "eligibility": true,
+      "evidence": [
+        {
+          "blob_sha": null,
+          "observed": false,
+          "path": "infra/scripts/operator-recovery.mjs"
+        }
+      ],
+      "hyperedges": [
+        "E_ambiguity_terminality",
+        "E_operator_recovery",
+        "E_release",
+        "E_restore",
+        "E_truthful_health",
+        "E_whole_release_rollback"
+      ],
+      "id": "D16",
+      "operator_consequence": "Operator receives bounded evidence and a safe next action for operator-visible release lifecycle.",
+      "partial_effect_path": [
+        "before_effect",
+        "partial_effect",
+        "durable_terminal_or_operator_blocked"
+      ],
+      "patch_surfaces": [
+        "infra/scripts/operator-recovery.mjs"
+      ],
+      "proof_obligation": "Behaviorally prove represented vertices and reject false success for operator-visible release lifecycle.",
+      "q": 0.39919168,
+      "rejection_reason": null,
+      "repair_rollback_path": [
+        "preserve_original_identity",
+        "validate_durable_truth",
+        "repair_or_rollback",
+        "refind_proof"
+      ],
+      "score_vector": {
+        "Adj": 0.7375,
+        "ArchLeverage": 0.35,
+        "BV": 0.7425,
+        "Cost": 0.45,
+        "CrossLens": 0.43,
+        "FeatureYield": 0.4,
+        "FutureBug": 0.6025,
+        "IG": 0.72,
+        "N": 0.7,
+        "ProofDensity": 0.735,
+        "Reversibility": 0.645,
+        "Risk": 0.35,
+        "Scope": 0.483333,
+        "Testability": 0.6625,
+        "Unsupported": 0.45,
+        "VF": 0.8
+      },
+      "software_vertices": [
+        "backup_id",
+        "failure_state",
+        "five_service_state",
+        "retry_permission",
+        "rollback_proof",
+        "safe_next_action",
+        "signed_manifest"
+      ],
+      "state_sequence": [
+        "observed",
+        "planned",
+        "verified"
+      ],
+      "theme": "operator",
+      "title": "operator-visible release lifecycle"
+    }
+  ],
+  "count": 64,
+  "schema": "amtech.trace008.candidates.v1"
+}

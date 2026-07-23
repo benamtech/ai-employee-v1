@@ -1,0 +1,85 @@
+{
+  "cases": [
+    {
+      "candidate_id": "C01",
+      "proof": "Behaviorally prove represented vertices and reject false success for Caddy healthy while upstream missing.",
+      "title": "Caddy healthy while upstream missing"
+    },
+    {
+      "candidate_id": "C02",
+      "proof": "Behaviorally prove represented vertices and reject false success for gateway shares manager tag and drifts command.",
+      "title": "gateway shares manager tag and drifts command"
+    },
+    {
+      "candidate_id": "C03",
+      "proof": "Behaviorally prove represented vertices and reject false success for rollback omits gateway coordinate.",
+      "title": "rollback omits gateway coordinate"
+    },
+    {
+      "candidate_id": "C04",
+      "proof": "Behaviorally prove represented vertices and reject false success for restore archive valid but database absent.",
+      "title": "restore archive valid but database absent"
+    },
+    {
+      "candidate_id": "C05",
+      "proof": "Behaviorally prove represented vertices and reject false success for restore succeeds but proof cannot be refound.",
+      "title": "restore succeeds but proof cannot be refound"
+    },
+    {
+      "candidate_id": "C06",
+      "proof": "Behaviorally prove represented vertices and reject false success for fault after first destructive release step.",
+      "title": "fault after first destructive release step"
+    },
+    {
+      "candidate_id": "C07",
+      "proof": "Behaviorally prove represented vertices and reject false success for retry after ambiguous release mutation.",
+      "title": "retry after ambiguous release mutation"
+    },
+    {
+      "candidate_id": "C08",
+      "proof": "Behaviorally prove represented vertices and reject false success for application projection diverges from returned database record.",
+      "title": "application projection diverges from returned database record"
+    },
+    {
+      "candidate_id": "C09",
+      "proof": "Behaviorally prove represented vertices and reject false success for replica clock expires shared lease early.",
+      "title": "replica clock expires shared lease early"
+    },
+    {
+      "candidate_id": "C10",
+      "proof": "Behaviorally prove represented vertices and reject false success for Manager receives Docker socket.",
+      "title": "Manager receives Docker socket"
+    },
+    {
+      "candidate_id": "C11",
+      "proof": "Behaviorally prove represented vertices and reject false success for cross-employee network attachment.",
+      "title": "cross-employee network attachment"
+    },
+    {
+      "candidate_id": "C12",
+      "proof": "Behaviorally prove represented vertices and reject false success for secret value enters release diagnostics.",
+      "title": "secret value enters release diagnostics"
+    },
+    {
+      "candidate_id": "C13",
+      "proof": "Behaviorally prove represented vertices and reject false success for one noisy employee starves another.",
+      "title": "one noisy employee starves another"
+    },
+    {
+      "candidate_id": "C14",
+      "proof": "Behaviorally prove represented vertices and reject false success for SSE fanout exhausts descriptors.",
+      "title": "SSE fanout exhausts descriptors"
+    },
+    {
+      "candidate_id": "C15",
+      "proof": "Behaviorally prove represented vertices and reject false success for pilot continues after saturation.",
+      "title": "pilot continues after saturation"
+    },
+    {
+      "candidate_id": "C16",
+      "proof": "Behaviorally prove represented vertices and reject false success for 200-500 pressure becomes current claim.",
+      "title": "200-500 pressure becomes current claim"
+    }
+  ],
+  "schema": "amtech.trace008.counterexamples.v1"
+}

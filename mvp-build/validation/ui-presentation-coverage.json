@@ -1,0 +1,102 @@
+{
+  "schema": "amtech.ui-presentation-coverage.v2",
+  "method": "deterministic greedy constrained covering array",
+  "coverage": {
+    "pairwise": [
+      "surface",
+      "adapter",
+      "scenario",
+      "browser",
+      "viewport",
+      "density",
+      "runtime_state",
+      "preset_state"
+    ],
+    "three_way": [
+      [
+        "surface",
+        "browser",
+        "runtime_state"
+      ],
+      [
+        "adapter",
+        "scenario",
+        "preset_state"
+      ]
+    ],
+    "constraints": [
+      "talk/workspace/review require owner_web",
+      "public_form surface requires public_form adapter",
+      "boundless_website surface requires boundless_website adapter",
+      "UI Lab workbench and preview may exercise every adapter"
+    ],
+    "consequential_authority_states": "excluded; covered exhaustively by validation/ui-state-machine-cases.json",
+    "approved_presets": "every approved preset receives explicit browser smoke outside this covering array"
+  },
+  "factors": {
+    "surface": [
+      "talk",
+      "workspace",
+      "review",
+      "public_form",
+      "boundless_website",
+      "ui_lab_workbench",
+      "ui_lab_preview"
+    ],
+    "adapter": [
+      "owner_web",
+      "public_form",
+      "boundless_website"
+    ],
+    "scenario": [
+      "website",
+      "office",
+      "personal-brain",
+      "research",
+      "contractor",
+      "clothing-ops"
+    ],
+    "browser": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "viewport": [
+      "mobile",
+      "tablet",
+      "desktop",
+      "responsive"
+    ],
+    "density": [
+      "calm",
+      "balanced",
+      "dense"
+    ],
+    "runtime_state": [
+      "initial",
+      "active",
+      "needs_you",
+      "stalled",
+      "recovering",
+      "completed"
+    ],
+    "preset_state": [
+      "unsaved",
+      "dirty_draft",
+      "clean_draft",
+      "approved"
+    ]
+  },
+  "unconstrained_combination_count": 108864,
+  "valid_combination_count": 57024,
+  "requirement_count": 746,
+  "generated_case_count": 126,
+  "selected_case_digest_sha256": "28626cfde8d3db91660476801629b208ed24c79200e1e1570e1f117841085497",
+  "uncovered_combinations": [],
+  "nonclaims": [
+    "Generated combinations are test plans, not executed browser evidence.",
+    "UI Lab cases remain fixture demonstrations even when production components render them.",
+    "A green covering array does not establish aesthetic quality; human review remains required for promotion.",
+    "Browser, accessibility, capacity, pilot, deployment, and production acceptance remain separate."
+  ]
+}

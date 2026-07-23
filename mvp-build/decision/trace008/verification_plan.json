@@ -1,0 +1,64 @@
+{
+  "external_blockers": [
+    "target Linux host",
+    "registry/signing authority",
+    "managed database backup/restore",
+    "representative 64 GiB capacity run",
+    "pilot cohort"
+  ],
+  "schema": "amtech.trace008.verification-plan.v1",
+  "software_edge_tests": {
+    "E_ambiguity_terminality": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_capacity_groundwork": [
+      "tests/unit/ws09-capacity-groundwork.test.ts"
+    ],
+    "E_docker_authority": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_durable_truth": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_effect_recovery": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_network_isolation": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_operator_recovery": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_release": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_repository_closure": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_restore": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_temporal_authority": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_truthful_health": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ],
+    "E_whole_release_rollback": [
+      "tests/unit/ws08-release-authority.test.ts"
+    ]
+  },
+  "workflow_required": [
+    "trace verifier",
+    "governance",
+    "source generation",
+    "typecheck/lint",
+    "focused and broad units",
+    "PostgreSQL integration",
+    "all-workspace build",
+    "production compose validation",
+    "five exact-SHA image builds",
+    "digest inspection",
+    "release-manifest verification"
+  ]
+}

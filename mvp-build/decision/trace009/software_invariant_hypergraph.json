@@ -1,0 +1,60 @@
+{
+  "edges": {
+    "E_authority_machine": [
+      "SnapshotAuthority",
+      "StreamAuthority",
+      "Approval",
+      "Effect",
+      "Ambiguity",
+      "RetryPermission",
+      "ReceiptOracle",
+      "ProofOracle",
+      "Isolation"
+    ],
+    "E_executable_governance": [
+      "StateMachine",
+      "BehavioralTest",
+      "ReviewQuestion",
+      "FitnessFunction",
+      "ADR",
+      "UncoveredCombinations"
+    ],
+    "E_experiment_conformance": [
+      "SameTruth",
+      "SameAuthority",
+      "SameActions",
+      "PresentationPolicy",
+      "UILab",
+      "ProductionRenderer"
+    ],
+    "E_release_closure": [
+      "exact_sha",
+      "five_images",
+      "gateway_image",
+      "compose_hash",
+      "image_digests",
+      "signed_manifest",
+      "independent_verifier",
+      "workflow_artifact"
+    ],
+    "E_single_projection_path": [
+      "ProjectionController",
+      "SemanticCompiler",
+      "LayoutPlanner",
+      "RendererRegistry",
+      "WorkResourceRenderer",
+      "EmbeddedViewCompiler"
+    ],
+    "E_thin_surfaces": [
+      "Talk",
+      "Workspace",
+      "Review",
+      "MCPApps",
+      "Operator",
+      "UILab",
+      "ProjectionController"
+    ]
+  },
+  "proved_rule": "complete representation plus accepted independent exact-candidate evidence",
+  "schema": "trace009.hypergraph.v1"
+}

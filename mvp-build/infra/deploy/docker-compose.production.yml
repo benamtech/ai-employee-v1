@@ -26,6 +26,11 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     restart: unless-stopped
+    depends_on:
+      model-gateway:
+        condition: service_healthy
+      host-provisioner:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:8080/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 15s
@@ -40,13 +45,12 @@ services:
 
   model-gateway:
     container_name: amtech-model-gateway
-    image: amtech-ai-employee-manager:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
+    image: amtech-ai-employee-model-gateway:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
-      dockerfile: infra/deploy/manager.Dockerfile
+      dockerfile: infra/deploy/model-gateway.Dockerfile
       args:
         AMTECH_GIT_SHA: ${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
-    command: ["node", "apps/manager/dist/model-gateway-server.js"]
     env_file:
       - ./.env.production
     environment:
@@ -73,7 +77,7 @@ services:
 
   host-provisioner:
     container_name: amtech-host-provisioner
-    image: amtech-ai-employee-provisioner:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
+    image: amtech-ai-employee-host-provisioner:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
     build:
       context: ../..
       dockerfile: infra/deploy/provisioner.Dockerfile
@@ -147,9 +151,9 @@ services:
         max-file: "5"
 
   # Production Caddy deliberately shares the Linux host network. The public proxy
-  # must reach Web, Manager, and every employee Hermes gateway through ports that
-  # are published only on host loopback. A bridge-network Caddy cannot reach those
-  # 127.0.0.1 bindings because its localhost is its own network namespace.
+  # must reach Web, Manager, Model Gateway, and employee Hermes gateways through
+  # host-loopback ports. Its health is the aggregate five-service release health,
+  # not merely a successful Caddyfile parse.
   caddy:
     container_name: amtech-caddy
     image: amtech-ai-employee-caddy:${AMTECH_GIT_SHA:?AMTECH_GIT_SHA is required}
@@ -174,14 +178,18 @@ services:
     depends_on:
       manager:
         condition: service_healthy
+      model-gateway:
+        condition: service_healthy
+      host-provisioner:
+        condition: service_healthy
       web:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      test: ["CMD-SHELL", "caddy validate --config /etc/caddy/Caddyfile >/dev/null && wget -q -T 5 -O /dev/null http://127.0.0.1:8080/health && wget -q -T 5 -O /dev/null http://127.0.0.1:8092/health && wget -q -T 5 -O /dev/null http://127.0.0.1:3000"]
       interval: 30s
-      timeout: 5s
+      timeout: 8s
       retries: 3
-      start_period: 10s
+      start_period: 30s
     logging:
       driver: local
       options:

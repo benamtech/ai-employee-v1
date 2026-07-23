@@ -1,0 +1,9 @@
+{
+  "independent_outcomes": {
+    "defects_found": null,
+    "proof_yield": null,
+    "unnecessary_scope": null
+  },
+  "schema": "amtech.trace008.ablation.v1",
+  "status": "unestablished"
+}

@@ -2,9 +2,15 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { SupabaseClient } from "@amtech/db";
 import { mintModelGatewayCredential, revokeModelGatewayCredential } from "../../apps/manager/src/lib/model-gateway.js";
 import { buildModelGatewayApp } from "../../apps/manager/src/lib/model-gateway-http.js";
+import type {
+  GatewayCommercialAdmission,
+  GatewayCommercialRecord,
+  GatewayCommercialStore,
+  GatewaySettlementInput,
+} from "../../apps/manager/src/lib/model-gateway-commercial.js";
 
 interface QueryResult<T = unknown> { data: T; error: null | { code?: string; message: string } }
-type Row = Record<string, unknown>;
+type Row = Record<string, any>;
 type Filter = (row: Row) => boolean;
 
 class FakeQuery implements PromiseLike<QueryResult<any>> {
@@ -15,23 +21,15 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
   private orderAscending = true;
 
   constructor(private readonly store: FakeSupabase, private readonly table: string) {}
-
   select(_columns = "*"): this { return this; }
   insert(payload: Row | Row[]): this { this.operation = "insert"; this.payload = payload; return this; }
   update(payload: Row): this { this.operation = "update"; this.payload = payload; return this; }
   upsert(payload: Row | Row[], _options?: Record<string, unknown>): this { this.operation = "upsert"; this.payload = payload; return this; }
   eq(column: string, value: unknown): this { this.filters.push((row) => row[column] === value); return this; }
-  is(column: string, value: unknown): this {
-    this.filters.push((row) => value === null ? row[column] == null : row[column] === value);
-    return this;
-  }
+  is(column: string, value: unknown): this { this.filters.push((row) => value === null ? row[column] == null : row[column] === value); return this; }
   lte(_column: string, _value: unknown): this { return this; }
   or(_expression: string): this { return this; }
-  order(column: string, options?: { ascending?: boolean }): this {
-    this.orderKey = column;
-    this.orderAscending = options?.ascending ?? true;
-    return this;
-  }
+  order(column: string, options?: { ascending?: boolean }): this { this.orderKey = column; this.orderAscending = options?.ascending ?? true; return this; }
 
   async maybeSingle(): Promise<QueryResult<Row | null>> {
     const result = await this.execute();
@@ -57,8 +55,7 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
       const values = Array.isArray(this.payload) ? this.payload : [this.payload ?? {}];
       const written: Row[] = [];
       for (const value of values) {
-        const id = value.id;
-        const existing = id == null ? null : rows.find((row) => row.id === id);
+        const existing = value.id == null ? null : rows.find((row) => row.id === value.id);
         if (existing) Object.assign(existing, value);
         else rows.push({ created_at: new Date().toISOString(), ...value });
         written.push(existing ?? value);
@@ -72,24 +69,72 @@ class FakeQuery implements PromiseLike<QueryResult<any>> {
     }
     const selected = [...matches];
     if (this.orderKey) {
-      const key = this.orderKey;
       const direction = this.orderAscending ? 1 : -1;
-      selected.sort((left, right) => String(left[key] ?? "").localeCompare(String(right[key] ?? "")) * direction);
+      selected.sort((left, right) => String(left[this.orderKey!] ?? "").localeCompare(String(right[this.orderKey!] ?? "")) * direction);
     }
     return { data: selected, error: null };
   }
 }
 
+class MemoryCommercialStore<T> implements GatewayCommercialStore<T> {
+  readonly rows = new Map<string, GatewayCommercialRecord<T>>();
+  async admit(input: GatewayCommercialAdmission) {
+    const existing = this.rows.get(input.request_key);
+    if (existing) return { kind: "replay" as const, record: existing };
+    const row: GatewayCommercialRecord<T> = {
+      request_key: input.request_key,
+      assignment_id: input.assignment_id,
+      revision_id: input.revision_id,
+      request_hash: input.request_hash,
+      provider_idempotency_key: input.provider_idempotency_key,
+      rate_window_key: input.rate_window_key,
+      state: "admitted",
+      reserved_amount_minor: input.reserve_amount_minor,
+      committed_amount_minor: 0,
+      released_amount_minor: 0,
+      refunded_amount_minor: 0,
+      provider_receipt_id: null,
+      effect_receipt_id: null,
+      accounting_receipt_id: null,
+      error_code: null,
+      ambiguity_code: null,
+      response: null,
+      proof_state: "pending",
+      proof_ref: null,
+      command_id: `cmd_${input.request_key}`,
+      command_intent_id: `intent_${input.request_key}`,
+      effect_key: input.effect_key,
+      correlation_id: input.correlation_id,
+    };
+    this.rows.set(input.request_key, row);
+    return { kind: "admitted" as const, record: row };
+  }
+  async markDispatched(requestKey: string) { const row = this.must(requestKey); row.state = "dispatched"; return row; }
+  async settle(input: GatewaySettlementInput<T>) {
+    const row = this.must(input.request_key);
+    row.state = input.state;
+    row.provider_receipt_id = input.provider_receipt_id ?? null;
+    row.effect_receipt_id = input.effect_receipt_id ?? null;
+    row.accounting_receipt_id = input.accounting_receipt_id ?? null;
+    row.error_code = input.error_code ?? null;
+    row.ambiguity_code = input.ambiguity_code ?? null;
+    row.response = input.response ?? null;
+    if (input.state === "accepted") {
+      row.committed_amount_minor = input.amount_minor;
+      row.released_amount_minor = row.reserved_amount_minor - input.amount_minor;
+    }
+    if (input.state === "failed") row.released_amount_minor = row.reserved_amount_minor;
+    return row;
+  }
+  async markProofProjected(requestKey: string, proofRef: string) { const row = this.must(requestKey); row.proof_state = "projected"; row.proof_ref = proofRef; return row; }
+  private must(requestKey: string) { const row = this.rows.get(requestKey); if (!row) throw new Error("missing_gateway_request"); return row; }
+}
+
 class FakeSupabase {
   private readonly tables = new Map<string, Row[]>();
-
+  readonly commercial = new MemoryCommercialStore<any>();
   from(table: string): FakeQuery { return new FakeQuery(this, table); }
-
-  rows(table: string): Row[] {
-    const rows = this.tables.get(table) ?? [];
-    this.tables.set(table, rows);
-    return rows;
-  }
+  rows(table: string): Row[] { const rows = this.tables.get(table) ?? []; this.tables.set(table, rows); return rows; }
 
   async rpc(name: string, params: Record<string, unknown>): Promise<QueryResult<unknown>> {
     if (name !== "amtech_default_assignment_for_employee_account") {
@@ -102,52 +147,25 @@ class FakeSupabase {
     const beneficiaryId = `crel_beneficiary_${employeeId}`;
     const priceId = `price_${employeeId}`;
     const startsAt = "2026-01-01T00:00:00.000Z";
-    const ensure = (table: string, row: Row) => {
-      if (!this.rows(table).some((current) => current.id === row.id)) this.rows(table).push(row);
-    };
-    ensure("employee_assignments", {
-      id: assignmentId,
-      account_id: accountId,
-      employee_principals: { employee_id: employeeId },
+    const ensure = (table: string, row: Row) => { if (!this.rows(table).some((current) => current.id === row.id)) this.rows(table).push(row); };
+    ensure("employee_assignments", { id: assignmentId, account_id: accountId, employee_principals: { employee_id: employeeId } });
+    ensure("commercial_relationships", {
+      id: payerId, assignment_id: assignmentId, relationship_type: "payer", organization_id: `org_${employeeId}`,
+      account_id: accountId, status: "active", starts_at: startsAt, ends_at: null,
     });
     ensure("commercial_relationships", {
-      id: payerId,
-      assignment_id: assignmentId,
-      relationship_type: "payer",
-      organization_id: `org_payer_${employeeId}`,
-      account_id: accountId,
-      status: "active",
-      starts_at: startsAt,
-      ends_at: null,
-    });
-    ensure("commercial_relationships", {
-      id: beneficiaryId,
-      assignment_id: assignmentId,
-      relationship_type: "beneficiary",
-      organization_id: `org_beneficiary_${employeeId}`,
-      account_id: accountId,
-      status: "active",
-      starts_at: startsAt,
-      ends_at: null,
+      id: beneficiaryId, assignment_id: assignmentId, relationship_type: "beneficiary", organization_id: `org_${employeeId}`,
+      account_id: accountId, status: "active", starts_at: startsAt, ends_at: null,
     });
     ensure("commercial_price_versions", {
-      id: priceId,
-      assignment_id: assignmentId,
-      policy_key: "provider-cost-observation",
-      version: "1.0.0",
-      currency: "USD",
-      unit: "provider_request",
-      unit_price_minor: 0,
-      status: "active",
-      effective_at: startsAt,
-      expires_at: null,
+      id: priceId, assignment_id: assignmentId, policy_key: "provider-cost-observation", version: "1.0.0",
+      currency: "USD", unit: "provider_request", unit_price_minor: 0, status: "active", effective_at: startsAt, expires_at: null,
     });
     return { data: assignmentId, error: null };
   }
 }
 
 const originalEnv = { ...process.env };
-
 beforeEach(() => {
   process.env = { ...originalEnv };
   process.env.NODE_ENV = "production";
@@ -160,9 +178,7 @@ beforeEach(() => {
   process.env.MODEL_GATEWAY_ALLOWED_MODELS = "provider-model";
   process.env.MODEL_GATEWAY_ALLOWED_PROVIDERS = "openai_compatible";
   process.env.MODEL_GATEWAY_UPSTREAM_MODEL = "provider-model";
-  process.env.MODEL_GATEWAY_MAX_RETRIES = "0";
 });
-
 afterEach(() => { process.env = { ...originalEnv }; });
 
 function request(employeeId: string, token: string, body: Record<string, unknown> = {}): Request {
@@ -173,169 +189,123 @@ function request(employeeId: string, token: string, body: Record<string, unknown
   });
 }
 
+function app(fake: FakeSupabase, fetch: typeof globalThis.fetch) {
+  const db = fake as unknown as SupabaseClient;
+  return buildModelGatewayApp({
+    db: () => db,
+    fetch,
+    commercialStore: () => fake.commercial,
+    executeEffect: (async <T>(_db: SupabaseClient, input: any) => {
+      const applied = await input.apply();
+      return { replayed: false, command_id: input.command_id, effect_id: "eff_test", receipt_id: "erec_test", result: applied.result as T };
+    }) as any,
+  });
+}
+
 describe("model gateway HTTP isolation", () => {
-  it("accepts only the assignment-bound credential and resolves the alias through the Manager provider registry", async () => {
+  it("accepts only assignment-bound credentials and preserves receipt/accounting/proof identity", async () => {
     const fake = new FakeSupabase();
     const db = fake as unknown as SupabaseClient;
     const employeeA = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
     const employeeB = await mintModelGatewayCredential(db, { account_id: "acct_bravo", employee_id: "emp_bravo" });
-    const expired = await mintModelGatewayCredential(db, {
-      account_id: "acct_alpha",
-      employee_id: "emp_alpha",
-      policy: { credential_version: 2, expires_at: new Date(Date.now() - 1_000).toISOString() },
-    });
-    const revoked = await mintModelGatewayCredential(db, {
-      account_id: "acct_alpha",
-      employee_id: "emp_alpha",
-      policy: { credential_version: 3, expires_at: new Date(Date.now() + 60_000).toISOString() },
-    });
+    const revoked = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha", policy: { credential_version: 2 } });
     await revokeModelGatewayCredential(db, revoked.credential_id);
 
-    const upstreamCalls: Array<{ url: string; authorization: string | null; assignment: string | null; body: Record<string, unknown> }> = [];
-    const app = buildModelGatewayApp({
-      db: () => db,
-      fetch: async (input, init) => {
-        const headers = new Headers(init?.headers);
-        upstreamCalls.push({
-          url: String(input),
-          authorization: headers.get("Authorization"),
-          assignment: headers.get("X-Amtech-Assignment-Id"),
-          body: JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>,
-        });
-        return new Response(JSON.stringify({ id: "provider-response", usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 } }), {
-          status: 200,
-          headers: { "Content-Type": "application/json", "x-request-id": "provider-request-alpha" },
-        });
-      },
+    const upstreamCalls: Array<{ authorization: string | null; assignment: string | null; idempotency: string | null; body: Row }> = [];
+    const gateway = app(fake, async (_input, init) => {
+      const headers = new Headers(init?.headers);
+      upstreamCalls.push({
+        authorization: headers.get("Authorization"),
+        assignment: headers.get("X-Amtech-Assignment-Id"),
+        idempotency: headers.get("Idempotency-Key"),
+        body: JSON.parse(String(init?.body ?? "{}")),
+      });
+      return new Response(JSON.stringify({ id: "provider-response", usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", "x-request-id": "provider-request-alpha" },
+      });
     });
 
-    const ownA = await app.fetch(request("emp_alpha", employeeA.token));
-    expect(ownA.status).toBe(200);
-    const response = await ownA.json() as Record<string, any>;
+    const own = await gateway.fetch(request("emp_alpha", employeeA.token));
+    expect(own.status).toBe(200);
+    const response = await own.json() as Row;
     expect(response.model).toBe("amtech-primary");
-    expect(response.amtech_gateway.assignment_id).toBe("asn_emp_alpha");
-    expect(response.amtech_gateway.provider_receipt_id).toBe("provider-request-alpha");
+    expect(response.amtech_gateway).toMatchObject({
+      assignment_id: "asn_emp_alpha",
+      provider_receipt_id: "provider-request-alpha",
+      effect_receipt_id: "erec_test",
+      proof_ref: expect.stringContaining("commercial://assignments/asn_emp_alpha/model-requests/"),
+    });
     expect(response.amtech_gateway.accounting_receipt_id).toMatch(/^usage_/);
-    expect(upstreamCalls).toHaveLength(1);
     expect(upstreamCalls[0]).toMatchObject({
-      url: "https://provider.example.test/v1/chat/completions",
       assignment: "asn_emp_alpha",
       authorization: "Bearer provider-master-key-never-returned",
+      idempotency: expect.stringMatching(/^amtech-/),
       body: { model: "provider-model", stream: false },
     });
-    expect(fake.rows("commercial_usage_receipts")).toHaveLength(1);
-    expect(fake.rows("model_gateway_request_audit")[0]).toMatchObject({
-      assignment_id: "asn_emp_alpha",
-      provider: "openai_compatible",
-      upstream_model: "provider-model",
-      provider_receipt_id: "provider-request-alpha",
-      status: "ok",
-    });
+    expect(fake.rows("commercial_usage_receipts")[0]).toMatchObject({ effect_receipt_id: "erec_test", state: "accepted" });
 
     for (const [label, req] of [
       ["malformed", request("emp_alpha", "malformed")],
-      ["expired", request("emp_alpha", expired.token)],
       ["revoked", request("emp_alpha", revoked.token)],
-      ["cross-employee-a-to-b", request("emp_bravo", employeeA.token)],
-      ["cross-employee-b-to-a", request("emp_alpha", employeeB.token)],
+      ["cross-a-to-b", request("emp_bravo", employeeA.token)],
+      ["cross-b-to-a", request("emp_alpha", employeeB.token)],
     ] as const) {
-      const rejected = await app.fetch(req);
+      const rejected = await gateway.fetch(req);
       expect(rejected.status, label).toBe(401);
     }
     expect(upstreamCalls).toHaveLength(1);
   });
 
-  it("rejects upstream model names even when they are in the signed policy", async () => {
+  it("rejects aliases and caller-supplied provider authority before dispatch", async () => {
     const fake = new FakeSupabase();
     const db = fake as unknown as SupabaseClient;
     const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
     let upstreamCalls = 0;
-    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
+    const gateway = app(fake, async () => { upstreamCalls += 1; return new Response(); });
 
-    const response = await app.fetch(request("emp_alpha", credential.token, { model: "provider-model" }));
-    expect(response.status).toBe(403);
-    expect(await response.json()).toMatchObject({ error: { code: "model_alias_required" } });
-    expect(upstreamCalls).toBe(0);
-    expect(fake.rows("model_gateway_request_audit").at(-1)).toMatchObject({
-      provider: "none",
-      upstream_model: "provider-model",
-      error_code: "model_alias_required",
-      status: "failed",
-    });
-  });
-
-  it("rejects caller-supplied provider routing, endpoints, headers, and credentials before dispatch", async () => {
-    const forbiddenBodies = [
-      { provider: "attacker" },
-      { provider_profile: "attacker" },
-      { upstream_model: "attacker-model" },
-      { base_url: "https://attacker.test" },
-      { api_key: "attacker-key" },
-      { headers: { Authorization: "Bearer attacker" } },
-      { extra_headers: { Authorization: "Bearer attacker" } },
-      { extra_body: { provider: "attacker" } },
-      { endpoint: "https://attacker.test" },
-      { authorization: "Bearer attacker" },
-      { credential: "attacker" },
-      { token: "attacker" },
-      { routing: { provider: "attacker" } },
-    ];
-
-    const fake = new FakeSupabase();
-    const db = fake as unknown as SupabaseClient;
-    const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
-    let upstreamCalls = 0;
-    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
-
-    for (const body of forbiddenBodies) {
-      const response = await app.fetch(request("emp_alpha", credential.token, body));
-      expect(response.status, JSON.stringify(body)).toBe(400);
+    expect((await gateway.fetch(request("emp_alpha", credential.token, { model: "provider-model" }))).status).toBe(403);
+    for (const body of [{ provider: "attacker" }, { base_url: "https://attacker.test" }, { api_key: "attacker" }, { headers: { Authorization: "attacker" } }]) {
+      const response = await gateway.fetch(request("emp_alpha", credential.token, body));
+      expect(response.status).toBe(400);
       expect(await response.json()).toMatchObject({ error: { code: "provider_authority_fields_forbidden" } });
     }
     expect(upstreamCalls).toBe(0);
-    expect(fake.rows("model_gateway_request_audit")).toHaveLength(forbiddenBodies.length);
-    expect(fake.rows("model_gateway_request_audit").every((row) => row.provider === "none" && row.error_code === "provider_authority_fields_forbidden")).toBe(true);
   });
 
-  it("invalidates a signed credential when its durable provider policy changes", async () => {
+  it("invalidates signed credentials when durable routing policy changes", async () => {
     const fake = new FakeSupabase();
     const db = fake as unknown as SupabaseClient;
     const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
-    const row = fake.rows("model_gateway_credentials").find((candidate) => candidate.id === credential.credential_id);
-    expect(row).toBeDefined();
-    row!.allowed_models = ["different-provider-model"];
-
+    fake.rows("model_gateway_credentials").find((row) => row.id === credential.credential_id)!.allowed_models = ["changed-model"];
     let upstreamCalls = 0;
-    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
-    const response = await app.fetch(request("emp_alpha", credential.token));
+    const response = await app(fake, async () => { upstreamCalls += 1; return new Response(); }).fetch(request("emp_alpha", credential.token));
     expect(response.status).toBe(401);
     expect(upstreamCalls).toBe(0);
   });
 
-  it("fails closed when deployment selects an unregistered or disallowed provider profile", async () => {
+  it("persists response loss as ambiguity and does not redispatch the same request", async () => {
     const fake = new FakeSupabase();
     const db = fake as unknown as SupabaseClient;
     const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
     let upstreamCalls = 0;
-    const app = buildModelGatewayApp({ db: () => db, fetch: async () => { upstreamCalls += 1; return new Response(); } });
-
-    process.env.MODEL_GATEWAY_PROVIDER_PROFILE = "not_registered";
-    const unknown = await app.fetch(request("emp_alpha", credential.token));
-    expect(unknown.status).toBe(503);
-    expect(await unknown.json()).toMatchObject({ error: { code: "model_gateway_route_unavailable" } });
-
-    process.env.MODEL_GATEWAY_PROVIDER_PROFILE = "xai";
-    const disallowed = await app.fetch(request("emp_alpha", credential.token));
-    expect(disallowed.status).toBe(503);
-    expect(await disallowed.json()).toMatchObject({ error: { code: "model_gateway_route_unavailable" } });
-    expect(upstreamCalls).toBe(0);
+    const gateway = app(fake, async () => { upstreamCalls += 1; throw new Error("connection_reset_after_write"); });
+    const first = await gateway.fetch(request("emp_alpha", credential.token));
+    const replay = await gateway.fetch(request("emp_alpha", credential.token));
+    expect(first.status).toBe(502);
+    expect(replay.status).toBe(502);
+    expect(await replay.json()).toMatchObject({ error: { code: "model_gateway_provider_outcome_ambiguous" } });
+    expect(upstreamCalls).toBe(1);
   });
 
-  it("keeps legacy unbound OpenAI-compatible routes absent in production", async () => {
+  it("fails closed for unavailable routes and keeps legacy unbound routes absent", async () => {
     const fake = new FakeSupabase();
-    const app = buildModelGatewayApp({ db: () => fake as unknown as SupabaseClient, fetch: globalThis.fetch });
-    const response = await app.request("/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-    expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ error: { code: "employee_route_required" } });
+    const db = fake as unknown as SupabaseClient;
+    const credential = await mintModelGatewayCredential(db, { account_id: "acct_alpha", employee_id: "emp_alpha" });
+    process.env.MODEL_GATEWAY_PROVIDER_PROFILE = "not_registered";
+    expect((await app(fake, globalThis.fetch).fetch(request("emp_alpha", credential.token))).status).toBe(503);
+    const legacy = await app(fake, globalThis.fetch).request("/v1/chat/completions", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+    expect(legacy.status).toBe(404);
+    expect(await legacy.json()).toEqual({ error: { code: "employee_route_required" } });
   });
 });

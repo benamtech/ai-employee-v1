@@ -1,0 +1,40 @@
+name: WS08 Platform Context Patch
+
+on:
+  push:
+    branches: [agent/ws08-ws09-production]
+    paths: ['.github/workflows/ws08-platform-context-patch.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Bind platform session and lease into durable command
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('mvp-build/apps/manager/src/lib/platform-admin-runtime.ts')
+          s=p.read_text()
+          old='''    assignment_id: assignmentId,\n    reason: auth.actor.support_reason,'''
+          new='''    assignment_id: assignmentId,\n    platform_session_id: auth.actor.platform_session_id,\n    support_lease_id: auth.actor.support_lease_id,\n    reason: auth.actor.support_reason,'''
+          if s.count(old) != 1:
+              raise SystemExit(f'expected one command payload anchor, found {s.count(old)}')
+          p.write_text(s.replace(old,new))
+          PY
+          git diff --check
+          grep -n 'platform_session_id: auth.actor.platform_session_id' mvp-build/apps/manager/src/lib/platform-admin-runtime.ts
+          grep -n 'support_lease_id: auth.actor.support_lease_id' mvp-build/apps/manager/src/lib/platform-admin-runtime.ts
+      - name: Commit exact source correction
+        run: |
+          git config user.name amtech-source-bot
+          git config user.email actions@users.noreply.github.com
+          git add mvp-build/apps/manager/src/lib/platform-admin-runtime.ts
+          git commit -m 'fix(admin): bind durable platform session and lease context'
+          git push origin HEAD:agent/ws08-ws09-production

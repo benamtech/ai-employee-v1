@@ -1,0 +1,26 @@
+{
+  "schema": "amtech.ui-conformance-cases.v1",
+  "coverage": "exhaustive declared consequential transition set",
+  "case_shape": ["S", "A", "O_positive", "O_negative", "D", "E"],
+  "cases": [
+    {"id":"AUTH-01","S":{"snapshot":"absent","authority":"unknown"},"A":["render","send_message"],"O_positive":["validating_state","send_disabled"],"O_negative":["live","message_dispatched"],"D":"no command row","E":"unit"},
+    {"id":"AUTH-02","S":{"snapshot":"valid","authority":"current"},"A":["install_snapshot"],"O_positive":["live","scope_bound"],"O_negative":["cross_assignment_data"],"D":"snapshot account+employee+assignment+authority+cursor","E":"unit"},
+    {"id":"AUTH-03","S":{"snapshot":"valid","authority":"stale"},"A":["approval_update"],"O_positive":["offline_or_blocked"],"O_negative":["approval_action_available","success"],"D":"current assignment authority version","E":"unit"},
+    {"id":"AUTH-04","S":{"snapshot":"valid","frame_scope":"different_assignment"},"A":["work_event"],"O_positive":["projection_denied"],"O_negative":["event_rendered"],"D":"unchanged work-event collection","E":"unit"},
+    {"id":"APPROVAL-01","S":{"approval":"pending","authority":"current"},"A":["approve"],"O_positive":["submitting_exact_gate"],"O_negative":["optimistic_effect_success"],"D":"approval resolution receipt","E":"unit"},
+    {"id":"APPROVAL-02","S":{"approval":"expired"},"A":["approve"],"O_positive":["expired_or_rejected"],"O_negative":["effect_dispatched"],"D":"approval remains terminal nonaccepted","E":"integration"},
+    {"id":"APPROVAL-03","S":{"approval":"pending","resource_revision":"changed"},"A":["approve"],"O_positive":["stale_revision_denial"],"O_negative":["effect_dispatched"],"D":"new approval required","E":"integration"},
+    {"id":"EFFECT-01","S":{"effect":"not_started"},"A":["approved_action"],"O_positive":["committing_or_working"],"O_negative":["completed_without_receipt"],"D":"command/effect identity","E":"integration"},
+    {"id":"EFFECT-02","S":{"effect":"accepted","receipt":"durable"},"A":["reconnect"],"O_positive":["completed_from_durable_truth"],"O_negative":["redispatch","new_intent"],"D":"same effect and receipt IDs","E":"integration"},
+    {"id":"AMBIGUITY-01","S":{"effect":"ambiguous","terminal_proof":"absent"},"A":["render","retry"],"O_positive":["blocked_reconciling","retry_disabled"],"O_negative":["failed","completed","redispatch"],"D":"ambiguous durable record","E":"unit"},
+    {"id":"AMBIGUITY-02","S":{"effect":"ambiguous","accepted_proof":"present"},"A":["reconcile"],"O_positive":["accepted","proof_available"],"O_negative":["new_effect"],"D":"original effect receipt","E":"integration"},
+    {"id":"AMBIGUITY-03","S":{"effect":"ambiguous","nonacceptance_proof":"present"},"A":["reconcile"],"O_positive":["retry_permission_explicit"],"O_negative":["automatic_retry"],"D":"reservation released against original effect","E":"integration"},
+    {"id":"RETRY-01","S":{"intent":"accepted","response":"lost"},"A":["reconnect"],"O_positive":["fresh_snapshot"],"O_negative":["intent_replayed"],"D":"single intent/command record","E":"unit"},
+    {"id":"RECEIPT-01","S":{"effect":"accepted","accounting_receipt":"missing"},"A":["render_completion"],"O_positive":["degraded_or_reconciling"],"O_negative":["commercial_success"],"D":"effect receipt without accounting receipt","E":"unit"},
+    {"id":"PROOF-01","S":{"effect":"accepted","proof_projection":"pending"},"A":["render"],"O_positive":["accepted_but_proof_pending"],"O_negative":["republish_action"],"D":"accepted effect identity","E":"unit"},
+    {"id":"PROOF-02","S":{"effect":"accepted","proof_projection":"missing_after_restart"},"A":["repair"],"O_positive":["same_effect_proof_refound"],"O_negative":["duplicate_effect"],"D":"proof references original effect","E":"integration"},
+    {"id":"ISOLATION-01","S":{"owner":"account_A","frame":"account_B"},"A":["snapshot"],"O_positive":["scope_denied"],"O_negative":["account_B_content"],"D":"no projection install","E":"unit"},
+    {"id":"ISOLATION-02","S":{"employee":"employee_A","frame":"employee_B"},"A":["stream_event"],"O_positive":["scope_denied"],"O_negative":["employee_B_content"],"D":"unchanged cursor and resources","E":"unit"},
+    {"id":"EXPERIMENT-01","S":{"truth":"same","authority":"same","actions":"same"},"A":["change_density_policy"],"O_positive":["presentation_changes_only"],"O_negative":["action_set_change","authority_change"],"D":"same payload and proof references","E":"fixture_demonstration"}
+  ]
+}

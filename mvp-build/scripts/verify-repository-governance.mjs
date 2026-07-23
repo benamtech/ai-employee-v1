@@ -1,144 +1,386 @@
 #!/usr/bin/env node
-import { access, readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { access, readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
+import { inflateSync } from "node:zlib";
 
-// Validate durable structure only. Evidence values such as SHAs, run IDs, counts,
-// and prose status belong in the resolution ledger, not in validator source.
 const root = process.cwd();
-const program = "production-readiness-program";
-const historicalPlans = "second-half-plan";
 const passes = [];
 const failures = [];
 const record = (id, ok, detail) => (ok ? passes : failures).push({ id, detail });
-const read = (path) => readFile(resolve(root, path), "utf8");
+const pathOf = (path) => resolve(root, path);
 const exists = async (path) => {
-  try { await access(resolve(root, path)); return true; } catch { return false; }
+  try { await access(pathOf(path)); return true; } catch { return false; }
 };
-const parse = (name, text) => {
-  try { return JSON.parse(text); }
-  catch (error) { failures.push({ id: `JSON-${name}`, detail: String(error) }); return {}; }
-};
+const read = (path) => readFile(pathOf(path), "utf8");
 const nonempty = (value) => typeof value === "string" && value.trim().length > 0;
-const sha = (value) => typeof value === "string" && /^[a-f0-9]{40}$/i.test(value);
 const unique = (values) => new Set(values).size === values.length;
-const sameSet = (a, b) => a.size === b.size && [...a].every((value) => b.has(value));
+const candidateId = (value) => typeof value === "string" && /^[A-D][0-9]{2}$/.test(value);
+const sorted = (values) => [...values].sort();
+
+function parseJson(name, text) {
+  try { return JSON.parse(text); }
+  catch (error) {
+    failures.push({ id: `JSON-${name}`, detail: String(error) });
+    return {};
+  }
+}
+
+function decodeJson(name, text) {
+  const wrapper = parseJson(name, text);
+  if (wrapper?.encoding !== "zlib+base64+json") return wrapper;
+  try {
+    const raw = inflateSync(Buffer.from(wrapper.payload, "base64"));
+    const digest = createHash("sha256").update(raw).digest("hex");
+    if (digest !== wrapper.sha256 || raw.length !== wrapper.bytes) {
+      throw new Error(`compressed payload mismatch digest=${digest} bytes=${raw.length}`);
+    }
+    return JSON.parse(raw.toString("utf8"));
+  } catch (error) {
+    failures.push({ id: `DECODE-${name}`, detail: String(error) });
+    return {};
+  }
+}
 
 const required = [
-  "../identity.md", "../README.md", "../AGENTS.md", "../CLAUDE.md", "../CONTRIBUTING.md", "../CODEGRAPH.md",
-  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "STANDARD.md", "memory/MEMORY.md", `${historicalPlans}/README.md`,
-  `${program}/README.md`, `${program}/04-dependency-ordered-production-plan.md`, `${program}/07-verification-and-handoff-matrix.md`,
-  `${program}/08-production-issue-vector.json`, `${program}/09-workstream-execution-map.md`, `${program}/10-test-suite-disposition.md`,
-  `${program}/13-resolution-ledger.json`, `${program}/17-ws03-p0-fisher-frontier.md`, `${program}/18-ws03-p0-task-contract.json`,
-  "docs/architecture/README.md", "docs/architecture/17-hermes-upstream-review-protocol.md", "validation/hermes-upstream-baseline.json",
-  "../.github/workflows/phase-2-remediation-plan.yml", "../.github/workflows/main-integration-gates.yml", "../.github/pull_request_template.md",
+  "../identity.md", "../AGENTS.md", "../CLAUDE.md", "../CONTRIBUTING.md", "../CODEGRAPH.md",
+  "AGENTS.md", "CLAUDE.md", "CODEGRAPH.md", "README.md", "STANDARD.md", "STANDARD-V0.2-AMENDMENT-001.md",
+  "decision/README.md", "decision/protocol-v1.json", "decision/trace007/compute.py",
+  "decision/trace007/task_state.json", "decision/trace007/candidate_population.json",
+  "decision/trace007/candidate_scores.json", "decision/trace007/candidate_graph.json",
+  "decision/trace007/software_invariant_hypergraph.json", "decision/trace007/selection_comparison.json",
+  "decision/trace007/selected_exploration.json", "decision/trace007/selected_implementation.json",
+  "decision/trace007/implementation_ablation.json", "decision/trace007/counterexample_matrix.json",
+  "decision/trace007/implementation_contract.json", "decision/trace007/verification_plan.json",
+  "decision/trace007/decision_record.md", "production-readiness-program/README.md",
+  "production-readiness-program/04-dependency-ordered-production-plan.md",
+  "production-readiness-program/07-verification-and-handoff-matrix.md",
+  "production-readiness-program/08-production-issue-vector.json",
+  "production-readiness-program/09-workstream-execution-map.md",
+  "production-readiness-program/10-test-suite-disposition.md",
+  "production-readiness-program/13-resolution-ledger.json",
+  "production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+  "docs/architecture/README.md", "memory/MEMORY.md", "second-half-plan/README.md",
+  "packages/db/migration-ledger.mjs", "package.json",
+  "../.github/workflows/ws07-ws08-commercial-effect.yml", "../.github/workflows/main-integration-gates.yml"
 ];
 const missing = [];
 for (const path of required) if (!(await exists(path))) missing.push(path);
-record("GOV-01", missing.length === 0, `required files exist; missing: ${missing.join(", ") || "none"}`);
+record("GOV-01", missing.length === 0,
+  `required authority and trace files exist; missing=${missing.join(",") || "none"}`);
 
-const [
-  rootReadme, rootCodegraph, scopedCodegraph, contributing, rootAgents, scopedAgents,
-  standard, historicalIndex, activePlan, roadmap, workstreamsDoc, testsDoc, verificationDoc,
-  memoryIndex, packageText, issuesText, ledgerText, ws03Text, governanceWorkflow,
-  mainWorkflow, prTemplate, hermesProtocol, hermesBaselineText,
-] = await Promise.all([
-  read("../README.md"), read("../CODEGRAPH.md"), read("CODEGRAPH.md"), read("../CONTRIBUTING.md"),
-  read("../AGENTS.md"), read("AGENTS.md"), read("STANDARD.md"), read(`${historicalPlans}/README.md`),
-  read(`${program}/README.md`), read(`${program}/04-dependency-ordered-production-plan.md`),
-  read(`${program}/09-workstream-execution-map.md`), read(`${program}/10-test-suite-disposition.md`),
-  read(`${program}/07-verification-and-handoff-matrix.md`), read("memory/MEMORY.md"), read("package.json"),
-  read(`${program}/08-production-issue-vector.json`), read(`${program}/13-resolution-ledger.json`),
-  read(`${program}/18-ws03-p0-task-contract.json`), read("../.github/workflows/phase-2-remediation-plan.yml"),
-  read("../.github/workflows/main-integration-gates.yml"), read("../.github/pull_request_template.md"),
-  read("docs/architecture/17-hermes-upstream-review-protocol.md"), read("validation/hermes-upstream-baseline.json"),
-]);
-const pkg = parse("package.json", packageText);
-const issues = parse("issue-vector", issuesText);
-const ledger = parse("resolution-ledger", ledgerText);
-const ws03 = parse("ws03-contract", ws03Text);
-const hermes = parse("hermes-baseline", hermesBaselineText);
+const texts = Object.fromEntries(await Promise.all(required
+  .filter((path) => path.endsWith(".md") || path.endsWith(".json") || path.endsWith(".mjs") || path.endsWith(".py") || path.endsWith(".yml"))
+  .map(async (path) => [path, await read(path)])));
 
-record("GOV-02", standard.includes("Status: **ratified and effective**"), "ratified Standard remains canonical");
+const protocol = parseJson("protocol", texts["decision/protocol-v1.json"]);
+const candidateGraph = parseJson("candidate-graph", texts["decision/trace007/candidate_graph.json"]);
+const softwareGraph = parseJson("software-graph", texts["decision/trace007/software_invariant_hypergraph.json"]);
+const comparison = parseJson("selection-comparison", texts["decision/trace007/selection_comparison.json"]);
+const exploration = parseJson("selected-exploration", texts["decision/trace007/selected_exploration.json"]);
+const implementation = parseJson("selected-implementation", texts["decision/trace007/selected_implementation.json"]);
+const ablation = parseJson("implementation-ablation", texts["decision/trace007/implementation_ablation.json"]);
+const verification = parseJson("verification-plan", texts["decision/trace007/verification_plan.json"]);
+const issueVector = parseJson("issue-vector", texts["production-readiness-program/08-production-issue-vector.json"]);
+const ledger = parseJson("resolution-ledger", texts["production-readiness-program/13-resolution-ledger.json"]);
+const pkg = parseJson("package", texts["package.json"]);
+const population = decodeJson("candidate-population", texts["decision/trace007/candidate_population.json"]);
+const scores = decodeJson("candidate-scores", texts["decision/trace007/candidate_scores.json"]);
+
+record("GOV-02",
+  texts["STANDARD.md"].includes("ratified and effective")
+  && texts["STANDARD-V0.2-AMENDMENT-001.md"].includes("ratified additive amendment and effective"),
+  "ratified Standard and additive amendment remain canonical");
+
+const rootClaudeLines = texts["../CLAUDE.md"].trim().split(/\r?\n/).length;
+const scopedClaudeLines = texts["CLAUDE.md"].trim().split(/\r?\n/).length;
 record("GOV-03",
-  activePlan.includes("Status: **active and canonical**")
-    && historicalIndex.includes("historical and non-canonical")
-    && !(await exists(`${historicalPlans}/2026-07-19-ratified-standard-production-program`)),
-  "one root-level active program; second-half plans are historical");
-record("GOV-04",
-  rootReadme.includes("mvp-build/production-readiness-program")
-    && rootCodegraph.includes("mvp-build/production-readiness-program")
-    && scopedCodegraph.includes("production-readiness-program")
-    && activePlan.includes("New work starts on reviewed task branches from current `main`")
-    && memoryIndex.includes("Index — newest first"),
-  "entrypoints route to the root-level active program and current-main task branches");
-record("GOV-05", contributing.includes("Six-point rubric") && rootAgents.includes("Required contributor gate") && scopedAgents.includes("Hermes upstream review"), "contributor gates remain routed");
+  texts["../CLAUDE.md"].includes("AGENTS.md") && texts["CLAUDE.md"].includes("AGENTS.md")
+  && rootClaudeLines <= 20 && scopedClaudeLines <= 20,
+  `CLAUDE compatibility routers remain short; root=${rootClaudeLines} scoped=${scopedClaudeLines}`);
+
+const statusMirrors = ["../AGENTS.md", "../CODEGRAPH.md", "AGENTS.md", "README.md"];
+const duplicatedStatus = statusMirrors.flatMap((path) => {
+  const hits = [];
+  if (/PR #\d+/i.test(texts[path])) hits.push(`${path}:PR`);
+  if (/Source migration head/i.test(texts[path])) hits.push(`${path}:migration`);
+  if (/Current main baseline/i.test(texts[path])) hits.push(`${path}:baseline`);
+  return hits;
+});
+record("GOV-04", duplicatedStatus.length === 0,
+  `exact product status is owned by scoped CODEGRAPH only; duplicates=${duplicatedStatus.join(",") || "none"}`);
+
+const migrationFiles = await readdir(pathOf("packages/db/migrations"));
+const migrationNumbers = migrationFiles
+  .map((name) => /^(\d{4})[a-z]?_.*\.sql$/.exec(name))
+  .filter(Boolean)
+  .map((match) => Number(match[1]));
+const sourceHead = Math.max(...migrationNumbers);
+const sourceHeadLabel = String(sourceHead).padStart(4, "0");
+const ledgerHeadMatch = /const APPLIED_HEAD\s*=\s*(\d+)/.exec(texts["packages/db/migration-ledger.mjs"]);
+record("GOV-05",
+  Number(ledgerHeadMatch?.[1]) === sourceHead
+  && texts["CODEGRAPH.md"].includes(`Source migration head: \`${sourceHeadLabel}\``),
+  `migration status is derived from source; head=${sourceHeadLabel}`);
+
+record("GOV-06",
+  protocol.schema === "amtech.computed-decision.v1"
+  && protocol.protocol_revision >= 3
+  && protocol.topology_contract?.candidate_graph
+  && protocol.topology_contract?.software_invariant_hypergraph
+  && protocol.baseline_contracts?.trace007
+  && protocol.feasible_domain?.mandatory_coverage === "constraint_not_objective_bonus"
+  && protocol.tiers?.T3_production_cross_workstream?.minimum_random_feasible_baselines >= 1000
+  && protocol.tiers?.T3_production_cross_workstream?.minimum_search_restarts >= 32
+  && protocol.tiers?.T3_production_cross_workstream?.minimum_weight_sensitivity_runs >= 32,
+  "decision protocol separates topologies, declares baseline semantics, equalizes feasibility, and requires sensitivity");
+
+const softwareVertices = new Set(softwareGraph.vertices ?? []);
+const softwareEdges = softwareGraph.hyperedges ?? [];
+const invalidSoftwareMembers = softwareEdges.flatMap((edge) =>
+  (edge.members ?? []).filter((member) => !softwareVertices.has(member)));
+record("GOV-07",
+  candidateGraph.semantic_boundary?.includes("candidate trajectories")
+  && candidateGraph.forbidden_uses?.includes("software invariant completion")
+  && softwareVertices.size > 0
+  && [...softwareVertices].every((vertex) => !candidateId(vertex))
+  && invalidSoftwareMembers.length === 0
+  && softwareGraph.coverage_definitions?.touch
+  && softwareGraph.coverage_definitions?.fractional
+  && softwareGraph.coverage_definitions?.complete
+  && softwareGraph.coverage_definitions?.proved,
+  `candidate and software topology semantics are distinct; invalid_members=${invalidSoftwareMembers.join(",") || "none"}`);
+
+record("GOV-08",
+  comparison.feasible_domain?.rule?.includes("constraint, not an objective reward")
+  && comparison.objectives?.no_graph
+  && comparison.objectives?.no_diversity
+  && comparison.objectives?.evidence_baseline?.contract === "../protocol-v1.json:baseline_contracts.trace007"
+  && comparison.classifications?.candidate_graph_terms === "descriptive"
+  && comparison.classifications?.software_invariant_graph_terms === "descriptive"
+  && comparison.classifications?.causal_improvement === "unestablished"
+  && comparison.search?.random_feasible_baselines >= 1000,
+  "selection controls share one feasible domain, use the declared baseline contract, and make no causal claim");
+
+record("GOV-09",
+  ablation.status === "unestablished"
+  && Object.values(ablation.required_independent_outcomes ?? {}).every((value) => value === null)
+  && ablation.current_findings?.causal_improvement === "unestablished",
+  "implementation ablation remains explicitly unestablished");
+
+const softwareEdgeIds = softwareEdges.map((edge) => edge.id);
+const plannedEdgeIds = Object.keys(verification.software_edge_tests ?? {});
+record("GOV-10",
+  unique(softwareEdgeIds) && unique(plannedEdgeIds)
+  && softwareEdgeIds.length > 0
+  && softwareEdgeIds.every((id) =>
+    Array.isArray(verification.software_edge_tests?.[id])
+    && verification.software_edge_tests[id].length > 0)
+  && plannedEdgeIds.every((id) => softwareEdgeIds.includes(id)),
+  "every software hyperedge has a complete behavioral proof plan");
+
+const candidates = population.candidates ?? [];
+const candidateIds = candidates.map((candidate) => candidate.id);
+record("GOV-11",
+  candidateIds.length >= protocol.tiers?.T3_production_cross_workstream?.minimum_candidates
+  && unique(candidateIds)
+  && candidateIds.every(candidateId)
+  && (exploration.seed_selected_ids ?? []).every((id) => candidateIds.includes(id))
+  && (implementation.selected_ids ?? []).every((id) => candidateIds.includes(id))
+  && implementation.mathematical_causality === "unestablished",
+  "candidate population, feasible seed, and implementation references are structurally valid");
+
+const issueSchema = issueVector.schema ?? [];
+const issueRows = Array.isArray(issueVector.issues) ? issueVector.issues : [];
+const issueIdIndex = issueSchema.indexOf("id");
+const issueIds = issueRows.map((row) => row?.[issueIdIndex]);
+const knownIssues = new Set(issueIds);
+const resolutions = Array.isArray(ledger.issue_resolutions) ? ledger.issue_resolutions : [];
+const remaining = Array.isArray(ledger.remaining_issue_ids) ? ledger.remaining_issue_ids : [];
+record("GOV-12",
+  issueIdIndex >= 0
+  && issueRows.every((row) => Array.isArray(row) && row.length === issueSchema.length)
+  && unique(issueIds)
+  && resolutions.every((entry) =>
+    knownIssues.has(entry?.id) && nonempty(entry?.state) && nonempty(entry?.evidence))
+  && unique(resolutions.map((entry) => entry.id))
+  && unique(remaining)
+  && remaining.every((id) => knownIssues.has(id))
+  && ledger.production_ready === false,
+  "issue and resolution ledgers satisfy schema/reference invariants without pinned counts or IDs");
+
+const computeText = texts["decision/trace007/compute.py"];
+record("GOV-13",
+  computeText.includes('load("candidate_graph.json")')
+  && computeText.includes('load("software_invariant_hypergraph.json")')
+  && computeText.includes('load("implementation_ablation.json")')
+  && computeText.includes("validate_baseline_contract")
+  && computeText.includes("unclassified_baseline_dimensions")
+  && computeText.includes("full_objective_difference")
+  && computeText.includes("independent_proof_yield_difference")
+  && computeText.includes("random_feasible_baselines")
+  && computeText.includes("weight_sensitivity_runs")
+  && !computeText.includes("POSITIVE_ALIASES")
+  && !computeText.includes("NEGATIVE_ALIASES")
+  && !computeText.includes('"C_Omega"')
+  && !computeText.includes('"C_H"'),
+  "deterministic verifier uses explicit baseline semantics, corrected topology, controls, and sensitivity");
+
+const forbiddenActiveClaims = [
+  /graph\/diversity classification\s*=\s*causal/i,
+  /graph\/diversity terms are causal/i,
+  /C_H\s*=|C_Ω\s*=/,
+  /120 feasible random/i
+];
+const claimDocs = [
+  "CODEGRAPH.md", "README.md", "AGENTS.md", "decision/README.md",
+  "decision/trace007/decision_record.md", "production-readiness-program/README.md",
+  "production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+  "production-readiness-program/10-test-suite-disposition.md"
+];
+const staleClaims = claimDocs.flatMap((path) => forbiddenActiveClaims
+  .filter((pattern) => pattern.test(texts[path]))
+  .map((pattern) => `${path}:${pattern}`));
+record("GOV-14", staleClaims.length === 0,
+  `active documents contain no invalid causal/coverage claims; hits=${staleClaims.join(",") || "none"}`);
 
 const scripts = pkg.scripts ?? {};
-const requiredScripts = ["repo:rubric", "repo:verify:quick", "repo:verify:full", "test:repo-governance", "test:unit", "test:integration", "test:production-boundary", "build", "hermes:upstream:check"];
-record("GOV-06", requiredScripts.every((name) => nonempty(scripts[name])), "required scripts exist");
-record("GOV-07",
-  governanceWorkflow.includes("npm run test:repo-governance") && governanceWorkflow.includes("npm run typecheck") && governanceWorkflow.includes("npm run lint")
-    && !governanceWorkflow.includes("npm run test:unit") && !governanceWorkflow.includes("npm run build")
-    && mainWorkflow.includes("npm run repo:verify:full") && mainWorkflow.includes("npm run test:unit")
-    && mainWorkflow.includes("npm run test:production-boundary") && mainWorkflow.includes("npm run build"),
-  "governance and merge workflows have distinct responsibilities");
-record("GOV-08",
-  prTemplate.includes("## Evidence boundary") && hermesProtocol.includes("upstream is intelligence, not authority")
-    && hermes.upstream_repository === "NousResearch/hermes-agent" && sha(hermes.reviewed_main_sha)
-    && sha(hermes.watched_paths?.["hermes_cli/__init__.py"]) && sha(hermes.watched_paths?.["web/src/App.tsx"]),
-  "PR and Hermes evidence contracts remain intact");
+const requiredScripts = [
+  "repo:rubric", "repo:verify:quick", "repo:verify:full", "test:repo-governance",
+  "test:unit", "test:integration", "test:production-boundary", "test:ws07-ws08",
+  "db:verify:commercial-effect-migrations", "build"
+];
+record("GOV-15",
+  requiredScripts.every((name) => nonempty(scripts[name]))
+  && String(scripts["repo:verify:quick"]).includes("test:repo-governance"),
+  "required contributor, trace, test, database, and build scripts remain routed");
 
-const expectedSchema = ["id","workstream","priority","production_blocking","evidence_confidence","user_impact","authority_safety_risk","dependency_centrality","blast_radius","reversibility_risk","maintainability_drag","production_readiness_gap","title","affected_boundaries","evidence"];
-const rows = Array.isArray(issues.issues) ? issues.issues : [];
-const ids = rows.map((row) => row?.[0]);
-const rowValid = rows.every((row) => Array.isArray(row) && row.length === expectedSchema.length
-  && /^ISS-\d{3}$/.test(row[0]) && /^WS-0[1-9]$/.test(row[1]) && ["P0","P1","P2"].includes(row[2])
-  && [3,4,5,6,7,8,9,10,11].every((i) => typeof row[i] === "number" && row[i] >= 0 && row[i] <= 1)
-  && nonempty(row[12]) && Array.isArray(row[13]) && Array.isArray(row[14]));
-record("GOV-09", issues.repository === "benamtech/ai-employee-v1" && JSON.stringify(issues.schema) === JSON.stringify(expectedSchema)
-  && rows.length === 38 && unique(ids) && new Set(rows.map((row) => row[1])).size === 9 && rowValid
-  && sha(issues.baseline?.merge_sha) && sha(issues.baseline?.cutover_head), "immutable issue vector is valid");
+record("GOV-16",
+  texts["../.github/workflows/ws07-ws08-commercial-effect.yml"].includes("python decision/trace007/compute.py")
+  && texts["../.github/workflows/ws07-ws08-commercial-effect.yml"].includes("npm run test:repo-governance")
+  && texts["../.github/workflows/main-integration-gates.yml"].includes("npm run repo:verify:full"),
+  "focused and main workflows execute the structural governance and trace verifier");
 
-const all = new Set(ids);
-const resolutions = Array.isArray(ledger.issue_resolutions) ? ledger.issue_resolutions : [];
-const resolved = resolutions.map((entry) => entry?.id);
-const remaining = Array.isArray(ledger.remaining_issue_ids) ? ledger.remaining_issue_ids : [];
-const remainingSet = new Set(remaining);
-const overlap = resolved.filter((id) => remainingSet.has(id));
-const evidenceHeads = [ledger.implementation_evidence_head, ledger.ws01_implementation_evidence_head, ledger.ws02_protocol_implementation_evidence_head].filter(Boolean);
-record("GOV-10", ledger.baseline_issue_vector === "08-production-issue-vector.json"
-  && resolutions.every((entry) => all.has(entry?.id) && nonempty(entry?.state) && nonempty(entry?.evidence))
-  && unique(resolved) && unique(remaining) && remaining.every((id) => all.has(id)) && overlap.length === 0
-  && sameSet(new Set([...resolved, ...remaining]), all) && evidenceHeads.every(sha)
-  && ledger.workflow_evidence && Object.values(ledger.workflow_evidence).every(nonempty)
-  && ledger.production_ready === (remaining.length === 0), "resolution ledger partitions every issue exactly once");
+record("GOV-17", !(await exists("decision/trace007/hypergraph.json")),
+  "legacy conflated hypergraph transport is removed");
 
-const controls = Array.isArray(ledger.control_resolutions) ? ledger.control_resolutions : [];
-record("GOV-11", unique(controls.map((entry) => entry?.id)) && controls.every((entry) => nonempty(entry?.id) && nonempty(entry?.state)
-  && (!entry.evidence_head || sha(entry.evidence_head)) && nonempty(entry?.scope) && Array.isArray(entry?.does_not_resolve)
-  && entry.does_not_resolve.every((id) => remainingSet.has(id))), "control claims reference only unresolved issues");
-
-let frontierValid = true;
-for (const frontier of Array.isArray(ledger.prepared_frontiers) ? ledger.prepared_frontiers : []) {
-  if (!nonempty(frontier?.id) || !nonempty(frontier?.state) || !Array.isArray(frontier?.documents)) frontierValid = false;
-  for (const doc of frontier?.documents ?? []) if (!nonempty(doc) || !(await exists(`${program}/${doc}`))) frontierValid = false;
+const scoreDimensions = scores.dimensions ?? [];
+const scoreWeights = scores.weights ?? {};
+const baseline = protocol.baseline_contracts?.trace007 ?? {};
+const roles = baseline.roles ?? {};
+const positiveRequired = roles.positive_required ?? [];
+const positiveOptional = roles.positive_optional ?? [];
+const penaltyRequired = roles.penalty_required ?? [];
+const penaltyOptional = roles.penalty_optional ?? [];
+const excluded = roles.excluded ?? [];
+const declared = [
+  ...positiveRequired,
+  ...positiveOptional,
+  ...penaltyRequired,
+  ...penaltyOptional,
+  ...excluded
+];
+const dimensionSet = new Set(scoreDimensions);
+const optionalSet = new Set([...positiveOptional, ...penaltyOptional]);
+const duplicateBaseline = declared.filter((dimension, index) => declared.indexOf(dimension) !== index);
+const missingRequired = sorted([
+  ...positiveRequired.filter((dimension) => !dimensionSet.has(dimension)),
+  ...penaltyRequired.filter((dimension) => !dimensionSet.has(dimension))
+]);
+const unclassified = sorted(scoreDimensions.filter((dimension) => !declared.includes(dimension)));
+const staleNonoptional = sorted(declared.filter((dimension) => !dimensionSet.has(dimension) && !optionalSet.has(dimension)));
+const semantics = protocol.dimension_semantics ?? {};
+const orientationMismatch = scoreDimensions.filter((dimension) => {
+  const orientation = semantics?.[dimension]?.orientation;
+  const weight = Number(scoreWeights?.[dimension]);
+  return !["maximize", "minimize"].includes(orientation)
+    || !Number.isFinite(weight)
+    || (orientation === "maximize" ? weight < 0 : weight > 0);
+});
+const usedBySide = {
+  positive: [...positiveRequired, ...positiveOptional].filter((dimension) => dimensionSet.has(dimension)),
+  penalty: [...penaltyRequired, ...penaltyOptional].filter((dimension) => dimensionSet.has(dimension))
+};
+const groupProblems = [];
+for (const side of ["positive", "penalty"]) {
+  const groups = baseline.groups?.[side] ?? {};
+  const declaredWeight = Number(baseline[`${side}_group_weight_sum`]);
+  const actualWeight = Object.values(groups).reduce((sum, group) => sum + Number(group.weight), 0);
+  if (!Number.isFinite(declaredWeight) || Math.abs(actualWeight - declaredWeight) > 1e-12) {
+    groupProblems.push(`${side}:weight_sum`);
+  }
+  const counts = new Map();
+  for (const [name, group] of Object.entries(groups)) {
+    const used = (group.dimensions ?? []).filter((dimension) => dimensionSet.has(dimension));
+    if (used.length === 0) groupProblems.push(`${side}:${name}:empty`);
+    for (const dimension of used) counts.set(dimension, (counts.get(dimension) ?? 0) + 1);
+  }
+  for (const dimension of usedBySide[side]) {
+    if ((counts.get(dimension) ?? 0) !== 1) groupProblems.push(`${side}:${dimension}:multiplicity`);
+  }
 }
-record("GOV-12", frontierValid, "prepared frontiers point to real documents");
+record("GOV-18",
+  scoreDimensions.length > 0
+  && JSON.stringify(scoreDimensions) === JSON.stringify(protocol.candidate_dimensions)
+  && duplicateBaseline.length === 0
+  && missingRequired.length === 0
+  && unclassified.length === 0
+  && staleNonoptional.length === 0
+  && orientationMismatch.length === 0
+  && groupProblems.length === 0,
+  `explicit baseline schema valid; duplicate=${sorted(new Set(duplicateBaseline)).join(",") || "none"}; missing_required=${missingRequired.join(",") || "none"}; unclassified=${unclassified.join(",") || "none"}; stale=${staleNonoptional.join(",") || "none"}; orientation=${orientationMismatch.join(",") || "none"}; groups=${groupProblems.join(",") || "none"}`);
 
-const ws03Commands = ["npm run test:unit", "npm run test:integration", "npm run test:production-boundary", "npm run repo:verify:full", "npm run build"];
-const rubric = Object.values(ws03.rubric ?? {});
-record("GOV-13", ws03.task_id === "AMTECH-P0-WS03-000" && ws03.repository === "benamtech/ai-employee-v1"
-  && /^agent\/ws03-/.test(ws03.branch ?? "") && ws03.start_conditions?.length >= 3 && ws03.success_criteria?.length >= 5
-  && ws03.allowed_files?.some((path) => String(path).includes("migrations/0073"))
-  && ws03.forbidden_files?.some((path) => String(path).includes("0001") && String(path).includes("0072"))
-  && ws03Commands.every((cmd) => ws03.required_tests?.includes(cmd)) && ws03.required_tests?.some((test) => /managed Supabase/i.test(test))
-  && rubric.length === 6 && rubric.every((value) => typeof value === "number" && value >= 0 && value <= 1), "WS-03 start and proof guards remain intact");
-record("GOV-14", roadmap.includes("### Phase 1.1") && roadmap.includes("### Phase 1.9") && roadmap.includes("## Phase 2")
-  && workstreamsDoc.includes("## WS-01") && workstreamsDoc.includes("## WS-09")
-  && activePlan.includes("13-resolution-ledger.json") && activePlan.includes("17-ws03-p0-fisher-frontier.md") && activePlan.includes("18-ws03-p0-task-contract.json")
-  && testsDoc.includes("A suite is evidence only for the boundary it exercises") && verificationDoc.includes("Source/CI evidence boundary"), "roadmap and evidence routes are connected");
+const directManagerSource = await read("apps/manager/src/server.ts");
+const managerPackage = parseJson("manager-package", await read("apps/manager/package.json"));
+const managerDockerfile = await read("infra/deploy/manager.Dockerfile");
+const provisionerDockerfile = await read("infra/deploy/provisioner.Dockerfile");
+const focusedWorkflow = texts["../.github/workflows/ws07-ws08-commercial-effect.yml"];
+const removedManagerAssembly = [
+  "apps/manager/src/server.template.ts",
+  "apps/manager/src/server.promoted.ts",
+  "apps/manager/src/server.generated.ts",
+  "apps/manager/scripts/generate-production-server.mjs",
+  "apps/manager/scripts/patch-production-stream.mjs",
+  "apps/manager/scripts/production-admin-block.mjs",
+];
+const lingeringManagerAssembly = [];
+for (const path of removedManagerAssembly) if (await exists(path)) lingeringManagerAssembly.push(path);
+const rootScriptText = Object.values(pkg.scripts ?? {}).map(String).join("\n");
+record("GOV-19",
+  directManagerSource.includes("export function buildApp(): Hono")
+  && directManagerSource.includes("validateProjectedProtocolAuthority")
+  && directManagerSource.includes("subscribeProgress(streamScope")
+  && managerPackage.main === "./dist/server.js"
+  && managerPackage.scripts?.start === "node dist/server.js"
+  && managerPackage.scripts?.build === "tsc -p tsconfig.json"
+  && managerPackage.scripts?.typecheck === "tsc -p tsconfig.json --noEmit"
+  && !managerPackage.scripts?.pretypecheck
+  && !managerPackage.scripts?.["generate:production-server"]
+  && !pkg.scripts?.prepare
+  && !pkg.scripts?.["generate:production-sources"]
+  && !rootScriptText.includes("server.generated")
+  && managerDockerfile.includes("apps/manager/dist/server.js")
+  && !managerDockerfile.includes("server.generated")
+  && !provisionerDockerfile.includes("server.generated")
+  && !focusedWorkflow.includes("generate:production-sources")
+  && focusedWorkflow.includes("contents: read")
+  && lingeringManagerAssembly.length === 0,
+  `Manager direct typed composition is canonical; lingering=${lingeringManagerAssembly.join(",") || "none"}`);
 
-const report = { generated_at: new Date().toISOString(), validator_version: "2.2.0-root-program", status: failures.length ? "fail" : "pass", pass_count: passes.length, fail_count: failures.length, passes, failures };
+const report = {
+  generated_at: new Date().toISOString(),
+  validator_version: "6.0.0-direct-typed-manager",
+  status: failures.length ? "fail" : "pass",
+  source_migration_head: sourceHeadLabel,
+  pass_count: passes.length,
+  fail_count: failures.length,
+  passes,
+  failures
+};
 console.log(JSON.stringify(report, null, 2));
-if (failures.length) { console.error("❌ AMTECH repository governance failed"); process.exitCode = 1; }
-else console.log("✅ AMTECH repository governance OK");
+if (failures.length) {
+  console.error("❌ AMTECH repository governance failed");
+  process.exitCode = 1;
+} else {
+  console.log("✅ AMTECH repository governance OK");
+}

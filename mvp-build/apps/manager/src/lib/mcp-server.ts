@@ -23,8 +23,12 @@ import {
   ARTIFACT_WORKBENCH_TOOL_NAMES,
   getArtifactWorkbenchToolSchema,
 } from "../tools/artifact-workbench-tools.js";
+import {
+  MANAGER_EXTENSION_TOOL_NAMES,
+  getManagerExtensionToolSchema,
+} from "../tools/manager-extension-tools.js";
 
-const SERVER_INFO = { name: "amtech-manager", version: "0.2.0" } as const;
+const SERVER_INFO = { name: "amtech-manager", version: "0.3.0" } as const;
 
 const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
   get_business_brain: "Read the business brain index and resource map; use business-facts only for explicit fact details.",
@@ -57,25 +61,29 @@ const TOOL_DESCRIPTIONS: Partial<Record<ToolName, string>> = {
   get_aged_payables: "Read a QuickBooks A/P aging summary (what the business owes, and how overdue).",
 };
 
-const ARTIFACT_TOOL_DESCRIPTIONS: Record<string, string> = {
+const EXTENDED_TOOL_DESCRIPTIONS: Record<string, string> = {
   create_artifact_revision: "Create or revise one assignment-scoped artifact project and return its immutable revision hash.",
   validate_artifact_revision: "Attach validator evidence to the current artifact revision. Failed evidence cannot be hidden by publishing.",
   get_artifact_history: "Read immutable artifact revisions and validation evidence for comparison and owner review.",
   publish_artifact_sandbox: "Publish the exact validated artifact revision to the AMTECH sandbox. Requires a matching approved approval_id.",
   verify_artifact_publication: "Verify the observed sandbox publication and record a post-publish receipt.",
+  resolve_owner_channel_decision: "Resolve the exact approval focused in a verified owner SMS conversation after interpreting the owner's natural-language reply. Never use for an unrelated approval or when the reply is ambiguous.",
 };
 
 function employeeCallableTools(): ToolName[] {
   return [
     ...TOOL_NAMES.filter((name) => !SCHEDULER_ONLY_TOOLS.has(name)),
     ...(ARTIFACT_WORKBENCH_TOOL_NAMES as readonly string[]).map((name) => name as ToolName),
+    ...(MANAGER_EXTENSION_TOOL_NAMES as readonly string[]).map((name) => name as ToolName),
   ];
 }
 
 const INJECTED_OWNER_FIELDS = ["account_id", "employee_id"] as const;
 
 function inputSchemaFor(name: ToolName): Record<string, unknown> {
-  const schema = getArtifactWorkbenchToolSchema(String(name)) ?? getToolSchema(name);
+  const schema = getManagerExtensionToolSchema(String(name))
+    ?? getArtifactWorkbenchToolSchema(String(name))
+    ?? getToolSchema(name);
   const json = zodToJsonSchema(schema, { $refStrategy: "none" }) as Record<string, unknown>;
   delete json.$schema;
   if (json.type !== "object") return { type: "object", additionalProperties: true };
@@ -179,7 +187,7 @@ export function buildManagerMcpServer(identity: McpIdentity = {}): Server {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: employeeCallableTools().map((name) => ({
       name,
-      description: ARTIFACT_TOOL_DESCRIPTIONS[String(name)] ?? TOOL_DESCRIPTIONS[name] ?? `Manager tool: ${name}`,
+      description: EXTENDED_TOOL_DESCRIPTIONS[String(name)] ?? TOOL_DESCRIPTIONS[name] ?? `Manager tool: ${name}`,
       inputSchema: inputSchemaFor(name),
       _meta: {
         "amtech/discovery": "broad",

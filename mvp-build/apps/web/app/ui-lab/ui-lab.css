@@ -1,0 +1,30 @@
+.ui-lab-workbench button,
+.ui-lab-workbench a,
+.ui-lab-workbench select,
+.ui-lab-workbench input:not([type="color"]),
+.ui-lab-workbench summary {
+  min-height: 44px;
+}
+
+.ui-lab-workbench summary {
+  display: flex;
+  align-items: center;
+}
+
+.ui-lab-workbench input[type="color"] {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.ui-lab-workbench iframe:focus-visible {
+  outline: 3px solid #7aa7ff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-lab-workbench *,
+  .ui-lab-workbench *::before,
+  .ui-lab-workbench *::after {
+    scroll-behavior: auto !important;
+  }
+}

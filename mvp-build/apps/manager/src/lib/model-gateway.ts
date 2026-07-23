@@ -10,8 +10,6 @@ import { sealSecret } from "./secrets.js";
 import { resolveCommercialScope } from "./commercial-attribution.js";
 import { resolveModelProviderRoute, type ModelProviderRoute } from "./model-provider-registry.js";
 
-const rateBuckets = new Map<string, { window_start: number; count: number }>();
-
 function requiredEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`${name} missing.`);
@@ -205,19 +203,12 @@ export async function verifyModelGatewayCredential(
   return claims;
 }
 
+/**
+ * The signed token only authorizes the Manager-owned alias. Spend and rate are
+ * intentionally absent here: PostgreSQL admission is the single shared authority.
+ */
 export function enforceGatewayTokenPolicy(claims: ModelGatewayTokenClaims, requestedModel: string): { ok: true } | { ok: false; status: number; code: string } {
-  if (requestedModel !== claims.model_alias) {
-    return { ok: false, status: 403, code: "model_alias_required" };
-  }
-  if (claims.spend_limit_cents <= 0) return { ok: false, status: 402, code: "spend_limit_exhausted" };
-  const now = Date.now();
-  const bucket = rateBuckets.get(claims.credential_id);
-  if (!bucket || now - bucket.window_start >= 60_000) {
-    rateBuckets.set(claims.credential_id, { window_start: now, count: 1 });
-    return { ok: true };
-  }
-  bucket.count += 1;
-  if (bucket.count > claims.rate_limit_per_minute) return { ok: false, status: 429, code: "rate_limit_exceeded" };
+  if (requestedModel !== claims.model_alias) return { ok: false, status: 403, code: "model_alias_required" };
   return { ok: true };
 }
 

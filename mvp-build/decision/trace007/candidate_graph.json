@@ -1,0 +1,55 @@
+{
+  "schema": "amtech.trace007.candidate-graph.v2",
+  "purpose": "search diversity, lineage, redundancy, and shared-evidence analysis over candidate trajectories",
+  "vertex_source": "candidate_population.json:candidates[].id",
+  "semantic_boundary": "Vertices are candidate trajectories, not software entities. Candidate-edge coverage must never be reported as software-invariant completion.",
+  "concept_edges": {
+    "construction": "group validated candidates by exact candidates[].concept",
+    "relation": "same_concept_variant",
+    "weight": 1.0
+  },
+  "higher_order_edges": [
+    {
+      "name": "admission-settlement",
+      "members": ["A01", "D01", "A02", "D02", "A03", "D03"],
+      "relation": "shared_implementation_boundary",
+      "weight": 1.4
+    },
+    {
+      "name": "receipt-continuity",
+      "members": ["A04", "D04", "A06", "D06", "A07", "D07"],
+      "relation": "shared_implementation_boundary",
+      "weight": 1.5
+    },
+    {
+      "name": "repair-observability",
+      "members": ["D07", "D09", "D12", "D13", "D14", "D15"],
+      "relation": "recombination_lineage",
+      "weight": 1.25
+    },
+    {
+      "name": "authority-proof",
+      "members": ["A06", "A10", "A11", "D06", "D10", "D11"],
+      "relation": "shared_evidence_and_authority_boundary",
+      "weight": 1.2
+    },
+    {
+      "name": "ws8-groundwork",
+      "members": ["D07", "D09", "D12", "D13", "D15"],
+      "relation": "recombination_lineage",
+      "weight": 1.3
+    }
+  ],
+  "allowed_uses": [
+    "candidate redundancy",
+    "candidate separation",
+    "candidate lineage",
+    "candidate-edge touch",
+    "search-space diversity"
+  ],
+  "forbidden_uses": [
+    "software invariant completion",
+    "runtime architecture proof",
+    "causal improvement without implementation ablation"
+  ]
+}

@@ -6,6 +6,8 @@ export type DeliveryChannel = "web" | "sms" | "none";
 export interface EmployeeIntent {
   account_id: string;
   employee_id: string;
+  /** Current assignment scope when already known by the producer. */
+  assignment_id?: string | null;
   intent_key: string;
   move: EmployeeIntentMove;
   text: string;
@@ -19,6 +21,7 @@ export interface DeliveryDecision {
   id: string;
   account_id: string;
   employee_id: string;
+  assignment_id?: string | null;
   intent_key: string;
   move: EmployeeIntentMove;
   chosen_channel: DeliveryChannel;

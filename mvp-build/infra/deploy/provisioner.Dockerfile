@@ -16,7 +16,7 @@ RUN npm run build --workspace @amtech/shared \
   && npm run build --workspace @amtech/db \
   && npm run build --workspace @amtech/manager \
   && test -f apps/manager/dist/provisioner-host.js \
-  && test -f apps/manager/dist/server.generated.js
+  && test -f apps/manager/dist/server.js
 
 FROM node:22-bookworm-slim AS runtime
 ARG AMTECH_GIT_SHA
@@ -38,6 +38,6 @@ COPY --from=build /app/packages ./packages
 COPY --from=build /app/infra ./infra
 
 RUN test -f apps/manager/dist/provisioner-host.js \
-  && test -f apps/manager/dist/server.generated.js
+  && test -f apps/manager/dist/server.js
 
 CMD ["node", "apps/manager/dist/provisioner-host.js"]
