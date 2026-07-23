@@ -1,30 +1,28 @@
 # CODEGRAPH.md — AI Employee executable topology
 
-Status: active source candidate; exact acceptance is owned by workflows and retained release records  
-Updated: 2026-07-21  
-Candidate: PR #36, branch `agent/ws08-ws09-production`, stacked on PR #35  
+Status: active cumulative source candidate; exact acceptance is owned by workflows and retained release records  
+Updated: 2026-07-23  
+Candidate stack: PR #40 cumulative branch → PR #35 branch → PR #34 branch → `main`  
 Source migration head: `0082`
 
-This is the sole contributor-facing file that carries current product/workstream structure. Root and compatibility documents route here rather than duplicating it. Exact transient SHA, run number, and conclusion remain in GitHub Actions or retained evidence.
+This is the sole contributor-facing file that carries current product/workstream structure. `authority-map.json` routes machine readers here. Exact transient SHA, run number, and conclusion remain in the current PR, GitHub Actions, or retained release evidence.
 
-## Evidence headline
+## Current integration state
 
-- PR #36 contains production-level WS-08 source closure, WS-09 capacity groundwork, and the computed UI projection consolidation.
-- Source migrations extend through `0082`; application to managed Supabase remains a separate evidence class.
-- `0077` makes the shared minute rate window database-owned; `0078` qualifies the conflict target; `0079` qualifies the subsequent rate-window update predicate and expression; `0080` adds the provider-neutral connector lifecycle, guided setup intents, capability projections, fail-closed revocation, and exact conversational decision context; `0081` normalizes verified reconnects, resets stale revocation/discovery projections, and records connected lifecycle receipts; `0082` serializes one SMS decision focus per owner assignment and attaches it atomically to the delivered work object.
-- Manager compiles and runs from committed typed `apps/manager/src/server.ts`; generated-template and string-patch assembly remains structurally forbidden.
-- The owner UI has one projection controller, one semantic compiler, one layout planner, one renderer registry, one WorkResource renderer, and one embedded-view compiler. Talk, Workspace, Review, MCP Apps, and UI Lab are projections rather than authority.
-- Connector setup now uses one owner experience: AMTECH-managed authorization for supported providers and guided assignment-bound setup intents for long-tail systems. SMS remains a normal verified owner session; Hermes interprets natural language while Manager binds decisions to the exact immutable approval and effect.
-- WS-08 source binds five exact-SHA image identities, signed release metadata, topology validation, deterministic failure/recovery states, database/filesystem/secret-version backup continuity, proof refinding, and fail-closed rollback compatibility.
-- The exact-candidate workflow must pass Trace008/009 verification, governance, focused and broad source tests, typecheck/lint, blank-ledger PostgreSQL integration, all-workspace build, five image builds, digest inspection, and independent manifest verification after every candidate change.
-- Managed database, live provider, target host, representative 64 GiB capacity, restore rehearsal, rollback rehearsal, pilot, deployment, and production remain separate gates.
+- The cumulative candidate includes WS-01 through WS-09 source work represented by PRs #34, #35, the already integrated internal PRs #36–#39, and PR #40.
+- PR #40 adds the employee UI port, presentation adapters, production UI Lab, canonical agent onboarding, and folder-first full employee UI variants.
+- The incomplete accidental Trace013 planning attempt was removed. `decision/active.json` records no open decision transaction; Trace013 is reserved for a fresh post-merge branch.
+- Trace011 and Trace012 are completed UI decision records. Their recorded SHAs are historical coordinates, not moving acceptance claims.
+- The current cumulative candidate has historical exact-head success for governance, typecheck, lint, broad unit, PostgreSQL integration, workspace production builds, Compose validation, five exact-SHA image builds, image-identity inspection, and independent signed-manifest verification.
+- Any new documentation or merge commit requires its own exact-head verification. Ancestor success does not certify a descendant SHA.
+- Managed database, live connector/provider, target host, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain separate gates.
 - The public estimator is outdated and non-canonical.
 
 ## Product authority
 
 - **Hermes:** reasoning, runs, sessions, runtime-local memory, and tool execution.
 - **Manager:** identity, assignments, authority, capability/tool contracts, connector/provider custody, approvals, durable effects, shared commercial admission/accounting, reconciliation, repair, and proof.
-- **Web/SMS/signed Review/MCP Apps/AG-UI:** role-safe projections, not authority.
+- **Web/SMS/signed Review/MCP Apps/AG-UI/UI Lab:** role-safe projections, not authority.
 - **PostgreSQL/Supabase:** shared durable identity, rate, budget, effect, receipt, accounting, lineage, reconciliation, and retry permission.
 - **Host Provisioner:** sole Docker and bounded target-host lifecycle authority.
 
@@ -51,36 +49,32 @@ owner, ambient, scheduled, or delegated intent
 
 ```text
 owner names or selects a business system
-→ AMTECH-managed provider authorization or guided setup intent
+→ AMTECH-managed authorization or guided setup intent
 → Manager credential custody + exact assignment binding
 → provider-neutral capability discovery
 → harmless read/health proof
-→ verified event ingress or controlled polling when supported
-→ Hermes uses broad effective capabilities in normal work
-→ delivered approval opens one atomic conversation focus for the verified owner
-→ natural owner decision across web/SMS/voice for held consequential work
-→ Manager revalidates exact principal + assignment + approval snapshot + effect
+→ verified event ingress or controlled polling
+→ Hermes uses broad effective capabilities
+→ exact conversational decision context when approval is held
+→ Manager revalidates principal + assignment + snapshot + effect
 → lifecycle/effect receipt projected to owner
 → revoke binding + credential reference + grant + capability projection
-→ verified reconnect resets stale terminal state and requires fresh discovery
-→ later events and tool use fail closed when the binding is not current
+→ verified reconnect requires fresh discovery
+→ later use fails closed when binding is not current
 ```
 
-## Canonical UI projection transaction
+## Canonical UI transaction
 
 ```text
 Manager durable truth + exact assignment authority
-→ one semantic compiler
-→ one deterministic layout planner
-→ one renderer registry
-→ WorkResource renderer or Manager-compiled embedded view
-→ thin Talk / Workspace / Review / MCP Apps / UI Lab projection
-→ finite action intersection
+→ production semantic compiler or neutral EmployeeExperienceModelV1 projection
+→ production renderer path or folder-first UI variant
+→ bounded intent bridge
 → fresh Manager authorization
 → durable receipt and proof refresh
 ```
 
-Production semantic compilation fails closed when authoritative `operating_state` is absent or scope-mismatched. Fixture demonstrations reuse the same compiler and renderer path but remain explicitly non-authoritative.
+The production Web client is one conforming presentation, not the mandatory visual grammar. UI variants preserve capabilities and bounded actions without inheriting private application modules, navigation, terminology, DOM hierarchy, or component structure.
 
 ## Canonical release and recovery transaction
 
@@ -88,133 +82,101 @@ Production semantic compilation fails closed when authoritative `operating_state
 exact Git SHA
 → five distinct OCI image identities
 → compose/config/migration/secret-version hashes
-→ Ed25519 manifest + independent fingerprint verification
+→ signed manifest + independent fingerprint verification
 → topology-complete health
 → deterministic fault state
 → operator terminality and safe next action
 → complete backup bundle
 → restore + durable-truth conservation + proof refinding
-→ exact prior SHA rollback inside executable schema/config compatibility
+→ exact prior SHA rollback inside schema/config compatibility
 → accepted-work conservation
 ```
 
-A running container without a healthy state is not healthy. Rollback never retags a release to a floating alias and blocks when the signed prior migration or configuration envelope does not match.
+A running container without a healthy dependency-complete state is not healthy. Rollback never retags a release to a floating alias and blocks when the signed prior migration or configuration envelope is incompatible.
 
-## Active source graph
+## Active source hubs
 
 ```text
 apps/manager/src/server.ts
-  ├─ direct typed Manager route composition
-  ├─ owner assignment/current authority interception
-  ├─ assignment/version-scoped streams
-  └─ no generated source or production string patching
+  direct typed Manager composition and current-authority interception
+
+packages/db/migrations/0077..0082
+  shared rate authority, namespace repairs, connector lifecycle,
+  reconnect normalization, and atomic SMS decision focus
 
 packages/shared/src/adaptive-connector-runtime.ts
-  ├─ provider-neutral connector/setup manifests
-  ├─ adaptive business/workflow activation plan
-  └─ natural approval interaction grammar, not a parallel authority engine
-
 apps/manager/src/lib/connector-lifecycle.ts
-  ├─ capability discovery and lifecycle snapshot
-  ├─ guided long-tail setup intents
-  └─ atomic assignment-scoped revoke projection
-
-packages/db/migrations/0080_connector_operating_substrate.sql
-  ├─ connector capability, lifecycle, setup-intent and decision-context records
-  ├─ atomic revoke transaction
-  └─ exact SMS-message-to-approval resolution transaction
-
-packages/db/migrations/0081_connector_reactivation_normalization.sql
-  ├─ verified reconnect normalization
-  ├─ stale terminal/discovery projection reset
-  └─ connected lifecycle receipt and guided-intent completion
-
-packages/db/migrations/0082_atomic_sms_decision_focus.sql
-  ├─ one open SMS focus per assignment-bound human
-  ├─ advisory-lock and partial-unique race closure
-  └─ supersede, open/replay and message attachment in one transaction
-
-apps/manager/src/lib/channel-decisions.ts + webhooks/twilio.ts
-  ├─ verified SMS principal and assignment
-  ├─ multiple legitimate roles for one human principal
-  ├─ atomic exact pending-approval conversation focus
-  ├─ natural-language interpretation by Hermes
-  └─ immutable Manager approval resolution without repeated challenges
+apps/manager/src/lib/channel-decisions.ts
+  provider-neutral discovery, lifecycle, revoke/reconnect, and exact decisions
 
 apps/web/app/agent/[employeeId]/owner-projection-controller.ts
-  ├─ sole owner EventSource lifecycle
-  ├─ snapshot-before-delta scope installation
-  └─ reconnect without intent replay
-
 packages/shared/src/operating-projection.ts
-  ├─ authoritative production-state validation
-  └─ bounded fixture semantic compilation
-
 packages/shared/src/operating-layout.ts
-  └─ sole deterministic adaptive planner
+  one scoped owner stream and deterministic production projection path
 
-apps/web/.../operating-renderer-registry.ts
-  └─ sole operating-region registry
+packages/shared/src/employee-ui-presentation.ts
+apps/web/app/_components/employee-ui/EmployeeUiPort.tsx
+  employee UI port, adapters, and presentation strategies
 
-apps/web/.../components/WorkObjectRenderer.tsx
-  └─ sole native work-resource renderer
-
-apps/manager/src/lib/ui-resources.ts
-  └─ sole embedded-view compiler and bounded authority projection
+apps/web/ui-variants/
+apps/web/app/_components/ui-variant/
+ui-lab/README.md
+  neutral capability model, folder-first variants, bounded host, and agent-first UI Lab
 
 infra/scripts/release-manifest.mjs
-  ├─ exact SHA + five image IDs
-  ├─ compose/config/migration/secret-version identity
-  └─ signed payload
-
 infra/scripts/verify-release-manifest.mjs
-  └─ external-key fingerprint, signature, repository and image recomputation
-
-infra/scripts/backup-restore.mjs + restore-verify.mjs
-  └─ database + filesystem + secret version + accepted-work + proof-refinding continuity
-
+infra/scripts/backup-restore.mjs
+infra/scripts/restore-verify.mjs
 infra/scripts/deploy-rollback.mjs
-  └─ signed exact prior release + migration/config compatibility + accepted-work conservation
+  exact release identity, independent verification, recovery, and rollback guards
 ```
 
-## Decision topology
+## Decision topology and current traces
 
-Trace008 and Trace009 keep non-interchangeable structures:
+Candidate search topology and software-invariant topology are non-interchangeable:
 
 ```text
-candidate_graph.json
+candidate graph
   vertices: candidate trajectories
-  use: similarity, lineage, redundancy and selection sensitivity
+  use: similarity, lineage, redundancy, separation, and sensitivity
 
-software_invariant_hypergraph.json
-  vertices: software entities, states and proof obligations
-  use: touch, fractional, complete and independently proved coverage
+software invariant hypergraph
+  vertices: actual entities, states, and proof obligations
+  use: touch, fractional, complete, and independently proved coverage
 ```
 
-All controls use the same feasible domain. Mandatory invariants are constraints. Pareto and evidence/invariants baselines own primary comparison in Trace009; weighted aggregation is sensitivity only. Representation is never proof, and causal improvement remains unestablished without independent outcomes.
+Mandatory invariants are feasibility constraints. Eigenvectors, graph density, spectral gaps, weighted scores, edge touch, and represented nodes can guide exploration only. They do not override dependency order or establish architecture, causality, or acceptance.
 
-## Source hubs and open gates
+- `decision/trace007/` — commercial/effect transaction and baseline semantics.
+- `decision/trace008/` — release, recovery, rollback, and capacity compression.
+- `decision/trace009/` — UI projection architecture search and calibration.
+- `decision/trace010/` — connector operating substrate.
+- `decision/trace011/` — employee UI port and presentation adapters.
+- `decision/trace012/` — UI Lab and folder-first UI variants; latest completed trace.
+- `decision/trace013/` — reserved and absent until the next branch begins a fresh computation.
 
-| Boundary | Source candidate | Still open |
+Representation is never proof. Causal improvement remains unestablished without equal-feasibility implementation outcomes.
+
+## Workstream state and open gates
+
+| Boundary | Cumulative source candidate | Still open |
 |---|---|---|
-| repository/source truth | Trace008/009/010, structural governance, direct typed Manager, singleton UI projection architecture, exact-candidate workflow | final exact-head workflow record and later release evidence |
-| protocol/capability | current assignment/version interception; scoped streams; connector manifests/discovery; exact conversational decisions; embedded actions | live remote MCP/OAuth/provider/client lifecycle |
-| database | forward migrations through `0082`, immutable ledger, blank-ledger and direct PostgreSQL contracts | managed Supabase migration, advisors, backup and rollback proof |
-| release identity | five exact-SHA image definitions, signed manifest and independent verifier | trusted production signing authority and registry retention |
-| target host/runtime | Host Provisioner-only Docker authority and lifecycle contracts | target-host secrets, isolation, replacement and recovery evidence |
-| owner UI | one controller/compiler/planner/registry/render path; unified native/guided connector setup; evidence-gated connected state; constrained presentation coverage | fixture-free browser, accessibility, reconnect and cross-account acceptance |
-| connectors/events | assignment-bound discovery, lifecycle receipts, setup intents, verified ingress, durable effects, revoke and reactivation projection | live OAuth consent, credential refresh/expiry, provider webhook delivery, provider-side revoke confirmation |
-| SMS decisions | verified assignment-bound owner session, multi-role principal resolution, atomic exact approval focus and resolution bridge | live Twilio delivery and fixture-free conversational approval journey |
-| restore/rollback | complete source transaction and fail-closed compatibility/conservation guards | destructive local rehearsal and target-host rehearsal |
-| Model Gateway | database admission, one provider identity, validated bounds, reconciliation | provider sandbox idempotency and accepted-response-loss proof |
-| WS-09 groundwork | queue/connection/SSE/fairness descriptors, saturation and pilot-stop schema | representative 64 GiB measurement, capacity and pilot acceptance |
+| repository/source truth | authority routers, direct typed Manager, structural governance, exact-head workflows, cumulative PR stack | final exact-head verification after each merge and final `main` merge |
+| protocol/capability | current authority interception, scoped streams, connector manifests/discovery, exact conversational decisions | live remote MCP/OAuth/provider/client lifecycle |
+| database | forward migrations through `0082`, blank-ledger and direct PostgreSQL contracts | disposable managed Supabase migration, security, advisors, backup, restore, rollback |
+| release identity | five exact-SHA image definitions, signed manifest, independent verifier | trusted production signing authority and registry retention |
+| target host/runtime | Host Provisioner-only Docker authority and lifecycle contracts | target-host secrets, isolation, replacement, destructive recovery |
+| owner UI | one production projection path plus neutral folder-first variants and agent-first UI Lab | fixture-free browser/channel, human visual review, accessibility, reconnect and cross-account acceptance |
+| connectors/events | assignment-bound discovery, lifecycle receipts, setup intents, verified ingress, revoke and reactivation projection | live consent, refresh/expiry, webhook delivery, provider-side revoke confirmation |
+| commercial/provider | shared rate/budget, one effect/provider identity, ambiguity and reconciliation source contracts | provider sandbox idempotency, accepted-response-loss, billing lifecycle |
+| restore/rollback | complete source transaction and fail-closed compatibility/conservation guards | destructive rehearsal on production-matching infrastructure |
+| capacity/pilot | queue/connection/SSE/fairness descriptors and pilot-stop schema | representative 64 GiB measurement, accessibility, pilot packet and acceptance |
 
 ## Active authority map
 
+- `authority-map.json` — machine router.
 - `STANDARD.md` plus ratified amendments — normative requirements.
-- `decision/protocol-v1.json` and `decision/trace008/` — WS-08 computation and implementation compression.
-- `decision/trace009/` — UI architecture search, Pareto comparison, ADR and calibration artifacts.
-- `decision/trace010/` — connector substrate evidence matrix and implementation decision.
+- `decision/active.json` and `decision/protocol-v1.json` — transaction router and method.
 - `production-readiness-program/README.md` — sole active production route.
 - `production-readiness-program/10-test-suite-disposition.md` — test/evidence classification.
 - `production-readiness-program/07-verification-and-handoff-matrix.md` — evidence/handoff boundary.
@@ -224,10 +186,10 @@ All controls use the same feasible domain. Mandatory invariants are constraints.
 
 ## Dependency order
 
-1. Use the exact current candidate workflow record; stop downstream claims on any red job.
-2. Apply and prove migrations through `0082` on a disposable managed platform.
-3. Run provider-backed connector setup, harmless-use, event-ingress, natural-decision, revoke, reconnect, and post-revoke failure evidence.
-4. Run provider-backed idempotency, ambiguity, original-effect, accounting and proof-refinding evidence.
-5. Rehearse destructive fault, restore and rollback transactions without accepted-work loss.
-6. Run fixture-free golden journeys, target-host isolation, accessibility and representative 25–30-runtime capacity.
-7. Complete pilot, signed production release, deployment and production gates separately.
+1. Complete exact-head verification on the cumulative PR #40 branch.
+2. Merge PR #40 into PR #35’s branch and verify the new cumulative PR #35 head.
+3. Merge PR #35 into PR #34’s branch and verify the new cumulative PR #34 head.
+4. Present PR #34 as the single ready-to-review integration into `main`.
+5. After `main`, begin a fresh Trace013 on a new branch.
+6. Apply and prove migrations through `0082` on a disposable managed platform.
+7. Run live connector/provider, original-effect, accounting, host/recovery, fixture-free channel/golden-work, browser/accessibility, capacity, pilot, deployment, and production gates in dependency order.
