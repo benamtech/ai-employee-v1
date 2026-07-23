@@ -26,6 +26,8 @@ const requiredFiles = [
   'decision/trace013/compute.mjs',
   'decision/trace013/implementation_contract.json',
   'decision/trace013/verification_plan.json',
+  'decision/trace013/retrospective_cases.json',
+  'decision/trace013/retrospective_benchmark.mjs',
   'tests/unit/decision-engine-contract.test.ts',
   'ui-lab/README.md', 'memory/MEMORY.md'
 ];
@@ -44,6 +46,7 @@ const registry = await json('decision/engine/representation-registry.json');
 
 if (authority?.exact_status?.owner !== 'mvp-build/CODEGRAPH.md') errors.push('authority-map exact-status owner must be mvp-build/CODEGRAPH.md');
 if (authority?.decision?.router !== 'mvp-build/decision/active.json') errors.push('authority-map must route through decision/active.json');
+if (authority?.decision?.executable_engine !== 'mvp-build/decision/engine/repoctl.mjs') errors.push('authority-map must route to the executable experiment compiler');
 if (Number(protocol?.protocol_revision) < 5) errors.push('decision protocol revision must include the P0-P4 proof taxonomy');
 for (const key of ['P0_representation_calculation', 'P1_formal_model_property', 'P2_representation_fidelity', 'P3_executable_software', 'P4_external_production_acceptance']) {
   if (!protocol?.proof_classes?.[key]) errors.push(`decision protocol missing proof class: ${key}`);
@@ -58,8 +61,8 @@ if (!['active_decision_transaction', 'no_open_decision_transaction'].includes(ac
 if (active?.status === 'active_decision_transaction' && active?.active_transaction?.id !== 'trace013') errors.push('active decision transaction must be Trace013');
 if (active?.status === 'no_open_decision_transaction' && active?.latest_completed_trace?.id !== 'trace013') errors.push('completed decision router must identify Trace013');
 
-function runJson(label, argv, timeout = 180_000) {
-  const result = spawnSync(process.execPath, argv, { cwd: root, encoding: 'utf8', shell: false, timeout, maxBuffer: 32 * 1024 * 1024 });
+function runJson(label, argv, timeout = 240_000) {
+  const result = spawnSync(process.execPath, argv, { cwd: root, encoding: 'utf8', shell: false, timeout, maxBuffer: 64 * 1024 * 1024 });
   if (result.error || result.status !== 0) {
     errors.push(`${label} failed: ${result.error ?? result.stderr ?? result.stdout}`);
     return null;
@@ -77,6 +80,16 @@ if (selfTest && !selfTest.ok) errors.push(`experiment compiler self-test reporte
 if (selfTest?.verified?.results?.certificate?.evidence_class !== 'P1') errors.push('self-test did not produce a P1 formal-model certificate');
 if (selfTest?.verified?.results?.correspondence?.ok !== true) errors.push('self-test did not produce verified P2 correspondence');
 if (selfTest?.evaluated?.maximum_evidence_class !== 'P3') errors.push('self-test did not produce P3 executable evidence');
+const retrospective = runJson('Trace013 retrospective benchmark', ['decision/trace013/retrospective_benchmark.mjs']);
+if (retrospective?.summary?.cases !== 6) errors.push(`retrospective benchmark must execute six historical cases; received ${retrospective?.summary?.cases}`);
+for (const arm of ['treatment', 'lexical_baseline']) {
+  for (const [metric, value] of Object.entries(retrospective?.summary?.[arm] ?? {})) {
+    if (!Number.isFinite(value)) errors.push(`retrospective benchmark produced non-finite ${arm}.${metric}`);
+  }
+}
+if (retrospective?.classification?.causal_engineering_improvement !== 'unestablished; requires prospective matched tasks and independent outcomes') {
+  errors.push('retrospective benchmark must preserve the causal nonclaim');
+}
 
 if (errors.length) {
   console.error(JSON.stringify({ ok: false, errors }, null, 2));
@@ -90,5 +103,7 @@ console.log(JSON.stringify({
   engine_version: doctor.engine_version,
   implemented_dialects: doctor.implemented_dialects,
   proof_chain: ['P1 formal model certificate', 'P2 correspondence', 'P3 executable self-test'],
+  retrospective_summary: retrospective.summary,
+  retrospective_classification: retrospective.classification,
   current_transaction_state: active.status
 }, null, 2));
