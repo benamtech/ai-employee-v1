@@ -56,7 +56,9 @@ async function httpCheck(name, url, { web = false, proxy = false } = {}) {
   }
 }
 
-function composeHealth(service) {
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function composeHealthOnce(service) {
   const ps = dockerCompose(["ps", "-q", service]);
   if (ps.status !== 0 || !ps.stdout.trim()) {
     return {
@@ -84,6 +86,16 @@ function composeHealth(service) {
   // container with no health state is partial topology, never release health.
   const ok = container_state === "running" && health === "healthy";
   return { name: `compose:${service}`, status: ok ? "pass" : "fail", container_id: id, container_state, health };
+}
+
+async function composeHealth(service, attempts = 12) {
+  let last = null;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    last = composeHealthOnce(service);
+    if (last.status === "pass") return last;
+    await sleep(2500);
+  }
+  return last ?? { name: `compose:${service}`, status: "fail", error: "not_checked" };
 }
 
 function provisionerSocket() {
@@ -169,11 +181,11 @@ const checks = [
   await httpCheck("model-gateway-health", `${baseModelGateway.replace(/\/$/, "")}/health`),
   await httpCheck("web", baseWeb, { web: true }),
   await httpCheck("caddy", baseCaddy, { proxy: true }),
-  composeHealth("manager"),
-  composeHealth("model-gateway"),
-  composeHealth("host-provisioner"),
-  composeHealth("web"),
-  composeHealth("caddy"),
+  await composeHealth("manager"),
+  await composeHealth("model-gateway"),
+  await composeHealth("host-provisioner"),
+  await composeHealth("web"),
+  await composeHealth("caddy"),
   provisionerSocket(),
   caddyValidate(),
   employeeNetworkTopology(),
