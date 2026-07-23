@@ -1,0 +1,84 @@
+{
+  "schema": "amtech.authority-map.v1",
+  "status": "active_router",
+  "updated_at": "2026-07-23",
+  "self": {
+    "path": "mvp-build/authority-map.json",
+    "last_reconciliation": "PR40 stack and active-document cleanup",
+    "rule": "This file routes authority; it does not promote an evidence class or duplicate transient workflow conclusions."
+  },
+  "exact_status": {
+    "owner": "mvp-build/CODEGRAPH.md",
+    "transient_acceptance": "GitHub Actions and retained release records",
+    "pull_request_record": "the current cumulative integration pull request",
+    "rule": "Exact SHA, run number, and conclusion belong to the PR or retained release record."
+  },
+  "normative": [
+    "mvp-build/STANDARD.md",
+    "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+  ],
+  "agent_entry": [
+    "AGENTS.md",
+    "mvp-build/AGENTS.md"
+  ],
+  "active_plan": [
+    "mvp-build/production-readiness-program/README.md",
+    "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+    "mvp-build/production-readiness-program/09-workstream-execution-map.md",
+    "mvp-build/production-readiness-program/13-resolution-ledger.json"
+  ],
+  "decision": {
+    "router": "mvp-build/decision/active.json",
+    "protocol": "mvp-build/decision/protocol-v1.json",
+    "latest_completed_trace": "mvp-build/decision/trace012/",
+    "next_trace_reserved": "mvp-build/decision/trace013/",
+    "next_trace_state": "not_created; begin only on the next branch with fresh authority extraction and computation"
+  },
+  "current_trace_roles": {
+    "trace007": "commercial/effect production transaction and computation baseline",
+    "trace008": "release, recovery, and capacity implementation compression",
+    "trace009": "UI projection architecture search and calibration",
+    "trace010": "connector operating substrate",
+    "trace011": "employee UI port and presentation adapters",
+    "trace012": "UI Lab and folder-first UI variant standard"
+  },
+  "architecture": "mvp-build/docs/architecture/",
+  "memory": {
+    "index": "mvp-build/memory/MEMORY.md",
+    "latest": "mvp-build/memory/2026-07-23-stack-reconciliation-and-main-readiness.md"
+  },
+  "historical": [
+    "mvp-build/second-half-plan/",
+    "mvp-build/GAPS.md",
+    "mvp-build/REMEDIATION.md",
+    "complete prior decision traces"
+  ],
+  "evidence_order": [
+    "deployed_release_proof",
+    "applied_durable_state",
+    "committed_source_and_configuration",
+    "exact_candidate_executable_evidence",
+    "ratified_standard_and_active_program",
+    "current_topology_and_architecture",
+    "indexed_memory",
+    "historical_records"
+  ],
+  "nonpromotion": [
+    "decision",
+    "documentation",
+    "source",
+    "unit",
+    "integration",
+    "ci",
+    "managed_database",
+    "connector_provider",
+    "target_host",
+    "browser_channel_accessibility",
+    "commercial",
+    "recovery",
+    "signed_release",
+    "pilot",
+    "deployment",
+    "production"
+  ]
+}
