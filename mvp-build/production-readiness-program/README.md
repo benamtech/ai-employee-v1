@@ -8,6 +8,17 @@ This directory is the single active production-readiness route. Exact candidate 
 
 ## Authority
 
+Formal proof is first-class for the exact property and model it certifies. Evidence classes remain explicit:
+
+```text
+P1 formal model-property proof
++ P2 representation fidelity when required
+→ P3 executable software proof when the gate correspondence is established
+→ P4 external/production acceptance only under the external gate contract
+```
+
+The ordinary repository evidence route remains:
+
 ```text
 deployed release proof
 → applied durable state
@@ -19,7 +30,7 @@ deployed release proof
 → historical records
 ```
 
-Decision computation is below implementation and acceptance evidence. It may change what is attempted; it cannot establish what passed.
+Decision computation can establish formal properties, alter what is attempted, and generate proof obligations. It cannot claim a wider property than the certificate, correspondence, or evidence actually establishes.
 
 ## Current position
 
@@ -32,30 +43,34 @@ The cumulative source candidate now includes:
 - five-image exact-SHA release identity, signed-manifest verification, restore/rollback guards, and capacity groundwork;
 - one production owner projection path;
 - employee UI port and presentation adapters;
-- the production UI Lab and folder-first full employee UI variants behind `EmployeeExperienceModelV1`.
+- the production UI Lab and folder-first full employee UI variants behind `EmployeeExperienceModelV1`;
+- a first-class machine-native representation contract covering graphs, hypergraphs, vectors, tensors, spectral objects, formal systems, state machines, and proof correspondence.
 
-The cumulative branch has historical exact-candidate source/CI/image evidence, but every descendant documentation or merge commit requires its own exact-head verification. Managed database, live provider, target-host, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain open evidence classes.
+The cumulative branch has historical exact-candidate source/CI/image evidence, but every descendant documentation or merge commit requires its own exact-head verification. Managed database, live provider, target-host, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain open evidence classes unless an explicit formal correspondence contract legitimately discharges a particular gate.
 
 ## Execution method
 
-Use [`../decision/README.md`](../decision/README.md) and resolve transaction state through [`../decision/active.json`](../decision/active.json):
+Use [`../decision/README.md`](../decision/README.md), [`../decision/representation-contract.md`](../decision/representation-contract.md), and resolve transaction state through [`../decision/active.json`](../decision/active.json):
 
 ```text
-authority/evidence/Unknown extraction
+authority and evidence extraction
+→ machine-native representation extraction
+→ Observed / Inferred / Hypothesis / Unknown / NotApplicable
 → independent candidate batches
 → invariant/prerequisite filter
 → explicit evidence-and-invariants baseline
 → candidate search topology when useful
-→ software invariant hypergraph when useful
+→ software invariant hypergraph and formal models when useful
+→ formal/model certificates when useful
 → equal-feasibility controls
 → search and weight sensitivity
 → separate implementation compression
-→ complete behavioral proof plan
+→ proof plan by declared proof class
 → implementation and exact verification
 → active-document and memory reconciliation
 ```
 
-Candidate topology and software topology are distinct. Mandatory coverage is a feasibility constraint, not an objective bonus. Eigenvectors, hypergraph centrality, spectral gaps, graph density, and weighted scores may expose relationships or affect exploration; they cannot override prerequisites, establish software proof, or become causal without equal-feasibility implementation outcomes.
+Candidate topology and software topology are distinct. Mandatory coverage is a feasibility constraint, not an objective bonus. Eigenvectors, hypergraph centrality, spectral gaps, graph density, formal solvers, and weighted scores may expose relationships, change decisions, or provide formal certificates. A verified eigenstructure may be decisive P1 proof for its declared operator-defined property. P2 correspondence is required before treating that formal result as the associated software property, and causal or production claims remain separately bounded.
 
 No new decision transaction is open. Trace012 is the latest completed trace. Trace013 is reserved for a fresh computation on the next post-merge branch.
 
@@ -75,8 +90,9 @@ Manager is the authority plane and compiles from committed typed source. Hermes 
 6. `10-test-suite-disposition.md` — test/evidence authority.
 7. `07-verification-and-handoff-matrix.md` — evidence and handoff boundary.
 8. `../decision/active.json` — current/no-open-transaction router.
-9. `../decision/trace007/` through `../decision/trace012/` — completed scoped decisions and their exact evidence boundaries.
-10. current source, immutable migrations, tests, workflows, proof, and newest indexed memory.
+9. `../decision/README.md` and `../decision/representation-contract.md` — computation and representation/proof method.
+10. `../decision/trace007/` through `../decision/trace012/` — completed scoped decisions and their exact evidence boundaries.
+11. current source, immutable migrations, representations, certificates, tests, workflows, proof, and newest indexed memory.
 
 Historical WS-02/03 records and `second-half-plan/` remain available for provenance but do not override newer exact source or evidence.
 
@@ -99,7 +115,7 @@ committed typed Manager source
 
 Forward migrations through the source-derived head preserve immutable history. Caller metadata cannot shard shared rate authority, redefine replay identity, or select commercial/approval state.
 
-## Current trace map
+## Current trace and proof map
 
 - Trace007 — production commercial/effect transaction and the explicit evidence baseline.
 - Trace008 — release, recovery, rollback, and capacity implementation compression.
@@ -111,13 +127,13 @@ Forward migrations through the source-derived head preserve immutable history. C
 Across these records:
 
 ```text
-candidate graph terms: descriptive
-software invariant hypergraph terms: descriptive
-spectral/eigenvector terms: descriptive or selection-supporting
-causal improvement: unestablished unless independent implementation outcomes exist
+candidate graph calculations: P0 unless accompanied by a stronger certificate
+software invariant hypergraph: P0 representation, P1 formal properties, P2/P3 when correspondence and executable proof are satisfied
+spectral/eigenvector results: P1 when operator semantics, theorem assumptions, residuals, conditioning, and reproducibility hold
+causal improvement: unestablished unless an appropriate causal proof or independent implementation outcomes exist
 ```
 
-A candidate graph supports diversity, lineage, and redundancy. A software-invariant hypergraph represents genuine many-way obligations and reports touch/fractional/complete/proved coverage. Representation remains distinct from accepted behavioral proof.
+A candidate graph supports diversity, lineage, and redundancy. A software-invariant hypergraph represents genuine many-way obligations and may carry formal certificates as well as touch/fractional/complete/proved coverage. Mere representation remains distinct from proof; formal proof remains valid within its declared boundary.
 
 ## Current integration checkpoint
 
@@ -138,9 +154,11 @@ No ancestor result certifies a merge commit. A red lower-stack coordinate is not
 - Do not create Trace013 on this branch or reuse the discarded incomplete attempt.
 - Do not use a lower tier to evade risk or prerequisites.
 - Do not compare controls from different feasible domains.
-- Do not call a ranking, eigenvector, objective, or coverage difference causal improvement.
+- Do not call a ranking, eigenvector change, objective delta, or coverage difference causal improvement by itself.
+- Do not demote a valid theorem, eigenstructure, solver certificate, or model-checker result from being proof of its declared formal property.
+- Do not promote a P1 model-property proof to a broader software or production claim without the required P2/P3/P4 correspondence.
 - Do not weaken tests for green.
-- Do not infer authority or acceptance from filenames, dates, fixtures, UI labels, scores, source wiring, workflow names, or stale prose.
+- Do not infer authority or acceptance from filenames, dates, fixtures, UI labels, unverified scores, source wiring, workflow names, or stale prose.
 - Preserve exact account/employee/assignment/authority/revision/commercial/effect identity across snapshot, stream, reconnect, retry, output, accounting, and proof.
 - Shared rate and budget authority cannot be process-local or caller-sharded.
 - Accepted provider success requires matching effect and accounting receipts.
@@ -148,7 +166,7 @@ No ancestor result certifies a merge commit. A red lower-stack coordinate is not
 - Repair cannot erase accepted effects or invent completion.
 - Fixture state cannot satisfy fixture-free acceptance.
 - A source-built or CI-signed manifest is not trusted production signing or deployment evidence.
-- Do not claim a stronger evidence class without exact proof on the claimed candidate.
+- Do not claim a stronger property or evidence class without exact proof on the claimed candidate and boundary.
 
 ## Resolved source liabilities
 
