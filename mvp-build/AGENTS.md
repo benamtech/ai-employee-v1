@@ -5,9 +5,9 @@ Updated: 2026-07-23
 
 ## Start
 
-1. Read `../identity.md`, root `AGENTS.md`, this file, `CODEGRAPH.md`, and `authority-map.json`.
-2. Read `STANDARD.md` plus ratified amendments.
-3. Resolve the current transaction through `decision/active.json`.
+1. For a fresh coding-agent session, execute `decision/SESSION_ONBOARDING.md` before receiving or compiling the task prompt.
+2. Read `../identity.md`, root `AGENTS.md`, this file, `CODEGRAPH.md`, and `authority-map.json` as routed by that bootstrap.
+3. Read `STANDARD.md` plus ratified amendments and resolve the current transaction through `decision/active.json`.
 4. For every non-mechanical task, run the repository-owned experiment compiler before source edits:
 
 ```bash

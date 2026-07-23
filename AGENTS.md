@@ -7,15 +7,16 @@ Updated: 2026-07-23
 
 1. Read `identity.md`, this file, `CONTRIBUTING.md`, and `CODEGRAPH.md`.
 2. Enter the target subtree and read its nearest `AGENTS.md`, `authority-map.json`, and `CODEGRAPH.md`.
-3. For non-mechanical `mvp-build` work, run the repository-owned experiment compiler before source edits:
+3. For a fresh coding-agent session targeting `mvp-build`, execute `mvp-build/decision/SESSION_ONBOARDING.md` before receiving or compiling the task prompt.
+4. For non-mechanical `mvp-build` work, run the repository-owned experiment compiler before source edits:
 
 ```bash
 cd mvp-build
 node decision/engine/repoctl.mjs start --task <task.json> --out decision/<trace-or-transaction>
 ```
 
-4. Use the generated task capsule, admit the plan, implement within its maximum patch, evaluate, and finish.
-5. Stop stronger claims on red exact-head evidence.
+5. Use the generated task capsule, admit the plan, implement within its maximum patch, evaluate, and finish.
+6. Stop stronger claims on red exact-head evidence.
 
 Historical plans, completed traces, audits, and handoffs are provenance, not active instructions.
 
@@ -41,6 +42,7 @@ Retain typed artifacts, generators, provenance, assumptions, certificates, predi
 
 ## Routing
 
+- `mvp-build/decision/SESSION_ONBOARDING.md` — canonical pre-task session bootstrap.
 - `mvp-build/` — executable product and experiment compiler.
 - `mvp-build/decision/engine/repoctl.mjs` — universal non-mechanical task interface.
 - `mvp-build/STANDARD.md` plus amendments — normative requirements.
