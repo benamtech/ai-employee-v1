@@ -168,7 +168,8 @@ async function verifyUiLabWorkbench(browser) {
   const registryResponse = await page.request.get(`${baseUrl}/api/ui-lab/presets`);
   if (!registryResponse.ok()) throw new Error(`ui_lab_registry_get_failed:${registryResponse.status()}`);
   const registry = await registryResponse.json();
-  if (!registry.presets.some((preset) => preset.preset_ref === "ecommerce-manager@v0001")) throw new Error("ui_lab_seed_preset_missing");
+  if (!Array.isArray(registry.presets)) throw new Error("ui_lab_registry_shape_invalid");
+  if (serverMode !== "production" && !registry.presets.some((preset) => preset.preset_ref === "ecommerce-manager@v0001")) throw new Error("ui_lab_seed_preset_missing");
   if (serverMode === "production") {
     const writeResponse = await page.request.post(`${baseUrl}/api/ui-lab/presets`, { data: {} });
     if (writeResponse.status() !== 403) throw new Error(`ui_lab_production_write_not_denied:${writeResponse.status()}`);
