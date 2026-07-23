@@ -41,20 +41,24 @@ describe("UI variant standard", () => {
     expect(launcher).toContain("launchAgent");
   });
 
-  it("provides environment-adaptive agent onboarding with a lightweight repeat path", () => {
+  it("makes the UI Lab README the canonical environment-adaptive agent entry point", () => {
     const quickstart = readRepository("UI_VIBE_QUICKSTART.md");
+    const readme = read("ui-lab/README.md");
     const onboarding = read("UI_LAB_AGENT_ONBOARDING.md");
 
+    expect(readme).toContain("Canonical agent entry point");
+    expect(readme).toContain("Agent onboarding prompt");
+    expect(readme).toContain("mvp-build/ui-lab/README.md");
+    expect(readme).toContain("Do not run an unattended operating-system upgrade");
+    expect(readme).toContain("--agent none --scenario <scenario>");
+    expect(readme).toContain("mvp-build/apps/web/ui-variants/<variant-slug>/");
+    expect(readme).not.toContain("sudo pacman");
+
     expect(quickstart).toContain("First inspect the operating system, architecture, shell");
-    expect(quickstart).toContain("Do not perform an unattended operating-system upgrade");
-    expect(quickstart).toContain("--agent none --scenario clothing-ops");
-    expect(quickstart).toContain("Every later session");
     expect(quickstart).toContain("Do not repeat operating-system setup or browser installation");
     expect(quickstart).not.toContain("ui-vibe.sh");
-    expect(quickstart).not.toContain("sudo pacman");
 
     expect(onboarding).toContain("Environment-adaptive setup contract");
-    expect(onboarding).toContain("never run an unattended operating-system upgrade");
     expect(onboarding).toContain("bootstrap or repair operation, not a mandatory repeat-session operation");
   });
 
