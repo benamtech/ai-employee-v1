@@ -1,8 +1,8 @@
 {
   "schema": "amtech.task.v1",
   "id": "AMTECH-PROMPT-COMPRESSION-001",
-  "title": "Repository-native prompt compression with phase-local manifold scheduling",
-  "goal": "Implement and evaluate a deterministic Prompt IR, phase-local activation frontier, invariant-hypergraph closure, model-tokenizer accounting, verified renderers, and adversarial benchmark so coding-agent prompts minimize token cost without weakening repository authority, exact commands, stop conditions, or evidence boundaries.",
+  "title": "Repository-native query-conditioned coarse-to-fine prompt compression",
+  "goal": "Implement and evaluate a deterministic-trust-boundary prompt compiler that combines exact repository authority and invariant-hypergraph closure with question-aware coarse selection, explicit position scheduling, relevance-conditioned dynamic budgets, protected atom/span fine compression, tokenizer-specific rendering, and provenance-bounded recovery so coding-agent prompts reduce token cost without weakening execution or evidence fidelity.",
   "scope": [
     "mvp-build/decision/engine",
     "mvp-build/decision/benchmarks/prompt-compression",
@@ -11,27 +11,49 @@
   ],
   "constraints": [
     "No product runtime changes",
-    "Compressed prompts remain derived projections; canonical authority and task capsules remain semantic owners",
-    "Token cost must be measured per tokenizer, never inferred from character count",
-    "Mandatory invariant hyperedges must remain complete",
-    "Symbolic and hypervector methods require baseline outperformance and held-out evaluation",
-    "No P0/P1/P2/P3 result promotes itself to P4"
+    "Compressed prompts are derived projections; canonical authority and task capsules remain semantic owners",
+    "Mandatory invariant-hypergraph closure, task-local authority, and output/stop contracts are included before any ranking or pruning",
+    "Learned, perplexity, embedding, symbolic, and hypervector signals remain P0 ranking hypotheses and cannot establish authority or P2 correspondence",
+    "Compression operates first on typed atoms or recoverable spans; arbitrary subword deletion is not the initial implementation",
+    "Negation, branch rules, exact argv commands, paths, SHAs, evidence classes, and stop conditions are protected",
+    "Token cost is measured per target tokenizer, never inferred from characters",
+    "Recovery is deterministic, digest-bound, and rejects ambiguous mappings",
+    "No P0, P1, P2, or P3 result promotes itself to P4"
+  ],
+  "required_methods": [
+    "Question-aware coarse selection with deterministic structural baseline and optional p(task plus restrictive suffix given context) adapter",
+    "Reversed conditional direction and no-restrictive-suffix controls",
+    "Explicit document or atom position scheduler with dependency-order constraints and position-sweep evaluation",
+    "Dynamic relevance-ranked budget allocation with mandatory closure and risk floors",
+    "Optional contrastive task-conditioned atom importance compared with ordinary perplexity",
+    "Deterministic expansion and provenance-bounded output identifier recovery",
+    "Factorial ablations isolating each imported component"
   ],
   "success": [
     "At least 50 percent median token reduction versus canonical prose on declared tokenizers",
     "Zero critical invariant loss on adversarial benchmark cases",
-    "Deterministic expansion and digest verification",
-    "Non-inferior execution behavior established within a declared margin on available model runs",
+    "Complete mandatory-hyperedge and authority-route recall",
+    "Exact command, path, SHA, negation, evidence-class, and stop-condition retention",
+    "Deterministic expansion-map and digest verification",
+    "Non-inferior execution behavior established within a predeclared margin on available model runs",
+    "At least one held-out task set demonstrates whether each coarse selector, position scheduler, dynamic budget, contrastive scorer, and recovery component has causal benefit",
+    "Compression and recovery overhead remains below saved inference cost for admitted defaults",
     "Exact-head repository tests and build pass"
   ],
   "falsifiers": [
-    "Any branch, worktree-preservation, authority, negation, exact-command, stop-condition, or evidence-boundary invariant is lost",
+    "Any branch, worktree-preservation, authority, negation, exact-command, path, SHA, stop-condition, or evidence-boundary invariant is lost",
+    "Question-aware coarse ranking fails to improve gold-node Recall@k over deterministic structural or lexical baselines",
+    "Contrastive atom scoring fails to outperform ordinary perplexity or deterministic atom selection at equal budgets",
+    "Dynamic budgets fail to outperform uniform budgets on heterogeneous-relevance tasks",
+    "Position scheduling does not reduce middle-position execution variance",
+    "Recovery corrupts or ambiguously rewrites identifiers, commands, paths, or SHAs",
     "Symbolic rendering increases token count or execution variance without compensating benefit",
     "Hypervector retrieval fails to outperform deterministic diffusion or introduces authority drift",
-    "Compression/decompression overhead exceeds saved inference cost",
-    "The mathematical layer does not alter selection, proof obligations, or verification"
+    "Compression and decompression overhead exceeds saved inference cost",
+    "The mathematical layer does not alter selection, proof obligations, ablation design, or verification"
   ],
   "research_inputs": [
+    "ACL Anthology 2024.acl-long.91",
     "arXiv:2602.20338",
     "arXiv:2310.05736",
     "arXiv:2310.06839",
