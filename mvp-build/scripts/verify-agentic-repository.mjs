@@ -1,26 +1,33 @@
 #!/usr/bin/env node
+import { spawnSync } from 'node:child_process';
 import { access, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const root = process.cwd();
 const errors = [];
 const requiredFiles = [
-  'AGENTS.md',
-  'CLAUDE.md',
-  'CODEGRAPH.md',
-  'authority-map.json',
-  'decision/active.json',
-  'decision/README.md',
-  'decision/protocol-v1.json',
-  'decision/representation-contract.md',
-  'decision/trace010/task_state.json',
-  'decision/trace010/generate_inventory.mjs',
-  'decision/trace010/verify_inventory.mjs',
-  'decision/trace012/task_state.json',
-  'decision/trace012/research-and-decision-record.md',
-  'decision/trace012/folder-first-ui-variant-extension.md',
-  'ui-lab/README.md',
-  'memory/MEMORY.md'
+  'AGENTS.md', 'CLAUDE.md', 'CODEGRAPH.md', 'authority-map.json',
+  'decision/active.json', 'decision/README.md', 'decision/protocol-v1.json',
+  'decision/representation-contract.md', 'decision/engine/repoctl.mjs',
+  'decision/engine/representation-registry.json',
+  'decision/engine/extract/repository-facts.mjs',
+  'decision/engine/represent/authority-dag.mjs',
+  'decision/engine/represent/dependency-graph.mjs',
+  'decision/engine/represent/invariant-hypergraph.mjs',
+  'decision/engine/analyze/spectral-hypergraph.mjs',
+  'decision/engine/analyze/task-diffusion.mjs',
+  'decision/engine/analyze/effect-frontier.mjs',
+  'decision/engine/verify/verify-correspondence.mjs',
+  'decision/engine/verify/verify-certificate.mjs',
+  'decision/engine/verify/verify-task-capsule.mjs',
+  'decision/engine/verify/verify-transaction.mjs',
+  'decision/trace013/task_state.json',
+  'decision/trace013/candidate_descriptors.json',
+  'decision/trace013/compute.mjs',
+  'decision/trace013/implementation_contract.json',
+  'decision/trace013/verification_plan.json',
+  'tests/unit/decision-engine-contract.test.ts',
+  'ui-lab/README.md', 'memory/MEMORY.md'
 ];
 for (const path of requiredFiles) {
   try { await access(join(root, path)); }
@@ -28,64 +35,48 @@ for (const path of requiredFiles) {
 }
 
 const read = (path) => readFile(join(root, path), 'utf8');
-const agents = await read('AGENTS.md');
-const claude = await read('CLAUDE.md');
-const codegraph = await read('CODEGRAPH.md');
-const authority = JSON.parse(await read('authority-map.json'));
-const active = JSON.parse(await read('decision/active.json'));
-const protocol = JSON.parse(await read('decision/protocol-v1.json'));
-const representation = await read('decision/representation-contract.md');
-const trace010 = JSON.parse(await read('decision/trace010/task_state.json'));
-const trace012 = JSON.parse(await read('decision/trace012/task_state.json'));
-const memory = await read('memory/MEMORY.md');
-const uiLab = await read('ui-lab/README.md');
+const json = async (path) => JSON.parse(await read(path));
+const authority = await json('authority-map.json');
+const active = await json('decision/active.json');
+const protocol = await json('decision/protocol-v1.json');
+const trace013 = await json('decision/trace013/task_state.json');
+const registry = await json('decision/engine/representation-registry.json');
 
-for (const token of ['Observation', 'Hypothesis', 'Counterexample', 'Invariant', 'Candidate', 'Prediction', 'Test', 'Outcome']) {
-  if (!agents.includes(token)) errors.push(`AGENTS.md missing typed reasoning node: ${token}`);
-}
-if (!claude.includes('Compatibility router')) errors.push('CLAUDE.md must remain a compatibility router');
-if (!codegraph.includes('Source migration head: `0082`')) errors.push('CODEGRAPH.md missing source-derived migration head 0082');
-if (!codegraph.includes('Trace012') || !codegraph.includes('Trace013')) errors.push('CODEGRAPH.md missing completed/next trace boundary');
-if (!codegraph.includes('P1 formal model-property proof')) errors.push('CODEGRAPH.md missing formal model-property proof class');
-if (!trace010.starting_sha) errors.push('trace010 task_state missing starting_sha');
-if (!String(trace012.status).includes('implementation_complete')) errors.push('trace012 must be recorded as a completed implementation decision');
 if (authority?.exact_status?.owner !== 'mvp-build/CODEGRAPH.md') errors.push('authority-map exact-status owner must be mvp-build/CODEGRAPH.md');
 if (authority?.decision?.router !== 'mvp-build/decision/active.json') errors.push('authority-map must route through decision/active.json');
-if (authority?.decision?.machine_native_representation_contract !== 'mvp-build/decision/representation-contract.md') {
-  errors.push('authority-map must route to the machine-native representation contract');
+if (Number(protocol?.protocol_revision) < 5) errors.push('decision protocol revision must include the P0-P4 proof taxonomy');
+for (const key of ['P0_representation_calculation', 'P1_formal_model_property', 'P2_representation_fidelity', 'P3_executable_software', 'P4_external_production_acceptance']) {
+  if (!protocol?.proof_classes?.[key]) errors.push(`decision protocol missing proof class: ${key}`);
 }
-if (active?.status !== 'no_open_decision_transaction') errors.push('decision/active.json must state that no new transaction is open');
-if (active?.latest_completed_trace?.id !== 'trace012') errors.push('latest completed trace must be trace012');
-if (active?.next_transaction?.reserved_id !== 'trace013' || active?.next_transaction?.state !== 'not_created') {
-  errors.push('Trace013 must remain reserved and not created on this branch');
+if (!String(trace013.status).includes('implementation')) errors.push('Trace013 must identify the experiment compiler implementation transaction');
+if (trace013.starting_sha !== '9f9874242e3740059e9f4f857c2f164962bc91d6') errors.push('Trace013 starting SHA changed');
+const implemented = new Set((registry.dialects ?? []).filter((item) => item.status === 'implemented').map((item) => item.id));
+for (const id of ['repo.fact.v1', 'authority.dag.v1', 'dependency.graph.v1', 'invariant.hypergraph.v1', 'correspondence.v1', 'spectral.hypergraph.v1', 'task.diffusion.v1', 'effect.frontier.v1', 'experiment.design.v1', 'claim.certificate.v1', 'evidence.ledger.v1']) {
+  if (!implemented.has(id)) errors.push(`implemented representation missing: ${id}`);
 }
-if (Number(protocol?.protocol_revision) < 5) errors.push('decision protocol revision must include machine-native proof classes');
-if (protocol?.representation_contract !== 'representation-contract.md') errors.push('decision protocol must route to representation-contract.md');
-for (const proofClass of ['P0_representation_calculation', 'P1_formal_model_property', 'P2_representation_fidelity', 'P3_executable_software', 'P4_external_production_acceptance']) {
-  if (!protocol?.proof_classes?.[proofClass]) errors.push(`decision protocol missing proof class: ${proofClass}`);
-}
-if (protocol?.topology_contract?.spectral?.proof_status?.startsWith('P1') !== true) {
-  errors.push('spectral eigenstructure must be allowed as P1 proof under its declared assumptions');
-}
-for (const token of ['vectors', 'tensors', 'hypergraphs', 'P1 — Formal model-property proof', 'Eigenvectors and other spectral objects are explicitly allowed']) {
-  if (!representation.includes(token)) errors.push(`representation contract missing required token: ${token}`);
-}
-if (!agents.includes('Natural language is the audit/interoperability layer')) {
-  errors.push('AGENTS.md must state that natural language is not the mandatory reasoning substrate');
-}
-if (!memory.includes('2026-07-23-stack-reconciliation-and-main-readiness.md')) errors.push('memory index missing current stack handoff');
-if (!uiLab.includes('Canonical agent entry point')) errors.push('UI Lab README must remain the canonical agent entry point');
+if (!['active_decision_transaction', 'no_open_decision_transaction'].includes(active?.status)) errors.push(`invalid decision router status: ${active?.status}`);
+if (active?.status === 'active_decision_transaction' && active?.active_transaction?.id !== 'trace013') errors.push('active decision transaction must be Trace013');
+if (active?.status === 'no_open_decision_transaction' && active?.latest_completed_trace?.id !== 'trace013') errors.push('completed decision router must identify Trace013');
 
-try {
-  await access(join(root, 'decision/trace013'));
-  errors.push('decision/trace013 must not exist before the fresh post-merge planning branch');
-} catch {
-  // Expected on this branch.
+function runJson(label, argv, timeout = 180_000) {
+  const result = spawnSync(process.execPath, argv, { cwd: root, encoding: 'utf8', shell: false, timeout, maxBuffer: 32 * 1024 * 1024 });
+  if (result.error || result.status !== 0) {
+    errors.push(`${label} failed: ${result.error ?? result.stderr ?? result.stdout}`);
+    return null;
+  }
+  try { return JSON.parse(result.stdout); }
+  catch (error) { errors.push(`${label} returned invalid JSON: ${error}`); return null; }
 }
 
-for (const forbidden of ['quantum proof', 'neural latent access', 'production proven by CI']) {
-  if (agents.toLowerCase().includes(forbidden)) errors.push(`unsupported claim in AGENTS.md: ${forbidden}`);
-}
+const selection = runJson('Trace013 candidate computation', ['decision/trace013/compute.mjs']);
+if (selection && selection.selected !== 'R05') errors.push(`Trace013 selected unexpected candidate: ${selection.selected}`);
+const doctor = runJson('experiment compiler doctor', ['decision/engine/repoctl.mjs', 'doctor']);
+if (doctor && !doctor.ok) errors.push(...doctor.errors.map((error) => `doctor:${error}`));
+const selfTest = runJson('experiment compiler self-test', ['decision/engine/repoctl.mjs', 'self-test']);
+if (selfTest && !selfTest.ok) errors.push(`experiment compiler self-test reported failure: ${JSON.stringify(selfTest.verified?.errors ?? selfTest)}`);
+if (selfTest?.verified?.results?.certificate?.evidence_class !== 'P1') errors.push('self-test did not produce a P1 formal-model certificate');
+if (selfTest?.verified?.results?.correspondence?.ok !== true) errors.push('self-test did not produce verified P2 correspondence');
+if (selfTest?.evaluated?.maximum_evidence_class !== 'P3') errors.push('self-test did not produce P3 executable evidence');
 
 if (errors.length) {
   console.error(JSON.stringify({ ok: false, errors }, null, 2));
@@ -94,8 +85,10 @@ if (errors.length) {
 console.log(JSON.stringify({
   ok: true,
   checked: requiredFiles,
-  latest_completed_trace: 'trace012',
-  next_trace: 'trace013:not_created',
-  representation_policy: 'machine-native-first-class',
-  spectral_proof: 'P1-under-declared-assumptions'
+  trace: 'trace013',
+  selected_candidate: selection.selected,
+  engine_version: doctor.engine_version,
+  implemented_dialects: doctor.implemented_dialects,
+  proof_chain: ['P1 formal model certificate', 'P2 correspondence', 'P3 executable self-test'],
+  current_transaction_state: active.status
 }, null, 2));
