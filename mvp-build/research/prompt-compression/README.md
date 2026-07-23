@@ -1,6 +1,6 @@
 # Prompt Compression Research
 
-Status: active P0 research program; implementation awaits Trace014 admission.
+Status: active P0 research program with an executable forced-divergence envelope prototype; full Trace014 implementation remains unadmitted.
 
 ## Read order
 
@@ -32,5 +32,7 @@ Executable research artifacts:
 compile-forced-dreaming.mjs
 forced-dreaming.schema.json
 ```
+
+The prototype compiles an eight-slot independent exploration envelope over a twelve-dimensional registered lens basis. It verifies control-vector separation before emitting candidate slots and forces every explorer to produce mechanism, repository evidence, invariants, effects, predictions, falsifiers, patch bounds, and argv verification before convergence.
 
 Conditional perplexity, contrastive scoring, latent/context-space steering, embeddings, symbols, hypervectors, lens vectors, novelty, and diversity remain P0 search/ranking/rendering treatments behind the deterministic trust boundary. They cannot establish repository authority, P2 correspondence, executable P3 evidence, or P4 acceptance.
