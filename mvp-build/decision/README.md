@@ -3,6 +3,7 @@
 Status: **active for non-mechanical `mvp-build` work**  
 Updated: 2026-07-23  
 Machine contract: [`protocol-v1.json`](protocol-v1.json)  
+Machine-native representation contract: [`representation-contract.md`](representation-contract.md)  
 Transaction router: [`active.json`](active.json)  
 Latest completed trace: [`trace012/`](trace012/)  
 Next trace: `trace013`, reserved and not created until a fresh post-merge branch begins
@@ -13,7 +14,9 @@ No decision transaction is currently open. Completed traces explain implemented 
 
 Expand useful possibility space, then compress action into the smallest coherent implementation that preserves repository invariants and advances the production goal.
 
-Computation is useful only when repository evidence feeds it and it changes at least one of:
+Agents should use the representation that preserves the relevant software relationships best. Natural language is the interoperability and audit layer, not the mandatory reasoning substrate. Graphs, hypergraphs, vectors, tensors, embeddings, formal systems, state machines, geometric/topological structures, and executable matrices are first-class artifacts under `representation-contract.md`.
+
+Computation is useful when repository evidence feeds it and it changes at least one of:
 
 - candidate admission or rejection;
 - implementation scope;
@@ -23,12 +26,13 @@ Computation is useful only when repository evidence feeds it and it changes at l
 - experiment design;
 - rollback or stop conditions.
 
-The default control is the simpler evidence-and-invariants baseline. Mathematics earns causal status only through independent equal-feasibility implementation outcomes.
+The default control is the simpler evidence-and-invariants baseline. A mathematical or machine-checkable result may be decisive formal proof for its declared model property. Causal benefit requires an appropriate causal argument or independent equal-feasibility implementation outcomes.
 
 ## Required order
 
 ```text
 authority and exact-coordinate extraction
+→ one or more machine-native evidence representations
 → Observed / Inferred / Hypothesis / Unknown / NotApplicable matrix
 → proportional tier
 → typed predictions and falsifiers
@@ -37,7 +41,8 @@ authority and exact-coordinate extraction
 → explicit baseline semantics
 → simple evidence-and-invariants baseline
 → candidate topology when useful
-→ software-invariant hypergraph when useful
+→ software-invariant hypergraph and other formal models when useful
+→ formal/model certificates when available
 → bounded higher-order effect propagation
 → equal-feasibility controls
 → search and weight sensitivity
@@ -74,7 +79,19 @@ Invariant + Generator → ExecutableTest
 Prediction + Outcome → CalibrationUpdate
 ```
 
-Store evidence, hypotheses, rejected alternatives, predictions, tests, and outcomes. Do not store private chain-of-thought as repository authority.
+Store evidence, machine representations, generators, hypotheses, rejected alternatives, predictions, formal certificates, tests, and outcomes. Do not store private chain-of-thought as repository authority.
+
+## Proof classes
+
+Use the detailed contract in `representation-contract.md`:
+
+- **P0 representation calculation** — a computed score, vector, embedding, mode, clustering, centrality, or simulation result.
+- **P1 formal model-property proof** — a theorem, verified eigenstructure, solver certificate, model-checker result, invariant proof, spectral bound, or other reproducible certificate for an explicitly declared model.
+- **P2 representation-fidelity proof** — evidence that the model corresponds to the source/runtime boundary it claims to represent.
+- **P3 executable software proof** — accepted source, type, unit, integration, database, browser, build, image, or related evidence on the exact candidate.
+- **P4 external/production acceptance** — managed, provider, target-host, real channel/accessibility, commercial, recovery, trusted signing, pilot, deployment, or production evidence.
+
+P1 is real proof for the exact formal property and assumptions. A P1+P2 chain may satisfy a P3 gate when the gate defines and verifies a sound correspondence. No proof class is demoted, and none silently expands beyond its stated domain.
 
 ## Tiers
 
@@ -136,7 +153,7 @@ penalties:
   cost          0.15 × mean(Cost)
 ```
 
-Scores prioritize candidates. They do not prove architecture, correctness, or acceptance.
+Scores prioritize candidates. They are P0 unless accompanied by a valid stronger certificate; weighted ranking alone does not prove architecture, correctness, or acceptance.
 
 ## Two non-interchangeable topology layers
 
@@ -151,7 +168,7 @@ Vertices are candidate trajectories. Relations may encode:
 - common evidence or prerequisites;
 - conflicting resource or sequencing demands.
 
-This layer supports redundancy detection, diversity, lineage, clustering, and sensitivity. It cannot report software-invariant completion.
+This layer supports redundancy detection, diversity, lineage, clustering, and sensitivity. It cannot, merely by containing a candidate, report completion of software-invariant obligations.
 
 ### Software-invariant hypergraph
 
@@ -166,41 +183,49 @@ Examples:
 {VariantManifest, NeutralModel, ImportBoundary, IntentBridge, RegistryParity}
 ```
 
-Only this layer reports:
+This layer reports:
 
 - `C_touch` — weighted fraction of invariant hyperedges with any represented member;
 - `C_fractional` — weighted mean represented-member fraction;
 - `C_complete` — weighted fraction whose complete member set is represented;
-- `C_proved` — weighted fraction complete and accepted by independent behavioral proof on the exact candidate.
+- `C_proved` — weighted fraction complete and accepted by the proof contract assigned to that hyperedge.
 
-Representation is not proof. Complete representation with pending tests contributes to `C_complete`, not `C_proved`.
+Mere representation is P0. A theorem or machine certificate over the hypergraph may be P1. `C_proved` advances only when the edge’s declared proof class is satisfied, including P2/P3 correspondence when the edge is an executable-software obligation.
 
 ## Hypergraph spectral analysis
 
-For a genuine weighted hypergraph with incidence matrix `H`, hyperedge weights `W`, vertex degrees `D_v`, and hyperedge degrees `D_e`, a normalized hypergraph Laplacian may be computed as:
+For a genuine weighted hypergraph with incidence matrix `H`, hyperedge weights `W`, vertex degrees `D_v`, and hyperedge degrees `D_e`, an allowed normalized hypergraph Laplacian is:
 
 ```text
 L = I - D_v^(-1/2) H W D_e^(-1) Hᵀ D_v^(-1/2)
 ```
 
+Other operators, including directed, signed, tensor, random-walk, dual-hypergraph, simplicial, or non-normal operators, are allowed when their semantics and theorem basis are explicit.
+
 Permitted uses of eigenvalues/eigenvectors include:
 
+- formal certificates of operator-defined connectivity, decomposition, stability, convergence, observability, controllability, expansion, mixing, or mode separation;
+- solutions or certificates for declared exact or relaxed optimization problems;
 - identifying loosely connected obligation clusters;
 - exposing high-centrality prerequisites or shared failure boundaries;
 - detecting candidate portfolios concentrated in one mode;
 - selecting counterexamples that cross weakly coupled regions;
 - measuring sensitivity when edge membership or weights change;
-- comparing whether an implementation touches structurally distinct obligations.
+- comparing whether an implementation touches structurally distinct obligations;
+- providing bases for reconstruction or prediction with measured residual/error.
 
 Guards:
 
 - Use hypergraphs only for genuine multi-way obligations.
-- Use Hodge Laplacians only for a true simplicial complex with valid boundary operators.
-- Do not interpret a dominant eigenvector as “the best feature.”
-- Do not let centrality override prerequisite feasibility, risk stop conditions, or required evidence classes.
-- Do not hand-author weights to force an intended ranking.
-- Report instability under alternative edge definitions and bounded weights.
-- A spectral mode is a representation of relationships, not a causal mechanism or proof of correctness.
+- Use Hodge Laplacians only for a true simplicial/cellular complex with valid boundary operators.
+- Define the operator, domain, symmetry/normality, direction, signs, weights, normalization, and boundary conditions.
+- Verify eigenpair residuals, multiplicity, numerical conditioning, tolerances, and sensitivity.
+- Distinguish theorem, exact certificate, relaxation, approximation, and learned heuristic.
+- A dominant eigenvector may be the decisive proof or optimizer for the declared mathematical problem.
+- Calling that vector “the best feature” additionally requires a valid mapping from the mathematical objective to the feature decision.
+- Dependency feasibility or safety constraints remain binding unless the formal result proves that they are satisfied.
+- Do not hand-author weights or topology after selecting the desired result.
+- A P1 spectral proof establishes the declared model property; P2 correspondence is required before promoting it to the associated software property, and P4 remains separately defined.
 
 ## Higher-order effect propagation
 
@@ -214,7 +239,7 @@ current state
 → fourth-order commercial, support, or production-system obligation
 ```
 
-Model these effects as typed relations, not free-form optimism. Examples:
+Model these effects as typed relations, tensors, transition systems, hyperedges, constraints, or other inspectable structures rather than free-form optimism. Examples:
 
 - implementation enables capability;
 - capability introduces lifecycle obligation;
@@ -228,11 +253,11 @@ A higher-order relation is admitted only when it has:
 
 - an evidence or architecture basis;
 - a direction and effect type;
-- a falsifier or observable prediction;
+- a falsifier, formal property, or observable prediction;
 - a bounded horizon;
 - an explicit uncertainty label.
 
-Reachability, path counts, hyperedge participation, centrality, or spectral projection may identify hypotheses worth testing. They do not establish that the predicted effect will occur.
+Reachability, path counts, hyperedge participation, centrality, spectral projection, formal transition analysis, or solver output may prove properties of the declared model or identify hypotheses worth testing. An empirical future-world claim still requires the proof/evidence class appropriate to that claim.
 
 ## Feasible-domain controls
 
@@ -242,7 +267,7 @@ Mandatory coverage and invariants define:
 F = {D : size(D)=k, MandatoryCoverage(D)=1, Invariants(D)=1, Prerequisites(D)=1}
 ```
 
-Mandatory coverage and dependency feasibility are constraints, not objective bonuses.
+Mandatory coverage and dependency feasibility are constraints, not objective bonuses. A valid formal proof may establish that a candidate belongs to `F`; a score cannot waive membership.
 
 For `T2/T3`, every comparison searches the same feasible domain:
 
@@ -263,13 +288,16 @@ Report:
 - implementation-set Jaccard when implementation arms exist;
 - objective differences;
 - independent proof-yield differences;
+- formal certificate class;
 - causal classification.
 
-## Selection influence versus causal improvement
+## Selection influence, formal proof, and causal improvement
 
 A term is **selection-influencing** when it changes a selected set inside the same feasible domain.
 
-A term is **causally improving** only when an equal-feasibility implementation ablation improves independent outcomes such as:
+A result is **formally proving** when it supplies a valid P1/P2/P3 certificate for the declared property.
+
+A method is **causally improving** when an appropriate causal proof or equal-feasibility implementation ablation improves independent outcomes such as:
 
 - defects discovered before patching;
 - complete invariant proof obligations;
@@ -280,22 +308,23 @@ A term is **causally improving** only when an equal-feasibility implementation a
 - executable verification yield;
 - prediction calibration.
 
-Ranking differences, eigenvector changes, objective deltas, edge touch, complete representation, or narrative plausibility do not establish causal improvement.
+Ranking differences, eigenvector changes, objective deltas, edge touch, complete representation, or narrative plausibility do not by themselves establish causal improvement. This does not prevent a verified eigenstructure from being formal proof of its declared property.
 
 ## Data-driven experiment loop
 
 For each selected implementation or planning method:
 
 1. record predictions before implementation;
-2. define measurable outcomes and falsifiers;
+2. define measurable outcomes, formal properties, and falsifiers;
 3. preserve the simple baseline arm when feasible;
 4. keep compared arms inside the same prerequisite domain;
-5. run focused and broad verification;
+5. run formal/model checks plus focused and broad executable verification;
 6. record defects, scope, review findings, proof yield, reversions, and external blockers;
 7. update calibration rather than rewriting the prediction;
-8. retire mathematical layers that do not outperform simpler methods.
+8. retain formal methods that provide valuable certificates even when they do not claim causal superiority;
+9. retire predictive or ranking layers that do not outperform simpler methods for their declared purpose.
 
-Longitudinal models such as Koopman/DMD/DMDc/EDMDc require repeated homogeneous, consistently sampled, task-conditioned episodes. Fit on training episodes, evaluate held-out one-step and multistep prediction, compare with persistence and ordinary regression, and retain residual/diversity controls. Keep the model disabled when it does not outperform the simpler baseline.
+Longitudinal models such as Koopman/DMD/DMDc/EDMDc require repeated homogeneous, consistently sampled, task-conditioned episodes. Fit on training episodes, evaluate held-out one-step and multistep prediction, compare with persistence and ordinary regression, and retain residual/diversity controls. Algebraic properties of the fitted operator may be P1; predictive or causal claims require the appropriate held-out or intervention evidence.
 
 ## Implementation compression
 
@@ -305,16 +334,16 @@ Exploration is not the patch list. The implementation transaction must:
 - resolve the highest-value current dependency boundary;
 - reuse existing authority rather than create a parallel ontology/runtime;
 - bound scope, risk, and operational burden;
-- map every selected software hyperedge to a complete behavioral proof plan or honest blocker;
+- map every selected software hyperedge to a formal certificate, complete behavioral proof plan, or honest blocker according to its declared proof class;
 - exclude unrelated cleanup;
 - define rollback and stop conditions.
 
-When mathematics is non-causal, use the evidence-and-invariants result and record the mathematics as descriptive.
+When a formal proof is decisive, use it and record its assumptions and correspondence. When a mathematical layer is merely descriptive or does not improve its declared task, use the simpler result and record that limitation.
 
 ## Verification and evidence
 
 ```text
-decision verifier
+representation generator and formal/model verifier
 → narrow behavioral proof
 → source/migration change
 → affected suites
@@ -323,7 +352,7 @@ decision verifier
 → prediction/outcome calibration
 ```
 
-Focused PR workflows must explicitly check out and verify the branch head SHA, not a synthetic merge ref. Decision records, documentation, source, unit, integration, CI, managed database, provider, browser/channel, target host, commercial lifecycle, recovery, trusted signing, pilot, deployment, and production are separate evidence classes.
+Focused PR workflows must explicitly check out and verify the branch head SHA, not a synthetic merge ref. Formal proof, representation fidelity, documentation, source, unit, integration, CI, managed database, provider, browser/channel, target host, commercial lifecycle, recovery, trusted signing, pilot, deployment, and production are distinct evidence classes with explicit correspondence rules.
 
 ## Trace artifacts
 
@@ -336,6 +365,7 @@ candidate_population.json
 candidate_scores.json
 candidate_graph.json
 software_invariant_hypergraph.json
+representation schemas/generators/certificates as applicable
 selection_comparison.json
 selected_exploration.json
 selected_implementation.json
@@ -365,6 +395,7 @@ Keep one open trace per active transaction. Preserve complete historical traces.
 
 ```text
 source / migrations / tests / workflows
+→ machine-native representations and certificates
 → completed or active trace
 → active production program and evidence map
 → architecture and scoped CODEGRAPH
@@ -373,4 +404,4 @@ source / migrations / tests / workflows
 → PR or release record
 ```
 
-Computation improves how a choice is made. Evidence establishes what is true.
+Computation improves how a choice is made. Formal proof establishes the property it actually proves. Evidence establishes the boundary it actually exercises.
