@@ -123,6 +123,10 @@ apps/web/app/_components/ui-variant/
 ui-lab/README.md
   neutral capability model, folder-first variants, bounded host, and agent-first UI Lab
 
+decision/representation-contract.md
+  vectors, matrices, tensors, graphs, hypergraphs, spectral objects,
+  formal systems, geometric/topological structures, and proof correspondence
+
 infra/scripts/release-manifest.mjs
 infra/scripts/verify-release-manifest.mjs
 infra/scripts/backup-restore.mjs
@@ -131,7 +135,7 @@ infra/scripts/deploy-rollback.mjs
   exact release identity, independent verification, recovery, and rollback guards
 ```
 
-## Decision topology and current traces
+## Decision topology, machine representations, and current traces
 
 Candidate search topology and software-invariant topology are non-interchangeable:
 
@@ -142,10 +146,22 @@ candidate graph
 
 software invariant hypergraph
   vertices: actual entities, states, and proof obligations
-  use: touch, fractional, complete, and independently proved coverage
+  use: touch, fractional, complete, and proof-class-aware coverage
 ```
 
-Mandatory invariants are feasibility constraints. Eigenvectors, graph density, spectral gaps, weighted scores, edge touch, and represented nodes can guide exploration only. They do not override dependency order or establish architecture, causality, or acceptance.
+Agents may use non-language representations as first-class reasoning and proof artifacts: AST/CFG/data-flow graphs, dependency DAGs, incidence matrices, tensors, embeddings, transition systems, state-space models, constraints, proof terms, eigenspaces, and valid geometric/topological structures. Natural language is the audit/interoperability layer.
+
+Proof classes are distinct:
+
+- P0 representation calculation;
+- P1 formal model-property proof or machine-checkable certificate;
+- P2 representation-to-source/runtime fidelity proof;
+- P3 exact-candidate executable software proof;
+- P4 external/production acceptance.
+
+Eigenvectors, eigenspaces, singular vectors, Laplacians, spectral bounds, solver certificates, and model-checker results may be decisive proof at P1. They may satisfy P3 only when a verified P2 correspondence establishes that the formal property is the software property required by the gate. They do not silently establish causal benefit or P4.
+
+Mandatory invariants and dependency feasibility are hard constraints unless a valid formal certificate proves they are satisfied. Weighted scores and centrality cannot waive them. Do not hand-author graph structure or weights after choosing the desired implementation.
 
 - `decision/trace007/` — commercial/effect transaction and baseline semantics.
 - `decision/trace008/` — release, recovery, rollback, and capacity compression.
@@ -155,13 +171,13 @@ Mandatory invariants are feasibility constraints. Eigenvectors, graph density, s
 - `decision/trace012/` — UI Lab and folder-first UI variants; latest completed trace.
 - `decision/trace013/` — reserved and absent until the next branch begins a fresh computation.
 
-Representation is never proof. Causal improvement remains unestablished without equal-feasibility implementation outcomes.
+Causal improvement remains unestablished without an appropriate formal causal argument or equal-feasibility implementation outcomes. Formal property proofs remain valid within their declared model and correspondence boundary.
 
 ## Workstream state and open gates
 
 | Boundary | Cumulative source candidate | Still open |
 |---|---|---|
-| repository/source truth | authority routers, direct typed Manager, structural governance, exact-head workflows, cumulative PR stack | final exact-head verification after each merge and final `main` merge |
+| repository/source truth | authority routers, machine-native representation contract, direct typed Manager, structural governance, exact-head workflows, cumulative PR stack | final exact-head verification after each merge and final `main` merge |
 | protocol/capability | current authority interception, scoped streams, connector manifests/discovery, exact conversational decisions | live remote MCP/OAuth/provider/client lifecycle |
 | database | forward migrations through `0082`, blank-ledger and direct PostgreSQL contracts | disposable managed Supabase migration, security, advisors, backup, restore, rollback |
 | release identity | five exact-SHA image definitions, signed manifest, independent verifier | trusted production signing authority and registry retention |
@@ -174,9 +190,11 @@ Representation is never proof. Causal improvement remains unestablished without 
 
 ## Active authority map
 
-- `authority-map.json` — machine router.
+- `authority-map.json` — machine router and proof-class map.
 - `STANDARD.md` plus ratified amendments — normative requirements.
-- `decision/active.json` and `decision/protocol-v1.json` — transaction router and method.
+- `decision/active.json` and `decision/protocol-v1.json` — transaction router and machine contract.
+- `decision/README.md` — computation-first human method.
+- `decision/representation-contract.md` — first-class non-language representation and proof policy.
 - `production-readiness-program/README.md` — sole active production route.
 - `production-readiness-program/10-test-suite-disposition.md` — test/evidence classification.
 - `production-readiness-program/07-verification-and-handoff-matrix.md` — evidence/handoff boundary.
