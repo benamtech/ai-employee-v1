@@ -1,0 +1,104 @@
+{
+  "schema": "trace013.retrospective-cases.v1",
+  "top_k": 80,
+  "cases": [
+    {
+      "id": "trace007-commercial-effect",
+      "goal": "Preserve database-authoritative rate budget provider effect accounting ambiguity reconciliation and owner proof invariants.",
+      "task_seeds": ["commercial effect", "provider receipt", "accounting receipt", "rate authority", "ambiguous reconciliation"],
+      "expected_source_paths": [
+        "mvp-build/apps/manager/src/server.ts",
+        "mvp-build/apps/manager/src/lib/model-gateway-commercial.ts",
+        "mvp-build/packages/db/migration-ledger.mjs",
+        "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+      ],
+      "expected_test_paths": [
+        "mvp-build/tests/unit/ws07-commercial-admission.test.ts",
+        "mvp-build/tests/unit/ws06-ws08-failure-manifold.test.ts",
+        "mvp-build/tests/unit/model-gateway-request-envelope.test.ts"
+      ]
+    },
+    {
+      "id": "trace008-release-recovery",
+      "goal": "Bind exact release images manifest provenance backup restore rollback accepted work conservation and proof refinding.",
+      "task_seeds": ["release manifest", "five images", "backup restore", "rollback", "proof refinding"],
+      "expected_source_paths": [
+        "mvp-build/infra/scripts/release-manifest.mjs",
+        "mvp-build/infra/scripts/verify-release-manifest.mjs",
+        "mvp-build/infra/scripts/backup-restore.mjs",
+        "mvp-build/infra/scripts/restore-verify.mjs",
+        "mvp-build/infra/scripts/deploy-rollback.mjs"
+      ],
+      "expected_test_paths": [
+        "mvp-build/tests/unit/ws06-ws08-failure-manifold.test.ts",
+        "mvp-build/tests/unit/release-evidence-contract.test.ts",
+        "mvp-build/tests/unit/production-topology-acceptance.test.ts"
+      ]
+    },
+    {
+      "id": "trace009-ui-projection",
+      "goal": "Consolidate one owner projection compiler layout planner renderer registry and scoped stream without fixture authority drift.",
+      "task_seeds": ["owner projection", "operating projection", "layout planner", "renderer registry", "stream scope"],
+      "expected_source_paths": [
+        "mvp-build/packages/shared/src/operating-projection.ts",
+        "mvp-build/packages/shared/src/operating-layout.ts",
+        "mvp-build/apps/web/app/agent/[employeeId]/owner-projection-controller.ts"
+      ],
+      "expected_test_paths": [
+        "mvp-build/tests/unit/ui-architecture-fitness.test.ts",
+        "mvp-build/tests/unit/web-operating-snapshot-contract.test.ts",
+        "mvp-build/tests/unit/ui-presentation-coverage.test.ts"
+      ]
+    },
+    {
+      "id": "trace010-connector-substrate",
+      "goal": "Implement provider-neutral connector discovery guided setup revocation reconnect and exact conversational decision context.",
+      "task_seeds": ["connector lifecycle", "guided setup", "revoke reconnect", "capability discovery", "decision context"],
+      "expected_source_paths": [
+        "mvp-build/packages/shared/src/adaptive-connector-runtime.ts",
+        "mvp-build/apps/manager/src/lib/connector-lifecycle.ts",
+        "mvp-build/apps/manager/src/lib/channel-decisions.ts",
+        "mvp-build/packages/db/migrations/0080_connector_operating_substrate.sql",
+        "mvp-build/packages/db/migrations/0081_connector_reactivation_normalization.sql"
+      ],
+      "expected_test_paths": [
+        "mvp-build/tests/unit/adaptive-connector-runtime.test.ts",
+        "mvp-build/tests/unit/capability-drawer-setup-contract.test.ts",
+        "mvp-build/tests/unit/connector-capability-binding-contract.test.ts"
+      ]
+    },
+    {
+      "id": "trace011-employee-ui-port",
+      "goal": "Add an employee UI port with presentation adapters while preserving neutral capability fidelity and Manager authority.",
+      "task_seeds": ["employee UI port", "presentation adapters", "profile context", "capability fidelity"],
+      "expected_source_paths": [
+        "mvp-build/packages/shared/src/employee-ui-presentation.ts",
+        "mvp-build/apps/web/app/_components/employee-ui/EmployeeUiPort.tsx",
+        "mvp-build/apps/manager/src/lib/profile-context.ts",
+        "mvp-build/docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md"
+      ],
+      "expected_test_paths": [
+        "mvp-build/tests/unit/employee-ui-port.test.ts",
+        "mvp-build/tests/unit/ui-presentation-coverage.test.ts"
+      ]
+    },
+    {
+      "id": "trace012-folder-first-ui-lab",
+      "goal": "Create an agent-first UI Lab and folder-first complete employee UI variants behind a neutral model and bounded intent bridge.",
+      "task_seeds": ["UI Lab", "folder first variants", "neutral employee model", "bounded intent bridge", "variant registry"],
+      "expected_source_paths": [
+        "mvp-build/ui-lab/README.md",
+        "mvp-build/scripts/ui-variant.mjs",
+        "mvp-build/scripts/ui-variant-collaborator.mjs",
+        "mvp-build/apps/web/app/_components/ui-variant/UiVariantHost.tsx",
+        "mvp-build/apps/web/app/_components/ui-variant/buildEmployeeExperienceModel.ts",
+        "mvp-build/apps/web/ui-variants/contract.ts"
+      ],
+      "expected_test_paths": [
+        "mvp-build/tests/unit/ui-variant-standard.test.ts",
+        "mvp-build/tests/unit/ui-lab-workbench-contract.test.ts",
+        "mvp-build/tests/unit/ui-lab-registry.test.ts"
+      ]
+    }
+  ]
+}
