@@ -4,13 +4,14 @@ Status: **active execution order**
 Updated: 2026-07-23  
 Exact structural status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
 Decision router: [`../decision/active.json`](../decision/active.json)  
-Decision protocol: [`../decision/README.md`](../decision/README.md)
+Decision protocol: [`../decision/README.md`](../decision/README.md)  
+Representation/proof contract: [`../decision/representation-contract.md`](../decision/representation-contract.md)
 
 This is the sole active roadmap. Issue state lives in `08-production-issue-vector.json` and `13-resolution-ledger.json`; workstream exits live in `09-workstream-execution-map.md`; test/evidence authority lives in `10-test-suite-disposition.md` and `07-verification-and-handoff-matrix.md`.
 
 ## Current checkpoint
 
-The cumulative source candidate has implemented and historically verified the locally/CI-provable portions of WS-01 through WS-09, including migrations through `0082`, typed Manager authority, connector and commercial substrate, release-image and recovery machinery, the production owner projection, UI presentation adapters, and folder-first UI variants.
+The cumulative source candidate has implemented and historically verified the locally/CI-provable portions of WS-01 through WS-09, including migrations through `0082`, typed Manager authority, connector and commercial substrate, release-image and recovery machinery, the production owner projection, UI presentation adapters, folder-first UI variants, and a first-class machine-native representation/proof contract.
 
 The repository is currently at an **integration checkpoint**, not an external-acceptance checkpoint:
 
@@ -29,20 +30,23 @@ The lower historical PR #35 coordinate is red while the cumulative PR #40 coordi
 ## Workstream decision rule
 
 ```text
-authority/evidence/Unknown extraction
+authority and evidence extraction
+→ machine-native representation extraction
+→ Observed / Inferred / Hypothesis / Unknown / NotApplicable
 → independent candidate batches
 → invariant/prerequisite filter
 → simple evidence-and-invariants baseline
 → candidate and software topology when useful
+→ formal/model certificate when useful
 → equal-feasibility controls
 → search and weight sensitivity
 → implementation compression
-→ complete behavioral proof plan
+→ proof plan by declared proof class
 → implementation and exact verification
 → current-document and memory reconciliation
 ```
 
-A workstream map is not a candidate population. A score is not a patch list. Candidate-edge touch is not software completion. Hypergraph eigenvectors and spectral measures can expose centrality, coupling, bottlenecks, or sensitivity, but dependency feasibility remains a hard constraint. Without implementation-level ablation, mathematics remains descriptive or selection-influencing.
+A workstream map is not a candidate population. A score is not a patch list. Candidate-edge touch is not software completion. Hypergraph eigenvectors, spectral measures, theorem provers, solvers, and model checkers may provide decisive formal proof for their declared model property. Dependency feasibility remains a hard constraint unless the certificate proves it. P2 representation fidelity is required before a P1 result satisfies the associated software gate, and causal or production claims require their own proof/evidence class.
 
 No new planning transaction is open. Trace012 is the latest completed trace; Trace013 is reserved for a fresh post-merge branch.
 
@@ -72,8 +76,8 @@ Delivered in the cumulative source candidate:
 - one repository contract, one product contract, short compatibility routers;
 - one exact-status owner: `mvp-build/CODEGRAPH.md`;
 - machine routers at `authority-map.json` and `decision/active.json`;
-- one Standard family, one decision protocol, one active program, one memory index;
-- structural governance based on schemas, references, authority, evidence class, and reproducibility;
+- one Standard family, one decision protocol, one machine-native representation contract, one active program, one memory index;
+- structural governance based on schemas, references, authority, evidence class, proof class, and reproducibility;
 - exact-head broad gates without weakened assertions;
 - historical and completed traces separated from the next planning transaction.
 
@@ -203,4 +207,4 @@ Exit: supported-browser/WCAG acceptance, declared safe capacity, and complete co
 
 ## Frozen candidate rule
 
-Freeze only after every non-waivable gate passes on one exact candidate with migration hashes, image digests, managed database, provider, target-host, browser/channel, commercial, recovery, trusted signing, and pilot evidence. Pilot is a measured production stage, never a substitute for prerequisites.
+Freeze only after every non-waivable gate passes on one exact candidate with migration hashes, image digests, managed database, provider, target-host, browser/channel, commercial, recovery, trusted signing, and pilot evidence. A formal certificate may discharge a gate only when that gate explicitly defines and verifies the required model-to-system correspondence. Pilot is a measured production stage, never a substitute for prerequisites.
