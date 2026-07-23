@@ -1,0 +1,66 @@
+{
+  "allowed_evidence_classes": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "external_blockers": [
+    "Gmail pubsub and OAuth redirect proof vars",
+    "Stripe Connect client id proof var",
+    "QuickBooks OAuth redirect and webhook verifier proof vars",
+    "fresh real onboarding employee proof",
+    "ops Caddy/DNS/Cloudflare/backup/red-health/egress proofs",
+    "pilot production acceptance"
+  ],
+  "goal": "Update authoritative production state documentation after exact-HEAD c83c23b production bring-up, database status verification, deploy smoke proof, and production readiness boundary review, while marking UI Lab non-authoritative for the next redesign branch.",
+  "maximum_patch": {
+    "allowed_paths": [
+      "CODEGRAPH.md",
+      "authority-map.json",
+      "memory/MEMORY.md",
+      "memory/2026-07-23-production-state-after-c83c23b.md",
+      "production-readiness-program/README.md",
+      "production-readiness-program/04-dependency-ordered-production-plan.md",
+      "production-readiness-program/09-workstream-execution-map.md",
+      "production-readiness-program/13-resolution-ledger.json",
+      "decision/trace017",
+      "decision/active.json"
+    ],
+    "expansion_rule": "Additional documentation paths require discovered_later entries before evaluation.",
+    "maximum_files": 12
+  },
+  "non_goals": [
+    "Do not print or commit production secret values.",
+    "Do not claim P4 production acceptance from P3/local-mirror evidence.",
+    "Do not make UI Lab authoritative; the next task branch will redesign it.",
+    "Do not change executable runtime behavior in this docs transaction."
+  ],
+  "paths": [
+    "CODEGRAPH.md",
+    "authority-map.json",
+    "memory/MEMORY.md",
+    "production-readiness-program/README.md",
+    "production-readiness-program/04-dependency-ordered-production-plan.md",
+    "production-readiness-program/09-workstream-execution-map.md",
+    "production-readiness-program/13-resolution-ledger.json"
+  ],
+  "task_id": "TRACE017-PRODUCTION-STATE-DOCS-001",
+  "task_seeds": [
+    "production readiness",
+    "local mirror proof",
+    "deploy smoke",
+    "production env",
+    "database migrations",
+    "Caddy",
+    "Hermes runtime",
+    "host provisioner",
+    "UI Lab redesign",
+    "P4 gates"
+  ],
+  "unknowns": [
+    "Provider journey proofs remain unavailable until Gmail, Stripe, and QuickBooks missing env/proof requirements are supplied and exercised.",
+    "Existing live employee acceptance remains blocked without a fresh real onboarding flow and current proof artifacts.",
+    "Ops proofs for Caddy activation, DNS-01 wildcard, Cloudflare desired state, backup/restore, red-health, and egress are not yet produced."
+  ]
+}

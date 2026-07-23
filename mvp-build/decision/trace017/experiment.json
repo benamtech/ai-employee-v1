@@ -1,0 +1,86 @@
+{
+  "content_digest": "sha256:add5c14ec6eebced407b42086456f2ac3bd4f42a94d6fcc05c311bf95125ca6c",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T21:14:37.220Z",
+  "payload": {
+    "baseline": {
+      "id": "evidence-and-invariants",
+      "same_prerequisite_domain": true
+    },
+    "evidence_classes": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "lineage": {
+      "previous_digest": "sha256:7f642c1bd7897373df09417595c00937e5c90bd303627aad4fbd5c0c9aa08dc8",
+      "root_digest": "sha256:f80b87abe8ff4ae526bf3c5060acfa8d2998207064bd40cb428f302a29380b7f"
+    },
+    "metrics": [
+      "changed_file_recall",
+      "required_test_recall",
+      "missed_invariant_edges",
+      "unnecessary_scope",
+      "time_to_valid_plan",
+      "time_to_exact_head_green",
+      "review_defects",
+      "context_volume"
+    ],
+    "outcomes": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "p1-docs-name-current-trace-and-proof-boundary",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "p2-memory-routes-next-ui-session-correctly",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "predictions": [
+      {
+        "claim": "CODEGRAPH and production readiness docs will name trace014 through trace017 and c83c23b local-mirror production proof without claiming P4.",
+        "expected": 1,
+        "falsifier": "Docs still say Trace014 is absent/reserved or promote local mirror proof to production acceptance.",
+        "horizon": 1,
+        "id": "p1-docs-name-current-trace-and-proof-boundary",
+        "metric": "authority_document_consistency",
+        "type": "documentation-consistency"
+      },
+      {
+        "claim": "Memory index will route the next session to a current production-state handoff and explicitly mark UI Lab redesign as the next fresh branch, not an authoritative current surface.",
+        "expected": 1,
+        "falsifier": "Memory omits production state or treats current UI Lab as authoritative for new UI work.",
+        "horizon": 1,
+        "id": "p2-memory-routes-next-ui-session-correctly",
+        "metric": "handoff_routing_consistency",
+        "type": "handoff-routing"
+      }
+    ],
+    "status": "finished",
+    "stop_conditions": [
+      "hard invariant violation",
+      "red exact-head gate",
+      "evidence-class promotion",
+      "unbounded patch scope"
+    ],
+    "task_id": "TRACE017-PRODUCTION-STATE-DOCS-001"
+  },
+  "provenance": {
+    "chronology": "immutable root experiment retained in experiment.initial.json",
+    "generator": "decision/engine/repoctl.mjs"
+  },
+  "schema": "experiment.design.v1",
+  "source_sha": "c83c23be7d9bc5c36c164579ff47c16c45bb97a0"
+}

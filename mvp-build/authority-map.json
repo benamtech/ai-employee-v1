@@ -4,16 +4,17 @@
   "updated_at": "2026-07-23",
   "self": {
     "path": "mvp-build/authority-map.json",
-    "last_reconciliation": "Trace013 experiment compiler completion and stack readiness",
-    "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions."
+    "last_reconciliation": "Trace017 production state documentation after c83c23b local production mirror proof",
+    "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions or secret values."
   },
   "exact_status": {
     "owner": "mvp-build/CODEGRAPH.md",
-    "transient_acceptance": "GitHub Actions and retained release records",
-    "pull_request_record": "the current cumulative integration pull request"
+    "transient_acceptance": "GitHub Actions, retained release records, and retained infra proof files",
+    "branch_record": "task/new-task-20260723 at c83c23be7d9bc5c36c164579ff47c16c45bb97a0",
+    "merge_descendant_rule": "the future main merge commit requires its own exact-head evidence"
   },
   "normative": ["mvp-build/STANDARD.md", "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"],
-  "agent_entry": ["AGENTS.md", "mvp-build/AGENTS.md", "mvp-build/decision/engine/repoctl.mjs"],
+  "agent_entry": ["AGENTS.md", "mvp-build/AGENTS.md", "mvp-build/decision/SESSION_ONBOARDING.md", "mvp-build/decision/engine/repoctl.mjs"],
   "active_plan": [
     "mvp-build/production-readiness-program/README.md",
     "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
@@ -27,9 +28,10 @@
     "representation_contract": "mvp-build/decision/representation-contract.md",
     "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
     "representation_registry": "mvp-build/decision/engine/representation-registry.json",
-    "latest_completed_trace": "mvp-build/decision/trace013/",
-    "next_trace_reserved": "mvp-build/decision/trace014/",
-    "next_trace_state": "not_created"
+    "latest_completed_trace": "mvp-build/decision/trace017/",
+    "trace016_state": "source/proof repair retained; repoctl finish not claimed because admitted impact was exceeded",
+    "next_trace_reserved": "mvp-build/decision/trace018/",
+    "next_trace_state": "not_created_until_fresh_task_branch_after_main_merge"
   },
   "proof_classes": {
     "P0": "representation calculation or hypothesis",
@@ -51,14 +53,19 @@
     "trace009": "UI projection architecture search and calibration",
     "trace010": "connector operating substrate",
     "trace011": "employee UI port and presentation adapters",
-    "trace012": "UI Lab and folder-first UI variant standard",
-    "trace013": "repository-native software experiment compiler"
+    "trace012": "UI Lab and folder-first UI variant standard; historical for next redesign",
+    "trace013": "repository-native software experiment compiler",
+    "trace014": "canonical session bootstrap enforcement",
+    "trace015": "repair frontier and generated full-stack strategy map",
+    "trace016": "production Caddy/upstream/runtime repair with retained P3 local mirror proof; transaction finish not claimed",
+    "trace017": "production state authority, ledger, and memory reconciliation"
   },
   "architecture": "mvp-build/docs/architecture/",
   "memory": {
     "index": "mvp-build/memory/MEMORY.md",
-    "latest": "mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md"
+    "latest": "mvp-build/memory/2026-07-23-production-state-after-c83c23b.md"
   },
   "historical": ["mvp-build/second-half-plan/", "mvp-build/GAPS.md", "mvp-build/REMEDIATION.md", "complete prior decision traces"],
-  "nonpromotion": ["P0_to_P1", "P1_to_P2", "P2_to_P3", "P3_to_P4", "documentation_to_source", "source_to_ci", "ci_to_external_acceptance"]
+  "non_authoritative_for_next_ui_redesign": ["mvp-build/ui-lab/", "mvp-build/apps/web/ui-variants/"],
+  "nonpromotion": ["P0_to_P1", "P1_to_P2", "P2_to_P3", "P3_to_P4", "documentation_to_source", "source_to_ci", "ci_to_external_acceptance", "local_mirror_to_external_acceptance"]
 }

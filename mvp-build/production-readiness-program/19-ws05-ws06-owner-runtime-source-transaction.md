@@ -41,7 +41,7 @@ Product source commit `f4c0babb8c2ec9b0cb331cb0abee557f0941ef9a`:
   - repository governance: 13 controls passed, `GOV-03` failed because two program documents (`03` and `05`) remained under the nested path.
 - The relocation defect was corrected by removing the nested subtree and restoring both documents unchanged under `mvp-build/production-readiness-program/`.
 
-Final exact-head workflow results must be attached to PR #34. Until then, source behavior is not CI-accepted on the final candidate.
+Current exact-head status is owned by `../CODEGRAPH.md`, retained workflows, and retained proof files. This historical source transaction does not certify `task/new-task-20260723`, any descendant `main` merge commit, or fixture-free WS-05/WS-06 acceptance.
 
 ## WS-06 boundary
 

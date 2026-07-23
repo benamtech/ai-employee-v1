@@ -1,0 +1,103 @@
+{
+  "discovered_later": [
+    {
+      "path": "mvp-build/production-readiness-program/19-ws05-ws06-owner-runtime-source-transaction.md",
+      "reason": "stale PR #34 exact-head wording discovered by repository-wide documentation scan after initial admission; update is documentation-only and required for current state consistency"
+    }
+  ],
+  "maximum_patch": {
+    "allowed_paths": [
+      "mvp-build/CODEGRAPH.md",
+      "mvp-build/authority-map.json",
+      "mvp-build/memory/MEMORY.md",
+      "mvp-build/memory/2026-07-23-production-state-after-c83c23b.md",
+      "mvp-build/production-readiness-program/README.md",
+      "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+      "mvp-build/production-readiness-program/09-workstream-execution-map.md",
+      "mvp-build/production-readiness-program/13-resolution-ledger.json",
+      "mvp-build/decision/trace017"
+    ],
+    "maximum_files": 12
+  },
+  "predictions": [
+    {
+      "claim": "CODEGRAPH and production readiness docs will name trace014 through trace017 and c83c23b local-mirror production proof without claiming P4.",
+      "expected": 1,
+      "falsifier": "Docs still say Trace014 is absent/reserved or promote local mirror proof to production acceptance.",
+      "horizon": 1,
+      "id": "p1-docs-name-current-trace-and-proof-boundary",
+      "metric": "authority_document_consistency",
+      "type": "documentation-consistency"
+    },
+    {
+      "claim": "Memory index will route the next session to a current production-state handoff and explicitly mark UI Lab redesign as the next fresh branch, not an authoritative current surface.",
+      "expected": 1,
+      "falsifier": "Memory omits production state or treats current UI Lab as authoritative for new UI work.",
+      "horizon": 1,
+      "id": "p2-memory-routes-next-ui-session-correctly",
+      "metric": "handoff_routing_consistency",
+      "type": "handoff-routing"
+    }
+  ],
+  "proof_obligations": [
+    {
+      "candidate_evidence": [
+        "npm run repo:verify:quick",
+        "repoctl evaluate/finish/verify"
+      ],
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:2a7f7dba6be1",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "npm run repo:verify:quick",
+        "repoctl evaluate/finish/verify"
+      ],
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/authority-map.json:2cc915bac733",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "npm run repo:verify:quick",
+        "repoctl evaluate/finish/verify"
+      ],
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:3ce25668dcf2",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "npm run repo:verify:quick",
+        "repoctl evaluate/finish/verify"
+      ],
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/README.md:5c127a3f419b",
+      "status": "planned"
+    }
+  ],
+  "selected_candidates": [
+    "TRACE017-DOCS-AUTHORITY-UPDATE"
+  ],
+  "verification": {
+    "commands": [
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:quick"
+        ],
+        "timeout_ms": 300000
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "verify",
+          "--transaction",
+          "decision/trace017",
+          "--phase",
+          "admitted"
+        ],
+        "timeout_ms": 120000
+      }
+    ]
+  }
+}

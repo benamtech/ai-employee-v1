@@ -1,0 +1,51 @@
+{
+  "content_digest": "sha256:5502cd54b412db89f49ca013a6dea9a33175ed8d157ae6787b2f24ccc9d8c1a9",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T21:14:37.235Z",
+  "payload": {
+    "base_sha": "c83c23be7d9bc5c36c164579ff47c16c45bb97a0",
+    "capsule_digest": "sha256:f245bb25958e549ea11e1c008cd79ce29d6c35860990d9307cf016a0d75f8ab8",
+    "certificate_digest": "sha256:a68e8bf484c7139a472440c1a58c01aa98165cc8ae3658c17d2b73d6b81fee35",
+    "correspondence_digest": "sha256:e73e6549079419a7668827401fae5e572499bd456c0ed3846d271779144b68d0",
+    "evidence_ledger_digest": "sha256:c573db6f163f32b9758d3f5bee52f85d848f2212ec4947b8d973b8f1ff60684c",
+    "experiment_digest": "sha256:add5c14ec6eebced407b42086456f2ac3bd4f42a94d6fcc05c311bf95125ca6c",
+    "external_blockers": [
+      "Gmail pubsub and OAuth redirect proof vars",
+      "Stripe Connect client id proof var",
+      "QuickBooks OAuth redirect and webhook verifier proof vars",
+      "fresh real onboarding employee proof",
+      "ops Caddy/DNS/Cloudflare/backup/red-health/egress proofs",
+      "pilot production acceptance"
+    ],
+    "final_sha": "c83c23be7d9bc5c36c164579ff47c16c45bb97a0",
+    "maximum_evidence_class": "P3",
+    "outcome_calibration": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "p1-docs-name-current-trace-and-proof-boundary",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "p2-memory-routes-next-ui-session-correctly",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "plan_admission_digest": "sha256:e3c26e8f73e9a8c1e6f25640ae861a382f78ee2d0c0c69cd49c92d47f5448c3f",
+    "status": "finished",
+    "task_id": "TRACE017-PRODUCTION-STATE-DOCS-001"
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs finish"
+  },
+  "schema": "experiment.transaction.v1",
+  "source_sha": "c83c23be7d9bc5c36c164579ff47c16c45bb97a0"
+}

@@ -1,21 +1,53 @@
 # CODEGRAPH.md — AI Employee executable topology
 
-Status: active cumulative source candidate; exact acceptance is owned by workflows and retained release records  
+Status: active cumulative source candidate with exact-head local production mirror evidence; external acceptance remains open
 Updated: 2026-07-23  
-Candidate stack: PR #40 cumulative branch → PR #35 branch → PR #34 branch → `main`  
+Candidate stack: `task/new-task-20260723` at `c83c23be7d9bc5c36c164579ff47c16c45bb97a0` -> review/merge to `main` -> verify the merge commit
 Source migration head: `0082`
 
-This is the sole contributor-facing owner of current product and workstream structure. `authority-map.json` routes machine readers here. Exact transient SHA, run number, and conclusion remain in the current PR, workflows, or retained release evidence.
+This is the sole contributor-facing owner of current product and workstream structure. `authority-map.json` routes machine readers here. Exact transient SHA, run number, and conclusion remain in the current branch, workflows, or retained release evidence.
 
 ## Current state
 
-- The cumulative candidate contains WS-01 through WS-09 source work represented by PRs #34, #35, integrated PRs #36–#39, and PR #40.
-- Trace011 and Trace012 complete the employee UI port, presentation adapters, production UI Lab, canonical agent onboarding, and folder-first UI variants.
-- Trace013 completes the repository-native software experiment compiler.
-- `decision/active.json` records no open transaction. Trace014 is reserved and absent until a new post-merge branch begins.
-- The compiler’s implementation coordinate passed merge gates and the complete source/PostgreSQL/image/release workflow. Documentation and merge descendants require their own exact-head evidence.
-- Managed database, live provider, target host, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain P4 gates.
-- The public estimator is outdated and non-canonical.
+- The current branch contains the post-main cumulative source candidate through Trace014, Trace015, and the Trace016 production-runtime repair commits.
+- Trace014 enforced the canonical session bootstrap. Trace015 generated the repair frontier and full-stack strategy map. Trace016 repaired the production Caddy/upstream/runtime test path and produced exact-candidate local mirror evidence, but its repoctl finish was blocked because the actual source repair exceeded the originally admitted patch envelope. Treat the source commits and proof files as P3 evidence; do not claim Trace016 lifecycle completion.
+- Trace017 is the documentation and memory reconciliation transaction for this exact candidate.
+- Production envvars are present for deploy/prod tests in `infra/deploy/.env.production`; do not print values. The production database status check shows all migrations through `0082` applied.
+- Production preflight with the production env loaded is 6/9 runnable. Gmail, Stripe Connect, and QBO remain blocked by missing provider callback/webhook/client envvars.
+- Managed database acceptance, live provider acceptance, target-host destructive recovery, trusted signing/registry retention, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain P4 gates.
+- UI Lab and existing `apps/web/ui-variants` are historical/fixture-bearing source artifacts only. They are not authoritative for the next UI effort; redesign UI Lab on a fresh task branch with a new repoctl transaction.
+- The public estimator remains outdated and non-canonical.
+
+## Exact production mirror evidence
+
+Exact candidate: `c83c23be7d9bc5c36c164579ff47c16c45bb97a0`
+
+Retained P3 proof files:
+
+- `infra/proofs/prod-like-normal-up-2026-07-23T20-52-56-118Z.json`
+- `infra/proofs/production-normal-up-local-tunnel-2026-07-23T20-52-56-150Z.json`
+- `infra/proofs/deploy-smoke-2026-07-23T20-53-29-125Z.json`
+- `infra/proofs/prod-env-proof-2026-07-23T20-53-34-573Z.json`
+
+Current local mirror runtime observed healthy on 2026-07-23:
+
+- `amtech-manager`
+- `amtech-model-gateway`
+- `amtech-web`
+- `amtech-host-provisioner`
+- `amtech-caddy`
+- `amtech-tunnel`
+
+The proof tier is `local_mirror`. The proof covers source/image/runtime wiring on the current host; it does not prove Caddy system activation, wildcard DNS-01, desired Cloudflare production state, backup/restore, red-health operations, egress policy, target host isolation, or external provider acceptance.
+
+## Provider/runtime preflight boundary
+
+Production preflight with `infra/deploy/.env.production` loaded reports 6/9 runnable:
+
+- runnable: Supabase, Manager, Model Gateway, Host Provisioner, Twilio Employee, Twilio Test;
+- blocked: Gmail missing OAuth/PubSub callback values; Stripe missing Connect client id; QBO missing OAuth/webhook verifier values.
+
+Provider placeholders and skipped checks cannot be promoted to live acceptance.
 
 ## Product authority
 
@@ -61,7 +93,7 @@ exact Git SHA + task
 
 Canonical engine: `decision/engine/repoctl.mjs`  
 Dialect registry: `decision/engine/representation-registry.json`  
-Completed implementation record: `decision/trace013/`
+Completed compiler implementation record: `decision/trace013/`
 
 ## Proof taxonomy
 
@@ -78,6 +110,19 @@ A checked eigenpair may be decisive proof of its declared operator property. No 
 ```text
 apps/manager/src/server.ts
   direct typed Manager composition and authority interception
+
+apps/manager/src/provisioner-host.ts
+apps/manager/src/lib/hermes-client.ts
+infra/compose/production.yml
+infra/compose/topology-test.yml
+infra/caddy/Caddyfile
+infra/deploy/prod-like-up.sh
+  production runtime topology, host lifecycle, Hermes path, and Caddy upstream wiring
+
+infra/scripts/deploy-smoke.mjs
+infra/scripts/prod-env-proof.mjs
+infra/scripts/acceptance/
+  deploy smoke, env proof, and provider/runtime preflight checks
 
 packages/db/migrations/0077..0082
   rate authority, connector lifecycle, reconnect normalization,
@@ -97,7 +142,8 @@ packages/shared/src/employee-ui-presentation.ts
 apps/web/app/_components/employee-ui/EmployeeUiPort.tsx
 apps/web/ui-variants/
 ui-lab/README.md
-  presentation adapters, neutral variants, and agent-first UI Lab
+  presentation adapters and historical UI Lab/variant fixtures;
+  not authoritative for the next UI Lab redesign
 
 decision/engine/
   facts, dialects, transformations, certificates, task capsules,
@@ -118,27 +164,30 @@ infra/scripts/deploy-rollback.mjs
 - Trace009 — UI projection architecture search and calibration.
 - Trace010 — connector operating substrate.
 - Trace011 — employee UI port and presentation adapters.
-- Trace012 — UI Lab and folder-first UI variants.
+- Trace012 — UI Lab and folder-first UI variants; historical and non-authoritative for the next redesign.
 - Trace013 — repository-native software experiment compiler; completed.
-- Trace014 — reserved and not created.
+- Trace014 — canonical session bootstrap enforcement; completed on branch lineage.
+- Trace015 — repair frontier and feature/use strategy map; completed on branch lineage.
+- Trace016 — production Caddy/upstream/runtime repair and local mirror proof; source/proof evidence retained, transaction finish not claimed.
+- Trace017 — production-state documentation, authority, ledger, and memory reconciliation.
 
 ## Open gates
 
-| Boundary | Cumulative source candidate | Still open |
+| Boundary | Current exact candidate evidence | Still open |
 |---|---|---|
-| repository/agent truth | routers, typed Manager, structural governance, compiler, P1/P2/P3 verifiers | exact-head evidence after each stack merge |
+| repository/agent truth | routers, typed Manager, structural governance, compiler, P1/P2/P3 verifiers, current branch pushed | exact-head evidence on the eventual `main` merge commit |
 | protocol/capability | current authority, scoped streams, connector lifecycle and exact decisions | live MCP/OAuth/provider lifecycle |
-| database | migrations through `0082`, blank-ledger and PostgreSQL contracts | managed platform, backup, restore, rollback |
-| release identity | five exact-SHA images, signed manifest, independent verifier | trusted signing and registry retention |
-| target host/runtime | Host Provisioner lifecycle and isolation contracts | host secrets, isolation, destructive recovery |
-| owner UI/golden work | production projection, UI variants, effect/proof contracts | fixture-free channels and all three provider journeys |
+| database | migrations through `0082`; production Supabase status observed fully applied | advisors, existing-row behavior, backup, restore, rollback |
+| release identity | current-SHA app images in the local mirror and previous signed manifest machinery | trusted signing, registry retention, production release record |
+| target host/runtime | six-service local mirror healthy with Caddy upstream wiring and deploy smoke | production host secrets, isolation, destructive recovery, managed tunnel/DNS |
+| owner UI/golden work | production projection, historical UI variants, effect/proof contracts | redesigned UI Lab, fixture-free channels, all three provider journeys |
 | human/capacity/pilot | responsive surfaces, automation, fairness/pilot-stop schema | manual accessibility, 64 GiB capacity, pilot packet |
 
 ## Dependency order
 
-1. Verify the final PR #40 closure head.
-2. Merge PR #40 into PR #35’s branch and verify that exact head.
-3. Merge PR #35 into PR #34’s branch and verify that exact head.
-4. Present PR #34 as the only ready-to-review integration into `main`.
-5. After the user merges, create a new branch and run `repoctl start`; that transaction becomes Trace014.
+1. Keep `task/new-task-20260723` pushed and exact-green.
+2. Review and merge the branch into `main`.
+3. Verify the exact `main` merge commit; no ancestor branch proof certifies that descendant.
+4. Create a fresh UI development branch and run `repoctl start` before non-mechanical UI Lab work.
+5. Use `infra/deploy/.env.production` for production builds/live tests without printing values.
 6. Cross the remaining P4 gates in dependency order.

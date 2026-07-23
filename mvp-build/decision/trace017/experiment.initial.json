@@ -1,0 +1,86 @@
+{
+  "content_digest": "sha256:f80b87abe8ff4ae526bf3c5060acfa8d2998207064bd40cb428f302a29380b7f",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T21:03:16.950Z",
+  "payload": {
+    "baseline": {
+      "id": "evidence-and-invariants",
+      "same_prerequisite_domain": true
+    },
+    "evidence_classes": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "lineage": null,
+    "metrics": [
+      "changed_file_recall",
+      "required_test_recall",
+      "missed_invariant_edges",
+      "unnecessary_scope",
+      "time_to_valid_plan",
+      "time_to_exact_head_green",
+      "review_defects",
+      "context_volume"
+    ],
+    "outcomes": [],
+    "predictions": [
+      {
+        "claim": "Every changed source path is present in the generated impact frontier or explicitly recorded as discovered later.",
+        "context_hint_count": 1081,
+        "expected": 0,
+        "falsifier": "The final diff contains an uncovered path.",
+        "horizon": 1,
+        "id": "prediction-impact-recall",
+        "metric": "uncovered_changed_paths",
+        "type": "direct"
+      },
+      {
+        "claim": "Every hard invariant hyperedge touched by the change has an accepted proof obligation or an explicit blocker.",
+        "context_hint_count": 1081,
+        "expected": 0,
+        "falsifier": "A touched hard hyperedge has neither accepted evidence nor a blocker.",
+        "horizon": 2,
+        "id": "prediction-invariant-coverage",
+        "metric": "unresolved_hard_hyperedges",
+        "type": "verification"
+      },
+      {
+        "claim": "The change preserves one routed authority chain without a competing current-status owner.",
+        "context_hint_count": 1081,
+        "expected": 0,
+        "falsifier": "Authority verification finds a cycle, duplicate status owner, or stale active router.",
+        "horizon": 3,
+        "id": "prediction-authority-consistency",
+        "metric": "authority_errors",
+        "type": "architecture"
+      },
+      {
+        "claim": "The final handoff does not promote model, source, CI, or fixture evidence into an unearned external class.",
+        "context_hint_count": 1081,
+        "expected": 0,
+        "falsifier": "The evidence ledger claims a class stronger than its evidence.",
+        "horizon": 4,
+        "id": "prediction-evidence-nonpromotion",
+        "metric": "evidence_promotions",
+        "type": "production-system"
+      }
+    ],
+    "status": "draft",
+    "stop_conditions": [
+      "hard invariant violation",
+      "red exact-head gate",
+      "evidence-class promotion",
+      "unbounded patch scope"
+    ],
+    "task_id": "TRACE017-PRODUCTION-STATE-DOCS-001"
+  },
+  "provenance": {
+    "chronology": "predictions are recorded before plan admission and outcomes",
+    "generator": "decision/engine/repoctl.mjs"
+  },
+  "schema": "experiment.design.v1",
+  "source_sha": "c83c23be7d9bc5c36c164579ff47c16c45bb97a0"
+}

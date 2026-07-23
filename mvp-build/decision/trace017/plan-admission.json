@@ -1,0 +1,79 @@
+{
+  "content_digest": "sha256:e3c26e8f73e9a8c1e6f25640ae861a382f78ee2d0c0c69cd49c92d47f5448c3f",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T21:04:26.598Z",
+  "payload": {
+    "capsule_digest": "sha256:f245bb25958e549ea11e1c008cd79ce29d6c35860990d9307cf016a0d75f8ab8",
+    "current_head_at_admission": "c83c23be7d9bc5c36c164579ff47c16c45bb97a0",
+    "discovered_later_policy": "must be recorded with evidence before evaluation",
+    "experiment_digest": "sha256:5ac50c8de443a628dce3204dda020c02bbf1918452b2d4777274f6b4e8bfc7d4",
+    "experiment_root_digest": "sha256:f80b87abe8ff4ae526bf3c5060acfa8d2998207064bd40cb428f302a29380b7f",
+    "new_paths_before_admission": [],
+    "plan_digest": "sha256:8418278a12863b2ce38a3bfe7f874882f1e6845af8d1f55f866258dc3b3d3e29",
+    "proof_obligations": [
+      {
+        "candidate_evidence": [
+          "npm run repo:verify:quick",
+          "repoctl evaluate/finish/verify"
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:2a7f7dba6be1",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "npm run repo:verify:quick",
+          "repoctl evaluate/finish/verify"
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/authority-map.json:2cc915bac733",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "npm run repo:verify:quick",
+          "repoctl evaluate/finish/verify"
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:3ce25668dcf2",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "npm run repo:verify:quick",
+          "repoctl evaluate/finish/verify"
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/README.md:5c127a3f419b",
+        "status": "planned"
+      }
+    ],
+    "selected_candidates": [
+      "TRACE017-DOCS-AUTHORITY-UPDATE"
+    ],
+    "task_id": "TRACE017-PRODUCTION-STATE-DOCS-001",
+    "verification_commands": [
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:quick"
+        ],
+        "timeout_ms": 300000
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "verify",
+          "--transaction",
+          "decision/trace017",
+          "--phase",
+          "admitted"
+        ],
+        "timeout_ms": 120000
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs admit-plan"
+  },
+  "schema": "plan.admission.v1",
+  "source_sha": "c83c23be7d9bc5c36c164579ff47c16c45bb97a0"
+}
