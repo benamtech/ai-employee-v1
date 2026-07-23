@@ -174,6 +174,8 @@ function writeMergedDeployEnv() {
   put("PUBLIC_WEB_ORIGIN", webOrigin);
   put("AGENT_WEB_ORIGIN", webOrigin);
   put("WEB_APP_ORIGIN", webOrigin);
+  put("WEB_UPSTREAM", "127.0.0.1:3000");
+  put("MANAGER_UPSTREAM", "127.0.0.1:8080");
   put("CADDY_CLIENTS_DIR", "/var/lib/amtech/caddy/clients");
   put("CADDY_VALIDATE_COMMAND", `docker exec ${PRODUCTION_CONTAINER_NAMES.caddy} caddy validate --config /etc/caddy/Caddyfile`);
   put("CADDY_RELOAD_COMMAND", `docker exec ${PRODUCTION_CONTAINER_NAMES.caddy} caddy reload --config /etc/caddy/Caddyfile`);

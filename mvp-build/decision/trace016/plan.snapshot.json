@@ -1,0 +1,93 @@
+{
+  "discovered_later": [],
+  "maximum_patch": {
+    "allowed_paths": [
+      "infra/scripts/prod-like-normal-employee-up.mjs",
+      "tests/unit/prod-like-normal-employee-up.test.ts",
+      "decision/trace016"
+    ],
+    "maximum_files": 3
+  },
+  "predictions": [
+    {
+      "claim": "prod-like env preparation writes WEB_UPSTREAM=127.0.0.1:3000 and MANAGER_UPSTREAM=127.0.0.1:8080 even when stale values exist.",
+      "expected": "pass",
+      "falsifier": "Focused unit test observes stale Caddy upstream values surviving production env preparation.",
+      "horizon": 1,
+      "id": "p1-env-prep-overrides-stale-caddy-upstreams",
+      "metric": "unit_test_pass",
+      "type": "verification"
+    },
+    {
+      "claim": "After rerunning the production stack, Caddy agent/API route checks pass locally and public checks pass when tunnel/DNS forwarding is valid.",
+      "expected": "pass",
+      "falsifier": "deploy smoke still reports caddy_agent_route or caddy_api_route as HTTP 502 with healthy web/manager services.",
+      "horizon": 2,
+      "id": "p2-caddy-routes-pass",
+      "metric": "deploy_smoke_caddy",
+      "type": "production-system"
+    }
+  ],
+  "proof_obligations": [
+    {
+      "candidate_evidence": [
+        "tests/unit/prod-like-normal-employee-up.test.ts",
+        "npm run deploy:smoke",
+        "npm run prod:normal:up"
+      ],
+      "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-like-normal-employee-up.mjs:23288468d5fd",
+      "status": "planned"
+    },
+    {
+      "candidate_evidence": [
+        "npm run deploy:smoke"
+      ],
+      "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/deploy-smoke.mjs:d3308c3c8c26",
+      "status": "planned"
+    }
+  ],
+  "rejected_candidates": [
+    {
+      "id": "C0-temporary-env-edit-only",
+      "reason": "Would make this host pass but leave stale production env values able to break the next fresh deploy."
+    },
+    {
+      "id": "C2-change-Caddyfile-defaults-only",
+      "reason": "Defaults are already correct; explicit stale env keys override them."
+    },
+    {
+      "id": "C3-host-/app-symlink",
+      "reason": "Incorrect topology; /app belongs inside built containers."
+    }
+  ],
+  "selected_candidates": [
+    "C1-force-host-network-caddy-upstreams-in-prod-env-prep"
+  ],
+  "stop_conditions": [
+    "Caddy 502 remains after forced host-loopback upstream env",
+    "unit test cannot assert without exposing env secrets",
+    "patch requires touching unrelated UI Lab work"
+  ],
+  "verification": {
+    "commands": [
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "tests/unit/prod-like-normal-employee-up.test.ts"
+        ],
+        "timeout_ms": 120000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:quick"
+        ],
+        "timeout_ms": 300000
+      }
+    ]
+  }
+}

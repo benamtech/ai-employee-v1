@@ -1,0 +1,67 @@
+{
+  "content_digest": "sha256:e595900d3d41fcede21ace3f391033987e5f0c50b271b35bf601a9ad250bfece",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T18:43:57.428Z",
+  "payload": {
+    "baseline": {
+      "id": "evidence-and-invariants",
+      "same_prerequisite_domain": true
+    },
+    "evidence_classes": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "lineage": {
+      "previous_digest": "sha256:2d016f58d5cdddeb43b34211e8b9f9dc1ec01c149d943ad1b326c105b1545f33",
+      "root_digest": "sha256:46f9d9072d223b56ccf3d048d18f51305930d85bac3542d4853c0717d5345ced"
+    },
+    "metrics": [
+      "changed_file_recall",
+      "required_test_recall",
+      "missed_invariant_edges",
+      "unnecessary_scope",
+      "time_to_valid_plan",
+      "time_to_exact_head_green",
+      "review_defects",
+      "context_volume"
+    ],
+    "outcomes": [],
+    "predictions": [
+      {
+        "claim": "prod-like env preparation writes WEB_UPSTREAM=127.0.0.1:3000 and MANAGER_UPSTREAM=127.0.0.1:8080 even when stale values exist.",
+        "expected": "pass",
+        "falsifier": "Focused unit test observes stale Caddy upstream values surviving production env preparation.",
+        "horizon": 1,
+        "id": "p1-env-prep-overrides-stale-caddy-upstreams",
+        "metric": "unit_test_pass",
+        "type": "verification"
+      },
+      {
+        "claim": "After rerunning the production stack, Caddy agent/API route checks pass locally and public checks pass when tunnel/DNS forwarding is valid.",
+        "expected": "pass",
+        "falsifier": "deploy smoke still reports caddy_agent_route or caddy_api_route as HTTP 502 with healthy web/manager services.",
+        "horizon": 2,
+        "id": "p2-caddy-routes-pass",
+        "metric": "deploy_smoke_caddy",
+        "type": "production-system"
+      }
+    ],
+    "status": "admitted",
+    "stop_conditions": [
+      "hard invariant violation",
+      "red exact-head gate",
+      "evidence-class promotion",
+      "unbounded patch scope"
+    ],
+    "task_id": "TRACE016-PRODUCTION-CADDY-UPSTREAM-001"
+  },
+  "provenance": {
+    "chronology": "immutable root experiment retained in experiment.initial.json",
+    "generator": "decision/engine/repoctl.mjs"
+  },
+  "schema": "experiment.design.v1",
+  "source_sha": "68184c7cf27207807129ca371de574b5acd501c3"
+}

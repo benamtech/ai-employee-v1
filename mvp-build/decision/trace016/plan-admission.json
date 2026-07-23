@@ -1,0 +1,61 @@
+{
+  "content_digest": "sha256:5202f93f6065f3018c9a840c1b8326ce817c6da21b489a44aed77619c011c947",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T18:43:57.436Z",
+  "payload": {
+    "capsule_digest": "sha256:a44fec753ce5561cec8ad88cc5d749c2f5a1997612863221add40300db599367",
+    "current_head_at_admission": "68184c7cf27207807129ca371de574b5acd501c3",
+    "discovered_later_policy": "must be recorded with evidence before evaluation",
+    "experiment_digest": "sha256:e595900d3d41fcede21ace3f391033987e5f0c50b271b35bf601a9ad250bfece",
+    "experiment_root_digest": "sha256:46f9d9072d223b56ccf3d048d18f51305930d85bac3542d4853c0717d5345ced",
+    "new_paths_before_admission": [],
+    "plan_digest": "sha256:3137260e494a13c08a5b940dd397b0bf2c7060eb194a81166f790beff1efb515",
+    "proof_obligations": [
+      {
+        "candidate_evidence": [
+          "tests/unit/prod-like-normal-employee-up.test.ts",
+          "npm run deploy:smoke",
+          "npm run prod:normal:up"
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-like-normal-employee-up.mjs:23288468d5fd",
+        "status": "planned"
+      },
+      {
+        "candidate_evidence": [
+          "npm run deploy:smoke"
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/deploy-smoke.mjs:d3308c3c8c26",
+        "status": "planned"
+      }
+    ],
+    "selected_candidates": [
+      "C1-force-host-network-caddy-upstreams-in-prod-env-prep"
+    ],
+    "task_id": "TRACE016-PRODUCTION-CADDY-UPSTREAM-001",
+    "verification_commands": [
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "tests/unit/prod-like-normal-employee-up.test.ts"
+        ],
+        "timeout_ms": 120000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:quick"
+        ],
+        "timeout_ms": 300000
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs admit-plan"
+  },
+  "schema": "plan.admission.v1",
+  "source_sha": "68184c7cf27207807129ca371de574b5acd501c3"
+}

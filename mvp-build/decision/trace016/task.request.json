@@ -1,0 +1,34 @@
+{
+  "allowed_evidence_classes": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "goal": "Repair production normal local-tunnel Caddy upstream preparation so host-network Caddy routes web and manager through loopback ports even when stale env values exist, then rerun exact-SHA smoke evidence.",
+  "maximum_patch": {
+    "allowed_paths": [
+      "infra/scripts/prod-like-normal-employee-up.mjs",
+      "infra/scripts/production-normal-up.mjs",
+      "infra/deploy/docker-compose.production.yml",
+      "tests/unit/production-caddy-upstream.test.ts",
+      "tests/unit/prod-like-normal-employee-up.test.ts",
+      "tests/unit/deploy-smoke.test.ts"
+    ],
+    "maximum_files": 4
+  },
+  "non_goals": [
+    "Do not print or commit production secret values.",
+    "Do not create a host /app symlink.",
+    "Do not change unrelated UI Lab work."
+  ],
+  "task_id": "TRACE016-PRODUCTION-CADDY-UPSTREAM-001",
+  "task_seeds": [
+    "infra/scripts/prod-like-normal-employee-up.mjs",
+    "infra/deploy/docker-compose.production.yml",
+    "infra/scripts/deploy-smoke.mjs",
+    "host-network Caddy",
+    "WEB_UPSTREAM",
+    "MANAGER_UPSTREAM"
+  ]
+}

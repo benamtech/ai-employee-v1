@@ -1,0 +1,3714 @@
+{
+  "content_digest": "sha256:82813366463de0f88e351054aac35786d2826c17742ee21475ae324fdabc88dd",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T18:42:57.813Z",
+  "payload": {
+    "current_authority_paths": [
+      "AGENTS.md",
+      "mvp-build/AGENTS.md",
+      "mvp-build/CODEGRAPH.md",
+      "mvp-build/GAPS.md",
+      "mvp-build/REMEDIATION.md",
+      "mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+      "mvp-build/STANDARD.md",
+      "mvp-build/authority-map.json",
+      "mvp-build/decision/README.md",
+      "mvp-build/decision/active.json",
+      "mvp-build/decision/engine/repoctl.mjs",
+      "mvp-build/decision/engine/representation-registry.json",
+      "mvp-build/decision/protocol-v1.json",
+      "mvp-build/decision/representation-contract.md",
+      "mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md",
+      "mvp-build/memory/MEMORY.md",
+      "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+      "mvp-build/production-readiness-program/09-workstream-execution-map.md",
+      "mvp-build/production-readiness-program/13-resolution-ledger.json",
+      "mvp-build/production-readiness-program/README.md"
+    ],
+    "cycles": [
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:AGENTS.md"
+      ],
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:mvp-build/AGENTS.md",
+        "file:mvp-build/ui-lab/AGENTS.md",
+        "file:mvp-build/AGENTS.md"
+      ],
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:mvp-build/AGENTS.md",
+        "file:mvp-build/ui-lab/README.md",
+        "file:mvp-build/AGENTS.md"
+      ],
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:mvp-build/AGENTS.md",
+        "file:mvp-build/ui-lab/README.md",
+        "file:mvp-build/ui-lab/README.md"
+      ],
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:mvp-build/authority-map.json",
+        "file:AGENTS.md"
+      ],
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:mvp-build/authority-map.json",
+        "file:mvp-build/authority-map.json"
+      ],
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:mvp-build/authority-map.json",
+        "file:mvp-build/memory/MEMORY.md"
+      ],
+      [
+        "file:AGENTS.md",
+        "file:mvp-build/memory/MEMORY.md",
+        "file:mvp-build/authority-map.json",
+        "file:mvp-build/STANDARD.md",
+        "file:mvp-build/memory/MEMORY.md"
+      ]
+    ],
+    "edges": [
+      {
+        "evidence": {
+          "path": "mvp-build/authority-map.json",
+          "pointer": "/evidence_order"
+        },
+        "from": "evidence-class:deployed_release_proof",
+        "id": "class-order:0",
+        "to": "evidence-class:applied_durable_state",
+        "type": "HigherAuthorityThan"
+      },
+      {
+        "evidence": {
+          "path": "mvp-build/authority-map.json",
+          "pointer": "/evidence_order"
+        },
+        "from": "evidence-class:applied_durable_state",
+        "id": "class-order:1",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "HigherAuthorityThan"
+      },
+      {
+        "evidence": {
+          "path": "mvp-build/authority-map.json",
+          "pointer": "/evidence_order"
+        },
+        "from": "evidence-class:committed_source_and_configuration",
+        "id": "class-order:2",
+        "to": "evidence-class:exact_candidate_executable_evidence",
+        "type": "HigherAuthorityThan"
+      },
+      {
+        "evidence": {
+          "path": "mvp-build/authority-map.json",
+          "pointer": "/evidence_order"
+        },
+        "from": "evidence-class:exact_candidate_executable_evidence",
+        "id": "class-order:3",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "HigherAuthorityThan"
+      },
+      {
+        "evidence": {
+          "path": "mvp-build/authority-map.json",
+          "pointer": "/evidence_order"
+        },
+        "from": "evidence-class:ratified_standard_and_active_program",
+        "id": "class-order:4",
+        "to": "evidence-class:current_topology_and_architecture",
+        "type": "HigherAuthorityThan"
+      },
+      {
+        "evidence": {
+          "path": "mvp-build/authority-map.json",
+          "pointer": "/evidence_order"
+        },
+        "from": "evidence-class:current_topology_and_architecture",
+        "id": "class-order:5",
+        "to": "evidence-class:indexed_memory",
+        "type": "HigherAuthorityThan"
+      },
+      {
+        "evidence": {
+          "path": "mvp-build/authority-map.json",
+          "pointer": "/evidence_order"
+        },
+        "from": "evidence-class:indexed_memory",
+        "id": "class-order:6",
+        "to": "evidence-class:historical_records",
+        "type": "HigherAuthorityThan"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:8592ba9ecde36efe3da1aa3b1de3b4ec2beac29d42a3d51a382cca1f6b616610",
+          "path": "AGENTS.md"
+        },
+        "from": "file:AGENTS.md",
+        "id": "classified:file:AGENTS.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:81dea9ac9652b167ba51b2354fd2d9267bea3ffcc79f772f21775f82d485c7de",
+          "path": "CODEGRAPH.md"
+        },
+        "from": "file:CODEGRAPH.md",
+        "id": "classified:file:CODEGRAPH.md",
+        "to": "evidence-class:current_topology_and_architecture",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:da34d70e255a5eb2c89b2785b4a91f1254d7434267dcc79dc0001a4baac8f340",
+          "path": "docs/ui/README.md"
+        },
+        "from": "file:docs/ui/README.md",
+        "id": "classified:file:docs/ui/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:9b252860240ed690b113aefaeffa39c0b5b7fe97fc02da8b50b341d3f4223385",
+          "path": "local-prod/README.md"
+        },
+        "from": "file:local-prod/README.md",
+        "id": "classified:file:local-prod/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:bd59aed446ed017901dcd0c646d00d424127483265a0f51e1b95d1455a759f70",
+          "path": "mvp-build/.devcontainer/README.md"
+        },
+        "from": "file:mvp-build/.devcontainer/README.md",
+        "id": "classified:file:mvp-build/.devcontainer/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:f08589f7f84614ba29c30f0765adb5b70a8c365671f3e8737bc160f245c7804d",
+          "path": "mvp-build/AGENTS.md"
+        },
+        "from": "file:mvp-build/AGENTS.md",
+        "id": "classified:file:mvp-build/AGENTS.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:45e85a0f4e87687423c125ad19daa92751bbbea077a90fbc3a5896133426941c",
+          "path": "mvp-build/apps/web/ui-variants/AGENTS.md"
+        },
+        "from": "file:mvp-build/apps/web/ui-variants/AGENTS.md",
+        "id": "classified:file:mvp-build/apps/web/ui-variants/AGENTS.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:19153d9ba785ffd5cb3989079307ba16df27bbecc324d32e8cb88800f5101e7d",
+          "path": "mvp-build/apps/web/ui-variants/README.md"
+        },
+        "from": "file:mvp-build/apps/web/ui-variants/README.md",
+        "id": "classified:file:mvp-build/apps/web/ui-variants/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:e2477a2d2935ec964ff2a14eaa5313bfbbe9a6019ccfb32154c7b0f3a05fc61e",
+          "path": "mvp-build/authority-map.json"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "classified:file:mvp-build/authority-map.json",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:4b43c16d0ef79ac9f04eae675d405ce9d7fd4bc2497eb894de7eb1d601c34169",
+          "path": "mvp-build/CODEGRAPH.md"
+        },
+        "from": "file:mvp-build/CODEGRAPH.md",
+        "id": "classified:file:mvp-build/CODEGRAPH.md",
+        "to": "evidence-class:current_topology_and_architecture",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:21407b7735cff96550f95533dc2717646f4ac0c8e5bcdeef7a8573da036fffb3",
+          "path": "mvp-build/decision/active.json"
+        },
+        "from": "file:mvp-build/decision/active.json",
+        "id": "classified:file:mvp-build/decision/active.json",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:a9bce93a8d814c4236b4c577d2ef1eba148549f3a7ee79aa15d741dd5b7e048e",
+          "path": "mvp-build/decision/engine/README.md"
+        },
+        "from": "file:mvp-build/decision/engine/README.md",
+        "id": "classified:file:mvp-build/decision/engine/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:1c4f2a25bd25896984a9fe939d015c97ff79096d1936573f2afd43eb66739ee2",
+          "path": "mvp-build/decision/engine/repoctl.mjs"
+        },
+        "from": "file:mvp-build/decision/engine/repoctl.mjs",
+        "id": "classified:file:mvp-build/decision/engine/repoctl.mjs",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:6a238620a3b57b1f6cbf5bfff8bce391f739347fdf2b1f4fdf186b8134fd82a7",
+          "path": "mvp-build/decision/engine/representation-registry.json"
+        },
+        "from": "file:mvp-build/decision/engine/representation-registry.json",
+        "id": "classified:file:mvp-build/decision/engine/representation-registry.json",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:38bf6cc098bd6bc79257899b86d211fa81ea204b8acce02f75f9c7a3f071fca6",
+          "path": "mvp-build/decision/protocol-v1.json"
+        },
+        "from": "file:mvp-build/decision/protocol-v1.json",
+        "id": "classified:file:mvp-build/decision/protocol-v1.json",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:38a6269ef0cf443a371f09462987fa8c17916622fa3bc6a54f0e402e6b302cf3",
+          "path": "mvp-build/decision/README.md"
+        },
+        "from": "file:mvp-build/decision/README.md",
+        "id": "classified:file:mvp-build/decision/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:fc20b7230fec19d0265af861e0684242ac63d73065468c4df55654ecff69688f",
+          "path": "mvp-build/decision/representation-contract.md"
+        },
+        "from": "file:mvp-build/decision/representation-contract.md",
+        "id": "classified:file:mvp-build/decision/representation-contract.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:04d71962398a6b9049ba1d815ac83589e91dbdec7b1fd4d06bc9a985786e0fd1",
+          "path": "mvp-build/docs/architecture/README.md"
+        },
+        "from": "file:mvp-build/docs/architecture/README.md",
+        "id": "classified:file:mvp-build/docs/architecture/README.md",
+        "to": "evidence-class:current_topology_and_architecture",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:ec2d4d344339e590cf59f82f54735e30aa2535c28b36aa600f5f7655e84dec40",
+          "path": "mvp-build/docs/architecture/trajectories/README.md"
+        },
+        "from": "file:mvp-build/docs/architecture/trajectories/README.md",
+        "id": "classified:file:mvp-build/docs/architecture/trajectories/README.md",
+        "to": "evidence-class:current_topology_and_architecture",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:be2c9965711a479d8fc9de882bbb0b26d9a91489211088ae9361adad5b26b34e",
+          "path": "mvp-build/docs/archive/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/README.md",
+        "id": "classified:file:mvp-build/docs/archive/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:b6939116103274c60fdc5db0e7ac65b730d4215eb58ba08e22e89ff987ebda98",
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "classified:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:d6c101625bc4fd84ba3e4a90c6057f20c691acb6e8f1132160c6fd3835307d49",
+          "path": "mvp-build/docs/ux/README.md"
+        },
+        "from": "file:mvp-build/docs/ux/README.md",
+        "id": "classified:file:mvp-build/docs/ux/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:207e8d8c0f6db0420ab08efa457845c2fdc443b498ffbc3a0b6a4d6cf9ffc6a3",
+          "path": "mvp-build/estimator-funnel-employee/README.md"
+        },
+        "from": "file:mvp-build/estimator-funnel-employee/README.md",
+        "id": "classified:file:mvp-build/estimator-funnel-employee/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:974599d3793ce988e0d3d92874a92981cb76b18bee3eb44deedcdbf9188a29b8",
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "classified:file:mvp-build/GAPS.md",
+        "to": "evidence-class:historical_records",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:6e2e8bd3c963b1b20667cc30d23ae1a157e1a6b8a3349a3eee8679fd9f0f3a72",
+          "path": "mvp-build/infra/deploy/README.md"
+        },
+        "from": "file:mvp-build/infra/deploy/README.md",
+        "id": "classified:file:mvp-build/infra/deploy/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:32a343b6d48371c1f135268d1196f18e235feddbdd02811e6ae95eb21c4bd607",
+          "path": "mvp-build/infra/scripts/local/test/README.md"
+        },
+        "from": "file:mvp-build/infra/scripts/local/test/README.md",
+        "id": "classified:file:mvp-build/infra/scripts/local/test/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:b01c94d333dfec77830c97cd28b9c0ac74d131111498abb69cd8254c4ce9ab0f",
+          "path": "mvp-build/infra/scripts/README.md"
+        },
+        "from": "file:mvp-build/infra/scripts/README.md",
+        "id": "classified:file:mvp-build/infra/scripts/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:82b10710abe707dc0e3493860b7ba1f3e69fa089a7e6965a6ddf6e0ff8e54d35",
+          "path": "mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md"
+        },
+        "from": "file:mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md",
+        "id": "classified:file:mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md",
+        "to": "evidence-class:indexed_memory",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:4fcac6cc99e956803f6e2bd63a0664ff2d7b406c94849116d2eaddab78dcc739",
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "classified:file:mvp-build/memory/MEMORY.md",
+        "to": "evidence-class:indexed_memory",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:c748fffc06dc630066023d2e756595eafa62ef7bed602e0e690a607790aeae8d",
+          "path": "mvp-build/packages/agent-template/README.md"
+        },
+        "from": "file:mvp-build/packages/agent-template/README.md",
+        "id": "classified:file:mvp-build/packages/agent-template/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:c214216176c78a4b7eeede0d21fde3e753829aeb85eb903c99cb99f7830a7831",
+          "path": "mvp-build/packages/agent-template/workspace/AGENTS.md"
+        },
+        "from": "file:mvp-build/packages/agent-template/workspace/AGENTS.md",
+        "id": "classified:file:mvp-build/packages/agent-template/workspace/AGENTS.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:79bb61921d0c9754f50c732cea41346b2dc3beb30f84720aea1b0b79b6acab29",
+          "path": "mvp-build/packages/profile-packages/website_estimator_conversation/AGENTS.md"
+        },
+        "from": "file:mvp-build/packages/profile-packages/website_estimator_conversation/AGENTS.md",
+        "id": "classified:file:mvp-build/packages/profile-packages/website_estimator_conversation/AGENTS.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:32e882f5936948a48436850de6bd9ede18d011f2cf76928c1908e4ed099a1ba8",
+          "path": "mvp-build/packages/profile-packages/website_estimator_conversation/docs/demos/README.md"
+        },
+        "from": "file:mvp-build/packages/profile-packages/website_estimator_conversation/docs/demos/README.md",
+        "id": "classified:file:mvp-build/packages/profile-packages/website_estimator_conversation/docs/demos/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:eb56ee6e15f9b0027688804b5e1855223b3629c387fe8e70d908e4159a9dee34",
+          "path": "mvp-build/packages/profile-packages/website_estimator_conversation/README.md"
+        },
+        "from": "file:mvp-build/packages/profile-packages/website_estimator_conversation/README.md",
+        "id": "classified:file:mvp-build/packages/profile-packages/website_estimator_conversation/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:0d5ebc485347c4f55df51245bbd9f4f6365b5345d0ed1c34fbffc4e197abb488",
+          "path": "mvp-build/production-readiness-program/01-ratification-and-change-control.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/01-ratification-and-change-control.md",
+        "id": "classified:file:mvp-build/production-readiness-program/01-ratification-and-change-control.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:8d2e0cd044092541aa31bcf557560eed86f752d401db4fa8fa55328b5664e782",
+          "path": "mvp-build/production-readiness-program/02-standard-evolution-vector.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/02-standard-evolution-vector.md",
+        "id": "classified:file:mvp-build/production-readiness-program/02-standard-evolution-vector.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:ad3c10feed046e078ab58c15fe1680f0ab7fbc94ff3e2c6031c00b7e506e075b",
+          "path": "mvp-build/production-readiness-program/03-connector-mcp-apps-ag-ui-program.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/03-connector-mcp-apps-ag-ui-program.md",
+        "id": "classified:file:mvp-build/production-readiness-program/03-connector-mcp-apps-ag-ui-program.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:1c9439a5be790e141074876d6650f104c9d01647013be6378763fc802018c6cf",
+          "path": "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "id": "classified:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:70bd2eda3f225680fdf397407ea4a987231fa05fa899fb40f16a9374bd78a251",
+          "path": "mvp-build/production-readiness-program/05-database-tdd-and-release-proof.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/05-database-tdd-and-release-proof.md",
+        "id": "classified:file:mvp-build/production-readiness-program/05-database-tdd-and-release-proof.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:a91f54f06cc897bcb1a7d7e43526965768dff15e230fcec596906e7b8a81e0a4",
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "classified:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:0b64df7fe718bf27071ddb0ec3c076e31f4de1036cf2cba73455261fed90f4df",
+          "path": "mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md",
+        "id": "classified:file:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:a007cef78dbf1d74cbfeafbf4939d236075090aefead0c5d8bbd7668037b1ca9",
+          "path": "mvp-build/production-readiness-program/08-production-issue-vector.json"
+        },
+        "from": "file:mvp-build/production-readiness-program/08-production-issue-vector.json",
+        "id": "classified:file:mvp-build/production-readiness-program/08-production-issue-vector.json",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:f3c63fb0a071f09bc9e6fc88b53ff597eea55240737ab37712ab8e59c453004b",
+          "path": "mvp-build/production-readiness-program/08-production-issue-vector.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/08-production-issue-vector.md",
+        "id": "classified:file:mvp-build/production-readiness-program/08-production-issue-vector.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:0063445adb2605b672eb9fb1128a304417c13ecc26a4426c88e141a752c393ba",
+          "path": "mvp-build/production-readiness-program/09-workstream-execution-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "id": "classified:file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:ee83fd795d54c882906345a04a6775efb1c62fa2ed39f77a425d86341d887e09",
+          "path": "mvp-build/production-readiness-program/10-test-suite-disposition.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/10-test-suite-disposition.md",
+        "id": "classified:file:mvp-build/production-readiness-program/10-test-suite-disposition.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:5a2b1d0aa3c5a7b9a454a87164ee21caa19b27b1303e9d157e5f8e34762cc678",
+          "path": "mvp-build/production-readiness-program/11-task-contract.json"
+        },
+        "from": "file:mvp-build/production-readiness-program/11-task-contract.json",
+        "id": "classified:file:mvp-build/production-readiness-program/11-task-contract.json",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:b8675333121bc6ddf0a668264308259403136109a601d599bdf7f0a0e9ba572f",
+          "path": "mvp-build/production-readiness-program/12-ws01-ws02-execution-contract.json"
+        },
+        "from": "file:mvp-build/production-readiness-program/12-ws01-ws02-execution-contract.json",
+        "id": "classified:file:mvp-build/production-readiness-program/12-ws01-ws02-execution-contract.json",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:a28184e5d4cd7d134c6bcc473daa35d4a2e4340d5512f9855778b1e74b01ed94",
+          "path": "mvp-build/production-readiness-program/13-resolution-ledger.json"
+        },
+        "from": "file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "id": "classified:file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:6f5f31951d6baabaf4f4f6cd63265ee765ac9c83cb16ed275cc5da83f385ef36",
+          "path": "mvp-build/production-readiness-program/14-ws02-runtime-ui-capability-contract.json"
+        },
+        "from": "file:mvp-build/production-readiness-program/14-ws02-runtime-ui-capability-contract.json",
+        "id": "classified:file:mvp-build/production-readiness-program/14-ws02-runtime-ui-capability-contract.json",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:f1bc66bfbcb65071e750b5006bbc72b5482412d08271ad4066ce897c426b7b73",
+          "path": "mvp-build/production-readiness-program/15-ws02-capability-manifold/00-manifest.json"
+        },
+        "from": "file:mvp-build/production-readiness-program/15-ws02-capability-manifold/00-manifest.json",
+        "id": "classified:file:mvp-build/production-readiness-program/15-ws02-capability-manifold/00-manifest.json",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:0460ac8116f691b1e259b47fe72df22e3fdbb248c5b185620863b2932fee8d73",
+          "path": "mvp-build/production-readiness-program/15-ws02-capability-manifold/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/15-ws02-capability-manifold/README.md",
+        "id": "classified:file:mvp-build/production-readiness-program/15-ws02-capability-manifold/README.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:90cf30361fd653e22016d1be430ef59d6720b56183e43f2bf60c0257fb2e55c1",
+          "path": "mvp-build/production-readiness-program/16-ws02-streaming-protocol-source-ci-closure.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/16-ws02-streaming-protocol-source-ci-closure.md",
+        "id": "classified:file:mvp-build/production-readiness-program/16-ws02-streaming-protocol-source-ci-closure.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:a7705a70ceba5a4995df2f0079c4b40b65e415fe7034a3ca8e99f46f7808e77d",
+          "path": "mvp-build/production-readiness-program/17-ws03-p0-fisher-frontier.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/17-ws03-p0-fisher-frontier.md",
+        "id": "classified:file:mvp-build/production-readiness-program/17-ws03-p0-fisher-frontier.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:f2130b883f78ae280b623dcc488db0101f82fe5c9270d91d56a96176df546eea",
+          "path": "mvp-build/production-readiness-program/18-ws03-p0-task-contract.json"
+        },
+        "from": "file:mvp-build/production-readiness-program/18-ws03-p0-task-contract.json",
+        "id": "classified:file:mvp-build/production-readiness-program/18-ws03-p0-task-contract.json",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:171d857b5225fd77186a6fb1801ec78c073015476a129c66effecf882f40c031",
+          "path": "mvp-build/production-readiness-program/19-ws05-ws06-owner-runtime-source-transaction.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/19-ws05-ws06-owner-runtime-source-transaction.md",
+        "id": "classified:file:mvp-build/production-readiness-program/19-ws05-ws06-owner-runtime-source-transaction.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:bfb4ce828f7c9db08973d33b94ee58b07954f140ca5c756f4594992715e95992",
+          "path": "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "id": "classified:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:bda8d0e42f3883633df91e2607d1844ae65c65996fc61f71a32e0083ec2976d4",
+          "path": "mvp-build/production-readiness-program/21-generated-bespoke-software-strategy.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/21-generated-bespoke-software-strategy.md",
+        "id": "classified:file:mvp-build/production-readiness-program/21-generated-bespoke-software-strategy.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:5067bdac8b978fbe76a7eced5dd56822a983b4c328a1c383fc797334184ae39f",
+          "path": "mvp-build/production-readiness-program/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/README.md",
+        "id": "classified:file:mvp-build/production-readiness-program/README.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:584ac4f18c25373ceaa55c13bd6b56c77b1e73c4d4b29da791c50412c69e2376",
+          "path": "mvp-build/README.md"
+        },
+        "from": "file:mvp-build/README.md",
+        "id": "classified:file:mvp-build/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:25d9b6057f647e54ce8c4b15c461561f56786cf3ef8a5a17673bd7003a249a05",
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "classified:file:mvp-build/REMEDIATION.md",
+        "to": "evidence-class:historical_records",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:16c2d6cfdcd80dee81ea856fb77e1714196c9c440e348f8146abaa6fe908dfc0",
+          "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "id": "classified:file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "to": "evidence-class:historical_records",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:b4d6ae458e6db5712af40c6ab4ab905df8758c9c9ac39abda974aa5e744de000",
+          "path": "mvp-build/second-half-plan/context-engineering/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/context-engineering/README.md",
+        "id": "classified:file:mvp-build/second-half-plan/context-engineering/README.md",
+        "to": "evidence-class:historical_records",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:fcb26c33f8e30712890d8df57308f3e5c0374efafac01a841c0a4d889434815a",
+          "path": "mvp-build/second-half-plan/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/README.md",
+        "id": "classified:file:mvp-build/second-half-plan/README.md",
+        "to": "evidence-class:historical_records",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:fcf48ea4920a752ff992a6b0c0502ec482f9818007aeea40ef8d7e8137056f39",
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "classified:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:abed61644a732d5bf4dd3f2568544230015fb53bd919adcefce477d327f532ce",
+          "path": "mvp-build/STANDARD.md"
+        },
+        "from": "file:mvp-build/STANDARD.md",
+        "id": "classified:file:mvp-build/STANDARD.md",
+        "to": "evidence-class:ratified_standard_and_active_program",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:f2efd571d1ac3eefdc2b68dc7522e19b2543d60cb89dc4708f29ec3850743db3",
+          "path": "mvp-build/tests/README.md"
+        },
+        "from": "file:mvp-build/tests/README.md",
+        "id": "classified:file:mvp-build/tests/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:4049ab876b2e1bcaaa593e1b067b298a343a1f85b584c34cd6e9229bf579b7ae",
+          "path": "mvp-build/ui-lab/AGENTS.md"
+        },
+        "from": "file:mvp-build/ui-lab/AGENTS.md",
+        "id": "classified:file:mvp-build/ui-lab/AGENTS.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:78016184481c2cbe98c05769d418ce7cf62bff8ecc333ced771a57b894c15e81",
+          "path": "mvp-build/ui-lab/README.md"
+        },
+        "from": "file:mvp-build/ui-lab/README.md",
+        "id": "classified:file:mvp-build/ui-lab/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:321bfc8be0773f0efe0f0e3759e48be31c575159a1e70b9e75e1d252fdfb04e8",
+          "path": "mvp-build/ui-redesign/README.md"
+        },
+        "from": "file:mvp-build/ui-redesign/README.md",
+        "id": "classified:file:mvp-build/ui-redesign/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:646ce3b1678a89b4011508e6ad0ed7bd2e28e325b864104fa7348be9325c6fd4",
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "classified:file:README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:78cbd7939ad590065192f02ee3fee1ddaac173b9dac6b8b30d900ef9081baf20",
+          "path": "wiki/logs/README.md"
+        },
+        "from": "file:wiki/logs/README.md",
+        "id": "classified:file:wiki/logs/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:558002e9cb8008b248b7a0b196be2cadab2d9303e03665f11c22265017d8bd11",
+          "path": "wiki/MVP/build-plan-current/phases/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/phases/README.md",
+        "id": "classified:file:wiki/MVP/build-plan-current/phases/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:81c8809518897feb8b85635f977dbbf27b9a8d542c81cef07bee609a0f46cb6b",
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "classified:file:wiki/MVP/build-plan-current/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:12a14101f7089266aba230c18ed3a3ed50ccfa27c1484d863ac30a925d42020b",
+          "path": "wiki/MVP/implementation-records/README.md"
+        },
+        "from": "file:wiki/MVP/implementation-records/README.md",
+        "id": "classified:file:wiki/MVP/implementation-records/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:f150b63d6f14a0b203b77936ab0965852bb60ea7664858db18e18e1799d22bfe",
+          "path": "wiki/MVP/old-build-plan/README.md"
+        },
+        "from": "file:wiki/MVP/old-build-plan/README.md",
+        "id": "classified:file:wiki/MVP/old-build-plan/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:be738b55d1a4960a38dd14d0f36f05ffd91f40f3a036fd413cb989488cc03fb1",
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "classified:file:wiki/MVP/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "digest": "sha256:39b97bbe400f4c6f24022cc63ca48c3c0c8497b61c1684c972b965fe15c98a04",
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "classified:file:wiki/README.md",
+        "to": "evidence-class:committed_source_and_configuration",
+        "type": "ClassifiedAs"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:AGENTS.md:mvp-build/authority-map.json:1168",
+        "to": "file:AGENTS.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/AGENTS.md:mvp-build/authority-map.json:1169",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/authority-map.json:mvp-build/authority-map.json:1164",
+        "to": "file:mvp-build/authority-map.json",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/CODEGRAPH.md:mvp-build/authority-map.json:1165",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/decision/active.json:mvp-build/authority-map.json:1175",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/decision/engine/repoctl.mjs:mvp-build/authority-map.json:1170",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/decision/engine/representation-registry.json:mvp-build/authority-map.json:1179",
+        "to": "file:mvp-build/decision/engine/representation-registry.json",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/decision/protocol-v1.json:mvp-build/authority-map.json:1176",
+        "to": "file:mvp-build/decision/protocol-v1.json",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/decision/README.md:mvp-build/authority-map.json:1177",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/decision/representation-contract.md:mvp-build/authority-map.json:1178",
+        "to": "file:mvp-build/decision/representation-contract.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/GAPS.md:mvp-build/authority-map.json:1182",
+        "to": "file:mvp-build/GAPS.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md:mvp-build/authority-map.json:1181",
+        "to": "file:mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/memory/MEMORY.md:mvp-build/authority-map.json:1180",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:mvp-build/authority-map.json:1172",
+        "to": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:mvp-build/authority-map.json:1173",
+        "to": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/production-readiness-program/13-resolution-ledger.json:mvp-build/authority-map.json:1174",
+        "to": "file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/production-readiness-program/README.md:mvp-build/authority-map.json:1171",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/REMEDIATION.md:mvp-build/authority-map.json:1183",
+        "to": "file:mvp-build/REMEDIATION.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:mvp-build/authority-map.json:1167",
+        "to": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "path": "mvp-build/authority-map.json",
+          "pointer": "$"
+        },
+        "from": "file:mvp-build/authority-map.json",
+        "id": "rel:CurrentAuthority:file:mvp-build/authority-map.json:file:mvp-build/STANDARD.md:mvp-build/authority-map.json:1166",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "CurrentAuthority"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 25,
+          "path": "AGENTS.md"
+        },
+        "from": "file:AGENTS.md",
+        "id": "rel:References:file:AGENTS.md:file:mvp-build/CODEGRAPH.md:AGENTS.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 47,
+          "path": "AGENTS.md"
+        },
+        "from": "file:AGENTS.md",
+        "id": "rel:References:file:AGENTS.md:file:mvp-build/decision/engine/repoctl.mjs:AGENTS.md:3",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 50,
+          "path": "AGENTS.md"
+        },
+        "from": "file:AGENTS.md",
+        "id": "rel:References:file:AGENTS.md:file:mvp-build/memory/MEMORY.md:AGENTS.md:5",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 48,
+          "path": "AGENTS.md"
+        },
+        "from": "file:AGENTS.md",
+        "id": "rel:References:file:AGENTS.md:file:mvp-build/STANDARD.md:AGENTS.md:4",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "docs/ui/README.md"
+        },
+        "from": "file:docs/ui/README.md",
+        "id": "rel:References:file:docs/ui/README.md:file:mvp-build/ui-lab/AGENTS.md:docs/ui/README.md:12",
+        "to": "file:mvp-build/ui-lab/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "docs/ui/README.md"
+        },
+        "from": "file:docs/ui/README.md",
+        "id": "rel:References:file:docs/ui/README.md:file:mvp-build/ui-lab/AGENTS.md:docs/ui/README.md:13",
+        "to": "file:mvp-build/ui-lab/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 54,
+          "path": "docs/ui/README.md"
+        },
+        "from": "file:docs/ui/README.md",
+        "id": "rel:References:file:docs/ui/README.md:file:mvp-build/ui-lab/AGENTS.md:docs/ui/README.md:20",
+        "to": "file:mvp-build/ui-lab/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "docs/ui/README.md"
+        },
+        "from": "file:docs/ui/README.md",
+        "id": "rel:References:file:docs/ui/README.md:file:mvp-build/ui-lab/README.md:docs/ui/README.md:10",
+        "to": "file:mvp-build/ui-lab/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "docs/ui/README.md"
+        },
+        "from": "file:docs/ui/README.md",
+        "id": "rel:References:file:docs/ui/README.md:file:mvp-build/ui-lab/README.md:docs/ui/README.md:11",
+        "to": "file:mvp-build/ui-lab/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 10,
+          "path": "mvp-build/AGENTS.md"
+        },
+        "from": "file:mvp-build/AGENTS.md",
+        "id": "rel:References:file:mvp-build/AGENTS.md:file:mvp-build/decision/active.json:mvp-build/AGENTS.md:2",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 39,
+          "path": "mvp-build/AGENTS.md"
+        },
+        "from": "file:mvp-build/AGENTS.md",
+        "id": "rel:References:file:mvp-build/AGENTS.md:file:mvp-build/decision/engine/representation-registry.json:mvp-build/AGENTS.md:5",
+        "to": "file:mvp-build/decision/engine/representation-registry.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 35,
+          "path": "mvp-build/AGENTS.md"
+        },
+        "from": "file:mvp-build/AGENTS.md",
+        "id": "rel:References:file:mvp-build/AGENTS.md:file:mvp-build/ui-lab/AGENTS.md:mvp-build/AGENTS.md:4",
+        "to": "file:mvp-build/ui-lab/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 35,
+          "path": "mvp-build/AGENTS.md"
+        },
+        "from": "file:mvp-build/AGENTS.md",
+        "id": "rel:References:file:mvp-build/AGENTS.md:file:mvp-build/ui-lab/README.md:mvp-build/AGENTS.md:3",
+        "to": "file:mvp-build/ui-lab/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "mvp-build/CODEGRAPH.md"
+        },
+        "from": "file:mvp-build/CODEGRAPH.md",
+        "id": "rel:References:file:mvp-build/CODEGRAPH.md:file:mvp-build/decision/active.json:mvp-build/CODEGRAPH.md:0",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 62,
+          "path": "mvp-build/CODEGRAPH.md"
+        },
+        "from": "file:mvp-build/CODEGRAPH.md",
+        "id": "rel:References:file:mvp-build/CODEGRAPH.md:file:mvp-build/decision/engine/repoctl.mjs:mvp-build/CODEGRAPH.md:1",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 63,
+          "path": "mvp-build/CODEGRAPH.md"
+        },
+        "from": "file:mvp-build/CODEGRAPH.md",
+        "id": "rel:References:file:mvp-build/CODEGRAPH.md:file:mvp-build/decision/engine/representation-registry.json:mvp-build/CODEGRAPH.md:2",
+        "to": "file:mvp-build/decision/engine/representation-registry.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/decision/README.md"
+        },
+        "from": "file:mvp-build/decision/README.md",
+        "id": "rel:References:file:mvp-build/decision/README.md:file:mvp-build/decision/engine/repoctl.mjs:mvp-build/decision/README.md:0",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/decision/README.md"
+        },
+        "from": "file:mvp-build/decision/README.md",
+        "id": "rel:References:file:mvp-build/decision/README.md:file:mvp-build/decision/engine/repoctl.mjs:mvp-build/decision/README.md:1",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 7,
+          "path": "mvp-build/decision/README.md"
+        },
+        "from": "file:mvp-build/decision/README.md",
+        "id": "rel:References:file:mvp-build/decision/README.md:file:mvp-build/decision/engine/representation-registry.json:mvp-build/decision/README.md:2",
+        "to": "file:mvp-build/decision/engine/representation-registry.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 7,
+          "path": "mvp-build/decision/README.md"
+        },
+        "from": "file:mvp-build/decision/README.md",
+        "id": "rel:References:file:mvp-build/decision/README.md:file:mvp-build/decision/engine/representation-registry.json:mvp-build/decision/README.md:3",
+        "to": "file:mvp-build/decision/engine/representation-registry.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/decision/representation-contract.md"
+        },
+        "from": "file:mvp-build/decision/representation-contract.md",
+        "id": "rel:References:file:mvp-build/decision/representation-contract.md:file:mvp-build/decision/engine/repoctl.mjs:mvp-build/decision/representation-contract.md:0",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/decision/representation-contract.md"
+        },
+        "from": "file:mvp-build/decision/representation-contract.md",
+        "id": "rel:References:file:mvp-build/decision/representation-contract.md:file:mvp-build/decision/engine/repoctl.mjs:mvp-build/decision/representation-contract.md:1",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/decision/representation-contract.md"
+        },
+        "from": "file:mvp-build/decision/representation-contract.md",
+        "id": "rel:References:file:mvp-build/decision/representation-contract.md:file:mvp-build/decision/engine/representation-registry.json:mvp-build/decision/representation-contract.md:2",
+        "to": "file:mvp-build/decision/engine/representation-registry.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/decision/representation-contract.md"
+        },
+        "from": "file:mvp-build/decision/representation-contract.md",
+        "id": "rel:References:file:mvp-build/decision/representation-contract.md:file:mvp-build/decision/engine/representation-registry.json:mvp-build/decision/representation-contract.md:3",
+        "to": "file:mvp-build/decision/engine/representation-registry.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 3,
+          "path": "mvp-build/docs/architecture/README.md"
+        },
+        "from": "file:mvp-build/docs/architecture/README.md",
+        "id": "rel:References:file:mvp-build/docs/architecture/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/docs/architecture/README.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 3,
+          "path": "mvp-build/docs/architecture/README.md"
+        },
+        "from": "file:mvp-build/docs/architecture/README.md",
+        "id": "rel:References:file:mvp-build/docs/architecture/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/docs/architecture/README.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 65,
+          "path": "mvp-build/docs/architecture/README.md"
+        },
+        "from": "file:mvp-build/docs/architecture/README.md",
+        "id": "rel:References:file:mvp-build/docs/architecture/README.md:file:mvp-build/decision/README.md:mvp-build/docs/architecture/README.md:2",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 65,
+          "path": "mvp-build/docs/architecture/README.md"
+        },
+        "from": "file:mvp-build/docs/architecture/README.md",
+        "id": "rel:References:file:mvp-build/docs/architecture/README.md:file:mvp-build/decision/README.md:mvp-build/docs/architecture/README.md:3",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 196,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/AGENTS.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:2",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 195,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 196,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:3",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 215,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:7",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 328,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:8",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 197,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/memory/MEMORY.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:4",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 328,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/memory/MEMORY.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:9",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 198,
+          "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+        },
+        "from": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "id": "rel:References:file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:file:mvp-build/second-half-plan/README.md:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md:5",
+        "to": "file:mvp-build/second-half-plan/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "mvp-build/docs/ux/README.md"
+        },
+        "from": "file:mvp-build/docs/ux/README.md",
+        "id": "rel:References:file:mvp-build/docs/ux/README.md:file:mvp-build/ui-lab/AGENTS.md:mvp-build/docs/ux/README.md:0",
+        "to": "file:mvp-build/ui-lab/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 18,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/decision/protocol-v1.json:mvp-build/GAPS.md:2",
+        "to": "file:mvp-build/decision/protocol-v1.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 18,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/decision/protocol-v1.json:mvp-build/GAPS.md:3",
+        "to": "file:mvp-build/decision/protocol-v1.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 18,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/decision/README.md:mvp-build/GAPS.md:0",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 18,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/decision/README.md:mvp-build/GAPS.md:1",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 19,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/production-readiness-program/08-production-issue-vector.json:mvp-build/GAPS.md:4",
+        "to": "file:mvp-build/production-readiness-program/08-production-issue-vector.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 19,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/production-readiness-program/08-production-issue-vector.json:mvp-build/GAPS.md:5",
+        "to": "file:mvp-build/production-readiness-program/08-production-issue-vector.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 21,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:mvp-build/GAPS.md:8",
+        "to": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 21,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:mvp-build/GAPS.md:9",
+        "to": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 20,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/production-readiness-program/13-resolution-ledger.json:mvp-build/GAPS.md:6",
+        "to": "file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 20,
+          "path": "mvp-build/GAPS.md"
+        },
+        "from": "file:mvp-build/GAPS.md",
+        "id": "rel:References:file:mvp-build/GAPS.md:file:mvp-build/production-readiness-program/13-resolution-ledger.json:mvp-build/GAPS.md:7",
+        "to": "file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 22,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:AGENTS.md:mvp-build/memory/MEMORY.md:1",
+        "to": "file:AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 23,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:mvp-build/AGENTS.md:mvp-build/memory/MEMORY.md:2",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 24,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:mvp-build/authority-map.json:mvp-build/memory/MEMORY.md:4",
+        "to": "file:mvp-build/authority-map.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 23,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:mvp-build/CODEGRAPH.md:mvp-build/memory/MEMORY.md:3",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 25,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:mvp-build/decision/active.json:mvp-build/memory/MEMORY.md:5",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 26,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:mvp-build/decision/engine/repoctl.mjs:mvp-build/memory/MEMORY.md:6",
+        "to": "file:mvp-build/decision/engine/repoctl.mjs",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 28,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:mvp-build/docs/architecture/README.md:mvp-build/memory/MEMORY.md:8",
+        "to": "file:mvp-build/docs/architecture/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 27,
+          "path": "mvp-build/memory/MEMORY.md"
+        },
+        "from": "file:mvp-build/memory/MEMORY.md",
+        "id": "rel:References:file:mvp-build/memory/MEMORY.md:file:mvp-build/production-readiness-program/README.md:mvp-build/memory/MEMORY.md:7",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:2",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:3",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 12,
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:file:mvp-build/AGENTS.md:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:0",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 12,
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:2",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 30,
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:file:mvp-build/docs/architecture/README.md:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:6",
+        "to": "file:mvp-build/docs/architecture/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:file:mvp-build/memory/MEMORY.md:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:4",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 31,
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:file:mvp-build/memory/MEMORY.md:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:7",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:file:mvp-build/STANDARD.md:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:3",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 26,
+          "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:file:mvp-build/STANDARD.md:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md:5",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/09-workstream-execution-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/09-workstream-execution-map.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/09-workstream-execution-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/09-workstream-execution-map.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/09-workstream-execution-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/09-workstream-execution-map.md:2",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/09-workstream-execution-map.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/09-workstream-execution-map.md:3",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/10-test-suite-disposition.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/10-test-suite-disposition.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/10-test-suite-disposition.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/10-test-suite-disposition.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/10-test-suite-disposition.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/10-test-suite-disposition.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/10-test-suite-disposition.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/10-test-suite-disposition.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 131,
+          "path": "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:4",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:2",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:3",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/README.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/README.md:0",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "mvp-build/production-readiness-program/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/README.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/production-readiness-program/README.md:1",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/README.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/README.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/README.md:2",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 6,
+          "path": "mvp-build/production-readiness-program/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/README.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/README.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/README.md:3",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 37,
+          "path": "mvp-build/production-readiness-program/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/README.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/README.md:file:mvp-build/decision/active.json:mvp-build/production-readiness-program/README.md:4",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 38,
+          "path": "mvp-build/production-readiness-program/README.md"
+        },
+        "from": "file:mvp-build/production-readiness-program/README.md",
+        "id": "rel:References:file:mvp-build/production-readiness-program/README.md:file:mvp-build/decision/README.md:mvp-build/production-readiness-program/README.md:5",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 78,
+          "path": "mvp-build/README.md"
+        },
+        "from": "file:mvp-build/README.md",
+        "id": "rel:References:file:mvp-build/README.md:file:mvp-build/decision/active.json:mvp-build/README.md:2",
+        "to": "file:mvp-build/decision/active.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 82,
+          "path": "mvp-build/README.md"
+        },
+        "from": "file:mvp-build/README.md",
+        "id": "rel:References:file:mvp-build/README.md:file:mvp-build/memory/MEMORY.md:mvp-build/README.md:3",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 32,
+          "path": "mvp-build/README.md"
+        },
+        "from": "file:mvp-build/README.md",
+        "id": "rel:References:file:mvp-build/README.md:file:mvp-build/ui-lab/README.md:mvp-build/README.md:0",
+        "to": "file:mvp-build/ui-lab/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 32,
+          "path": "mvp-build/README.md"
+        },
+        "from": "file:mvp-build/README.md",
+        "id": "rel:References:file:mvp-build/README.md:file:mvp-build/ui-lab/README.md:mvp-build/README.md:1",
+        "to": "file:mvp-build/ui-lab/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 26,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/decision/README.md:mvp-build/REMEDIATION.md:0",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 26,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/decision/README.md:mvp-build/REMEDIATION.md:1",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 27,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:mvp-build/REMEDIATION.md:2",
+        "to": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 27,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:mvp-build/REMEDIATION.md:3",
+        "to": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 28,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/08-production-issue-vector.json:mvp-build/REMEDIATION.md:4",
+        "to": "file:mvp-build/production-readiness-program/08-production-issue-vector.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 28,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/08-production-issue-vector.json:mvp-build/REMEDIATION.md:5",
+        "to": "file:mvp-build/production-readiness-program/08-production-issue-vector.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 30,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:mvp-build/REMEDIATION.md:8",
+        "to": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 30,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:mvp-build/REMEDIATION.md:9",
+        "to": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 31,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/10-test-suite-disposition.md:mvp-build/REMEDIATION.md:10",
+        "to": "file:mvp-build/production-readiness-program/10-test-suite-disposition.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 31,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/10-test-suite-disposition.md:mvp-build/REMEDIATION.md:11",
+        "to": "file:mvp-build/production-readiness-program/10-test-suite-disposition.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 29,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/13-resolution-ledger.json:mvp-build/REMEDIATION.md:6",
+        "to": "file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 29,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/13-resolution-ledger.json:mvp-build/REMEDIATION.md:7",
+        "to": "file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 38,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:mvp-build/REMEDIATION.md:12",
+        "to": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 38,
+          "path": "mvp-build/REMEDIATION.md"
+        },
+        "from": "file:mvp-build/REMEDIATION.md",
+        "id": "rel:References:file:mvp-build/REMEDIATION.md:file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md:mvp-build/REMEDIATION.md:13",
+        "to": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 19,
+          "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:file:mvp-build/memory/MEMORY.md:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:4",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 19,
+          "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:file:mvp-build/memory/MEMORY.md:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:5",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 17,
+          "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:file:mvp-build/second-half-plan/README.md:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:2",
+        "to": "file:mvp-build/second-half-plan/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 17,
+          "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:file:mvp-build/second-half-plan/README.md:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:3",
+        "to": "file:mvp-build/second-half-plan/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:file:mvp-build/STANDARD.md:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:0",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:file:mvp-build/STANDARD.md:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md:1",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 8,
+          "path": "mvp-build/second-half-plan/context-engineering/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/context-engineering/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/context-engineering/README.md:file:mvp-build/second-half-plan/README.md:mvp-build/second-half-plan/context-engineering/README.md:0",
+        "to": "file:mvp-build/second-half-plan/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "mvp-build/second-half-plan/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/README.md:file:mvp-build/decision/protocol-v1.json:mvp-build/second-half-plan/README.md:4",
+        "to": "file:mvp-build/decision/protocol-v1.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 8,
+          "path": "mvp-build/second-half-plan/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/README.md:file:mvp-build/decision/README.md:mvp-build/second-half-plan/README.md:0",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "mvp-build/second-half-plan/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/README.md:file:mvp-build/decision/README.md:mvp-build/second-half-plan/README.md:3",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 17,
+          "path": "mvp-build/second-half-plan/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/README.md:file:mvp-build/memory/MEMORY.md:mvp-build/second-half-plan/README.md:6",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "mvp-build/second-half-plan/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/README.md:file:mvp-build/production-readiness-program/README.md:mvp-build/second-half-plan/README.md:5",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "mvp-build/second-half-plan/README.md"
+        },
+        "from": "file:mvp-build/second-half-plan/README.md",
+        "id": "rel:References:file:mvp-build/second-half-plan/README.md:file:mvp-build/STANDARD.md:mvp-build/second-half-plan/README.md:2",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 197,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/AGENTS.md:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:6",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 200,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/CODEGRAPH.md:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:7",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 219,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/CODEGRAPH.md:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:8",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 227,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/decision/protocol-v1.json:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:10",
+        "to": "file:mvp-build/decision/protocol-v1.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 8,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/decision/protocol-v1.json:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:2",
+        "to": "file:mvp-build/decision/protocol-v1.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 8,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/decision/protocol-v1.json:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:3",
+        "to": "file:mvp-build/decision/protocol-v1.json",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 8,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/decision/README.md:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:0",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 8,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/decision/README.md:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:1",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 227,
+          "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+        },
+        "from": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "id": "rel:References:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:file:mvp-build/decision/README.md:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:9",
+        "to": "file:mvp-build/decision/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 628,
+          "path": "mvp-build/STANDARD.md"
+        },
+        "from": "file:mvp-build/STANDARD.md",
+        "id": "rel:References:file:mvp-build/STANDARD.md:file:mvp-build/memory/MEMORY.md:mvp-build/STANDARD.md:3",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 9,
+          "path": "mvp-build/ui-lab/AGENTS.md"
+        },
+        "from": "file:mvp-build/ui-lab/AGENTS.md",
+        "id": "rel:References:file:mvp-build/ui-lab/AGENTS.md:file:mvp-build/AGENTS.md:mvp-build/ui-lab/AGENTS.md:1",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 78,
+          "path": "mvp-build/ui-lab/README.md"
+        },
+        "from": "file:mvp-build/ui-lab/README.md",
+        "id": "rel:References:file:mvp-build/ui-lab/README.md:file:mvp-build/AGENTS.md:mvp-build/ui-lab/README.md:0",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 80,
+          "path": "mvp-build/ui-lab/README.md"
+        },
+        "from": "file:mvp-build/ui-lab/README.md",
+        "id": "rel:References:file:mvp-build/ui-lab/README.md:file:mvp-build/CODEGRAPH.md:mvp-build/ui-lab/README.md:2",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 81,
+          "path": "mvp-build/ui-lab/README.md"
+        },
+        "from": "file:mvp-build/ui-lab/README.md",
+        "id": "rel:References:file:mvp-build/ui-lab/README.md:file:mvp-build/ui-lab/AGENTS.md:mvp-build/ui-lab/README.md:3",
+        "to": "file:mvp-build/ui-lab/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 82,
+          "path": "mvp-build/ui-lab/README.md"
+        },
+        "from": "file:mvp-build/ui-lab/README.md",
+        "id": "rel:References:file:mvp-build/ui-lab/README.md:file:mvp-build/ui-lab/README.md:mvp-build/ui-lab/README.md:4",
+        "to": "file:mvp-build/ui-lab/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/AGENTS.md:README.md:0",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/AGENTS.md:README.md:1",
+        "to": "file:mvp-build/AGENTS.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/CODEGRAPH.md:README.md:4",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/CODEGRAPH.md:README.md:5",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 17,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/memory/MEMORY.md:README.md:10",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 17,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/memory/MEMORY.md:README.md:11",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 85,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/memory/MEMORY.md:README.md:13",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/production-readiness-program/README.md:README.md:8",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/production-readiness-program/README.md:README.md:9",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 81,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/STANDARD.md:README.md:12",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/STANDARD.md:README.md:6",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "README.md"
+        },
+        "from": "file:README.md",
+        "id": "rel:References:file:README.md:file:mvp-build/STANDARD.md:README.md:7",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 55,
+          "path": "wiki/MVP/build-plan-current/phases/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/phases/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/phases/README.md:file:mvp-build/CODEGRAPH.md:wiki/MVP/build-plan-current/phases/README.md:4",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 124,
+          "path": "wiki/MVP/build-plan-current/phases/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/phases/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/phases/README.md:file:mvp-build/memory/MEMORY.md:wiki/MVP/build-plan-current/phases/README.md:7",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 124,
+          "path": "wiki/MVP/build-plan-current/phases/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/phases/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/phases/README.md:file:mvp-build/memory/MEMORY.md:wiki/MVP/build-plan-current/phases/README.md:8",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 57,
+          "path": "wiki/MVP/build-plan-current/phases/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/phases/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/phases/README.md:file:wiki/MVP/build-plan-current/README.md:wiki/MVP/build-plan-current/phases/README.md:5",
+        "to": "file:wiki/MVP/build-plan-current/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 57,
+          "path": "wiki/MVP/build-plan-current/phases/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/phases/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/phases/README.md:file:wiki/MVP/build-plan-current/README.md:wiki/MVP/build-plan-current/phases/README.md:6",
+        "to": "file:wiki/MVP/build-plan-current/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 12,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:CODEGRAPH.md:wiki/MVP/build-plan-current/README.md:4",
+        "to": "file:CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 12,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:CODEGRAPH.md:wiki/MVP/build-plan-current/README.md:5",
+        "to": "file:CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/CODEGRAPH.md:wiki/MVP/build-plan-current/README.md:6",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/CODEGRAPH.md:wiki/MVP/build-plan-current/README.md:7",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/memory/MEMORY.md:wiki/MVP/build-plan-current/README.md:12",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/memory/MEMORY.md:wiki/MVP/build-plan-current/README.md:13",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/production-readiness-program/README.md:wiki/MVP/build-plan-current/README.md:0",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/production-readiness-program/README.md:wiki/MVP/build-plan-current/README.md:1",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/production-readiness-program/README.md:wiki/MVP/build-plan-current/README.md:10",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/production-readiness-program/README.md:wiki/MVP/build-plan-current/README.md:11",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/STANDARD.md:wiki/MVP/build-plan-current/README.md:8",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "wiki/MVP/build-plan-current/README.md"
+        },
+        "from": "file:wiki/MVP/build-plan-current/README.md",
+        "id": "rel:References:file:wiki/MVP/build-plan-current/README.md:file:mvp-build/STANDARD.md:wiki/MVP/build-plan-current/README.md:9",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 11,
+          "path": "wiki/MVP/implementation-records/README.md"
+        },
+        "from": "file:wiki/MVP/implementation-records/README.md",
+        "id": "rel:References:file:wiki/MVP/implementation-records/README.md:file:CODEGRAPH.md:wiki/MVP/implementation-records/README.md:1",
+        "to": "file:CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 12,
+          "path": "wiki/MVP/implementation-records/README.md"
+        },
+        "from": "file:wiki/MVP/implementation-records/README.md",
+        "id": "rel:References:file:wiki/MVP/implementation-records/README.md:file:mvp-build/CODEGRAPH.md:wiki/MVP/implementation-records/README.md:2",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 16,
+          "path": "wiki/MVP/implementation-records/README.md"
+        },
+        "from": "file:wiki/MVP/implementation-records/README.md",
+        "id": "rel:References:file:wiki/MVP/implementation-records/README.md:file:mvp-build/docs/architecture/README.md:wiki/MVP/implementation-records/README.md:6",
+        "to": "file:mvp-build/docs/architecture/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "wiki/MVP/implementation-records/README.md"
+        },
+        "from": "file:wiki/MVP/implementation-records/README.md",
+        "id": "rel:References:file:wiki/MVP/implementation-records/README.md:file:mvp-build/memory/MEMORY.md:wiki/MVP/implementation-records/README.md:5",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "wiki/MVP/implementation-records/README.md"
+        },
+        "from": "file:wiki/MVP/implementation-records/README.md",
+        "id": "rel:References:file:wiki/MVP/implementation-records/README.md:file:mvp-build/production-readiness-program/README.md:wiki/MVP/implementation-records/README.md:4",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "wiki/MVP/implementation-records/README.md"
+        },
+        "from": "file:wiki/MVP/implementation-records/README.md",
+        "id": "rel:References:file:wiki/MVP/implementation-records/README.md:file:mvp-build/STANDARD.md:wiki/MVP/implementation-records/README.md:3",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 5,
+          "path": "wiki/MVP/old-build-plan/README.md"
+        },
+        "from": "file:wiki/MVP/old-build-plan/README.md",
+        "id": "rel:References:file:wiki/MVP/old-build-plan/README.md:file:mvp-build/second-half-plan/README.md:wiki/MVP/old-build-plan/README.md:0",
+        "to": "file:mvp-build/second-half-plan/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 11,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:CODEGRAPH.md:wiki/MVP/README.md:2",
+        "to": "file:CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 11,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:CODEGRAPH.md:wiki/MVP/README.md:3",
+        "to": "file:CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 12,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/CODEGRAPH.md:wiki/MVP/README.md:4",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 12,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/CODEGRAPH.md:wiki/MVP/README.md:5",
+        "to": "file:mvp-build/CODEGRAPH.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/memory/MEMORY.md:wiki/MVP/README.md:10",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 15,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/memory/MEMORY.md:wiki/MVP/README.md:11",
+        "to": "file:mvp-build/memory/MEMORY.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/production-readiness-program/README.md:wiki/MVP/README.md:8",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 14,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/production-readiness-program/README.md:wiki/MVP/README.md:9",
+        "to": "file:mvp-build/production-readiness-program/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/STANDARD.md:wiki/MVP/README.md:6",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 13,
+          "path": "wiki/MVP/README.md"
+        },
+        "from": "file:wiki/MVP/README.md",
+        "id": "rel:References:file:wiki/MVP/README.md:file:mvp-build/STANDARD.md:wiki/MVP/README.md:7",
+        "to": "file:mvp-build/STANDARD.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 32,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/logs/README.md:wiki/README.md:25",
+        "to": "file:wiki/logs/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 32,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/logs/README.md:wiki/README.md:26",
+        "to": "file:wiki/logs/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 50,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/MVP/build-plan-current/README.md:wiki/README.md:33",
+        "to": "file:wiki/MVP/build-plan-current/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 50,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/MVP/build-plan-current/README.md:wiki/README.md:34",
+        "to": "file:wiki/MVP/build-plan-current/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 56,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/MVP/implementation-records/README.md:wiki/README.md:45",
+        "to": "file:wiki/MVP/implementation-records/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 56,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/MVP/implementation-records/README.md:wiki/README.md:46",
+        "to": "file:wiki/MVP/implementation-records/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 53,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/MVP/old-build-plan/README.md:wiki/README.md:39",
+        "to": "file:wiki/MVP/old-build-plan/README.md",
+        "type": "References"
+      },
+      {
+        "evidence": {
+          "extractor": "repository-facts.v1",
+          "line": 53,
+          "path": "wiki/README.md"
+        },
+        "from": "file:wiki/README.md",
+        "id": "rel:References:file:wiki/README.md:file:wiki/MVP/old-build-plan/README.md:wiki/README.md:40",
+        "to": "file:wiki/MVP/old-build-plan/README.md",
+        "type": "References"
+      }
+    ],
+    "evidence_order": [
+      "deployed_release_proof",
+      "applied_durable_state",
+      "committed_source_and_configuration",
+      "exact_candidate_executable_evidence",
+      "ratified_standard_and_active_program",
+      "current_topology_and_architecture",
+      "indexed_memory",
+      "historical_records"
+    ],
+    "facts_digest": "sha256:7683120366923ff63a2055790864b14cfe904d3fd1845dc88909f353e743d84c",
+    "fidelity": {
+      "class": "P2",
+      "facts_digest": "sha256:7683120366923ff63a2055790864b14cfe904d3fd1845dc88909f353e743d84c",
+      "status": "failed"
+    },
+    "nodes": [
+      {
+        "id": "evidence-class:applied_durable_state",
+        "index": 1,
+        "kind": "evidence_class",
+        "name": "applied_durable_state"
+      },
+      {
+        "id": "evidence-class:committed_source_and_configuration",
+        "index": 2,
+        "kind": "evidence_class",
+        "name": "committed_source_and_configuration"
+      },
+      {
+        "id": "evidence-class:current_topology_and_architecture",
+        "index": 5,
+        "kind": "evidence_class",
+        "name": "current_topology_and_architecture"
+      },
+      {
+        "id": "evidence-class:deployed_release_proof",
+        "index": 0,
+        "kind": "evidence_class",
+        "name": "deployed_release_proof"
+      },
+      {
+        "id": "evidence-class:exact_candidate_executable_evidence",
+        "index": 3,
+        "kind": "evidence_class",
+        "name": "exact_candidate_executable_evidence"
+      },
+      {
+        "id": "evidence-class:historical_records",
+        "index": 7,
+        "kind": "evidence_class",
+        "name": "historical_records"
+      },
+      {
+        "id": "evidence-class:indexed_memory",
+        "index": 6,
+        "kind": "evidence_class",
+        "name": "indexed_memory"
+      },
+      {
+        "id": "evidence-class:ratified_standard_and_active_program",
+        "index": 4,
+        "kind": "evidence_class",
+        "name": "ratified_standard_and_active_program"
+      },
+      {
+        "digest": "sha256:8592ba9ecde36efe3da1aa3b1de3b4ec2beac29d42a3d51a382cca1f6b616610",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:AGENTS.md",
+        "path": "AGENTS.md"
+      },
+      {
+        "digest": "sha256:81dea9ac9652b167ba51b2354fd2d9267bea3ffcc79f772f21775f82d485c7de",
+        "evidence_class": "current_topology_and_architecture",
+        "id": "file:CODEGRAPH.md",
+        "path": "CODEGRAPH.md"
+      },
+      {
+        "digest": "sha256:da34d70e255a5eb2c89b2785b4a91f1254d7434267dcc79dc0001a4baac8f340",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:docs/ui/README.md",
+        "path": "docs/ui/README.md"
+      },
+      {
+        "digest": "sha256:9b252860240ed690b113aefaeffa39c0b5b7fe97fc02da8b50b341d3f4223385",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:local-prod/README.md",
+        "path": "local-prod/README.md"
+      },
+      {
+        "digest": "sha256:bd59aed446ed017901dcd0c646d00d424127483265a0f51e1b95d1455a759f70",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/.devcontainer/README.md",
+        "path": "mvp-build/.devcontainer/README.md"
+      },
+      {
+        "digest": "sha256:f08589f7f84614ba29c30f0765adb5b70a8c365671f3e8737bc160f245c7804d",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/AGENTS.md",
+        "path": "mvp-build/AGENTS.md"
+      },
+      {
+        "digest": "sha256:45e85a0f4e87687423c125ad19daa92751bbbea077a90fbc3a5896133426941c",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/apps/web/ui-variants/AGENTS.md",
+        "path": "mvp-build/apps/web/ui-variants/AGENTS.md"
+      },
+      {
+        "digest": "sha256:19153d9ba785ffd5cb3989079307ba16df27bbecc324d32e8cb88800f5101e7d",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/apps/web/ui-variants/README.md",
+        "path": "mvp-build/apps/web/ui-variants/README.md"
+      },
+      {
+        "digest": "sha256:e2477a2d2935ec964ff2a14eaa5313bfbbe9a6019ccfb32154c7b0f3a05fc61e",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/authority-map.json",
+        "path": "mvp-build/authority-map.json"
+      },
+      {
+        "digest": "sha256:4b43c16d0ef79ac9f04eae675d405ce9d7fd4bc2497eb894de7eb1d601c34169",
+        "evidence_class": "current_topology_and_architecture",
+        "id": "file:mvp-build/CODEGRAPH.md",
+        "path": "mvp-build/CODEGRAPH.md"
+      },
+      {
+        "digest": "sha256:21407b7735cff96550f95533dc2717646f4ac0c8e5bcdeef7a8573da036fffb3",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/decision/active.json",
+        "path": "mvp-build/decision/active.json"
+      },
+      {
+        "digest": "sha256:a9bce93a8d814c4236b4c577d2ef1eba148549f3a7ee79aa15d741dd5b7e048e",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/decision/engine/README.md",
+        "path": "mvp-build/decision/engine/README.md"
+      },
+      {
+        "digest": "sha256:1c4f2a25bd25896984a9fe939d015c97ff79096d1936573f2afd43eb66739ee2",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/decision/engine/repoctl.mjs",
+        "path": "mvp-build/decision/engine/repoctl.mjs"
+      },
+      {
+        "digest": "sha256:6a238620a3b57b1f6cbf5bfff8bce391f739347fdf2b1f4fdf186b8134fd82a7",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/decision/engine/representation-registry.json",
+        "path": "mvp-build/decision/engine/representation-registry.json"
+      },
+      {
+        "digest": "sha256:38bf6cc098bd6bc79257899b86d211fa81ea204b8acce02f75f9c7a3f071fca6",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/decision/protocol-v1.json",
+        "path": "mvp-build/decision/protocol-v1.json"
+      },
+      {
+        "digest": "sha256:38a6269ef0cf443a371f09462987fa8c17916622fa3bc6a54f0e402e6b302cf3",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/decision/README.md",
+        "path": "mvp-build/decision/README.md"
+      },
+      {
+        "digest": "sha256:fc20b7230fec19d0265af861e0684242ac63d73065468c4df55654ecff69688f",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/decision/representation-contract.md",
+        "path": "mvp-build/decision/representation-contract.md"
+      },
+      {
+        "digest": "sha256:04d71962398a6b9049ba1d815ac83589e91dbdec7b1fd4d06bc9a985786e0fd1",
+        "evidence_class": "current_topology_and_architecture",
+        "id": "file:mvp-build/docs/architecture/README.md",
+        "path": "mvp-build/docs/architecture/README.md"
+      },
+      {
+        "digest": "sha256:ec2d4d344339e590cf59f82f54735e30aa2535c28b36aa600f5f7655e84dec40",
+        "evidence_class": "current_topology_and_architecture",
+        "id": "file:mvp-build/docs/architecture/trajectories/README.md",
+        "path": "mvp-build/docs/architecture/trajectories/README.md"
+      },
+      {
+        "digest": "sha256:be2c9965711a479d8fc9de882bbb0b26d9a91489211088ae9361adad5b26b34e",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/docs/archive/README.md",
+        "path": "mvp-build/docs/archive/README.md"
+      },
+      {
+        "digest": "sha256:b6939116103274c60fdc5db0e7ac65b730d4215eb58ba08e22e89ff987ebda98",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/docs/archive/ui-handoff-2026-07-14/README.md",
+        "path": "mvp-build/docs/archive/ui-handoff-2026-07-14/README.md"
+      },
+      {
+        "digest": "sha256:d6c101625bc4fd84ba3e4a90c6057f20c691acb6e8f1132160c6fd3835307d49",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/docs/ux/README.md",
+        "path": "mvp-build/docs/ux/README.md"
+      },
+      {
+        "digest": "sha256:207e8d8c0f6db0420ab08efa457845c2fdc443b498ffbc3a0b6a4d6cf9ffc6a3",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/estimator-funnel-employee/README.md",
+        "path": "mvp-build/estimator-funnel-employee/README.md"
+      },
+      {
+        "digest": "sha256:974599d3793ce988e0d3d92874a92981cb76b18bee3eb44deedcdbf9188a29b8",
+        "evidence_class": "historical_records",
+        "id": "file:mvp-build/GAPS.md",
+        "path": "mvp-build/GAPS.md"
+      },
+      {
+        "digest": "sha256:6e2e8bd3c963b1b20667cc30d23ae1a157e1a6b8a3349a3eee8679fd9f0f3a72",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/infra/deploy/README.md",
+        "path": "mvp-build/infra/deploy/README.md"
+      },
+      {
+        "digest": "sha256:32a343b6d48371c1f135268d1196f18e235feddbdd02811e6ae95eb21c4bd607",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/infra/scripts/local/test/README.md",
+        "path": "mvp-build/infra/scripts/local/test/README.md"
+      },
+      {
+        "digest": "sha256:b01c94d333dfec77830c97cd28b9c0ac74d131111498abb69cd8254c4ce9ab0f",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/infra/scripts/README.md",
+        "path": "mvp-build/infra/scripts/README.md"
+      },
+      {
+        "digest": "sha256:82b10710abe707dc0e3493860b7ba1f3e69fa089a7e6965a6ddf6e0ff8e54d35",
+        "evidence_class": "indexed_memory",
+        "id": "file:mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md",
+        "path": "mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md"
+      },
+      {
+        "digest": "sha256:4fcac6cc99e956803f6e2bd63a0664ff2d7b406c94849116d2eaddab78dcc739",
+        "evidence_class": "indexed_memory",
+        "id": "file:mvp-build/memory/MEMORY.md",
+        "path": "mvp-build/memory/MEMORY.md"
+      },
+      {
+        "digest": "sha256:c748fffc06dc630066023d2e756595eafa62ef7bed602e0e690a607790aeae8d",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/packages/agent-template/README.md",
+        "path": "mvp-build/packages/agent-template/README.md"
+      },
+      {
+        "digest": "sha256:c214216176c78a4b7eeede0d21fde3e753829aeb85eb903c99cb99f7830a7831",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/packages/agent-template/workspace/AGENTS.md",
+        "path": "mvp-build/packages/agent-template/workspace/AGENTS.md"
+      },
+      {
+        "digest": "sha256:79bb61921d0c9754f50c732cea41346b2dc3beb30f84720aea1b0b79b6acab29",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/packages/profile-packages/website_estimator_conversation/AGENTS.md",
+        "path": "mvp-build/packages/profile-packages/website_estimator_conversation/AGENTS.md"
+      },
+      {
+        "digest": "sha256:32e882f5936948a48436850de6bd9ede18d011f2cf76928c1908e4ed099a1ba8",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/packages/profile-packages/website_estimator_conversation/docs/demos/README.md",
+        "path": "mvp-build/packages/profile-packages/website_estimator_conversation/docs/demos/README.md"
+      },
+      {
+        "digest": "sha256:eb56ee6e15f9b0027688804b5e1855223b3629c387fe8e70d908e4159a9dee34",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/packages/profile-packages/website_estimator_conversation/README.md",
+        "path": "mvp-build/packages/profile-packages/website_estimator_conversation/README.md"
+      },
+      {
+        "digest": "sha256:0d5ebc485347c4f55df51245bbd9f4f6365b5345d0ed1c34fbffc4e197abb488",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/01-ratification-and-change-control.md",
+        "path": "mvp-build/production-readiness-program/01-ratification-and-change-control.md"
+      },
+      {
+        "digest": "sha256:8d2e0cd044092541aa31bcf557560eed86f752d401db4fa8fa55328b5664e782",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/02-standard-evolution-vector.md",
+        "path": "mvp-build/production-readiness-program/02-standard-evolution-vector.md"
+      },
+      {
+        "digest": "sha256:ad3c10feed046e078ab58c15fe1680f0ab7fbc94ff3e2c6031c00b7e506e075b",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/03-connector-mcp-apps-ag-ui-program.md",
+        "path": "mvp-build/production-readiness-program/03-connector-mcp-apps-ag-ui-program.md"
+      },
+      {
+        "digest": "sha256:1c9439a5be790e141074876d6650f104c9d01647013be6378763fc802018c6cf",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+        "path": "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md"
+      },
+      {
+        "digest": "sha256:70bd2eda3f225680fdf397407ea4a987231fa05fa899fb40f16a9374bd78a251",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/05-database-tdd-and-release-proof.md",
+        "path": "mvp-build/production-readiness-program/05-database-tdd-and-release-proof.md"
+      },
+      {
+        "digest": "sha256:a91f54f06cc897bcb1a7d7e43526965768dff15e230fcec596906e7b8a81e0a4",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/06-document-authority-and-archive-map.md",
+        "path": "mvp-build/production-readiness-program/06-document-authority-and-archive-map.md"
+      },
+      {
+        "digest": "sha256:0b64df7fe718bf27071ddb0ec3c076e31f4de1036cf2cba73455261fed90f4df",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md",
+        "path": "mvp-build/production-readiness-program/07-verification-and-handoff-matrix.md"
+      },
+      {
+        "digest": "sha256:a007cef78dbf1d74cbfeafbf4939d236075090aefead0c5d8bbd7668037b1ca9",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/08-production-issue-vector.json",
+        "path": "mvp-build/production-readiness-program/08-production-issue-vector.json"
+      },
+      {
+        "digest": "sha256:f3c63fb0a071f09bc9e6fc88b53ff597eea55240737ab37712ab8e59c453004b",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/08-production-issue-vector.md",
+        "path": "mvp-build/production-readiness-program/08-production-issue-vector.md"
+      },
+      {
+        "digest": "sha256:0063445adb2605b672eb9fb1128a304417c13ecc26a4426c88e141a752c393ba",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/09-workstream-execution-map.md",
+        "path": "mvp-build/production-readiness-program/09-workstream-execution-map.md"
+      },
+      {
+        "digest": "sha256:ee83fd795d54c882906345a04a6775efb1c62fa2ed39f77a425d86341d887e09",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/10-test-suite-disposition.md",
+        "path": "mvp-build/production-readiness-program/10-test-suite-disposition.md"
+      },
+      {
+        "digest": "sha256:5a2b1d0aa3c5a7b9a454a87164ee21caa19b27b1303e9d157e5f8e34762cc678",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/11-task-contract.json",
+        "path": "mvp-build/production-readiness-program/11-task-contract.json"
+      },
+      {
+        "digest": "sha256:b8675333121bc6ddf0a668264308259403136109a601d599bdf7f0a0e9ba572f",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/12-ws01-ws02-execution-contract.json",
+        "path": "mvp-build/production-readiness-program/12-ws01-ws02-execution-contract.json"
+      },
+      {
+        "digest": "sha256:a28184e5d4cd7d134c6bcc473daa35d4a2e4340d5512f9855778b1e74b01ed94",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/13-resolution-ledger.json",
+        "path": "mvp-build/production-readiness-program/13-resolution-ledger.json"
+      },
+      {
+        "digest": "sha256:6f5f31951d6baabaf4f4f6cd63265ee765ac9c83cb16ed275cc5da83f385ef36",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/14-ws02-runtime-ui-capability-contract.json",
+        "path": "mvp-build/production-readiness-program/14-ws02-runtime-ui-capability-contract.json"
+      },
+      {
+        "digest": "sha256:f1bc66bfbcb65071e750b5006bbc72b5482412d08271ad4066ce897c426b7b73",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/15-ws02-capability-manifold/00-manifest.json",
+        "path": "mvp-build/production-readiness-program/15-ws02-capability-manifold/00-manifest.json"
+      },
+      {
+        "digest": "sha256:0460ac8116f691b1e259b47fe72df22e3fdbb248c5b185620863b2932fee8d73",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/15-ws02-capability-manifold/README.md",
+        "path": "mvp-build/production-readiness-program/15-ws02-capability-manifold/README.md"
+      },
+      {
+        "digest": "sha256:90cf30361fd653e22016d1be430ef59d6720b56183e43f2bf60c0257fb2e55c1",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/16-ws02-streaming-protocol-source-ci-closure.md",
+        "path": "mvp-build/production-readiness-program/16-ws02-streaming-protocol-source-ci-closure.md"
+      },
+      {
+        "digest": "sha256:a7705a70ceba5a4995df2f0079c4b40b65e415fe7034a3ca8e99f46f7808e77d",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/17-ws03-p0-fisher-frontier.md",
+        "path": "mvp-build/production-readiness-program/17-ws03-p0-fisher-frontier.md"
+      },
+      {
+        "digest": "sha256:f2130b883f78ae280b623dcc488db0101f82fe5c9270d91d56a96176df546eea",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/18-ws03-p0-task-contract.json",
+        "path": "mvp-build/production-readiness-program/18-ws03-p0-task-contract.json"
+      },
+      {
+        "digest": "sha256:171d857b5225fd77186a6fb1801ec78c073015476a129c66effecf882f40c031",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/19-ws05-ws06-owner-runtime-source-transaction.md",
+        "path": "mvp-build/production-readiness-program/19-ws05-ws06-owner-runtime-source-transaction.md"
+      },
+      {
+        "digest": "sha256:bfb4ce828f7c9db08973d33b94ee58b07954f140ca5c756f4594992715e95992",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md",
+        "path": "mvp-build/production-readiness-program/20-ws06-ws08-commercial-effect-transaction.md"
+      },
+      {
+        "digest": "sha256:bda8d0e42f3883633df91e2607d1844ae65c65996fc61f71a32e0083ec2976d4",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/21-generated-bespoke-software-strategy.md",
+        "path": "mvp-build/production-readiness-program/21-generated-bespoke-software-strategy.md"
+      },
+      {
+        "digest": "sha256:5067bdac8b978fbe76a7eced5dd56822a983b4c328a1c383fc797334184ae39f",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/production-readiness-program/README.md",
+        "path": "mvp-build/production-readiness-program/README.md"
+      },
+      {
+        "digest": "sha256:584ac4f18c25373ceaa55c13bd6b56c77b1e73c4d4b29da791c50412c69e2376",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/README.md",
+        "path": "mvp-build/README.md"
+      },
+      {
+        "digest": "sha256:25d9b6057f647e54ce8c4b15c461561f56786cf3ef8a5a17673bd7003a249a05",
+        "evidence_class": "historical_records",
+        "id": "file:mvp-build/REMEDIATION.md",
+        "path": "mvp-build/REMEDIATION.md"
+      },
+      {
+        "digest": "sha256:16c2d6cfdcd80dee81ea856fb77e1714196c9c440e348f8146abaa6fe908dfc0",
+        "evidence_class": "historical_records",
+        "id": "file:mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md",
+        "path": "mvp-build/second-half-plan/2026-07-20-capability-production-closure/README.md"
+      },
+      {
+        "digest": "sha256:b4d6ae458e6db5712af40c6ab4ab905df8758c9c9ac39abda974aa5e744de000",
+        "evidence_class": "historical_records",
+        "id": "file:mvp-build/second-half-plan/context-engineering/README.md",
+        "path": "mvp-build/second-half-plan/context-engineering/README.md"
+      },
+      {
+        "digest": "sha256:fcb26c33f8e30712890d8df57308f3e5c0374efafac01a841c0a4d889434815a",
+        "evidence_class": "historical_records",
+        "id": "file:mvp-build/second-half-plan/README.md",
+        "path": "mvp-build/second-half-plan/README.md"
+      },
+      {
+        "digest": "sha256:fcf48ea4920a752ff992a6b0c0502ec482f9818007aeea40ef8d7e8137056f39",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md",
+        "path": "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
+      },
+      {
+        "digest": "sha256:abed61644a732d5bf4dd3f2568544230015fb53bd919adcefce477d327f532ce",
+        "evidence_class": "ratified_standard_and_active_program",
+        "id": "file:mvp-build/STANDARD.md",
+        "path": "mvp-build/STANDARD.md"
+      },
+      {
+        "digest": "sha256:f2efd571d1ac3eefdc2b68dc7522e19b2543d60cb89dc4708f29ec3850743db3",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/tests/README.md",
+        "path": "mvp-build/tests/README.md"
+      },
+      {
+        "digest": "sha256:4049ab876b2e1bcaaa593e1b067b298a343a1f85b584c34cd6e9229bf579b7ae",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/ui-lab/AGENTS.md",
+        "path": "mvp-build/ui-lab/AGENTS.md"
+      },
+      {
+        "digest": "sha256:78016184481c2cbe98c05769d418ce7cf62bff8ecc333ced771a57b894c15e81",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/ui-lab/README.md",
+        "path": "mvp-build/ui-lab/README.md"
+      },
+      {
+        "digest": "sha256:321bfc8be0773f0efe0f0e3759e48be31c575159a1e70b9e75e1d252fdfb04e8",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:mvp-build/ui-redesign/README.md",
+        "path": "mvp-build/ui-redesign/README.md"
+      },
+      {
+        "digest": "sha256:646ce3b1678a89b4011508e6ad0ed7bd2e28e325b864104fa7348be9325c6fd4",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:README.md",
+        "path": "README.md"
+      },
+      {
+        "digest": "sha256:78cbd7939ad590065192f02ee3fee1ddaac173b9dac6b8b30d900ef9081baf20",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:wiki/logs/README.md",
+        "path": "wiki/logs/README.md"
+      },
+      {
+        "digest": "sha256:558002e9cb8008b248b7a0b196be2cadab2d9303e03665f11c22265017d8bd11",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:wiki/MVP/build-plan-current/phases/README.md",
+        "path": "wiki/MVP/build-plan-current/phases/README.md"
+      },
+      {
+        "digest": "sha256:81c8809518897feb8b85635f977dbbf27b9a8d542c81cef07bee609a0f46cb6b",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:wiki/MVP/build-plan-current/README.md",
+        "path": "wiki/MVP/build-plan-current/README.md"
+      },
+      {
+        "digest": "sha256:12a14101f7089266aba230c18ed3a3ed50ccfa27c1484d863ac30a925d42020b",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:wiki/MVP/implementation-records/README.md",
+        "path": "wiki/MVP/implementation-records/README.md"
+      },
+      {
+        "digest": "sha256:f150b63d6f14a0b203b77936ab0965852bb60ea7664858db18e18e1799d22bfe",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:wiki/MVP/old-build-plan/README.md",
+        "path": "wiki/MVP/old-build-plan/README.md"
+      },
+      {
+        "digest": "sha256:be738b55d1a4960a38dd14d0f36f05ffd91f40f3a036fd413cb989488cc03fb1",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:wiki/MVP/README.md",
+        "path": "wiki/MVP/README.md"
+      },
+      {
+        "digest": "sha256:39b97bbe400f4c6f24022cc63ca48c3c0c8497b61c1684c972b965fe15c98a04",
+        "evidence_class": "committed_source_and_configuration",
+        "id": "file:wiki/README.md",
+        "path": "wiki/README.md"
+      }
+    ]
+  },
+  "provenance": {
+    "algorithm": "explicit authority-map membership plus observed document references",
+    "generator": "decision/engine/represent/authority-dag.mjs",
+    "input_digest": "sha256:7683120366923ff63a2055790864b14cfe904d3fd1845dc88909f353e743d84c"
+  },
+  "schema": "authority.dag.v1",
+  "source_sha": "68184c7cf27207807129ca371de574b5acd501c3"
+}
