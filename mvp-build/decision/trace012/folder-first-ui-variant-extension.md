@@ -2,12 +2,15 @@
 
 Task extension: `AMTECH-UI-LAB-001 / UI-VARIANT-STANDARD`  
 Branch: `agent/employee-ui-port-adapters-current`  
-Recorded code head: `69ea9c2e23da78ea04c97af88922f529466bebb9`  
-Status: source, unit, typecheck, lint, and production build verified; headed browser review remains open
+Original implementation coordinate: `69ea9c2e23da78ea04c97af88922f529466bebb9`  
+Reconciled: 2026-07-23  
+Status: **source, unit, typecheck, lint, production build, PostgreSQL integration, five-image build/identity, and source-built signed-manifest verification exist on historical exact candidates; headed supported-browser and human visual/accessibility review remain open**
+
+The original coordinate is retained as provenance. Current structural and exact evidence state lives in [`../../CODEGRAPH.md`](../../CODEGRAPH.md), [`task_state.json`](task_state.json), the current PR, workflows, and release records.
 
 ## Problem
 
-The production Web client and the original UI Lab workbench support controlled changes to adapters, themes, layouts, component sets, density, and brand tokens. They do not provide a safe way for a collaborator to replace the complete employee experience without inheriting the production client's visual grammar and private component hierarchy.
+The production Web client and original UI Lab workbench support controlled changes to adapters, themes, layouts, component sets, density, and brand tokens. They did not provide a safe way for a collaborator to replace the complete employee experience without inheriting the production client’s visual grammar and private component hierarchy.
 
 The required boundary is capability fidelity rather than visual fidelity:
 
@@ -15,35 +18,7 @@ The required boundary is capability fidelity rather than visual fidelity:
 production Web-client capabilities ⊂ UI variant capability space
 ```
 
-A valid variant must receive enough neutral employee truth to represent identity, owner context, runtime and recovery, conversation, work, decisions, approvals, waiting conditions, changes, connections, capabilities, evidence, outputs, and bounded interactions. It must not be forced to preserve the production client's appearance, terminology, navigation, DOM hierarchy, or component model.
-
-## Repository evidence
-
-The repository already had:
-
-- a typed production employee payload;
-- deterministic fixture scenarios and runtime transitions;
-- a guarded UI Lab;
-- Next.js App Router and React Suspense;
-- a production client that could be retained as a reference implementation;
-- source-controlled agent guidance and repository governance tests.
-
-The missing layer was a public neutral variant contract, folder-level write boundary, deterministic discovery, and executable validation.
-
-## Architecture hypotheses
-
-| Dimension | Retained | Rejected default | Decision reason |
-|---|---|---|---|
-| Discovery | Folder-first generated registry | Manual central registration | Folder existence is the source of truth; generation catches stale registries. |
-| Rendering | React/Next-native module | Iframe for every variant | Native modules preserve existing state, routing, accessibility, and chunking without duplicate bridges. |
-| Fidelity | Neutral capability model | Production component hierarchy | Capability preservation is required; visual and structural imitation is not. |
-| Isolation | Import boundary plus CSS containment | Visual uniformity | Prevents private coupling and rendering spillover without reducing design freedom. |
-| Responsiveness | Inline-size container queries | Viewport-only assumptions | Variants respond to their allocated surface rather than assuming viewport ownership. |
-| Loading | Literal lazy imports and Suspense | Eagerly bundle every experiment | Next.js can statically discover chunks and preload concrete module paths. |
-| Heavy graphics | Worker, OffscreenCanvas, and WASM opt-in | Unrestricted main-thread computation | Advanced techniques remain available but must be explicit and reviewable. |
-| Agent context | Generated folder-local instructions | One repository-root prompt | The smallest relevant context and write scope are placed next to the code. |
-| Safety | Agent launched inside variant folder | Repository-root write access | Tool working-directory boundaries reinforce the repository contract. |
-| Extensibility | Manifest-declared browser features | Fixed component SDK | Beginners can use React/CSS while advanced variants declare only the features they need. |
+A valid variant receives enough neutral employee truth to represent identity, owner context, runtime/recovery, conversation, work, decisions, approvals, waiting conditions, changes, connections, capabilities, evidence, outputs, and bounded interactions. It is not required to preserve the production client’s appearance, terminology, navigation, DOM hierarchy, or component model.
 
 ## Selected standard
 
@@ -65,54 +40,99 @@ The host supplies:
 - a bounded `dispatchIntent` bridge;
 - the production client as optional `slots.reference_client`.
 
-The host does not supply private product modules, direct network access, ambient storage, filesystem access, or implicit Worker/WASM privileges.
+The host does not supply private product modules, direct network access, ambient storage, filesystem access, undeclared dependencies, or implicit Worker/WASM privileges.
 
-The generated registry uses literal manifest imports and literal dynamic component imports. This is required because Next.js module matching and preloading depend on statically discoverable import paths.
+## Architecture decisions
+
+| Dimension | Selected | Rejected default | Reason |
+|---|---|---|---|
+| Discovery | folder-first generated registry | manual central registration | folder presence is source truth; generation detects drift |
+| Rendering | React/Next-native module | iframe for every variant | preserves state, routing, accessibility, and chunking without duplicate bridges |
+| Fidelity | neutral capability model | production component hierarchy | capabilities are binding; visual imitation is not |
+| Isolation | import boundary + CSS containment | visual uniformity | prevents private coupling and spillover without reducing design freedom |
+| Responsiveness | inline-size container queries | viewport-only assumptions | variants respond to allocated surface |
+| Loading | literal lazy imports + Suspense | eager bundle of every experiment | Next can statically discover and split concrete module paths |
+| Agent context | generated folder-local instructions | one repository-root prompt | gives smallest relevant context and write scope |
+| Setup | environment-adaptive coding-agent workflow | OS-specific installer | agents inspect the actual environment and avoid repeated unnecessary setup |
+| Extensibility | manifest-declared browser features | fixed visual SDK | ordinary React/CSS stays simple; advanced capabilities remain explicit |
 
 ## Checked-in reference variants
 
-- `reference-client`: proves the normal production Web client is one conforming variant.
-- `radical-canvas`: proves a materially different visual and structural experience can retain employee capabilities.
-- `editorial-studio`: provides a conventional React/CSS example that is readable by designers and less experienced collaborators.
+- `reference-client` — proves the production Web client is one conforming variant.
+- `radical-canvas` — proves a materially different visual and structural experience can retain employee capabilities.
+- `editorial-studio` — provides a conventional React/CSS example readable by designers and less experienced collaborators.
+
+## Canonical agent entry
+
+`mvp-build/ui-lab/README.md` is the canonical agent entry point. It instructs Claude Code, Codex, Cursor, or another coding agent to:
+
+1. inspect the OS, architecture, shell, Git, Node/npm, browser tooling, checkout, branch, and working tree;
+2. clone or safely reuse the repository;
+3. preserve local work and avoid unattended OS upgrades or unnecessary repeated installs;
+4. establish the exact required branch and project state;
+5. run the UI-variant doctor;
+6. launch the collaborator with `--agent none` when already controlling the session;
+7. work only in the selected variant folder unless broader changes are explicitly authorized;
+8. report exact environment, SHA, commands, validation, URL, and changed-file boundary.
 
 ## Executable governance
 
-The canonical doctor validates every folder and rejects:
+The canonical doctor validates every variant folder and rejects:
 
-- folder-escaping imports;
-- private application imports;
-- undeclared dependencies;
-- Node/server modules;
-- direct network APIs;
-- ambient browser storage;
-- undeclared Worker or WebAssembly use;
-- malformed or mismatched manifests;
-- stale generated registries.
+- invalid or missing manifests;
+- registry drift or non-literal imports;
+- imports escaping the variant root or reaching private application modules;
+- direct network/storage/Node/Worker/WASM use without allowed declaration;
+- undeclared runtime dependencies;
+- missing local agent guidance;
+- invalid component exports;
+- production-like UI Lab exposure;
+- source-owned variants that cannot be reproduced from the repository.
 
-The collaborator launcher scaffolds when needed, validates, regenerates, starts UI Lab and the registry watcher, opens the exact route, and launches Claude Code, Codex, Cursor, or no agent with the variant directory as working directory.
+The ordinary write boundary is:
 
-## Verification snapshot
+```text
+mvp-build/apps/web/ui-variants/<variant-slug>/
+```
 
-At code head `69ea9c2e23da78ea04c97af88922f529466bebb9`:
+## Validation and promotion
 
-- complete merge gate: PASS, run `29941013090`;
-- release-candidate source and UI job: PASS, run `29941013083`;
-- PostgreSQL integration job: PASS;
-- unit suite: 132 files and 743 tests PASS;
-- repository governance, typecheck, and lint: PASS;
-- Next.js production build: PASS;
-- generated UI variant registry parity: PASS;
-- generated UI Lab assignment registry parity: PASS.
+Minimum machine validation:
 
-The trace records this as source/build evidence, not browser, provider, target-host, pilot, or production acceptance.
+```bash
+node scripts/ui-variant.mjs validate <variant-slug>
+node scripts/ui-variant.mjs doctor
+npm run repo:verify:full
+npm run test:unit
+npm run build
+```
 
-## Remaining evidence boundary
+Relevant exact-candidate workflows also exercise PostgreSQL integration, production Compose, five image builds, image identity, and independent release-manifest verification.
 
-Still required before calling the variant subsystem merge-ready for visual review:
+Promotion additionally requires deliberate desktop/mobile inspection and human visual/accessibility judgment. A green doctor, build, screenshot, ARIA snapshot, or fixture matrix is not aesthetic, supported-browser, live-channel, or production acceptance.
 
-1. headed browser checks for all three variants;
-2. desktop and mobile scenarios including active, waiting, stalled, recovery, and relevant empty states;
-3. human visual and accessibility review;
-4. final exact-head CI after documentation reconciliation.
+## Higher-order effects
 
-Live-provider behavior, production authorization, target-host deployment, commercial acceptance, and aesthetic quality are not inferred from this work.
+Second order:
+
+- full visual alternatives can be explored against the same neutral employee truth;
+- agent work becomes parallelizable and folder-bounded;
+- generated registries and local instructions become new drift surfaces requiring executable checks;
+- capability preservation becomes testable independently from production visual structure.
+
+Third order:
+
+- variants become a governed product-line mechanism with migration, deprecation, fallback, support, and customer-branding obligations;
+- stable variant identities enable experiments, but experiment outcomes cannot create authority or skip release gates;
+- broader design freedom increases the importance of manual accessibility and cross-browser review;
+- agent-first onboarding lowers setup cost while requiring stricter repository routing and completion reports.
+
+Fourth order:
+
+- successful variants may become commercial product configurations, which creates entitlement, lifecycle, compatibility, and support-policy requirements;
+- presentation diversity can reveal missing neutral capabilities, causing the capability contract to evolve under versioning rather than private imports;
+- variant proliferation can multiply verification cost, requiring risk-based smoke coverage, pairwise exploration, and explicit golden commercial surfaces rather than exhaustive combinatorics.
+
+## Evidence boundary
+
+Trace012 is complete as an implementation decision and latest completed trace. It is not a new production-planning computation. Historical exact-candidate CI/image evidence does not establish headed all-variant supported-browser coverage, human visual approval, manual accessibility, live provider/channel behavior, managed database, target host, pilot, deployment, or production.
