@@ -44,6 +44,11 @@ const protocol = await json('decision/protocol-v1.json');
 const trace013 = await json('decision/trace013/task_state.json');
 const registry = await json('decision/engine/representation-registry.json');
 
+const traceIdFromPath = (value) => String(value ?? '').match(/trace\d+/)?.[0] ?? null;
+const routedLatestTrace = traceIdFromPath(authority?.decision?.latest_completed_trace);
+const reservedNextTrace = traceIdFromPath(authority?.decision?.next_trace_reserved);
+const productionTraceIds = new Set((active?.production_trace_chain ?? []).map((item) => item?.id).filter(Boolean));
+
 if (authority?.exact_status?.owner !== 'mvp-build/CODEGRAPH.md') errors.push('authority-map exact-status owner must be mvp-build/CODEGRAPH.md');
 if (authority?.decision?.router !== 'mvp-build/decision/active.json') errors.push('authority-map must route through decision/active.json');
 if (authority?.decision?.executable_engine !== 'mvp-build/decision/engine/repoctl.mjs') errors.push('authority-map must route to the executable experiment compiler');
@@ -53,13 +58,27 @@ for (const key of ['P0_representation_calculation', 'P1_formal_model_property', 
 }
 if (!String(trace013.status).includes('implementation')) errors.push('Trace013 must identify the experiment compiler implementation transaction');
 if (trace013.starting_sha !== '9f9874242e3740059e9f4f857c2f164962bc91d6') errors.push('Trace013 starting SHA changed');
+if (!productionTraceIds.has('trace013')) errors.push('decision production trace chain must retain Trace013 compiler baseline');
 const implemented = new Set((registry.dialects ?? []).filter((item) => item.status === 'implemented').map((item) => item.id));
 for (const id of ['repo.fact.v1', 'authority.dag.v1', 'dependency.graph.v1', 'invariant.hypergraph.v1', 'correspondence.v1', 'spectral.hypergraph.v1', 'task.diffusion.v1', 'effect.frontier.v1', 'experiment.design.v1', 'claim.certificate.v1', 'evidence.ledger.v1']) {
   if (!implemented.has(id)) errors.push(`implemented representation missing: ${id}`);
 }
 if (!['active_decision_transaction', 'no_open_decision_transaction'].includes(active?.status)) errors.push(`invalid decision router status: ${active?.status}`);
-if (active?.status === 'active_decision_transaction' && active?.active_transaction?.id !== 'trace013') errors.push('active decision transaction must be Trace013');
-if (active?.status === 'no_open_decision_transaction' && active?.latest_completed_trace?.id !== 'trace013') errors.push('completed decision router must identify Trace013');
+if (active?.status === 'active_decision_transaction') {
+  const activeId = active?.active_transaction?.id;
+  if (!activeId) errors.push('active decision transaction missing id');
+  if (activeId && activeId !== reservedNextTrace && !productionTraceIds.has(activeId)) {
+    errors.push(`active decision transaction ${activeId} must match the reserved next trace or declared trace chain`);
+  }
+}
+if (active?.status === 'no_open_decision_transaction') {
+  const latestId = active?.latest_completed_trace?.id;
+  if (!latestId) errors.push('completed decision router missing latest trace id');
+  if (latestId && !productionTraceIds.has(latestId)) errors.push(`completed decision router ${latestId} missing from production trace chain`);
+  if (routedLatestTrace && latestId !== routedLatestTrace) {
+    errors.push(`completed decision router ${latestId} must match authority-map latest trace ${routedLatestTrace}`);
+  }
+}
 
 function runJson(label, argv, timeout = 240_000) {
   const result = spawnSync(process.execPath, argv, { cwd: root, encoding: 'utf8', shell: false, timeout, maxBuffer: 64 * 1024 * 1024 });
@@ -98,7 +117,8 @@ if (errors.length) {
 console.log(JSON.stringify({
   ok: true,
   checked: requiredFiles,
-  trace: 'trace013',
+  compiler_baseline_trace: 'trace013',
+  routed_latest_trace: active.status === 'no_open_decision_transaction' ? active.latest_completed_trace.id : active.active_transaction.id,
   selected_candidate: selection.selected,
   engine_version: doctor.engine_version,
   implemented_dialects: doctor.implemented_dialects,

@@ -1,9 +1,16 @@
 #!/usr/bin/env node
 import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { spawn } from "node:child_process";
+import net from "node:net";
 
-const root = process.cwd();
-const baseUrl = process.env.UI_FIXTURE_BASE_URL ?? "http://127.0.0.1:3200";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = join(__dirname, "../../..");
+const webDir = join(root, "apps/web");
+const nextBin = join(root, "node_modules/next/dist/bin/next");
+const port = Number(process.env.UI_FIXTURE_PORT ?? 3200);
+const baseUrl = process.env.UI_FIXTURE_BASE_URL ?? `http://127.0.0.1:${port}`;
 const evidenceDir = join(root, "infra/.local/ui-fixtures");
 
 let chromium;
@@ -14,6 +21,27 @@ try {
 }
 
 await mkdir(evidenceDir, { recursive: true });
+let server;
+let serverError;
+if (!(await serverReady())) {
+  server = spawn(process.execPath, [nextBin, "dev", "-p", String(port), "-H", "127.0.0.1", "--turbopack"], {
+    cwd: webDir,
+    env: {
+      ...process.env,
+      NODE_ENV: "development",
+      AMTECH_ENVIRONMENT_NAME: "product-shell-browser",
+    },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  server.on("error", (error) => {
+    serverError = error;
+    console.error(`Failed to start product shell Next server: ${error.message}`);
+  });
+  server.stdout?.on("data", (chunk) => { if (process.env.UI_FIXTURE_LOGS === "1") process.stdout.write(chunk); });
+  server.stderr?.on("data", (chunk) => { if (process.env.UI_FIXTURE_LOGS === "1") process.stderr.write(chunk); });
+  await waitForServer();
+}
+
 const browser = await chromium.launch({ headless: process.env.UI_HEADLESS !== "0" });
 const matrix = [];
 
@@ -67,6 +95,7 @@ try {
   console.log("Product shell browser acceptance passed.");
 } finally {
   await browser.close();
+  server?.kill("SIGTERM");
 }
 
 async function assertMinimumTargets(page, rootSelector) {
@@ -111,4 +140,29 @@ async function assertLightSurface(page, rootSelector) {
   const [, r, g, b] = match.map(Number);
   const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
   if (luminance < 0.65) throw new Error(`product_surface_not_light:${background}`);
+}
+
+async function serverReady() {
+  const url = new URL(baseUrl);
+  const readyPort = Number(url.port || (url.protocol === "https:" ? 443 : 80));
+  return new Promise((resolvePromise) => {
+    const socket = net.createConnection({ host: url.hostname, port: readyPort, timeout: 1000 }, () => {
+      socket.end();
+      resolvePromise(true);
+    });
+    socket.on("timeout", () => { socket.destroy(); resolvePromise(false); });
+    socket.on("error", () => resolvePromise(false));
+  });
+}
+
+async function waitForServer() {
+  const started = Date.now();
+  while (Date.now() - started < 60_000) {
+    if (serverError) throw serverError;
+    if (server?.exitCode !== null) throw new Error(`product_shell_server_exited:${server.exitCode ?? "unknown"}`);
+    if (await serverReady()) return;
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 500));
+  }
+  server?.kill("SIGTERM");
+  throw new Error(`product_shell_server_timeout:${baseUrl}`);
 }

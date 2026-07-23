@@ -1,0 +1,56 @@
+{
+  "content_digest": "sha256:25bf3bea7b5d5cb2e2b007ac4cc8cca36dc25d4c50cc4d3c0642e44adad335ff",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T21:43:25.671Z",
+  "payload": {
+    "certificate": {
+      "artifact_schema": "spectral.hypergraph.v1",
+      "digest": "sha256:b36ce1411475863385d4d010947e498e44bd568234ff1ba1fa432e01747283a4",
+      "residual_max": 4.135580766728708e-14,
+      "tolerance": 1e-9,
+      "type": "dominant_eigenpair"
+    },
+    "claim": {
+      "evidence_class": "P1",
+      "property": "dominant_eigenpair_of_declared_normalized_hypergraph_operator",
+      "scope": "sha256:15c510ca8807342f6ecd01f8c90febe13bf75b869710e8c7ca82c5d92240c296",
+      "statement": "The supplied vector is an eigenvector of the declared normalized hypergraph adjacency with residual_max <= 1e-9."
+    },
+    "claim_id": "claim:b36ce14114758633",
+    "correspondence": {
+      "artifact_schema": "correspondence.v1",
+      "class": "P2",
+      "digest": "sha256:98875c41a4c5e5091eb4bca66758a073aca93db81a4513b43634d2f0c5ace6bd",
+      "status": "verified_membership_parity"
+    },
+    "does_not_claim": [
+      "best implementation",
+      "causal engineering improvement",
+      "runtime correctness",
+      "exact-head CI success",
+      "external or production acceptance"
+    ],
+    "model": {
+      "artifact_schema": "invariant.hypergraph.v1",
+      "assumptions": {
+        "finite_operator": true,
+        "nonzero_represented_vertex_degrees": true,
+        "positive_hyperedge_weights": true,
+        "symmetric_normalized_operator": true
+      },
+      "digest": "sha256:15c510ca8807342f6ecd01f8c90febe13bf75b869710e8c7ca82c5d92240c296",
+      "operator": "zhou-normalized-hypergraph-adjacency"
+    },
+    "verifier": {
+      "path": "decision/engine/verify/verify-certificate.mjs",
+      "version": "1.0.0"
+    }
+  },
+  "provenance": {
+    "certificate_digest": "sha256:b36ce1411475863385d4d010947e498e44bd568234ff1ba1fa432e01747283a4",
+    "generator": "decision/engine/analyze/spectral-hypergraph.mjs",
+    "model_digest": "sha256:15c510ca8807342f6ecd01f8c90febe13bf75b869710e8c7ca82c5d92240c296"
+  },
+  "schema": "claim.certificate.v1",
+  "source_sha": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205"
+}

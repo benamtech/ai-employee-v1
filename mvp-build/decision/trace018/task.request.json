@@ -1,0 +1,68 @@
+{
+  "external_blockers": [
+    "live provider acceptance",
+    "target host recovery",
+    "manual accessibility acceptance",
+    "production deployment",
+    "multi-employee live browser credentials outside local evidence"
+  ],
+  "goal": "Implement UI Lab Phase 1: live-first authorized AI Employee workbench with one shared browser projection controller, route-backed Phase 1 projections, live variants through existing EmployeeExperienceModelV1, explicit fixture separation, and complete Phase 2-5 implementation documents.",
+  "maximum_patch": {
+    "allowed_paths": [
+      "apps/web/app/ui-lab",
+      "apps/web/app/agent/[employeeId]",
+      "apps/web/app/_components/ui-variant",
+      "apps/web/app/_components/live-employee",
+      "packages/shared/src/index.ts",
+      "packages/shared/src/ui-variant.ts",
+      "tests/unit",
+      "infra/scripts/ui",
+      "docs/adr",
+      "docs/ui-lab",
+      "decision/trace018",
+      "decision/active.json",
+      "CODEGRAPH.md",
+      "authority-map.json",
+      "memory/MEMORY.md",
+      "memory/2026-07-23-ui-lab-phase-1-live-workbench.md",
+      "production-readiness-program/13-resolution-ledger.json"
+    ],
+    "expansion_rule": "Record discovered-later evidence before evaluation; stop rather than expanding into Manager, database, Hermes, provider, deployment, replay storage, launcher rewrite, or generated runtime Phase 2-5 work.",
+    "maximum_files": 40
+  },
+  "non_goals": [
+    "Do not implement generated bespoke application runtime beyond existing variants.",
+    "Do not implement channel/runtime/access inspectors.",
+    "Do not implement recording/replay or launcher topology rewrite.",
+    "Do not modify Manager, database migrations, provider adapters, Hermes integration, deployment, or production compose unless repoctl reveals a hard blocker and the work is explicitly replanned.",
+    "Do not edit main."
+  ],
+  "paths": [
+    "apps/web/app/ui-lab",
+    "apps/web/app/agent/[employeeId]",
+    "apps/web/app/_components/ui-variant",
+    "tests/unit",
+    "infra/scripts/ui",
+    "docs/adr",
+    "docs/ui-lab",
+    "decision/active.json",
+    "CODEGRAPH.md",
+    "authority-map.json",
+    "memory/MEMORY.md"
+  ],
+  "task_id": "TRACE018-UI-LAB-LIVE-AE-PHASE1",
+  "task_seeds": [
+    "UI Lab live-first",
+    "owner projection controller",
+    "ResourcePayload",
+    "EmployeeExperienceModelV1",
+    "fixture separation",
+    "route-backed workbench",
+    "Trace018"
+  ],
+  "unknowns": [
+    "Whether existing dashboard/employee list APIs are sufficient for UI Lab employee authorization resolution.",
+    "Whether normal owner route can be refactored onto the shared provider without broad visual churn.",
+    "Whether current browser harness can validate live routes without a live logged-in fixture stack."
+  ]
+}

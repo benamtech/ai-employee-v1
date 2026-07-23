@@ -6,6 +6,7 @@ import { AgentSurface } from "./AgentSurface";
 import { fixtureResourcePayload } from "./fixtures";
 import { protocolAuthority, type OwnerStreamScope } from "./owner-stream-state";
 import { openOwnerProjectionController } from "./owner-projection-controller";
+import type { LiveEmployeeProjectionState } from "../../_components/live-employee/LiveEmployeeProvider";
 
 type PrimaryMode = "talk" | "operate";
 type StreamState = "connecting" | "live" | "reconnecting" | "offline";
@@ -55,18 +56,21 @@ const EMPTY: ResourcePayload = {
 export function LiveEmployeeOperatingShell({
   employeeId,
   fixtureMode,
+  liveProjection,
 }: {
   employeeId: string;
   fixtureMode: boolean;
+  liveProjection?: LiveEmployeeProjectionState;
 }) {
+  const controlledLive = Boolean(liveProjection);
   const [mode, setMode] = useState<PrimaryMode>("talk");
-  const [res, setRes] = useState<ResourcePayload>(() => fixtureMode ? fixtureResourcePayload(employeeId) : EMPTY);
+  const [res, setRes] = useState<ResourcePayload>(() => liveProjection?.resources ?? (fixtureMode ? fixtureResourcePayload(employeeId) : EMPTY));
   const [runs, setRuns] = useState<Record<string, LiveRun>>({});
   const [pending, setPending] = useState<PendingTurn[]>([]);
   const [input, setInput] = useState("");
   const [dispatching, setDispatching] = useState(false);
   const [status, setStatus] = useState("");
-  const [streamState, setStreamState] = useState<StreamState>(fixtureMode ? "live" : "connecting");
+  const [streamState, setStreamState] = useState<StreamState>(liveProjection?.streamState ?? (fixtureMode ? "live" : "connecting"));
   const scopeRef = useRef<OwnerStreamScope | null>(null);
   const reconnectTimer = useRef<number | null>(null);
   const threadEndRef = useRef<HTMLDivElement | null>(null);
@@ -75,7 +79,19 @@ export function LiveEmployeeOperatingShell({
     setRes({ ...EMPTY, ...next });
   }, []);
 
+  useEffect(() => {
+    if (!liveProjection) return;
+    scopeRef.current = liveProjection.scope;
+    installResources(liveProjection.resources);
+    setStreamState(liveProjection.streamState);
+    setStatus(liveProjection.notice || liveProjection.progress || "");
+  }, [installResources, liveProjection]);
+
   const refreshResources = useCallback(async () => {
+    if (liveProjection) {
+      await liveProjection.refresh();
+      return;
+    }
     if (fixtureMode || mode !== "talk") return;
     const scope = scopeRef.current;
     if (!scope) return;
@@ -94,15 +110,17 @@ export function LiveEmployeeOperatingShell({
       // The validated stream remains authoritative; a failed convenience refresh
       // must not erase the live conversation or resend owner intent.
     }
-  }, [employeeId, fixtureMode, installResources, mode]);
+  }, [employeeId, fixtureMode, installResources, liveProjection, mode]);
 
   useEffect(() => {
+    if (controlledLive) return;
     if (!fixtureMode) return;
     installResources(fixtureResourcePayload(employeeId));
     setStreamState("live");
-  }, [employeeId, fixtureMode, installResources]);
+  }, [controlledLive, employeeId, fixtureMode, installResources]);
 
   useEffect(() => {
+    if (controlledLive) return;
     if (fixtureMode || mode !== "talk") {
       scopeRef.current = null;
       return;
@@ -163,7 +181,7 @@ export function LiveEmployeeOperatingShell({
         setStatus("AMTECH stopped an invalid live conversation projection (" + reason + "). No owner action was replayed.");
       },
     });
-  }, [employeeId, fixtureMode, installResources, mode, refreshResources]);
+  }, [controlledLive, employeeId, fixtureMode, installResources, mode, refreshResources]);
 
   const employeeName = res.employee?.name ?? res.operating_state?.context.employee_name ?? "Your employee";
   const durableMessages = useMemo(
@@ -206,6 +224,16 @@ export function LiveEmployeeOperatingShell({
   const sendMessage = useCallback(async (messageOverride?: string) => {
     const body = (messageOverride ?? input).trim();
     if (!body || dispatching) return;
+
+    if (liveProjection) {
+      setDispatching(true);
+      setStatus("Sending through the UI Lab live action bridge.");
+      const result = await liveProjection.sendMessage(body);
+      if (result.ok) setInput("");
+      setStatus(result.message);
+      setDispatching(false);
+      return;
+    }
 
     if (fixtureMode) {
       const intentId = createIntentId(employeeId);
@@ -292,7 +320,7 @@ export function LiveEmployeeOperatingShell({
       </header>
 
       {mode === "operate" ? (
-        <div className="nextgen-operate"><AgentSurface employeeId={employeeId} fixtureMode={fixtureMode} /></div>
+        <div className="nextgen-operate"><AgentSurface employeeId={employeeId} fixtureMode={fixtureMode} liveProjection={liveProjection} /></div>
       ) : (
         <main className="nextgen-talk">
           <section className="nextgen-conversation" aria-label={`Conversation with ${employeeName}`}>

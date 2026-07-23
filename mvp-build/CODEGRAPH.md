@@ -1,21 +1,21 @@
 # CODEGRAPH.md — AI Employee executable topology
 
-Status: active cumulative source candidate with exact-head local production mirror evidence; external acceptance remains open
+Status: active cumulative source candidate with Trace018 UI Lab Phase 1 local P3 evidence; external acceptance remains open
 Updated: 2026-07-23  
-Candidate stack: `task/new-task-20260723` at `c83c23be7d9bc5c36c164579ff47c16c45bb97a0` -> review/merge to `main` -> verify the merge commit
+Candidate stack: `task/ui-lab-live-ae-phase-1-20260723` at `7fc40dc8dc7c60f3a8ec3e79dff59e6181566205` plus working-tree Trace018 candidate -> review/merge to `main` -> verify the merge commit
 Source migration head: `0082`
 
 This is the sole contributor-facing owner of current product and workstream structure. `authority-map.json` routes machine readers here. Exact transient SHA, run number, and conclusion remain in the current branch, workflows, or retained release evidence.
 
 ## Current state
 
-- The current branch contains the post-main cumulative source candidate through Trace014, Trace015, and the Trace016 production-runtime repair commits.
+- The current branch contains the post-main cumulative source candidate through Trace014, Trace015, Trace016 production-runtime repair commits, Trace017 authority reconciliation, and Trace018 UI Lab Phase 1 live AE workbench source.
 - Trace014 enforced the canonical session bootstrap. Trace015 generated the repair frontier and full-stack strategy map. Trace016 repaired the production Caddy/upstream/runtime test path and produced exact-candidate local mirror evidence, but its repoctl finish was blocked because the actual source repair exceeded the originally admitted patch envelope. Treat the source commits and proof files as P3 evidence; do not claim Trace016 lifecycle completion.
-- Trace017 is the documentation and memory reconciliation transaction for this exact candidate.
+- Trace017 is the documentation and memory reconciliation transaction for the production-state candidate. Trace018 adds a live-first `/ui-lab` workbench for one Manager-authorized owner-visible AI Employee, using the existing owner session and owner projection stream, with fixtures only at `/ui-lab/fixtures`.
 - Production envvars are present for deploy/prod tests in `infra/deploy/.env.production`; do not print values. The production database status check shows all migrations through `0082` applied.
 - Production preflight with the production env loaded is 6/9 runnable. Gmail, Stripe Connect, and QBO remain blocked by missing provider callback/webhook/client envvars.
 - Managed database acceptance, live provider acceptance, target-host destructive recovery, trusted signing/registry retention, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain P4 gates.
-- UI Lab and existing `apps/web/ui-variants` are historical/fixture-bearing source artifacts only. They are not authoritative for the next UI effort; redesign UI Lab on a fresh task branch with a new repoctl transaction.
+- Fixture-era UI Lab artifacts remain historical. The current `/ui-lab` route is a bounded Web projection over Manager-owned authority and `ResourcePayload`; Trace018 evidence is P3 only and does not prove production or provider acceptance.
 - The public estimator remains outdated and non-canonical.
 
 ## Exact production mirror evidence
@@ -138,12 +138,16 @@ packages/shared/src/operating-projection.ts
 packages/shared/src/operating-layout.ts
   scoped owner stream and deterministic production projection
 
+apps/web/app/ui-lab/
+apps/web/app/_components/live-employee/
+  Trace018 live-first UI Lab workbench, one Web-local owner projection controller,
+  explicit fixture route, and route-backed live variant evidence
+
 packages/shared/src/employee-ui-presentation.ts
 apps/web/app/_components/employee-ui/EmployeeUiPort.tsx
 apps/web/ui-variants/
 ui-lab/README.md
-  presentation adapters and historical UI Lab/variant fixtures;
-  not authoritative for the next UI Lab redesign
+  presentation adapters and fixture/variant source; fixtures remain secondary evidence
 
 decision/engine/
   facts, dialects, transformations, certificates, task capsules,
@@ -170,6 +174,7 @@ infra/scripts/deploy-rollback.mjs
 - Trace015 — repair frontier and feature/use strategy map; completed on branch lineage.
 - Trace016 — production Caddy/upstream/runtime repair and local mirror proof; source/proof evidence retained, transaction finish not claimed.
 - Trace017 — production-state documentation, authority, ledger, and memory reconciliation.
+- Trace018 — UI Lab Phase 1 live-first owner-visible AI Employee workbench; P3 local source, contract, typecheck, unit, browser, and build evidence only.
 
 ## Open gates
 
@@ -180,7 +185,7 @@ infra/scripts/deploy-rollback.mjs
 | database | migrations through `0082`; production Supabase status observed fully applied | advisors, existing-row behavior, backup, restore, rollback |
 | release identity | current-SHA app images in the local mirror and previous signed manifest machinery | trusted signing, registry retention, production release record |
 | target host/runtime | six-service local mirror healthy with Caddy upstream wiring and deploy smoke | production host secrets, isolation, destructive recovery, managed tunnel/DNS |
-| owner UI/golden work | production projection, historical UI variants, effect/proof contracts | redesigned UI Lab, fixture-free channels, all three provider journeys |
+| owner UI/golden work | production projection, Trace018 live-first UI Lab Phase 1, explicit fixture route, effect/proof contracts | generated runtime, fixture-free channels, all three provider journeys |
 | human/capacity/pilot | responsive surfaces, automation, fairness/pilot-stop schema | manual accessibility, 64 GiB capacity, pilot packet |
 
 ## Dependency order
@@ -188,6 +193,6 @@ infra/scripts/deploy-rollback.mjs
 1. Keep `task/new-task-20260723` pushed and exact-green.
 2. Review and merge the branch into `main`.
 3. Verify the exact `main` merge commit; no ancestor branch proof certifies that descendant.
-4. Create a fresh UI development branch and run `repoctl start` before non-mechanical UI Lab work.
+4. For the next UI Lab phase, create a fresh task branch from merged main and run `repoctl start` before non-mechanical work.
 5. Use `infra/deploy/.env.production` for production builds/live tests without printing values.
 6. Cross the remaining P4 gates in dependency order.

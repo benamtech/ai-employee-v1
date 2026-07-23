@@ -148,37 +148,22 @@ async function verifyOwnerClient(browser) {
 
 async function verifyUiLabWorkbench(browser) {
   const page = await browser.newPage({ viewport: { width: 1600, height: 1050 }, reducedMotion: "reduce" });
-  await openRoute(page, `${baseUrl}/ui-lab/clothing-ops?preset=ecommerce-manager@v0001&viewport=desktop&mode=workspace_fixture`);
-  await page.getByRole("heading", { name: "Clothing operations employee", exact: true }).waitFor({ timeout: 20_000 });
-  await page.getByText("live production-component workbench", { exact: true }).waitFor();
-  await page.getByLabel("Saved version").waitFor();
-  await page.getByLabel("Saved version").selectOption("ecommerce-manager@v0001");
-  const frame = page.frameLocator('iframe[title="Clothing operations employee production UI preview"]');
-  await frame.locator('[data-ui-adapter="owner_web"]').waitFor({ timeout: 30_000 });
-  await frame.getByText("Shopify", { exact: true }).first().waitFor({ timeout: 10_000 });
-  await assertMinimumTargets(page, ".ui-lab-workbench");
-  await assertNoHorizontalOverflow(page, "ui_lab_workbench_desktop");
+  await openRoute(page, `${baseUrl}/ui-lab/fixtures`);
+  await page.getByRole("heading", { name: "Fixture gallery", exact: true }).waitFor({ timeout: 20_000 });
+  await page.getByText("Explicit fixture evidence", { exact: true }).waitFor();
+  await page.getByRole("link", { name: /Clothing operations employee/ }).waitFor();
+  await assertNoHorizontalOverflow(page, "ui_lab_fixtures_desktop");
 
-  await page.getByLabel("Theme").selectOption("midnight");
-  await frame.locator('[data-ui-theme="midnight"]').waitFor({ timeout: 20_000 });
-  await page.getByLabel("Layout").selectOption("focus");
-  await frame.locator('[data-ui-layout="focus"]').waitFor({ timeout: 20_000 });
+  await openRoute(page, `${baseUrl}/ui-lab/clothing-ops`);
+  await page.waitForURL(/\/ui-lab\/fixtures\?scenario=clothing-ops/, { timeout: 20_000 });
 
-  await page.getByRole("button", { name: "Heartbeat gap", exact: true }).click();
-  await page.getByText(/Stalled · Reconciling/).waitFor({ timeout: 8_000 });
-  await page.getByRole("button", { name: "Recover", exact: true }).click();
-  await page.getByText(/Completed · Completed/).waitFor({ timeout: 8_000 });
-  const fixtureInput = page.getByLabel("Fixture interaction");
-  await fixtureInput.fill("Recalculate material needs and bring back the smallest safe purchase decision.");
-  await page.getByRole("button", { name: "Run", exact: true }).click();
-  await frame.getByRole("heading", { name: "One fixture decision is ready", exact: true }).waitFor({ timeout: 12_000 });
-
-  await page.getByLabel("Viewport").selectOption("mobile");
-  const device = page.locator(".device-frame");
-  await page.waitForTimeout(300);
-  const box = await device.boundingBox();
-  if (!box || Math.abs(box.width - 390) > 2) throw new Error(`ui_lab_mobile_frame_width_invalid:${box?.width ?? "missing"}`);
-  await page.screenshot({ path: join(screenshotDir, "ui-lab-workbench-clothing-ops.png"), fullPage: true });
+  await openRoute(page, `${baseUrl}/ui-lab/preview/clothing-ops?adapter=owner_web&theme=studio&layout=canvas&components=editorial&density=balanced&mode=workspace_fixture`);
+  await page.locator('[data-ui-adapter="owner_web"]').waitFor({ timeout: 30_000 });
+  await page.locator('[data-ui-theme="studio"]').waitFor({ timeout: 20_000 });
+  await page.getByRole("textbox", { name: /Command/ }).waitFor({ timeout: 20_000 });
+  await assertMinimumTargets(page, ".ui-lab-preview-root");
+  await assertNoHorizontalOverflow(page, "ui_lab_fixture_preview_desktop");
+  await page.screenshot({ path: join(screenshotDir, "ui-lab-fixture-preview-clothing-ops.png"), fullPage: true });
 
   const registryResponse = await page.request.get(`${baseUrl}/api/ui-lab/presets`);
   if (!registryResponse.ok()) throw new Error(`ui_lab_registry_get_failed:${registryResponse.status()}`);
@@ -189,17 +174,16 @@ async function verifyUiLabWorkbench(browser) {
     if (writeResponse.status() !== 403) throw new Error(`ui_lab_production_write_not_denied:${writeResponse.status()}`);
   }
   await page.close();
-  matrix.push({ id: "ui-lab-workbench-clothing", route: "/ui-lab/clothing-ops", viewport: "1600x1050 + isolated 390/1440", checks: ["preset_load", "iframe_isolation", "production_component", "strategy_change", "runtime_gap", "recovery", "fixture_interaction", "viewport_switch", "registry_read", "write_guard"], status: "PASS" });
+  matrix.push({ id: "ui-lab-fixtures-clothing", route: "/ui-lab/fixtures + /ui-lab/preview/clothing-ops", viewport: "1600x1050", checks: ["explicit_fixture_route", "legacy_redirect", "production_preview", "registry_read", "write_guard"], status: "PASS" });
 
   for (const scenario of ["website", "office", "personal-brain", "research", "contractor"]) {
     const scenarioPage = await browser.newPage({ viewport: { width: 1280, height: 900 }, reducedMotion: "reduce" });
     await openRoute(scenarioPage, `${baseUrl}/ui-lab/${scenario}`);
-    await scenarioPage.locator(".workbench-canvas iframe").waitFor({ timeout: 20_000 });
-    const scenarioFrame = scenarioPage.frameLocator(".workbench-canvas iframe");
-    await scenarioFrame.locator("[data-ui-adapter]").waitFor({ timeout: 30_000 });
-    await assertNoHorizontalOverflow(scenarioPage, `ui_lab_${scenario}`);
+    await scenarioPage.waitForURL(new RegExp(`/ui-lab/fixtures\\?scenario=${scenario}`), { timeout: 20_000 });
+    await scenarioPage.getByRole("heading", { name: "Fixture gallery", exact: true }).waitFor({ timeout: 20_000 });
+    await assertNoHorizontalOverflow(scenarioPage, `ui_lab_fixture_redirect_${scenario}`);
     await scenarioPage.close();
-    matrix.push({ id: `ui-lab-${scenario}`, route: `/ui-lab/${scenario}`, viewport: "1280x900", checks: ["workbench", "isolated_preview", "production_port_host", "no_horizontal_overflow"], status: "PASS" });
+    matrix.push({ id: `ui-lab-${scenario}`, route: `/ui-lab/${scenario}`, viewport: "1280x900", checks: ["legacy_redirect", "explicit_fixture_route", "no_horizontal_overflow"], status: "PASS" });
   }
 }
 

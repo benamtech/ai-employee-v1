@@ -1,0 +1,144 @@
+{
+  "content_digest": "sha256:c79b7c3e6bd8ffd9364b2e571ecd9483f96b6cb42515b103a29dd76ae5f50b7d",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T23:06:15.588Z",
+  "payload": {
+    "base_sha": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205",
+    "capsule_digest": "sha256:3e7d7f514bc0c1322188addfc0d9200c03f07d759f6ff8f375e866bc2fc8ed6c",
+    "certificate_digest": "sha256:25bf3bea7b5d5cb2e2b007ac4cc8cca36dc25d4c50cc4d3c0642e44adad335ff",
+    "correspondence_digest": "sha256:98875c41a4c5e5091eb4bca66758a073aca93db81a4513b43634d2f0c5ace6bd",
+    "evidence_ledger_digest": "sha256:6daff44a9e58fc497d401d583913e3647963c2398b2754f3ede93b47c1f76dda",
+    "experiment_digest": "sha256:5f66f309b3683aed40a64bdc44ff94ec2fdbc7b5fa2a6062169e8c99b8d97d73",
+    "external_blockers": [
+      "live provider acceptance",
+      "target host recovery",
+      "manual accessibility acceptance",
+      "production deployment",
+      "multi-employee live browser credentials outside local evidence"
+    ],
+    "final_sha": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205",
+    "maximum_evidence_class": "P3",
+    "outcome_calibration": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-impact-recall",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          "hyperedge:authority-obligation:file:AGENTS.md:1b61f9e2a321",
+          "hyperedge:authority-obligation:file:mvp-build/AGENTS.md:9bca59df372f",
+          "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:3dcbceb3acca",
+          "hyperedge:authority-obligation:file:mvp-build/decision/engine/representation-registry.json:42cddd8727da",
+          "hyperedge:authority-obligation:file:mvp-build/decision/protocol-v1.json:75a680dc9d1e",
+          "hyperedge:authority-obligation:file:mvp-build/decision/README.md:bcae2ce9c63a",
+          "hyperedge:authority-obligation:file:mvp-build/decision/representation-contract.md:19a6bbdececd",
+          "hyperedge:authority-obligation:file:mvp-build/decision/SESSION_ONBOARDING.md:5309d2aa7996",
+          "hyperedge:authority-obligation:file:mvp-build/GAPS.md:ee2797c85105",
+          "hyperedge:authority-obligation:file:mvp-build/memory/2026-07-23-production-state-after-c83c23b.md:ee461432557f",
+          "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:90b42a7462c9",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:e8ca03086641",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:2bd8208fc691",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/13-resolution-ledger.json:a44533579fd6",
+          "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/README.md:5c127a3f419b",
+          "hyperedge:authority-obligation:file:mvp-build/REMEDIATION.md:9be6a5827c03",
+          "hyperedge:authority-obligation:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:00786e2d17a3",
+          "hyperedge:authority-obligation:file:mvp-build/STANDARD.md:971bd3281e12",
+          "hyperedge:authority-routing:authority-map:dfd4abfc460e",
+          "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/ui/fixture-browser.mjs:4e5a6f2dd5d3",
+          "hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/ui/product-shell-browser.mjs:782c7fdc0875",
+          "hyperedge:behavioral-obligation:file:mvp-build/scripts/validate-ui-system.mjs:3dd97d2bfac2",
+          "hyperedge:behavioral-obligation:file:mvp-build/scripts/verify-agentic-repository.mjs:6a697a0d0a1f"
+        ],
+        "observed": {
+          "passed": false,
+          "value": 23
+        },
+        "prediction_id": "prediction-invariant-coverage",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/AGENTS.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/ui-lab/README.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/authority-map.json"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/memory/MEMORY.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/STANDARD.md",
+            "file:mvp-build/memory/MEMORY.md"
+          ]
+        ],
+        "observed": {
+          "passed": false,
+          "value": 8
+        },
+        "prediction_id": "prediction-authority-consistency",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-evidence-nonpromotion",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "plan_admission_digest": "sha256:9815ebce687e802a8ea8fdd3bd4835f105e0ed5736df6cc99bf370e7534b64e3",
+    "status": "finished",
+    "task_id": "TRACE018-UI-LAB-LIVE-AE-PHASE1"
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs finish"
+  },
+  "schema": "experiment.transaction.v1",
+  "source_sha": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205"
+}
