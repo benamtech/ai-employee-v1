@@ -1,0 +1,85 @@
+{
+  "schema": "trace013.task.v1",
+  "status": "active_implementation_transaction",
+  "task_id": "AMTECH-EXPERIMENT-COMPILER-001",
+  "repository": "benamtech/ai-employee-v1",
+  "working_branch": "agent/employee-ui-port-adapters-current",
+  "parent_pr": 40,
+  "starting_sha": "9f9874242e3740059e9f4f857c2f164962bc91d6",
+  "tier": "T3_production_cross_workstream",
+  "mission": "Implement a repository-native software experiment compiler that turns exact repository facts and a task into typed representations, verified transformations, a task capsule, proof-carrying claims, an admitted plan, executable evaluation, and calibrated outcomes for any coding agent.",
+  "authority": [
+    "mvp-build/decision/protocol-v1.json",
+    "mvp-build/decision/representation-contract.md",
+    "mvp-build/authority-map.json",
+    "mvp-build/CODEGRAPH.md",
+    "mvp-build/production-readiness-program/README.md",
+    "user-supplied Repository-Native Software Experiment Compiler design"
+  ],
+  "observed": [
+    "The repository already distinguishes P0 representation calculations, P1 formal model-property certificates, P2 representation fidelity, P3 executable software evidence, and P4 external acceptance.",
+    "The prior implementation was operationally incomplete because active governance relied primarily on prose and string-presence checks.",
+    "The repository has no executable repository-fact extractor, representation registry, source-to-model correspondence verifier, claim-certificate verifier, task capsule compiler, experiment chronology controller, or query interface.",
+    "Trace012 is complete historical UI authority; this methodology mutation requires a new transaction rather than silently changing active authority while no transaction is open."
+  ],
+  "unknown": [
+    "retrospective recall and precision across Trace007 through Trace012 until benchmark execution",
+    "prospective improvement over the existing evidence-and-invariants workflow until matched task outcomes exist",
+    "which future specialized dialects will outperform the implemented base cascade"
+  ],
+  "hard_invariants": [
+    "facts are content-addressed and tied to an exact Git SHA",
+    "every retained representation declares generator, schema, provenance, assumptions, validation, proof class, and correspondence boundary",
+    "P1 claims require a machine-checkable certificate and small verifier",
+    "P1 model proof never silently promotes itself through P2, P3, or P4",
+    "task capsule and predictions predate source edits and outcomes",
+    "every hard invariant hyperedge has an accepted proof obligation or explicit blocker",
+    "changed paths are covered by generated impact analysis or explicit discovered-later evidence",
+    "specialized representations activate through an admissibility selector rather than every method running on every task",
+    "no remote mutable skill or task-time package download is required",
+    "the engine remains vendor-neutral for Claude Code, Codex, Cursor, Pi, local models, deterministic scripts, and humans"
+  ],
+  "selected_vertical_slice": [
+    "content-addressed repository facts",
+    "authority/evidence DAG",
+    "dependency graph",
+    "software-invariant hypergraph",
+    "P2 correspondence artifact",
+    "normalized hypergraph spectral certificate with checked residual",
+    "task-local graph/hypergraph diffusion",
+    "typed first-through-fourth-order effect frontier",
+    "task capsule",
+    "plan admission chronology",
+    "executable verification and evidence ledger",
+    "prediction/outcome calibration",
+    "transaction finish verifier",
+    "structured query interface"
+  ],
+  "deferred_registered_dialects": [
+    "transition.system.v1",
+    "constraint.smt.v1",
+    "rewrite.egraph.v1",
+    "queueing.state.v1",
+    "koopman.episode.v1",
+    "topology.complex.v1",
+    "embedding.code-change.v1"
+  ],
+  "non_goals": [
+    "claim that the experiment compiler has already improved engineering outcomes",
+    "install MLIR, Souffle, egglog, an SMT solver, a theorem prover, or numerical packages as runtime dependencies",
+    "implement every future representation dialect in the first vertical slice",
+    "claim managed database, provider, target-host, accessibility, pilot, deployment, or production acceptance",
+    "merge directly into main"
+  ],
+  "chronology": {
+    "task_state_committed_before_engine_source": true,
+    "predictions_required_before_plan_admission": true,
+    "outcomes_required_after_executable_evidence": true
+  },
+  "self_reference": {
+    "path": "mvp-build/decision/trace013/task_state.json",
+    "decision_record": "mvp-build/decision/trace013/decision_record.md",
+    "implementation_contract": "mvp-build/decision/trace013/implementation_contract.json",
+    "verification_plan": "mvp-build/decision/trace013/verification_plan.json"
+  }
+}
