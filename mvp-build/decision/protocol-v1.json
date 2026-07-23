@@ -1,25 +1,66 @@
 {
   "schema": "amtech.computed-decision.v1",
-  "protocol_revision": 4,
+  "protocol_revision": 5,
   "status": "active",
   "scope": "mvp-build non-mechanical planning and implementation decisions",
+  "representation_contract": "representation-contract.md",
+  "representation_policy": {
+    "natural_language_role": "interoperability_and_audit_layer_not_mandatory_reasoning_substrate",
+    "first_class_representations": [
+      "vectors",
+      "matrices",
+      "tensors",
+      "embeddings",
+      "syntax_control_data_call_import_dependency_and_provenance_graphs",
+      "genuine_hypergraphs_and_incidence_operators",
+      "spectral_objects_and_kernels",
+      "transition_systems_state_machines_petri_nets",
+      "sat_smt_proof_terms_and_model_checker_traces",
+      "geometric_topological_and_simplicial_structures",
+      "state_space_koopman_dmd_and_control_models",
+      "executable_schemas_and_generated_inventories"
+    ],
+    "retained_artifact_requirements": [
+      "generator_or_extraction_rule",
+      "schema_dimensions_units_and_missing_semantics",
+      "source_and_evidence_provenance",
+      "transformations_parameters_seeds_and_tolerances",
+      "assumptions_and_theorem_prerequisites",
+      "validation_residuals_reconstruction_or_held_out_error",
+      "declared_proof_class",
+      "compact_language_bridge"
+    ]
+  },
+  "proof_classes": {
+    "P0_representation_calculation": "computed score vector embedding mode clustering centrality simulation or other observation about the chosen representation",
+    "P1_formal_model_property": "theorem machine-checkable certificate verified eigenstructure solver result model-checker result or invariant proof for an explicitly declared model and assumptions",
+    "P2_representation_fidelity": "proof that the formal or learned representation corresponds to the source runtime or evidence boundary it claims to model",
+    "P3_executable_software": "accepted exact-candidate source type unit integration database browser build image or related executable proof",
+    "P4_external_production_acceptance": "managed provider target-host real-channel accessibility commercial recovery trusted-signing pilot deployment or production evidence",
+    "correspondence_rule": "P1 is proof for its declared formal property; P1 plus sufficient P2 may satisfy a P3 gate only when that gate defines and verifies the correspondence; no proof class is demoted or silently expanded"
+  },
   "order": [
     "authority_extraction",
+    "machine_native_representation_extraction",
     "evidence_unknown_matrix",
     "tier_selection",
+    "typed_predictions_and_falsifiers",
     "independent_candidate_batches",
     "feasibility_invariant_filter",
     "explicit_baseline_semantics",
     "simple_evidence_invariants_baseline",
     "candidate_search_topology",
     "software_invariant_topology",
+    "formal_model_certificate_when_useful",
+    "bounded_higher_order_effect_propagation",
     "equal_feasibility_comparison",
     "weight_and_search_sensitivity",
     "selected_exploration",
     "coherent_implementation_compression",
-    "complete_behavioral_proof_plan",
+    "complete_proof_plan_by_declared_class",
     "red_green_refactor",
     "exact_head_and_external_verification",
+    "prediction_outcome_calibration",
     "documentation_handoff_update"
   ],
   "tiers": {
@@ -33,7 +74,7 @@
       "minimum_candidates": 4,
       "minimum_batches": 2,
       "required": ["evidence_labels", "feasibility_filter", "rejection_reasons", "implementation_choice"],
-      "topology": "only_when_it_changes_a_material_decision"
+      "topology": "only_when_it_changes_a_material_decision_or_proof_obligation"
     },
     "T2_consequential": {
       "minimum_candidates": 16,
@@ -46,7 +87,8 @@
         "simple_baseline",
         "equal_feasibility_controls",
         "separate_implementation_compression",
-        "behavioral_failure_manifold"
+        "behavioral_failure_manifold",
+        "proof_class_and_correspondence_for_each_decisive_certificate"
       ]
     },
     "T3_production_cross_workstream": {
@@ -68,7 +110,8 @@
         "weight_sensitivity",
         "implementation_ablation_or_noncausal_classification",
         "separate_implementation_compression",
-        "complete_behavioral_proof_plan"
+        "complete_proof_plan_by_declared_class",
+        "machine_native_representation_and_correspondence_contract"
       ]
     }
   },
@@ -117,7 +160,7 @@
     "VF": {"meaning": "verification feasibility", "orientation": "maximize"},
     "Testability": {"meaning": "behavioral testability", "orientation": "maximize"},
     "Reversibility": {"meaning": "implementation reversibility", "orientation": "maximize"},
-    "ProofDensity": {"meaning": "independent proof obligations addressed per unit scope", "orientation": "maximize"},
+    "ProofDensity": {"meaning": "independent proof obligations addressed per unit scope across declared proof classes", "orientation": "maximize"},
     "Risk": {"meaning": "implementation and production risk", "orientation": "minimize"},
     "Cost": {"meaning": "implementation and operational cost", "orientation": "minimize"},
     "Scope": {"meaning": "implementation scope burden", "orientation": "minimize"},
@@ -156,23 +199,30 @@
     "candidate_graph": {
       "vertices": "candidate trajectories",
       "relations": ["same concept", "shared implementation boundary", "recombination lineage", "semantic similarity", "common evidence"],
-      "allowed_metrics": ["candidate edge touch", "separation", "redundancy", "search diversity"],
-      "forbidden_claim": "software invariant completion"
+      "allowed_metrics": ["candidate edge touch", "separation", "redundancy", "search diversity", "spectral and geometric certificates for declared graph properties"],
+      "forbidden_claim": "software invariant completion without a declared mapping and proof contract"
     },
     "software_invariant_hypergraph": {
-      "vertices": "actual software entities or obligations",
+      "vertices": "actual software entities states or obligations",
       "candidate_mapping": "candidates declare represented software vertices",
       "coverage": ["touch", "fractional", "complete", "proved"],
-      "proved_rule": "complete representation plus accepted independent behavioral proof on the exact candidate"
+      "proved_rule": "the hyperedge declared proof contract is satisfied; P1 formal proof is sufficient for a formal-model edge, while executable-software edges additionally require the declared P2/P3 correspondence"
+    },
+    "spectral": {
+      "allowed": true,
+      "proof_status": "P1 when theorem assumptions operator semantics residuals conditioning and reproducibility are satisfied",
+      "uses": ["connectivity", "decomposition", "stability", "convergence", "observability", "controllability", "expansion", "mixing", "mode separation", "optimization certificate", "centrality", "hypothesis generation"],
+      "guard": "a dominant eigenvector may be decisive for the declared mathematical problem; mapping it to a software decision requires explicit fidelity and objective correspondence"
     }
   },
   "feasible_domain": {
-    "rule": "All objective variants and baselines use the same mandatory-coverage and invariant-feasible domain.",
-    "mandatory_coverage": "constraint_not_objective_bonus"
+    "rule": "All objective variants and baselines use the same mandatory-coverage prerequisite and invariant-feasible domain.",
+    "mandatory_coverage": "constraint_not_objective_bonus",
+    "formal_membership": "a P1 plus sufficient P2 certificate may prove feasible-domain membership"
   },
   "required_controls_T2_T3": ["full", "no_graph", "no_diversity", "evidence_baseline", "feasible_random"],
   "baseline_rules": {
-    "membership": "declared explicitly; never inferred from names, aliases, weight signs, or whatever dimensions happen to exist",
+    "membership": "declared explicitly; never inferred from names aliases weight signs or whatever dimensions happen to exist",
     "orientation": "declared independently from objective weights",
     "schema_change": "a newly introduced unclassified score dimension fails with unclassified_baseline_dimensions",
     "grouping": "semantic group weights prevent schema density from changing baseline importance",
@@ -186,35 +236,41 @@
       "implementation_jaccard",
       "full_objective_difference",
       "independent_proof_yield_difference",
+      "formal_certificate_class",
       "causal_improvement"
     ]
   },
   "causality": {
     "selection_influencing": "the term changes a selected candidate set inside the same feasible domain",
-    "causal_improvement": "an equal-feasibility implementation ablation improves independent outcomes such as defects found, complete proof obligations, coherence, review defects, unnecessary scope, or executable verification yield",
-    "default_without_ablation": "descriptive_or_selection_influencing",
-    "forbidden_evidence": ["ranking difference alone", "objective delta alone", "candidate edge touch", "software node representation alone"]
+    "formal_proof": "a valid P1 P2 or P3 certificate proves the exact property declared by its proof class",
+    "causal_improvement": "an appropriate formal causal argument or equal-feasibility implementation ablation improves independent outcomes such as defects found complete proof obligations coherence review defects unnecessary scope or executable verification yield",
+    "default_without_ablation": "formal_property_proof_may_stand_but_causal_superiority_remains_descriptive_or_selection_influencing",
+    "forbidden_causal_evidence": ["ranking difference alone", "objective delta alone", "candidate edge touch alone", "software node representation alone"]
   },
   "sensitivity": {
-    "search": "report unique optima, objective spread, and selected-set stability across deterministic restarts",
-    "weights": "report selected-set and software-coverage stability under declared bounded perturbations",
-    "failure_rule": "instability is reported and reduces confidence; it is not hidden by choosing a favorable run"
+    "search": "report unique optima objective spread and selected-set stability across deterministic restarts",
+    "weights": "report selected-set software-coverage and certificate stability under declared bounded perturbations",
+    "spectral": "report operator construction normalization residual multiplicity conditioning and sensitivity to plausible edge and weight changes",
+    "failure_rule": "instability is reported and reduces the scope or confidence of the claim; it is not hidden by choosing a favorable run"
   },
   "mathematics_guards": {
-    "hypergraph": "separate candidate topology from software invariant topology",
-    "hodge": "use only for a true simplicial complex",
-    "koopman": "use only with repeated comparable trajectories, fitted propagation, held-out evaluation, and diversity or residual control",
-    "predictive_models": "disabled when they do not outperform a simpler evidence-and-invariants baseline on held-out outcomes",
-    "continuous_thought": "COCONUT, latent BFS, hidden-state recursion, manifold, or continuous-thought language is inspiration only unless executable implementation and verification exist",
-    "unknown": "never coerce to observed, zero risk, or positive evidence"
+    "hypergraph": "separate candidate topology from software invariant topology and preserve genuine many-way relations",
+    "spectral": "eigenvalues eigenvectors eigenspaces singular vectors and projectors may be P1 proof when operator semantics theorem assumptions residuals conditioning and reproducibility are valid",
+    "hodge": "use only for a true simplicial or cellular complex with valid boundary operators",
+    "koopman": "use with repeated comparable trajectories fitted propagation held-out evaluation and diversity or residual control; algebraic fitted-model properties may be P1 while predictive claims require held-out evidence",
+    "predictive_models": "disabled for predictive ranking when they do not outperform a simpler evidence-and-invariants baseline on held-out outcomes",
+    "continuous_thought": "COCONUT latent BFS hidden-state recursion manifold or continuous-thought language may inspire representation design but retained claims require inspectable artifacts and verification",
+    "unknown": "never coerce to observed zero risk or positive evidence",
+    "anti_rationalization": "do not construct topology operators weights or embeddings after selecting the desired patch merely to justify it"
   },
   "implementation_compression": {
     "separate_from_exploration": true,
     "must_preserve_invariants": true,
-    "must_have_complete_behavioral_proof_plan_or_honest_blocker": true,
+    "must_have_complete_proof_plan_or_honest_blocker_by_declared_class": true,
     "must_avoid_parallel_ontology_or_runtime": true,
     "must_minimize_unrelated_scope": true,
-    "may_use_simple_baseline_when_math_is_noncausal": true
+    "may_use_formal_certificate_when_decisive": true,
+    "may_use_simple_baseline_when_math_is_noncausal_or_nonpredictive": true
   },
   "required_trace_artifacts_T2_T3": [
     "task_state.json",
@@ -223,6 +279,7 @@
     "candidate_scores.json",
     "candidate_graph.json",
     "software_invariant_hypergraph.json",
+    "representation_schema_generator_and_certificates_as_applicable",
     "selection_comparison.json",
     "selected_exploration.json",
     "selected_implementation.json",
@@ -234,6 +291,11 @@
     "deterministic_verifier"
   ],
   "evidence_nonpromotion": [
+    "P0_representation_calculation",
+    "P1_formal_model_property",
+    "P2_representation_fidelity",
+    "P3_executable_software",
+    "P4_external_production_acceptance",
     "decision",
     "documentation",
     "source",
@@ -245,7 +307,7 @@
     "target_host",
     "browser_channel",
     "commercial",
-    "signed_release",
+    "trusted_signed_release",
     "pilot",
     "deployment",
     "production"
