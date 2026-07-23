@@ -1,20 +1,29 @@
 {
   "schema": "amtech.decision-active.v1",
-  "status": "no_open_decision_transaction",
+  "status": "active_decision_transaction",
   "updated_at": "2026-07-23",
-  "active_transaction": null,
+  "active_transaction": {
+    "id": "trace013",
+    "path": "mvp-build/decision/trace013/",
+    "task_id": "AMTECH-EXPERIMENT-COMPILER-001",
+    "starting_sha": "9f9874242e3740059e9f4f857c2f164962bc91d6",
+    "scope": "repository-native software experiment compiler and proof-carrying representation transaction",
+    "selected_candidate": "R05",
+    "state": "implementation_and_exact_verification"
+  },
   "method": {
     "protocol": "mvp-build/decision/protocol-v1.json",
     "human_contract": "mvp-build/decision/README.md",
+    "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
+    "representation_registry": "mvp-build/decision/engine/representation-registry.json",
     "machine_native_representation_contract": "mvp-build/decision/representation-contract.md",
-    "natural_language_role": "interoperability_and_audit_not_mandatory_reasoning_substrate",
-    "proof_boundary": "formal model-property proofs including verified eigenstructure are first-class; source/runtime and external claims require the declared correspondence and evidence class"
+    "natural_language_role": "generated_interoperability_and_audit_view_not_mandatory_reasoning_substrate",
+    "proof_boundary": "P1 model-property certificates, P2 correspondence, P3 executable evidence, and P4 external acceptance remain explicit and non-promoting"
   },
   "latest_completed_trace": {
     "id": "trace012",
     "path": "mvp-build/decision/trace012/",
-    "scope": "UI Lab live workbench and folder-first employee UI variant standard",
-    "evidence_boundary": "source, unit, typecheck, lint, production build, PostgreSQL integration, exact-image build, image identity, and signed-manifest verification are historical exact-candidate evidence; headed multi-browser and human visual/accessibility acceptance remain separate"
+    "scope": "UI Lab live workbench and folder-first employee UI variant standard"
   },
   "production_trace_chain": [
     {"id":"trace007","scope":"commercial/effect authority and proof transaction"},
@@ -22,18 +31,14 @@
     {"id":"trace009","scope":"UI projection architecture search"},
     {"id":"trace010","scope":"connector operating substrate"},
     {"id":"trace011","scope":"employee UI port and presentation adapters"},
-    {"id":"trace012","scope":"UI Lab and folder-first UI variants"}
+    {"id":"trace012","scope":"UI Lab and folder-first UI variants"},
+    {"id":"trace013","scope":"repository-native software experiment compiler","state":"active"}
   ],
-  "next_transaction": {
-    "reserved_id": "trace013",
-    "state": "not_created",
-    "required_start": "new branch, fresh exact-coordinate authority extraction, machine-native representation selection, independent candidate generation, feasibility filtering, baseline comparison, formal certificate design where useful, and reproducible computation before selection",
-    "prohibition": "Do not reuse or revive the discarded incomplete Trace013 attempt from the prior branch state."
-  },
+  "next_transaction": null,
   "exact_status_owner": "mvp-build/CODEGRAPH.md",
   "active_plan": "mvp-build/production-readiness-program/README.md",
   "self_reference": {
     "path": "mvp-build/decision/active.json",
-    "purpose": "orientation only; not normative authority or acceptance evidence"
+    "purpose": "transaction orientation; executable artifacts and evidence own stronger claims"
   }
 }
