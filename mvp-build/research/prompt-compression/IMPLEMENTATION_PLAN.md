@@ -1,95 +1,126 @@
 # Prompt Compression Implementation Plan
 
-Status: proposed input to the repository experiment compiler; no implementation admitted yet.
+Status: proposed Trace014 input; implementation not yet admitted.
 
 ## Agent directive
 
 ```text
 R:=repo@HEAD; S:=mvp-build; Q:=prompt-compression.
-Read S/research/prompt-compression/RESEARCH.md + active authority.
-Create task.json; run repoctl start before source edits.
+Read active authority + research/prompt-compression/{RESEARCH,LONGLMLINGUA_INTEGRATION}.md.
+Run repoctl start with research/prompt-compression/task.json before source edits.
 
 Goal:
-Π:(task,phase,repo-facts)->PromptIR->Candidates->VerifiedParetoPrompt.
-Minimize model-token cost while preserving authority, mandatory invariant hyperedges, effects, exact commands, stop conditions, and P0..P4 boundaries.
+(q,F,A,G,H)->Dmust->C0->πr->Br->C1->V->Prompt*->RecoveryMap.
+Minimize target-model tokens/cost/latency subject to exact authority, mandatory hyperedge, command, stop, effect, and P0..P4 fidelity.
 
-Implement first:
-D:=deterministic {PromptIR, phase frontier, invariant closure, tokenizer adapters, renderers, static verifier, benchmark harness}.
-Optional symbolic/HV methods remain candidates; admit only if measured.
+Trust boundary:
+Dmust:=cl_H(q)∪authority(q)∪output(q); ∀ranker,Dmust⊆candidate.
+Learned/perplexity/HV scores=P0 ranking only; never authority or P2 proof.
 
-Required artifacts:
-- compress/prompt-ir + compiler + renderer + verifier;
-- JSON schemas;
-- symbol registry with deterministic expansion;
-- repoctl {compress,verify-prompt,benchmark-prompts};
-- adversarial cases + exact expected invariants;
-- contract tests + docs.
+Implement:
+1 PromptIR schema with query/phase, typed atoms, source digests, mandatory/protected classes, coarse/fine scores, budgets, position bands, expansion map.
+2 deterministic atom extractor from capsule+repo facts+authority DAG+dependency graph+invariant hypergraph.
+3 C0 coarse selector:
+  r_repo=α·structural+β·conditional+γ·risk;
+  adapters={structural,BM25,embedding?,small-LM p(q+restrict|d)?};
+  include reversed p(d|q) + no-restrict controls.
+4 πr position scheduler:
+  maximize Σ r_i·u(pos_i,n) subject to dependency/order/fragmentation constraints;
+  render hard mode/prohibition at head; verification+stop at tail.
+5 Br dynamic budget ledger:
+  τ_k=clip(τ0+δτ(1-2I(r_k)/K'),min,max);
+  τ_repo=max(τ_k,τrisk,τclosure);
+  expose score/rank/input/retained/floor reason.
+6 C1 fine compressor:
+  deterministic atom/span pruning first;
+  optional contrastive score s(a)=ℓ(a|h)-ℓ(a|q,h);
+  never prune protected negation, branch, command, path/SHA, evidence, stop atoms.
+7 renderers={full,compact,reference-folded,structured,symbolic}; exact tokenizer adapters.
+8 V static verifier:
+  digest+authority parity; complete required hyperedges; exact argv/path/SHA; forbidden effects absent; recovery map bijective where required.
+9 RecoveryMap:
+  deterministic alias/reference expansion before/tool-time execution;
+  post-output repair only for provenance-bounded exact identifiers; reject ambiguity.
+10 benchmark harness + component/factorial ablations + Pareto selector.
 
-Model:
-Π=(q,σ,V,H,B,ρ,δ);
-M_t={phase}∪parents∪invariant-closure∪output-contract;
-e={jointly-required atoms};
-valid(c)⇔digest-parity∧authority-parity∧∀e_required:e⊆c∧forbidden(c)=∅.
-
-Search:
-C={full prose,compact prose,reference-folded,structured,symbolic};
-measure each tokenizer exactly;
-P*=Pareto{fidelity↑,tokens↓,latency↓,variance↓};
-never scalarize away a fidelity failure.
+CLI:
+repoctl compress --transaction <p> --phase <z> --tokenizer <m> --ranker <r> --budget <b> --out <d>
+repoctl verify-prompt --candidate <f>
+repoctl benchmark-prompts --suite <d> --models <matrix> --ablations all
 
 Baselines:
-B0 canonical prose;
+B0 full canonical prose;
 B1 hand compact;
-B2 current symbolic;
-B3 reference-only phase prompt.
-Treatment: deterministic graph/hypergraph compiler; learned/HV retrieval is separate ablation.
+B2 symbolic;
+B3 reference-only phase;
+B4 deterministic structural/hypergraph;
+B5 B4+position+dynamic budgets;
+B6 B5+conditional coarse ranker;
+B7 B6+contrastive atom scorer;
+B8 B7+recovery;
+B9 optional HV retrieval ablation.
+
+Required ablations:
+¬query-aware-C0; conditional direction reversed; ¬restrict;
+¬contrastive-C1; uniform budget; ¬reorder; ¬recovery;
+small-ranker variants; deterministic-only vs learned hybrid.
+
+Corpus:
+completed traces + adversarial {clean,dirty,on-main,stale-base,red-doctor,conflicting-memory,premature-code,negation,evidence-promotion,ambiguous-path,corrupted-command};
+position sweep critical atom across {head,early-mid,center,late-mid,tail}.
+
+Metrics:
+C0:{gold-node Recall@k,authority recall,mandatory-edge recall,noise density};
+C1:{protected-token recall,exact command/path/SHA retention,atom-kind CR};
+E2E:{required-action success,forbidden-action absence,tokens,cost,compression latency,total latency,retries,tool calls,recovery accuracy,position/model/seed variance}.
+
+Admission:
+zero critical invariant loss;
+median token reduction≥50% on declared tokenizers;
+non-inferior execution within predeclared margin;
+component benefit survives held-out tasks;
+compression+recovery overhead < saved inference cost;
+exact-head tests/build green.
+No scalar score may hide fidelity regression.
 
 Predictions:
-P1 phase slicing+reference folding reduces tokens ≥50% with zero critical invariant loss;
-P2 tokenizer-aware lexical choice beats character-count choice;
-P3 invariant closure prevents negation/evidence/branch-rule deletion;
-P4 symbolic form is model-dependent and will not dominate every tokenizer;
-P5 HV retrieval does not replace deterministic authority or P2 correspondence.
+P1 q-conditioned C0 improves gold Recall@k vs unconditioned ranking.
+P2 contrastive atom score beats ordinary perplexity at equal budget.
+P3 dynamic budgets beat uniform when relevance/risk is heterogeneous.
+P4 position scheduling lowers middle-position execution variance.
+P5 recovery lowers corrupted identifiers/commands.
+P6 structural closure+learned ranking beats either alone at high CR.
+P7 symbolic/HV variants remain model-dependent and non-authoritative.
 
-Falsify on any critical invariant loss, branch/source mutation during onboarding, unsupported evidence promotion, exact-command corruption, or non-inferior execution not established.
-
-Minimum benchmark matrix:
-{Codex,Claude,≥1 open model}×{clean,dirty,on-main,stale-base,red-doctor,conflicting-memory,premature-code,negation-trap}×{B0..B3,treatment}.
-Use deterministic fixtures where provider execution is unavailable; label them below live/model evidence.
-
-Proof:
-P0 token/ranking/behavior hypotheses;
-P1 only explicit verifier properties;
-P2 exact PromptIR↔repo/authority/hyperedge correspondence;
-P3 exact-candidate tests/benchmark execution;
-P4 external model/provider acceptance only.
+Falsify/remove any component lacking held-out benefit after latency+variance; reject candidate on any branch/worktree/authority/negation/command/stop/evidence invariant loss.
 
 Max patch:
 S/decision/engine/{compress,schemas,templates,repoctl.mjs,representation-registry.json,README.md};
-S/tests; S/decision/benchmarks/prompt-compression; scoped docs only.
+S/decision/benchmarks/prompt-compression; S/tests; scoped research/docs.
 No product runtime changes.
 
 Verify argv-only:
 node decision/engine/repoctl.mjs doctor
 node decision/engine/repoctl.mjs self-test
 npm test -- prompt-compression-contract.test.ts
-node decision/engine/repoctl.mjs benchmark-prompts --suite decision/benchmarks/prompt-compression
+node decision/engine/repoctl.mjs benchmark-prompts --suite decision/benchmarks/prompt-compression --ablations all
 node scripts/verify-agentic-repository.mjs
 npm test
 npm run build
 
-Finish only when exact-head evidence is recorded and unavailable model/provider runs remain explicit blockers.
+Finish only with exact-head evidence; provider/model results unavailable locally remain explicit blockers.
 ```
 
-## Implementation order
+## Ordered implementation
 
-1. Compile exact task and inspect generated diffusion/effect frontier.
-2. Define schemas and invariants before algorithms.
-3. Implement lossless reference folding and phase slicing.
-4. Implement mandatory hyperedge closure and static rejection.
-5. Add model-tokenizer adapters; never infer token cost from characters.
-6. Add compact prose, structured, and symbolic renderers sharing one Prompt IR.
-7. Build adversarial benchmark and B0–B3 baselines.
-8. Evaluate optional hypervector retrieval only after deterministic baseline.
-9. Admit a default codec only from held-out Pareto evidence.
-10. Evaluate, finish, verify, and record excluded P4 claims.
+1. Start Trace014 and inspect generated diffusion/effect frontier.
+2. Define Prompt IR, evaluation, budget-ledger, and recovery-map schemas.
+3. Implement deterministic extraction, mandatory closure, and structural baseline.
+4. Implement coarse selector interfaces and gold-node Recall@k benchmark.
+5. Implement position scheduler and position-sweep fixtures.
+6. Implement dynamic budget allocation with risk/closure floors.
+7. Implement atom/span fine compression and protected-token verifier.
+8. Add optional conditional and contrastive small-model adapters behind deterministic interfaces.
+9. Implement renderers, tokenizer accounting, and expansion/recovery.
+10. Run factorial ablations; select only Pareto candidates with zero critical fidelity loss.
+11. Evaluate, finish, verify, and record P4 exclusions.
