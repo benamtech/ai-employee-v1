@@ -71,7 +71,7 @@ describe("canonical production deployment topology", () => {
   it.runIf(dockerComposeAvailable)("renders the canonical compose as a five-service topology with separated Docker authority", async () => {
     const envPath = join(root, "infra", "deploy", ".env.production");
     const createdEnv = !existsSync(envPath);
-    if (createdEnv) await writeFile(envPath, "AMTECH_GIT_SHA=compose-contract-test\n", "utf8");
+    if (createdEnv) await writeFile(envPath, "", "utf8");
 
     try {
       const result = spawnSync("docker", [
@@ -83,7 +83,11 @@ describe("canonical production deployment topology", () => {
         "config",
         "--format",
         "json",
-      ], { cwd: root, encoding: "utf8" });
+      ], {
+        cwd: root,
+        encoding: "utf8",
+        env: { ...process.env, AMTECH_GIT_SHA: "compose-contract-test" },
+      });
 
       expect(result.status, `${result.stdout ?? ""}\n${result.stderr ?? ""}`).toBe(0);
       const config = JSON.parse(result.stdout);
