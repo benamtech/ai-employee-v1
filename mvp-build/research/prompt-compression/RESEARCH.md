@@ -1,337 +1,329 @@
 # Repository-Native Prompt Compression via Dynamic Manifold Scheduling
 
 Status: research hypothesis; implementation not yet admitted  
-Branch: `agent/prompt-compression-research-v3`  
-Primary stimulus: Chun, Polo, Chung, *Emergent Manifold Separability during Reasoning in Large Language Models*, arXiv:2602.20338v2 (2026)
+Branch: `agent/prompt-compression-research-v3`
 
 ## 0. Claim boundary
 
-This document does **not** claim that mathematical glyphs directly control hidden-state manifolds, that prompt compression preserves behavior across models, or that the repository already implements a compressor. The paper measures latent geometry in controlled reasoning traces; it does not evaluate repository-agent prompts or symbolic metalanguages. We use its findings to derive testable engineering hypotheses, not to promote them beyond P0.
+This program does not claim that mathematical glyphs directly control hidden-state manifolds, that compression preserves behavior across models, or that the repository already implements a compressor. Dynamic Manifold Management and LongLLMLingua supply engineering hypotheses and methods; every transferred mechanism remains P0 until isolated by repository-specific ablation.
 
-## 1. Problem
+## 1. Objective
 
-Current coding-agent onboarding and task prompts repeat authority, workflow, evidence rules, and future-phase instructions in natural language. This creates four costs:
-
-1. token cost and latency;
-2. interference from concepts irrelevant to the current phase;
-3. authority drift when copied prose diverges from repository files;
-4. weak computability because instructions remain untyped and unaddressed.
-
-The target is not minimum characters. It is minimum model-token cost subject to invariant-preserving execution:
+Current coding-agent prompts repeat authority, workflow, evidence rules, and future phases. The target is not minimum characters but minimum model-token and execution cost under invariant-preserving behavior:
 
 \[
-\min_{p'}\;T_m(p')+\lambda_r R(p')+\lambda_c C(p')
+\min_{\tilde p,\pi,B}\;T_m(\tilde p)+\lambda_lL(\tilde p)+\lambda_vVar(\tilde p)+\lambda_rRisk(\tilde p)
 \]
 
 subject to
 
 \[
-\Pr_m[\mathcal I(p')=\mathcal I(p)]\ge 1-\epsilon,
-\quad A(p')=A(p),
-\quad E(p')\subseteq E_{allowed}.
+A(\tilde p)=A(p),\quad H_{required}\subseteq\tilde p,\quad E(\tilde p)\subseteq E_{allowed},\quad
+Pr[\mathcal I(\tilde p)=\mathcal I(p)]\ge1-\epsilon.
 \]
 
-- \(T_m\): tokens under tokenizer/model \(m\);
-- \(R\): behavioral failure risk;
-- \(C\): decompression/retrieval overhead;
-- \(\mathcal I\): required invariant outcomes;
-- \(A\): authority resolution;
-- \(E\): enabled effects.
+A visually dense symbolic prompt may tokenize badly or increase ambiguity. Tokenizer measurement and behavior dominate character count.
 
-A visually dense string can have high \(T_m\), high ambiguity, or both. Unicode and LaTeX are candidates only after tokenizer measurement and behavioral evaluation.
-
-## 2. Research synthesis
+## 2. Combined research synthesis
 
 ### 2.1 Dynamic Manifold Management
 
-Chun et al. report a transient capacity pulse: a concept manifold becomes linearly separable immediately before computation, compresses afterward, and partially re-separates when recalled by a parent. Probe decodability persists longer than manifold capacity, distinguishing *retrievable* information from information *prepared for processing*. Only the current node and immediate dependencies remain strongly separable, while estimated intrinsic/global dimensionality stays near ten in their studied traces.
-
-Engineering hypothesis:
+The manifold paper reports transient separability: a concept becomes prepared immediately before computation, compresses afterward, and reactivates when recalled. Decodability can persist without computation-readiness. Engineering analogue:
 
 \[
-\text{retain globally} \ne \text{activate globally}.
+retain\ globally\ne activate\ globally.
 \]
 
-A session prompt should activate only the current computation frontier; repository artifacts retain everything else. The prompt becomes a capacity scheduler rather than a miniature repository manual.
+A session prompt should activate only the current phase frontier; content-addressed repository artifacts retain everything else.
 
-### 2.2 Question-conditioned compression
+### 2.2 LongLLMLingua
 
-LLMLingua formulates compression as output-distance plus token-budget minimization. LongLLMLingua improves this with question-aware coarse selection, contrastive token importance, dynamic budgets, position-aware reordering, and subsequence recovery. Its relevant abstraction is:
+LongLLMLingua contributes a concrete coarse-to-fine pipeline:
+
+1. rank contexts by how well each context predicts the question, not vice versa;
+2. reorder retained contexts to reduce middle-position loss;
+3. assign nonuniform budgets from coarse relevance;
+4. use question-conditioned contrastive importance for fine pruning;
+5. recover exact subsequences/entities after compressed execution;
+6. evaluate every component by ablation.
+
+The full repository adaptation is normative research input in `LONGLMLINGUA_INTEGRATION.md`.
+
+### 2.3 Repository-native trust boundary
+
+The existing compiler already constructs:
 
 \[
-\min_{\tilde x}D_\phi(y,\tilde y)+\lambda\|\tilde x\|_0.
+F\to A\oplus G\oplus H\to C_{P2}\to D_q\to\Phi_{\le4}\to X.
 \]
 
-For repository work, “question” becomes the exact task capsule; “documents” become authority/source/test/evidence nodes; relevance must be constrained by repository correspondence rather than inferred only from perplexity.
+- `F`: content-addressed repository facts;
+- `A`: authority DAG;
+- `G`: dependency graph;
+- `H`: invariant hypergraph;
+- `C_P2`: verified source/model correspondence;
+- `D_q`: task diffusion;
+- `Φ`: bounded effect frontier;
+- `X`: experiment contract.
 
-### 2.3 Hypergraph correspondence
+Learned relevance, perplexity, embeddings, and hypervectors operate only after mandatory closure and cannot override this chain.
 
-The existing engine already constructs:
+## 3. Revised Prompt IR
+
+Define:
 
 \[
-F\to A\oplus G\oplus H\to C_{P2}\to D_q\to \Phi_{\le4}\to X.
+\Pi=(q,\sigma,V,H,B,\rho,\delta,\chi),
 \]
 
-- \(F\): content-addressed repository facts;
-- \(A\): authority DAG;
-- \(G\): dependency graph;
-- \(H\): invariant hypergraph;
-- \(C_{P2}\): source/model correspondence;
-- \(D_q\): task-local diffusion;
-- \(\Phi_{\le4}\): bounded effect frontier;
-- \(X\): experiment contract.
+where `q` is task+phase query, `σ` exact repository coordinates/digests, `V` typed atoms, `H` constraint hypergraph, `B` tokenizer-specific budget ledger, `ρ` retrieval/position schedule, `δ` renderer/decoder, and `χ` expansion/recovery map.
 
-This is a stronger substrate than free-form prompt compression because required invariants can be represented as hyperedges whose members cannot be independently deleted.
+Each atom includes identity, kind, canonical reference, mandatory/protected classes, coarse and fine scores, budget floor/allocation, position band, provenance, and proof ceiling.
 
-## 3. Proposed representation
-
-Define a prompt transaction:
+Mandatory closure:
 
 \[
-\Pi=(q,\sigma,V,H,B,\rho,\delta).
+V_{must}=cl_H(q)\cup authority(q)\cup output(q).
 \]
 
-- \(q\): task/phase query;
-- \(\sigma\): exact repository coordinate and artifact digests;
-- \(V\): atomic instruction nodes;
-- \(H=(V,E,w)\): constraint hypergraph;
-- \(B\): model/tokenizer-specific budget;
-- \(\rho\): retrieval schedule;
-- \(\delta\): decoder/renderer contract.
-
-Each node \(v_i\) contains:
-
-```json
-{
-  "id": "branch.non-main",
-  "kind": "invariant",
-  "payload_ref": "mvp-build/decision/SESSION_ONBOARDING.md#branch",
-  "phase": "onboard",
-  "must_preserve": true,
-  "token_cost": {"model": 0},
-  "ambiguity_risk": 0,
-  "provenance": {"sha": "...", "path": "..."}
-}
-```
-
-Each hyperedge \(e_j\) encodes joint semantics, for example:
+For every candidate `c`:
 
 \[
-e_{branch}=\{origin/main,\ new\ branch,\ \Delta main=0,\ preserve\ worktree\}.
+valid(c)\iff digest\ parity\land authority\ parity\land V_{must}\subseteq c\land forbidden(c)=\varnothing.
 \]
-
-Deleting one member without a registered rewrite invalidates the candidate.
 
 ## 4. Phase-local activation
 
-Let the transaction DAG be \(G_T=(N,D)\), with phase \(z_t\in N\). The active prompt frontier is:
+For transaction DAG phase `z_t`:
 
 \[
-M_t=\{z_t\}\cup pa(z_t)\cup I(z_t)\cup O(z_t),
+M_t=\{z_t\}\cup pa(z_t)\cup cl_H(z_t)\cup O(z_t).
 \]
 
-where \(I\) is the invariant closure and \(O\) the required output contract. Everything else remains retrievable by digest.
-
-For onboarding:
+Onboarding activates only:
 
 \[
 M_0=\{root,branch,bootstrap,doctor,selftest,stop\}.
 \]
 
-Task compilation, candidate search, implementation, evaluation, and P4 gates are inactive until their transition fires.
+Task compilation, candidate search, implementation, evaluation, and external gates remain retrievable but inactive until their transition fires.
 
-This is not a claim about manipulating neural geometry. It is a prompt-architecture analogue whose causal value must be measured.
-
-## 5. Compression operators
-
-Operators are typed rewrites, not arbitrary deletion:
-
-1. **Reference folding**: replace stable prose with `(path,digest,section)`.
-2. **Phase slicing**: retain only \(M_t\).
-3. **Invariant closure**: include all members of touched mandatory hyperedges.
-4. **Alias substitution**: use registry aliases only when a decoder is already in authority.
-5. **Structural packing**: encode repeated fields as deterministic JSON/CBOR-like tuples.
-6. **Query retrieval**: replace context dumps with exact `repoctl query` calls.
-7. **Position scheduling**: place current objective and stop contract at high-salience boundaries.
-8. **Lossless canonicalization**: normalize paths, commands, evidence classes, and branch rules.
-9. **Model-aware lexical compression**: choose shorter equivalent strings by measured tokenizer cost.
-10. **Optional learned pruning**: admissible only after deterministic closure and held-out evaluation.
-
-Forbidden rewrites include removing negation, weakening evidence classes, replacing exact paths with ambiguous names, eliding branch ancestry, shell-stringifying argv commands, or inventing symbol semantics inline.
-
-## 6. Symbol policy
-
-Symbols are useful when they are:
-
-- conventional (`¬`, `∧`, `→`, `Δ`, `:=`);
-- tokenizer-measured;
-- defined once in a stable codec;
-- structurally decisive;
-- accompanied by a deterministic expansion.
-
-Symbols are harmful when they are visually exotic, model-specific, undefined, or require a glossary larger than the prose they replace.
-
-Define utility:
+## 5. Query-conditioned coarse-to-fine compiler
 
 \[
-U(s)=\frac{I_{preserved}(s)}{T_m(s)+\lambda A(s)+\mu D(s)},
+(q,F,A,G,H)\xrightarrow{closure}D_{must}\xrightarrow{C_0}D'\xrightarrow{\pi_r}D''\xrightarrow{B_r}B_{1:K'}\xrightarrow{C_1}\tilde p\xrightarrow{V}\tilde p^*\xrightarrow{\chi}y_{rec}.
 \]
 
-where \(A\) is ambiguity and \(D\) decoder burden. A symbol is admitted only when \(U(s)>U(phrase)\) on held-out tasks.
+### 5.1 Coarse selection
 
-## 7. Hypervector role
-
-Hypervectors should represent retrieval and similarity hypotheses, not authority. Let atomic nodes map to high-dimensional vectors \(h_i\in\{-1,+1\}^d\). Use binding \(\otimes\), bundling \(\oplus\), and permutation \(\pi\):
+LongLLMLingua ranks a document using negative average log probability of the question plus restrictive suffix conditioned on that document:
 
 \[
-h_{task}=\bigoplus_i w_i(h_{role_i}\otimes h_{entity_i}\otimes \pi^{k_i}h_{phase_i}).
+r_k=-\frac1{N_c}\sum_i\log p(q_i^{restrict}\mid d_k).
 \]
 
-Potential uses:
+Repository composite:
 
-- approximate retrieval of related prompt atoms;
-- duplicate/near-duplicate rule detection;
-- task-to-historical-transaction similarity;
-- candidate diversity and cross-lens resonance.
+\[
+r_k^{repo}=\alpha r_k^{struct}+\beta r_k^{conditional}+\gamma r_k^{risk},
+\]
 
-Non-uses:
+with mandatory closure always retained. Compare structural diffusion, lexical/BM25, embeddings, conditional ranker, reversed conditional control, and no-restrict control using gold-node Recall@k.
 
-- deciding current authority;
-- proving source correspondence;
-- promoting P0 similarity into P2/P3 evidence.
+### 5.2 Fine importance
 
-The existing registry’s `embedding.code-change.v1` remains future/P0; a prompt analogue should inherit the same held-out evaluation constraint.
+Ordinary perplexity rewards surprise, not task relevance. Contrastive importance measures distribution shift from conditioning on the task:
 
-## 8. Compressor architecture
+\[
+s(a_i)=\ell(a_i\mid h_i)-\ell(a_i\mid q,h_i).
+\]
+
+Apply initially to typed atoms/recoverable spans, not arbitrary subwords. Negation, branch rules, argv commands, paths, SHAs, evidence classes, and stop conditions are protected regardless of score.
+
+### 5.3 Position scheduler
+
+Explicitly optimize placement under a measured position prior:
+
+\[
+\pi^*=\arg\max_\pi\sum_i r_i u(\pi(i),n)-\lambda_dViol_{dep}(\pi)-\lambda_gFrag(\pi).
+\]
+
+Default: mode/goal/prohibition at head; task-local context in dependency-preserving groups; verification/output/stop contract at tail. Position benefit is accepted only if head-to-tail sweep shows reduced variance.
+
+### 5.4 Dynamic budgets
+
+Use relevance-ranked allocation rather than uniform compression:
+
+\[
+\tau_k=clip\left(\tau_0+\delta_\tau\left(1-\frac{2I(r_k)}{K'}\right),\tau_{min},\tau_{max}\right),
+\]
+
+then enforce repository floors:
+
+\[
+\tau_k^{repo}=\max(\tau_k,\tau_{risk}(k),\tau_{closure}(k)).
+\]
+
+The budget ledger records score, rank, original/retained tokens, floor, reason, tokenizer, and rejected alternatives.
+
+### 5.5 Expansion and recovery
+
+Maintain a digest-bound bidirectional map from compact aliases/symbols/references to canonical atoms. Expand before execution or tool invocation when required. Post-generation repair is allowed only for exact provenance-bound commands, identifiers, paths, SHAs, and aliases; ambiguous mappings fail closed.
+
+## 6. Compression operators
+
+Admissible typed rewrites:
+
+1. reference folding `(path,digest,section)`;
+2. phase slicing to `M_t`;
+3. mandatory hyperedge closure;
+4. deterministic alias substitution;
+5. structural tuple packing;
+6. exact query retrieval instead of context dumps;
+7. task-conditioned coarse selection;
+8. position scheduling;
+9. dynamic relevance/risk budgets;
+10. atom/span contrastive pruning;
+11. tokenizer-aware lexical choice;
+12. deterministic expansion/recovery;
+13. optional learned/HV retrieval after deterministic baselines.
+
+Forbidden rewrites include dropping negation, weakening evidence classes, corrupting argv, replacing exact paths with ambiguity, eliding ancestry, or inventing symbol semantics inline.
+
+## 7. Symbols and hypervectors
+
+Symbol utility:
+
+\[
+U(s)=\frac{I_{preserved}(s)}{T_m(s)+\lambda A(s)+\mu D(s)}.
+\]
+
+Admit only conventional, tokenizer-measured, registry-defined symbols with deterministic expansion and held-out benefit.
+
+Hypervectors may support P0 retrieval, duplicate detection, historical-task similarity, and candidate diversity:
+
+\[
+h_q=\bigoplus_iw_i(h_{role_i}\otimes h_{entity_i}\otimes\pi^{k_i}h_{phase_i}).
+\]
+
+They cannot decide authority, prove correspondence, or promote evidence.
+
+## 8. Architecture
 
 ```text
-exact task + phase
-  -> repo facts / authority / dependency / invariant hypergraph
-  -> mandatory closure
-  -> candidate retrieval (deterministic first; hypervector optional)
-  -> model-tokenizer cost table
-  -> constrained rewrite search
-  -> render candidates: prose | compact text | symbolic | structured
-  -> static verifier
-  -> behavioral harness across agents/models
-  -> Pareto selector
-  -> content-addressed prompt artifact + expansion map
+exact task+phase
+ -> repository facts/authority/dependency/invariant hypergraph
+ -> mandatory closure
+ -> coarse rankers and Recall@k ledger
+ -> position scheduler
+ -> dynamic budget allocator
+ -> deterministic atom/span compressor
+ -> optional contrastive scorer
+ -> renderers + exact tokenizer counts
+ -> static verifier
+ -> execution harness
+ -> deterministic expansion/recovery
+ -> factorial ablations
+ -> fidelity-first Pareto selector
+ -> content-addressed prompt artifact
 ```
 
-Optimization is multi-objective:
+Optimize the vector
 
 \[
-\max_c\;(F_c,\ -T_c,\ -L_c,\ -V_c)
+\max_c(F_c,-T_c,-L_c,-Var_c),
 \]
 
-where \(F\) is behavioral fidelity, \(T\) tokens, \(L\) latency/cost, and \(V\) variance. No scalar score should hide a fidelity regression.
+without scalarizing away any fidelity failure.
 
-## 9. Evaluation design
+## 9. Evaluation
 
 ### Baselines
 
-- B0: canonical full prose;
-- B1: hand-compressed prose;
-- B2: current symbolic prompt;
-- B3: reference-only phase prompt;
-- B4: deterministic graph/hypergraph compressor;
-- B5: B4 + model-aware lexical selection;
-- B6: B5 + optional learned/hypervector retrieval.
+- B0 canonical prose;
+- B1 hand compact;
+- B2 symbolic;
+- B3 reference-only phase;
+- B4 deterministic structural/hypergraph;
+- B5 B4 + position + dynamic budgets;
+- B6 B5 + conditional coarse ranker;
+- B7 B6 + contrastive atom scorer;
+- B8 B7 + recovery;
+- B9 optional hypervector retrieval.
 
-### Task corpus
+### Required ablations
 
-Use completed repository transactions and synthetic adversarial variants:
+- no question-aware coarse selector;
+- reversed conditional direction;
+- no restrictive suffix;
+- no contrastive fine scoring;
+- uniform budgets;
+- no reordering;
+- no recovery;
+- alternate/smaller rankers;
+- deterministic-only versus learned hybrid.
 
-- clean versus dirty worktree;
-- agent starts on `main`;
-- stale base versus current `origin/main`;
-- missing dependencies;
-- conflicting historical memory;
-- red `doctor` or `self-test`;
-- task requests premature implementation;
-- exact versus ambiguous path names;
-- negation and evidence-boundary traps.
+### Corpus
+
+Use completed repository transactions and adversarial variants: dirty worktree, direct-main start, stale base, red doctor/self-test, conflicting historical memory, premature coding, negation/evidence traps, ambiguous paths, and corrupted commands. Sweep the decisive atom across head, early-middle, center, late-middle, and tail.
 
 ### Metrics
 
-\[
-CR=T(B0)/T(c)
-\]
+Coarse: gold-node Recall@k, authority recall, mandatory-edge recall, noise density.  
+Fine: protected-token recall, exact command/path/SHA retention, atom-kind compression.  
+End-to-end: required action success, forbidden action absence, token/cost/latency including compressor overhead, retries, tool calls, recovery accuracy, and model/position/seed variance.
 
-\[
-IF=\frac{\sum_j w_j\mathbf1[e_j\ preserved]}{\sum_j w_j}
-\]
-
-\[
-ER=\Pr[required\ actions\ correct\land forbidden\ actions\ absent]
-\]
-
-Also record latency, input cost, output-token cost, retries, tool calls, branch violations, authority violations, unsupported claims, and model variance.
-
-### Admission threshold
-
-A compressed codec is not default unless:
-
-- zero critical invariant loss on adversarial tests;
-- non-inferior execution rate with confidence interval bounded by a declared margin;
-- meaningful token/cost reduction on at least two target tokenizers;
-- deterministic expansion and digest verification pass;
-- improvement survives held-out repository tasks.
+A codec is not default unless critical invariant loss is zero, execution is non-inferior within a predeclared margin, token reduction is meaningful on at least two target tokenizers, expansion/digest verification passes, and benefit survives held-out tasks.
 
 ## 10. Exact repo integration
 
-Proposed additive paths:
+Additive targets:
 
 ```text
 mvp-build/decision/engine/compress/
-  compile-prompt.mjs
+  prompt-ir.mjs
+  extract-atoms.mjs
+  coarse-select.mjs
+  position-schedule.mjs
+  allocate-budget.mjs
+  fine-compress.mjs
   render-prompt.mjs
-  verify-prompt.mjs
   tokenizer-adapters.mjs
+  recover-prompt.mjs
+  verify-prompt.mjs
   symbol-registry.json
 mvp-build/decision/engine/schemas/
   prompt-ir.schema.json
   prompt-candidate.schema.json
+  prompt-budget-ledger.schema.json
+  prompt-expansion-map.schema.json
   prompt-evaluation.schema.json
-mvp-build/decision/engine/templates/
-  prompt-codec.json
-mvp-build/tests/
-  prompt-compression-contract.test.ts
 mvp-build/decision/benchmarks/prompt-compression/
-  cases/*.json
-  expected/*.json
+  cases/ expected/ ablations/
+mvp-build/tests/prompt-compression-contract.test.ts
 ```
 
-Extend `repoctl` with:
+CLI:
 
 ```bash
-repoctl compress --transaction <path> --phase <phase> --model <tokenizer> --out <dir>
+repoctl compress --transaction <path> --phase <phase> --tokenizer <model> --ranker <ranker> --budget <n> --out <dir>
 repoctl verify-prompt --candidate <file>
-repoctl benchmark-prompts --suite <dir> --models <matrix>
+repoctl benchmark-prompts --suite <dir> --models <matrix> --ablations all
 ```
 
-Do not replace `task-capsule.json` or canonical authority. The compressed prompt is a derived, content-addressed projection.
+Do not replace canonical authority or `task-capsule.json`. Every compressed prompt is a derived, content-addressed projection.
 
-## 11. Key falsifiers
+## 11. Decision
 
-Reject or narrow the approach if:
+The first implementation candidate is now:
 
-1. reference-only prompts cause agents not to read/execute referenced files;
-2. symbolic variants tokenize worse than compact prose;
-3. behavior varies strongly across Codex/Claude/open models;
-4. compression removes low-frequency but safety-critical constraints;
-5. hypervector retrieval fails to beat deterministic task diffusion;
-6. position scheduling has no repeatable effect;
-7. decompression/tool overhead exceeds saved inference cost;
-8. the mathematical layer does not change selection or verification.
+**query-conditioned coarse-to-fine Prompt IR compiler + mandatory hypergraph closure + position scheduler + dynamic budget ledger + protected atom/span compression + tokenizer-specific renderers + deterministic expansion/recovery + factorial benchmark.**
 
-## 12. Research references
+Learned conditional/contrastive rankers are pluggable P0 treatments behind a deterministic trust boundary. Symbolic and hypervector dialects remain optional measured ablations. Arbitrary subword deletion and bespoke esoteric languages are explicitly deferred.
 
+## 12. References
+
+- Jiang et al. *LongLLMLingua: Accelerating and Enhancing LLMs in Long Context Scenarios via Prompt Compression*. ACL 2024, 2024.acl-long.91.
 - Chun, Polo, Chung. *Emergent Manifold Separability during Reasoning in Large Language Models*. arXiv:2602.20338v2, 2026.
-- Jiang et al. *LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models*. arXiv:2310.05736, 2023.
-- Jiang et al. *LongLLMLingua: Accelerating and Enhancing LLMs in Long Context Scenarios via Prompt Compression*. arXiv:2310.06839, 2023.
+- Jiang et al. *LLMLingua: Compressing Prompts for Accelerated Inference of Large Language Models*. EMNLP 2023.
 - Chung et al. *Classification and Geometry of General Perceptual Manifolds*. Physical Review X 8, 031003, 2018.
-
-## 13. Decision
-
-Admit a deterministic, repository-grounded **Prompt IR + phase-local renderer + invariant verifier + benchmark harness** as the first implementation candidate. Treat symbolic and hypervector layers as measured optional dialects. Do not begin with a bespoke esoteric language or learned compressor.
