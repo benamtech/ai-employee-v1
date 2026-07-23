@@ -60,6 +60,8 @@ const selection = {
   causal_status: descriptors.causal_status,
   rationale: 'R05 is the smallest candidate that simultaneously supplies repository facts, typed representations, P1/P2 proof carrying, experiment chronology, vendor-neutral execution, and bounded first-slice scope.'
 };
-await writeFile(resolve(root, 'candidate_population.generated.json'), `${JSON.stringify(population, null, 2)}\n`);
-await writeFile(resolve(root, 'selection.generated.json'), `${JSON.stringify(selection, null, 2)}\n`);
+if (process.argv.includes('--write')) {
+  await writeFile(resolve(root, 'candidate_population.generated.json'), `${JSON.stringify(population, null, 2)}\n`);
+  await writeFile(resolve(root, 'selection.generated.json'), `${JSON.stringify(selection, null, 2)}\n`);
+}
 console.log(JSON.stringify(selection, null, 2));
