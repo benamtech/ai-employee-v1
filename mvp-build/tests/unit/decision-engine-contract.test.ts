@@ -61,4 +61,18 @@ describe('repository-native software experiment compiler', () => {
     expect(core).toContain('shell: false');
     expect(core).not.toContain('execSync(');
   });
+
+  it('retains one canonical pre-task onboarding contract', () => {
+    const onboarding = readFileSync(resolve(root, 'decision/SESSION_ONBOARDING.md'), 'utf8');
+    const rootAgents = readFileSync(resolve(root, '../AGENTS.md'), 'utf8');
+    const scopedAgents = readFileSync(resolve(root, 'AGENTS.md'), 'utf8');
+
+    expect(rootAgents).toContain('mvp-build/decision/SESSION_ONBOARDING.md');
+    expect(scopedAgents).toContain('decision/SESSION_ONBOARDING.md');
+    expect(onboarding).toContain('Do not create the next transaction until the user supplies the actual task');
+    expect(onboarding).toContain('node decision/engine/repoctl.mjs doctor');
+    expect(onboarding).toContain('node decision/engine/repoctl.mjs self-test');
+    expect(onboarding).toContain('Prefer machine queries');
+    expect(onboarding).toContain('READY FOR TASK PROMPT');
+  });
 });
