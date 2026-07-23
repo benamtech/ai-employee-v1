@@ -1,0 +1,36 @@
+{
+  "schema": "trace013.typed-artifacts.v1",
+  "principle": "Retain inspectable typed artifacts and certificates, not private chain-of-thought.",
+  "types": {
+    "RepositoryFact": ["id", "type", "source_sha", "source_location", "digest", "confidence", "extractor_version"],
+    "Representation": ["schema", "input_digests", "generator", "algorithm", "parameters", "assumptions", "content_digest"],
+    "Transformation": ["from_dialect", "to_dialect", "input_digests", "output_digest", "determinism", "validation"],
+    "ClaimCertificate": ["claim", "assumptions", "model_digest", "certificate_digest", "verifier", "correspondence_digest", "proof_class", "does_not_claim"],
+    "TaskCapsule": ["task_id", "base_sha", "goal", "authority_digest", "fact_digest", "selected_representations", "mandatory_context", "hard_invariants", "unknowns", "predictions", "proof_obligations", "stop_conditions", "maximum_patch", "external_blockers"],
+    "Prediction": ["id", "horizon", "type", "claim", "falsifier", "metric", "expected"],
+    "Outcome": ["prediction_id", "observed", "evidence", "calibration"],
+    "EvidenceLedger": ["exact_candidate", "changed_paths", "impact_coverage", "verification_results", "claims", "maximum_evidence_class", "external_blockers"]
+  },
+  "valid_transformations": [
+    "repository source + extractor -> repository facts + digest parity",
+    "repository facts -> authority DAG + P2 membership evidence",
+    "repository facts -> dependency graph + provenance",
+    "repository facts + dependency graph + authority DAG -> invariant hypergraph + P2 correspondence",
+    "invariant hypergraph -> spectral certificate + P1 residual verification",
+    "task + dependency graph + invariant hypergraph -> task diffusion + effect frontier",
+    "task representations -> immutable task capsule + draft experiment",
+    "capsule + predictions + clean chronology -> admitted plan",
+    "admitted plan + diff + executable checks -> evidence ledger + outcomes",
+    "valid artifacts + complete outcomes -> finished experiment transaction"
+  ],
+  "prohibitions": [
+    "no proof claim without claim, assumptions, semantics, certificate, verifier, and correspondence boundary",
+    "no opaque vector as self-authenticating truth",
+    "no P1 to P2/P3/P4 promotion without the missing evidence",
+    "no source edit before plan admission",
+    "no outcome written before prediction",
+    "no unregistered generator in an admitted transaction",
+    "no arbitrary shell string in verification commands",
+    "no private chain-of-thought retained as repository authority"
+  ]
+}
