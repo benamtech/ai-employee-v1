@@ -27,12 +27,16 @@ deployed release proof
 
 A lower evidence class never promotes itself into a higher one. Source is not CI. CI is not provider proof. Fixtures are not live acceptance. Ancestor evidence is not current-candidate evidence.
 
+Formal and mathematical proof is first-class: a theorem, solver certificate, model-checker result, verified eigenstructure, or other reproducible certificate proves the exact property of the declared model. It satisfies a software or external gate only when the model-to-system correspondence required by that gate is also established.
+
 ## Routing
 
 - `mvp-build/` — executable AI Employee product and production authority.
 - `mvp-build/authority-map.json` — machine-readable authority router.
 - `mvp-build/STANDARD.md` plus ratified amendments — normative requirements.
 - `mvp-build/decision/active.json` — current decision router; it may state that no transaction is open.
+- `mvp-build/decision/README.md` — computation-first method.
+- `mvp-build/decision/representation-contract.md` — first-class non-language and machine-native software representations.
 - `mvp-build/decision/` — decision protocol and completed traces.
 - `mvp-build/production-readiness-program/` — sole active production-readiness route.
 - `mvp-build/docs/architecture/` — source-backed explanatory architecture.
@@ -45,12 +49,13 @@ Exact branch, candidate, migration, workstream, and gate status lives in `mvp-bu
 ## Repository-wide decision rules
 
 - Compute before non-mechanical implementation using the scoped decision protocol.
-- No mathematical term is causal without an implementation-level ablation against a simpler baseline.
+- Agents may reason primarily with graphs, hypergraphs, vectors, tensors, embeddings, state machines, constraints, geometric/topological structures, and formal proof artifacts; natural language is the audit/interoperability layer.
+- Mathematical proof or a machine-checkable certificate may decisively prove a property of a faithful formal representation.
+- Causal benefit requires an appropriate experimental or formal causal argument; production acceptance requires the evidence class defined by the gate.
 - Unknown remains Unknown; do not convert missing evidence into confidence.
 - Keep exploration separate from implementation compression.
-- Hypergraph or spectral representation may expose relationships and centrality; it cannot override prerequisite feasibility or establish proof.
-- Koopman/DMD/EDMD-style propagation requires repeated comparable trajectories and held-out superiority over ordinary baselines.
-- Do not claim latent-state, COCONUT, continuous-thought, Koopman, Hodge, or similar mechanisms without executable implementation and verification.
+- Do not hand-construct representations or weights after selecting a desired patch merely to rationalize it.
+- Koopman/DMD/EDMD-style propagation requires repeated comparable trajectories and held-out superiority over ordinary baselines for predictive claims.
 - Do not let structural document tests become a second semantic specification.
 
 ## Contributor and Git discipline
