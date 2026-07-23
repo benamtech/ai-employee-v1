@@ -4,6 +4,7 @@ Status: **active execution decomposition**
 Updated: 2026-07-23  
 Exact product status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
 Decision state: [`../decision/active.json`](../decision/active.json)  
+Representation/proof contract: [`../decision/representation-contract.md`](../decision/representation-contract.md)  
 Issues: [`08-production-issue-vector.json`](08-production-issue-vector.json)  
 Resolution state: [`13-resolution-ledger.json`](13-resolution-ledger.json)  
 Roadmap: [`04-dependency-ordered-production-plan.md`](04-dependency-ordered-production-plan.md)
@@ -16,32 +17,34 @@ Nine workstreams own distinct completion contracts. Order is dependency order, n
 - Trace012 is the latest completed trace and records the UI Lab/folder-first UI-variant decision.
 - Trace013 is reserved for a fresh post-merge branch; no prior candidate selection is active.
 - The active transaction is repository-stack convergence: PR #40 → PR #35 branch → PR #34 branch → `main`, with exact-head verification after each merge.
-- After `main`, a new branch may open Trace013 and recompute the production frontier from the merged coordinate.
+- After `main`, a new branch may open Trace013 and recompute the production frontier from the merged coordinate using machine-native representations and formal certificates where useful.
 
 ## Decision contract
 
 Before opening or materially changing a workstream:
 
 1. extract current authority and evidence;
-2. mark `Observed`, `Inferred`, `Hypothesis`, `Unknown`, and `NotApplicable`;
-3. select the proportional tier;
-4. generate independent candidate batches before recombination;
-5. reject invariant or prerequisite violations;
-6. establish the simple evidence-and-invariants baseline;
-7. separate candidate topology from software-invariant topology;
-8. compare equal-feasibility controls and report search/weight sensitivity;
-9. select exploration and implementation separately;
-10. map every selected software hyperedge to behavioral proof;
-11. implement, verify exact head, and update active records.
+2. construct the useful machine-native representations and record provenance/dimensions;
+3. mark `Observed`, `Inferred`, `Hypothesis`, `Unknown`, and `NotApplicable`;
+4. select the proportional tier;
+5. generate independent candidate batches before recombination;
+6. reject invariant or prerequisite violations;
+7. establish the simple evidence-and-invariants baseline;
+8. separate candidate topology from software-invariant topology;
+9. compute formal/model certificates when useful;
+10. compare equal-feasibility controls and report search/weight/operator sensitivity;
+11. select exploration and implementation separately;
+12. map every selected software hyperedge to its declared P1/P2/P3/P4 proof contract or blocker;
+13. implement, verify exact head, and update active records.
 
-Cross-workstream work is normally `T3`. Scores, graph density, hypergraph eigenvectors, spectral gaps, and represented edges do not promote evidence. Ranking changes are selection influence, not causal improvement.
+Cross-workstream work is normally `T3`. Scores and unverified representation metrics do not promote evidence. Verified eigenstructure, solver results, model-checker traces, or theorem certificates may be decisive P1 proof for their declared formal property. P2 correspondence determines whether that proof satisfies a software gate; ranking changes alone remain selection influence rather than causal improvement.
 
 ## Workstream matrix
 
 | WS | Current cumulative source state | External prerequisites | Complete only when |
 |---|---|---|---|
-| WS-01 repository/test/document truth | authority routers, structural governance, historical separation, broad/curated tests, exact-status owner, cumulative stack plan | exact-head CI on each merge coordinate | one exact-status owner; no false-current entrypoint; cumulative PR to `main` passes without weakened assertions |
-| WS-02 connector/protocol/capability | OAuth/MCP authority contracts, custody, effective capability, MCP Apps, AG-UI, lifecycle discovery/revoke/reconnect | OAuth/MCP servers, connector sandboxes, browser host | unknown/stale evidence fails closed and live authorization/revocation/outage/repair evidence passes |
+| WS-01 repository/test/document truth | authority routers, machine-native representation contract, structural governance, historical separation, broad/curated tests, exact-status owner, cumulative stack plan | exact-head CI on each merge coordinate | one exact-status owner; no false-current entrypoint; formal/executable evidence boundaries are explicit; cumulative PR to `main` passes without weakened assertions |
+| WS-02 connector/protocol/capability | OAuth/MCP authority contracts, custody, effective capability, MCP Apps, AG-UI, lifecycle discovery/revoke/reconnect | OAuth/MCP servers, connector sandboxes, browser host | unknown/stale evidence fails closed and live authorization/revocation/outage/repair evidence passes or an accepted correspondence-backed proof discharges the exact gate |
 | WS-03 database authority | forward ledger through `0082`, local RLS/grants/functions/isolation/concurrency contracts | disposable managed platform, staging backup/advisors | blank/existing-row/security/concurrency/backup/rollback matrices pass; applied migrations remain immutable |
 | WS-04 target host/runtime custody | secret and exact-image contracts, Host Provisioner Docker authority, lifecycle/isolation scripts | Linux host, secret store, DNS/TLS, registry | least privilege, two-employee isolation, lifecycle repair, destructive recovery, and exact-image proof pass |
 | WS-05 fixture-free owner/channels | exact snapshots/streams/reconnect, Talk-first streaming, connector/review projections, UI variants | Auth, target host, connector/channel sandboxes | one real owner supervises one real assignment; failures stay distinct; channels converge without fixtures |
@@ -57,6 +60,7 @@ Cross-workstream work is normally `T3`. Scores, graph density, hypergraph eigenv
 - exact status is duplicated outside `mvp-build/CODEGRAPH.md` as a moving acceptance claim;
 - historical material or a completed trace appears as an open transaction;
 - Trace013 is created or preselected before the new branch and fresh computation;
+- machine-native artifacts omit generators, dimensions, provenance, assumptions, tolerances, validation, proof class, or compact language bridge;
 - tests are weakened for green;
 - a known-red lower-stack coordinate is merged independently before its green cumulative repair.
 
@@ -69,7 +73,7 @@ Cross-workstream work is normally `T3`. Scores, graph density, hypergraph eigenv
 ### WS-03
 
 - an applied migration is edited;
-- local PostgreSQL is promoted to managed-platform acceptance;
+- local PostgreSQL is promoted to managed-platform acceptance without a gate correspondence contract;
 - service/browser roles bypass reviewed authority RPCs;
 - negative isolation, concurrency, or migration compatibility fails.
 
@@ -131,18 +135,19 @@ Cross-workstream work is normally `T3`. Scores, graph density, hypergraph eigenv
 - Trace011: employee UI port and presentation adapters.
 - Trace012: production UI Lab and folder-first full employee UI variants.
 
-Candidate search terms and hypergraph/spectral measures remain descriptive or selection-supporting. Software `proved` coverage requires accepted independent behavioral evidence on the exact candidate.
+Candidate search calculations are P0 unless accompanied by a stronger certificate. Hypergraph/spectral results may be P1 proof for a declared formal property. Software `proved` coverage requires the proof contract assigned to each edge: formal-model edges may close at P1, while executable-software edges require the declared P2/P3 correspondence and evidence.
 
 ## Completion rule
 
 ```text
 valid decision record when a decision is required
-AND source/migration behavior exists
+AND required machine-native artifacts and formal certificates are valid
+AND source/migration behavior exists or the gate's accepted correspondence proves the property
 AND complete software-edge proof plan exists or the blocker is explicit
-AND selected behavioral tests pass
+AND selected behavioral tests pass when required by the proof contract
 AND exact-head CI passes
 AND required external evidence passes
 AND active documentation/handoff agrees
 ```
 
-A lower evidence class cannot satisfy a higher one. Blocks, skips, unavailable environments, and historical coordinates remain visible.
+A lower proof/evidence class cannot silently satisfy a higher one. A valid correspondence may explicitly connect classes. Blocks, skips, unavailable environments, and historical coordinates remain visible.
