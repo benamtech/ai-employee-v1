@@ -1,0 +1,101 @@
+{
+  "schema": "amtech.next-step-hypervector.v1",
+  "task_id": "TRACE015-GENERATED-BESPOKE-SOFTWARE-001",
+  "vertices": [
+    "generated_business_os_blueprint",
+    "bespoke_experience_generator",
+    "connector_effect_proof_generator",
+    "identity_assignment",
+    "swarm_roles",
+    "work_lifecycle",
+    "connectors_systems",
+    "authority_approval",
+    "effects_receipts",
+    "recovery_repair",
+    "commercial_accounting",
+    "lead_intake",
+    "estimating_quoting",
+    "scheduling_dispatch",
+    "customer_comm",
+    "backoffice_books",
+    "procurement_inventory",
+    "delivery_quality",
+    "owner_intelligence",
+    "WS-01",
+    "WS-02",
+    "WS-03",
+    "WS-04",
+    "WS-05",
+    "WS-06",
+    "WS-07",
+    "WS-08",
+    "WS-09"
+  ],
+  "hyperedges": [
+    {
+      "id": "H1",
+      "label": "Generated Business OS Blueprint",
+      "members": [
+        "generated_business_os_blueprint",
+        "identity_assignment",
+        "swarm_roles",
+        "work_lifecycle",
+        "owner_intelligence",
+        "WS-01",
+        "WS-09"
+      ],
+      "weight": 0.94,
+      "next_steps": [
+        "Generate multi-vertical blueprints",
+        "Validate against authority and P4 gaps",
+        "Select first executable generated surface"
+      ]
+    },
+    {
+      "id": "H2",
+      "label": "Bespoke Experience Generator",
+      "members": [
+        "bespoke_experience_generator",
+        "work_lifecycle",
+        "authority_approval",
+        "delivery_quality",
+        "customer_comm",
+        "WS-05",
+        "WS-09"
+      ],
+      "weight": 0.9,
+      "next_steps": [
+        "Generate folder-first UI variant draft",
+        "Bind to EmployeeExperienceModelV1",
+        "Validate with UI variant doctor and fixtures"
+      ]
+    },
+    {
+      "id": "H3",
+      "label": "Connector Effect Proof Generator",
+      "members": [
+        "connector_effect_proof_generator",
+        "connectors_systems",
+        "effects_receipts",
+        "recovery_repair",
+        "commercial_accounting",
+        "WS-02",
+        "WS-06",
+        "WS-07",
+        "WS-08"
+      ],
+      "weight": 0.92,
+      "next_steps": [
+        "Generate connector/capability needs",
+        "Generate approval/effect/proof obligations",
+        "Block P4 claims until live evidence exists"
+      ]
+    }
+  ],
+  "first_next_steps": [
+    "Generated Business OS Blueprint",
+    "Bespoke Experience Generator",
+    "Connector Effect Proof Generator"
+  ],
+  "state_summary": "Source/local-CI substrate is broad, but managed database, live provider/connector, target host, fixture-free channels, accessibility, capacity, pilot, deployment, and production remain open P4 gates."
+}

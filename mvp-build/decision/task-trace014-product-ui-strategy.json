@@ -1,0 +1,51 @@
+{
+  "schema": "amtech.task.v1",
+  "task_id": "TRACE015-GENERATED-BESPOKE-SOFTWARE-001",
+  "repository": "benamtech/ai-employee-v1",
+  "subtree": "mvp-build",
+  "branch": "task/new-task-20260723",
+  "mode": "planning_research_no_source_edit",
+  "goal": "Create a 64-dimensional generated-bespoke-software map for AMTECH: AI employees and swarms generate custom-feeling operating software for every computer-based job in non-technical businesses, without owners needing API keys or technical setup.",
+  "task_seeds": [
+    "generated bespoke software",
+    "AI employee swarm",
+    "non-technical business operating system",
+    "authority effects proof recovery"
+  ],
+  "effect_frontier": {
+    "depth": 4,
+    "max_seed_ids": 64,
+    "max_effects": 20000,
+    "max_evidence_members": 12
+  },
+  "objective": "Determine the most recent active plan, assess overall software state, evaluate why the current UI underrepresents generated bespoke AI-employee software, and produce the 64D map, generated full-stack multi-vertical matrix, best three first next steps, downstream maps, and typed hypervector/interconnection view.",
+  "success_criteria": [
+    "Use active repository authority and repoctl-generated artifacts rather than stale plans.",
+    "Use task-conditioned repoctl queries for authority, effects, invariants, and evidence.",
+    "Include focused online research for current cutting-edge AI agent/work UI patterns.",
+    "Identify the best three first next steps and three next steps under each.",
+    "Internalize the generated-bespoke-software thesis as the primary product/UI constraint.",
+    "Map connections to existing active plans, software topology, proof classes, and open gates.",
+    "Do not modify product source or create implementation claims."
+  ],
+  "allowed_files": [
+    "mvp-build/decision/trace014/",
+    "mvp-build/decision/task-trace014-product-ui-strategy.json"
+  ],
+  "forbidden_files": [
+    "mvp-build/apps/",
+    "mvp-build/packages/",
+    "mvp-build/infra/",
+    "mvp-build/tests/",
+    "mvp-build/scripts/"
+  ],
+  "known_pre_existing_dirty_paths": [
+    "mvp-build/apps/web/app/_components/ui-variant/registry.generated.ts",
+    "mvp-build/apps/web/ui-variants/production-control-room/"
+  ],
+  "required_verification": [
+    ["node", "decision/engine/repoctl.mjs", "doctor"],
+    ["node", "decision/engine/repoctl.mjs", "verify", "--transaction", "decision/trace014", "--phase", "start"]
+  ],
+  "evidence_boundary": "Planning and research output only. Repository facts and generated representations are P0-P2 as declared by repoctl; no P3 implementation or P4 external acceptance is claimed."
+}

@@ -1,0 +1,44 @@
+{
+  "allowed_evidence_classes": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "branch": "task/new-task-20260723",
+  "external_blockers": [
+    "No P4 production, provider, or deployment acceptance is involved in this compiler repair."
+  ],
+  "goal": "Repair effect frontier generation so broad planning tasks produce bounded diagnostic artifacts instead of RangeError failures.",
+  "maximum_patch": {
+    "allowed_paths": [
+      "decision/engine/analyze/effect-frontier.mjs",
+      "decision/engine/repoctl.mjs",
+      "tests/unit/decision-engine-contract.test.ts",
+      "decision/trace014/plan.json",
+      "decision/trace014/outcomes.json",
+      "decision/task-trace014-effect-frontier-bounds.json"
+    ],
+    "expansion_rule": "Additional paths require discovered_later evidence before evaluation.",
+    "maximum_files": 6
+  },
+  "paths": [
+    "decision/engine/analyze/effect-frontier.mjs",
+    "decision/engine/repoctl.mjs",
+    "tests/unit/decision-engine-contract.test.ts"
+  ],
+  "repository": "benamtech/ai-employee-v1",
+  "schema": "amtech.task.v1",
+  "success_criteria": [
+    "Broad planning tasks can start a repoctl transaction without JSON.stringify RangeError.",
+    "Effect-frontier artifacts retain deterministic truncation diagnostics.",
+    "Existing doctor, self-test, and decision-engine unit contracts pass.",
+    "No source edits occur outside the admitted maximum patch."
+  ],
+  "task_id": "TRACE014-EFFECT-FRONTIER-BOUNDS-001",
+  "task_seeds": [
+    "effect frontier bounds",
+    "RangeError start failure",
+    "repoctl broad task"
+  ]
+}

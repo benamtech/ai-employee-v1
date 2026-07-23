@@ -1,0 +1,56 @@
+{
+  "content_digest": "sha256:307cc97ff25b0c2d770f53790adfad499686f0d36671ba4a3e672edeb17d6e03",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T09:09:14.528Z",
+  "payload": {
+    "capsule_digest": "sha256:595019bd37004aecf5d9afb148daf94209ba9e6e1c6458d9277378c190999465",
+    "current_head_at_admission": "ed0cd4b876149210193faa406aa7def41ba4f58e",
+    "discovered_later_policy": "Any additional source path requires explicit evidence before evaluation.",
+    "experiment_digest": "sha256:9bd687e6c40c0e273b712033d7c5d4b72eb1fb0d403474679a7385c118399093",
+    "experiment_root_digest": "sha256:2df56f2b1b297a83ff3821ca655cbd633e10d70fafc9a98916f0324ae70a4c23",
+    "new_paths_before_admission": [],
+    "plan_digest": "sha256:5e9335d712a1aa7ea4140fa47ed78355b0c1eb9d1c580bd7776c49f08d044f11",
+    "proof_obligations": [
+      {
+        "hyperedge_id": "manual-control-plane-repair-exception",
+        "reason": "repoctl could not admit a normal plan until duplicate context and frontier blow-up were repaired; red compiler evidence is retained.",
+        "status": "blocked"
+      }
+    ],
+    "selected_candidates": [
+      "C1-bound-frontier-and-deduplicate-context"
+    ],
+    "task_id": "TRACE014-EFFECT-FRONTIER-BOUNDS-001",
+    "verification_commands": [
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "doctor"
+        ]
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "self-test"
+        ]
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "--run",
+          "tests/unit/decision-engine-contract.test.ts"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs admit-plan"
+  },
+  "schema": "plan.admission.v1",
+  "source_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e"
+}

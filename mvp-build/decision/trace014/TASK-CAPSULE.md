@@ -1,0 +1,301 @@
+# Task capsule — TRACE014-EFFECT-FRONTIER-BOUNDS-001
+
+Base SHA: `ed0cd4b876149210193faa406aa7def41ba4f58e`  
+Goal: Repair effect frontier generation so broad planning tasks produce bounded diagnostic artifacts instead of RangeError failures.
+
+## Machine authority
+
+- facts: `sha256:55e4a19cd83656899033b96c45dfe4817618da48bb50c7a6dd5e1713b574c3af`
+- authority DAG: `sha256:e740a1c8429903287e6581831b3f5412262c95502776165dcaa0c9e24fe7d429`
+- invariant hypergraph: `sha256:5d62f4e4365faaad26579138c6dbf2efaaf7818761dde65d41b568502fa9293a`
+- task diffusion: `sha256:fe7f7693d54342314fec90275e77a6002338e298e05e862d7a93aa0472dead0e`
+
+## Mandatory context
+
+- `mvp-build/decision/engine/repoctl.mjs` — 0.039254
+- `mvp-build/packages/shared/src/command-effect.ts` — 0.020209
+- `mvp-build/infra/scripts/acceptance/effective-capability-live-proof.mjs` — 0.017425
+- `mvp-build/packages/shared/src/task-capabilities.ts` — 0.014020
+- `mvp-build/decision/engine/analyze/effect-frontier.mjs` — 0.013439
+- `mvp-build/apps/manager/src/lib/artifacts.ts` — 0.007851
+- `mvp-build/packages/shared/src/effective-capabilities.ts` — 0.007466
+- `mvp-build/apps/manager/src/lib/ambient-inbox.ts` — 0.006700
+- `mvp-build/apps/manager/src/lib/effect-proof-projection.ts` — 0.006278
+- `mvp-build/apps/manager/src/lib/owner-turn-repair.ts` — 0.006063
+- `mvp-build/decision/engine/lib/core.mjs` — 0.005569
+- `mvp-build/apps/manager/src/lib/effective-capability-evidence.ts` — 0.005525
+- `mvp-build/infra/scripts/repair.mjs` — 0.004987
+- `mvp-build/packages/shared/src/adaptive-connector-runtime.ts` — 0.004192
+- `mvp-build/decision/engine/analyze/task-diffusion.mjs` — 0.004041
+- `mvp-build/tests/integration/command-effect-kernel.test.ts` — 0.003996
+- `mvp-build/tests/unit/decision-engine-contract.test.ts` — 0.003989
+- `mvp-build/apps/manager/src/lib/provisioning-reconciler.ts` — 0.003918
+- `mvp-build/apps/manager/src/lib/commercial-effect-attribution.ts` — 0.003865
+- `mvp-build/docs/architecture/06-effect-graphs-failure-semantics-and-observability.md` — 0.003852
+- `mvp-build/packages/db/migrations/0074_ws07_commercial_effect_and_ws08_repair.sql` — 0.003852
+- `mvp-build/CODEGRAPH.md` — 0.003802
+- `wiki/MVP/codebase-reading-guide-3-hour.md` — 0.003608
+- `mvp-build/apps/manager/src/lib/durable-command-runtime.ts` — 0.003177
+- `mvp-build/apps/manager/src/provisioner-host.ts` — 0.003032
+- `mvp-build/apps/manager/src/tools/assignment-artifacts.stub.ts` — 0.003008
+- `mvp-build/apps/manager/src/lib/employee-stream.ts` — 0.002982
+- `mvp-build/apps/manager/src/tools/repair.stub.ts` — 0.002846
+- `mvp-build/STANDARD.md` — 0.002765
+- `mvp-build/packages/shared/src/index.ts` — 0.002665
+
+## Hard invariant edges
+
+- `hyperedge:authority-obligation:file:AGENTS.md:1b61f9e2a321`
+- `hyperedge:authority-obligation:file:mvp-build/AGENTS.md:9bca59df372f`
+- `hyperedge:authority-obligation:file:mvp-build/authority-map.json:2cc915bac733`
+- `hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:f4ffab670e92`
+- `hyperedge:authority-obligation:file:mvp-build/decision/active.json:dbde1dd9496f`
+- `hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:6737eb4f5f67`
+- `hyperedge:authority-obligation:file:mvp-build/decision/engine/representation-registry.json:42cddd8727da`
+- `hyperedge:authority-obligation:file:mvp-build/decision/protocol-v1.json:75a680dc9d1e`
+- `hyperedge:authority-obligation:file:mvp-build/decision/README.md:bcae2ce9c63a`
+- `hyperedge:authority-obligation:file:mvp-build/decision/representation-contract.md:19a6bbdececd`
+- `hyperedge:authority-obligation:file:mvp-build/GAPS.md:ee2797c85105`
+- `hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:3ce25668dcf2`
+- `hyperedge:authority-obligation:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:e8ca03086641`
+- `hyperedge:authority-obligation:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:2bd8208fc691`
+- `hyperedge:authority-obligation:file:mvp-build/production-readiness-program/13-resolution-ledger.json:a44533579fd6`
+- `hyperedge:authority-obligation:file:mvp-build/production-readiness-program/README.md:5c127a3f419b`
+- `hyperedge:authority-obligation:file:mvp-build/REMEDIATION.md:9be6a5827c03`
+- `hyperedge:authority-obligation:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:00786e2d17a3`
+- `hyperedge:authority-obligation:file:mvp-build/STANDARD.md:8f98e72f2c0c`
+- `hyperedge:authority-routing:authority-map:6e1610c8f591`
+- `hyperedge:behavioral-obligation:file:mvp-build/apps/manager/src/server.ts:7ab95d6c07de`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/ambient-ingress-live-proof.mjs:ae187ff9b41f`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/assignment-enforcement-spine.mjs:cb25c1757ecd`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/canonical-browser-live-proof.mjs:1c0de94e5964`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/effective-capability-live-proof.mjs:6bc3432a42a2`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/generated-work-object-live-proof.mjs:e2ea8cee4286`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/golden-artifact-journey.mjs:8ed7dbe77f33`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/hermes-exact-image-filesystem-proof.mjs:7344521aeeee`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/migration-staging-live-proof.mjs:76ce12c43de5`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/model-gateway-live-proof.mjs:a031722785a0`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/preflight.mjs:85a9fd9f61b2`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/production-boundary-live.mjs:13ad9e615307`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/reconciler-recovery-live-proof.mjs:6daf6f196c36`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/release-evidence-spine.mjs:7d0c9923af63`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/report.mjs:a8bf6e20e638`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/rotation-live-proof.mjs:e7833fba36d5`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/run2-provision.mjs:62f8d435fbfa`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/target-host-two-employee-isolation.mjs:2332ed3a1407`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/verify-commercial-effect-migrations.mjs:3f559ea6e680`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/acceptance/verify-worker-migrations.mjs:b739470922aa`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/backup-restore.mjs:b60a733b6319`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/caddy-proof.mjs:8c9e204fae5d`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/caddy-wildcard-proof.mjs:a4e0b3cf947e`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/capacity-pod-alpha.mjs:64f45b2faa42`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/cloudflare-dns.mjs:b93868c8ec37`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/deploy-rollback.mjs:9c138512ad41`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/deploy-smoke.mjs:d3308c3c8c26`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/egress-policy.mjs:f2df592c214e`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/employee-lifecycle.mjs:d3ed17aedadc`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/healthcheck.mjs:6751c3a5535a`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/hermes-jobs-runner.mjs:a512cfd36987`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/acceptance/01-env.mjs:5a1579f6d496`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/acceptance/02-services.mjs:b0a0ca541182`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/acceptance/03-runtime.mjs:ea183b3b2579`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/acceptance/04-chat.mjs:e79434fd4d43`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/acceptance/05-browser.mjs:47a89bf1e9f1`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/acceptance/06-browser-onboard.mjs:2d6cd9158713`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/acceptance/full-local.mjs:7eb60c460842`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/bootstrap.mjs:4a30ac90bb6e`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/build-hermes-image.mjs:06628c4eb4cd`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/chat.mjs:79793fb7a8c5`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/check.mjs:5fb691070e5e`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/contractor-fixtures.mjs:1d2723f9e4ab`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/inspect.mjs:1f2eb0502736`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/model-bridge-worker.mjs:3fa7dd65df5a`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/model-bridge.mjs:3df83018d58f`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/onboard.mjs:8fdb6947a296`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/profile-generator-harness.mjs:46c7a81be048`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/test/reprovision.mjs:160407b3c3ec`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/local/tool-loop-proof.mjs:b24fcd9c1da9`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/number-pool.mjs:42bbf36bb426`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/platform-admin-session.mjs:6e44e2d66608`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-env-overlay.mjs:4c42b348baab`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-env-proof.mjs:84683c0bbcf2`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-like-down.mjs:6d367deb6982`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-like-normal-employee-down.mjs:0868b1b93166`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-like-normal-employee-up.mjs:e6fdb87473c2`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-like-public-estimator-up.mjs:0532d44c7ee4`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-normal-employee-validate.mjs:091bd247bca0`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/prod-onboarding-proof.mjs:2d47e77867bb`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/production-normal-up.mjs:bc27e95e946f`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/public-estimator-smoke.mjs:7e1b6921ce1e`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/red-health.mjs:fdd95b003674`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/repair.mjs:c188157b18b6`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/reprovision-scoped-mcp.mjs:5e611dddfe97`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/scheduler-tick.mjs:a33125cd96cb`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/ui/capability-drawer-browser.mjs:0be9b43aa3a2`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/ui/fixture-browser.mjs:4e5a6f2dd5d3`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/ui/product-shell-browser.mjs:782c7fdc0875`
+- `hyperedge:behavioral-obligation:file:mvp-build/infra/scripts/with-git-sha.mjs:fe1d76d4a7d1`
+- `hyperedge:behavioral-obligation:file:mvp-build/packages/agent-template/plugins/amtech-hygiene/test_hygiene.py:10cd99b50b69`
+- `hyperedge:behavioral-obligation:file:mvp-build/packages/db/migrate.mjs:a4f75c28331a`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/agent-task-rubric.mjs:4fca0356adb1`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/check-hermes-upstream.mjs:c46cf144c457`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/install-git-hooks.mjs:c18ac957cc75`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/ui-lab-dev.mjs:5bfe6ba31382`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/ui-lab-registry.mjs:1f515cd6fbbb`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/ui-variant-collaborator.mjs:9d2428da4f48`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/ui-variant.mjs:9d08d97cf81c`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/validate-ui-system.mjs:3dd97d2bfac2`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/verify-agentic-repository.mjs:6a697a0d0a1f`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/verify-package-scripts.mjs:2f4d54c8dc5c`
+- `hyperedge:behavioral-obligation:file:mvp-build/scripts/verify-repository-governance.mjs:cc564f7b1ce9`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/ambiguous-command-reconciliation.test.ts:e191b3dad661`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/approval-authority-boundary.test.ts:fbba7bae59fc`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/authority-revocation-boundary.test.ts:345bd81edc95`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/command-effect-kernel.test.ts:926641db4359`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/connector-commercial-boundary.test.ts:be3968cbeefc`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/onboarding-identity-boundary.test.ts:ee43303e61f8`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/relationship-authorization-matrix.test.ts:b36fd488f978`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/worker-migrations.test.ts:16dc50067737`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/integration/ws07-commercial-ledger.test.ts:b2d0b0cd0436`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/adaptive-connector-runtime.test.ts:135f94dc5ca1`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/agent-context.test.ts:28980f7c6527`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ambient-inbox-contract.test.ts:bc7bd7231ab1`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/amtech-agent-ui-contract.test.ts:7aec3d304e83`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/approval-authority-contract.test.ts:0a52e2a53918`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/approval-policy.test.ts:9126da19bf18`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/approval-preview-token-contract.test.ts:5f0a9a541632`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/artifact-workbench-contract.test.ts:6d8837133ab2`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/artifacts.test.ts:30955ef34550`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/assignment-enforcement-contract.test.ts:4e39872e99e5`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/authority-version-contract.test.ts:2c7e7c831344`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/authorization-scope-registry.test.ts:9427e12fe8d6`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/caddy-activation.test.ts:2ce86d5e9118`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/caddy-wildcard-proof.test.ts:7a020da0125b`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/capability-drawer-setup-contract.test.ts:7516575d8e6d`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ce4-operator-policy.test.ts:bf20d2d5db9b`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/channel-router.test.ts:4db214d3b34f`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/cleanup.test.ts:c0367d1361f1`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/cloudflare-dns.test.ts:89f1be6c73d9`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/command-effect-contract.test.ts:397990f094b0`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/connector-capability-binding-contract.test.ts:726d388afaeb`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/connector-commercial-contract.test.ts:560a3ea7f12e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/connector-registry.test.ts:42fab0d81ef0`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/connector-setup.test.ts:1f9ba18655ea`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/contractor-fixtures.test.ts:968b97aba776`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/create-account-error.test.ts:44c426ebdcd6`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/db.test.ts:1cb90d830d4a`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/decision-engine-contract.test.ts:75a3f1e42373`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/destructive-docker.test.ts:326c770c286b`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/employee-stream-strict.test.ts:9e8c38eeae26`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/envelope.test.ts:32f9de000b38`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/estimate-tools.test.ts:8fa2ecd5a5da`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/event-adapter-contract.test.ts:1bd45aae4742`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/event-adapters.test.ts:ae62771cd598`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/event-batching.test.ts:e6c683638647`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/event-routing.test.ts:96b7b9e92a91`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/event-triage.test.ts:7b8b87ca6616`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/fake-supabase.test.ts:60b1ea4f2877`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/forged-requests.test.ts:eedc993cd91d`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/gmail-send.test.ts:e33e3c51a392`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/google-gmail.test.ts:941d10a15632`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/group-by-job.test.ts:bf3fb4d922a6`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/hermes-client.test.ts:5089c4cf8977`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/hermes-stream.test.ts:0cb0393e14a3`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/manifest.test.ts:1783a3a2db44`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/materialization.test.ts:a7f2d5381616`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/mcp-server.test.ts:13653401eaa6`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/metering.test.ts:582481111c04`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/migration-ledger-preflight.test.ts:8265b7aaa9ef`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/mime.test.ts:9d938ecfd3fd`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/model-bridge.test.ts:14918feff2ae`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/model-context.test.ts:01afcf539f56`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/model-gateway-http-isolation.test.ts:58f50fdc19ed`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/model-gateway-request-envelope.test.ts:fd4591a44c46`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/model-profile-isolation.test.ts:317de9b240dd`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/oauth-state.test.ts:8b73c263b467`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/observe-work-event-projection.test.ts:5dfd5da95235`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/onboarding-compile.test.ts:e46c8389fe54`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/onboarding-identity-contract.test.ts:740906dcb5af`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/orchestrator-model.test.ts:6c5c7d9f1d3b`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/orchestrator-readiness.test.ts:ab01ea106181`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/owner-stream-state.test.ts:a93fd42b671a`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/owner-turn-command-contract.test.ts:e2ab958ea97e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/owner-turn-context.test.ts:901a9fc608a0`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/phone-verify-dev-bypass.test.ts:128a5c239fd6`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/platform-admin-authority-groundwork.test.ts:0f2de4894160`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/prod-env-proof.test.ts:acfe6572d8d8`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/production-boundary-source.test.ts:208e85495a28`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/production-live-harness.test.ts:9503bf5fc88e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/production-proof-redaction.test.ts:bf0d94bbfb4e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/production-topology-acceptance.test.ts:3f9a3aa88adf`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/profile-context.test.ts:c2f03cfef86e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/profile-generator-harness.test.ts:b8093fc61c71`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/protocol-projection-authority.test.ts:85edc54612f0`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/provisioner-idempotency.test.ts:7b4d5d9b0c27`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/public-estimator-email.test.ts:088589b5b5b4`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/public-estimator-routes.test.ts:6ed94747c566`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/qbo-client.test.ts:ff073f6961ab`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/qbo-gotchas.test.ts:3e7303f05dc4`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/qbo-lookup.test.ts:93b67217d44d`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/qbo-query.test.ts:3d12d06dc9fa`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/qbo-tokens.test.ts:76fb0f4c4fac`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/qbo-tools.test.ts:dac1aa522817`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/relationship-contract.test.ts:2bb8036dc191`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/release-evidence-contract.test.ts:b19a64ddda69`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/remediation-plan-integrity.test.ts:aeb7104684e3`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/reminders.test.ts:a2d3ce7e993d`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/run-tool.test.ts:db9bb9ddcf0f`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/s8-local-production-contract.test.ts:33b9c4ece723`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/scheduler-runner.test.ts:343e1f073aa8`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/sdrt-v2-contract.test.ts:fa984cd32335`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/secrets.test.ts:d6777c855d3b`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/session-rotation.test.ts:b50051995602`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/signature.test.ts:b717f3920885`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/signed-links.test.ts:c407d9d712bf`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/sms-channel-decision-context.test.ts:99b5b4ec4d23`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/sms-preview.test.ts:bf447f49e35e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/sms-sender.test.ts:17f3fa023bf7`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/standard-ratification-contract.test.ts:8814633459ea`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/stripe-signature.test.ts:e40ecfa94b0e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/stripe-tools.test.ts:a69f7dac0e4f`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/task-capability-catalog.test.ts:fae7e0cf2bf4`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/tool-activity.test.ts:b7655c353463`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/tool-contracts.test.ts:e2221d746dcf`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/turn-drain.test.ts:10dbfedfc567`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-fixture-guard.test.ts:afd3639185ed`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-fixture-mode.test.ts:ee00f0516f41`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-lab-registry.test.ts:4582f23dc8dc`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-lab-workbench-contract.test.ts:a5d66cc5b844`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-resources.test.ts:486678dcf63d`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-state-machine-conformance.test.ts:c069017e1e41`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/web-operating-snapshot-contract.test.ts:109c6a6e1a63`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/work-events.test.ts:54b6d163b22b`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/work-surface-model.test.ts:fccf68fbe290`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws02-capability-manifold.test.ts:55cfeff5d6b5`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws02-hardening-regressions.test.ts:8c4a99f5fd6e`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws02-http-adapters.test.ts:338a7d224fb3`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws02-protocol-boundary.test.ts:035474ddc458`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws04-host-lifecycle-contract.test.ts:a80279ef2c52`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws06-ws08-failure-manifold.test.ts:edbe591207a6`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws07-commercial-admission.test.ts:f1a063beefea`
+- `hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws08-release-authority.test.ts:1dde942c3348`
+- `hyperedge:behavioral-obligation:file:mvp-build/vitest.integration.config.ts:3253e6b2d040`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/audit.mjs:e6173f9e8632`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/build.mjs:60dc6e088f93`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/dev.mjs:5029cfb482ac`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/go-no-go.mjs:9a2e26e9271e`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/measure-command.mjs:2329a807a279`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/preflight.mjs:881bb62244a6`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/test.mjs:a0ae42f8f0e4`
+- `hyperedge:behavioral-obligation:file:scripts/local-prod/verify.mjs:b99bf6bdb05a`
+- `hyperedge:behavioral-obligation:file:scripts/sdrt/sdrt_mcp_server.py:c60585db682e`
+- `hyperedge:behavioral-obligation:file:scripts/sdrt/sdrt_validator.py:74be45945a3e`
+
+## Effect frontier
+
+- order 1: 273 typed relations
+- order 2: 2102 typed relations
+- order 3: 9519 typed relations
+- order 4: 4891 typed relations
+
+Natural language is a review view. The JSON artifacts and their verifiers own semantics.

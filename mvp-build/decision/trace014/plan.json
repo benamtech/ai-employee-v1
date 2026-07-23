@@ -1,0 +1,82 @@
+{
+  "schema": "amtech.plan.v1",
+  "task_id": "TRACE014-EFFECT-FRONTIER-BOUNDS-001",
+  "selected_candidates": ["C1-bound-frontier-and-deduplicate-context"],
+  "candidates": [
+    {
+      "id": "C1-bound-frontier-and-deduplicate-context",
+      "mechanism": "Deduplicate mandatory context by path and cap broad effect-frontier seed/effect expansion while retaining diagnostics.",
+      "repository_evidence": [
+        "repoctl start failed with duplicate_mandatory_context_path on real repository facts.",
+        "broad product task produced 1732 seed nodes and approximately 79787 pre-dedupe effect records before JSON serialization failed."
+      ],
+      "affected_invariants": [
+        "P0/P1/P2/P3/P4 non-promotion",
+        "bounded first-through-fourth-order effect frontier",
+        "valid task capsule before plan admission",
+        "dirty work is recorded, not hidden"
+      ],
+      "prediction": "Broad planning tasks can start with truncation diagnostics rather than RangeError.",
+      "falsifier": "repoctl start on the broad generated-bespoke task still fails or emits duplicate mandatory context paths.",
+      "proof_obligations": [
+        "decision engine doctor passes",
+        "decision engine self-test passes",
+        "unit contract covers bounded effect-frontier behavior",
+        "trace014 start/admit/evaluate/finish verification passes"
+      ],
+      "maximum_patch": {
+        "maximum_files": 6,
+        "allowed_paths": [
+          "decision/engine/analyze/effect-frontier.mjs",
+          "decision/engine/analyze/task-diffusion.mjs",
+          "decision/engine/repoctl.mjs",
+          "tests/unit/decision-engine-contract.test.ts",
+          "decision/task-trace014-effect-frontier-bounds.json",
+          "decision/trace014/plan.json"
+        ]
+      },
+      "verification_argv": [
+        ["node", "decision/engine/repoctl.mjs", "doctor"],
+        ["node", "decision/engine/repoctl.mjs", "self-test"],
+        ["npm", "run", "test:unit", "--", "--run", "tests/unit/decision-engine-contract.test.ts"]
+      ],
+      "risk": "The effect frontier becomes explicitly partial for broad tasks; downstream claims must read diagnostics and avoid treating truncated P0 as complete impact proof."
+    }
+  ],
+  "rejected_alternatives": [
+    {
+      "id": "C0-increase-node-memory",
+      "reason": "Does not fix unbounded artifact semantics or duplicate mandatory context paths."
+    },
+    {
+      "id": "C2-disable-effect-frontier-for-broad-tasks",
+      "reason": "Would weaken the control plane by removing required effect diagnostics."
+    },
+    {
+      "id": "C3-rewrite-compiler",
+      "reason": "Unnecessary scope expansion for two localized start-time defects."
+    }
+  ],
+  "proof_obligations": [
+    {"hyperedge_id": "manual-control-plane-repair-exception", "status": "blocked", "reason": "repoctl could not admit a normal plan until duplicate context and frontier blow-up were repaired; red compiler evidence is retained."}
+  ],
+  "maximum_patch": {
+    "maximum_files": 6,
+    "allowed_paths": [
+      "decision/engine/analyze/effect-frontier.mjs",
+      "decision/engine/analyze/task-diffusion.mjs",
+      "decision/engine/repoctl.mjs",
+      "tests/unit/decision-engine-contract.test.ts",
+      "decision/task-trace014-effect-frontier-bounds.json",
+      "decision/trace014/plan.json"
+    ]
+  },
+  "verification": {
+    "commands": [
+      {"argv": ["node", "decision/engine/repoctl.mjs", "doctor"]},
+      {"argv": ["node", "decision/engine/repoctl.mjs", "self-test"]},
+      {"argv": ["npm", "run", "test:unit", "--", "--run", "tests/unit/decision-engine-contract.test.ts"]}
+    ]
+  },
+  "discovered_later_policy": "Any additional source path requires explicit evidence before evaluation."
+}

@@ -62,6 +62,67 @@ describe('repository-native software experiment compiler', () => {
     expect(core).not.toContain('execSync(');
   });
 
+  it('bounds broad effect-frontier artifacts with deterministic diagnostics', async () => {
+    const { computeEffectFrontier } = await import('../../decision/engine/analyze/effect-frontier.mjs');
+    const dependencyGraph = {
+      content_digest: 'sha256:dependency',
+      source_sha: 'test-sha',
+      payload: {
+        nodes: [
+          { id: 'file:a.ts', path: 'a.ts' },
+          { id: 'file:b.ts', path: 'b.ts' },
+          { id: 'file:c.ts', path: 'c.ts' },
+          { id: 'file:d.ts', path: 'd.ts' },
+        ],
+        edges: [
+          { id: 'e1', from: 'file:a.ts', to: 'file:b.ts', type: 'Imports', evidence: { path: 'a.ts' } },
+          { id: 'e2', from: 'file:b.ts', to: 'file:c.ts', type: 'Imports', evidence: { path: 'b.ts' } },
+          { id: 'e3', from: 'file:c.ts', to: 'file:d.ts', type: 'Imports', evidence: { path: 'c.ts' } },
+        ],
+      },
+    };
+    const diffusion = {
+      content_digest: 'sha256:diffusion',
+      payload: {
+        seeds: { 'file:a.ts': 1, 'file:b.ts': 1, 'file:c.ts': 1, 'file:d.ts': 1 },
+        ranked_nodes: [
+          { id: 'file:a.ts', score: 4 },
+          { id: 'file:b.ts', score: 3 },
+          { id: 'file:c.ts', score: 2 },
+          { id: 'file:d.ts', score: 1 },
+        ],
+      },
+    };
+    const hypergraph = {
+      content_digest: 'sha256:hypergraph',
+      payload: {
+        hyperedges: [{
+          id: 'h1',
+          kind: 'source-test-execution',
+          hard: true,
+          relation_ids: ['r1', 'r2', 'r3'],
+          members: ['file:a.ts', 'file:b.ts', 'file:c.ts', 'file:d.ts'],
+        }],
+      },
+    };
+
+    const result = computeEffectFrontier(
+      { task_id: 'BROAD', paths: [] },
+      diffusion,
+      dependencyGraph,
+      hypergraph,
+      { max_seed_ids: 2, max_effects: 20, max_evidence_members: 2 },
+    );
+
+    expect(result.payload.diagnostics.raw_seed_count).toBe(4);
+    expect(result.payload.diagnostics.used_seed_count).toBe(2);
+    expect(result.payload.diagnostics.truncated).toBe(true);
+    expect(result.payload.diagnostics.limit_reasons).toContain('max_seed_ids');
+    expect(result.payload.effects.length).toBeLessThanOrEqual(20);
+    expect(result.payload.effects.every((effect: { evidence?: Record<string, unknown> }) => !Object.hasOwn(effect.evidence ?? {}, 'members'))).toBe(true);
+    expect(result.payload.effects.some((effect: { evidence?: { member_count?: number } }) => effect.evidence?.member_count === 4)).toBe(true);
+  });
+
   it('retains one canonical pre-task onboarding contract', () => {
     const onboarding = readFileSync(resolve(root, 'decision/SESSION_ONBOARDING.md'), 'utf8');
     const rootAgents = readFileSync(resolve(root, '../AGENTS.md'), 'utf8');

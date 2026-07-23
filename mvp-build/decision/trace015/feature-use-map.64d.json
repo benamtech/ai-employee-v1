@@ -1,0 +1,1485 @@
+{
+  "schema": "amtech.generated-bespoke-feature-map.v1",
+  "task_id": "TRACE015-GENERATED-BESPOKE-SOFTWARE-001",
+  "thesis": "AMTECH generates bespoke-feeling operating software for non-technical businesses: governed AI employees and swarms do every computer-based job while the owner never handles API keys, infrastructure, schemas, or provider mechanics.",
+  "evidence_boundary": "P0/P2 strategy and repository-correspondence artifact. Generated drafts do not imply implementation, live provider acceptance, deployment, or production readiness.",
+  "basis": {
+    "capability_families": [
+      {
+        "id": "identity_assignment",
+        "name": "Identity and assignment",
+        "description": "who the employee works for and what scope it can act inside"
+      },
+      {
+        "id": "swarm_roles",
+        "name": "Employee/swarm role generation",
+        "description": "which employees or specialist agents are generated for the business"
+      },
+      {
+        "id": "work_lifecycle",
+        "name": "Work-object lifecycle",
+        "description": "how work moves from signal to prepared output"
+      },
+      {
+        "id": "connectors_systems",
+        "name": "Connectors and external systems",
+        "description": "which business systems are connected without owner API knowledge"
+      },
+      {
+        "id": "authority_approval",
+        "name": "Authority and approval",
+        "description": "what needs owner, manager, or policy approval"
+      },
+      {
+        "id": "effects_receipts",
+        "name": "Effects and receipts",
+        "description": "what changes outside AMTECH and how receipts bind proof"
+      },
+      {
+        "id": "recovery_repair",
+        "name": "Recovery and repair",
+        "description": "how failures, ambiguity, and stale evidence recover"
+      },
+      {
+        "id": "commercial_accounting",
+        "name": "Commercial and accounting proof",
+        "description": "how value, cost, payer, and margin are shown"
+      }
+    ],
+    "business_axes": [
+      {
+        "id": "lead_intake",
+        "name": "Lead capture and intake",
+        "description": "turn inbound demand into structured work"
+      },
+      {
+        "id": "estimating_quoting",
+        "name": "Estimation and quoting",
+        "description": "prepare prices, scope, assumptions, and send-ready quotes"
+      },
+      {
+        "id": "scheduling_dispatch",
+        "name": "Scheduling and dispatch",
+        "description": "coordinate time, people, route, and commitments"
+      },
+      {
+        "id": "customer_comm",
+        "name": "Customer communication",
+        "description": "draft, hold, send, and reconcile customer messages"
+      },
+      {
+        "id": "backoffice_books",
+        "name": "Back office and bookkeeping",
+        "description": "categorize, invoice, reconcile, and close admin loops"
+      },
+      {
+        "id": "procurement_inventory",
+        "name": "Procurement and inventory",
+        "description": "manage materials, vendors, stock, and reorder choices"
+      },
+      {
+        "id": "delivery_quality",
+        "name": "Delivery, proof, and quality",
+        "description": "turn completed work into proof, artifacts, and follow-up"
+      },
+      {
+        "id": "owner_intelligence",
+        "name": "Owner intelligence and strategy",
+        "description": "show what changed, what matters, and what to do next"
+      }
+    ]
+  },
+  "dimensions": [
+    {
+      "dimension_id": "D01",
+      "capability_family": "identity_assignment",
+      "business_axis": "lead_intake",
+      "feature_combination": "Identity and assignment x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "high",
+      "connected_dimensions": []
+    },
+    {
+      "dimension_id": "D02",
+      "capability_family": "identity_assignment",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Identity and assignment x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D03",
+      "capability_family": "identity_assignment",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Identity and assignment x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D04",
+      "capability_family": "identity_assignment",
+      "business_axis": "customer_comm",
+      "feature_combination": "Identity and assignment x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D05",
+      "capability_family": "identity_assignment",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Identity and assignment x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D06",
+      "capability_family": "identity_assignment",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Identity and assignment x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D07",
+      "capability_family": "identity_assignment",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Identity and assignment x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D08",
+      "capability_family": "identity_assignment",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Identity and assignment x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should who the employee works for and what scope it can act inside while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds identity_assignment to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local contracts for identity, assignment, authority version, owner session",
+      "missing_gap": "generated business ontology and role graph must not invent authority",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D09",
+      "capability_family": "swarm_roles",
+      "business_axis": "lead_intake",
+      "feature_combination": "Employee/swarm role generation x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D10",
+      "capability_family": "swarm_roles",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Employee/swarm role generation x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "high",
+      "connected_dimensions": [
+        "D09",
+        "D02"
+      ]
+    },
+    {
+      "dimension_id": "D11",
+      "capability_family": "swarm_roles",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Employee/swarm role generation x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D09",
+        "D03"
+      ]
+    },
+    {
+      "dimension_id": "D12",
+      "capability_family": "swarm_roles",
+      "business_axis": "customer_comm",
+      "feature_combination": "Employee/swarm role generation x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D09",
+        "D04"
+      ]
+    },
+    {
+      "dimension_id": "D13",
+      "capability_family": "swarm_roles",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Employee/swarm role generation x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D09",
+        "D05"
+      ]
+    },
+    {
+      "dimension_id": "D14",
+      "capability_family": "swarm_roles",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Employee/swarm role generation x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D09",
+        "D06"
+      ]
+    },
+    {
+      "dimension_id": "D15",
+      "capability_family": "swarm_roles",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Employee/swarm role generation x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D09",
+        "D07"
+      ]
+    },
+    {
+      "dimension_id": "D16",
+      "capability_family": "swarm_roles",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Employee/swarm role generation x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should which employees or specialist agents are generated for the business while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds swarm_roles to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/fixture support for employees, delegation, workforce concepts; richer swarm generation remains P0",
+      "missing_gap": "model-authored role drafts need schema, validator, and human review",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D09",
+        "D08"
+      ]
+    },
+    {
+      "dimension_id": "D17",
+      "capability_family": "work_lifecycle",
+      "business_axis": "lead_intake",
+      "feature_combination": "Work-object lifecycle x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D18",
+      "capability_family": "work_lifecycle",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Work-object lifecycle x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D17",
+        "D02"
+      ]
+    },
+    {
+      "dimension_id": "D19",
+      "capability_family": "work_lifecycle",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Work-object lifecycle x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "high",
+      "connected_dimensions": [
+        "D17",
+        "D03"
+      ]
+    },
+    {
+      "dimension_id": "D20",
+      "capability_family": "work_lifecycle",
+      "business_axis": "customer_comm",
+      "feature_combination": "Work-object lifecycle x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D17",
+        "D04"
+      ]
+    },
+    {
+      "dimension_id": "D21",
+      "capability_family": "work_lifecycle",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Work-object lifecycle x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D17",
+        "D05"
+      ]
+    },
+    {
+      "dimension_id": "D22",
+      "capability_family": "work_lifecycle",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Work-object lifecycle x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D17",
+        "D06"
+      ]
+    },
+    {
+      "dimension_id": "D23",
+      "capability_family": "work_lifecycle",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Work-object lifecycle x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D17",
+        "D07"
+      ]
+    },
+    {
+      "dimension_id": "D24",
+      "capability_family": "work_lifecycle",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Work-object lifecycle x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should how work moves from signal to prepared output while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds work_lifecycle to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source contracts for SurfaceEnvelope, WorkResource, WorkAction, operating projection",
+      "missing_gap": "generated work apps need neutral capability coverage and fixture-to-live parity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D17",
+        "D08"
+      ]
+    },
+    {
+      "dimension_id": "D25",
+      "capability_family": "connectors_systems",
+      "business_axis": "lead_intake",
+      "feature_combination": "Connectors and external systems x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D26",
+      "capability_family": "connectors_systems",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Connectors and external systems x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D25",
+        "D02"
+      ]
+    },
+    {
+      "dimension_id": "D27",
+      "capability_family": "connectors_systems",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Connectors and external systems x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D25",
+        "D03"
+      ]
+    },
+    {
+      "dimension_id": "D28",
+      "capability_family": "connectors_systems",
+      "business_axis": "customer_comm",
+      "feature_combination": "Connectors and external systems x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "high",
+      "connected_dimensions": [
+        "D25",
+        "D04"
+      ]
+    },
+    {
+      "dimension_id": "D29",
+      "capability_family": "connectors_systems",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Connectors and external systems x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D25",
+        "D05"
+      ]
+    },
+    {
+      "dimension_id": "D30",
+      "capability_family": "connectors_systems",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Connectors and external systems x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D25",
+        "D06"
+      ]
+    },
+    {
+      "dimension_id": "D31",
+      "capability_family": "connectors_systems",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Connectors and external systems x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D25",
+        "D07"
+      ]
+    },
+    {
+      "dimension_id": "D32",
+      "capability_family": "connectors_systems",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Connectors and external systems x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should which business systems are connected without owner API knowledge while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds connectors_systems to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local connector manifests and custody; live provider acceptance open",
+      "missing_gap": "owner-safe setup must cross real OAuth/provider P4 gates",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D25",
+        "D08"
+      ]
+    },
+    {
+      "dimension_id": "D33",
+      "capability_family": "authority_approval",
+      "business_axis": "lead_intake",
+      "feature_combination": "Authority and approval x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D34",
+      "capability_family": "authority_approval",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Authority and approval x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D33",
+        "D02"
+      ]
+    },
+    {
+      "dimension_id": "D35",
+      "capability_family": "authority_approval",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Authority and approval x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D33",
+        "D03"
+      ]
+    },
+    {
+      "dimension_id": "D36",
+      "capability_family": "authority_approval",
+      "business_axis": "customer_comm",
+      "feature_combination": "Authority and approval x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D33",
+        "D04"
+      ]
+    },
+    {
+      "dimension_id": "D37",
+      "capability_family": "authority_approval",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Authority and approval x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "high",
+      "connected_dimensions": [
+        "D33",
+        "D05"
+      ]
+    },
+    {
+      "dimension_id": "D38",
+      "capability_family": "authority_approval",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Authority and approval x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D33",
+        "D06"
+      ]
+    },
+    {
+      "dimension_id": "D39",
+      "capability_family": "authority_approval",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Authority and approval x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D33",
+        "D07"
+      ]
+    },
+    {
+      "dimension_id": "D40",
+      "capability_family": "authority_approval",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Authority and approval x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should what needs owner, manager, or policy approval while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds authority_approval to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local approval authority and exact binding contracts",
+      "missing_gap": "generated approval copy must bind exact resource/action/policy",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D33",
+        "D08"
+      ]
+    },
+    {
+      "dimension_id": "D41",
+      "capability_family": "effects_receipts",
+      "business_axis": "lead_intake",
+      "feature_combination": "Effects and receipts x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D42",
+      "capability_family": "effects_receipts",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Effects and receipts x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D41",
+        "D02"
+      ]
+    },
+    {
+      "dimension_id": "D43",
+      "capability_family": "effects_receipts",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Effects and receipts x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D41",
+        "D03"
+      ]
+    },
+    {
+      "dimension_id": "D44",
+      "capability_family": "effects_receipts",
+      "business_axis": "customer_comm",
+      "feature_combination": "Effects and receipts x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D41",
+        "D04"
+      ]
+    },
+    {
+      "dimension_id": "D45",
+      "capability_family": "effects_receipts",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Effects and receipts x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D41",
+        "D05"
+      ]
+    },
+    {
+      "dimension_id": "D46",
+      "capability_family": "effects_receipts",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Effects and receipts x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "high",
+      "connected_dimensions": [
+        "D41",
+        "D06"
+      ]
+    },
+    {
+      "dimension_id": "D47",
+      "capability_family": "effects_receipts",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Effects and receipts x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D41",
+        "D07"
+      ]
+    },
+    {
+      "dimension_id": "D48",
+      "capability_family": "effects_receipts",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Effects and receipts x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should what changes outside AMTECH and how receipts bind proof while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds effects_receipts to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local command/effect/idempotency/accounting contracts; live receipts open",
+      "missing_gap": "generated effects must reserve one idempotent identity and reconcile ambiguity",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D41",
+        "D08"
+      ]
+    },
+    {
+      "dimension_id": "D49",
+      "capability_family": "recovery_repair",
+      "business_axis": "lead_intake",
+      "feature_combination": "Recovery and repair x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D50",
+      "capability_family": "recovery_repair",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Recovery and repair x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D49",
+        "D02"
+      ]
+    },
+    {
+      "dimension_id": "D51",
+      "capability_family": "recovery_repair",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Recovery and repair x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D49",
+        "D03"
+      ]
+    },
+    {
+      "dimension_id": "D52",
+      "capability_family": "recovery_repair",
+      "business_axis": "customer_comm",
+      "feature_combination": "Recovery and repair x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D49",
+        "D04"
+      ]
+    },
+    {
+      "dimension_id": "D53",
+      "capability_family": "recovery_repair",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Recovery and repair x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D49",
+        "D05"
+      ]
+    },
+    {
+      "dimension_id": "D54",
+      "capability_family": "recovery_repair",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Recovery and repair x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D49",
+        "D06"
+      ]
+    },
+    {
+      "dimension_id": "D55",
+      "capability_family": "recovery_repair",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Recovery and repair x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "high",
+      "connected_dimensions": [
+        "D49",
+        "D07"
+      ]
+    },
+    {
+      "dimension_id": "D56",
+      "capability_family": "recovery_repair",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Recovery and repair x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should how failures, ambiguity, and stale evidence recover while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds recovery_repair to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local repair, rollback, ambiguity, recovery contracts; target-host rehearsal open",
+      "missing_gap": "generated recovery UX must prove accepted-work conservation",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D49",
+        "D08"
+      ]
+    },
+    {
+      "dimension_id": "D57",
+      "capability_family": "commercial_accounting",
+      "business_axis": "lead_intake",
+      "feature_combination": "Commercial and accounting proof x Lead capture and intake",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it turn inbound demand into structured work, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for lead capture and intake that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to lead_intake with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke lead capture and intake work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D01"
+      ]
+    },
+    {
+      "dimension_id": "D58",
+      "capability_family": "commercial_accounting",
+      "business_axis": "estimating_quoting",
+      "feature_combination": "Commercial and accounting proof x Estimation and quoting",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it prepare prices, scope, assumptions, and send-ready quotes, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for estimation and quoting that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to estimating_quoting with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke estimation and quoting work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D57",
+        "D02"
+      ]
+    },
+    {
+      "dimension_id": "D59",
+      "capability_family": "commercial_accounting",
+      "business_axis": "scheduling_dispatch",
+      "feature_combination": "Commercial and accounting proof x Scheduling and dispatch",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it coordinate time, people, route, and commitments, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for scheduling and dispatch that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to scheduling_dispatch with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke scheduling and dispatch work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D57",
+        "D03"
+      ]
+    },
+    {
+      "dimension_id": "D60",
+      "capability_family": "commercial_accounting",
+      "business_axis": "customer_comm",
+      "feature_combination": "Commercial and accounting proof x Customer communication",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it draft, hold, send, and reconcile customer messages, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for customer communication that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to customer_comm with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke customer communication work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D57",
+        "D04"
+      ]
+    },
+    {
+      "dimension_id": "D61",
+      "capability_family": "commercial_accounting",
+      "business_axis": "backoffice_books",
+      "feature_combination": "Commercial and accounting proof x Back office and bookkeeping",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it categorize, invoice, reconcile, and close admin loops, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for back office and bookkeeping that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to backoffice_books with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke back office and bookkeeping work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D57",
+        "D05"
+      ]
+    },
+    {
+      "dimension_id": "D62",
+      "capability_family": "commercial_accounting",
+      "business_axis": "procurement_inventory",
+      "feature_combination": "Commercial and accounting proof x Procurement and inventory",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it manage materials, vendors, stock, and reorder choices, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for procurement and inventory that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to procurement_inventory with explicit states, blockers, and next safe action.",
+        "connector_config": "Draft connector/capability needs; Manager custody and live provider proof required before use.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke procurement and inventory work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D57",
+        "D06"
+      ]
+    },
+    {
+      "dimension_id": "D63",
+      "capability_family": "commercial_accounting",
+      "business_axis": "delivery_quality",
+      "feature_combination": "Commercial and accounting proof x Delivery, proof, and quality",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it turn completed work into proof, artifacts, and follow-up, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for delivery, proof, and quality that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to delivery_quality with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke delivery, proof, and quality work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "medium",
+      "connected_dimensions": [
+        "D57",
+        "D07"
+      ]
+    },
+    {
+      "dimension_id": "D64",
+      "capability_family": "commercial_accounting",
+      "business_axis": "owner_intelligence",
+      "feature_combination": "Commercial and accounting proof x Owner intelligence and strategy",
+      "nontechnical_business_use": "Generated bespoke software should how value, cost, payer, and margin are shown while it show what changed, what matters, and what to do next, in the owner's business language.",
+      "generated_full_stack_implication": {
+        "ui": "A custom-feeling surface for owner intelligence and strategy that hides technical setup and exposes only owner-safe work state.",
+        "workflow": "A generated workflow template binds commercial_accounting to owner_intelligence with explicit states, blockers, and next safe action.",
+        "connector_config": "No new connector authority implied by the draft.",
+        "proof": "Draft proof obligations remain P0/P2 until exact executable or external evidence exists."
+      },
+      "current_repo_support": "source/local metering/commercial attribution; billing lifecycle open",
+      "missing_gap": "generated ROI ledger needs measured cost/value receipts",
+      "ui_implication": "Do not render this as a generic approval card; render it as a bespoke owner intelligence and strategy work app backed by governed employee state.",
+      "proof_class_available": "P0-P3 source/local where present; P4 open",
+      "next_step_relevance": "high",
+      "connected_dimensions": [
+        "D57",
+        "D08"
+      ]
+    }
+  ]
+}

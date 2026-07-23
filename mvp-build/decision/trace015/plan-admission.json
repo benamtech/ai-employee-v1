@@ -1,0 +1,43 @@
+{
+  "content_digest": "sha256:2341cffbc5e0cb4ed11afdccf62455b762d11c542321dadd4ae2e3f9fccb0113",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T09:14:29.024Z",
+  "payload": {
+    "capsule_digest": "sha256:e5ae210d9e91f6b406433addf07b9c7466c5c92c30bf8a9e210bcb0da0ae26de",
+    "current_head_at_admission": "ed0cd4b876149210193faa406aa7def41ba4f58e",
+    "discovered_later_policy": "Additional product source paths are out of scope for this strategy transaction.",
+    "experiment_digest": "sha256:a661c7234be7368472ab22cd17d7253454e80f4b710161d3786631f4de6c9a33",
+    "experiment_root_digest": "sha256:9e0cf68450718038a7821093644cd13a34fcc2ad7d38a9b709832eb5e9976526",
+    "new_paths_before_admission": [],
+    "plan_digest": "sha256:a2475c3d5b88caff34155635e49b9f92b662821740095e78274d963327b73778",
+    "proof_obligations": [
+      {
+        "hyperedge_id": "strategy-artifacts-only",
+        "reason": "No runtime/product source files are in the maximum patch.",
+        "status": "planned"
+      }
+    ],
+    "selected_candidates": [
+      "C1-generated-bespoke-full-stack-map"
+    ],
+    "task_id": "TRACE015-GENERATED-BESPOKE-SOFTWARE-001",
+    "verification_commands": [
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "verify",
+          "--transaction",
+          "decision/trace015",
+          "--phase",
+          "admitted"
+        ]
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs admit-plan"
+  },
+  "schema": "plan.admission.v1",
+  "source_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e"
+}

@@ -1,0 +1,89 @@
+{
+  "schema": "amtech.plan.v1",
+  "task_id": "TRACE015-GENERATED-BESPOKE-SOFTWARE-001",
+  "selected_candidates": ["C1-generated-bespoke-full-stack-map"],
+  "candidates": [
+    {
+      "id": "C1-generated-bespoke-full-stack-map",
+      "mechanism": "Retain a 64-dimensional map, multi-vertical full-stack draft matrix, and next-step hypervector that reframe AMTECH as generated bespoke operating software for non-technical businesses.",
+      "repository_evidence": [
+        "STANDARD.md defines governed AI labor and workforces for owner-operated businesses.",
+        "Trace012 defines folder-first UI variants behind EmployeeExperienceModelV1 without preserving the production Web grammar.",
+        "Trace015 diffusion identifies operating-system, employee-stream, onboarding, UI presentation, fixture runtime, command-effect, approval authority, and UI variant contracts as high-relevance context.",
+        "Effect-frontier diagnostics are explicitly truncated and P0 only for this broad planning task."
+      ],
+      "affected_invariants": [
+        "Generated UI remains untrusted input and cannot alter authority, policy, secrets, or system instructions.",
+        "Model-authored drafts are P0 proposals until repository validators and exact evidence accept them.",
+        "P0/P1/P2/P3/P4 evidence classes remain non-promoting.",
+        "No product source or runtime behavior changes are made in this strategy transaction."
+      ],
+      "prediction": "The retained artifacts will identify three first next steps that connect generated bespoke UI, generated workflow/connector drafts, and proof/recovery obligations to the current production-readiness plan.",
+      "falsifier": "The artifacts collapse back to approval-card UI polish or promote generated drafts into implementation/production acceptance.",
+      "proof_obligations": [
+        "Trace015 plan admission passes.",
+        "Trace015 evaluation records no uncovered runtime source paths.",
+        "Repoctl finished-phase verification passes."
+      ],
+      "maximum_patch": {
+        "maximum_files": 6,
+        "allowed_paths": [
+          "decision/trace015/plan.json",
+          "decision/trace015/feature-use-map.64d.json",
+          "decision/trace015/generated-full-stack-matrix.json",
+          "decision/trace015/next-step-hypervector.json",
+          "decision/trace015/feature-use-map.64d.md",
+          "production-readiness-program/21-generated-bespoke-software-strategy.md"
+        ]
+      },
+      "verification_argv": [
+        ["node", "decision/engine/repoctl.mjs", "verify", "--transaction", "decision/trace015", "--phase", "admitted"],
+        ["node", "decision/engine/repoctl.mjs", "evaluate", "--transaction", "decision/trace015", "--skip-commands"],
+        ["node", "decision/engine/repoctl.mjs", "finish", "--transaction", "decision/trace015"],
+        ["node", "decision/engine/repoctl.mjs", "verify", "--transaction", "decision/trace015", "--phase", "finished"]
+      ],
+      "risk": "The map is strategic P0/P2 guidance; it is not generated application code, live connector acceptance, or production proof."
+    }
+  ],
+  "rejected_alternatives": [
+    {
+      "id": "C0-ui-polish-only",
+      "reason": "Does not internalize the generated bespoke software thesis and remains trapped in approval-card grammar."
+    },
+    {
+      "id": "C2-generate-runtime-config-now",
+      "reason": "Would risk creating authority/effect changes without enough schema and validator preparation."
+    },
+    {
+      "id": "C3-single-vertical-only",
+      "reason": "Too narrow for the requested cross-industry 64D feature-use map."
+    }
+  ],
+  "proof_obligations": [
+    {"hyperedge_id": "strategy-artifacts-only", "status": "planned", "reason": "No runtime/product source files are in the maximum patch."}
+  ],
+  "maximum_patch": {
+    "maximum_files": 6,
+    "allowed_paths": [
+      "decision/trace015/plan.json",
+      "decision/trace015/feature-use-map.64d.json",
+      "decision/trace015/generated-full-stack-matrix.json",
+      "decision/trace015/next-step-hypervector.json",
+      "decision/trace015/feature-use-map.64d.md",
+      "production-readiness-program/21-generated-bespoke-software-strategy.md"
+    ]
+  },
+  "verification": {
+    "commands": [
+      {"argv": ["node", "decision/engine/repoctl.mjs", "verify", "--transaction", "decision/trace015", "--phase", "admitted"]}
+    ]
+  },
+  "discovered_later": [
+    {"path": "mvp-build/apps/web/app/ui-lab/page.tsx", "reason": "pre-existing user/UI Lab dirty path; out of scope for Trace015 strategy artifacts"},
+    {"path": "mvp-build/decision/engine/analyze/effect-frontier.mjs", "reason": "Trace014 control-plane repair source; out of scope for Trace015 strategy artifacts"},
+    {"path": "mvp-build/decision/engine/analyze/task-diffusion.mjs", "reason": "Trace014 control-plane repair source; out of scope for Trace015 strategy artifacts"},
+    {"path": "mvp-build/decision/engine/repoctl.mjs", "reason": "Trace014 control-plane repair source; out of scope for Trace015 strategy artifacts"},
+    {"path": "mvp-build/tests/unit/decision-engine-contract.test.ts", "reason": "Trace014 control-plane repair test; out of scope for Trace015 strategy artifacts"}
+  ],
+  "discovered_later_policy": "Additional product source paths are out of scope for this strategy transaction."
+}

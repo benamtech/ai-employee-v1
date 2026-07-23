@@ -1,0 +1,188 @@
+{
+  "content_digest": "sha256:01094a32e875f8c16533bfb0231a33f6c53919a291a39e0834493b9d8977f6c7",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T09:12:28.894Z",
+  "payload": {
+    "baseline": {
+      "id": "evidence-and-invariants",
+      "same_prerequisite_domain": true
+    },
+    "evidence_classes": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "lineage": {
+      "previous_digest": "sha256:a1d9634fc742a71fb6841985ad7a8c3bf0d7f8cd81531d405210803406ec704d",
+      "root_digest": "sha256:2df56f2b1b297a83ff3821ca655cbd633e10d70fafc9a98916f0324ae70a4c23"
+    },
+    "metrics": [
+      "changed_file_recall",
+      "required_test_recall",
+      "missed_invariant_edges",
+      "unnecessary_scope",
+      "time_to_valid_plan",
+      "time_to_exact_head_green",
+      "review_defects",
+      "context_volume"
+    ],
+    "outcomes": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-impact-recall",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          "hyperedge:authority-obligation:file:AGENTS.md:1b61f9e2a321",
+          "hyperedge:authority-obligation:file:mvp-build/authority-map.json:2cc915bac733",
+          "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:f4ffab670e92",
+          "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:6737eb4f5f67",
+          "hyperedge:authority-obligation:file:mvp-build/decision/README.md:bcae2ce9c63a",
+          "hyperedge:authority-obligation:file:mvp-build/decision/representation-contract.md:19a6bbdececd",
+          "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:3ce25668dcf2",
+          "hyperedge:authority-routing:authority-map:6e1610c8f591",
+          "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/decision-engine-contract.test.ts:75a3f1e42373"
+        ],
+        "observed": {
+          "passed": false,
+          "value": 9
+        },
+        "prediction_id": "prediction-invariant-coverage",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/AGENTS.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/ui-lab/README.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/authority-map.json"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/memory/MEMORY.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/STANDARD.md",
+            "file:mvp-build/memory/MEMORY.md"
+          ]
+        ],
+        "observed": {
+          "passed": false,
+          "value": 8
+        },
+        "prediction_id": "prediction-authority-consistency",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-evidence-nonpromotion",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "predictions": [
+      {
+        "claim": "Every changed source path is present in the generated impact frontier or explicitly recorded as discovered later.",
+        "context_hint_count": 1030,
+        "expected": 0,
+        "falsifier": "The final diff contains an uncovered path.",
+        "horizon": 1,
+        "id": "prediction-impact-recall",
+        "metric": "uncovered_changed_paths",
+        "type": "direct"
+      },
+      {
+        "claim": "Every hard invariant hyperedge touched by the change has an accepted proof obligation or an explicit blocker.",
+        "context_hint_count": 1030,
+        "expected": 0,
+        "falsifier": "A touched hard hyperedge has neither accepted evidence nor a blocker.",
+        "horizon": 2,
+        "id": "prediction-invariant-coverage",
+        "metric": "unresolved_hard_hyperedges",
+        "type": "verification"
+      },
+      {
+        "claim": "The change preserves one routed authority chain without a competing current-status owner.",
+        "context_hint_count": 1030,
+        "expected": 0,
+        "falsifier": "Authority verification finds a cycle, duplicate status owner, or stale active router.",
+        "horizon": 3,
+        "id": "prediction-authority-consistency",
+        "metric": "authority_errors",
+        "type": "architecture"
+      },
+      {
+        "claim": "The final handoff does not promote model, source, CI, or fixture evidence into an unearned external class.",
+        "context_hint_count": 1030,
+        "expected": 0,
+        "falsifier": "The evidence ledger claims a class stronger than its evidence.",
+        "horizon": 4,
+        "id": "prediction-evidence-nonpromotion",
+        "metric": "evidence_promotions",
+        "type": "production-system"
+      }
+    ],
+    "status": "finished",
+    "stop_conditions": [
+      "hard invariant violation",
+      "red exact-head gate",
+      "evidence-class promotion",
+      "unbounded patch scope"
+    ],
+    "task_id": "TRACE014-EFFECT-FRONTIER-BOUNDS-001"
+  },
+  "provenance": {
+    "chronology": "immutable root experiment retained in experiment.initial.json",
+    "generator": "decision/engine/repoctl.mjs"
+  },
+  "schema": "experiment.design.v1",
+  "source_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e"
+}

@@ -1,0 +1,126 @@
+{
+  "content_digest": "sha256:eacee35653d2777c0b7cddc536b13aab628c6e85ac37f10c5edf5433f5856880",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T09:12:28.927Z",
+  "payload": {
+    "base_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e",
+    "capsule_digest": "sha256:595019bd37004aecf5d9afb148daf94209ba9e6e1c6458d9277378c190999465",
+    "certificate_digest": "sha256:e0c8dc44044877387c7eb3ced69d7329ce95f9a6e73251fcd8b85f0692477ae2",
+    "correspondence_digest": "sha256:f30ea0ae3f3fce13e8df2411336ffd72f13b2f9df286d807fd2b789dd4e7db22",
+    "evidence_ledger_digest": "sha256:3da155a67b4821d90ad045147f79e6de9d8164fdaf856f03fa216e060a129957",
+    "experiment_digest": "sha256:01094a32e875f8c16533bfb0231a33f6c53919a291a39e0834493b9d8977f6c7",
+    "external_blockers": [
+      "No P4 production, provider, or deployment acceptance is involved in this compiler repair."
+    ],
+    "final_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e",
+    "maximum_evidence_class": "P3",
+    "outcome_calibration": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-impact-recall",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          "hyperedge:authority-obligation:file:AGENTS.md:1b61f9e2a321",
+          "hyperedge:authority-obligation:file:mvp-build/authority-map.json:2cc915bac733",
+          "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:f4ffab670e92",
+          "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:6737eb4f5f67",
+          "hyperedge:authority-obligation:file:mvp-build/decision/README.md:bcae2ce9c63a",
+          "hyperedge:authority-obligation:file:mvp-build/decision/representation-contract.md:19a6bbdececd",
+          "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:3ce25668dcf2",
+          "hyperedge:authority-routing:authority-map:6e1610c8f591",
+          "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/decision-engine-contract.test.ts:75a3f1e42373"
+        ],
+        "observed": {
+          "passed": false,
+          "value": 9
+        },
+        "prediction_id": "prediction-invariant-coverage",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/AGENTS.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/ui-lab/README.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/authority-map.json"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/memory/MEMORY.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/STANDARD.md",
+            "file:mvp-build/memory/MEMORY.md"
+          ]
+        ],
+        "observed": {
+          "passed": false,
+          "value": 8
+        },
+        "prediction_id": "prediction-authority-consistency",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-evidence-nonpromotion",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "plan_admission_digest": "sha256:307cc97ff25b0c2d770f53790adfad499686f0d36671ba4a3e672edeb17d6e03",
+    "status": "finished",
+    "task_id": "TRACE014-EFFECT-FRONTIER-BOUNDS-001"
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs finish"
+  },
+  "schema": "experiment.transaction.v1",
+  "source_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e"
+}

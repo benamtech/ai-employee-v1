@@ -1,0 +1,135 @@
+{
+  "schema": "amtech.generated-full-stack-matrix.v1",
+  "task_id": "TRACE015-GENERATED-BESPOKE-SOFTWARE-001",
+  "mode": "model-authored draft proposals validated by repository authority before promotion",
+  "verticals": [
+    {
+      "id": "contractor_office",
+      "draft_status": "P0 proposal",
+      "generated_stack": [
+        "business profile",
+        "employee/swarm roles",
+        "work graph",
+        "bespoke UI variant concept",
+        "connector/capability needs",
+        "approval/effect/proof/recovery obligations",
+        "owner-safe value copy"
+      ],
+      "primary_axes": [
+        "lead_intake",
+        "estimating_quoting",
+        "scheduling_dispatch",
+        "customer_comm"
+      ],
+      "promotion_gate": "schema validation, human review, repoctl plan admission, exact tests, then external P4 only where actually observed"
+    },
+    {
+      "id": "clothing_ecommerce_ops",
+      "draft_status": "P0 proposal",
+      "generated_stack": [
+        "business profile",
+        "employee/swarm roles",
+        "work graph",
+        "bespoke UI variant concept",
+        "connector/capability needs",
+        "approval/effect/proof/recovery obligations",
+        "owner-safe value copy"
+      ],
+      "primary_axes": [
+        "estimating_quoting",
+        "scheduling_dispatch",
+        "customer_comm",
+        "backoffice_books"
+      ],
+      "promotion_gate": "schema validation, human review, repoctl plan admission, exact tests, then external P4 only where actually observed"
+    },
+    {
+      "id": "bookkeeping_admin",
+      "draft_status": "P0 proposal",
+      "generated_stack": [
+        "business profile",
+        "employee/swarm roles",
+        "work graph",
+        "bespoke UI variant concept",
+        "connector/capability needs",
+        "approval/effect/proof/recovery obligations",
+        "owner-safe value copy"
+      ],
+      "primary_axes": [
+        "scheduling_dispatch",
+        "customer_comm",
+        "backoffice_books",
+        "procurement_inventory"
+      ],
+      "promotion_gate": "schema validation, human review, repoctl plan admission, exact tests, then external P4 only where actually observed"
+    },
+    {
+      "id": "marketing_creative_agency",
+      "draft_status": "P0 proposal",
+      "generated_stack": [
+        "business profile",
+        "employee/swarm roles",
+        "work graph",
+        "bespoke UI variant concept",
+        "connector/capability needs",
+        "approval/effect/proof/recovery obligations",
+        "owner-safe value copy"
+      ],
+      "primary_axes": [
+        "lead_intake",
+        "estimating_quoting",
+        "scheduling_dispatch",
+        "customer_comm"
+      ],
+      "promotion_gate": "schema validation, human review, repoctl plan admission, exact tests, then external P4 only where actually observed"
+    },
+    {
+      "id": "personal_operator_brain",
+      "draft_status": "P0 proposal",
+      "generated_stack": [
+        "business profile",
+        "employee/swarm roles",
+        "work graph",
+        "bespoke UI variant concept",
+        "connector/capability needs",
+        "approval/effect/proof/recovery obligations",
+        "owner-safe value copy"
+      ],
+      "primary_axes": [
+        "estimating_quoting",
+        "scheduling_dispatch",
+        "customer_comm",
+        "backoffice_books"
+      ],
+      "promotion_gate": "schema validation, human review, repoctl plan admission, exact tests, then external P4 only where actually observed"
+    },
+    {
+      "id": "local_service_generalist",
+      "draft_status": "P0 proposal",
+      "generated_stack": [
+        "business profile",
+        "employee/swarm roles",
+        "work graph",
+        "bespoke UI variant concept",
+        "connector/capability needs",
+        "approval/effect/proof/recovery obligations",
+        "owner-safe value copy"
+      ],
+      "primary_axes": [
+        "scheduling_dispatch",
+        "customer_comm",
+        "backoffice_books",
+        "procurement_inventory"
+      ],
+      "promotion_gate": "schema validation, human review, repoctl plan admission, exact tests, then external P4 only where actually observed"
+    }
+  ],
+  "validators_required": [
+    "ui-variant doctor",
+    "connector manifest validator",
+    "authority/effect policy validator",
+    "proof obligation ledger",
+    "browser fixture evidence",
+    "human visual/accessibility review"
+  ]
+}

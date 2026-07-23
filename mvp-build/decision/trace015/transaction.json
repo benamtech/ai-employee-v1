@@ -1,0 +1,132 @@
+{
+  "content_digest": "sha256:7970d00bcdb473cfd5cd80119c8c4054ec65853f831a4dadf5aa8afcd4436246",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-23T09:18:35.752Z",
+  "payload": {
+    "base_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e",
+    "capsule_digest": "sha256:e5ae210d9e91f6b406433addf07b9c7466c5c92c30bf8a9e210bcb0da0ae26de",
+    "certificate_digest": "sha256:bb750cbcab2ace9dfef931b0f4ad0b7b96e0373162febab6eab0bb9b71969be9",
+    "correspondence_digest": "sha256:7d8e064300aa00d30a226fb2ef54348191e9c9d74f5b9e805d985e797a4de03a",
+    "evidence_ledger_digest": "sha256:658010fbf7be648e00c13914e6ad5f9ff6b7bdabd42e817d4e6e1e98cf587ce3",
+    "experiment_digest": "sha256:fe1131f2b7520f0fa95d76485e1e3412c9d0b52eaa5ad0e2b20fc949e4f3c540",
+    "external_blockers": [
+      "managed database",
+      "live provider",
+      "target host",
+      "human accessibility",
+      "pilot",
+      "deployment",
+      "production"
+    ],
+    "final_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e",
+    "maximum_evidence_class": "P3",
+    "outcome_calibration": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-impact-recall",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          "hyperedge:authority-obligation:file:AGENTS.md:1b61f9e2a321",
+          "hyperedge:authority-obligation:file:mvp-build/authority-map.json:2cc915bac733",
+          "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:f4ffab670e92",
+          "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:6737eb4f5f67",
+          "hyperedge:authority-obligation:file:mvp-build/decision/README.md:bcae2ce9c63a",
+          "hyperedge:authority-obligation:file:mvp-build/decision/representation-contract.md:19a6bbdececd",
+          "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:3ce25668dcf2",
+          "hyperedge:authority-routing:authority-map:6e1610c8f591",
+          "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/decision-engine-contract.test.ts:75a3f1e42373"
+        ],
+        "observed": {
+          "passed": false,
+          "value": 9
+        },
+        "prediction_id": "prediction-invariant-coverage",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/AGENTS.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/AGENTS.md",
+            "file:mvp-build/ui-lab/README.md",
+            "file:mvp-build/ui-lab/README.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:AGENTS.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/authority-map.json"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/memory/MEMORY.md"
+          ],
+          [
+            "file:AGENTS.md",
+            "file:mvp-build/memory/MEMORY.md",
+            "file:mvp-build/authority-map.json",
+            "file:mvp-build/STANDARD.md",
+            "file:mvp-build/memory/MEMORY.md"
+          ]
+        ],
+        "observed": {
+          "passed": false,
+          "value": 8
+        },
+        "prediction_id": "prediction-authority-consistency",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": true,
+          "value": 0
+        },
+        "prediction_id": "prediction-evidence-nonpromotion",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "plan_admission_digest": "sha256:2341cffbc5e0cb4ed11afdccf62455b762d11c542321dadd4ae2e3f9fccb0113",
+    "status": "finished",
+    "task_id": "TRACE015-GENERATED-BESPOKE-SOFTWARE-001"
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs finish"
+  },
+  "schema": "experiment.transaction.v1",
+  "source_sha": "ed0cd4b876149210193faa406aa7def41ba4f58e"
+}
