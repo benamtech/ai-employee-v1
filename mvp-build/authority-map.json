@@ -4,14 +4,13 @@
   "updated_at": "2026-07-23",
   "self": {
     "path": "mvp-build/authority-map.json",
-    "last_reconciliation": "PR40 stack, active-document, and machine-native representation cleanup",
-    "rule": "This file routes authority; it does not promote an evidence class or duplicate transient workflow conclusions."
+    "last_reconciliation": "Trace013 repository-native experiment compiler implementation",
+    "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions."
   },
   "exact_status": {
     "owner": "mvp-build/CODEGRAPH.md",
     "transient_acceptance": "GitHub Actions and retained release records",
-    "pull_request_record": "the current cumulative integration pull request",
-    "rule": "Exact SHA, run number, and conclusion belong to the PR or retained release record."
+    "pull_request_record": "the current cumulative integration pull request"
   },
   "normative": [
     "mvp-build/STANDARD.md",
@@ -19,7 +18,8 @@
   ],
   "agent_entry": [
     "AGENTS.md",
-    "mvp-build/AGENTS.md"
+    "mvp-build/AGENTS.md",
+    "mvp-build/decision/engine/repoctl.mjs"
   ],
   "active_plan": [
     "mvp-build/production-readiness-program/README.md",
@@ -31,37 +31,35 @@
     "router": "mvp-build/decision/active.json",
     "protocol": "mvp-build/decision/protocol-v1.json",
     "human_method": "mvp-build/decision/README.md",
-    "machine_native_representation_contract": "mvp-build/decision/representation-contract.md",
-    "latest_completed_trace": "mvp-build/decision/trace012/",
-    "next_trace_reserved": "mvp-build/decision/trace013/",
-    "next_trace_state": "not_created; begin only on the next branch with fresh authority extraction and computation"
+    "representation_contract": "mvp-build/decision/representation-contract.md",
+    "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
+    "representation_registry": "mvp-build/decision/engine/representation-registry.json",
+    "active_trace": "mvp-build/decision/trace013/",
+    "latest_completed_before_active": "mvp-build/decision/trace012/"
   },
   "proof_classes": {
-    "P0": "representation calculation, score, embedding, mode, or simulation",
-    "P1": "formal model-property proof or machine-checkable certificate, including valid eigenstructure",
-    "P2": "representation-to-source/runtime fidelity proof",
-    "P3": "exact-candidate executable software proof",
+    "P0": "representation calculation, score, embedding, diffusion, mode, or simulation",
+    "P1": "machine-verified property of an explicit formal model, including valid eigenstructure",
+    "P2": "verified representation-to-repository correspondence",
+    "P3": "exact-candidate executable software evidence",
     "P4": "external, deployment, pilot, or production acceptance",
-    "correspondence_rule": "A stronger formal certificate may satisfy a software gate only when the gate defines and verifies the required model-to-system correspondence; no class is demoted and no class silently expands."
+    "correspondence_rule": "No class silently promotes itself. A P1 certificate may satisfy a software gate only when verified P2 correspondence makes that implication sound."
   },
   "representation_policy": {
-    "natural_language": "interoperability_and_audit_layer_not_mandatory_reasoning_substrate",
-    "first_class": [
-      "vectors",
-      "matrices",
-      "tensors",
-      "embeddings",
-      "graphs",
-      "hypergraphs",
-      "incidence_operators",
-      "spectral_objects",
-      "geometric_and_topological_structures",
-      "transition_systems",
-      "formal_constraints_and_proof_terms",
-      "state_space_and_operator_models",
-      "executable_schemas"
+    "natural_language": "generated_interoperability_review_and_audit_view_not_mandatory_reasoning_substrate",
+    "always_on": [
+      "repo.fact.v1",
+      "authority.dag.v1",
+      "dependency.graph.v1",
+      "invariant.hypergraph.v1",
+      "correspondence.v1",
+      "task.diffusion.v1",
+      "effect.frontier.v1",
+      "experiment.design.v1"
     ],
-    "retention_rule": "Retained artifacts expose generator, dimensions, provenance, assumptions, transformations, tolerances, validation, proof class, and a compact language bridge."
+    "specialized_first": "spectral.hypergraph.v1",
+    "selector": "mvp-build/decision/engine/representation-registry.json",
+    "retention_rule": "Artifacts expose generator, digests, dimensions, provenance, assumptions, transformations, parameters, validation, proof class, excluded claims, and compact language bridge."
   },
   "current_trace_roles": {
     "trace007": "commercial/effect production transaction and computation baseline",
@@ -69,7 +67,8 @@
     "trace009": "UI projection architecture search and calibration",
     "trace010": "connector operating substrate",
     "trace011": "employee UI port and presentation adapters",
-    "trace012": "UI Lab and folder-first UI variant standard"
+    "trace012": "UI Lab and folder-first UI variant standard",
+    "trace013": "repository-native software experiment compiler"
   },
   "architecture": "mvp-build/docs/architecture/",
   "memory": {
@@ -83,35 +82,22 @@
     "complete prior decision traces"
   ],
   "evidence_order": [
-    "formal_property_and_correspondence_proof_when_applicable",
-    "deployed_release_proof",
-    "applied_durable_state",
-    "committed_source_and_configuration",
-    "exact_candidate_executable_evidence",
-    "ratified_standard_and_active_program",
+    "P1_formal_model_property",
+    "P2_representation_fidelity",
+    "P3_executable_candidate",
+    "P4_external_acceptance",
+    "ratified_requirements_and_active_program",
     "current_topology_and_architecture",
     "indexed_memory",
     "historical_records"
   ],
   "nonpromotion": [
-    "representation_calculation",
-    "formal_model_property",
-    "representation_fidelity",
-    "decision",
-    "documentation",
-    "source",
-    "unit",
-    "integration",
-    "ci",
-    "managed_database",
-    "connector_provider",
-    "target_host",
-    "browser_channel_accessibility",
-    "commercial",
-    "recovery",
-    "trusted_signed_release",
-    "pilot",
-    "deployment",
-    "production"
+    "P0_to_P1",
+    "P1_to_P2",
+    "P2_to_P3",
+    "P3_to_P4",
+    "documentation_to_source",
+    "source_to_ci",
+    "ci_to_external_acceptance"
   ]
 }
