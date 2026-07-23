@@ -1,0 +1,64 @@
+{
+  "schema": "amtech.authority-map.v1",
+  "status": "active_router",
+  "updated_at": "2026-07-23",
+  "self": {
+    "path": "mvp-build/authority-map.json",
+    "last_reconciliation": "Trace013 experiment compiler completion and stack readiness",
+    "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions."
+  },
+  "exact_status": {
+    "owner": "mvp-build/CODEGRAPH.md",
+    "transient_acceptance": "GitHub Actions and retained release records",
+    "pull_request_record": "the current cumulative integration pull request"
+  },
+  "normative": ["mvp-build/STANDARD.md", "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"],
+  "agent_entry": ["AGENTS.md", "mvp-build/AGENTS.md", "mvp-build/decision/engine/repoctl.mjs"],
+  "active_plan": [
+    "mvp-build/production-readiness-program/README.md",
+    "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
+    "mvp-build/production-readiness-program/09-workstream-execution-map.md",
+    "mvp-build/production-readiness-program/13-resolution-ledger.json"
+  ],
+  "decision": {
+    "router": "mvp-build/decision/active.json",
+    "protocol": "mvp-build/decision/protocol-v1.json",
+    "human_method": "mvp-build/decision/README.md",
+    "representation_contract": "mvp-build/decision/representation-contract.md",
+    "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
+    "representation_registry": "mvp-build/decision/engine/representation-registry.json",
+    "latest_completed_trace": "mvp-build/decision/trace013/",
+    "next_trace_reserved": "mvp-build/decision/trace014/",
+    "next_trace_state": "not_created"
+  },
+  "proof_classes": {
+    "P0": "representation calculation or hypothesis",
+    "P1": "machine-verified property of an explicit formal model",
+    "P2": "verified representation-to-repository correspondence",
+    "P3": "exact-candidate executable software evidence",
+    "P4": "external, deployment, pilot, or production acceptance",
+    "rule": "No class silently promotes itself."
+  },
+  "representation_policy": {
+    "natural_language": "generated_interoperability_review_and_audit_view_not_mandatory_reasoning_substrate",
+    "always_on": ["repo.fact.v1", "authority.dag.v1", "dependency.graph.v1", "invariant.hypergraph.v1", "correspondence.v1", "task.diffusion.v1", "effect.frontier.v1", "experiment.design.v1"],
+    "specialized_first": "spectral.hypergraph.v1",
+    "selector": "mvp-build/decision/engine/representation-registry.json"
+  },
+  "current_trace_roles": {
+    "trace007": "commercial/effect authority and computation baseline",
+    "trace008": "release, recovery, and capacity groundwork",
+    "trace009": "UI projection architecture search and calibration",
+    "trace010": "connector operating substrate",
+    "trace011": "employee UI port and presentation adapters",
+    "trace012": "UI Lab and folder-first UI variant standard",
+    "trace013": "repository-native software experiment compiler"
+  },
+  "architecture": "mvp-build/docs/architecture/",
+  "memory": {
+    "index": "mvp-build/memory/MEMORY.md",
+    "latest": "mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md"
+  },
+  "historical": ["mvp-build/second-half-plan/", "mvp-build/GAPS.md", "mvp-build/REMEDIATION.md", "complete prior decision traces"],
+  "nonpromotion": ["P0_to_P1", "P1_to_P2", "P2_to_P3", "P3_to_P4", "documentation_to_source", "source_to_ci", "ci_to_external_acceptance"]
+}

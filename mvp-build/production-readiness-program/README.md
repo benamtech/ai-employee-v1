@@ -1,112 +1,75 @@
 # AMTECH Production Readiness Program
 
 Status: **active and canonical**  
-Updated: 2026-07-20
+Updated: 2026-07-23  
+Structural status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Decision state: [`../decision/active.json`](../decision/active.json)
 
-This directory is the single active production-readiness route. Current structural status lives in [`../CODEGRAPH.md`](../CODEGRAPH.md); exact transient candidate conclusions live in workflow or release records. Historical plans and audits are provenance only.
+This is the single active production-readiness route. Exact candidate conclusions belong to the current PR, workflows, or retained release records. Historical plans, audits, completed traces, and ancestor results remain provenance only.
 
 ## Authority
 
 ```text
-deployed release proof
-→ applied durable state
-→ committed executable source and configuration
-→ exact-candidate executable evidence
-→ ratified Standard and this program
-→ current topology and architecture
-→ indexed memory
-→ historical records
+P0 representation calculation
+P1 verified formal-model property
+P2 verified representation correspondence
+P3 exact-candidate executable evidence
+P4 external or production acceptance
 ```
 
-Decision computation is below implementation and acceptance evidence. It may change what is attempted; it cannot establish what passed.
+No class silently promotes itself. Provider and connector adapters do not create authority. Manager remains the authority plane; Hermes is the reasoning/runtime substrate; all UI and protocol surfaces are bounded projections.
 
-## Execution method
+## Current position
 
-Use [`../decision/README.md`](../decision/README.md):
+The cumulative source candidate includes typed Manager authority, migrations through `0082`, connector and commercial substrates, release/recovery machinery, the production owner projection, employee UI adapters, UI Lab, folder-first variants, and Trace013’s repository-native software experiment compiler.
 
-```text
-authority/evidence/Unknown extraction
-→ independent candidate batches
-→ invariant/prerequisite filter
-→ explicit evidence-and-invariants baseline
-→ candidate search graph when useful
-→ software invariant hypergraph when useful
-→ equal-feasibility controls
-→ search and weight sensitivity
-→ separate implementation compression
-→ complete behavioral proof plan
-→ implementation and exact verification
-```
-
-Candidate topology and software topology are distinct. Mandatory coverage is a feasibility constraint, not an objective bonus. Without implementation-level outcome ablation, graph terms are descriptive and diversity is at most selection-influencing.
-
-## Product target
-
-AMTECH installs governed persistent AI Employees. The owner experience preserves exact account, employee, assignment, current authority, entitlement, request/work revision, approval, shared rate/budget admission, command/effect, provider receipt, accounting receipt, recovery, output, and proof identity.
-
-Manager is the authority plane and compiles from committed typed source. Hermes is the reasoning/runtime substrate. Web, SMS, signed Review, MCP, MCP Apps, and AG-UI are bounded projections. Provider and connector adapters do not create authority.
+Trace013 is completed. `decision/active.json` records no open transaction. Trace014 begins only on a new post-merge branch via `repoctl start`.
 
 ## Program route
 
-1. `04-dependency-ordered-production-plan.md` — dependency order.
+1. `04-dependency-ordered-production-plan.md` — dependency order and stack checkpoint.
 2. `08-production-issue-vector.json` — issue baseline.
-3. `13-resolution-ledger.json` — current resolution/control state.
+3. `13-resolution-ledger.json` — resolution/control state.
 4. `09-workstream-execution-map.md` — completion and stop contracts.
-5. `20-ws06-ws08-commercial-effect-transaction.md` — current source transaction.
+5. `20-ws06-ws08-commercial-effect-transaction.md` — durable effect/recovery transaction.
 6. `10-test-suite-disposition.md` — test/evidence authority.
 7. `07-verification-and-handoff-matrix.md` — evidence and handoff boundary.
-8. `../decision/trace007/` — candidate matrix, split topology, controls, implementation compression, and proof plan.
-9. current source, immutable migrations, tests, workflows, proof, and newest indexed memory.
+8. `../decision/active.json` — transaction router.
+9. `../decision/README.md` — executable experiment protocol.
+10. `../decision/engine/` — generators, representations, certificates, task capsules, and trusted verifiers.
+11. `../decision/trace007/` through `../decision/trace013/` — completed scoped decisions.
+12. current source, immutable migrations, tests, workflows, proof, and newest indexed memory.
 
-Historical WS-02/03 records remain available for provenance but do not override newer exact source or evidence.
-
-## Current source transaction
-
-WS-01 through WS-07 now converge on one locally reproducible production boundary:
-
-```text
-committed typed Manager source
-→ exact account/employee/assignment/current-authority interception
-→ scoped snapshot and stream projection
-→ finite Model Gateway request economics
-→ database-owned rate and budget admission
-→ one command/effect/provider identity
-→ durable accepted/failed/ambiguous settlement
-→ effect-bound accounting and conservation
-→ exact output and repairable proof
-```
-
-Forward migrations through the source-derived head preserve immutable history. Caller metadata cannot shard shared rate authority or redefine replay identity.
-
-## Current trace contract
-
-Trace007 retains 64 independently batched candidates and a six-trajectory implementation transaction, but its mathematical status is deliberately narrow:
+## Current integration checkpoint
 
 ```text
-candidate graph terms: descriptive
-software invariant graph terms: descriptive
-diversity terms: descriptive or selection-influencing
-causal improvement: unestablished
+verify final PR #40 head
+→ merge PR #40 into PR #35 branch
+→ verify cumulative PR #35 head
+→ merge PR #35 into PR #34 branch
+→ verify cumulative PR #34 head
+→ leave PR #34 as the single ready-to-review integration into main
 ```
 
-`candidate_graph.json` supports search diversity, lineage, and redundancy. `software_invariant_hypergraph.json` alone computes software `touch`, `fractional`, `complete`, and `proved` coverage. `implementation_ablation.json` is the only route to a causal claim.
+No ancestor workflow certifies a descendant merge commit.
+
+## Open P4 gates
+
+- managed platform migration, security, backup, restore, and rollback;
+- live OAuth/MCP/provider authorization, idempotency, response-loss, revoke, outage, and repair;
+- target-host secrets, two-employee isolation, destructive recovery, and trusted signing;
+- fixture-free Web/SMS/Review convergence and provider-backed golden work;
+- supported browsers, human visual/accessibility, representative capacity, and fairness;
+- controlled pilot, deployment, and production.
 
 ## Stop rules
 
-- Do not implement before the applicable decision record is valid.
-- Do not use a lower tier to evade risk or prerequisites.
-- Do not compare controls from different feasible domains.
-- Do not call a ranking difference causal improvement.
+- Run `repoctl start` before non-mechanical source edits.
 - Do not weaken tests for green.
-- Do not infer authority or acceptance from filenames, dates, fixtures, UI labels, scores, source wiring, workflow names, or stale prose.
-- Preserve exact account/employee/assignment/authority/revision/commercial/effect identity across snapshot, stream, reconnect, retry, output, accounting, and proof.
-- Shared rate and budget authority cannot be process-local or caller-sharded.
-- Accepted provider success requires matching effect and accounting receipts.
-- Ambiguous outcomes reconcile the original effect identity before retry.
-- Repair cannot erase accepted effects or invent completion.
-- Fixture state cannot satisfy fixture-free acceptance.
-- Do not claim a stronger evidence class without exact proof on the claimed candidate.
-
-## Resolved source liability
-
-String-based production server generation and patching has been removed. `apps/manager/src/server.ts` is the canonical typed source, and structural governance rejects the deleted mutation chain and generated entrypoints. This resolves source composition only; it does not establish target-host, provider, managed, pilot, deployment, or production acceptance.
+- Do not hand-author representations or weights to justify an intended patch.
+- Do not demote valid formal proof of its exact property.
+- Do not promote P1/P2/P3 into P4 without the missing evidence.
+- Unknown is not zero.
+- Ambiguous effects reconcile original identity before retry.
+- Repair cannot erase accepted work or invent completion.
+- Fixtures cannot satisfy fixture-free acceptance.

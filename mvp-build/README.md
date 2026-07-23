@@ -1,90 +1,85 @@
 # mvp-build — AMTECH AI Employee
 
 Status: active implementation home  
-Updated: 2026-07-20
+Updated: 2026-07-23
 
-This directory contains the executable product: Manager, Hermes integration, owner web surface, PostgreSQL authority, connectors, Model Gateway, commercial/effect state, provisioning, deployment, tests, decision traces, memory, and release proof.
+This directory contains the executable product and its repository-native software experiment compiler.
 
-Exact branch, candidate, migration, workstream, and acceptance status lives in [`CODEGRAPH.md`](CODEGRAPH.md).
+Current structural status lives in [`CODEGRAPH.md`](CODEGRAPH.md). Exact transient SHA, workflow run, and conclusion live in the current PR, workflows, or retained release records.
 
-## Contributor route
+## Agent route
 
 ```text
-../AGENTS.md + ../CONTRIBUTING.md
-→ AGENTS.md + CODEGRAPH.md
-→ STANDARD.md + ratified amendments
-→ decision/README.md
-→ production-readiness-program/README.md
-→ current transaction
-→ exact source, tests, workflows, and proof
+../identity.md
+→ ../AGENTS.md + AGENTS.md
+→ authority-map.json + CODEGRAPH.md
+→ STANDARD.md and amendments
+→ decision/active.json
+→ decision/engine/repoctl.mjs
+→ generated task capsule
+→ admitted plan
+→ exact source, tests, workflows, and evidence
 ```
 
+For every non-mechanical task, create `task.json` and run:
+
 ```bash
-npm ci
-npm run hooks:install
-npm run repo:verify:quick
+node decision/engine/repoctl.mjs start --task task.json --out decision/<trace-or-transaction>
 ```
+
+Then admit the plan before source edits, evaluate after implementation, and finish the transaction. The same interface works for Claude Code, Codex, Cursor, Pi, local models, deterministic scripts, humans, and future agents.
+
+For UI Lab or full UI-variant work, begin at [`ui-lab/README.md`](ui-lab/README.md) after the task capsule is generated.
 
 ## Product boundary
 
 - **Hermes:** reasoning, runs, sessions, runtime-local memory, and tool execution.
-- **Manager:** identity, assignment authority, capability/tool contracts, connector/provider custody, approvals, durable effects, shared commercial admission/accounting, reconciliation, repair, and proof.
-- **Web/SMS/signed Review/MCP Apps/AG-UI:** bounded projections.
+- **Manager:** identity, assignment authority, capabilities, connector/provider custody, approvals, durable effects, commercial admission/accounting, reconciliation, repair, and proof.
+- **Web/SMS/signed Review/MCP Apps/AG-UI/UI Lab/UI variants:** bounded projections.
 - **PostgreSQL/Supabase:** shared durable identity, rate, budget, effect, receipt, accounting, lineage, and reconciliation authority.
+- **Host Provisioner:** sole Docker and target-host lifecycle authority.
 
-## Canonical transaction
+Provider and connector adapters do not create authority.
+
+## Proof and evidence
 
 ```text
-exact principal and assignment
-→ immutable request/work revision
-→ current capability and approval
-→ atomic shared rate/budget admission
-→ one command/effect + provider idempotency identity
-→ accepted | failed | ambiguous receipt
-→ effect-bound accounting
-→ output and owner proof
-→ original-effect reconciliation or projection repair
+P0 representation calculation
+P1 verified formal-model property
+P2 verified representation correspondence
+P3 exact-candidate executable evidence
+P4 external/production acceptance
 ```
 
-## Active authority
+No class silently promotes itself.
 
-- [`STANDARD.md`](STANDARD.md) plus ratified amendments — normative requirements.
-- [`decision/README.md`](decision/README.md) — computation protocol.
-- [`decision/trace007/`](decision/trace007/) — current decision trace; candidate and software topology are separate.
-- [`production-readiness-program/`](production-readiness-program/) — single active production route.
-- [`docs/architecture/`](docs/architecture/) — source-backed explanation.
-- [`memory/MEMORY.md`](memory/MEMORY.md) — sole handoff index.
-- [`second-half-plan/`](second-half-plan/), `GAPS.md`, and `REMEDIATION.md` — historical provenance only.
-
-## Verification entrypoints
+## Core verification
 
 ```bash
-python decision/trace007/compute.py
-npm run test:ws07-ws08
-npm run db:verify:commercial-effect-migrations
-npm run test:production-boundary
-npm run repo:verify:quick
+node decision/trace013/compute.mjs
+node decision/engine/repoctl.mjs doctor
+node decision/engine/repoctl.mjs self-test
+node decision/trace013/retrospective_benchmark.mjs
+npm run repo:agentic:check
 npm run repo:verify:full
 npm run test:unit
 npm run test:integration
 npm run build
+node scripts/ui-variant.mjs doctor
 ```
 
-Each command proves only the boundary and exact candidate it exercises. Missing managed database, provider, browser/channel, target-host, commercial, signed-release, pilot, or production prerequisites remain blocked rather than mocked into acceptance.
+Each command proves only its exact boundary and candidate. Managed database, live provider, browser/accessibility, target-host, commercial lifecycle, recovery rehearsal, trusted signing, pilot, deployment, and production remain separate unless explicitly verified.
 
-## Directory map
+## Active authority
 
-```text
-apps/web/                       owner operating environment and public surfaces
-apps/manager/                   authority, runtime, connectors, effects, commercial state, repair, proof
-packages/shared/                contracts and connector/capability manifests
-packages/db/                    forward migrations, clients, generated types
-infra/                          topology, deploy, lifecycle, acceptance, release operations
-tests/                          behavioral unit, PostgreSQL integration, browser matrices
-decision/                       protocol and computed traces
-validation/                     Standard evolution, rubric, upstream, evidence artifacts
-docs/architecture/              current explanatory architecture
-memory/                         durable handoffs; MEMORY.md is sole index
-production-readiness-program/   single active production route
-second-half-plan/               historical plans
-```
+- `authority-map.json` — machine router.
+- `CODEGRAPH.md` — sole current structural-status owner.
+- `STANDARD.md` plus amendments — normative requirements.
+- `decision/active.json` — current/no-open transaction router.
+- `decision/engine/` — executable experiment compiler.
+- `decision/trace013/` — completed compiler implementation record.
+- `production-readiness-program/` — single active production route.
+- `memory/MEMORY.md` — handoff index.
+- `second-half-plan/`, `GAPS.md`, and `REMEDIATION.md` — historical provenance.
+
+Trace014 is reserved for the first new task on a post-merge branch and does not yet exist.

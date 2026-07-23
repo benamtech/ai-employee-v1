@@ -1,170 +1,104 @@
 # Dependency-Ordered Production Roadmap
 
 Status: **active execution order**  
-Exact candidate and migration status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
-Decision protocol: [`../decision/README.md`](../decision/README.md)
+Updated: 2026-07-23  
+Exact structural status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Decision router: [`../decision/active.json`](../decision/active.json)
 
-This is the sole active roadmap. Issue state lives in `08-production-issue-vector.json` and `13-resolution-ledger.json`; workstream exits live in `09-workstream-execution-map.md`; test/evidence authority lives in `10-test-suite-disposition.md` and `07-verification-and-handoff-matrix.md`.
+## Current checkpoint
 
-## Workstream decision rule
+The locally and CI-provable source portions of WS-01 through WS-09 are integrated in the cumulative candidate. Trace013 adds the executable experiment compiler and closes the repository’s prompt-only methodology gap.
+
+Current order:
 
 ```text
-authority/evidence/Unknown extraction
-→ independent candidate batches
-→ invariant/prerequisite filter
-→ simple evidence-and-invariants baseline
-→ candidate and software topology when useful
-→ equal-feasibility controls
-→ search and weight sensitivity
-→ implementation compression
-→ complete behavioral proof plan
-→ implementation and exact verification
+final PR #40 exact-head verification
+→ merge into PR #35 branch and reverify
+→ merge into PR #34 branch and reverify
+→ present PR #34 for user merge to main
+→ create a new branch
+→ repoctl start opens Trace014
+→ managed database and external acceptance work
 ```
-
-A workstream map is not a candidate population. A score is not a patch list. Candidate-edge touch is not software completion. Without implementation-level ablation, mathematics remains descriptive or selection-influencing.
 
 ## Dependency spine
 
 ```text
-WS-01 repository/test/document truth
+WS-01 repository/test/document/experiment truth
 → WS-02 connector and protocol authority
 → WS-03 database authority
 → WS-04 target-host/runtime custody
 → WS-05 fixture-free owner/channels
 → WS-06 golden governed work
-↘ WS-07 commercial/rate/provider ambiguity
-→ WS-08 crash/rollback/observability/signed release
+↘ WS-07 commercial/provider ambiguity
+→ WS-08 repair/rollback/observability/release
 → WS-09 human surface/capacity/pilot
-→ frozen release candidate
+→ frozen candidate
 → controlled pilot
 → measured expansion
 ```
 
-No workstream inherits evidence from another SHA. Downstream preparation is allowed only when it cannot bypass a red prerequisite and is not claimed accepted early.
+## WS-01 — Repository, experiment, and document truth
 
-## WS-01 — Repository, test, and document truth
+Delivered:
 
-Deliver:
+- one exact-status owner and machine authority router;
+- repository-native fact extraction and registered representation dialects;
+- P1 certificate and P2 correspondence verifiers;
+- task capsules, predictions, plan admission, impact coverage, evidence ledgers, and finish verification;
+- six-case retrospective benchmark;
+- structural governance and broad exact-head gates.
 
-- one repository contract, one product contract, short compatibility routers;
-- one exact-status owner: `mvp-build/CODEGRAPH.md`;
-- one Standard family, one decision protocol, one active program, one memory index;
-- structural governance based on schemas, references, authority, evidence class, and reproducibility rather than pinned prose or counts;
-- exact-head broad gates without weakened assertions.
-
-Exit: active authority is unambiguous, stale entrypoints are historical routers, trace semantics are valid, and exact-head governance/broad checks pass.
+Exit: one exact-green cumulative PR targets `main`, with active documents and memory agreeing.
 
 ## WS-02 — Connector and protocol authority
 
-Deliver:
+Source contracts cover issuer/resource/scope/PKCE/custody, effective capability, discovery, guided setup, revoke/reconnect, MCP Apps, and exact conversational decisions.
 
-- Manager-owned issuer/resource/scope/redirect/PKCE/state/token custody;
-- default-deny consequential MCP execution;
-- content-bound MCP Apps and bounded host actions;
-- effective capability as the intersection of advertisement, runtime, dependencies, credentials, network, assignment, entitlement, health, freshness, and live probe;
-- role-safe AG-UI after durable truth exists;
-- live connector setup, scope change, revocation, outage, repair, and deletion.
-
-Exit: unknown or stale capability fails closed; browser/model cannot select provider authority; required live protocol lifecycle passes.
+Still required: live authorization, refresh/expiry, revocation, outage, repair, deletion, and remote conformance.
 
 ## WS-03 — Database authority
 
-Deliver:
+Source/local evidence covers the immutable ledger through `0082`, RLS, grants, functions, isolation, concurrency, rate/budget, ambiguity, and receipt chains.
 
-- blank forward migration ledger through the source head;
-- deterministic hashes and existing-row/backfill compatibility;
-- RLS, grants, security-definer, and negative-isolation matrices;
-- claim/lease/CAS/replay/authority/reservation/ambiguity concurrency proof;
-- applicable disposable managed-platform and rollback evidence.
+Still required: disposable managed application, advisors, existing-row behavior, backup/restore, and rollback.
 
-Exit: local/CI PostgreSQL and required managed-platform gates pass; applied migrations remain immutable.
+## WS-04 — Target-host custody
 
-## WS-04 — Secret custody and target-host runtime
+Source covers Host Provisioner authority, image identity, lifecycle/fault classification, and isolation scripts.
 
-Deliver:
+Still required: production-matching secrets, topology, two-employee isolation, replacement, rotation, teardown, and destructive recovery.
 
-- secret inventory, audience, access, rotation, revocation, audit, rollback;
-- no master credential in employee runtime, profile, browser, artifact, image, or logs;
-- healthy ingress/Web/Manager/Gateway/Provisioner topology;
-- Host Provisioner as sole Docker authority;
-- two-employee network/data/workspace/memory/queue/credential/action isolation;
-- lifecycle and exact Hermes image evidence.
+## WS-05 — Fixture-free owner/channels
 
-Exit: least privilege, isolation, lifecycle repair, and exact-image target-host proof pass.
+Source covers exact snapshots/streams, no-replay reconnect, Talk-first streaming, connector/review projections, and UI variants.
 
-## WS-05 — Fixture-free owner and channels
+Still required: real owner activation, denial/revocation, live reconnect, connector lifecycle, and Web/SMS/signed-Review convergence.
 
-Deliver:
+## WS-06 — Golden work
 
-- real owner verification, activation, assignment, runtime readiness, secure session, strict snapshot, and first turn;
-- assignment/role/authority denial and revocation;
-- reconnect, session rotation, and snapshot recovery;
-- live connector lifecycle;
-- Web/SMS/signed-Review convergence over one durable work/approval/proof state.
+Source covers revision, approval, effect, receipt, output, proof, repair, and replay safety.
 
-Exit: one real owner supervises one assigned employee with no fixture/manual outcome and failures never render as success.
+Still required: provider-backed Website, Contractor Office, and Bookkeeping journeys with preview/delivery parity and restart proof refinding.
 
-## WS-06 — Golden governed work
+## WS-07 — Commercial/provider ambiguity
 
-```text
-real trigger and assignment
-→ Hermes or deterministic work
-→ immutable typed revision
-→ validation and exact approval
-→ durable command/effect
-→ one external effect
-→ accepted | failed | ambiguous receipt
-→ effect-bound accounting when applicable
-→ post-effect verification
-→ repairable owner proof
-→ replay-safe recovery and restart refinding
-```
+Source/local evidence covers worst-case reservation, shared rate authority, one effect/provider identity, durable ambiguity, accounting, conservation, and original-effect reconciliation.
 
-Roles: Website, Contractor Office, and Bookkeeping employees.
+Still required: live provider idempotency/response loss and complete billing lifecycle.
 
-Exit: all three complete real bounded work; stale approval and duplicate effect fail closed; every success has matching tenant-isolated refindable proof.
+## WS-08 — Recovery and release
 
-## WS-07 — Commercial and provider ambiguity
+Source/CI evidence covers fault states, rollback guards, backup/restore scripts, five image identities, signed metadata, independent verification, and typed Manager composition.
 
-Deliver:
-
-- atomic worst-case reservation before dispatch;
-- shared PostgreSQL rate authority;
-- one durable request/effect/provider identity;
-- accepted, failed, denied, refunded, and ambiguous state;
-- effect-bound accounting, immutable adjustments, and conservation;
-- original-effect reconciliation before retry;
-- payer, beneficiary, price, entitlement, usage, cost, invoice, refund, suspension, and reactivation reconciliation.
-
-Exit: replicas cannot overspend or multiply rate authority; uncertainty cannot trigger blind replay; commercial state settles exactly once and is never caller-selectable.
-
-## WS-08 — Repair, rollback, observability, release
-
-Deliver:
-
-- fault injection at claims, dispatch, receipts, publication, provisioning, rotation, migration, and deployment;
-- convergent repair or explicit manual terminal states;
-- database/runtime/profile/ingress/config/image/application rollback compatibility;
-- backup/restore and recovery-time evidence;
-- telemetry and incident runbooks;
-- SBOM, provenance, signed deployment manifest, and independent verifier;
-- typed Manager server composition replacing generated string mutation.
-
-Exit: faults cannot create false success or duplicate effects; rollback preserves accepted work; signed evidence verifies independently.
+Still required: target-host destructive rehearsal, trusted signing/registry retention, incident execution, and accepted-work conservation under real faults.
 
 ## WS-09 — Human surface, capacity, and pilot
 
-Deliver:
+Source/fixture evidence covers coherent UI grammar, browser automation, capacity/fairness descriptors, and pilot-stop schema.
 
-- coherent owner/public/account/billing/admin/artifact/connector/approval/proof/recovery grammar;
-- representative Chromium, Firefox, WebKit, and mobile-Safari execution;
-- automated and manual accessibility acceptance;
-- interruption, reconnect, ambiguity, and recovery UX;
-- measured capacity/fairness progression;
-- pilot eligibility, limits, data handling, incident ownership, rollback, exit thresholds, and stop authority.
-
-Exit: supported-browser/WCAG acceptance, declared safe capacity, and complete controlled-pilot packet.
+Still required: supported browsers, human accessibility, live recovery UX, representative 64 GiB capacity/fairness, and a complete pilot packet.
 
 ## Frozen candidate rule
 
-Freeze only after every non-waivable gate passes on one exact candidate with migration hashes, image digests, database/provider/target-host/browser/channel/commercial/recovery evidence, and signed release metadata. Pilot is a measured production stage, never a substitute for prerequisites.
+Freeze only when every non-waivable gate passes on one exact candidate. Pilot is a measured production stage, never a substitute for prerequisites.

@@ -1,0 +1,69 @@
+{
+  "schema": "trace013.task.v1",
+  "status": "implementation_complete",
+  "task_id": "AMTECH-EXPERIMENT-COMPILER-001",
+  "repository": "benamtech/ai-employee-v1",
+  "working_branch": "agent/employee-ui-port-adapters-current",
+  "parent_pr": 40,
+  "starting_sha": "9f9874242e3740059e9f4f857c2f164962bc91d6",
+  "implementation_verified_sha": "620c3521dcdee7a67aa27e07487d7f5dae52b3a5",
+  "tier": "T3_production_cross_workstream",
+  "selected_candidate": "R05",
+  "mission": "Compile exact repository facts and a task into typed representations, verified transformations, a task capsule, an admitted experiment plan, proof-carrying claims, executable evidence, calibrated outcomes, and deterministic queries for any coding agent.",
+  "implemented": [
+    "content-addressed repository facts",
+    "representation dialect registry and selector",
+    "authority DAG",
+    "dependency graph",
+    "genuine software-invariant hypergraph",
+    "P2 correspondence verifier",
+    "normalized hypergraph spectral operator",
+    "P1 eigenpair certificate and residual verifier",
+    "task-local graph and hypergraph diffusion",
+    "typed first-through-fourth-order effect frontier",
+    "task capsule and language bridge",
+    "plan admission chronology",
+    "argv-based executable evaluation",
+    "evidence ledger and prediction/outcome calibration",
+    "transaction finish verifier",
+    "authority, impact, invariant, proof, effect, and evidence queries",
+    "six-case Trace007-Trace012 retrospective benchmark",
+    "isolated end-to-end lifecycle self-test"
+  ],
+  "proof_classes": {
+    "P0": "representation calculation or hypothesis",
+    "P1": "verified property of an explicit formal model",
+    "P2": "verified representation-to-repository correspondence",
+    "P3": "exact-candidate executable evidence",
+    "P4": "external or production acceptance"
+  },
+  "verification": {
+    "merge_gate_run": 29986180114,
+    "release_candidate_run": 29986180108,
+    "conclusion": "success on implementation_verified_sha",
+    "closure_rule": "The current PR and workflows own exact evidence for later documentation and merge descendants."
+  },
+  "causal_status": "unestablished; retrospective retrieval evaluation is implemented and prospective matched-task outcomes remain required",
+  "external_open": [
+    "managed database",
+    "live connector and provider",
+    "target host and destructive recovery",
+    "manual accessibility and supported-browser acceptance",
+    "representative capacity and fairness",
+    "pilot",
+    "deployment",
+    "production"
+  ],
+  "next_trace": {
+    "reserved_id": "trace014",
+    "state": "not_created",
+    "required_start": "new branch from the merged main coordinate using repoctl start and fresh authority extraction"
+  },
+  "self_reference": {
+    "path": "mvp-build/decision/trace013/task_state.json",
+    "decision_record": "mvp-build/decision/trace013/decision_record.md",
+    "engine": "mvp-build/decision/engine/repoctl.mjs",
+    "registry": "mvp-build/decision/engine/representation-registry.json",
+    "verification_plan": "mvp-build/decision/trace013/verification_plan.json"
+  }
+}

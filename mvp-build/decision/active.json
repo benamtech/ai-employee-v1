@@ -1,0 +1,42 @@
+{
+  "schema": "amtech.decision-active.v1",
+  "status": "no_open_decision_transaction",
+  "updated_at": "2026-07-23",
+  "active_transaction": null,
+  "latest_completed_trace": {
+    "id": "trace013",
+    "path": "mvp-build/decision/trace013/",
+    "task_id": "AMTECH-EXPERIMENT-COMPILER-001",
+    "scope": "repository-native software experiment compiler and proof-carrying representation system",
+    "implementation_verified_sha": "620c3521dcdee7a67aa27e07487d7f5dae52b3a5",
+    "evidence_boundary": "P1 certificate, P2 correspondence, P3 compiler lifecycle, broad source/build, PostgreSQL, and source-built release evidence are established at the recorded historical SHA; P4 external acceptance remains separate"
+  },
+  "method": {
+    "protocol": "mvp-build/decision/protocol-v1.json",
+    "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
+    "representation_registry": "mvp-build/decision/engine/representation-registry.json",
+    "representation_contract": "mvp-build/decision/representation-contract.md",
+    "natural_language_role": "generated_interoperability_review_and_audit_view"
+  },
+  "production_trace_chain": [
+    {"id":"trace007","scope":"commercial/effect authority and proof transaction"},
+    {"id":"trace008","scope":"release, recovery, rollback, and capacity groundwork"},
+    {"id":"trace009","scope":"UI projection architecture search"},
+    {"id":"trace010","scope":"connector operating substrate"},
+    {"id":"trace011","scope":"employee UI port and presentation adapters"},
+    {"id":"trace012","scope":"UI Lab and folder-first UI variants"},
+    {"id":"trace013","scope":"repository-native software experiment compiler"}
+  ],
+  "next_transaction": {
+    "reserved_id": "trace014",
+    "state": "not_created",
+    "required_start": "Create a new branch from merged main, define task.json, and run decision/engine/repoctl.mjs start before non-mechanical source edits.",
+    "prohibition": "Do not preselect the next implementation or reuse stale facts from the pre-merge branch."
+  },
+  "exact_status_owner": "mvp-build/CODEGRAPH.md",
+  "active_plan": "mvp-build/production-readiness-program/README.md",
+  "self_reference": {
+    "path": "mvp-build/decision/active.json",
+    "purpose": "transaction orientation; executable artifacts and exact evidence own stronger claims"
+  }
+}

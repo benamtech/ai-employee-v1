@@ -1,0 +1,70 @@
+{
+  "schema": "amtech.decision.task-state.v1",
+  "task_id": "AMTECH-UI-PORT-001",
+  "tier": "T2",
+  "starting_sha": "9eae981441820729ca9cf038141f9965d7b12adc",
+  "branch": "agent/employee-ui-port-adapters-current",
+  "authority_note": "The final product-review branch was created from the then-current PR #35 stacked head 9eae981441820729ca9cf038141f9965d7b12adc. Earlier inspection used PR #36 head c20adaede64d45c24d74b8531507935ad7a8ce02 and its tree-identical merge commit 712599ff31599e1a259157dd0e34915d0777d5f6; the patch was transplanted onto the newer stacked head before review.",
+  "goal": "Introduce one typed employee UI port, high-level web adapters for owner_web, public_form and boundless_website, and swappable theme/layout/component/density strategies that can make Web clients materially different without changing the loaded employee payload.",
+  "terminology": {
+    "port": "The stable purposeful employee UI conversation contract.",
+    "adapter": "A high-level Web client that implements that port for owner operation, a public bounded form workflow, or an employee-dominant website.",
+    "strategy": "Theme, layout, component set, density or brand-token selection inside an adapter.",
+    "ui_lab": "A fixture-backed test driver that mounts adapter and strategy combinations; not a product adapter."
+  },
+  "non_goals": [
+    "Do not deploy a public employee homepage.",
+    "Do not add a database migration.",
+    "Do not replace the current operating-state model or data-loading controller.",
+    "Do not create one adapter per theme or layout.",
+    "Do not add Storybook, a visual framework or a heavyweight optimization dependency.",
+    "Do not claim browser screenshots or production evidence when execution is unavailable."
+  ],
+  "authority": [
+    "identity.md",
+    "AGENTS.md",
+    "mvp-build/AGENTS.md",
+    "mvp-build/CODEGRAPH.md",
+    "mvp-build/decision/README.md",
+    "mvp-build/production-readiness-program/README.md",
+    "mvp-build/docs/adr/ADR-009-production-ui-projection-path.md",
+    "current shared, Manager, Web, UI Lab, onboarding, profile and browser-test source"
+  ],
+  "research_conclusions": [
+    "Cockburn's original pattern supports a small number of purpose-defined ports and multiple adapters, not adapters for every visual variant.",
+    "Cockburn's Component + Strategy framing is the closer match for radically different themes, layouts and component sets inside one owner Web adapter.",
+    "React Context is sufficient to distribute one resolved presentation profile through an existing component tree.",
+    "CSS custom properties are the lowest-cost mechanism for ordinary branding and theme changes; extreme variants may later select distinct React component registries.",
+    "Next dynamic imports should be introduced only when separate adapter component trees materially increase bundle size.",
+    "Playwright projects, screenshots and ARIA snapshots fit the adapter/strategy/viewport test matrix already represented by UI Lab."
+  ],
+  "observations": [
+    "The repository already has one operating projection compiler, one layout planner, one renderer registry and one production AgentSurface.",
+    "Employee profile key/version, business kind, dominant domains and profile/onboarding facts already reach the Web payload.",
+    "Onboarding branding facts can seed scoped design tokens without a schema migration.",
+    "Talk and Workspace styling is largely component-local and hard-coded, so the first implementation uses a scoped wrapper and CSS variables rather than a renderer rewrite.",
+    "The existing free estimator is the first concrete public_form adapter candidate.",
+    "UI Lab already routes fixture payloads through production components and can become the adapter/strategy matrix."
+  ],
+  "implemented_candidate": [
+    "packages/shared/src/employee-ui-presentation.ts",
+    "apps/web/app/_components/employee-ui/EmployeeUiPort.tsx",
+    "apps/web/app/agent/[employeeId]/page.tsx owner_web mount",
+    "apps/web/app/free-estimator/page.tsx public_form mount",
+    "apps/web/app/ui-lab/[scenario]/ProductionFixtureLabClient.tsx adapter/strategy controls",
+    "optional ui_presentation hints in onboarding and profile package contracts",
+    "unit and architecture fitness tests",
+    "docs/adr/ADR-010-employee-ui-port-and-web-presentation-adapters.md"
+  ],
+  "unknowns": [
+    "Visual quality and CSS collisions until Playwright runs in a dependency-complete environment.",
+    "Which boundless website component tree will become the first productized public adapter.",
+    "Where user-selected presentation preferences should be persisted after the UI control is designed."
+  ],
+  "maximum_patch": {
+    "database_migrations": 0,
+    "new_runtime_dependencies": 0,
+    "new_product_adapters": 3,
+    "new_presentation_dimensions": 4
+  }
+}

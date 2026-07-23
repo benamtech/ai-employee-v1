@@ -1,0 +1,21 @@
+{
+  "schema": "amtech.ui-variant.v1",
+  "id": "editorial-studio",
+  "name": "Editorial Studio",
+  "summary": "A beginner-readable publishing-oriented example that demonstrates complete data access with ordinary React and CSS Modules.",
+  "contract_version": 1,
+  "entry": "./index.tsx",
+  "status": "candidate",
+  "supported_adapters": ["owner_web", "boundless_website"],
+  "capabilities": {
+    "required": ["identity", "runtime", "work", "outputs"],
+    "optional": ["context", "conversation", "attention", "waiting", "changes", "connections", "capabilities", "evidence", "intents", "fixture_metadata", "reference_client", "presentation"],
+    "intentionally_omitted": []
+  },
+  "runtime_features": ["dom", "css", "svg"],
+  "dependencies": ["react"],
+  "isolation": "host_contained",
+  "performance": { "containment": "layout_paint_style", "content_visibility": "auto", "initial_render": "lazy" },
+  "production": { "eligibility": "candidate", "requires_reference_client": false },
+  "tags": ["editorial", "beginner-friendly", "publishing"]
+}

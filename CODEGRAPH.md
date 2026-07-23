@@ -1,7 +1,7 @@
 # CODEGRAPH.md — Repository routing map
 
 Status: active  
-Updated: 2026-07-20
+Updated: 2026-07-23
 
 ## Read path
 
@@ -9,45 +9,37 @@ Updated: 2026-07-20
 identity.md
 → AGENTS.md + CONTRIBUTING.md
 → nearest scoped AGENTS.md + CODEGRAPH.md
-→ normative requirements
-→ active program and decision trace
-→ exact source, tests, workflows, and proof
+→ scoped authority-map.json + decision/active.json
+→ decision/engine/repoctl.mjs for non-mechanical work
+→ generated task capsule and admitted plan
+→ exact source, tests, workflows, certificates, and evidence
 ```
 
-Historical plans, audits, and handoffs are provenance only.
-
-## Major boundaries
-
-- `mvp-build/` owns the executable AI Employee product and all exact candidate, migration, workstream, and acceptance status.
-- `wiki/` owns strategy, research, and factual history.
-- `.github/workflows/` produces exact-head executable evidence when a run exists.
-- root contributor files own repository-wide routing and evidence discipline, not product topology.
+Historical plans, audits, handoffs, and completed traces are provenance only.
 
 ## Product routing
 
 ```text
-mvp-build/AGENTS.md                 product execution contract
-mvp-build/CODEGRAPH.md              current executable topology and exact status
-mvp-build/STANDARD.md               ratified normative requirements
-mvp-build/decision/README.md        computation protocol
-mvp-build/production-readiness-program/README.md
-                                     single active production route
-mvp-build/docs/architecture/        source-backed explanation
-mvp-build/memory/MEMORY.md          sole handoff index
-mvp-build/second-half-plan/         historical plans
+mvp-build/AGENTS.md                         product execution contract
+mvp-build/authority-map.json                machine authority router
+mvp-build/CODEGRAPH.md                      current product/workstream status
+mvp-build/STANDARD.md                       normative requirements
+mvp-build/decision/active.json              transaction router
+mvp-build/decision/engine/repoctl.mjs       experiment compiler
+mvp-build/decision/representation-contract.md
+                                             proof and representation contract
+mvp-build/production-readiness-program/     active production route
+mvp-build/memory/MEMORY.md                  handoff index
 ```
 
 ## Evidence rule
 
 ```text
-deployed proof
-→ applied durable state
-→ executable source/config
-→ exact-SHA tests and acceptance
-→ requirements/current program
-→ topology/architecture
-→ indexed memory
-→ history
+P0 representation calculation
+P1 verified formal-model property
+P2 verified representation correspondence
+P3 exact-candidate executable evidence
+P4 external or production acceptance
 ```
 
-No document label, score, fixture, source path, workflow name, PR prose, or ancestor result promotes evidence class.
+No document label, score, eigenvector, certificate, source path, workflow name, PR prose, or ancestor result silently promotes evidence class. A valid P1 proof remains real proof of its exact property; broader claims require the missing P2/P3/P4 evidence.
