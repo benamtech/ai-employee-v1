@@ -3,89 +3,64 @@
 Status: active implementation home  
 Updated: 2026-07-23
 
-This directory contains the executable product: Manager, Hermes integration, owner web surface, PostgreSQL authority, connectors, Model Gateway, commercial/effect state, provisioning, deployment, tests, decision traces, machine-native representations, memory, UI Lab, and release proof.
+This directory contains the executable product and its repository-native software experiment compiler.
 
-Current structural status lives in [`CODEGRAPH.md`](CODEGRAPH.md). Exact transient SHA, workflow run, and conclusion live in the current PR, workflow, or retained release record.
+Current structural status lives in [`CODEGRAPH.md`](CODEGRAPH.md). Exact transient SHA, workflow run, and conclusion live in the current PR, workflows, or retained release records.
 
-## Contributor route
+## Agent route
 
 ```text
-../AGENTS.md + ../CONTRIBUTING.md
-→ AGENTS.md + authority-map.json + CODEGRAPH.md
-→ STANDARD.md + ratified amendments
-→ decision/active.json + decision/README.md
-→ decision/representation-contract.md
-→ production-readiness-program/README.md
-→ exact source, representations, certificates, tests, workflows, and proof
+../identity.md
+→ ../AGENTS.md + AGENTS.md
+→ authority-map.json + CODEGRAPH.md
+→ STANDARD.md and amendments
+→ decision/active.json
+→ decision/engine/repoctl.mjs
+→ generated task capsule
+→ admitted plan
+→ exact source, tests, workflows, and evidence
 ```
+
+For every non-mechanical task, create `task.json` and run:
 
 ```bash
-npm ci
-npm run hooks:install
-npm run repo:verify:quick
+node decision/engine/repoctl.mjs start --task task.json --out decision/<trace-or-transaction>
 ```
 
-For UI Lab or full employee UI-variant work, begin at [`ui-lab/README.md`](ui-lab/README.md), the canonical agent entry point.
+Then admit the plan before source edits, evaluate after implementation, and finish the transaction. The same interface works for Claude Code, Codex, Cursor, Pi, local models, deterministic scripts, humans, and future agents.
+
+For UI Lab or full UI-variant work, begin at [`ui-lab/README.md`](ui-lab/README.md) after the task capsule is generated.
 
 ## Product boundary
 
 - **Hermes:** reasoning, runs, sessions, runtime-local memory, and tool execution.
-- **Manager:** identity, assignment authority, capability/tool contracts, connector/provider custody, approvals, durable effects, shared commercial admission/accounting, reconciliation, repair, and proof.
-- **Web/SMS/signed Review/MCP Apps/AG-UI/UI Lab:** bounded projections.
+- **Manager:** identity, assignment authority, capabilities, connector/provider custody, approvals, durable effects, commercial admission/accounting, reconciliation, repair, and proof.
+- **Web/SMS/signed Review/MCP Apps/AG-UI/UI Lab/UI variants:** bounded projections.
 - **PostgreSQL/Supabase:** shared durable identity, rate, budget, effect, receipt, accounting, lineage, and reconciliation authority.
-- **Host Provisioner:** sole Docker and bounded target-host lifecycle authority.
+- **Host Provisioner:** sole Docker and target-host lifecycle authority.
 
-## Canonical transaction
+Provider and connector adapters do not create authority.
+
+## Proof and evidence
 
 ```text
-exact principal and assignment
-→ immutable request/work revision
-→ current capability and approval
-→ atomic shared rate/budget admission
-→ one command/effect + provider idempotency identity
-→ accepted | failed | ambiguous receipt
-→ effect-bound accounting
-→ output and owner proof
-→ original-effect reconciliation or projection repair
+P0 representation calculation
+P1 verified formal-model property
+P2 verified representation correspondence
+P3 exact-candidate executable evidence
+P4 external/production acceptance
 ```
 
-## Machine-native reasoning and proof
+No class silently promotes itself.
 
-Agents may reason primarily with vectors, matrices, tensors, embeddings, AST/CFG/data-flow/dependency graphs, genuine hypergraphs, incidence operators, eigenspaces, transition systems, state machines, formal constraints, proof terms, model-checker traces, and valid geometric/topological or state-space models.
-
-Natural language is the audit and interoperability layer, not the mandatory reasoning substrate.
-
-A verified eigenstructure, theorem, solver certificate, or model-checker result is legitimate formal proof for the exact property of its declared model. It becomes executable-software proof when the representation-to-source/runtime correspondence required by the gate is established. External acceptance remains separately defined.
-
-See [`decision/representation-contract.md`](decision/representation-contract.md).
-
-## Active authority
-
-- [`authority-map.json`](authority-map.json) — machine-readable authority router and proof-class map.
-- [`CODEGRAPH.md`](CODEGRAPH.md) — sole current product/workstream status owner.
-- [`STANDARD.md`](STANDARD.md) plus ratified amendments — normative requirements.
-- [`decision/active.json`](decision/active.json) — current decision router; currently no new decision transaction is open.
-- [`decision/README.md`](decision/README.md) — computation protocol.
-- [`decision/representation-contract.md`](decision/representation-contract.md) — machine-native representation, formal certificate, fidelity, executable-proof, and external-evidence contract.
-- [`decision/trace007/`](decision/trace007/) through [`decision/trace010/`](decision/trace010/) — current production-authority, release, UI-architecture, and connector decisions.
-- [`decision/trace011/`](decision/trace011/) and [`decision/trace012/`](decision/trace012/) — completed UI port and UI Lab/folder-first variant decisions.
-- [`production-readiness-program/`](production-readiness-program/) — single active production route.
-- [`docs/architecture/`](docs/architecture/) — source-backed explanation.
-- [`memory/MEMORY.md`](memory/MEMORY.md) — sole handoff index.
-- [`second-half-plan/`](second-half-plan/), `GAPS.md`, and `REMEDIATION.md` — historical provenance only.
-
-Trace013 is reserved for a fresh planning computation on the next branch. No incomplete prior Trace013 artifact is active or retained.
-
-## Verification entrypoints
+## Core verification
 
 ```bash
-python decision/trace007/compute.py
-python decision/trace008/compute.py
+node decision/trace013/compute.mjs
+node decision/engine/repoctl.mjs doctor
+node decision/engine/repoctl.mjs self-test
+node decision/trace013/retrospective_benchmark.mjs
 npm run repo:agentic:check
-npm run test:ws07-ws08
-npm run db:verify:commercial-effect-migrations
-npm run test:production-boundary
-npm run repo:verify:quick
 npm run repo:verify:full
 npm run test:unit
 npm run test:integration
@@ -93,22 +68,18 @@ npm run build
 node scripts/ui-variant.mjs doctor
 ```
 
-Each formal verifier or command proves only the declared property, boundary, and exact candidate it exercises. Missing representation fidelity, managed database, live provider, browser/channel/accessibility, target-host, commercial lifecycle, recovery rehearsal, trusted signing, pilot, deployment, or production prerequisites remain blocked rather than mocked into acceptance.
+Each command proves only its exact boundary and candidate. Managed database, live provider, browser/accessibility, target-host, commercial lifecycle, recovery rehearsal, trusted signing, pilot, deployment, and production remain separate unless explicitly verified.
 
-## Directory map
+## Active authority
 
-```text
-apps/web/                       owner operating environment and public surfaces
-apps/manager/                   authority, runtime, connectors, effects, commercial state, repair, proof
-packages/shared/                contracts and connector/capability manifests
-packages/db/                    forward migrations, clients, generated types
-infra/                          topology, deploy, lifecycle, acceptance, release operations
-tests/                          behavioral unit, PostgreSQL integration, browser matrices
-decision/                       protocol, representation contract, routers, traces, generators, certificates
-ui-lab/                         canonical agent-first UI Lab entry and source-owned presets
-validation/                     Standard evolution, rubric, upstream, evidence artifacts
-docs/architecture/              current explanatory architecture
-memory/                         durable handoffs; MEMORY.md is sole index
-production-readiness-program/   single active production route
-second-half-plan/               historical plans
-```
+- `authority-map.json` — machine router.
+- `CODEGRAPH.md` — sole current structural-status owner.
+- `STANDARD.md` plus amendments — normative requirements.
+- `decision/active.json` — current/no-open transaction router.
+- `decision/engine/` — executable experiment compiler.
+- `decision/trace013/` — completed compiler implementation record.
+- `production-readiness-program/` — single active production route.
+- `memory/MEMORY.md` — handoff index.
+- `second-half-plan/`, `GAPS.md`, and `REMEDIATION.md` — historical provenance.
+
+Trace014 is reserved for the first new task on a post-merge branch and does not yet exist.

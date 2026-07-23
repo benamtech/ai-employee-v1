@@ -4,7 +4,7 @@
   "updated_at": "2026-07-23",
   "self": {
     "path": "mvp-build/authority-map.json",
-    "last_reconciliation": "Trace013 repository-native experiment compiler implementation",
+    "last_reconciliation": "Trace013 experiment compiler completion and stack readiness",
     "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions."
   },
   "exact_status": {
@@ -12,15 +12,8 @@
     "transient_acceptance": "GitHub Actions and retained release records",
     "pull_request_record": "the current cumulative integration pull request"
   },
-  "normative": [
-    "mvp-build/STANDARD.md",
-    "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"
-  ],
-  "agent_entry": [
-    "AGENTS.md",
-    "mvp-build/AGENTS.md",
-    "mvp-build/decision/engine/repoctl.mjs"
-  ],
+  "normative": ["mvp-build/STANDARD.md", "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"],
+  "agent_entry": ["AGENTS.md", "mvp-build/AGENTS.md", "mvp-build/decision/engine/repoctl.mjs"],
   "active_plan": [
     "mvp-build/production-readiness-program/README.md",
     "mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md",
@@ -34,36 +27,27 @@
     "representation_contract": "mvp-build/decision/representation-contract.md",
     "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
     "representation_registry": "mvp-build/decision/engine/representation-registry.json",
-    "active_trace": "mvp-build/decision/trace013/",
-    "latest_completed_before_active": "mvp-build/decision/trace012/"
+    "latest_completed_trace": "mvp-build/decision/trace013/",
+    "next_trace_reserved": "mvp-build/decision/trace014/",
+    "next_trace_state": "not_created"
   },
   "proof_classes": {
-    "P0": "representation calculation, score, embedding, diffusion, mode, or simulation",
-    "P1": "machine-verified property of an explicit formal model, including valid eigenstructure",
+    "P0": "representation calculation or hypothesis",
+    "P1": "machine-verified property of an explicit formal model",
     "P2": "verified representation-to-repository correspondence",
     "P3": "exact-candidate executable software evidence",
     "P4": "external, deployment, pilot, or production acceptance",
-    "correspondence_rule": "No class silently promotes itself. A P1 certificate may satisfy a software gate only when verified P2 correspondence makes that implication sound."
+    "rule": "No class silently promotes itself."
   },
   "representation_policy": {
     "natural_language": "generated_interoperability_review_and_audit_view_not_mandatory_reasoning_substrate",
-    "always_on": [
-      "repo.fact.v1",
-      "authority.dag.v1",
-      "dependency.graph.v1",
-      "invariant.hypergraph.v1",
-      "correspondence.v1",
-      "task.diffusion.v1",
-      "effect.frontier.v1",
-      "experiment.design.v1"
-    ],
+    "always_on": ["repo.fact.v1", "authority.dag.v1", "dependency.graph.v1", "invariant.hypergraph.v1", "correspondence.v1", "task.diffusion.v1", "effect.frontier.v1", "experiment.design.v1"],
     "specialized_first": "spectral.hypergraph.v1",
-    "selector": "mvp-build/decision/engine/representation-registry.json",
-    "retention_rule": "Artifacts expose generator, digests, dimensions, provenance, assumptions, transformations, parameters, validation, proof class, excluded claims, and compact language bridge."
+    "selector": "mvp-build/decision/engine/representation-registry.json"
   },
   "current_trace_roles": {
-    "trace007": "commercial/effect production transaction and computation baseline",
-    "trace008": "release, recovery, and capacity implementation compression",
+    "trace007": "commercial/effect authority and computation baseline",
+    "trace008": "release, recovery, and capacity groundwork",
     "trace009": "UI projection architecture search and calibration",
     "trace010": "connector operating substrate",
     "trace011": "employee UI port and presentation adapters",
@@ -73,31 +57,8 @@
   "architecture": "mvp-build/docs/architecture/",
   "memory": {
     "index": "mvp-build/memory/MEMORY.md",
-    "latest": "mvp-build/memory/2026-07-23-stack-reconciliation-and-main-readiness.md"
+    "latest": "mvp-build/memory/2026-07-23-trace013-experiment-compiler-and-stack-ready.md"
   },
-  "historical": [
-    "mvp-build/second-half-plan/",
-    "mvp-build/GAPS.md",
-    "mvp-build/REMEDIATION.md",
-    "complete prior decision traces"
-  ],
-  "evidence_order": [
-    "P1_formal_model_property",
-    "P2_representation_fidelity",
-    "P3_executable_candidate",
-    "P4_external_acceptance",
-    "ratified_requirements_and_active_program",
-    "current_topology_and_architecture",
-    "indexed_memory",
-    "historical_records"
-  ],
-  "nonpromotion": [
-    "P0_to_P1",
-    "P1_to_P2",
-    "P2_to_P3",
-    "P3_to_P4",
-    "documentation_to_source",
-    "source_to_ci",
-    "ci_to_external_acceptance"
-  ]
+  "historical": ["mvp-build/second-half-plan/", "mvp-build/GAPS.md", "mvp-build/REMEDIATION.md", "complete prior decision traces"],
+  "nonpromotion": ["P0_to_P1", "P1_to_P2", "P2_to_P3", "P3_to_P4", "documentation_to_source", "source_to_ci", "ci_to_external_acceptance"]
 }
