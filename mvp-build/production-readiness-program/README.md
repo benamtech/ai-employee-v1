@@ -2,174 +2,143 @@
 
 Status: **active and canonical**  
 Updated: 2026-07-23  
-Self-reference: current structural state is owned by [`../CODEGRAPH.md`](../CODEGRAPH.md); this document owns the active route, not transient SHA conclusions.
+Structural status: [`../CODEGRAPH.md`](../CODEGRAPH.md)  
+Decision transaction: [`../decision/active.json`](../decision/active.json)
 
-This directory is the single active production-readiness route. Exact candidate conclusions live in the current PR, workflow, or retained release record. Historical plans, audits, completed traces, and ancestor workflow results remain provenance only.
+This directory is the single active production-readiness route. Exact candidate conclusions belong to the current pull request, exact-head workflows, or retained release records. Historical plans, audits, completed traces, and ancestor workflow results remain provenance only.
 
-## Authority
+## Authority and proof
 
-Formal proof is first-class for the exact property and model it certifies. Evidence classes remain explicit:
-
-```text
-P1 formal model-property proof
-+ P2 representation fidelity when required
-→ P3 executable software proof when the gate correspondence is established
-→ P4 external/production acceptance only under the external gate contract
-```
-
-The ordinary repository evidence route remains:
+AMTECH preserves five distinct proof classes:
 
 ```text
-deployed release proof
-→ applied durable state
-→ committed executable source and configuration
-→ exact-candidate executable evidence
-→ ratified Standard and this program
-→ current topology and architecture
-→ indexed memory
-→ historical records
+P0 representation calculation or hypothesis
+→ P1 verified formal-model property
++ P2 verified representation-to-repository correspondence
+→ P3 exact-candidate executable software evidence
+→ P4 external or production acceptance
 ```
 
-Decision computation can establish formal properties, alter what is attempted, and generate proof obligations. It cannot claim a wider property than the certificate, correspondence, or evidence actually establishes.
+No class silently promotes itself. A valid eigenpair, solver certificate, model-checker result, or other formal object may be decisive P1 proof for its declared model property. It establishes a software property only when the required P2 correspondence makes that implication sound. P3 and P4 remain separately bounded.
+
+Manager is the authority plane. Hermes is the reasoning and runtime substrate. Web, SMS, signed Review, MCP Apps, AG-UI, UI Lab, and UI variants are bounded projections. **Provider and connector adapters do not create authority.** Models, mathematical representations, and coding agents do not create product authority either.
 
 ## Current position
 
-The cumulative source candidate now includes:
+The cumulative source candidate includes:
 
 - direct typed Manager composition and current-assignment authority interception;
 - immutable forward migrations through `0082`;
-- provider-neutral connector lifecycle, revocation/reconnect, and exact conversational decisions;
+- provider-neutral connector discovery, lifecycle, revoke/reconnect, and exact conversational decisions;
 - shared rate/budget admission, one effect/provider identity, durable ambiguity, accounting, and reconciliation;
-- five-image exact-SHA release identity, signed-manifest verification, restore/rollback guards, and capacity groundwork;
+- five-image exact-SHA release identity, independent manifest verification, restore/rollback guards, and capacity groundwork;
 - one production owner projection path;
-- employee UI port and presentation adapters;
+- employee UI presentation adapters;
 - the production UI Lab and folder-first full employee UI variants behind `EmployeeExperienceModelV1`;
-- a first-class machine-native representation contract covering graphs, hypergraphs, vectors, tensors, spectral objects, formal systems, state machines, and proof correspondence.
+- Trace013’s repository-native software experiment compiler.
 
-The cumulative branch has historical exact-candidate source/CI/image evidence, but every descendant documentation or merge commit requires its own exact-head verification. Managed database, live provider, target-host, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain open evidence classes unless an explicit formal correspondence contract legitimately discharges a particular gate.
+Trace013 replaces the former prose-only methodology layer with executable infrastructure:
+
+```text
+exact Git SHA + task
+→ content-addressed repository facts
+→ authority DAG + dependency graph
+→ genuine invariant hypergraph
+→ P2 correspondence
+→ P1 formal certificate when admitted
+→ task diffusion + first-through-fourth-order effect frontier
+→ task capsule + predeclared predictions
+→ admitted plan before source edits
+→ executable verification and P3 evidence ledger
+→ prediction/outcome calibration
+→ finished transaction
+```
+
+The engine is `../decision/engine/repoctl.mjs`; the registered dialects and admission conditions are in `../decision/engine/representation-registry.json`.
 
 ## Execution method
 
-Use [`../decision/README.md`](../decision/README.md), [`../decision/representation-contract.md`](../decision/representation-contract.md), and resolve transaction state through [`../decision/active.json`](../decision/active.json):
+For non-mechanical work:
 
-```text
-authority and evidence extraction
-→ machine-native representation extraction
-→ Observed / Inferred / Hypothesis / Unknown / NotApplicable
-→ independent candidate batches
-→ invariant/prerequisite filter
-→ explicit evidence-and-invariants baseline
-→ candidate search topology when useful
-→ software invariant hypergraph and formal models when useful
-→ formal/model certificates when useful
-→ equal-feasibility controls
-→ search and weight sensitivity
-→ separate implementation compression
-→ proof plan by declared proof class
-→ implementation and exact verification
-→ active-document and memory reconciliation
+```bash
+node decision/engine/repoctl.mjs start --task <task.json> --out decision/<trace-or-transaction>
+node decision/engine/repoctl.mjs admit-plan --transaction <path> --plan <plan.json>
+# implement only after admission
+node decision/engine/repoctl.mjs evaluate --transaction <path>
+node decision/engine/repoctl.mjs finish --transaction <path>
 ```
 
-Candidate topology and software topology are distinct. Mandatory coverage is a feasibility constraint, not an objective bonus. Eigenvectors, hypergraph centrality, spectral gaps, graph density, formal solvers, and weighted scores may expose relationships, change decisions, or provide formal certificates. A verified eigenstructure may be decisive P1 proof for its declared operator-defined property. P2 correspondence is required before treating that formal result as the associated software property, and causal or production claims remain separately bounded.
+The compiler always produces content-addressed facts, authority/dependency structures, a genuine software-invariant hypergraph, task-local context diffusion, a typed higher-order effect frontier, and an experiment contract. Specialized state-machine, SMT, e-graph, queueing, Koopman, topology, embedding, and other dialects activate only when their registered prerequisites hold.
 
-No new decision transaction is open. Trace012 is the latest completed trace. Trace013 is reserved for a fresh computation on the next post-merge branch.
-
-## Product target
-
-AMTECH installs governed persistent AI Employees. The owner experience preserves exact account, employee, assignment, current authority, entitlement, request/work revision, approval, shared rate/budget admission, command/effect, provider receipt, accounting receipt, recovery, output, and proof identity.
-
-Manager is the authority plane and compiles from committed typed source. Hermes is the reasoning/runtime substrate. Web, SMS, signed Review, MCP, MCP Apps, AG-UI, and UI Lab are bounded projections. Provider adapters, connectors, UI variants, and models do not create authority.
+Natural language is a generated interoperability and audit view, not the mandatory reasoning substrate. Retained representations expose their generators, input/output digests, dimensions, provenance, assumptions, parameters, residuals or parity checks, proof class, and excluded claims.
 
 ## Program route
 
-1. `04-dependency-ordered-production-plan.md` — dependency order and current stack-integration checkpoint.
+1. `04-dependency-ordered-production-plan.md` — dependency order and stack-integration checkpoint.
 2. `08-production-issue-vector.json` — original issue baseline.
-3. `13-resolution-ledger.json` — current resolution/control state.
+3. `13-resolution-ledger.json` — current resolution and control state.
 4. `09-workstream-execution-map.md` — completion and stop contracts.
-5. `20-ws06-ws08-commercial-effect-transaction.md` — durable effect/recovery transaction.
-6. `10-test-suite-disposition.md` — test/evidence authority.
+5. `20-ws06-ws08-commercial-effect-transaction.md` — durable effect and recovery transaction.
+6. `10-test-suite-disposition.md` — test and evidence authority.
 7. `07-verification-and-handoff-matrix.md` — evidence and handoff boundary.
-8. `../decision/active.json` — current/no-open-transaction router.
-9. `../decision/README.md` and `../decision/representation-contract.md` — computation and representation/proof method.
-10. `../decision/trace007/` through `../decision/trace012/` — completed scoped decisions and their exact evidence boundaries.
-11. current source, immutable migrations, representations, certificates, tests, workflows, proof, and newest indexed memory.
+8. `../decision/active.json` — active transaction router.
+9. `../decision/README.md` — executable experiment protocol.
+10. `../decision/representation-contract.md` — representation and proof taxonomy.
+11. `../decision/engine/` — generators, analyzers, schemas, certificates, and trusted verifiers.
+12. `../decision/trace007/` through `../decision/trace013/` — scoped decision and implementation records.
+13. current source, immutable migrations, tests, workflows, proof, and newest indexed memory.
 
-Historical WS-02/03 records and `second-half-plan/` remain available for provenance but do not override newer exact source or evidence.
+## Current trace map
 
-## Current source transaction
-
-```text
-committed typed Manager source
-→ exact account/employee/assignment/current-authority interception
-→ scoped snapshot and stream projection
-→ provider-neutral connection and capability lifecycle
-→ finite Model Gateway request economics
-→ database-owned rate and budget admission
-→ one command/effect/provider identity
-→ durable accepted/failed/ambiguous settlement
-→ effect-bound accounting and conservation
-→ exact output and repairable proof
-→ production projection or neutral UI variant
-→ release identity, repair, restore, rollback, and proof refinding
-```
-
-Forward migrations through the source-derived head preserve immutable history. Caller metadata cannot shard shared rate authority, redefine replay identity, or select commercial/approval state.
-
-## Current trace and proof map
-
-- Trace007 — production commercial/effect transaction and the explicit evidence baseline.
-- Trace008 — release, recovery, rollback, and capacity implementation compression.
+- Trace007 — commercial/effect authority and computation baseline.
+- Trace008 — release, recovery, rollback, and capacity groundwork.
 - Trace009 — UI projection architecture search and calibration.
 - Trace010 — connector operating substrate.
 - Trace011 — employee UI port and presentation adapters.
-- Trace012 — UI Lab live workbench and folder-first employee UI variants.
+- Trace012 — UI Lab and folder-first employee UI variants.
+- Trace013 — repository-native software experiment compiler; active until exact-head closure.
 
-Across these records:
-
-```text
-candidate graph calculations: P0 unless accompanied by a stronger certificate
-software invariant hypergraph: P0 representation, P1 formal properties, P2/P3 when correspondence and executable proof are satisfied
-spectral/eigenvector results: P1 when operator semantics, theorem assumptions, residuals, conditioning, and reproducibility hold
-causal improvement: unestablished unless an appropriate causal proof or independent implementation outcomes exist
-```
-
-A candidate graph supports diversity, lineage, and redundancy. A software-invariant hypergraph represents genuine many-way obligations and may carry formal certificates as well as touch/fractional/complete/proved coverage. Mere representation remains distinct from proof; formal proof remains valid within its declared boundary.
+Trace013 uses 64 candidates in four independent batches and selects the smallest complete vertical slice: repository facts, registered representations, P1/P2 certificates, task capsules, plan chronology, executable evaluation, prediction calibration, and deterministic queries. The engine’s causal engineering benefit remains an explicit future outcome experiment; its artifact integrity and lifecycle are executable now.
 
 ## Current integration checkpoint
 
-The merge stack must be reconciled top-down because the historical PR #35 coordinate is red while the cumulative PR #40 coordinate is green:
+The stack is reconciled top-down:
 
-1. verify the current PR #40 head;
-2. merge PR #40 into PR #35’s branch;
-3. verify the new cumulative PR #35 head;
-4. merge PR #35 into PR #34’s branch;
-5. verify the new cumulative PR #34 head;
-6. leave PR #34 as the single ready-to-review integration into `main`.
+```text
+verify exact PR #40 head
+→ merge PR #40 into PR #35 branch
+→ verify exact PR #35 head
+→ merge PR #35 into PR #34 branch
+→ verify exact PR #34 head
+→ leave PR #34 as the only ready-to-review integration into main
+```
 
-No ancestor result certifies a merge commit. A red lower-stack coordinate is not merged independently before the green cumulative work that repairs it.
+A red ancestor is not promoted independently before the cumulative repair. No ancestor workflow certifies a descendant merge commit.
+
+## Open production gates
+
+The cumulative source and CI candidate do not yet establish:
+
+- disposable managed-platform migration, security, backup, restore, and rollback evidence;
+- live OAuth/MCP/provider authorization, refresh, idempotency, response-loss, revocation, outage, and repair;
+- target-host secret custody, two-employee isolation, destructive recovery, and trusted signing;
+- fixture-free Web/SMS/signed-Review convergence and all three provider-backed golden work journeys;
+- supported-browser, manual visual/accessibility, representative 64 GiB capacity, and fairness evidence;
+- controlled pilot, deployment, or production acceptance.
+
+These remain P4 gates unless a specific verified correspondence contract legitimately discharges a defined sub-gate.
 
 ## Stop rules
 
-- Do not implement before the applicable decision record is valid.
-- Do not create Trace013 on this branch or reuse the discarded incomplete attempt.
-- Do not use a lower tier to evade risk or prerequisites.
-- Do not compare controls from different feasible domains.
-- Do not call a ranking, eigenvector change, objective delta, or coverage difference causal improvement by itself.
-- Do not demote a valid theorem, eigenstructure, solver certificate, or model-checker result from being proof of its declared formal property.
-- Do not promote a P1 model-property proof to a broader software or production claim without the required P2/P3/P4 correspondence.
+- Do not edit source before task-capsule and plan admission for non-mechanical work.
 - Do not weaken tests for green.
-- Do not infer authority or acceptance from filenames, dates, fixtures, UI labels, unverified scores, source wiring, workflow names, or stale prose.
-- Preserve exact account/employee/assignment/authority/revision/commercial/effect identity across snapshot, stream, reconnect, retry, output, accounting, and proof.
+- Do not compare controls from different feasible domains.
+- Do not hand-author operators, graph structure, weights, scores, or certificates to justify a desired patch.
+- Do not demote a valid formal result from proof of its exact property.
+- Do not promote P1 into P2, P3, or P4 without the missing correspondence and evidence.
+- Unknown is not zero.
 - Shared rate and budget authority cannot be process-local or caller-sharded.
-- Accepted provider success requires matching effect and accounting receipts.
-- Ambiguous outcomes reconcile the original effect identity before retry.
-- Repair cannot erase accepted effects or invent completion.
+- Ambiguous provider outcomes reconcile the original effect before retry.
+- Repair cannot erase accepted work or invent completion.
 - Fixture state cannot satisfy fixture-free acceptance.
-- A source-built or CI-signed manifest is not trusted production signing or deployment evidence.
-- Do not claim a stronger property or evidence class without exact proof on the claimed candidate and boundary.
-
-## Resolved source liabilities
-
-String-based production server generation and patching has been removed. `apps/manager/src/server.ts` is canonical typed source, and structural governance rejects the deleted mutation chain and generated entrypoints.
-
-The UI Lab now has one canonical agent entry point and a neutral folder-first variant boundary. This resolves onboarding, development-loop, and source-governance liabilities only; it does not establish visual approval, supported-browser accessibility, live channels, target-host, provider, managed database, pilot, deployment, or production acceptance.
+- Source-built signing is not trusted production signing or deployment.
