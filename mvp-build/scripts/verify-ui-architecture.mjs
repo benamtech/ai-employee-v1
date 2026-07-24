@@ -44,6 +44,10 @@ requireExactly("one_renderer_registry", definitions(/export function registeredO
 requireExactly("one_work_resource_renderer", definitions(/export function WorkObjectRenderer\(/));
 requireExactly("one_embedded_view_compiler", definitions(/export function compileDeliverableUiResource\(/));
 
+requireExactly("one_variant_admission_policy", definitions(/export function admitUiVariantForRuntime\(/));
+requireExactly("one_variant_model_projection", definitions(/export function projectExperienceModelForVariant\(/));
+requireExactly("one_variant_intent_resolver", definitions(/export function resolveUiVariantIntent\(/));
+
 requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /openOwnerProjectionController/, "workspace_uses_controller");
 requireText("apps/web/app/agent/[employeeId]/LiveEmployeeOperatingShell.tsx", /openOwnerProjectionController/, "talk_uses_controller");
 requireText("apps/web/app/agent/[employeeId]/AgentSurface.tsx", /compileOperatingProjection/, "workspace_uses_compiler");
@@ -63,9 +67,17 @@ requireText("apps/web/app/api/ui-lab/presets/route.ts", /AMTECH_UI_LAB_WRITE/, "
 requireText("apps/web/app/_lib/ui-lab-registry.server.ts", /open\(path, "wx"\)/, "ui_lab_preset_versions_write_exclusively");
 requireText("packages/shared/src/ui-lab-preset.ts", /Approved presets require reproducible clean Git source/, "ui_lab_promotion_requires_reproducible_source");
 
+requireText("apps/web/app/_components/ui-variant/UiVariantHost.tsx", /if \(!admission\.admitted/, "generated_runtime_host_refuses_unadmitted_variant");
+requireText("apps/web/app/_components/live-employee/UiLabShell.tsx", /admitUiVariantForRuntime\([\s\S]*surface: "live_owner_workbench"/, "live_variant_admission_uses_live_surface");
+requireText("apps/web/app/_components/live-employee/UiLabShell.tsx", /projectExperienceModelForVariant\(model, manifest\)/, "live_variant_model_is_capability_scoped");
+requireText("apps/web/app/_components/live-employee/LiveEmployeeProvider.tsx", /resolveUiVariantIntent\(\{ request, model, admission \}\)/, "live_intent_bridge_uses_shared_resolver");
+requireText("apps/web/app/ui-lab/variant/[variant]/[scenario]/VariantFixtureLabClient.tsx", /surface: "fixture_lab"/, "fixture_variant_surface_is_explicit");
+
 forbidActive(/new EventSource\(/, "no_surface_local_eventsource", ["apps/web/app/agent/[employeeId]/owner-projection-controller.ts"]);
 forbidActive(/function fallbackOperatingState\(/, "no_active_fallback_compiler");
 forbidActive(/function deriveOperatingState\(/, "no_active_lab_compiler");
+// Intent policy stays in the one shared resolver; surfaces execute host methods, they do not decide them.
+forbidActive(/\.intents\.find\(/, "no_surface_local_intent_policy", ["packages/shared/src/ui-variant-runtime.ts"]);
 
 console.log(JSON.stringify({
   status: "ok",
@@ -77,5 +89,12 @@ console.log(JSON.stringify({
     preview_route: "ui-lab/preview/[scenario]/page.tsx",
     production_preview: "ProductionFixtureLabClient.tsx",
     legacy_fixture_lab: "isolated_not_routed",
+  },
+  generated_runtime: {
+    policy_owner: "packages/shared/src/ui-variant-runtime.ts",
+    admission: "admitUiVariantForRuntime",
+    projection: "projectExperienceModelForVariant",
+    intent_bridge: "resolveUiVariantIntent",
+    surfaces: ["live_owner_workbench", "fixture_lab"],
   },
 }, null, 2));

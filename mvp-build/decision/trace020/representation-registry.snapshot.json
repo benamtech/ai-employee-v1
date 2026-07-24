@@ -1,0 +1,397 @@
+{
+  "dialects": [
+    {
+      "admission_conditions": [
+        "git_repository",
+        "tracked_files_available"
+      ],
+      "claims_supported": [
+        "content-addressed tracked-file inventory",
+        "observed import, definition, script, workflow, and authority relations"
+      ],
+      "cost_class": "low",
+      "generator": "extract/repository-facts.mjs",
+      "id": "repo.fact.v1",
+      "input_dialects": [],
+      "proof_class_maximum": "P2",
+      "required_fidelity": "tracked-file digest parity",
+      "status": "implemented",
+      "verifier": "verify/verify-correspondence.mjs"
+    },
+    {
+      "admission_conditions": [
+        "authority_map_available"
+      ],
+      "claims_supported": [
+        "authority route membership",
+        "evidence-class ordering",
+        "authority-reference cycle detection"
+      ],
+      "cost_class": "low",
+      "generator": "represent/authority-dag.mjs",
+      "id": "authority.dag.v1",
+      "input_dialects": [
+        "repo.fact.v1"
+      ],
+      "proof_class_maximum": "P2",
+      "required_fidelity": "authority-map membership parity",
+      "status": "implemented",
+      "verifier": "verify/verify-correspondence.mjs"
+    },
+    {
+      "admission_conditions": [
+        "repository_facts_valid"
+      ],
+      "claims_supported": [
+        "observed dependency reachability",
+        "task-local impact expansion"
+      ],
+      "cost_class": "low",
+      "generator": "represent/dependency-graph.mjs",
+      "id": "dependency.graph.v1",
+      "input_dialects": [
+        "repo.fact.v1"
+      ],
+      "proof_class_maximum": "P2",
+      "required_fidelity": "relation provenance parity",
+      "status": "implemented",
+      "verifier": "verify/verify-correspondence.mjs"
+    },
+    {
+      "admission_conditions": [
+        "at_least_one_joint_relation_with_cardinality_gte_3"
+      ],
+      "claims_supported": [
+        "joint source/dependency/test/execution/authority membership",
+        "touch, fractional, complete, and proved coverage accounting"
+      ],
+      "cost_class": "low",
+      "generator": "represent/invariant-hypergraph.mjs",
+      "id": "invariant.hypergraph.v1",
+      "input_dialects": [
+        "repo.fact.v1",
+        "dependency.graph.v1",
+        "authority.dag.v1"
+      ],
+      "proof_class_maximum": "P2",
+      "required_fidelity": "P2 membership parity",
+      "status": "implemented",
+      "verifier": "verify/verify-correspondence.mjs"
+    },
+    {
+      "admission_conditions": [
+        "all_members_and_relation_provenance_resolve_to_repository_facts"
+      ],
+      "claims_supported": [
+        "P2 representation membership parity"
+      ],
+      "cost_class": "low",
+      "generator": "represent/invariant-hypergraph.mjs",
+      "id": "correspondence.v1",
+      "input_dialects": [
+        "repo.fact.v1",
+        "invariant.hypergraph.v1"
+      ],
+      "proof_class_maximum": "P2",
+      "required_fidelity": "source fact digest parity",
+      "status": "implemented",
+      "verifier": "verify/verify-correspondence.mjs"
+    },
+    {
+      "admission_conditions": [
+        "positive_hyperedge_weights",
+        "nonzero_vertex_degrees",
+        "precise_operator_claim"
+      ],
+      "claims_supported": [
+        "dominant eigenpair of the declared normalized hypergraph operator",
+        "exact incidence connectivity components",
+        "task-local diffusion basis"
+      ],
+      "cost_class": "medium",
+      "generator": "analyze/spectral-hypergraph.mjs",
+      "id": "spectral.hypergraph.v1",
+      "input_dialects": [
+        "invariant.hypergraph.v1"
+      ],
+      "proof_class_maximum": "P1",
+      "required_fidelity": "P2 membership parity",
+      "status": "implemented",
+      "verifier": "verify/verify-certificate.mjs"
+    },
+    {
+      "admission_conditions": [
+        "task_goal_or_seed_available"
+      ],
+      "claims_supported": [
+        "ranked task-local context expansion"
+      ],
+      "cost_class": "low",
+      "generator": "analyze/task-diffusion.mjs",
+      "id": "task.diffusion.v1",
+      "input_dialects": [
+        "dependency.graph.v1",
+        "invariant.hypergraph.v1"
+      ],
+      "proof_class_maximum": "P0",
+      "required_fidelity": "input digest parity",
+      "status": "implemented",
+      "verifier": "verify/verify-transaction.mjs"
+    },
+    {
+      "admission_conditions": [
+        "bounded_depth_lte_4"
+      ],
+      "claims_supported": [
+        "typed first-through-fourth-order relationship frontier with falsifiers"
+      ],
+      "cost_class": "low",
+      "generator": "analyze/effect-frontier.mjs",
+      "id": "effect.frontier.v1",
+      "input_dialects": [
+        "task.diffusion.v1",
+        "dependency.graph.v1",
+        "invariant.hypergraph.v1"
+      ],
+      "proof_class_maximum": "P0",
+      "required_fidelity": "input relation provenance",
+      "status": "implemented",
+      "verifier": "verify/verify-transaction.mjs"
+    },
+    {
+      "admission_conditions": [
+        "predictions_precede_outcomes",
+        "falsifiers_declared",
+        "same_prerequisite_domain"
+      ],
+      "claims_supported": [
+        "predeclared predictions",
+        "baseline and treatment comparison",
+        "outcome calibration"
+      ],
+      "cost_class": "low",
+      "generator": "repoctl.mjs",
+      "id": "experiment.design.v1",
+      "input_dialects": [
+        "task.diffusion.v1",
+        "effect.frontier.v1"
+      ],
+      "proof_class_maximum": "P3",
+      "required_fidelity": "transaction chronology and evidence ledger",
+      "status": "implemented",
+      "verifier": "verify/verify-transaction.mjs"
+    },
+    {
+      "admission_conditions": [
+        "claim_assumptions_certificate_verifier_and_correspondence_declared"
+      ],
+      "claims_supported": [
+        "proof-carrying formal model property"
+      ],
+      "cost_class": "low",
+      "generator": "analyze/spectral-hypergraph.mjs",
+      "id": "claim.certificate.v1",
+      "input_dialects": [
+        "spectral.hypergraph.v1",
+        "correspondence.v1"
+      ],
+      "proof_class_maximum": "P1",
+      "required_fidelity": "P2 correspondence artifact",
+      "status": "implemented",
+      "verifier": "verify/verify-certificate.mjs"
+    },
+    {
+      "admission_conditions": [
+        "exact_candidate_or_explicit_external_coordinate"
+      ],
+      "claims_supported": [
+        "non-promoting evidence-class ledger",
+        "prediction-to-outcome binding"
+      ],
+      "cost_class": "low",
+      "generator": "repoctl.mjs",
+      "id": "evidence.ledger.v1",
+      "input_dialects": [
+        "experiment.design.v1"
+      ],
+      "proof_class_maximum": "P4",
+      "required_fidelity": "exact command, candidate, and evidence references",
+      "status": "implemented",
+      "verifier": "verify/verify-transaction.mjs"
+    },
+    {
+      "admission_conditions": [
+        "accepted_external_attestor",
+        "exact_candidate_or_external_coordinate",
+        "retained_evidence_reference"
+      ],
+      "claims_supported": [
+        "external or production acceptance record validation for P4"
+      ],
+      "cost_class": "low",
+      "generator": "verify/verify-external-acceptance.mjs",
+      "id": "external.acceptance.v1",
+      "input_dialects": [
+        "evidence.ledger.v1"
+      ],
+      "proof_class_maximum": "P4",
+      "required_fidelity": "attestor, boundary, accepted status, and evidence reference",
+      "status": "implemented",
+      "verifier": "verify/verify-external-acceptance.mjs"
+    },
+    {
+      "admission_conditions": [
+        "legal_illegal_transition_question",
+        "explicit_state_semantics"
+      ],
+      "claims_supported": [
+        "reachability",
+        "unreachability",
+        "counterexample traces"
+      ],
+      "cost_class": "medium",
+      "id": "transition.system.v1",
+      "input_dialects": [
+        "repo.fact.v1"
+      ],
+      "proof_class_maximum": "P2",
+      "status": "registered_future"
+    },
+    {
+      "admission_conditions": [
+        "boolean_or_resource_constraint_question",
+        "solver_certificate_available"
+      ],
+      "claims_supported": [
+        "satisfiability",
+        "unsatisfiability",
+        "bounded optimization"
+      ],
+      "cost_class": "medium",
+      "id": "constraint.smt.v1",
+      "input_dialects": [
+        "repo.fact.v1"
+      ],
+      "proof_class_maximum": "P2",
+      "status": "registered_future"
+    },
+    {
+      "admission_conditions": [
+        "many_equivalent_transformations",
+        "sound_rewrite_rules"
+      ],
+      "claims_supported": [
+        "equivalence-class saturation",
+        "cost-model extraction"
+      ],
+      "cost_class": "high",
+      "id": "rewrite.egraph.v1",
+      "input_dialects": [
+        "repo.fact.v1"
+      ],
+      "proof_class_maximum": "P2",
+      "status": "registered_future"
+    },
+    {
+      "admission_conditions": [
+        "queue_capacity_service_rate_question",
+        "measured_arrival_and_service_process"
+      ],
+      "claims_supported": [
+        "queue stability and capacity hypotheses"
+      ],
+      "cost_class": "medium",
+      "id": "queueing.state.v1",
+      "input_dialects": [
+        "trajectory.episode.v1"
+      ],
+      "proof_class_maximum": "P1",
+      "status": "registered_future"
+    },
+    {
+      "admission_conditions": [
+        "repeated_homogeneous_episodes",
+        "consistent_sampling",
+        "held_out_baseline_outperformance"
+      ],
+      "claims_supported": [
+        "fitted-operator properties",
+        "held-out trajectory predictions"
+      ],
+      "cost_class": "high",
+      "id": "koopman.episode.v1",
+      "input_dialects": [
+        "trajectory.episode.v1"
+      ],
+      "proof_class_maximum": "P1",
+      "status": "registered_future"
+    },
+    {
+      "admission_conditions": [
+        "true_oriented_face_relations",
+        "valid_boundary_operators"
+      ],
+      "claims_supported": [
+        "homology",
+        "Hodge decomposition",
+        "cycle and flow structure"
+      ],
+      "cost_class": "high",
+      "id": "topology.complex.v1",
+      "input_dialects": [
+        "repo.fact.v1"
+      ],
+      "proof_class_maximum": "P1",
+      "status": "registered_future"
+    },
+    {
+      "admission_conditions": [
+        "semantic_retrieval_or_duplicate_detection",
+        "held_out_task_evaluation"
+      ],
+      "claims_supported": [
+        "retrieval and similarity hypotheses"
+      ],
+      "cost_class": "high",
+      "id": "embedding.code-change.v1",
+      "input_dialects": [
+        "repo.fact.v1",
+        "trajectory.episode.v1"
+      ],
+      "proof_class_maximum": "P0",
+      "status": "registered_future"
+    },
+    {
+      "admission_conditions": [
+        "completed comparable task transactions"
+      ],
+      "claims_supported": [
+        "longitudinal task outcome dataset"
+      ],
+      "cost_class": "medium",
+      "id": "trajectory.episode.v1",
+      "input_dialects": [
+        "evidence.ledger.v1"
+      ],
+      "proof_class_maximum": "P0",
+      "status": "registered_future"
+    }
+  ],
+  "schema": "amtech.representation-registry.v1",
+  "selector": {
+    "always_on": [
+      "repo.fact.v1",
+      "authority.dag.v1",
+      "dependency.graph.v1",
+      "invariant.hypergraph.v1",
+      "effect.frontier.v1",
+      "experiment.design.v1"
+    ],
+    "rule": "Every non-mechanical task passes through the selector. Specialized dialects activate only when admission conditions are satisfied.",
+    "specialized_default": [
+      "spectral.hypergraph.v1"
+    ]
+  },
+  "status": "active",
+  "version": 1
+}

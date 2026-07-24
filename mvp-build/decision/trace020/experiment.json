@@ -1,0 +1,155 @@
+{
+  "content_digest": "sha256:547757dfbebec44adad1893a106eb907175bc6478a702092bf8dc05c626b019c",
+  "engine_version": "1.1.0",
+  "generated_at": "2026-07-24T02:46:08.698Z",
+  "payload": {
+    "baseline": {
+      "id": "evidence-and-invariants",
+      "same_prerequisite_domain": true
+    },
+    "evidence_classes": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "lineage": {
+      "previous_digest": "sha256:5895ed0624ed8f8da54668c4a180a40b43c540ecd35a7ce4fc19a68b957c7dce",
+      "root_digest": "sha256:eadfd011e863af8ea6e18625c40921ce4a830b5f19310da1b2864af096661774"
+    },
+    "metrics": [
+      "live_admission_refusals",
+      "capability_projection_withheld_count",
+      "intent_rejection_codes",
+      "ui_contract_suite_pass",
+      "architecture_verifier_status",
+      "web_typecheck_ok",
+      "browser_acceptance_state"
+    ],
+    "outcomes": [
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-admission-policy",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-capability-projection",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-intent-bridge",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-resource-payload-sufficiency",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-phase1-regression",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      }
+    ],
+    "predictions": [
+      {
+        "claim": "The generated runtime refuses live employee data to deprecated, experiment, and lab_only variants, admits approved variants directly, and admits candidate variants on the live surface only under explicit operator acknowledgement.",
+        "expected": true,
+        "falsifier": "A lab_only or experiment manifest is admitted on the live_owner_workbench surface, or a candidate manifest is admitted without acknowledgement.",
+        "horizon": 1,
+        "id": "prediction-admission-policy",
+        "metric": "live_admission_refusals",
+        "type": "verification"
+      },
+      {
+        "claim": "A variant receives only the EmployeeExperienceModelV1 capabilities its manifest declares in required or optional; undeclared and intentionally omitted capabilities are neutral empty values.",
+        "expected": true,
+        "falsifier": "A capability absent from the manifest declaration reaches the variant component with live employee content.",
+        "horizon": 2,
+        "id": "prediction-capability-projection",
+        "metric": "capability_projection_withheld_count",
+        "type": "verification"
+      },
+      {
+        "claim": "Every dispatched variant intent resolves to a closed UiVariantHostMethod union or a typed rejection code, and no fixture intent or high-risk direct intent executes on the live surface.",
+        "expected": true,
+        "falsifier": "A dispatched intent reaches a live Manager route without a declared model intent and an allowed host method.",
+        "horizon": 3,
+        "id": "prediction-intent-bridge",
+        "metric": "intent_rejection_codes",
+        "type": "verification"
+      },
+      {
+        "claim": "The generated runtime is implementable from ResourcePayload and the existing owner projection alone, with no Manager mutation, connector custody, or non-ResourcePayload employee read.",
+        "expected": true,
+        "falsifier": "A variant or the runtime requires non-ResourcePayload employee data, connector custody, or authority/approval/effect mutation.",
+        "horizon": 4,
+        "id": "prediction-resource-payload-sufficiency",
+        "metric": "architecture_verifier_status",
+        "type": "architecture"
+      },
+      {
+        "claim": "Phase 1 live workbench contracts, the UI architecture verifier, the UI system validator, and web typecheck stay green on the exact candidate.",
+        "expected": true,
+        "falsifier": "npm run test:ui:contracts, node scripts/verify-ui-architecture.mjs, node scripts/validate-ui-system.mjs, or npm run typecheck --workspace @amtech/web fails.",
+        "horizon": 4,
+        "id": "prediction-phase1-regression",
+        "metric": "ui_contract_suite_pass",
+        "type": "regression"
+      }
+    ],
+    "status": "finished",
+    "stop_conditions": [
+      "A variant or the generated runtime requires non-ResourcePayload employee data, connector custody, or authority/approval/effect mutation.",
+      "Implementation would require a new Manager endpoint, browser credential custody, migration, provider adapter, or Hermes change.",
+      "Implementation would require promoting a variant manifest, preset, or fixture.",
+      "Patch scope exceeds 26 files without a recorded re-admission.",
+      "Any P4 claim would be needed to discharge a proof obligation."
+    ],
+    "task_id": "TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME"
+  },
+  "provenance": {
+    "chronology": "immutable root experiment retained in experiment.initial.json",
+    "generator": "decision/engine/repoctl.mjs"
+  },
+  "schema": "experiment.design.v1",
+  "source_sha": "e5e36c5072c69dcc57ccefce1a5d807f71f70058"
+}

@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
+import { admitUiVariantForRuntime, projectExperienceModelForVariant, type UiVariantManifest } from "@amtech/shared";
 import { useEmployeeUiPort, EmployeeUiPortHost } from "../employee-ui/EmployeeUiPort";
 import { AgentSurface } from "../../agent/[employeeId]/AgentSurface";
 import { LiveEmployeeOperatingShell } from "../../agent/[employeeId]/LiveEmployeeOperatingShell";
 import { UiVariantHost } from "../ui-variant/UiVariantHost";
 import { buildEmployeeExperienceModel } from "../ui-variant/buildEmployeeExperienceModel";
+import { UI_VARIANT_REGISTRY, isUiVariantRegistryId } from "../ui-variant/registry.generated";
 import { useLiveEmployee } from "./LiveEmployeeProvider";
 
 const NAV = [
@@ -15,6 +17,7 @@ const NAV = [
   { href: "/conversation", label: "Conversation" },
   { href: "/state", label: "State" },
   { href: "/generated", label: "Generated" },
+  { href: "/variants", label: "Designs" },
   { href: "/fixtures", label: "Fixtures", absolute: true },
 ] as const;
 
@@ -128,18 +131,30 @@ export function UiLabGeneratedPanel() {
   );
 }
 
-export function UiLabVariantPanel({ variantId }: { variantId: string }) {
+function registryManifest(variantId: string): UiVariantManifest {
+  const id = isUiVariantRegistryId(variantId) ? variantId : "reference-client";
+  return UI_VARIANT_REGISTRY[id].manifest;
+}
+
+export function UiLabVariantPanel({
+  variantId,
+  operatorAcknowledged = false,
+}: {
+  variantId: string;
+  operatorAcknowledged?: boolean;
+}) {
   const live = useLiveEmployee();
   return (
     <EmployeeUiPortHost adapterKey="owner_web" payload={live.resources}>
-      <UiLabVariantInner variantId={variantId} />
+      <UiLabVariantInner variantId={variantId} operatorAcknowledged={operatorAcknowledged} />
     </EmployeeUiPortHost>
   );
 }
 
-function UiLabVariantInner({ variantId }: { variantId: string }) {
+function UiLabVariantInner({ variantId, operatorAcknowledged }: { variantId: string; operatorAcknowledged: boolean }) {
   const live = useLiveEmployee();
   const port = useEmployeeUiPort();
+  const manifest = registryManifest(variantId);
   const model = useMemo(() => buildEmployeeExperienceModel({
     payload: live.resources,
     port,
@@ -152,15 +167,65 @@ function UiLabVariantInner({ variantId }: { variantId: string }) {
     },
     evidenceLevel: "live",
   }), [live.progress, live.resources, live.scope, live.streamState, port]);
+  const admission = useMemo(() => admitUiVariantForRuntime({
+    manifest,
+    surface: "live_owner_workbench",
+    adapterKey: "owner_web",
+    operatorAcknowledged,
+  }), [manifest, operatorAcknowledged]);
+  // The variant only ever receives the capabilities its own manifest declared.
+  const projection = useMemo(() => projectExperienceModelForVariant(model, manifest), [manifest, model]);
   const referenceClient = <AgentSurface employeeId={live.employeeId} fixtureMode={false} embedded liveProjection={live} />;
   return (
-    <section className="ui-live-variant" data-evidence-level={model.metadata.evidence_level}>
+    <section
+      className="ui-live-variant"
+      data-evidence-level={model.metadata.evidence_level}
+      data-ui-variant-withheld={projection.withheld.join(" ")}
+    >
       <UiVariantHost
-        variantId={variantId}
-        model={model}
+        variantId={manifest.id}
+        admission={admission}
+        model={projection.model}
         referenceClient={referenceClient}
-        dispatchIntent={(request) => live.dispatchVariantIntent(request, model)}
+        dispatchIntent={(request) => live.dispatchVariantIntent(request, projection.model, admission)}
       />
+    </section>
+  );
+}
+
+export function UiLabVariantsPanel() {
+  const live = useLiveEmployee();
+  const base = `/ui-lab/employee/${live.employeeId}/variant`;
+  const decisions = Object.values(UI_VARIANT_REGISTRY).map(({ manifest }) => ({
+    manifest,
+    admission: admitUiVariantForRuntime({ manifest, surface: "live_owner_workbench", adapterKey: "owner_web", operatorAcknowledged: false }),
+    acknowledged: admitUiVariantForRuntime({ manifest, surface: "live_owner_workbench", adapterKey: "owner_web", operatorAcknowledged: true }),
+  }));
+  return (
+    <section className="ui-live-panel">
+      <h1>Designs</h1>
+      <p style={{ color: "#667085", maxWidth: 720 }}>
+        Each design renders your live employee only when it is cleared for it. Designs still under review open for
+        inspection only, and designs limited to sample data never receive live state here.
+      </p>
+      <div className="ui-live-grid">
+        {decisions.map(({ manifest, admission, acknowledged }) => (
+          <article className="ui-live-card" key={manifest.id} data-ui-variant={manifest.id} data-ui-variant-admission={admission.reason_code}>
+            <strong>{manifest.name}</strong>
+            <p>{manifest.summary}</p>
+            <p style={{ color: admission.admitted ? "#166534" : "#854d0e", fontSize: 12, fontWeight: 750 }}>
+              {admission.owner_message}
+            </p>
+            {admission.admitted ? (
+              <a href={`${base}/${manifest.id}`}>Open over live employee</a>
+            ) : acknowledged.admitted ? (
+              <a href={`${base}/${manifest.id}?admission=lab_review`}>Open for review only</a>
+            ) : (
+              <a href="/ui-lab/fixtures">Open with sample data</a>
+            )}
+          </article>
+        ))}
+      </div>
     </section>
   );
 }

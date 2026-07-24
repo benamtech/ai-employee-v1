@@ -37,6 +37,15 @@ Disable generated runtime route and fall back to Phase 1 reference client.
 ## Stop Conditions
 Any need for new authority endpoint, browser credential custody, or fixture promotion.
 ## Docs Reconciliation
-Update this doc, ADR, CODEGRAPH, and memory with exact evidence.
+Implemented by Trace020 (`decision/trace020/`, `TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME`) from merged main `e5e36c5`. Policy owner is `packages/shared/src/ui-variant-runtime.ts`; decision record is `docs/adr/ADR-012-ui-lab-phase-2-generated-experience-runtime.md`; CODEGRAPH, `authority-map.json`, `decision/active.json`, and `memory/MEMORY.md` are reconciled to the same evidence.
+
+Outcome against this contract:
+
+- Blockers cleared: variant safety policy now exists as tiered admission, and generated-runtime isolation is enforced by capability-scoped projection plus the closed host-method union.
+- Prediction held: live and generated models share one identity. The falsifier did not fire — no variant required non-`ResourcePayload` employee data.
+- Evidence: P3. Focused contract suite, `test:ui:contracts`, architecture verifier, UI system validator, variant doctor, web typecheck, and `repo:verify:full` pass on the exact candidate.
+- Blocked, not passed: the live-employee browser acceptance line. The only running stack is the production compose mirror and minting an owner session against it is outside the transaction's authority. Fixture-surface admission and unauthenticated live-surface fail-closed were proven in a real browser (`decision/trace020/browser-acceptance.json`).
+- Nothing promoted: no variant manifest, preset, or fixture changed eligibility to satisfy admission.
+
 ## Exact One-Line Future Prompt
-Implement UI Lab Phase 2 generated experience runtime from merged Trace018, preserving ResourcePayload and Manager authority.
+Implement UI Lab Phase 3 channel/runtime access by adding members to the Trace020 `UiVariantHostMethod` union without reopening admission or projection.

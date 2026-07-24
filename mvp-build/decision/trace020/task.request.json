@@ -1,0 +1,130 @@
+{
+  "allowed_evidence_classes": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "candidate_generation_contract": {
+    "independent_batches_before_recombination": true,
+    "invariant_and_prerequisite_filter": true,
+    "mathematical_layers_must_change_a_decision_or_proof_obligation": true,
+    "simple_baseline_required": true
+  },
+  "external_blockers": [
+    "live provider acceptance for Gmail, Stripe Connect, and QBO remains unavailable",
+    "deployment, pilot, and production acceptance remain uncrossed",
+    "external human review and acceptance record for this candidate",
+    "live browser acceptance depends on a running stack with an authorized owner-visible employee"
+  ],
+  "goal": "Govern the UI Lab generated experience runtime so approved variants receive a capability-scoped projection of EmployeeExperienceModelV1 and a typed bounded intent bridge, while lab-only and experimental variants are refused live employee data, without replacing ResourcePayload or adding Manager authority.",
+  "maximum_patch": {
+    "allowed_paths": [
+      "packages/shared/src/ui-variant-runtime.ts",
+      "packages/shared/src/ui-variant.ts",
+      "packages/shared/src/index.ts",
+      "apps/web/app/_components/ui-variant/UiVariantHost.tsx",
+      "apps/web/app/_components/live-employee/UiLabShell.tsx",
+      "apps/web/app/_components/live-employee/LiveEmployeeProvider.tsx",
+      "apps/web/app/ui-lab/employee/[employeeId]/variant/[variant]/page.tsx",
+      "apps/web/app/ui-lab/employee/[employeeId]/variants/page.tsx",
+      "scripts/verify-ui-architecture.mjs",
+      "scripts/ui-variant.mjs",
+      "package.json",
+      "tests/unit/ui-variant-runtime-contract.test.ts",
+      "tests/unit/ui-lab-workbench-contract.test.ts",
+      "tests/unit/ui-architecture-fitness.test.ts",
+      "docs/adr/ADR-012-ui-lab-phase-2-generated-experience-runtime.md",
+      "docs/ui-lab/PHASE-02-GENERATED-EXPERIENCE-RUNTIME.md",
+      "docs/ui-lab/README.md",
+      "CODEGRAPH.md",
+      "authority-map.json",
+      "decision/active.json",
+      "memory/MEMORY.md",
+      "memory/2026-07-23-trace020-ui-lab-phase-2-generated-runtime.md"
+    ],
+    "expansion_rule": "Additional paths require discovered_later entries with rationale before evaluation; do not silently widen scope or evidence.",
+    "maximum_files": 26
+  },
+  "metrics": [
+    "live_admission_refusals",
+    "capability_projection_withheld_count",
+    "intent_rejection_codes",
+    "ui_contract_suite_pass",
+    "architecture_verifier_status",
+    "web_typecheck_ok",
+    "browser_acceptance_state"
+  ],
+  "non_goals": [
+    "No new Manager endpoint, provider adapter, Hermes protocol change, migration, or deployment change.",
+    "No browser credential custody and no raw provider payload rendering.",
+    "No variant, preset, or fixture promotion.",
+    "No Phase 3 channel inspectors or Phase 4 recording/replay implementation.",
+    "No P4 external, provider, deployment, pilot, or production acceptance claim."
+  ],
+  "predictions": [
+    {
+      "claim": "The generated runtime refuses live employee data to deprecated, experiment, and lab_only variants, admits approved variants directly, and admits candidate variants on the live surface only under explicit operator acknowledgement.",
+      "expected": true,
+      "falsifier": "A lab_only or experiment manifest is admitted on the live_owner_workbench surface, or a candidate manifest is admitted without acknowledgement.",
+      "horizon": 1,
+      "id": "prediction-admission-policy",
+      "metric": "live_admission_refusals",
+      "type": "verification"
+    },
+    {
+      "claim": "A variant receives only the EmployeeExperienceModelV1 capabilities its manifest declares in required or optional; undeclared and intentionally omitted capabilities are neutral empty values.",
+      "expected": true,
+      "falsifier": "A capability absent from the manifest declaration reaches the variant component with live employee content.",
+      "horizon": 2,
+      "id": "prediction-capability-projection",
+      "metric": "capability_projection_withheld_count",
+      "type": "verification"
+    },
+    {
+      "claim": "Every dispatched variant intent resolves to a closed UiVariantHostMethod union or a typed rejection code, and no fixture intent or high-risk direct intent executes on the live surface.",
+      "expected": true,
+      "falsifier": "A dispatched intent reaches a live Manager route without a declared model intent and an allowed host method.",
+      "horizon": 3,
+      "id": "prediction-intent-bridge",
+      "metric": "intent_rejection_codes",
+      "type": "verification"
+    },
+    {
+      "claim": "The generated runtime is implementable from ResourcePayload and the existing owner projection alone, with no Manager mutation, connector custody, or non-ResourcePayload employee read.",
+      "expected": true,
+      "falsifier": "A variant or the runtime requires non-ResourcePayload employee data, connector custody, or authority/approval/effect mutation.",
+      "horizon": 4,
+      "id": "prediction-resource-payload-sufficiency",
+      "metric": "architecture_verifier_status",
+      "type": "architecture"
+    },
+    {
+      "claim": "Phase 1 live workbench contracts, the UI architecture verifier, the UI system validator, and web typecheck stay green on the exact candidate.",
+      "expected": true,
+      "falsifier": "npm run test:ui:contracts, node scripts/verify-ui-architecture.mjs, node scripts/validate-ui-system.mjs, or npm run typecheck --workspace @amtech/web fails.",
+      "horizon": 4,
+      "id": "prediction-phase1-regression",
+      "metric": "ui_contract_suite_pass",
+      "type": "regression"
+    }
+  ],
+  "stop_conditions": [
+    "A variant or the generated runtime requires non-ResourcePayload employee data, connector custody, or authority/approval/effect mutation.",
+    "Implementation would require a new Manager endpoint, browser credential custody, migration, provider adapter, or Hermes change.",
+    "Implementation would require promoting a variant manifest, preset, or fixture.",
+    "Patch scope exceeds 26 files without a recorded re-admission.",
+    "Any P4 claim would be needed to discharge a proof obligation."
+  ],
+  "task_id": "TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME",
+  "task_seeds": [
+    "apps/web/app/_components/ui-variant/UiVariantHost.tsx",
+    "apps/web/app/_components/ui-variant/buildEmployeeExperienceModel.ts",
+    "apps/web/app/_components/live-employee/UiLabShell.tsx",
+    "apps/web/app/_components/live-employee/LiveEmployeeProvider.tsx",
+    "packages/shared/src/ui-variant.ts",
+    "scripts/verify-ui-architecture.mjs",
+    "scripts/ui-variant.mjs",
+    "tests/unit/ui-lab-workbench-contract.test.ts"
+  ]
+}

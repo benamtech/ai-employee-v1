@@ -1,7 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { resolveEmployeeUiPort, type UiVariantIntentRequest, type UiVariantIntentResult } from "@amtech/shared";
+import {
+  admitUiVariantForRuntime,
+  resolveEmployeeUiPort,
+  type UiVariantIntentRequest,
+  type UiVariantIntentResult,
+} from "@amtech/shared";
+import { UI_VARIANT_REGISTRY, isUiVariantRegistryId } from "../../../../_components/ui-variant/registry.generated";
 import { EmployeeUiPortHost } from "../../../../_components/employee-ui/EmployeeUiPort";
 import { UiVariantHost } from "../../../../_components/ui-variant/UiVariantHost";
 import { buildEmployeeExperienceModel } from "../../../../_components/ui-variant/buildEmployeeExperienceModel";
@@ -111,5 +117,10 @@ export function VariantFixtureLabClient({
     </EmployeeUiPortHost>
   );
 
-  return <UiVariantHost variantId={variantId} model={model} referenceClient={referenceClient} dispatchIntent={dispatchIntent} />;
+  // Explicit fixture surface: a lab-only or experiment variant is admissible here precisely
+  // because no live employee state can reach it.
+  const manifest = UI_VARIANT_REGISTRY[isUiVariantRegistryId(variantId) ? variantId : "reference-client"].manifest;
+  const admission = admitUiVariantForRuntime({ manifest, surface: "fixture_lab", adapterKey: config.adapterKey });
+
+  return <UiVariantHost variantId={manifest.id} admission={admission} model={model} referenceClient={referenceClient} dispatchIntent={dispatchIntent} />;
 }
