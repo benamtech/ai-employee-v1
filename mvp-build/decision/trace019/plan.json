@@ -1,0 +1,182 @@
+{
+  "schema": "amtech.plan.v1",
+  "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION",
+  "selected_candidates": [
+    {
+      "id": "TRACE019-C1",
+      "summary": "Repair repoctl in place with evaluation-time re-extraction, command-bound hard-edge evidence, modern evidence-class gates, retained overrides, and a non-mutating check command.",
+      "accepted": true
+    },
+    {
+      "id": "TRACE019-C2",
+      "summary": "Add an external wrapper around repoctl without changing existing finish/evaluate semantics.",
+      "accepted": false,
+      "rejection": "Would leave the canonical engine vulnerable and create a parallel authority path."
+    },
+    {
+      "id": "TRACE019-C3",
+      "summary": "Only add tests and document the known evaluator weakness.",
+      "accepted": false,
+      "rejection": "Does not repair the engine gates required by the task."
+    }
+  ],
+  "maximum_patch": {
+    "maximum_files": 22,
+    "allowed_paths": [
+      "mvp-build/decision/engine/repoctl.mjs",
+      "mvp-build/decision/engine/lib/core.mjs",
+      "mvp-build/decision/engine/verify/verify-transaction.mjs",
+      "mvp-build/decision/engine/verify/verify-external-acceptance.mjs",
+      "mvp-build/decision/engine/representation-registry.json",
+      "mvp-build/decision/engine/schemas/evidence-ledger.schema.json",
+      "mvp-build/decision/engine/templates/plan.example.json",
+      "mvp-build/decision/engine/README.md",
+      "mvp-build/decision/engine/self-test/negative-cases.mjs",
+      "mvp-build/tests/unit/decision-engine-contract.test.ts",
+      "mvp-build/CODEGRAPH.md",
+      "mvp-build/authority-map.json",
+      "mvp-build/decision/active.json",
+      "decision/engine/repoctl.mjs",
+      "decision/engine/lib/core.mjs",
+      "decision/engine/verify/verify-transaction.mjs",
+      "decision/engine/verify/verify-external-acceptance.mjs",
+      "decision/engine/representation-registry.json",
+      "decision/engine/schemas/evidence-ledger.schema.json",
+      "decision/engine/templates/plan.example.json",
+      "decision/engine/README.md",
+      "decision/engine/self-test/negative-cases.mjs",
+      "tests/unit/decision-engine-contract.test.ts",
+      "CODEGRAPH.md",
+      "authority-map.json",
+      "decision/active.json"
+    ],
+    "expansion_rule": "If the 22-file envelope is exceeded, re-admit with a recorded reason before evaluating."
+  },
+  "implementation_steps": [
+    "Bump the engine version to 1.1.0 and add shared dirty-worktree, repo-path, and command-evidence helpers.",
+    "Clamp plan admission to capsule/effect/discovered-later bounds and reject inflated file caps or path scope.",
+    "At evaluate, re-extract current facts and rebuild authority, dependency, hypergraph, and correspondence artifacts; record differential findings.",
+    "Execute hard-edge evidence argv and allow only successful computed command results or explicit accepted blockers to discharge touched hard edges.",
+    "Compute P2/P3/P4 honestly from executed evidence and accepted external acceptance records; treat planned and supplied outcomes as unresolved for modern ledgers.",
+    "Add post-hoc override validation and retention, plus non-mutating check strict/advisory modes.",
+    "Extend doctor/registry/docs/tests, including the negative suite and historical trace018 compatibility."
+  ],
+  "proof_obligations": [
+    {
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:3dcbceb3acca",
+      "status": "accepted",
+      "evidence": [
+        {
+          "kind": "command",
+          "argv": ["node", "decision/engine/repoctl.mjs", "self-test"],
+          "discharges": ["engine_lifecycle", "hard_edge_command_execution", "P3_exact_candidate"]
+        },
+        {
+          "kind": "command",
+          "argv": ["node", "--test", "decision/engine/self-test/negative-cases.mjs"],
+          "discharges": ["negative_cases", "differential_gates", "evidence_nonpromotion"]
+        }
+      ]
+    },
+    {
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/decision/engine/representation-registry.json:42cddd8727da",
+      "status": "accepted",
+      "evidence": [
+        {
+          "kind": "command",
+          "argv": ["node", "decision/engine/repoctl.mjs", "doctor"],
+          "discharges": ["registry_dialect_presence", "external_acceptance_dialect"]
+        }
+      ]
+    },
+    {
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:fbf13dae8240",
+      "status": "accepted",
+      "evidence": [
+        {
+          "kind": "command",
+          "argv": ["npm", "run", "test:repo-governance"],
+          "discharges": ["document_authority_consistency"]
+        }
+      ]
+    },
+    {
+      "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/authority-map.json:17da23e0261c",
+      "status": "accepted",
+      "evidence": [
+        {
+          "kind": "command",
+          "argv": ["npm", "run", "test:repo-governance"],
+          "discharges": ["authority_router_consistency"]
+        }
+      ]
+    },
+    {
+      "hyperedge_id": "hyperedge:authority-routing:authority-map:4483b127021c",
+      "status": "accepted",
+      "evidence": [
+        {
+          "kind": "command",
+          "argv": ["npm", "run", "test:repo-governance"],
+          "discharges": ["authority_routing"]
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "commands": [
+      { "argv": ["node", "decision/engine/repoctl.mjs", "self-test"], "timeout_ms": 120000 },
+      { "argv": ["node", "decision/engine/repoctl.mjs", "doctor"], "timeout_ms": 120000 },
+      { "argv": ["node", "--test", "decision/engine/self-test/negative-cases.mjs"], "timeout_ms": 120000 },
+      { "argv": ["npx", "vitest", "run", "tests/unit/decision-engine-contract.test.ts"], "timeout_ms": 180000 },
+      { "argv": ["npm", "run", "test:repo-governance"], "timeout_ms": 300000 },
+      { "argv": ["npm", "run", "repo:verify:full"], "timeout_ms": 900000 },
+      { "argv": ["node", "decision/engine/repoctl.mjs", "verify", "--transaction", "decision/trace018", "--phase", "finished"], "timeout_ms": 120000 }
+    ]
+  },
+  "discovered_later_policy": "Allowed only for files within the engine, its unit tests, or active authority docs, with a rationale and no evidence-class widening.",
+  "predictions": [
+    {
+      "id": "prediction-negative-suite",
+      "horizon": 1,
+      "type": "verification",
+      "claim": "The new negative suite rejects failing evidence, inflated scope, absent execution evidence, planned hard edges, authority and correspondence regressions, bad overrides, unearned P4, dirty evaluation, calibration errors, and incremental/full parity drift.",
+      "falsifier": "node --test decision/engine/self-test/negative-cases.mjs fails.",
+      "metric": "negative_case_rejection_count",
+      "expected": 15
+    },
+    {
+      "id": "prediction-existing-lifecycle",
+      "horizon": 2,
+      "type": "regression",
+      "claim": "The existing isolated repoctl self-test still reaches P3 and finished verification.",
+      "falsifier": "node decision/engine/repoctl.mjs self-test fails.",
+      "metric": "self_test_ok",
+      "expected": true
+    },
+    {
+      "id": "prediction-registry",
+      "horizon": 3,
+      "type": "authority",
+      "claim": "repoctl doctor reports external.acceptance.v1 and no registry errors.",
+      "falsifier": "node decision/engine/repoctl.mjs doctor fails or omits external.acceptance.v1.",
+      "metric": "doctor_ok",
+      "expected": true
+    },
+    {
+      "id": "prediction-trace018",
+      "horizon": 4,
+      "type": "historical-regression",
+      "claim": "The modern verifier remains compatible with the finished trace018 ledger.",
+      "falsifier": "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished fails.",
+      "metric": "trace018_verify_ok",
+      "expected": true
+    }
+  ],
+  "stop_conditions": [
+    "Do not claim P4; record external acceptance as blocked unless an accepted external record exists.",
+    "Do not weaken historical trace verification to make trace018 pass.",
+    "Do not bypass dirty-worktree gates; use --allow-dirty only when the ledger records the dirty paths.",
+    "Stop and re-admit if implementation needs non-engine product source."
+  ]
+}

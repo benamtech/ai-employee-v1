@@ -1,6 +1,6 @@
 # CODEGRAPH.md — AI Employee executable topology
 
-Status: active cumulative source candidate with Trace018 UI Lab Phase 1 local P3 evidence; external acceptance remains open
+Status: active cumulative source candidate with Trace019 repoctl engine differential-evaluation repair local P3 evidence; external acceptance remains open
 Updated: 2026-07-23  
 Candidate stack: `task/ui-lab-live-ae-phase-1-20260723` at `7fc40dc8dc7c60f3a8ec3e79dff59e6181566205` plus working-tree Trace018 candidate -> review/merge to `main` -> verify the merge commit
 Source migration head: `0082`
@@ -9,7 +9,7 @@ This is the sole contributor-facing owner of current product and workstream stru
 
 ## Current state
 
-- The current branch contains the post-main cumulative source candidate through Trace014, Trace015, Trace016 production-runtime repair commits, Trace017 authority reconciliation, and Trace018 UI Lab Phase 1 live AE workbench source.
+- The current branch contains the post-main cumulative source candidate through Trace014, Trace015, Trace016 production-runtime repair commits, Trace017 authority reconciliation, Trace018 UI Lab Phase 1 live AE workbench source, and the Trace019 repoctl engine differential-evaluation repair candidate.
 - Trace014 enforced the canonical session bootstrap. Trace015 generated the repair frontier and full-stack strategy map. Trace016 repaired the production Caddy/upstream/runtime test path and produced exact-candidate local mirror evidence, but its repoctl finish was blocked because the actual source repair exceeded the originally admitted patch envelope. Treat the source commits and proof files as P3 evidence; do not claim Trace016 lifecycle completion.
 - Trace017 is the documentation and memory reconciliation transaction for the production-state candidate. Trace018 adds a live-first `/ui-lab` workbench for one Manager-authorized owner-visible AI Employee, using the existing owner session and owner projection stream, with fixtures only at `/ui-lab/fixtures`.
 - Production envvars are present for deploy/prod tests in `infra/deploy/.env.production`; do not print values. The production database status check shows all migrations through `0082` applied.
@@ -151,7 +151,8 @@ ui-lab/README.md
 
 decision/engine/
   facts, dialects, transformations, certificates, task capsules,
-  experiment chronology, evaluation, queries, and trusted verifiers
+  experiment chronology, differential evaluation, check/edit-guard context,
+  evidence-class gates, queries, and trusted verifiers
 
 infra/scripts/release-manifest.mjs
 infra/scripts/verify-release-manifest.mjs
@@ -175,6 +176,7 @@ infra/scripts/deploy-rollback.mjs
 - Trace016 — production Caddy/upstream/runtime repair and local mirror proof; source/proof evidence retained, transaction finish not claimed.
 - Trace017 — production-state documentation, authority, ledger, and memory reconciliation.
 - Trace018 — UI Lab Phase 1 live-first owner-visible AI Employee workbench; P3 local source, contract, typecheck, unit, browser, and build evidence only.
+- Trace019 — repoctl engine repair for evaluation-time fact re-derivation, command-bound hard-edge evidence, modern evidence non-promotion, retained overrides, external acceptance dialect, and non-mutating check; P3 local negative-suite evidence only until reviewed and accepted externally.
 
 ## Open gates
 

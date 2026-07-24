@@ -4,12 +4,12 @@
   "updated_at": "2026-07-23",
   "active_transaction": null,
   "latest_completed_trace": {
-    "id": "trace018",
-    "path": "mvp-build/decision/trace018/",
-    "task_id": "TRACE018-UI-LAB-LIVE-AE-PHASE1",
-    "scope": "UI Lab Phase 1 live-first owner-visible AI Employee workbench",
-    "implementation_verified_sha": "7fc40dc8dc7c60f3a8ec3e79dff59e6181566205",
-    "evidence_boundary": "P3 source, contract, typecheck, unit, browser, and build evidence for the exact local candidate; P4 external, deployment, provider, pilot, and production acceptance remain open"
+    "id": "trace019",
+    "path": "mvp-build/decision/trace019/",
+    "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION",
+    "scope": "repoctl engine differential evaluation, hard-edge evidence execution, evidence honesty, overrides, external acceptance dialect, and non-mutating check",
+    "implementation_verified_sha": "f1247b5a898bc5ee573fa0e3ebfa23bf676721a7",
+    "evidence_boundary": "P3 local executable evidence for the exact repoctl engine candidate; P4 external/human acceptance remains open"
   },
   "method": {
     "protocol": "mvp-build/decision/protocol-v1.json",
@@ -30,12 +30,13 @@
     {"id":"trace015","scope":"repair frontier and generated full-stack strategy map"},
     {"id":"trace016","scope":"production Caddy/upstream/runtime repair with retained P3 local mirror proof; transaction finish not claimed"},
     {"id":"trace017","scope":"production state authority, ledger, and memory reconciliation"},
-    {"id":"trace018","scope":"UI Lab Phase 1 live-first owner-visible AI Employee workbench"}
+    {"id":"trace018","scope":"UI Lab Phase 1 live-first owner-visible AI Employee workbench"},
+    {"id":"trace019","scope":"repoctl engine differential evaluation and evidence honesty repair"}
   ],
   "next_transaction": {
-    "reserved_id": "trace019",
+    "reserved_id": "trace020",
     "state": "not_created",
-    "required_start": "Create a new task branch from merged main, define task.json, and run decision/engine/repoctl.mjs start before non-mechanical source edits.",
+    "required_start": "After Trace019 is finished and merged, create a new task branch from merged main, define task.json, and run decision/engine/repoctl.mjs start before non-mechanical source edits.",
     "prohibition": "Do not preselect the next implementation or reuse stale facts from the pre-merge branch."
   },
   "exact_status_owner": "mvp-build/CODEGRAPH.md",

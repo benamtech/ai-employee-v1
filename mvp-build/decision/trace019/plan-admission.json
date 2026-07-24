@@ -1,0 +1,205 @@
+{
+  "content_digest": "sha256:d20c7ea3b58a84eb169393dfe1e55d05d3a88ce0b8dcbeb7478b8f206893f6a8",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-24T01:07:16.617Z",
+  "payload": {
+    "capsule_digest": "sha256:805fb1f308d9b49639234683a7baa92a376602c527cf3d0d3856509cd52ae7f4",
+    "current_head_at_admission": "e13608764e72da28cb552565ea7127fa7597031f",
+    "discovered_later_policy": "Allowed only for files within the engine, its unit tests, or active authority docs, with a rationale and no evidence-class widening.",
+    "experiment_digest": "sha256:c7562a1da836661dcedc8d83b4c9371e8778603f310feb140ed6c2502be12990",
+    "experiment_root_digest": "sha256:c35448a0efefaccf46fd93320059687d4d48c94a866a98019b7a70c3ad3b4562",
+    "new_paths_before_admission": [],
+    "plan_digest": "sha256:20df7244711db865277f2ef784d593da7b5c71d3c5c05e0de6683c0269942d92",
+    "proof_obligations": [
+      {
+        "evidence": [
+          {
+            "argv": [
+              "node",
+              "decision/engine/repoctl.mjs",
+              "self-test"
+            ],
+            "discharges": [
+              "engine_lifecycle",
+              "hard_edge_command_execution",
+              "P3_exact_candidate"
+            ],
+            "kind": "command"
+          },
+          {
+            "argv": [
+              "node",
+              "--test",
+              "decision/engine/self-test/negative-cases.mjs"
+            ],
+            "discharges": [
+              "negative_cases",
+              "differential_gates",
+              "evidence_nonpromotion"
+            ],
+            "kind": "command"
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:3dcbceb3acca",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "node",
+              "decision/engine/repoctl.mjs",
+              "doctor"
+            ],
+            "discharges": [
+              "registry_dialect_presence",
+              "external_acceptance_dialect"
+            ],
+            "kind": "command"
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/decision/engine/representation-registry.json:42cddd8727da",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "document_authority_consistency"
+            ],
+            "kind": "command"
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:fbf13dae8240",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "authority_router_consistency"
+            ],
+            "kind": "command"
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/authority-map.json:17da23e0261c",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "authority_routing"
+            ],
+            "kind": "command"
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-routing:authority-map:4483b127021c",
+        "status": "accepted"
+      }
+    ],
+    "selected_candidates": [
+      {
+        "accepted": true,
+        "id": "TRACE019-C1",
+        "summary": "Repair repoctl in place with evaluation-time re-extraction, command-bound hard-edge evidence, modern evidence-class gates, retained overrides, and a non-mutating check command."
+      },
+      {
+        "accepted": false,
+        "id": "TRACE019-C2",
+        "rejection": "Would leave the canonical engine vulnerable and create a parallel authority path.",
+        "summary": "Add an external wrapper around repoctl without changing existing finish/evaluate semantics."
+      },
+      {
+        "accepted": false,
+        "id": "TRACE019-C3",
+        "rejection": "Does not repair the engine gates required by the task.",
+        "summary": "Only add tests and document the known evaluator weakness."
+      }
+    ],
+    "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION",
+    "verification_commands": [
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "self-test"
+        ],
+        "timeout_ms": 120000
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "doctor"
+        ],
+        "timeout_ms": 120000
+      },
+      {
+        "argv": [
+          "node",
+          "--test",
+          "decision/engine/self-test/negative-cases.mjs"
+        ],
+        "timeout_ms": 120000
+      },
+      {
+        "argv": [
+          "npx",
+          "vitest",
+          "run",
+          "tests/unit/decision-engine-contract.test.ts"
+        ],
+        "timeout_ms": 180000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:repo-governance"
+        ],
+        "timeout_ms": 300000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:full"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "verify",
+          "--transaction",
+          "decision/trace018",
+          "--phase",
+          "finished"
+        ],
+        "timeout_ms": 120000
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs admit-plan"
+  },
+  "schema": "plan.admission.v1",
+  "source_sha": "e13608764e72da28cb552565ea7127fa7597031f"
+}
