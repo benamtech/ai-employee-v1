@@ -1,0 +1,81 @@
+{
+  "content_digest": "sha256:c35448a0efefaccf46fd93320059687d4d48c94a866a98019b7a70c3ad3b4562",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-24T01:05:24.996Z",
+  "payload": {
+    "baseline": {
+      "id": "evidence-and-invariants",
+      "same_prerequisite_domain": true
+    },
+    "evidence_classes": [
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4"
+    ],
+    "lineage": null,
+    "metrics": [
+      "negative_case_rejection_count",
+      "incremental_full_parity",
+      "uncovered_changed_paths",
+      "unresolved_hard_hyperedges",
+      "evidence_promotions",
+      "doctor_dialect_registry_errors",
+      "trace018_finished_verification"
+    ],
+    "outcomes": [],
+    "predictions": [
+      {
+        "claim": "The new negative suite rejects failing evidence, inflated scope, absent execution evidence, planned hard edges, authority and correspondence regressions, bad overrides, unearned P4, dirty evaluation, calibration errors, and incremental/full parity drift.",
+        "expected": 15,
+        "falsifier": "node --test decision/engine/self-test/negative-cases.mjs fails.",
+        "horizon": 1,
+        "id": "prediction-negative-suite",
+        "metric": "negative_case_rejection_count",
+        "type": "verification"
+      },
+      {
+        "claim": "The existing isolated repoctl self-test still reaches P3 and finished verification.",
+        "expected": true,
+        "falsifier": "node decision/engine/repoctl.mjs self-test fails.",
+        "horizon": 2,
+        "id": "prediction-existing-lifecycle",
+        "metric": "self_test_ok",
+        "type": "regression"
+      },
+      {
+        "claim": "repoctl doctor reports external.acceptance.v1 and no registry errors.",
+        "expected": true,
+        "falsifier": "node decision/engine/repoctl.mjs doctor fails or omits external.acceptance.v1.",
+        "horizon": 3,
+        "id": "prediction-registry",
+        "metric": "doctor_ok",
+        "type": "authority"
+      },
+      {
+        "claim": "The modern verifier remains compatible with the finished trace018 ledger.",
+        "expected": true,
+        "falsifier": "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished fails.",
+        "horizon": 4,
+        "id": "prediction-trace018",
+        "metric": "trace018_verify_ok",
+        "type": "historical-regression"
+      }
+    ],
+    "status": "draft",
+    "stop_conditions": [
+      "hard invariant violation without accepted evidence or explicit blocker",
+      "negative suite cannot be made to fail red/green without weakening verifier semantics",
+      "P4 would require external human or production acceptance not available locally",
+      "patch scope exceeds 22 files without a re-admitted expansion reason"
+    ],
+    "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION"
+  },
+  "provenance": {
+    "chronology": "predictions are recorded before plan admission and outcomes",
+    "generator": "decision/engine/repoctl.mjs"
+  },
+  "schema": "experiment.design.v1",
+  "source_sha": "e13608764e72da28cb552565ea7127fa7597031f"
+}

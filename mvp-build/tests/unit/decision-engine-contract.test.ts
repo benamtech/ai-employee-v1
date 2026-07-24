@@ -24,7 +24,7 @@ describe('repository-native software experiment compiler', () => {
     for (const id of [
       'repo.fact.v1', 'authority.dag.v1', 'dependency.graph.v1', 'invariant.hypergraph.v1',
       'correspondence.v1', 'spectral.hypergraph.v1', 'task.diffusion.v1', 'effect.frontier.v1',
-      'experiment.design.v1', 'claim.certificate.v1', 'evidence.ledger.v1'
+      'experiment.design.v1', 'claim.certificate.v1', 'evidence.ledger.v1', 'external.acceptance.v1'
     ]) expect(implemented.has(id), id).toBe(true);
 
     const future = new Set(registry.dialects.filter((item) => item.status === 'registered_future').map((item) => item.id));
@@ -51,6 +51,8 @@ describe('repository-native software experiment compiler', () => {
     expect(result.verified.results.correspondence.ok).toBe(true);
     expect(result.evaluated.maximum_evidence_class).toBe('P3');
     expect(result.evaluated.uncovered_paths).toEqual([]);
+    expect(result.checked.non_mutating).toBe(true);
+    expect(result.checked.findings).toEqual([]);
     expect(result.evaluated.verification_results.every((entry: { ok: boolean }) => entry.ok)).toBe(true);
   });
 
@@ -60,6 +62,16 @@ describe('repository-native software experiment compiler', () => {
     expect(source).toContain('verification');
     expect(core).toContain('shell: false');
     expect(core).not.toContain('execSync(');
+  });
+
+  it('exposes a non-mutating strict check command and external acceptance dialect', () => {
+    const doctor = run('doctor');
+    expect(doctor.engine_version).toBe('1.1.0');
+    expect(doctor.implemented_dialects).toContain('external.acceptance.v1');
+
+    const help = execFileSync(process.execPath, [engine, 'help'], { cwd: root, encoding: 'utf8' });
+    expect(help).toContain('check --transaction path [--strict]');
+    expect(help).toContain('evaluate --transaction path [--outcomes outcomes.json] [--overrides overrides.json] [--allow-dirty]');
   });
 
   it('bounds broad effect-frontier artifacts with deterministic diagnostics', async () => {

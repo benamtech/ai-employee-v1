@@ -4,7 +4,7 @@
   "updated_at": "2026-07-23",
   "self": {
     "path": "mvp-build/authority-map.json",
-    "last_reconciliation": "Trace018 UI Lab Phase 1 live AE workbench after exact local P3 verification",
+    "last_reconciliation": "Trace019 repoctl engine differential-evaluation repair candidate; P4 external acceptance remains blocked",
     "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions or secret values."
   },
   "exact_status": {
@@ -30,8 +30,10 @@
     "representation_registry": "mvp-build/decision/engine/representation-registry.json",
     "latest_completed_trace": "mvp-build/decision/trace018/",
     "trace016_state": "source/proof repair retained; repoctl finish not claimed because admitted impact was exceeded",
+    "current_trace": "mvp-build/decision/trace019/",
+    "current_trace_state": "active_candidate_until_pinned_finish_and_external_review",
     "next_trace_reserved": "mvp-build/decision/trace019/",
-    "next_trace_state": "not_created_until_fresh_task_branch_after_main_merge"
+    "next_trace_state": "active"
   },
   "proof_classes": {
     "P0": "representation calculation or hypothesis",
@@ -59,7 +61,8 @@
     "trace015": "repair frontier and generated full-stack strategy map",
     "trace016": "production Caddy/upstream/runtime repair with retained P3 local mirror proof; transaction finish not claimed",
     "trace017": "production state authority, ledger, and memory reconciliation",
-    "trace018": "UI Lab Phase 1 live-first owner-visible AI Employee workbench"
+    "trace018": "UI Lab Phase 1 live-first owner-visible AI Employee workbench",
+    "trace019": "repoctl engine differential evaluation and evidence honesty repair"
   },
   "architecture": "mvp-build/docs/architecture/",
   "memory": {

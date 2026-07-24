@@ -1,0 +1,108 @@
+{
+  "allowed_evidence_classes": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "candidate_generation_contract": {
+    "independent_batches_before_recombination": true,
+    "invariant_and_prerequisite_filter": true,
+    "mathematical_layers_must_change_a_decision_or_proof_obligation": true,
+    "simple_baseline_required": true
+  },
+  "external_blockers": [
+    "human review of self-modifying compiler behavior",
+    "external acceptance record for P4",
+    "production deployment acceptance"
+  ],
+  "goal": "Repair the repository-native experiment compiler so evaluation re-derives current repository facts, executes claimed hard-edge evidence, blocks unearned evidence classes, retains honest overrides/provenance, and exposes a non-mutating check command.",
+  "maximum_patch": {
+    "allowed_paths": [
+      "decision/engine/repoctl.mjs",
+      "decision/engine/lib/core.mjs",
+      "decision/engine/verify/verify-transaction.mjs",
+      "decision/engine/verify/verify-external-acceptance.mjs",
+      "decision/engine/representation-registry.json",
+      "decision/engine/schemas/evidence-ledger.schema.json",
+      "decision/engine/templates/plan.example.json",
+      "decision/engine/README.md",
+      "decision/engine/self-test/negative-cases.mjs",
+      "tests/unit/decision-engine-contract.test.ts",
+      "CODEGRAPH.md",
+      "authority-map.json",
+      "decision/active.json",
+      "decision/trace019/EXCEPTION.md",
+      "decision/trace019/self-check.json",
+      "decision/trace019/retro-differential.json"
+    ],
+    "expansion_rule": "Additional paths require discovered_later entries with rationale before evaluation; do not silently widen.",
+    "maximum_files": 22
+  },
+  "metrics": [
+    "negative_case_rejection_count",
+    "incremental_full_parity",
+    "uncovered_changed_paths",
+    "unresolved_hard_hyperedges",
+    "evidence_promotions",
+    "doctor_dialect_registry_errors",
+    "trace018_finished_verification"
+  ],
+  "non_goals": [
+    "No Manager, database, provider, Hermes, product UI, migration, or runtime topology source changes.",
+    "No P4 production or external acceptance claim for this self-modifying engine repair."
+  ],
+  "predictions": [
+    {
+      "claim": "The new negative suite rejects failing evidence, inflated scope, absent execution evidence, planned hard edges, authority and correspondence regressions, bad overrides, unearned P4, dirty evaluation, calibration errors, and incremental/full parity drift.",
+      "expected": 15,
+      "falsifier": "node --test decision/engine/self-test/negative-cases.mjs fails.",
+      "horizon": 1,
+      "id": "prediction-negative-suite",
+      "metric": "negative_case_rejection_count",
+      "type": "verification"
+    },
+    {
+      "claim": "The existing isolated repoctl self-test still reaches P3 and finished verification.",
+      "expected": true,
+      "falsifier": "node decision/engine/repoctl.mjs self-test fails.",
+      "horizon": 2,
+      "id": "prediction-existing-lifecycle",
+      "metric": "self_test_ok",
+      "type": "regression"
+    },
+    {
+      "claim": "repoctl doctor reports external.acceptance.v1 and no registry errors.",
+      "expected": true,
+      "falsifier": "node decision/engine/repoctl.mjs doctor fails or omits external.acceptance.v1.",
+      "horizon": 3,
+      "id": "prediction-registry",
+      "metric": "doctor_ok",
+      "type": "authority"
+    },
+    {
+      "claim": "The modern verifier remains compatible with the finished trace018 ledger.",
+      "expected": true,
+      "falsifier": "node decision/engine/repoctl.mjs verify --transaction decision/trace018 --phase finished fails.",
+      "horizon": 4,
+      "id": "prediction-trace018",
+      "metric": "trace018_verify_ok",
+      "type": "historical-regression"
+    }
+  ],
+  "stop_conditions": [
+    "hard invariant violation without accepted evidence or explicit blocker",
+    "negative suite cannot be made to fail red/green without weakening verifier semantics",
+    "P4 would require external human or production acceptance not available locally",
+    "patch scope exceeds 22 files without a re-admitted expansion reason"
+  ],
+  "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION",
+  "task_seeds": [
+    "decision/engine/repoctl.mjs",
+    "decision/engine/lib/core.mjs",
+    "decision/engine/verify/verify-transaction.mjs",
+    "decision/engine/representation-registry.json",
+    "tests/unit/decision-engine-contract.test.ts",
+    "decision/engine/self-test/negative-cases.mjs"
+  ]
+}

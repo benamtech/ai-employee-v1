@@ -1,8 +1,13 @@
 {
   "schema": "amtech.decision-active.v1",
-  "status": "no_open_decision_transaction",
+  "status": "active_decision_transaction",
   "updated_at": "2026-07-23",
-  "active_transaction": null,
+  "active_transaction": {
+    "id": "trace019",
+    "path": "mvp-build/decision/trace019/",
+    "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION",
+    "scope": "repoctl engine differential evaluation, hard-edge evidence execution, evidence honesty, overrides, external acceptance dialect, and non-mutating check"
+  },
   "latest_completed_trace": {
     "id": "trace018",
     "path": "mvp-build/decision/trace018/",
@@ -33,9 +38,9 @@
     {"id":"trace018","scope":"UI Lab Phase 1 live-first owner-visible AI Employee workbench"}
   ],
   "next_transaction": {
-    "reserved_id": "trace019",
+    "reserved_id": "trace020",
     "state": "not_created",
-    "required_start": "Create a new task branch from merged main, define task.json, and run decision/engine/repoctl.mjs start before non-mechanical source edits.",
+    "required_start": "After Trace019 is finished and merged, create a new task branch from merged main, define task.json, and run decision/engine/repoctl.mjs start before non-mechanical source edits.",
     "prohibition": "Do not preselect the next implementation or reuse stale facts from the pre-merge branch."
   },
   "exact_status_owner": "mvp-build/CODEGRAPH.md",

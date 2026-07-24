@@ -3,7 +3,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
 import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 
-export const ENGINE_VERSION = '1.0.0';
+export const ENGINE_VERSION = '1.1.0';
 
 export function stableValue(value) {
   if (Array.isArray(value)) return value.map(stableValue);
@@ -85,6 +85,17 @@ export function gitStatus(root) {
     paths.push({ status, path: normalizeRepoPath(path) });
   }
   return paths.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+export function dirtyPaths(root, ignoredPrefixes = []) {
+  const repo = gitRoot(root);
+  const prefixes = ignoredPrefixes
+    .filter(Boolean)
+    .map((prefix) => normalizeRepoPath(prefix).replace(/\/$/, ''));
+  return gitStatus(repo).filter((item) => {
+    const path = item.path.replace(/\/$/, '');
+    return !prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`) || prefix.startsWith(`${path}/`));
+  });
 }
 
 export function normalizeRepoPath(path) {
@@ -199,6 +210,11 @@ export function runCommand(root, argv, { timeoutMs = 15 * 60_000 } = {}) {
     ok: result.status === 0 && !result.error,
     error: result.error ? String(result.error) : null
   };
+}
+
+export function compareEvidenceClass(a, b) {
+  const order = ['P0', 'P1', 'P2', 'P3', 'P4'];
+  return order.indexOf(a) - order.indexOf(b);
 }
 
 export async function fileExists(path) {
