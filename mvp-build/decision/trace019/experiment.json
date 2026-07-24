@@ -1,7 +1,7 @@
 {
-  "content_digest": "sha256:c7562a1da836661dcedc8d83b4c9371e8778603f310feb140ed6c2502be12990",
+  "content_digest": "sha256:14fe09b1b007c480a8752d08c87abe5b9bd94b8169f56bf439836a6e0aea9b88",
   "engine_version": "1.0.0",
-  "generated_at": "2026-07-24T01:07:16.608Z",
+  "generated_at": "2026-07-24T01:38:58.139Z",
   "payload": {
     "baseline": {
       "id": "evidence-and-invariants",
@@ -15,7 +15,7 @@
       "P4"
     ],
     "lineage": {
-      "previous_digest": "sha256:c35448a0efefaccf46fd93320059687d4d48c94a866a98019b7a70c3ad3b4562",
+      "previous_digest": "sha256:7798bb67a15a58c853151348947b4a974f77961fee0d2c64f1a0d32b079b621d",
       "root_digest": "sha256:c35448a0efefaccf46fd93320059687d4d48c94a866a98019b7a70c3ad3b4562"
     },
     "metrics": [
@@ -27,7 +27,44 @@
       "doctor_dialect_registry_errors",
       "trace018_finished_verification"
     ],
-    "outcomes": [],
+    "outcomes": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-negative-suite",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-existing-lifecycle",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-registry",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-trace018",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
     "predictions": [
       {
         "claim": "The new negative suite rejects failing evidence, inflated scope, absent execution evidence, planned hard edges, authority and correspondence regressions, bad overrides, unearned P4, dirty evaluation, calibration errors, and incremental/full parity drift.",
@@ -66,7 +103,7 @@
         "type": "historical-regression"
       }
     ],
-    "status": "admitted",
+    "status": "finished",
     "stop_conditions": [
       "hard invariant violation without accepted evidence or explicit blocker",
       "negative suite cannot be made to fail red/green without weakening verifier semantics",

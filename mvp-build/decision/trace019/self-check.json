@@ -1,0 +1,151 @@
+{
+  "evidence_boundary": "P3 local executable evidence only; no P4 external acceptance",
+  "generated_at": "2026-07-24T01:38:28.702Z",
+  "implementation_sha": "f1247b5a898bc5ee573fa0e3ebfa23bf676721a7",
+  "new_engine_check": {
+    "changed_paths": [
+      "mvp-build/CODEGRAPH.md",
+      "mvp-build/authority-map.json",
+      "mvp-build/decision/active.json",
+      "mvp-build/decision/engine/README.md",
+      "mvp-build/decision/engine/lib/core.mjs",
+      "mvp-build/decision/engine/repoctl.mjs",
+      "mvp-build/decision/engine/representation-registry.json",
+      "mvp-build/decision/engine/self-test/negative-cases.mjs",
+      "mvp-build/decision/engine/templates/plan.example.json",
+      "mvp-build/decision/engine/verify/verify-external-acceptance.mjs",
+      "mvp-build/decision/engine/verify/verify-transaction.mjs",
+      "mvp-build/tests/unit/decision-engine-contract.test.ts"
+    ],
+    "differential": {
+      "broken_hard_edges": [],
+      "correspondence_regressions": [],
+      "current_artifacts": {
+        "authority_digest": "sha256:b8b6bd2de61b4decccfcebabd6c18213e8c2ecd43921b3e2dbee61990068c6be",
+        "correspondence_digest": "sha256:ad0ad75edd7415a935f06af34054213b247ffb4432116ba5699067ddb75e5278",
+        "dependency_digest": "sha256:f624a9259ab30774e071bdfa25edb6e157a64f2c931bea804e4e121aa78960cb",
+        "hypergraph_digest": "sha256:479e6ad18cc7a066ef942d865f089c6a8727040e1e7e2504aac47bdd2da7555a",
+        "repository_fact_digest": "sha256:8284d41982fe0beb2271738490c7c88d0f6980a30e9f327a764989a575c9ba59"
+      },
+      "current_touched_hard_edges": [
+        "hyperedge:authority-obligation:file:AGENTS.md:1b61f9e2a321",
+        "hyperedge:authority-obligation:file:mvp-build/AGENTS.md:9bca59df372f",
+        "hyperedge:authority-obligation:file:mvp-build/authority-map.json:17da23e0261c",
+        "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:fbf13dae8240",
+        "hyperedge:authority-obligation:file:mvp-build/decision/active.json:75fdded1162e",
+        "hyperedge:authority-obligation:file:mvp-build/decision/engine/repoctl.mjs:3dcbceb3acca",
+        "hyperedge:authority-obligation:file:mvp-build/decision/engine/representation-registry.json:42cddd8727da",
+        "hyperedge:authority-obligation:file:mvp-build/decision/protocol-v1.json:75a680dc9d1e",
+        "hyperedge:authority-obligation:file:mvp-build/decision/README.md:bcae2ce9c63a",
+        "hyperedge:authority-obligation:file:mvp-build/decision/representation-contract.md:19a6bbdececd",
+        "hyperedge:authority-obligation:file:mvp-build/decision/SESSION_ONBOARDING.md:5309d2aa7996",
+        "hyperedge:authority-obligation:file:mvp-build/GAPS.md:ee2797c85105",
+        "hyperedge:authority-obligation:file:mvp-build/memory/2026-07-23-production-state-after-c83c23b.md:ee461432557f",
+        "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:90b42a7462c9",
+        "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/04-dependency-ordered-production-plan.md:e8ca03086641",
+        "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/09-workstream-execution-map.md:2bd8208fc691",
+        "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/13-resolution-ledger.json:a44533579fd6",
+        "hyperedge:authority-obligation:file:mvp-build/production-readiness-program/README.md:5c127a3f419b",
+        "hyperedge:authority-obligation:file:mvp-build/REMEDIATION.md:9be6a5827c03",
+        "hyperedge:authority-obligation:file:mvp-build/STANDARD-V0.2-AMENDMENT-001.md:00786e2d17a3",
+        "hyperedge:authority-obligation:file:mvp-build/STANDARD.md:971bd3281e12",
+        "hyperedge:authority-routing:authority-map:4483b127021c",
+        "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/decision-engine-contract.test.ts:0e53307b2378"
+      ],
+      "introduced_authority_cycles": [],
+      "invalid_overrides": [],
+      "overridden_findings": [],
+      "removed_hard_edge_anchors": [],
+      "retained_overrides": []
+    },
+    "findings": [],
+    "non_mutating": true,
+    "ok": true,
+    "strict": true
+  },
+  "new_engine_version": "1.1.0",
+  "pinned_evaluate": {
+    "ledger_digest": "sha256:0bc6e11ff3c87a443f3b75a05af895bbf07c991f933acca6382c50f61d5d6333",
+    "maximum_evidence_class": "P3",
+    "ok": true,
+    "verification_results": [
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "self-test"
+        ],
+        "duration_ms": 826,
+        "ok": true,
+        "status": 0
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "doctor"
+        ],
+        "duration_ms": 117,
+        "ok": true,
+        "status": 0
+      },
+      {
+        "argv": [
+          "node",
+          "--test",
+          "decision/engine/self-test/negative-cases.mjs"
+        ],
+        "duration_ms": 6285,
+        "ok": true,
+        "status": 0
+      },
+      {
+        "argv": [
+          "npx",
+          "vitest",
+          "run",
+          "tests/unit/decision-engine-contract.test.ts"
+        ],
+        "duration_ms": 5588,
+        "ok": true,
+        "status": 0
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:repo-governance"
+        ],
+        "duration_ms": 447,
+        "ok": true,
+        "status": 0
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:full"
+        ],
+        "duration_ms": 75028,
+        "ok": true,
+        "status": 0
+      },
+      {
+        "argv": [
+          "node",
+          "decision/engine/repoctl.mjs",
+          "verify",
+          "--transaction",
+          "decision/trace018",
+          "--phase",
+          "finished"
+        ],
+        "duration_ms": 2155,
+        "ok": true,
+        "status": 0
+      }
+    ]
+  },
+  "pinned_lifecycle_engine": "decision/trace019/.engine-pinned/repoctl.mjs",
+  "schema": "amtech.trace019.self-check.v1"
+}

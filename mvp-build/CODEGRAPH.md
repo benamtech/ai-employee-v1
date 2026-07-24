@@ -1,6 +1,6 @@
 # CODEGRAPH.md — AI Employee executable topology
 
-Status: active cumulative source candidate with Trace019 repoctl engine differential-evaluation repair in progress; external acceptance remains open
+Status: active cumulative source candidate with Trace019 repoctl engine differential-evaluation repair local P3 evidence; external acceptance remains open
 Updated: 2026-07-23  
 Candidate stack: `task/ui-lab-live-ae-phase-1-20260723` at `7fc40dc8dc7c60f3a8ec3e79dff59e6181566205` plus working-tree Trace018 candidate -> review/merge to `main` -> verify the merge commit
 Source migration head: `0082`

@@ -1,0 +1,66 @@
+{
+  "content_digest": "sha256:0b966b571d71f880f14cf62b7e188fc6a424e042cdfa0218a7751a10a050078d",
+  "engine_version": "1.0.0",
+  "generated_at": "2026-07-24T01:38:58.156Z",
+  "payload": {
+    "base_sha": "e13608764e72da28cb552565ea7127fa7597031f",
+    "capsule_digest": "sha256:805fb1f308d9b49639234683a7baa92a376602c527cf3d0d3856509cd52ae7f4",
+    "certificate_digest": "sha256:ae58fa0c87235b8de6b69443c5ba32f57b9099a805de91cf7db1ea7f73f2aa3b",
+    "correspondence_digest": "sha256:ad0ad75edd7415a935f06af34054213b247ffb4432116ba5699067ddb75e5278",
+    "evidence_ledger_digest": "sha256:0bc6e11ff3c87a443f3b75a05af895bbf07c991f933acca6382c50f61d5d6333",
+    "experiment_digest": "sha256:14fe09b1b007c480a8752d08c87abe5b9bd94b8169f56bf439836a6e0aea9b88",
+    "external_blockers": [
+      "human review of self-modifying compiler behavior",
+      "external acceptance record for P4",
+      "production deployment acceptance"
+    ],
+    "final_sha": "f1247b5a898bc5ee573fa0e3ebfa23bf676721a7",
+    "maximum_evidence_class": "P3",
+    "outcome_calibration": [
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-negative-suite",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-existing-lifecycle",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-registry",
+        "source": "repoctl-auto-evaluation"
+      },
+      {
+        "evidence": [],
+        "observed": {
+          "passed": null,
+          "value": null
+        },
+        "prediction_id": "prediction-trace018",
+        "source": "repoctl-auto-evaluation"
+      }
+    ],
+    "plan_admission_digest": "sha256:d20c7ea3b58a84eb169393dfe1e55d05d3a88ce0b8dcbeb7478b8f206893f6a8",
+    "status": "finished",
+    "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION"
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs finish"
+  },
+  "schema": "experiment.transaction.v1",
+  "source_sha": "f1247b5a898bc5ee573fa0e3ebfa23bf676721a7"
+}

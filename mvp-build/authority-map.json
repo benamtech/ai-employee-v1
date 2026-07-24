@@ -28,12 +28,12 @@
     "representation_contract": "mvp-build/decision/representation-contract.md",
     "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
     "representation_registry": "mvp-build/decision/engine/representation-registry.json",
-    "latest_completed_trace": "mvp-build/decision/trace018/",
+    "latest_completed_trace": "mvp-build/decision/trace019/",
     "trace016_state": "source/proof repair retained; repoctl finish not claimed because admitted impact was exceeded",
-    "current_trace": "mvp-build/decision/trace019/",
-    "current_trace_state": "active_candidate_until_pinned_finish_and_external_review",
-    "next_trace_reserved": "mvp-build/decision/trace019/",
-    "next_trace_state": "active"
+    "current_trace": null,
+    "current_trace_state": "none",
+    "next_trace_reserved": "mvp-build/decision/trace020/",
+    "next_trace_state": "not_created_until_fresh_task_branch_after_trace019_review"
   },
   "proof_classes": {
     "P0": "representation calculation or hypothesis",
