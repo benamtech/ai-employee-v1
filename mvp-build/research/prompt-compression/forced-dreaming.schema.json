@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "amtech.forced-dreaming.v1",
+  "title": "Forced Dreaming Candidate Envelope",
+  "type": "object",
+  "required": ["schema", "task", "basis", "constraints", "slots", "selection"],
+  "properties": {
+    "schema": {"const": "amtech.forced-dreaming.v1"},
+    "task": {
+      "type": "object",
+      "required": ["id", "goal", "phase"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "goal": {"type": "string", "minLength": 1},
+        "phase": {"enum": ["discover", "design", "plan", "repair", "test", "review"]},
+        "source_sha": {"type": "string"}
+      },
+      "additionalProperties": true
+    },
+    "basis": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "constraints": {
+      "type": "object",
+      "required": ["minimum_candidates", "minimum_mechanism_families", "maximum_pair_similarity", "independent_generation"],
+      "properties": {
+        "minimum_candidates": {"type": "integer", "minimum": 4},
+        "minimum_mechanism_families": {"type": "integer", "minimum": 3},
+        "maximum_pair_similarity": {"type": "number", "minimum": 0, "maximum": 1},
+        "independent_generation": {"const": true},
+        "forbid_early_ranking": {"const": true},
+        "require_counterfactual": {"type": "boolean"},
+        "require_weird_candidate": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "slots": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "required": ["id", "lens_vector", "mechanism_family", "forced_output"],
+        "properties": {
+          "id": {"type": "string"},
+          "lens_vector": {"type": "object", "minProperties": 2, "additionalProperties": {"type": "number", "minimum": -1, "maximum": 1}},
+          "mechanism_family": {"type": "string"},
+          "forced_output": {
+            "type": "object",
+            "required": ["mechanism", "repository_evidence", "invariants", "effects", "prediction", "falsifier", "maximum_patch", "verification"],
+            "properties": {
+              "mechanism": {"type": "string"},
+              "repository_evidence": {"type": "array", "items": {"type": "string"}},
+              "invariants": {"type": "array", "items": {"type": "string"}},
+              "effects": {"type": "array", "items": {"type": "string"}},
+              "prediction": {"type": "string"},
+              "falsifier": {"type": "string"},
+              "maximum_patch": {"type": "array", "items": {"type": "string"}},
+              "verification": {"type": "array", "items": {"type": "array", "items": {"type": "string"}}},
+              "counterfactual": {"type": "string"},
+              "novelty_claim": {"type": "string"},
+              "unknowns": {"type": "array", "items": {"type": "string"}}
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "selection": {
+      "type": "object",
+      "required": ["gate", "pareto_axes", "prohibition"],
+      "properties": {
+        "gate": {"const": "only_after_all_slots_complete_and_diversity_verified"},
+        "pareto_axes": {"type": "array", "minItems": 3, "items": {"type": "string"}},
+        "prohibition": {"const": "no_candidate_selected_by_style_or_unverified_novelty"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
