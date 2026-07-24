@@ -10,9 +10,9 @@
   "exact_status": {
     "owner": "mvp-build/CODEGRAPH.md",
     "transient_acceptance": "GitHub Actions, retained release records, and retained infra proof files",
-    "branch_record": "task/ui-lab-phase2-generated-runtime-20260723 at 7a10a7c8e8267874735689ec924493fc7803a60a, pushed, from merged main e5e36c5072c69dcc57ccefce1a5d807f71f70058, open in PR #49",
-    "merge_commit_record": "none; PR #49 is unmerged, so no merge-commit evidence exists and none is claimed",
-    "merge_descendant_rule": "the future main merge commit requires its own exact-head evidence"
+    "branch_record": "merged main 4aa7e9856e3c1296b4b0cf3712f93e6e8a1aa3aa via PR #49 from task/ui-lab-phase2-generated-runtime-20260723 at ceedf9ec47426f82ee700614cc69c3125c4fad6b",
+    "merge_commit_record": "4aa7e9856e3c1296b4b0cf3712f93e6e8a1aa3aa verified on its own exact head: repoctl verify phase finished ok, test:ui:contracts 12/98, verify-ui-architecture ok, repo:verify:full pass, repo-governance 19/19, engine doctor and self-test ok, negative suite 15/15; class P3, external_acceptance accepted_count 0",
+    "merge_descendant_rule": "a merge commit requires its own exact-head evidence and never inherits branch proof"
   },
   "normative": ["mvp-build/STANDARD.md", "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"],
   "agent_entry": ["AGENTS.md", "mvp-build/AGENTS.md", "mvp-build/decision/SESSION_ONBOARDING.md", "mvp-build/decision/engine/repoctl.mjs"],

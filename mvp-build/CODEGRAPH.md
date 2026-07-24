@@ -2,8 +2,8 @@
 
 Status: active cumulative source candidate with Trace020 UI Lab Phase 2 generated-experience-runtime local P3 evidence; external acceptance remains open
 Updated: 2026-07-23  
-Candidate stack: `task/ui-lab-phase2-generated-runtime-20260723` at `7a10a7c8e8267874735689ec924493fc7803a60a`, pushed, from merged `main` at `e5e36c5072c69dcc57ccefce1a5d807f71f70058`, open in PR `#49` -> merge to `main` -> verify the merge commit  
-Merge commit: none yet; PR `#49` is unmerged, so no merge-commit evidence exists and none is claimed
+Candidate stack: merged `main` at `4aa7e9856e3c1296b4b0cf3712f93e6e8a1aa3aa` (PR `#49`, merged 2026-07-24, from `task/ui-lab-phase2-generated-runtime-20260723` at `ceedf9ec47426f82ee700614cc69c3125c4fad6b`)  
+Merge commit evidence: verified on that exact merge commit, not inherited — `repoctl verify --transaction decision/trace020 --phase finished` ok (P1 certificate, P2 correspondence over 954 hyperedges, `external_acceptance accepted_count 0`), `test:ui:contracts` 12 files / 98 cases, `verify-ui-architecture.mjs` ok, `repo:verify:full` pass, `repo-governance` 19/19, engine `doctor`/`self-test` ok, negative suite 15/15. Class P3; no P4
 Source migration head: `0082`
 
 This is the sole contributor-facing owner of current product and workstream structure. `authority-map.json` routes machine readers here. Exact transient SHA, run number, and conclusion remain in the current branch, workflows, or retained release evidence.
@@ -200,9 +200,9 @@ infra/scripts/deploy-rollback.mjs
 
 ## Dependency order
 
-1. Keep `task/ui-lab-phase2-generated-runtime-20260723` at `7a10a7c8e8267874735689ec924493fc7803a60a` pushed and exact-green.
-2. Review and merge PR `#49` into `main`.
-3. Verify the exact `main` merge commit and record its SHA here; no ancestor branch proof certifies that descendant, so until that run exists this row stays empty rather than inheriting branch evidence.
-4. For the next UI Lab phase, create a fresh task branch from merged main and run `repoctl start` before non-mechanical work.
+1. Done: PR `#49` merged into `main` as `4aa7e9856e3c1296b4b0cf3712f93e6e8a1aa3aa` on 2026-07-24.
+2. Done: that exact merge commit was independently verified; its evidence is its own, not the branch's.
+3. For the next UI Lab phase, create a fresh task branch from `4aa7e98` and run `repoctl start` before non-mechanical work. Phase 3 attaches by extending `UiVariantHostMethod`; see `docs/adr/ADR-012-ui-lab-phase-2-generated-experience-runtime.md`.
+4. Cross the Phase 2 live-employee browser acceptance blocker on a disposable stack with an authorized owner-visible employee; the production mirror cannot satisfy it.
 5. Use `infra/deploy/.env.production` for production builds/live tests without printing values.
 6. Cross the remaining P4 gates in dependency order.
