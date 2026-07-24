@@ -1,18 +1,18 @@
 {
   "schema": "amtech.decision-active.v1",
-  "status": "active_decision_transaction",
+  "status": "no_open_decision_transaction",
   "updated_at": "2026-07-23",
-  "active_transaction": {
+  "active_transaction": null,
+  "latest_completed_trace": {
     "id": "trace020",
     "path": "mvp-build/decision/trace020/",
     "task_id": "TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME",
     "scope": "UI Lab Phase 2 generated experience runtime: variant admission policy, capability-scoped model projection, and bounded host-method intent bridge over the existing live owner projection",
     "base_sha": "e5e36c5072c69dcc57ccefce1a5d807f71f70058",
     "branch": "task/ui-lab-phase2-generated-runtime-20260723",
-    "state": "plan_admitted",
-    "evidence_boundary": "P3 maximum; P4 external, provider, deployment, pilot, and production acceptance remain open blockers"
+    "evidence_boundary": "P3 local executable evidence for the exact candidate; live-employee browser acceptance is a recorded blocker and P4 external/provider/deployment/pilot/production acceptance remains open"
   },
-  "latest_completed_trace": {
+  "previous_completed_trace": {
     "id": "trace019",
     "path": "mvp-build/decision/trace019/",
     "task_id": "TRACE019-ENGINE-DIFFERENTIAL-EVALUATION",

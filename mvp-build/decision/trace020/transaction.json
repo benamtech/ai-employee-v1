@@ -1,0 +1,103 @@
+{
+  "content_digest": "sha256:1f331ea1ea1d1159023f1b78c26a772069d073759ef6d62748aa33683503b8f4",
+  "engine_version": "1.1.0",
+  "generated_at": "2026-07-24T02:46:08.711Z",
+  "payload": {
+    "base_sha": "e5e36c5072c69dcc57ccefce1a5d807f71f70058",
+    "capsule_digest": "sha256:069606330d108256ef69222c8bcba545297993c45d11a3995d53e71aa49c9d2a",
+    "certificate_digest": "sha256:73b032e5c89aecb510458bc2571d4b31d270b0608f83b69fe74999b89a7b140d",
+    "correspondence_digest": "sha256:62e192fa1631e48def20667ebe0966bb89090e51f5ed6f1a6bc4ca159473a2ae",
+    "evidence_ledger_digest": "sha256:03b8daed3630a4bd44ed149048329be051fe7ff44ec8de0d032f781b7a757edf",
+    "experiment_digest": "sha256:547757dfbebec44adad1893a106eb907175bc6478a702092bf8dc05c626b019c",
+    "external_acceptance": {
+      "records": [],
+      "verification": {
+        "accepted_count": 0,
+        "errors": [],
+        "ok": false,
+        "results": []
+      }
+    },
+    "external_blockers": [
+      "live provider acceptance for Gmail, Stripe Connect, and QBO remains unavailable",
+      "deployment, pilot, and production acceptance remain uncrossed",
+      "external human review and acceptance record for this candidate",
+      "live browser acceptance depends on a running stack with an authorized owner-visible employee"
+    ],
+    "final_sha": "5d43bf46644a7ed54517e7d2435eb1e4adfbe04f",
+    "maximum_evidence_class": "P3",
+    "outcome_calibration": [
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-admission-policy",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-capability-projection",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-intent-bridge",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-resource-payload-sufficiency",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      },
+      {
+        "accepted": true,
+        "attestor": null,
+        "computed": {
+          "passed": null,
+          "value": null
+        },
+        "evidence": [],
+        "prediction_id": "prediction-phase1-regression",
+        "source": "repoctl-auto-evaluation",
+        "supplied": null
+      }
+    ],
+    "plan_admission_digest": "sha256:28a0bd800fb0056786ccd79cf305bd12b67a9351782b0fec643df6d2c5bb4970",
+    "status": "finished",
+    "task_id": "TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME",
+    "worktree_dirty": {
+      "allowed": false
+    }
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs finish"
+  },
+  "schema": "experiment.transaction.v1",
+  "source_sha": "5d43bf46644a7ed54517e7d2435eb1e4adfbe04f"
+}
