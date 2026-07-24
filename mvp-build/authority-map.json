@@ -10,7 +10,8 @@
   "exact_status": {
     "owner": "mvp-build/CODEGRAPH.md",
     "transient_acceptance": "GitHub Actions, retained release records, and retained infra proof files",
-    "branch_record": "task/ui-lab-phase2-generated-runtime-20260723 from merged main e5e36c5072c69dcc57ccefce1a5d807f71f70058",
+    "branch_record": "task/ui-lab-phase2-generated-runtime-20260723 at 7a10a7c8e8267874735689ec924493fc7803a60a, pushed, from merged main e5e36c5072c69dcc57ccefce1a5d807f71f70058, open in PR #49",
+    "merge_commit_record": "none; PR #49 is unmerged, so no merge-commit evidence exists and none is claimed",
     "merge_descendant_rule": "the future main merge commit requires its own exact-head evidence"
   },
   "normative": ["mvp-build/STANDARD.md", "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"],

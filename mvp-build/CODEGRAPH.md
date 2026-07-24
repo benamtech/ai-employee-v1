@@ -2,7 +2,8 @@
 
 Status: active cumulative source candidate with Trace020 UI Lab Phase 2 generated-experience-runtime local P3 evidence; external acceptance remains open
 Updated: 2026-07-23  
-Candidate stack: `task/ui-lab-phase2-generated-runtime-20260723` from merged `main` at `e5e36c5072c69dcc57ccefce1a5d807f71f70058` -> review/merge to `main` -> verify the merge commit
+Candidate stack: `task/ui-lab-phase2-generated-runtime-20260723` at `7a10a7c8e8267874735689ec924493fc7803a60a`, pushed, from merged `main` at `e5e36c5072c69dcc57ccefce1a5d807f71f70058`, open in PR `#49` -> merge to `main` -> verify the merge commit  
+Merge commit: none yet; PR `#49` is unmerged, so no merge-commit evidence exists and none is claimed
 Source migration head: `0082`
 
 This is the sole contributor-facing owner of current product and workstream structure. `authority-map.json` routes machine readers here. Exact transient SHA, run number, and conclusion remain in the current branch, workflows, or retained release evidence.
@@ -199,9 +200,9 @@ infra/scripts/deploy-rollback.mjs
 
 ## Dependency order
 
-1. Keep `task/new-task-20260723` pushed and exact-green.
-2. Review and merge the branch into `main`.
-3. Verify the exact `main` merge commit; no ancestor branch proof certifies that descendant.
+1. Keep `task/ui-lab-phase2-generated-runtime-20260723` at `7a10a7c8e8267874735689ec924493fc7803a60a` pushed and exact-green.
+2. Review and merge PR `#49` into `main`.
+3. Verify the exact `main` merge commit and record its SHA here; no ancestor branch proof certifies that descendant, so until that run exists this row stays empty rather than inheriting branch evidence.
 4. For the next UI Lab phase, create a fresh task branch from merged main and run `repoctl start` before non-mechanical work.
 5. Use `infra/deploy/.env.production` for production builds/live tests without printing values.
 6. Cross the remaining P4 gates in dependency order.
