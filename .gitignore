@@ -27,7 +27,11 @@ __pycache__/
 *.log
 
 # Agent + tooling working dirs
-.claude/
+# Track shared Claude Code enforcement (settings.json + hooks/); keep personal overrides local.
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+.claude/settings.local.json
 .agents/
 .codex/
 

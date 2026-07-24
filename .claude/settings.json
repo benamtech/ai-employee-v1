@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/amtech-session-start.mjs\"",
+            "timeout": 40,
+            "statusMessage": "AMTECH: orienting session (repoctl doctor + self-test)…"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/amtech-edit-guard.mjs\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
