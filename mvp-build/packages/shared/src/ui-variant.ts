@@ -8,6 +8,8 @@ export const UiVariantId = z.string().regex(/^[a-z][a-z0-9-]{1,62}[a-z0-9]$/, "U
 export type UiVariantId = z.infer<typeof UiVariantId>;
 export const UiVariantCapability = z.enum(["identity","context","presentation","runtime","conversation","work","attention","waiting","changes","connections","capabilities","evidence","outputs","intents","reference_client","fixture_metadata"]);
 export type UiVariantCapability = z.infer<typeof UiVariantCapability>;
+/** The exhaustive capability vocabulary a generated-runtime projection must decide on. */
+export const UI_VARIANT_CAPABILITIES: readonly UiVariantCapability[] = UiVariantCapability.options;
 export const UiVariantRuntimeFeature = z.enum(["dom","css","svg","canvas_2d","webgl","webgpu","web_worker","wasm","audio","video"]);
 export type UiVariantRuntimeFeature = z.infer<typeof UiVariantRuntimeFeature>;
 const PackageName = z.string().regex(/^(?:@[a-z0-9._-]+\/[a-z0-9._-]+|[a-z0-9._-]+)$/);
@@ -37,3 +39,21 @@ export interface EmployeeExperienceModelV1 {
 }
 export interface UiVariantIntentRequest { intent_id: string; value?: string|Record<string,unknown>|null }
 export interface UiVariantIntentResult { accepted:boolean; code:string; message:string }
+
+/**
+ * The closed set of host actions a generated variant may reach. Phase 3 channel access and
+ * Phase 4 recording/replay attach by extending this union and its resolver mapping; a variant
+ * can never name a host action that is not a member here.
+ */
+export type UiVariantHostMethod = "send_owner_message"|"resolve_approval"|"open_owner_resource"|"reset_fixture_state";
+/** Bounded, redacted record of one intent decision. Never carries owner payload or credential material. */
+export interface UiVariantIntentAudit {
+  variant_id: string;
+  surface: "live_owner_workbench"|"fixture_lab";
+  intent_id: string;
+  intent_kind: string|null;
+  host_method: UiVariantHostMethod|null;
+  decision: "allowed"|"rejected";
+  code: string;
+  employee_id: string;
+}

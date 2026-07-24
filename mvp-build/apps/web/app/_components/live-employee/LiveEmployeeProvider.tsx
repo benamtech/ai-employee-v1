@@ -10,10 +10,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type {
-  EmployeeExperienceModelV1,
-  UiVariantIntentRequest,
-  UiVariantIntentResult,
+import {
+  resolveUiVariantIntent,
+  type EmployeeExperienceModelV1,
+  type UiVariantAdmission,
+  type UiVariantIntentRequest,
+  type UiVariantIntentResult,
 } from "@amtech/shared";
 import type { ResourcePayload } from "../../agent/[employeeId]/surface-types";
 import {
@@ -43,6 +45,7 @@ export interface LiveEmployeeProjectionState {
   dispatchVariantIntent: (
     request: UiVariantIntentRequest,
     model: EmployeeExperienceModelV1,
+    admission: UiVariantAdmission,
   ) => Promise<UiVariantIntentResult>;
 }
 
@@ -260,22 +263,27 @@ export function LiveEmployeeProvider({
   const dispatchVariantIntent = useCallback(async (
     request: UiVariantIntentRequest,
     model: EmployeeExperienceModelV1,
+    admission: UiVariantAdmission,
   ) => {
-    const intent = model.intents.find((candidate) => candidate.id === request.intent_id);
-    if (!intent) return { accepted: false, code: "intent_unknown", message: "That live UI intent is not declared by the model." };
-    if (intent.kind === "send_message" && typeof request.value === "string") {
+    // Policy lives in the shared generated-runtime contract; this provider only executes the
+    // bounded host method the resolver already authorized against the projected model.
+    const resolution = resolveUiVariantIntent({ request, model, admission });
+    if (!resolution.allowed || !resolution.intent) {
+      return { accepted: false, code: resolution.code, message: resolution.message };
+    }
+    const intent = resolution.intent;
+    if (resolution.host_method === "send_owner_message") {
+      if (typeof request.value !== "string") {
+        return { accepted: false, code: "live_intent_unavailable", message: "That action needs owner text before AMTECH can send it." };
+      }
       const result = await sendMessage(request.value, `ui-variant:${employeeId}:${crypto.randomUUID?.() ?? Date.now()}`);
       return { accepted: result.ok, code: result.ok ? "live_message_accepted" : "live_message_unavailable", message: result.message };
     }
-    if (intent.kind === "approve" && intent.target?.kind === "approval") {
+    if (resolution.host_method === "resolve_approval" && intent.target?.kind === "approval") {
       const result = await resolveApproval(intent.target.id, "approved");
       return { accepted: result.ok, code: result.ok ? "live_approval_accepted" : "live_approval_unavailable", message: result.message };
     }
-    if (intent.kind === "respond" && typeof request.value === "string") {
-      const result = await sendMessage(request.value, `ui-variant:${employeeId}:${crypto.randomUUID?.() ?? Date.now()}`);
-      return { accepted: result.ok, code: result.ok ? "live_response_accepted" : "live_response_unavailable", message: result.message };
-    }
-    if (intent.kind === "open_resource") {
+    if (resolution.host_method === "open_owner_resource") {
       const href = safeModelHref(request.value ?? intent.target?.id, model, employeeId);
       if (!href) return { accepted: false, code: "open_resource_unavailable", message: "No owner-safe resource href is available for that live intent." };
       window.open(href, "_blank", "noopener,noreferrer");
@@ -284,7 +292,7 @@ export function LiveEmployeeProvider({
     return {
       accepted: false,
       code: "live_intent_unavailable",
-      message: "This Phase 1 live UI intent is unavailable. Use the reference client for governed actions.",
+      message: "This live UI intent is unavailable. Use the reference client for governed actions.",
     };
   }, [employeeId, resolveApproval, sendMessage]);
 

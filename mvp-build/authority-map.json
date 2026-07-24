@@ -4,13 +4,13 @@
   "updated_at": "2026-07-23",
   "self": {
     "path": "mvp-build/authority-map.json",
-    "last_reconciliation": "Trace019 repoctl engine differential-evaluation repair candidate; P4 external acceptance remains blocked",
+    "last_reconciliation": "Trace020 UI Lab Phase 2 generated-experience-runtime candidate; P4 external acceptance remains blocked",
     "rule": "This file routes authority and proof classes; it does not duplicate transient workflow conclusions or secret values."
   },
   "exact_status": {
     "owner": "mvp-build/CODEGRAPH.md",
     "transient_acceptance": "GitHub Actions, retained release records, and retained infra proof files",
-    "branch_record": "task/ui-lab-live-ae-phase-1-20260723 at 7fc40dc8dc7c60f3a8ec3e79dff59e6181566205 plus working-tree Trace018 candidate",
+    "branch_record": "task/ui-lab-phase2-generated-runtime-20260723 from merged main e5e36c5072c69dcc57ccefce1a5d807f71f70058",
     "merge_descendant_rule": "the future main merge commit requires its own exact-head evidence"
   },
   "normative": ["mvp-build/STANDARD.md", "mvp-build/STANDARD-V0.2-AMENDMENT-001.md"],
@@ -28,12 +28,12 @@
     "representation_contract": "mvp-build/decision/representation-contract.md",
     "executable_engine": "mvp-build/decision/engine/repoctl.mjs",
     "representation_registry": "mvp-build/decision/engine/representation-registry.json",
-    "latest_completed_trace": "mvp-build/decision/trace019/",
+    "latest_completed_trace": "mvp-build/decision/trace020/",
     "trace016_state": "source/proof repair retained; repoctl finish not claimed because admitted impact was exceeded",
     "current_trace": null,
     "current_trace_state": "none",
-    "next_trace_reserved": "mvp-build/decision/trace020/",
-    "next_trace_state": "not_created_until_fresh_task_branch_after_trace019_review"
+    "next_trace_reserved": "mvp-build/decision/trace021/",
+    "next_trace_state": "not_created_until_fresh_task_branch_after_trace020_review"
   },
   "proof_classes": {
     "P0": "representation calculation or hypothesis",
@@ -62,12 +62,14 @@
     "trace016": "production Caddy/upstream/runtime repair with retained P3 local mirror proof; transaction finish not claimed",
     "trace017": "production state authority, ledger, and memory reconciliation",
     "trace018": "UI Lab Phase 1 live-first owner-visible AI Employee workbench",
-    "trace019": "repoctl engine differential evaluation and evidence honesty repair"
+    "trace019": "repoctl engine differential evaluation and evidence honesty repair",
+    "trace020": "UI Lab Phase 2 generated experience runtime: variant admission, capability-scoped projection, and bounded host-method intent bridge"
   },
   "architecture": "mvp-build/docs/architecture/",
   "memory": {
     "index": "mvp-build/memory/MEMORY.md",
-    "latest": "mvp-build/memory/2026-07-23-production-state-after-c83c23b.md"
+    "latest": "mvp-build/memory/2026-07-23-trace020-ui-lab-phase-2-generated-runtime.md",
+    "current_production_state": "mvp-build/memory/2026-07-23-production-state-after-c83c23b.md"
   },
   "historical": ["mvp-build/second-half-plan/", "mvp-build/GAPS.md", "mvp-build/REMEDIATION.md", "complete prior decision traces"],
   "non_authoritative_for_next_ui_redesign": ["mvp-build/ui-lab/", "mvp-build/apps/web/ui-variants/"],

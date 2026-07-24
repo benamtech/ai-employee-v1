@@ -1,0 +1,56 @@
+{
+  "schema": "amtech.ui-lab.phase2-browser-acceptance.v1",
+  "trace": "trace020",
+  "task_id": "TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME",
+  "base_url": "http://127.0.0.1:3241",
+  "proof_tier": "local_dev_server_fixture_surface",
+  "status": "pass",
+  "findings": [
+    {
+      "id": "lab_only_variant_admitted_on_fixture_surface",
+      "ok": true,
+      "detail": "reason_code=admitted_fixture_lab tier=candidate_lab_review"
+    },
+    {
+      "id": "fixture_surface_shows_non_production_banner",
+      "ok": true,
+      "detail": "banner_count=1"
+    },
+    {
+      "id": "approved_variant_admitted_through_same_policy",
+      "ok": true,
+      "detail": "reason_code=admitted_fixture_lab"
+    },
+    {
+      "id": "live_variant_route_fails_closed_without_owner_session",
+      "ok": true,
+      "detail": "login_document_rendered_at=http://127.0.0.1:3241/ui-lab/employee/emp_probe_unauthorized/variant/reference-client"
+    },
+    {
+      "id": "live_variant_route_shows_no_fixture_fallback",
+      "ok": true,
+      "detail": "no variant host or fixture evidence rendered"
+    },
+    {
+      "id": "no_credential_material_in_document",
+      "ok": true,
+      "detail": "document scanned for token/session/hermes material"
+    },
+    {
+      "id": "no_offhost_requests_from_generated_runtime",
+      "ok": true,
+      "detail": "offhost_requests=0"
+    }
+  ],
+  "covers": [
+    "generated-runtime admission decision rendered on the explicit fixture surface",
+    "unauthenticated live-surface fail-closed with no fixture fallback",
+    "no credential material or off-host request from the generated runtime"
+  ],
+  "does_not_cover": [
+    "the Phase 2 live-employee browser acceptance line",
+    "provider, deployment, pilot, or production acceptance",
+    "capability projection observed against real owner state"
+  ],
+  "blocked_gate": "browser_acceptance_live_employee_unavailable"
+}

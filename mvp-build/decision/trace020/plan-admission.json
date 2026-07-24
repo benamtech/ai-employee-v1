@@ -1,0 +1,392 @@
+{
+  "content_digest": "sha256:28a0bd800fb0056786ccd79cf305bd12b67a9351782b0fec643df6d2c5bb4970",
+  "engine_version": "1.1.0",
+  "generated_at": "2026-07-24T02:12:20.637Z",
+  "payload": {
+    "admitted_scope": {
+      "allowed_paths": [
+        "CODEGRAPH.md",
+        "apps/web/app/_components/live-employee/LiveEmployeeProvider.tsx",
+        "apps/web/app/_components/live-employee/UiLabShell.tsx",
+        "apps/web/app/_components/ui-variant/UiVariantHost.tsx",
+        "apps/web/app/ui-lab/employee/[employeeId]/variant/[variant]/page.tsx",
+        "apps/web/app/ui-lab/employee/[employeeId]/variants/page.tsx",
+        "authority-map.json",
+        "decision/active.json",
+        "docs/adr/ADR-012-ui-lab-phase-2-generated-experience-runtime.md",
+        "docs/ui-lab/PHASE-02-GENERATED-EXPERIENCE-RUNTIME.md",
+        "docs/ui-lab/README.md",
+        "memory/2026-07-23-trace020-ui-lab-phase-2-generated-runtime.md",
+        "memory/MEMORY.md",
+        "mvp-build/CODEGRAPH.md",
+        "mvp-build/apps/web/app/_components/live-employee/LiveEmployeeProvider.tsx",
+        "mvp-build/apps/web/app/_components/live-employee/UiLabShell.tsx",
+        "mvp-build/apps/web/app/_components/ui-variant/UiVariantHost.tsx",
+        "mvp-build/apps/web/app/ui-lab/employee/[employeeId]/variant/[variant]/page.tsx",
+        "mvp-build/apps/web/app/ui-lab/employee/[employeeId]/variants/page.tsx",
+        "mvp-build/authority-map.json",
+        "mvp-build/decision/active.json",
+        "mvp-build/docs/adr/ADR-012-ui-lab-phase-2-generated-experience-runtime.md",
+        "mvp-build/docs/ui-lab/PHASE-02-GENERATED-EXPERIENCE-RUNTIME.md",
+        "mvp-build/docs/ui-lab/README.md",
+        "mvp-build/memory/2026-07-23-trace020-ui-lab-phase-2-generated-runtime.md",
+        "mvp-build/memory/MEMORY.md",
+        "mvp-build/package.json",
+        "mvp-build/packages/shared/src/index.ts",
+        "mvp-build/packages/shared/src/ui-variant-runtime.ts",
+        "mvp-build/packages/shared/src/ui-variant.ts",
+        "mvp-build/scripts/ui-variant.mjs",
+        "mvp-build/scripts/verify-ui-architecture.mjs",
+        "mvp-build/tests/unit/ui-architecture-fitness.test.ts",
+        "mvp-build/tests/unit/ui-lab-workbench-contract.test.ts",
+        "mvp-build/tests/unit/ui-variant-runtime-contract.test.ts",
+        "package.json",
+        "packages/shared/src/index.ts",
+        "packages/shared/src/ui-variant-runtime.ts",
+        "packages/shared/src/ui-variant.ts",
+        "scripts/ui-variant.mjs",
+        "scripts/verify-ui-architecture.mjs",
+        "tests/unit/ui-architecture-fitness.test.ts",
+        "tests/unit/ui-lab-workbench-contract.test.ts",
+        "tests/unit/ui-variant-runtime-contract.test.ts"
+      ],
+      "discovered_later_paths": [],
+      "errors": [],
+      "ok": true
+    },
+    "capsule_digest": "sha256:069606330d108256ef69222c8bcba545297993c45d11a3995d53e71aa49c9d2a",
+    "current_head_at_admission": "e5e36c5072c69dcc57ccefce1a5d807f71f70058",
+    "discovered_later_policy": "Allowed only for files inside the UI Lab generated-runtime boundary, the shared UI variant contract, their focused tests, or the active authority documents, with a recorded rationale and no evidence-class widening. Manager, database, provider, Hermes, migration, and infrastructure paths are never discovered-later.",
+    "experiment_digest": "sha256:2a0a8494dd4faa2a98106ee267861ea4d990266bb73b40cfabfb37d54f7b0b3a",
+    "experiment_root_digest": "sha256:eadfd011e863af8ea6e18625c40921ce4a830b5f19310da1b2864af096661774",
+    "new_paths_before_admission": [],
+    "plan_digest": "sha256:aa6da681b5e6dda803d804fba52e8056af02cb269478df9abd90f7ac564e3209",
+    "proof_obligations": [
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "authority_routing",
+              "document_authority_consistency",
+              "repo_governance"
+            ],
+            "kind": "command",
+            "timeout_ms": 600000
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-routing:authority-map:cb20a1b750c0",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "authority_router_consistency",
+              "document_authority"
+            ],
+            "kind": "command",
+            "timeout_ms": 600000
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/authority-map.json:17da23e0261c",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "document_authority_consistency"
+            ],
+            "kind": "command",
+            "timeout_ms": 600000
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/CODEGRAPH.md:fdc4a6e4d530",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "document_authority_consistency",
+              "authority_routing"
+            ],
+            "kind": "command",
+            "timeout_ms": 600000
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/decision/active.json:75fdded1162e",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:repo-governance"
+            ],
+            "discharges": [
+              "document_authority_consistency"
+            ],
+            "kind": "command",
+            "timeout_ms": 600000
+          }
+        ],
+        "hyperedge_id": "hyperedge:authority-obligation:file:mvp-build/memory/MEMORY.md:90b42a7462c9",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:unit",
+              "--",
+              "tests/unit/ui-variant-runtime-contract.test.ts",
+              "tests/unit/ui-lab-workbench-contract.test.ts",
+              "tests/unit/ui-architecture-fitness.test.ts"
+            ],
+            "discharges": [
+              "generated_runtime_contract",
+              "phase1_workbench_regression",
+              "architecture_fitness",
+              "P3_exact_candidate"
+            ],
+            "kind": "command",
+            "timeout_ms": 900000
+          }
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ui-lab-workbench-contract.test.ts:a5d66cc5b844",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "node",
+              "scripts/ui-variant.mjs",
+              "doctor"
+            ],
+            "discharges": [
+              "variant_manifest_validation",
+              "registry_parity",
+              "variant_isolation_patterns"
+            ],
+            "kind": "command",
+            "timeout_ms": 300000
+          }
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/scripts/ui-variant.mjs:9d08d97cf81c",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:unit",
+              "--",
+              "tests/unit/ws02-protocol-boundary.test.ts",
+              "tests/unit/ws02-hardening-regressions.test.ts",
+              "tests/unit/task-capability-catalog.test.ts"
+            ],
+            "discharges": [
+              "shared_contract_regression",
+              "protocol_boundary_regression"
+            ],
+            "kind": "command",
+            "timeout_ms": 900000
+          }
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws02-protocol-boundary.test.ts:035474ddc458",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:unit",
+              "--",
+              "tests/unit/ws02-protocol-boundary.test.ts",
+              "tests/unit/ws02-hardening-regressions.test.ts",
+              "tests/unit/task-capability-catalog.test.ts"
+            ],
+            "discharges": [
+              "shared_contract_regression"
+            ],
+            "kind": "command",
+            "timeout_ms": 900000
+          }
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/ws02-hardening-regressions.test.ts:8c4a99f5fd6e",
+        "status": "accepted"
+      },
+      {
+        "evidence": [
+          {
+            "argv": [
+              "npm",
+              "run",
+              "test:unit",
+              "--",
+              "tests/unit/ws02-protocol-boundary.test.ts",
+              "tests/unit/ws02-hardening-regressions.test.ts",
+              "tests/unit/task-capability-catalog.test.ts"
+            ],
+            "discharges": [
+              "shared_contract_regression"
+            ],
+            "kind": "command",
+            "timeout_ms": 900000
+          }
+        ],
+        "hyperedge_id": "hyperedge:behavioral-obligation:file:mvp-build/tests/unit/task-capability-catalog.test.ts:fae7e0cf2bf4",
+        "status": "accepted"
+      }
+    ],
+    "selected_candidates": [
+      {
+        "accepted": true,
+        "id": "TRACE020-C1",
+        "summary": "Add one shared, pure generated-runtime contract (admission policy, capability-scoped model projection, typed intent bridge over a closed host-method union) and route the existing UI Lab variant host, shell, provider, and routes through it; extend the architecture and variant verifiers with generated-runtime isolation checks."
+      },
+      {
+        "accepted": false,
+        "id": "TRACE020-C2",
+        "rejection": "Policy would live in browser components, could not be unit-tested independently of React, and would leave Phase 3/4 without a typed host-method attachment point.",
+        "summary": "Enforce admission and projection inline inside apps/web components without a shared contract module."
+      },
+      {
+        "accepted": false,
+        "id": "TRACE020-C3",
+        "rejection": "The Phase 2 spec rejects a second employee model; two models would split identity and let a variant read outside ResourcePayload.",
+        "summary": "Introduce a second employee model dedicated to generated variants alongside EmployeeExperienceModelV1."
+      },
+      {
+        "accepted": false,
+        "id": "TRACE020-C4",
+        "rejection": "Variants are first-party repository source compiled into the Web bundle, not negotiated remote ui:// resources; CCIP-6.8 isolation applies to MCP Apps, and an iframe transport would add a message boundary without removing the actual gap, which is unenforced manifest policy. Recorded as the escalation path if variants ever become non-first-party.",
+        "summary": "Render variants inside a sandboxed opaque-origin iframe with postMessage, mirroring the MCP Apps host."
+      },
+      {
+        "accepted": false,
+        "id": "TRACE020-C5",
+        "rejection": "Documentation is not a boundary; a lab_only experiment variant would still receive live owner approvals and conversation at runtime.",
+        "summary": "Baseline: document the admission and capability policy in the variant standard and leave enforcement to review."
+      }
+    ],
+    "task_id": "TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME",
+    "verification_commands": [
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "tests/unit/ui-variant-runtime-contract.test.ts",
+          "tests/unit/ui-lab-workbench-contract.test.ts",
+          "tests/unit/ui-architecture-fitness.test.ts"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:unit",
+          "--",
+          "tests/unit/ws02-protocol-boundary.test.ts",
+          "tests/unit/ws02-hardening-regressions.test.ts",
+          "tests/unit/task-capability-catalog.test.ts"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:ui:contracts"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "node",
+          "scripts/verify-ui-architecture.mjs"
+        ],
+        "timeout_ms": 300000
+      },
+      {
+        "argv": [
+          "node",
+          "scripts/validate-ui-system.mjs"
+        ],
+        "timeout_ms": 300000
+      },
+      {
+        "argv": [
+          "node",
+          "scripts/ui-variant.mjs",
+          "doctor"
+        ],
+        "timeout_ms": 300000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "typecheck",
+          "--workspace",
+          "@amtech/web"
+        ],
+        "timeout_ms": 900000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "test:repo-governance"
+        ],
+        "timeout_ms": 600000
+      },
+      {
+        "argv": [
+          "npm",
+          "run",
+          "repo:verify:full"
+        ],
+        "timeout_ms": 1800000
+      }
+    ]
+  },
+  "provenance": {
+    "generator": "decision/engine/repoctl.mjs admit-plan"
+  },
+  "schema": "plan.admission.v1",
+  "source_sha": "e5e36c5072c69dcc57ccefce1a5d807f71f70058"
+}

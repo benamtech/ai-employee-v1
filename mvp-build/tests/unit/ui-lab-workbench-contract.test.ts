@@ -65,6 +65,44 @@ describe("UI Lab Phase 1 live workbench contracts", () => {
     expect(builder).toContain('input.evidenceLevel ??');
   });
 
+  it("admits a live variant through the shared runtime policy instead of rendering any registry id", () => {
+    const shell = read("apps/web/app/_components/live-employee/UiLabShell.tsx");
+    const host = read("apps/web/app/_components/ui-variant/UiVariantHost.tsx");
+    expect(shell).toContain("admitUiVariantForRuntime");
+    expect(shell).toContain('surface: "live_owner_workbench"');
+    expect(shell).toContain("projectExperienceModelForVariant(model, manifest)");
+    expect(shell).toContain("projection.model");
+    expect(host).toContain("if (!admission.admitted");
+    expect(host).toContain("UiVariantRefused");
+    expect(host).toContain("requires_banner");
+  });
+
+  it("routes operator acknowledgement through the explicit route parameter only", () => {
+    const route = read("apps/web/app/ui-lab/employee/[employeeId]/variant/[variant]/page.tsx");
+    const shell = read("apps/web/app/_components/live-employee/UiLabShell.tsx");
+    expect(route).toContain('requested === "lab_review"');
+    expect(route).toContain("operatorAcknowledged");
+    expect(shell).toContain("operatorAcknowledged,");
+    expect(route).not.toContain("status");
+    expect(route).not.toContain("eligibility");
+  });
+
+  it("keeps live intent policy in the shared resolver and leaves the provider as a host executor", () => {
+    const provider = read("apps/web/app/_components/live-employee/LiveEmployeeProvider.tsx");
+    expect(provider).toContain("resolveUiVariantIntent({ request, model, admission })");
+    expect(provider).toContain("resolution.host_method === \"send_owner_message\"");
+    expect(provider).toContain("resolution.host_method === \"resolve_approval\"");
+    expect(provider).toContain("resolution.host_method === \"open_owner_resource\"");
+    expect(provider).not.toContain("model.intents.find(");
+    expect(provider).not.toContain('intent.kind === "send_message"');
+  });
+
+  it("keeps the fixture variant surface explicit so lab-only designs never claim the live surface", () => {
+    const fixtureClient = read("apps/web/app/ui-lab/variant/[variant]/[scenario]/VariantFixtureLabClient.tsx");
+    expect(fixtureClient).toContain('surface: "fixture_lab"');
+    expect(fixtureClient).not.toContain("live_owner_workbench");
+  });
+
   it("keeps fixtures explicit and redirects legacy fixture front doors", () => {
     const fixtures = read("apps/web/app/ui-lab/fixtures/page.tsx");
     const legacy = read("apps/web/app/ui-lab/[scenario]/page.tsx");

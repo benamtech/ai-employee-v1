@@ -1,8 +1,8 @@
 # CODEGRAPH.md — AI Employee executable topology
 
-Status: active cumulative source candidate with Trace019 repoctl engine differential-evaluation repair local P3 evidence; external acceptance remains open
+Status: active cumulative source candidate with Trace020 UI Lab Phase 2 generated-experience-runtime local P3 evidence; external acceptance remains open
 Updated: 2026-07-23  
-Candidate stack: `task/ui-lab-live-ae-phase-1-20260723` at `7fc40dc8dc7c60f3a8ec3e79dff59e6181566205` plus working-tree Trace018 candidate -> review/merge to `main` -> verify the merge commit
+Candidate stack: `task/ui-lab-phase2-generated-runtime-20260723` from merged `main` at `e5e36c5072c69dcc57ccefce1a5d807f71f70058` -> review/merge to `main` -> verify the merge commit
 Source migration head: `0082`
 
 This is the sole contributor-facing owner of current product and workstream structure. `authority-map.json` routes machine readers here. Exact transient SHA, run number, and conclusion remain in the current branch, workflows, or retained release evidence.
@@ -16,6 +16,7 @@ This is the sole contributor-facing owner of current product and workstream stru
 - Production preflight with the production env loaded is 6/9 runnable. Gmail, Stripe Connect, and QBO remain blocked by missing provider callback/webhook/client envvars.
 - Managed database acceptance, live provider acceptance, target-host destructive recovery, trusted signing/registry retention, fixture-free channels/golden work, manual accessibility, representative capacity, pilot, deployment, and production remain P4 gates.
 - Fixture-era UI Lab artifacts remain historical. The current `/ui-lab` route is a bounded Web projection over Manager-owned authority and `ResourcePayload`; Trace018 evidence is P3 only and does not prove production or provider acceptance.
+- Trace020 governs that projection with a generated experience runtime: `packages/shared/src/ui-variant-runtime.ts` decides variant admission per surface, narrows `EmployeeExperienceModelV1` to declared manifest capabilities, and resolves variant intents onto a closed `UiVariantHostMethod` union. Experiment and lab-only variants can no longer reach live employee state; candidates require an explicit per-open operator acknowledgement. Its live-employee browser acceptance line is a recorded blocker, not a pass.
 - The public estimator remains outdated and non-canonical.
 
 ## Exact production mirror evidence
@@ -143,6 +144,11 @@ apps/web/app/_components/live-employee/
   Trace018 live-first UI Lab workbench, one Web-local owner projection controller,
   explicit fixture route, and route-backed live variant evidence
 
+packages/shared/src/ui-variant-runtime.ts
+apps/web/app/_components/ui-variant/UiVariantHost.tsx
+  Trace020 generated experience runtime: variant admission policy,
+  capability-scoped model projection, and the closed host-method intent bridge
+
 packages/shared/src/employee-ui-presentation.ts
 apps/web/app/_components/employee-ui/EmployeeUiPort.tsx
 apps/web/ui-variants/
@@ -177,6 +183,7 @@ infra/scripts/deploy-rollback.mjs
 - Trace017 — production-state documentation, authority, ledger, and memory reconciliation.
 - Trace018 — UI Lab Phase 1 live-first owner-visible AI Employee workbench; P3 local source, contract, typecheck, unit, browser, and build evidence only.
 - Trace019 — repoctl engine repair for evaluation-time fact re-derivation, command-bound hard-edge evidence, modern evidence non-promotion, retained overrides, external acceptance dialect, and non-mutating check; P3 local negative-suite evidence only until reviewed and accepted externally.
+- Trace020 — UI Lab Phase 2 generated experience runtime: tiered variant admission, capability-scoped model projection, closed host-method intent bridge, and generated-runtime isolation checks in the architecture and variant verifiers; P3 local contract, verifier, typecheck, and fixture-surface browser evidence. Live-employee browser acceptance remains a recorded blocker.
 
 ## Open gates
 
@@ -187,7 +194,7 @@ infra/scripts/deploy-rollback.mjs
 | database | migrations through `0082`; production Supabase status observed fully applied | advisors, existing-row behavior, backup, restore, rollback |
 | release identity | current-SHA app images in the local mirror and previous signed manifest machinery | trusted signing, registry retention, production release record |
 | target host/runtime | six-service local mirror healthy with Caddy upstream wiring and deploy smoke | production host secrets, isolation, destructive recovery, managed tunnel/DNS |
-| owner UI/golden work | production projection, Trace018 live-first UI Lab Phase 1, explicit fixture route, effect/proof contracts | generated runtime, fixture-free channels, all three provider journeys |
+| owner UI/golden work | production projection, Trace018 live-first UI Lab Phase 1, Trace020 governed generated runtime, explicit fixture route, effect/proof contracts | live-employee variant browser acceptance, fixture-free channels, all three provider journeys |
 | human/capacity/pilot | responsive surfaces, automation, fairness/pilot-stop schema | manual accessibility, 64 GiB capacity, pilot packet |
 
 ## Dependency order

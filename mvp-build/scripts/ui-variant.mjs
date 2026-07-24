@@ -60,6 +60,13 @@ function validateVariant(slug) {
     const source = readFileSync(file, "utf8");
     if (/\b(?:fetch|XMLHttpRequest|WebSocket|EventSource)\s*\(/.test(source)) errors.push(`${rel(file)}:network_access_forbidden`);
     if (/\b(?:localStorage|sessionStorage|indexedDB)\b/.test(source)) errors.push(`${rel(file)}:ambient_storage_forbidden_use_host_intents`);
+    // A variant renders a bounded typed model. It never injects markup, evaluates code, reads
+    // ambient credentials or environment, or names a product route directly (HIP-7.4).
+    if (/\bdangerouslySetInnerHTML\b/.test(source)) errors.push(`${rel(file)}:raw_markup_injection_forbidden`);
+    if (/\bnew\s+Function\s*\(|(?<![.\w])eval\s*\(/.test(source)) errors.push(`${rel(file)}:dynamic_code_evaluation_forbidden`);
+    if (/\bdocument\s*\.\s*cookie\b/.test(source)) errors.push(`${rel(file)}:ambient_credential_access_forbidden`);
+    if (/\bprocess\s*\.\s*env\b/.test(source)) errors.push(`${rel(file)}:environment_access_forbidden`);
+    if (/["'`]\/api\//.test(source)) errors.push(`${rel(file)}:product_route_reference_forbidden_use_host_intents`);
     if (/\bnew\s+Worker\b/.test(source) && !(manifest.runtime_features ?? []).includes("web_worker")) errors.push(`${rel(file)}:worker_feature_not_declared`);
     if (/\bWebAssembly\b/.test(source) && !(manifest.runtime_features ?? []).includes("wasm")) errors.push(`${rel(file)}:wasm_feature_not_declared`);
     for (const specifier of importSpecifiers(source)) {

@@ -1,8 +1,17 @@
 {
   "schema": "amtech.decision-active.v1",
-  "status": "no_open_decision_transaction",
+  "status": "active_decision_transaction",
   "updated_at": "2026-07-23",
-  "active_transaction": null,
+  "active_transaction": {
+    "id": "trace020",
+    "path": "mvp-build/decision/trace020/",
+    "task_id": "TRACE020-UI-LAB-PHASE2-GENERATED-RUNTIME",
+    "scope": "UI Lab Phase 2 generated experience runtime: variant admission policy, capability-scoped model projection, and bounded host-method intent bridge over the existing live owner projection",
+    "base_sha": "e5e36c5072c69dcc57ccefce1a5d807f71f70058",
+    "branch": "task/ui-lab-phase2-generated-runtime-20260723",
+    "state": "plan_admitted",
+    "evidence_boundary": "P3 maximum; P4 external, provider, deployment, pilot, and production acceptance remain open blockers"
+  },
   "latest_completed_trace": {
     "id": "trace019",
     "path": "mvp-build/decision/trace019/",
@@ -31,12 +40,13 @@
     {"id":"trace016","scope":"production Caddy/upstream/runtime repair with retained P3 local mirror proof; transaction finish not claimed"},
     {"id":"trace017","scope":"production state authority, ledger, and memory reconciliation"},
     {"id":"trace018","scope":"UI Lab Phase 1 live-first owner-visible AI Employee workbench"},
-    {"id":"trace019","scope":"repoctl engine differential evaluation and evidence honesty repair"}
+    {"id":"trace019","scope":"repoctl engine differential evaluation and evidence honesty repair"},
+    {"id":"trace020","scope":"UI Lab Phase 2 generated experience runtime: variant admission, capability-scoped projection, and bounded host-method intent bridge"}
   ],
   "next_transaction": {
-    "reserved_id": "trace020",
+    "reserved_id": "trace021",
     "state": "not_created",
-    "required_start": "After Trace019 is finished and merged, create a new task branch from merged main, define task.json, and run decision/engine/repoctl.mjs start before non-mechanical source edits.",
+    "required_start": "After Trace020 is finished and merged, create a new task branch from merged main, define task.json, and run decision/engine/repoctl.mjs start before non-mechanical source edits.",
     "prohibition": "Do not preselect the next implementation or reuse stale facts from the pre-merge branch."
   },
   "exact_status_owner": "mvp-build/CODEGRAPH.md",
